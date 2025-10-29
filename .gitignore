@@ -1,0 +1,18 @@
+# Ghidra headless project outputs
+ghidra_projects/*
+!ghidra_projects/*.zip
+
+# Dependency vendors and build caches
+vendor/
+node_modules/
+
+# Python bytecode caches
+__pycache__/
+*.pyc
+
+# Editor and OS cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
