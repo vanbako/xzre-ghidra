@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-10-31
+- Added `ghidra_scripts/ListFunctionSignatures.py` and ran it headlessly to dump all `liblzma_la-crc64-fast.o` prototypes, then diffed the output against `ghidra_scripts/xzre_types_import_preprocessed.h` — uncovered 31 mismatches (missing const qualifiers, typedef drift like `uint` vs `unsigned int`, and the `secret_data_append_items` appender callback type) that still need to be resolved before the database matches upstream.
+- Built `ghidra_scripts/InspectFunctionTypes.py` plus scratch script `TestParseConst.py` to inspect the active signature datatypes; reapplying the header definitions confirmed that the remaining gaps are cosmetic quirks in Ghidra’s C parser (it canonicalises `const` away, folds `struct` tags into typedef names, and renders function-pointer callbacks as typedef pointers). No functional mismatches remain, so further changes would require upstream adjustments to the parser or accepting alternative renderings — Next: document the acceptable deltas in any downstream comparison tooling if strict textual equality is required.
+
 ## 2025-10-30
 - Added the nine missing extern prototypes (`__tls_get_addr`, `elf_contains_vaddr_impl`, `elf_find_rela_reloc`, `elf_find_relr_reloc`, `hook_EVP_PKEY_set1_RSA`, `hook_RSA_get0_key`, `j_tls_get_addr`, `lzma_check_init`, `lzma_free`) into `xzre/xzre.h`, regenerated `ghidra_scripts/xzre_types_import_preprocessed.h`, reran the import/signature pass, and refreshed the portable archive — Ghidra now reports zero missing prototypes with the OpenSSL hooks now typed against forward-declared structs for const-correctness.
 - Ran `ImportXzreTypes.py` headlessly against `ghidra_scripts/xzre_types_import_preprocessed.h` so every xzre function signature and related typedef now lives in the `liblzma_la-crc64-fast.o` program — this aligns Ghidra’s database with the upstream headers for cleaner decompilation.
