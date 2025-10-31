@@ -12,14 +12,11 @@
 - `PROGRESS.md`: Rolling log for analysis milestones and outstanding follow-ups.
 
 ## Working With Ghidra
-- Regenerate or update the project with headless Ghidra (11.4.2) installed at `~/tools/ghidra_11.4.2_PUBLIC`:
+- Refresh the project with the bundled helper (runs the import, replays header types/signatures, and exports the portable snapshot so the System V calling convention fix is always applied):
   ```bash
-  ~/tools/ghidra_11.4.2_PUBLIC/support/analyzeHeadless ghidra_projects xzre_ghidra \
-    -import xzre/liblzma_la-crc64-fast.o \
-    -overwrite
+  ./scripts/refresh_xzre_project.sh
   ```
-  - Remove `-overwrite` if you want to keep the existing project unchanged.
-  - Add `-analysisTimeoutPerFile <seconds>` or additional flags as your workflow requires.
+  - The script assumes Ghidra lives at `~/tools/ghidra_11.4.2_PUBLIC`. Override with `GHIDRA_HOME=/path/to/ghidra ./scripts/refresh_xzre_project.sh` if needed.
 - Produce a portable archive suitable for sharing or version control without committing the working `.rep` directory:
   ```bash
   ~/tools/ghidra_11.4.2_PUBLIC/support/analyzeHeadless ghidra_projects xzre_ghidra \

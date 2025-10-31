@@ -4,6 +4,7 @@
 
 from ghidra.app.cmd.function import ApplyFunctionSignatureCmd
 from ghidra.program.model.data import FunctionDefinitionDataType
+from ghidra.program.model.listing import Function
 from ghidra.program.model.symbol import SourceType
 
 
@@ -39,6 +40,18 @@ def main():
     missing_funcs = []
 
     txn = currentProgram.startTransaction("Apply xzre function signatures")
+    cc_updates = 0
+    default_cc_name = None
+    default_cc = currentProgram.getCompilerSpec().getDefaultCallingConvention()
+    if default_cc is None:
+        printerr(
+            "Compiler spec {} does not expose a default calling convention; skipping calling convention fixup.".format(
+                currentProgram.getCompilerSpec().getCompilerSpecID()
+            )
+        )
+    else:
+        default_cc_name = default_cc.getName()
+
     try:
         for func in func_manager.getFunctions(True):
             name = func.getName()
@@ -70,6 +83,13 @@ def main():
                         name, func.getEntryPoint()
                     )
                 )
+        if default_cc_name:
+            unknown_marker = Function.UNKNOWN_CALLING_CONVENTION_STRING
+            for func in func_manager.getFunctions(True):
+                cc_name = func.getCallingConventionName()
+                if cc_name is None or cc_name == unknown_marker:
+                    func.setCallingConvention(default_cc_name)
+                    cc_updates += 1
     finally:
         currentProgram.endTransaction(txn, True)
 
@@ -81,6 +101,12 @@ def main():
             applied, skipped, missing
         )
     )
+    if default_cc_name:
+        print(
+            "Calling convention fixup: assigned '{}' to {} functions".format(
+                default_cc_name, cc_updates
+            )
+        )
 
 
 if __name__ == "__main__":
