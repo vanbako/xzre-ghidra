@@ -25,8 +25,6 @@ if [[ ! -f "$HEADER_PATH" ]]; then
   exit 1
 fi
 
-"$ROOT_DIR/scripts/extract_local_variables.py"
-
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$OBJECT_PATH" \
   -overwrite \
@@ -34,8 +32,7 @@ fi
   -postScript ImportXzreTypes.py "$HEADER_PATH" \
   -postScript RenameFromLinkerMap.py "$ROOT_DIR/xzre/xzre.lds.in" \
   -postScript ApplySignaturesFromHeader.py \
-  -postScript FixAllParamStorage.py \
-  -postScript ApplyLocalsFromXzreSources.py
+  -postScript FixAllParamStorage.py
 
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process liblzma_la-crc64-fast.o \

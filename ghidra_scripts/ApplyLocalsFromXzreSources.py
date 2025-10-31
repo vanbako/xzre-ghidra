@@ -123,6 +123,12 @@ def _choose_variable(candidates, target_dt):
         if best is None or score < best_score:
             best = var
             best_score = score
+    if best is None:
+        return None
+    if best_score is None:
+        return best
+    if best_score > 8:
+        return None
     return best
 
 
@@ -191,6 +197,14 @@ def _clear_stack_conflicts(stack_frame, offset, size, grows_negative, offsets_se
         return
     target_start, target_end = _stack_interval(offset, size, grows_negative)
     to_clear = []
+    keep_offset = None
+    if keep_var is not None:
+        try:
+            keep_storage = keep_var.getVariableStorage()
+            if keep_storage is not None and keep_storage.hasStackStorage():
+                keep_offset = keep_storage.getStackOffset()
+        except Exception:
+            keep_offset = None
     for var in stack_frame.getStackVariables():
         if keep_var is not None and var == keep_var:
             continue
@@ -201,11 +215,11 @@ def _clear_stack_conflicts(stack_frame, offset, size, grows_negative, offsets_se
             var_offset = storage.getStackOffset()
         except Exception:
             continue
+        if keep_offset is not None and var_offset == keep_offset:
+            continue
         if grows_negative and var_offset >= 0:
             continue
         if var_offset == offset and var == keep_var:
-            continue
-        if var.getSource() == SourceType.USER_DEFINED and var != keep_var:
             continue
         var_len = max(var.getLength(), 1)
         var_start, var_end = _stack_interval(var_offset, var_len, grows_negative)
@@ -220,11 +234,114 @@ def _clear_stack_conflicts(stack_frame, offset, size, grows_negative, offsets_se
             printerr("Failed to clear stack var at {}: {}".format(off, exc))
 
 
+def _refresh_stack_variable(stack_frame, offset, fallback):
+    if offset is None:
+        return fallback
+    try:
+        for var in stack_frame.getStackVariables():
+            storage = var.getVariableStorage()
+            if storage is None or not storage.hasStackStorage():
+                continue
+            try:
+                var_offset = storage.getStackOffset()
+            except Exception:
+                continue
+            if var_offset == offset:
+                return var
+    except Exception:
+        pass
+    return fallback
+
+
+def _ensure_frame_capacity(stack_frame, offset, size, grows_negative):
+    if offset is None or size is None:
+        return
+    size = max(size, 1)
+    try:
+        current_size = stack_frame.getFrameSize()
+    except Exception:
+        return
+    try:
+        low, high = _stack_interval(offset, size, grows_negative)
+    except Exception:
+        low, high = (offset, offset)
+    needed = current_size
+    if grows_negative:
+        needed = max(current_size, abs(low))
+    else:
+        needed = max(current_size, high)
+    if needed > current_size:
+        try:
+            stack_frame.setLocalSize(needed)
+        except (Exception, Throwable) as exc:
+            printerr(
+                "Failed to expand stack frame to {} bytes: {}".format(
+                    needed, exc
+                )
+            )
+
+
 def _apply_locals_to_function(func, locals_data, type_resolver):
     stack_frame = func.getStackFrame()
     if stack_frame is None:
         printerr("Function {} has no stack frame".format(func.getName()))
         return 0, len(locals_data)
+
+    temp_name_counter = [0]
+
+    def _iter_all_locals():
+        try:
+            for var in func.getLocalVariables():
+                yield var
+        except Exception:
+            pass
+        try:
+            for var in stack_frame.getLocals():
+                yield var
+        except Exception:
+            pass
+
+    def _name_in_use(name):
+        for var in _iter_all_locals():
+            try:
+                if var.getName() == name:
+                    return True
+            except Exception:
+                continue
+        return False
+
+    def _make_temp_name():
+        while True:
+            name = "__xzre_tmp_{}".format(temp_name_counter[0])
+            temp_name_counter[0] += 1
+            if not _name_in_use(name):
+                return name
+
+    def _ensure_unique_local_name(desired_name, target_var):
+        for var in _iter_all_locals():
+            if var == target_var:
+                continue
+            try:
+                existing_name = var.getName()
+            except Exception:
+                continue
+            if existing_name != desired_name:
+                continue
+            temp_name = _make_temp_name()
+            try:
+                var.setName(temp_name, SourceType.USER_DEFINED)
+            except (Exception, Throwable):
+                try:
+                    var.setName(temp_name, SourceType.ANALYSIS)
+                except (Exception, Throwable) as exc:
+                    printerr(
+                        "Failed to displace '{}' when renaming in {}: {}".format(
+                            desired_name, func.getName(), exc
+                        )
+                    )
+                    continue
+            if var not in candidates:
+                candidates.append(var)
 
     stack_offsets = set()
 
@@ -315,31 +432,60 @@ def _apply_locals_to_function(func, locals_data, type_resolver):
                 continue
 
         if dt is not None:
+            storage = None
+            current_offset = None
             try:
                 storage = target_var.getVariableStorage()
-                if storage is not None and storage.hasStackStorage():
-                    try:
-                        current_offset = storage.getStackOffset()
-                    except Exception:
-                        current_offset = None
-                    if current_offset is not None:
-                        size = _data_type_length(dt)
-                        if size is None or size <= 0:
-                            size = target_var.getLength()
+            except Exception:
+                storage = None
+            if storage is not None and storage.hasStackStorage():
+                try:
+                    current_offset = storage.getStackOffset()
+                except Exception:
+                    current_offset = None
+            dt_size = _data_type_length(dt)
+            if dt_size is None or dt_size <= 0:
+                try:
+                    dt_size = target_var.getLength()
+                except Exception:
+                    dt_size = 1
+            _ensure_frame_capacity(stack_frame, current_offset, dt_size, grows_negative)
+
+            for attempt in range(2):
+                try:
+                    target_var.setDataType(dt, SourceType.USER_DEFINED)
+                    break
+                except (Exception, Throwable) as exc:
+                    if current_offset is not None and attempt == 0:
                         _clear_stack_conflicts(
-                            stack_frame, current_offset, size, grows_negative, stack_offsets, keep_var=target_var
+                            stack_frame, current_offset, dt_size, grows_negative, stack_offsets, keep_var=target_var
                         )
-                target_var.setDataType(dt, SourceType.USER_DEFINED)
-            except Exception as exc:
-                printerr(
-                    "Failed to set type '{}' on {}::{}: {}".format(
-                        type_str, func.getName(), target_var.getName(), exc
+                        target_var = _refresh_stack_variable(stack_frame, current_offset, target_var)
+                        try:
+                            storage = target_var.getVariableStorage()
+                        except Exception:
+                            storage = None
+                        continue
+                    printerr(
+                        "Failed to set type '{}' on {}::{}: {}".format(
+                            type_str, func.getName(), target_var.getName(), exc
+                        )
                     )
-                )
+                    break
 
         try:
+            if not target_var.isValid():
+                skipped += 1
+                if target_var in candidates:
+                    candidates.remove(target_var)
+                continue
+        except Exception:
+            pass
+
+        _ensure_unique_local_name(name, target_var)
+        try:
             target_var.setName(name, SourceType.USER_DEFINED)
-        except Exception as exc:
+        except (Exception, Throwable) as exc:
             printerr(
                 "Failed to rename {} to '{}' in {}: {}".format(
                     target_var.getName(), name, func.getName(), exc
