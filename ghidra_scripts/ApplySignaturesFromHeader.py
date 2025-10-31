@@ -71,6 +71,7 @@ def main():
                 func.getEntryPoint(), prototype, SourceType.USER_DEFINED, True, True
             )
             if cmd.applyTo(currentProgram):
+                func.setCustomVariableStorage(True)
                 applied += 1
                 print(
                     "Applied signature to {} at {}: {}".format(

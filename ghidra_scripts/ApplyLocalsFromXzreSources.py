@@ -6,7 +6,9 @@ import json
 import os
 
 from ghidra.app.util.cparser.C import CParser
+from ghidra.program.model.data import Undefined
 from ghidra.program.model.symbol import SourceType
+from ghidra.util.exception import DuplicateNameException, InvalidInputException
 
 try:
     from java.lang import Throwable  # type: ignore
@@ -51,29 +53,22 @@ class TypeResolver(object):
         else:
             snippet = "typedef {} {};\n".format(stripped, name)
         try:
-            self._parser.parse(snippet)
-            typedef = self._dtm.getDataType("/" + name)
-            if typedef is None:
+            parsed = self._parser.parse(snippet)
+            if parsed is None:
+                printerr("Type parse produced None for '{}'".format(type_str))
                 return None
-            data_type = typedef
-            if hasattr(typedef, "getDataType"):
+            data_type = parsed
+            if hasattr(parsed, "getDataType"):
                 try:
-                    data_type = typedef.getDataType()
+                    inner = parsed.getDataType()
+                    if inner is not None:
+                        data_type = inner
                 except Exception:
-                    # Fallback to the typedef itself; better than nothing.
-                    data_type = typedef
+                    pass
             return data_type
         except (Exception, Throwable) as exc:
             printerr("Type parse failed for '{}': {}".format(type_str, exc))
             return None
-        finally:
-            if typedef is not None:
-                try:
-                    self._dtm.remove(typedef, self._monitor)
-                except Exception:
-                    # If removal fails, leave the typedef behind rather than
-                    # interrupting the pipeline.
-                    pass
 
 
 def _load_mapping(default_path, args):
@@ -131,15 +126,143 @@ def _choose_variable(candidates, target_dt):
     return best
 
 
+def _data_type_length(dt):
+    if dt is None:
+        return None
+    if hasattr(dt, "getLength"):
+        try:
+            return dt.getLength()
+        except Exception:
+            return None
+    return None
+
+
+def _align_value(value, alignment, grows_negative):
+    if alignment <= 0:
+        return value
+    if grows_negative:
+        remainder = (-value) % alignment
+        if remainder != 0:
+            value -= alignment - remainder
+    else:
+        remainder = value % alignment
+        if remainder != 0:
+            value += alignment - remainder
+    return value
+
+
+def _next_stack_offset(offsets, grows_negative, size, alignment):
+    size = max(size, 1)
+    if offsets:
+        base = min(offsets) if grows_negative else max(offsets)
+        offset = base - size if grows_negative else base + size
+    else:
+        offset = -size if grows_negative else size
+    offset = _align_value(offset, alignment, grows_negative)
+    offsets.add(offset)
+    return offset
+
+
+def _ensure_data_type(dt, size):
+    if dt is not None:
+        return dt
+    size = max(size, 1)
+    try:
+        return Undefined.getUndefinedDataType(size)
+    except Exception:
+        return Undefined.getUndefinedDataType(1)
+
+
+def _stack_interval(offset, size, grows_negative):
+    size = max(size, 1)
+    if grows_negative:
+        start = offset
+        end = offset + size
+    else:
+        start = offset - size
+        end = offset
+    if start > end:
+        start, end = end, start
+    return start, end
+
+
+def _clear_stack_conflicts(stack_frame, offset, size, grows_negative, offsets_set, keep_var=None):
+    if size <= 0:
+        return
+    target_start, target_end = _stack_interval(offset, size, grows_negative)
+    to_clear = []
+    for var in stack_frame.getStackVariables():
+        if keep_var is not None and var == keep_var:
+            continue
+        storage = var.getVariableStorage()
+        if storage is None or not storage.hasStackStorage():
+            continue
+        try:
+            var_offset = storage.getStackOffset()
+        except Exception:
+            continue
+        if grows_negative and var_offset >= 0:
+            continue
+        if var_offset == offset and var == keep_var:
+            continue
+        if var.getSource() == SourceType.USER_DEFINED and var != keep_var:
+            continue
+        var_len = max(var.getLength(), 1)
+        var_start, var_end = _stack_interval(var_offset, var_len, grows_negative)
+        if target_start < var_end and var_start < target_end:
+            to_clear.append(var_offset)
+    for off in to_clear:
+        try:
+            stack_frame.clearVariable(off)
+            if offsets_set is not None:
+                offsets_set.discard(off)
+        except Exception as exc:
+            printerr("Failed to clear stack var at {}: {}".format(off, exc))
+
+
 def _apply_locals_to_function(func, locals_data, type_resolver):
-    existing_locals = list(func.getLocalVariables())
-    if not existing_locals:
-        println("Skipping {}: function has no locals in current program".format(func.getName()))
+    stack_frame = func.getStackFrame()
+    if stack_frame is None:
+        printerr("Function {} has no stack frame".format(func.getName()))
         return 0, len(locals_data)
 
-    candidates = list(existing_locals)
+    stack_offsets = set()
+
+    stack_vars = list(stack_frame.getStackVariables() or [])
+    other_locals = list(func.getLocalVariables() or [])
+    candidates = []
+    for var in stack_vars:
+        storage = var.getVariableStorage()
+        if storage is not None and storage.hasStackStorage():
+            try:
+                stack_offsets.add(storage.getStackOffset())
+            except Exception:
+                continue
+            candidates.append(var)
+            continue
+        candidates.append(var)
+    for var in other_locals:
+        if var in candidates:
+            continue
+        storage = var.getVariableStorage()
+        if storage is not None and storage.hasStackStorage():
+            try:
+                stack_offsets.add(storage.getStackOffset())
+            except Exception:
+                continue
+            candidates.append(var)
+            continue
+        candidates.append(var)
+
     updated = 0
     skipped = 0
+    seen_names = set()
+
+    grows_negative = True
+    try:
+        grows_negative = stack_frame.growsNegative()
+    except Exception:
+        grows_negative = True
 
     for entry in locals_data:
         monitor.checkCanceled()
@@ -148,19 +271,64 @@ def _apply_locals_to_function(func, locals_data, type_resolver):
         if not name:
             skipped += 1
             continue
+        if name in seen_names:
+            continue
 
         dt = None
         if type_str:
             dt = type_resolver.parse(type_str)
 
         target_var = _choose_variable(candidates, dt)
+        debug_func = func.getName()
         if target_var is None:
-            printerr("No available local slot for {} in {}".format(name, func.getName()))
-            skipped += 1
-            continue
+            size = _data_type_length(dt)
+            if size is None or size <= 0:
+                size = 8
+            if size >= 8:
+                alignment = 8
+            elif size >= 4:
+                alignment = 4
+            elif size >= 2:
+                alignment = 2
+            else:
+                alignment = 1
+            try:
+                offset = _next_stack_offset(stack_offsets, grows_negative, size, alignment)
+                storage_dt = _ensure_data_type(dt, size)
+                _clear_stack_conflicts(stack_frame, offset, size, grows_negative, stack_offsets)
+                new_var = stack_frame.createVariable(
+                    name or "local_{:x}".format(abs(offset)),
+                    offset,
+                    storage_dt,
+                    SourceType.USER_DEFINED,
+                )
+                target_var = new_var
+                candidates.append(target_var)
+                stack_offsets.add(offset)
+            except (DuplicateNameException, InvalidInputException, Exception, Throwable) as exc:
+                printerr(
+                    "No available local slot for {} in {} and creation failed: {}".format(
+                        name, func.getName(), exc
+                    )
+                )
+                skipped += 1
+                continue
 
         if dt is not None:
             try:
+                storage = target_var.getVariableStorage()
+                if storage is not None and storage.hasStackStorage():
+                    try:
+                        current_offset = storage.getStackOffset()
+                    except Exception:
+                        current_offset = None
+                    if current_offset is not None:
+                        size = _data_type_length(dt)
+                        if size is None or size <= 0:
+                            size = target_var.getLength()
+                        _clear_stack_conflicts(
+                            stack_frame, current_offset, size, grows_negative, stack_offsets, keep_var=target_var
+                        )
                 target_var.setDataType(dt, SourceType.USER_DEFINED)
             except Exception as exc:
                 printerr(
@@ -183,6 +351,7 @@ def _apply_locals_to_function(func, locals_data, type_resolver):
 
         candidates.remove(target_var)
         updated += 1
+        seen_names.add(name)
 
     return updated, skipped
 
