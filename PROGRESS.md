@@ -3,6 +3,13 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-10-31
+- Expanded `ghidra_scripts/RenameFromLinkerMap.py` so it now captures `.rodata*` and other non-text sections, which let the refresh pipeline stamp the branch-table symbols (`dasm_*`, `string_action_data`, `string_mask_data`, etc.) straight from `xzre.lds.in` — next: add explicit coverage for any data not represented in the linker script if we bring in additional objects.
+- Added `ghidra_scripts/InstallEnumEquates.py` and wired it into `scripts/refresh_xzre_project.sh`; each refresh now parses `xzre_types_import_preprocessed.h` to install equates for `EncodedStringId` and the `CommandFlags{1,2,3}` enums so constant operands decompile with names instead of raw hex — next: consider extending the parser to cover additional flag enums if we expand the signature coverage.
+
+## 2025-10-31
+- Enhanced `ghidra_scripts/RenameFromLinkerMap.py` to parse section metadata so `.data*`/`.bss*` entries from `xzre/xzre.lds.in` now create or rename the corresponding globals, then reran `scripts/refresh_xzre_project.sh` to regenerate `ghidra_projects/xzre_ghidra_portable.zip` with the new labels applied (headless log shows 7 data symbols updated) — next: decide whether to bring the `.rodata` branch-table labels in through the same path.
+
+## 2025-10-31
 - Removed the automated locals extraction/apply steps from `scripts/refresh_xzre_project.sh` and re-ran the refresh so the headless pipeline now stops after signatures/parameter fixes; this keeps Ghidra’s SSA-local naming untouched for manual curation while still exporting an updated portable project — next: revisit locals application once a reliable merge strategy is scripted.
 
 ## 2025-10-31

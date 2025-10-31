@@ -32,6 +32,7 @@ fi
   -postScript ImportXzreTypes.py "$HEADER_PATH" \
   -postScript RenameFromLinkerMap.py "$ROOT_DIR/xzre/xzre.lds.in" \
   -postScript ApplySignaturesFromHeader.py \
+  -postScript InstallEnumEquates.py "$HEADER_PATH" \
   -postScript FixAllParamStorage.py
 
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \

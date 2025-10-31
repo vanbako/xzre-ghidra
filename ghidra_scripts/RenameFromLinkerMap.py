@@ -16,6 +16,7 @@ MAP_PATTERN = re.compile(
 
 def load_map(path):
     entries = []
+    current_section = None
     with open(path, "r") as handle:
         for line in handle:
             raw = line.strip()
@@ -23,11 +24,21 @@ def load_map(path):
                 continue
             if "//" in raw:
                 raw = raw.split("//", 1)[0].strip()
+            if raw.startswith("DEFSYM_START("):
+                current_section = raw[len("DEFSYM_START(") : -1].strip()
+                continue
+            if raw.startswith("DEFSYM_END"):
+                current_section = None
+                continue
             match = MAP_PATTERN.match(raw)
             if not match:
                 continue
-            offset_hex, _, name, _ = match.groups()
-            entries.append((int(offset_hex, 16), name.strip()))
+            offset_hex, entry_type, name, trailing = match.groups()
+            if entry_type == "DEFSYM":
+                section = trailing.strip()
+            else:
+                section = current_section
+            entries.append((int(offset_hex, 16), name.strip(), section))
     return entries
 
 
@@ -59,18 +70,65 @@ def main():
         if addr_offset < min_func_offset:
             min_func_offset = addr_offset
 
-    min_map_offset = min(offset for offset, _ in map_entries)
+    min_map_offset = min(offset for offset, _, _ in map_entries)
     base = min_func_offset - min_map_offset
     print("Computed base offset: 0x{:X}".format(base))
 
     renamed = 0
     missing = 0
     unchanged = 0
+    data_created = 0
+    data_renamed = 0
+    data_unchanged = 0
+    data_failures = 0
+
+    symbol_table = currentProgram.getSymbolTable()
 
     txn = currentProgram.startTransaction("Rename from xzre linker map")
     try:
-        for offset, desired_name in map_entries:
+        for offset, desired_name, section in map_entries:
             address = toAddr(base + offset)
+            if section and ".text" not in section:
+                symbol = symbol_table.getPrimarySymbol(address)
+                if symbol is None:
+                    try:
+                        symbol_table.createLabel(
+                            address, desired_name, SourceType.USER_DEFINED
+                        )
+                        data_created += 1
+                        print(
+                            "Created data label {} at {}".format(
+                                desired_name, address
+                            )
+                        )
+                    except Exception as exc:
+                        data_failures += 1
+                        printerr(
+                            "Failed to create data label {} at {}: {}".format(
+                                desired_name, address, exc
+                            )
+                        )
+                else:
+                    current_name = symbol.getName()
+                    if current_name == desired_name:
+                        data_unchanged += 1
+                    else:
+                        try:
+                            symbol.setName(desired_name, SourceType.USER_DEFINED)
+                            data_renamed += 1
+                            print(
+                                "Renamed data {} -> {} at {}".format(
+                                    current_name, desired_name, address
+                                )
+                            )
+                        except Exception as exc:
+                            data_failures += 1
+                            printerr(
+                                "Failed to rename data {} at {}: {}".format(
+                                    current_name, address, exc
+                                )
+                            )
+                continue
             func = func_manager.getFunctionAt(address)
             if func is None:
                 missing += 1
@@ -94,8 +152,15 @@ def main():
                     )
                 )
         print(
-            "Rename summary: renamed={}, unchanged={}, missing={}".format(
-                renamed, unchanged, missing
+            "Rename summary: funcs renamed={}, funcs unchanged={}, funcs missing={}; "
+            "data created={}, data renamed={}, data unchanged={}, data failures={}".format(
+                renamed,
+                unchanged,
+                missing,
+                data_created,
+                data_renamed,
+                data_unchanged,
+                data_failures,
             )
         )
     finally:
