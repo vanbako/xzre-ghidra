@@ -17,6 +17,8 @@
   ./scripts/refresh_xzre_project.sh
   ```
   - The script assumes Ghidra lives at `~/tools/ghidra_11.4.2_PUBLIC`. Override with `GHIDRA_HOME=/path/to/ghidra ./scripts/refresh_xzre_project.sh` if needed.
+  - Function names get restored via `RenameFromLinkerMap.py` on every refresh before signatures are re-applied; if the renames are skipped, prototypes from `ApplySignaturesFromHeader.py` will no longer match the `.L`/`FUN_` symbols.
+  - Each refresh now regenerates `ghidra_scripts/generated/xzre_locals.json` via `scripts/extract_local_variables.py` and post-runs `ApplyLocalsFromXzreSources.py`, which tries to push local variable names/types from `xzre/xzre_code` into the active program. When a function is absent from `liblzma_la-crc64-fast.o`, the script logs it as missing; this is expected until those routines (or matching symbol aliases) are imported.
 - Produce a portable archive suitable for sharing or version control without committing the working `.rep` directory:
   ```bash
   ~/tools/ghidra_11.4.2_PUBLIC/support/analyzeHeadless ghidra_projects xzre_ghidra \

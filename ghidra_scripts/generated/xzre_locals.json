@@ -1,0 +1,500 @@
+{
+  "backdoor_entry": {
+    "source": "xzre/xzre_code/backdoor_entry.c",
+    "locals": [
+      {
+        "name": "a",
+        "type": "u32"
+      },
+      {
+        "name": "b",
+        "type": "u32"
+      },
+      {
+        "name": "c",
+        "type": "u32"
+      },
+      {
+        "name": "d",
+        "type": "u32"
+      },
+      {
+        "name": "state",
+        "type": "elf_entry_ctx_t"
+      }
+    ]
+  },
+  "backdoor_symbind64": {
+    "source": "xzre/xzre_code/backdoor_symbind64.c",
+    "locals": [
+      {
+        "name": "funcs",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "name": "ldso",
+        "type": "ldso_ctx_t *"
+      },
+      {
+        "name": "retaddr",
+        "type": "void *"
+      },
+      {
+        "name": "_dl_audit_symbind_alt",
+        "type": "void *"
+      },
+      {
+        "name": "__libc_stack_end",
+        "type": "void *"
+      },
+      {
+        "name": "func_end_addr",
+        "type": "uintptr_t"
+      },
+      {
+        "name": "offset_in_function",
+        "type": "uintptr_t"
+      },
+      {
+        "name": "string_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "name": "plt_entry_valid",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "c_memmove": {
+    "source": "xzre/xzre_code/c_memmove.c",
+    "locals": [
+      {
+        "name": "curr",
+        "type": "size_t"
+      },
+      {
+        "name": "curr",
+        "type": "size_t"
+      }
+    ]
+  },
+  "c_strlen": {
+    "source": "xzre/xzre_code/c_strlen.c",
+    "locals": [
+      {
+        "name": "len",
+        "type": "ssize_t"
+      }
+    ]
+  },
+  "c_strnlen": {
+    "source": "xzre/xzre_code/c_strnlen.c",
+    "locals": [
+      {
+        "name": "len",
+        "type": "ssize_t"
+      }
+    ]
+  },
+  "chacha_decrypt": {
+    "source": "xzre/xzre_code/chacha_decrypt.c",
+    "locals": [
+      {
+        "name": "outl",
+        "type": "int"
+      },
+      {
+        "name": "ctx",
+        "type": "EVP_CIPHER_CTX *"
+      },
+      {
+        "name": "cipher",
+        "type": "const EVP_CIPHER *"
+      }
+    ]
+  },
+  "count_bits": {
+    "source": "xzre/xzre_code/count_bits.c",
+    "locals": [
+      {
+        "name": "result",
+        "type": "u32"
+      }
+    ]
+  },
+  "count_pointers": {
+    "source": "xzre/xzre_code/count_pointers.c",
+    "locals": [
+      {
+        "name": "blockSize",
+        "type": "size_t"
+      },
+      {
+        "name": "nWords",
+        "type": "size_t"
+      },
+      {
+        "name": "i",
+        "type": "size_t"
+      }
+    ]
+  },
+  "decrypt_payload_message": {
+    "source": "xzre/xzre_code/decrypt_payload_message.c",
+    "locals": [
+      {
+        "name": "hdr",
+        "type": "backdoor_payload_hdr_t"
+      },
+      {
+        "name": "output",
+        "type": "u8[57]"
+      },
+      {
+        "name": "header_size",
+        "type": "const size_t"
+      },
+      {
+        "name": "body_length",
+        "type": "u16"
+      },
+      {
+        "name": "data",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "elf_parse": {
+    "source": "xzre/xzre_code/elf_parse.c",
+    "locals": [
+      {
+        "name": "i",
+        "type": "int"
+      },
+      {
+        "name": "phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "name": "first_vaddr",
+        "type": "u64"
+      },
+      {
+        "name": "dynamic_idx",
+        "type": "int"
+      },
+      {
+        "name": "dyn_phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "name": "dyn",
+        "type": "Elf64_Dyn *"
+      },
+      {
+        "name": "gnu_hash",
+        "type": "gnu_hash_table_t *"
+      },
+      {
+        "name": "d_pltrelsz",
+        "type": "u64"
+      },
+      {
+        "name": "d_relasz",
+        "type": "u64"
+      },
+      {
+        "name": "d_relrsz",
+        "type": "u64"
+      },
+      {
+        "name": "have_verdef_num",
+        "type": "BOOL"
+      },
+      {
+        "name": "hash_bloom",
+        "type": "u64 *"
+      },
+      {
+        "name": "hash_buckets",
+        "type": "u32 *"
+      },
+      {
+        "name": "hash_chain",
+        "type": "u32 *"
+      }
+    ]
+  },
+  "elf_symbol_get_addr": {
+    "source": "xzre/xzre_code/elf_symbol_get_addr.c",
+    "locals": [
+      {
+        "name": "sym",
+        "type": "Elf64_Sym *"
+      }
+    ]
+  },
+  "extract_payload_message": {
+    "source": "xzre/xzre_code/extract_payload_message.c",
+    "locals": [
+      {
+        "name": "i",
+        "type": "size_t"
+      },
+      {
+        "name": "cert_type",
+        "type": "char *"
+      },
+      {
+        "name": "p",
+        "type": "u8 *"
+      },
+      {
+        "name": "length",
+        "type": "u32"
+      },
+      {
+        "name": "data_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "sshbuf_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "remaining",
+        "type": "size_t"
+      },
+      {
+        "name": "cert_type_namelen",
+        "type": "size_t"
+      },
+      {
+        "name": "modulus_data",
+        "type": "u8 *"
+      },
+      {
+        "name": "modulus_length",
+        "type": "size_t"
+      }
+    ]
+  },
+  "fake_lzma_alloc": {
+    "source": "xzre/xzre_code/fake_lzma_alloc.c",
+    "locals": [
+      {
+        "name": "elf_info",
+        "type": "elf_info_t *"
+      },
+      {
+        "name": "string_id",
+        "type": "EncodedStringId"
+      }
+    ]
+  },
+  "fake_lzma_free": {
+    "source": "xzre/xzre_code/fake_lzma_free.c",
+    "locals": []
+  },
+  "find_call_instruction": {
+    "source": "xzre/xzre_code/find_call_instruction.c",
+    "locals": [
+      {
+        "name": "ctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "find_function": {
+    "source": "xzre/xzre_code/find_function.c",
+    "locals": [
+      {
+        "name": "res",
+        "type": "u8 *"
+      },
+      {
+        "name": "p",
+        "type": "u8 *"
+      },
+      {
+        "name": "search_from",
+        "type": "u8 *"
+      },
+      {
+        "name": "search_to",
+        "type": "u8 *"
+      },
+      {
+        "name": "found",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "find_lea_instruction": {
+    "source": "xzre/xzre_code/find_lea_instruction.c",
+    "locals": [
+      {
+        "name": "dctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "find_string_reference": {
+    "source": "xzre/xzre_code/find_string_reference.c",
+    "locals": [
+      {
+        "name": "dctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "get_lzma_allocator": {
+    "source": "xzre/xzre_code/get_lzma_allocator.c",
+    "locals": []
+  },
+  "hook_RSA_public_decrypt": {
+    "source": "xzre/xzre_code/hook_RSA_public_decrypt.c",
+    "locals": [
+      {
+        "name": "RSA_public_decrypt",
+        "type": "pfn_RSA_public_decrypt_t"
+      },
+      {
+        "name": "call_orig",
+        "type": "BOOL"
+      },
+      {
+        "name": "result",
+        "type": "int"
+      }
+    ]
+  },
+  "init_elf_entry_ctx": {
+    "source": "xzre/xzre_code/init_elf_entry_ctx.c",
+    "locals": []
+  },
+  "is_endbr64_instruction": {
+    "source": "xzre/xzre_code/is_endbr64_instruction.c",
+    "locals": []
+  },
+  "main_elf_parse": {
+    "source": "xzre/xzre_code/main_elf_parse.c",
+    "locals": [
+      {
+        "name": "libc_stack_end_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "dynamic_linker",
+        "type": "elf_info_t *"
+      },
+      {
+        "name": "libc_stack_end_ptr",
+        "type": "void **"
+      }
+    ]
+  },
+  "resolve_libc_imports": {
+    "source": "xzre/xzre_code/resolve_libc_imports.c",
+    "locals": [
+      {
+        "name": "resolver",
+        "type": "lzma_allocator *"
+      }
+    ]
+  },
+  "rsa_key_hash": {
+    "source": "xzre/xzre_code/rsa_key_hash.c",
+    "locals": [
+      {
+        "name": "buf",
+        "type": "u8[4106]"
+      },
+      {
+        "name": "written",
+        "type": "u64"
+      },
+      {
+        "name": "expSize",
+        "type": "u64"
+      },
+      {
+        "name": "n",
+        "type": "const BIGNUM *"
+      },
+      {
+        "name": "e",
+        "type": "const BIGNUM *"
+      },
+      {
+        "name": "result",
+        "type": "BOOL",
+        "line": 15
+      }
+    ]
+  },
+  "secret_data_append_from_address": {
+    "source": "xzre/xzre_code/secret_data_append_from_address.c",
+    "locals": [
+      {
+        "name": "code",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "secret_data_append_from_instruction": {
+    "source": "xzre/xzre_code/secret_data_append_from_instruction.c",
+    "locals": []
+  },
+  "secret_data_append_item": {
+    "source": "xzre/xzre_code/secret_data_append_item.c",
+    "locals": []
+  },
+  "secret_data_append_singleton": {
+    "source": "xzre/xzre_code/secret_data_append_singleton.c",
+    "locals": [
+      {
+        "name": "func_start",
+        "type": "void *"
+      }
+    ]
+  },
+  "sha256": {
+    "source": "xzre/xzre_code/sha256.c",
+    "locals": [
+      {
+        "name": "md",
+        "type": "const EVP_MD *"
+      }
+    ]
+  },
+  "sshd_patch_variables": {
+    "source": "xzre/xzre_code/sshd_patch_variables.c",
+    "locals": [
+      {
+        "name": "sshd_ctx",
+        "type": "sshd_ctx_t *"
+      },
+      {
+        "name": "permit_root_login",
+        "type": "int *"
+      },
+      {
+        "name": "use_pam",
+        "type": "int *"
+      },
+      {
+        "name": "mm_answer_authpassword_ptr",
+        "type": "sshd_monitor_func_t *"
+      }
+    ]
+  },
+  "update_cpuid_got_index": {
+    "source": "xzre/xzre_code/update_cpuid_got_index.c",
+    "locals": []
+  },
+  "update_got_offset": {
+    "source": "xzre/xzre_code/update_got_offset.c",
+    "locals": []
+  }
+}
