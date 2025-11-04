@@ -8,8 +8,11 @@ import os
 from ghidra.app.decompiler import DecompInterface  # type: ignore
 from ghidra.app.decompiler import DecompInterface  # type: ignore
 from ghidra.app.util.cparser.C import CParser  # type: ignore
+from ghidra.program.model.data import Undefined  # type: ignore
+from ghidra.program.model.listing import VariableStorage  # type: ignore
 from ghidra.program.model.symbol import SourceType  # type: ignore
 from ghidra.util.task import ConsoleTaskMonitor  # type: ignore
+from ghidra.util.exception import DuplicateNameException, InvalidInputException  # type: ignore
 from ghidra.util.task import ConsoleTaskMonitor  # type: ignore
 
 try:
@@ -97,7 +100,7 @@ def _find_local_variable(func_locals, high_symbols, target_name, storage_repr=No
                     pass
             except Exception:
                 pass
-        return var
+        return var, False
     symbol = high_symbols.get(target_name)
     if symbol is not None:
         if storage_repr:
@@ -106,8 +109,8 @@ def _find_local_variable(func_locals, high_symbols, target_name, storage_repr=No
                     pass
             except Exception:
                 pass
-        return symbol
-    return None
+        return symbol, True
+    return None, False
 
 
 def main():
@@ -127,104 +130,156 @@ def main():
 
     applied = 0
     skipped = 0
-    for entry in mapping.get("results", []):
-        func_name = entry.get("function")
-        func = _find_function_by_name(function_manager, func_name)
-        if func is None:
-            skipped += sum(len(match.get("assigned", [])) for match in entry.get("matches", []))
-            continue
-
-        func_locals = {}
-        try:
-            for local_var in func.getLocalVariables():
-                func_locals[local_var.getName()] = local_var
-        except Exception:
-            func_locals = {}
-
-        high_symbols = {}
-        try:
-            decomp_results = interface.decompileFunction(func, 60, ConsoleTaskMonitor())
-        except Exception:
-            decomp_results = None
-        if decomp_results is not None and decomp_results.decompileCompleted():
-            high_func = decomp_results.getHighFunction()
-            if high_func is not None:
-                try:
-                    symbol_map = high_func.getLocalSymbolMap()
-                    for symbol in symbol_map.getSymbols():
-                        try:
-                            if symbol.isParameter():
-                                continue
-                        except Exception:
-                            pass
-                        high_symbols[symbol.getName()] = symbol
-                except Exception:
-                    high_symbols = {}
-
-        for match in entry.get("matches", []):
-            notes = match.get("notes") or []
-            if notes:
-                # Skip low-confidence matches.
-                skipped += len(match.get("assigned", []))
+    transaction = program.startTransaction("ApplyMappedLocals")
+    try:
+        for entry in mapping.get("results", []):
+            func_name = entry.get("function")
+            func = _find_function_by_name(function_manager, func_name)
+            if func is None:
+                skipped += sum(len(match.get("assigned", [])) for match in entry.get("matches", []))
                 continue
 
-            source_type = match.get("source", {}).get("type")
-            target_dt = resolver.parse(source_type) if source_type else None
+            func_locals = {}
+            try:
+                for local_var in func.getLocalVariables():
+                    func_locals[local_var.getName()] = local_var
+            except Exception:
+                func_locals = {}
 
-            for assignment in match.get("assigned", []):
-                ghidra_name = assignment.get("ghidra_name")
-                suggested = assignment.get("suggested_name")
-                storage_repr = None
-                storage_info = assignment.get("storage")
-                if storage_info:
-                    storage_repr = storage_info.get("repr")
+            high_symbols = {}
+            symbol_map = None
+            try:
+                decomp_results = interface.decompileFunction(func, 60, ConsoleTaskMonitor())
+            except Exception:
+                decomp_results = None
+            if decomp_results is not None and decomp_results.decompileCompleted():
+                high_func = decomp_results.getHighFunction()
+                if high_func is not None:
+                    try:
+                        symbol_map = high_func.getLocalSymbolMap()
+                        for symbol in symbol_map.getSymbols():
+                            try:
+                                if symbol.isParameter():
+                                    continue
+                            except Exception:
+                                pass
+                            high_symbols[symbol.getName()] = symbol
+                    except Exception:
+                        high_symbols = {}
+                        symbol_map = None
 
-                if not ghidra_name or not suggested:
-                    skipped += 1
+            for match in entry.get("matches", []):
+                notes = match.get("notes") or []
+                if notes:
+                    # Skip low-confidence matches.
+                    skipped += len(match.get("assigned", []))
                     continue
 
-                var = _find_local_variable(func_locals, high_symbols, ghidra_name, storage_repr)
-                if var is None:
-                    skipped += 1
-                    continue
+                source_type = match.get("source", {}).get("type")
+                target_dt = resolver.parse(source_type) if source_type else None
 
-                if not dry_run and suggested != ghidra_name:
-                    renamed = False
-                    rename_attempts = [
-                        lambda obj: obj.setName(suggested, SourceType.USER_DEFINED),
-                        lambda obj: obj.setName(suggested),
-                        lambda obj: obj.rename(suggested, SourceType.USER_DEFINED),
-                        lambda obj: obj.rename(suggested),
-                    ]
-                    for attempt in rename_attempts:
-                        try:
-                            attempt(var)
-                            renamed = True
-                            break
-                        except (Exception, Throwable):
-                            continue
-                    if not renamed:
+                for assignment in match.get("assigned", []):
+                    ghidra_name = assignment.get("ghidra_name")
+                    suggested = assignment.get("suggested_name")
+                    storage_repr = None
+                    storage_info = assignment.get("storage")
+                    if storage_info:
+                        storage_repr = storage_info.get("repr")
+
+                    if not ghidra_name or not suggested:
                         skipped += 1
                         continue
 
-                if not dry_run and target_dt is not None:
-                    data_attempts = [
-                        lambda obj: obj.setDataType(target_dt, SourceType.USER_DEFINED),
-                        lambda obj: obj.setDataType(target_dt),
-                    ]
-                    for attempt in data_attempts:
-                        try:
-                            attempt(var)
-                            break
-                        except (Exception, Throwable):
+                    var, is_high_symbol = _find_local_variable(func_locals, high_symbols, ghidra_name, storage_repr)
+                    if var is None:
+                        skipped += 1
+                        continue
+
+                    if not dry_run and suggested != ghidra_name:
+                        renamed = False
+                        if is_high_symbol and symbol_map is not None:
+                            try:
+                                symbol_map.renameSymbol(var, suggested, SourceType.USER_DEFINED)
+                                renamed = True
+                            except (Exception, Throwable):
+                                renamed = False
+                        if not renamed:
+                            rename_attempts = [
+                                lambda obj: obj.setName(suggested, SourceType.USER_DEFINED),
+                                lambda obj: obj.setName(suggested),
+                                lambda obj: obj.rename(suggested, SourceType.USER_DEFINED),
+                                lambda obj: obj.rename(suggested),
+                            ]
+                            for attempt in rename_attempts:
+                                try:
+                                    attempt(var)
+                                    renamed = True
+                                    break
+                                except (Exception, Throwable):
+                                    continue
+                        if not renamed and is_high_symbol:
+                            try:
+                                storage = var.getStorage()
+                                data_type = target_dt or var.getDataType()
+                                if data_type is None and hasattr(var, "getDataType"):
+                                    data_type = var.getDataType()
+                                if data_type is None:
+                                    size = 1
+                                    try:
+                                        size = storage.size()
+                                    except Exception:
+                                        try:
+                                            size = storage.getSize()
+                                        except Exception:
+                                            size = 1
+                                    data_type = Undefined.getUndefinedDataType(size)
+                                func.createLocalVariable(suggested, data_type, storage, SourceType.USER_DEFINED)
+                                # Refresh our local cache so subsequent operations see the new variable.
+                                try:
+                                    for local_var in func.getLocalVariables():
+                                        if local_var.getName() == suggested:
+                                            func_locals[suggested] = local_var
+                                            var = local_var
+                                            is_high_symbol = False
+                                            break
+                                except Exception:
+                                    pass
+                                renamed = True
+                            except (DuplicateNameException, InvalidInputException, Exception, Throwable):
+                                renamed = False
+                        if not renamed:
+                            skipped += 1
                             continue
 
-                applied += 1
+                    if not dry_run and target_dt is not None:
+                        if is_high_symbol:
+                            try:
+                                var.setDataType(target_dt)
+                            except (Exception, Throwable):
+                                pass
+                        else:
+                            data_attempts = [
+                                lambda obj: obj.setDataType(target_dt, SourceType.USER_DEFINED),
+                                lambda obj: obj.setDataType(target_dt),
+                            ]
+                            for attempt in data_attempts:
+                                try:
+                                    attempt(var)
+                                    break
+                                except (Exception, Throwable):
+                                    continue
 
-    try:
-        interface.dispose()
-    except Exception:
-        pass
+                applied += 1
+    finally:
+        commit = not dry_run
+        try:
+            program.endTransaction(transaction, commit)
+        except Exception:
+            pass
+        try:
+            interface.dispose()
+        except Exception:
+            pass
 
     if dry_run:
         print("Dry run: {} mappings would be applied, {} skipped".format(applied, skipped))
