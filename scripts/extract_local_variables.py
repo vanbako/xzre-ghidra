@@ -82,9 +82,24 @@ def _process_function(
     node_file = _get_loc_file(loc)
     if not node_file:
         return ("", [])
-    node_abs = os.path.abspath(os.path.join(REPO_ROOT, node_file))
-    if os.path.normpath(node_abs) != os.path.normpath(abs_source):
-        return ("", [])
+    if node_file:
+        node_abs = os.path.abspath(os.path.join(REPO_ROOT, node_file))
+    else:
+        node_abs = ""
+    if not node_abs or os.path.normpath(node_abs) != os.path.normpath(abs_source):
+        # Some function definitions come through with a blank ``loc.file`` but
+        # still carry the originating file in the ``range`` metadata. Fall back
+        # to the range information when available.
+        if node_abs:
+            return ("", [])
+        range_info = node.get("range") or {}
+        range_begin = range_info.get("begin") or {}
+        range_file = _get_loc_file(range_begin)
+        if not range_file:
+            return ("", [])
+        node_abs = os.path.abspath(os.path.join(REPO_ROOT, range_file))
+        if os.path.normpath(node_abs) != os.path.normpath(abs_source):
+            return ("", [])
 
     body = None
     for child in node.get("inner") or []:
