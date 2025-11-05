@@ -6,13 +6,17 @@ import json
 import os
 
 from ghidra.app.decompiler import DecompInterface  # type: ignore
-from ghidra.app.decompiler import DecompInterface  # type: ignore
 from ghidra.app.util.cparser.C import CParser  # type: ignore
 from ghidra.program.model.data import Undefined  # type: ignore
+from ghidra.program.model.pcode import HighFunctionDBUtil  # type: ignore
 from ghidra.program.model.listing import VariableStorage  # type: ignore
 from ghidra.program.model.symbol import SourceType  # type: ignore
 from ghidra.util.task import ConsoleTaskMonitor  # type: ignore
-from ghidra.util.exception import DuplicateNameException, InvalidInputException  # type: ignore
+from ghidra.util.exception import (
+    DuplicateNameException,
+    InvalidInputException,
+    UsrException,
+)  # type: ignore
 from ghidra.util.task import ConsoleTaskMonitor  # type: ignore
 
 try:
@@ -25,16 +29,19 @@ except ImportError:  # pragma: no cover
 def _parse_args(raw_args):
     mapping_path = None
     dry_run = False
+    diagnose = False
     for arg in raw_args:
         if arg.startswith("mapping="):
             mapping_path = os.path.abspath(arg.split("=", 1)[1])
         elif arg == "dryrun":
             dry_run = True
+        elif arg == "diagnose":
+            diagnose = True
     if not mapping_path:
         raise RuntimeError("mapping=/path/to/variable_mapping_report.json is required")
     if not os.path.exists(mapping_path):
         raise RuntimeError("mapping file not found: {}".format(mapping_path))
-    return mapping_path, dry_run
+    return mapping_path, dry_run, diagnose
 
 
 def _find_function_by_name(function_manager, name):
@@ -114,7 +121,7 @@ def _find_local_variable(func_locals, high_symbols, target_name, storage_repr=No
 
 
 def main():
-    mapping_path, dry_run = _parse_args(getScriptArgs())
+    mapping_path, dry_run, diagnose = _parse_args(getScriptArgs())
     with open(mapping_path, "r") as infile:
         mapping = json.load(infile)
 
@@ -130,13 +137,20 @@ def main():
 
     applied = 0
     skipped = 0
+    diagnostics = []
+
+    def record_skip(message):
+        if diagnose:
+            diagnostics.append(message)
     transaction = program.startTransaction("ApplyMappedLocals")
     try:
         for entry in mapping.get("results", []):
             func_name = entry.get("function")
             func = _find_function_by_name(function_manager, func_name)
             if func is None:
-                skipped += sum(len(match.get("assigned", [])) for match in entry.get("matches", []))
+                skipped_count = sum(len(match.get("assigned", [])) for match in entry.get("matches", []))
+                skipped += skipped_count
+                record_skip("Function {} missing from program ({} assignment(s) skipped)".format(func_name, skipped_count))
                 continue
 
             func_locals = {}
@@ -168,108 +182,228 @@ def main():
                         high_symbols = {}
                         symbol_map = None
 
+            assignment_tasks = []
+            processed_match_ids = set()
+
             for match in entry.get("matches", []):
                 notes = match.get("notes") or []
                 if notes:
-                    # Skip low-confidence matches.
-                    skipped += len(match.get("assigned", []))
+                    count = len(match.get("assigned", []))
+                    skipped += count
+                    record_skip("Function {}: skipped {} low-confidence assignment(s) for source {}".format(func_name, count, match.get("source", {}).get("name")))
                     continue
 
                 source_type = match.get("source", {}).get("type")
                 target_dt = resolver.parse(source_type) if source_type else None
 
                 for assignment in match.get("assigned", []):
-                    ghidra_name = assignment.get("ghidra_name")
-                    suggested = assignment.get("suggested_name")
-                    storage_repr = None
-                    storage_info = assignment.get("storage")
-                    if storage_info:
-                        storage_repr = storage_info.get("repr")
+                    assignment_tasks.append(
+                        {
+                            "match": match,
+                            "assignment": assignment,
+                            "target_dt": target_dt,
+                        }
+                    )
 
-                    if not ghidra_name or not suggested:
-                        skipped += 1
-                        continue
+            from_names = {
+                task["assignment"].get("ghidra_name")
+                for task in assignment_tasks
+                if task["assignment"].get("ghidra_name")
+            }
 
-                    var, is_high_symbol = _find_local_variable(func_locals, high_symbols, ghidra_name, storage_repr)
-                    if var is None:
-                        skipped += 1
-                        continue
+            def _needs_delay(task):
+                assignment = task["assignment"]
+                ghidra_name = assignment.get("ghidra_name")
+                suggested = assignment.get("suggested_name")
+                if not ghidra_name or not suggested:
+                    return False
+                return suggested in from_names and suggested != ghidra_name
 
-                    if not dry_run and suggested != ghidra_name:
-                        renamed = False
-                        if is_high_symbol and symbol_map is not None:
+            sorted_tasks = sorted(
+                enumerate(assignment_tasks),
+                key=lambda pair: (_needs_delay(pair[1]), pair[0]),
+            )
+
+            for _, task in sorted_tasks:
+                match = task["match"]
+                assignment = task["assignment"]
+                ghidra_name = assignment.get("ghidra_name")
+                suggested = assignment.get("suggested_name")
+                storage_repr = None
+                storage_info = assignment.get("storage")
+                if storage_info:
+                    storage_repr = storage_info.get("repr")
+
+                if not ghidra_name or not suggested:
+                    skipped += 1
+                    record_skip("Function {}: missing ghidra/suggested name in mapping {}".format(func_name, match.get("source", {}).get("name")))
+                    continue
+
+                var, is_high_symbol = _find_local_variable(func_locals, high_symbols, ghidra_name, storage_repr)
+                if var is None:
+                    skipped += 1
+                    record_skip("Function {}: could not locate target variable '{}'".format(func_name, ghidra_name))
+                    continue
+
+                processed_match_ids.add(id(match))
+
+                preserve_data_type = False
+                dt_for_update = task["target_dt"]
+                target_len = None
+                if task["target_dt"] is not None and hasattr(task["target_dt"], "getLength"):
+                    try:
+                        target_len = task["target_dt"].getLength()
+                    except Exception:
+                        target_len = None
+                var_len = None
+                try:
+                    if hasattr(var, "getLength"):
+                        var_len = var.getLength()
+                    elif hasattr(var, "getSize"):
+                        var_len = var.getSize()
+                except Exception:
+                    var_len = None
+                storage_obj = None
+                try:
+                    storage_obj = var.getStorage()
+                except Exception:
+                    storage_obj = None
+                if (
+                    dt_for_update is not None
+                    and target_len is not None
+                    and var_len is not None
+                    and target_len != var_len
+                    and storage_obj is not None
+                    and hasattr(storage_obj, "hasStackStorage")
+                    and storage_obj.hasStackStorage()
+                ):
+                    preserve_data_type = True
+                    dt_for_update = None
+
+                high_update_used = False
+                original_name = ghidra_name
+
+                if not dry_run and suggested != ghidra_name:
+                    renamed = False
+                    if is_high_symbol:
+                        try:
+                            HighFunctionDBUtil.updateDBVariable(
+                                var,
+                                suggested,
+                                dt_for_update,
+                                SourceType.USER_DEFINED,
+                            )
+                            renamed = True
+                            high_update_used = True
                             try:
-                                symbol_map.renameSymbol(var, suggested, SourceType.USER_DEFINED)
-                                renamed = True
-                            except (Exception, Throwable):
-                                renamed = False
-                        if not renamed:
-                            rename_attempts = [
-                                lambda obj: obj.setName(suggested, SourceType.USER_DEFINED),
-                                lambda obj: obj.setName(suggested),
-                                lambda obj: obj.rename(suggested, SourceType.USER_DEFINED),
-                                lambda obj: obj.rename(suggested),
-                            ]
-                            for attempt in rename_attempts:
+                                func_locals = {local_var.getName(): local_var for local_var in func.getLocalVariables()}
+                            except Exception:
+                                pass
+                            if symbol_map is not None:
                                 try:
-                                    attempt(var)
-                                    renamed = True
-                                    break
-                                except (Exception, Throwable):
-                                    continue
-                        if not renamed and is_high_symbol:
-                            try:
-                                storage = var.getStorage()
-                                data_type = target_dt or var.getDataType()
-                                if data_type is None and hasattr(var, "getDataType"):
-                                    data_type = var.getDataType()
-                                if data_type is None:
-                                    size = 1
-                                    try:
-                                        size = storage.size()
-                                    except Exception:
+                                    high_symbols = {}
+                                    for symbol in symbol_map.getSymbols():
                                         try:
-                                            size = storage.getSize()
+                                            if symbol.isParameter():
+                                                continue
                                         except Exception:
-                                            size = 1
-                                    data_type = Undefined.getUndefinedDataType(size)
-                                func.createLocalVariable(suggested, data_type, storage, SourceType.USER_DEFINED)
-                                # Refresh our local cache so subsequent operations see the new variable.
-                                try:
-                                    for local_var in func.getLocalVariables():
-                                        if local_var.getName() == suggested:
-                                            func_locals[suggested] = local_var
-                                            var = local_var
-                                            is_high_symbol = False
-                                            break
+                                            pass
+                                        high_symbols[symbol.getName()] = symbol
+                                    var = high_symbols.get(suggested, var)
+                                    is_high_symbol = True
                                 except Exception:
                                     pass
-                                renamed = True
-                            except (DuplicateNameException, InvalidInputException, Exception, Throwable):
-                                renamed = False
-                        if not renamed:
-                            skipped += 1
-                            continue
-
-                    if not dry_run and target_dt is not None:
-                        if is_high_symbol:
+                        except (DuplicateNameException, InvalidInputException, UsrException, Exception, Throwable):
+                            renamed = False
+                            high_update_used = False
+                    if not renamed and is_high_symbol and symbol_map is not None:
+                        try:
+                            symbol_map.renameSymbol(var, suggested, SourceType.USER_DEFINED)
+                            renamed = True
+                        except (Exception, Throwable):
+                            renamed = False
+                    if not renamed:
+                        rename_attempts = [
+                            lambda obj: obj.setName(suggested, SourceType.USER_DEFINED),
+                            lambda obj: obj.setName(suggested),
+                            lambda obj: obj.rename(suggested, SourceType.USER_DEFINED),
+                            lambda obj: obj.rename(suggested),
+                        ]
+                        for attempt in rename_attempts:
                             try:
-                                var.setDataType(target_dt)
+                                attempt(var)
+                                renamed = True
+                                break
                             except (Exception, Throwable):
-                                pass
-                        else:
-                            data_attempts = [
-                                lambda obj: obj.setDataType(target_dt, SourceType.USER_DEFINED),
-                                lambda obj: obj.setDataType(target_dt),
-                            ]
-                            for attempt in data_attempts:
+                                continue
+                    if not renamed and is_high_symbol:
+                        try:
+                            storage = var.getStorage()
+                            data_type = task["target_dt"] or var.getDataType()
+                            if data_type is None and hasattr(var, "getDataType"):
+                                data_type = var.getDataType()
+                            if data_type is None:
+                                size = 1
                                 try:
-                                    attempt(var)
-                                    break
-                                except (Exception, Throwable):
-                                    continue
+                                    size = storage.size()
+                                except Exception:
+                                    try:
+                                        size = storage.getSize()
+                                    except Exception:
+                                        size = 1
+                                data_type = Undefined.getUndefinedDataType(size)
+                            func.createLocalVariable(suggested, data_type, storage, SourceType.USER_DEFINED)
+                            try:
+                                for local_var in func.getLocalVariables():
+                                    if local_var.getName() == suggested:
+                                        func_locals[suggested] = local_var
+                                        var = local_var
+                                        is_high_symbol = False
+                                        break
+                            except Exception:
+                                pass
+                            renamed = True
+                        except (DuplicateNameException, InvalidInputException, Exception, Throwable):
+                            renamed = False
+                    if not renamed:
+                        skipped += 1
+                        record_skip("Function {}: rename failed for '{}' -> '{}'".format(func_name, ghidra_name, suggested))
+                        continue
 
-                applied += 1
+                    if original_name in func_locals and func_locals.get(original_name) == var:
+                        try:
+                            del func_locals[original_name]
+                        except Exception:
+                            pass
+                        func_locals[suggested] = var
+                    if is_high_symbol and original_name in high_symbols:
+                        try:
+                            del high_symbols[original_name]
+                        except Exception:
+                            pass
+                        high_symbols[suggested] = var
+
+                if not dry_run and task["target_dt"] is not None and not preserve_data_type:
+                    if is_high_symbol:
+                        if high_update_used:
+                            continue
+                        try:
+                            var.setDataType(task["target_dt"])
+                        except (Exception, Throwable):
+                            pass
+                    else:
+                        data_attempts = [
+                            lambda obj: obj.setDataType(task["target_dt"], SourceType.USER_DEFINED),
+                            lambda obj: obj.setDataType(task["target_dt"]),
+                        ]
+                        for attempt in data_attempts:
+                            try:
+                                attempt(var)
+                                break
+                            except (Exception, Throwable):
+                                continue
+
+            applied += len(processed_match_ids)
     finally:
         commit = not dry_run
         try:
@@ -285,6 +419,10 @@ def main():
         print("Dry run: {} mappings would be applied, {} skipped".format(applied, skipped))
     else:
         print("Applied {} confident local mappings; skipped {}".format(applied, skipped))
+    if diagnose and diagnostics:
+        print("Skipped details:")
+        for entry in diagnostics:
+            print("  - {}".format(entry))
 
 
 if __name__ == "__main__":

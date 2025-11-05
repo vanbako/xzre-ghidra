@@ -9,6 +9,7 @@ the same source variable (handled via ``_1`` suffixes).
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import defaultdict, OrderedDict
@@ -23,6 +24,39 @@ DEFAULT_BINARY = "liblzma_la-crc64-fast.o"
 REPORT_DIR = os.path.join(REPO_ROOT, "reports")
 GHIDRA_OUTPUT_JSON = os.path.join(REPO_ROOT, "reports", "ghidra_locals_dump.json")
 MAPPING_REPORT_JSON = os.path.join(REPO_ROOT, "reports", "variable_mapping_report.json")
+
+BASE_TYPE_SIZES = {
+    "char": 1,
+    "uchar": 1,
+    "schar": 1,
+    "byte": 1,
+    "bool": 1,
+    "short": 2,
+    "ushort": 2,
+    "int": 4,
+    "uint": 4,
+    "long": 8,
+    "ulong": 8,
+    "longlong": 8,
+    "ulonglong": 8,
+    "float": 4,
+    "double": 8,
+    "size_t": 8,
+    "ssize_t": 8,
+    "ptrdiff_t": 8,
+}
+
+EQUIVALENT_BASE_TYPES = {
+    "int": {"int", "uint"},
+    "uint": {"int", "uint"},
+    "long": {"long", "ulong"},
+    "ulong": {"long", "ulong"},
+    "longlong": {"longlong", "ulonglong"},
+    "ulonglong": {"longlong", "ulonglong"},
+    "bool": {"bool", "int", "uint"},
+    "size_t": {"size_t", "ulong"},
+    "ssize_t": {"ssize_t", "long"},
+}
 
 
 class ExtractionError(RuntimeError):
@@ -93,8 +127,13 @@ class SourceVariable:
     use_lines: List[int] = field(default_factory=list)
     call_sites: List[Dict[str, Any]] = field(default_factory=list)
     returned: bool = False
+    size_hint: Optional[int] = None
 
     def to_dict(self) -> Dict:
+        normalized = _normalize_type(self.type_str)
+        hint = self.size_hint
+        if hint is None:
+            hint = _size_hint_from_normalized(normalized)
         return {
             "name": self.name,
             "type": self.type_str,
@@ -102,6 +141,7 @@ class SourceVariable:
             "uses": sorted(self.use_lines),
             "call_sites": list(self.call_sites),
             "returned": self.returned,
+            "size_hint": hint,
         }
 
 
@@ -181,6 +221,7 @@ def _collect_function_locals(
                     decl_offset=offset if isinstance(offset, int) else None,
                     decl_line=decl_line,
                 )
+                locals_out[var_id].size_hint = _size_hint_from_normalized(_normalize_type(type_str or ""))
             traversal_stack.extend(node.get("inner") or [])
         elif isinstance(node, list):
             traversal_stack.extend(node)
@@ -328,6 +369,8 @@ def _normalize_type(type_str: Optional[str]) -> str:
         (" volatile", ""),
         ("struct ", ""),
         ("enum ", ""),
+        ("int *", "int*"),
+        ("uint *", "uint*"),
     ]
     for search, repl in replacements:
         normalized = normalized.replace(search, repl)
@@ -349,6 +392,13 @@ def _normalize_type(type_str: Optional[str]) -> str:
         "undefined2": "ushort",
         "undefined1": "uchar",
         "long long": "longlong",
+        "unsigned": "uint",
+        "unsigned long long": "ulonglong",
+        "unsigned long": "ulong",
+        "unsigned int": "uint",
+        "ulonglong": "ulonglong",
+        "ulong": "ulong",
+        "uint": "uint",
     }
     pointer_depth = 0
     while normalized.endswith("*"):
@@ -367,6 +417,65 @@ def _normalize_type(type_str: Optional[str]) -> str:
 
 def _pointer_depth(type_str: str) -> int:
     return type_str.count("*")
+
+
+def _base_type_name(normalized: str) -> str:
+    base = normalized
+    if "[" in base:
+        base = base.split("[", 1)[0]
+    base = base.rstrip("*")
+    return base
+
+
+def _size_hint_from_normalized(normalized: str) -> Optional[int]:
+    if not normalized:
+        return None
+    pointer_depth = _pointer_depth(normalized)
+    if pointer_depth > 0:
+        return 8
+    array_len = None
+    match = re.search(r"\[(\d+)\]", normalized)
+    if match:
+        try:
+            array_len = int(match.group(1))
+        except Exception:
+            array_len = None
+    base = _base_type_name(normalized)
+    base_size = BASE_TYPE_SIZES.get(base)
+    if base_size is None:
+        return None if array_len is None else base_size
+    if array_len is None:
+        return base_size
+    return base_size * array_len
+
+
+def _types_close(src_type: str, cand_type: str) -> bool:
+    if not src_type or not cand_type:
+        return False
+    if src_type == cand_type:
+        return True
+    if _pointer_depth(src_type) != _pointer_depth(cand_type):
+        return False
+    src_base = _base_type_name(src_type)
+    cand_base = _base_type_name(cand_type)
+    if not src_base or not cand_base:
+        return False
+    if src_base == cand_base:
+        return True
+    return cand_base in EQUIVALENT_BASE_TYPES.get(src_base, set())
+
+
+def _allocate_name(base: str, used: set) -> str:
+    if base not in used:
+        used.add(base)
+        return base
+    idx = 1
+    while True:
+        candidate = "{}_{}".format(base, idx)
+        if candidate not in used:
+            used.add(candidate)
+            return candidate
+        idx += 1
 
 
 def _call_signature(entries: Optional[List[Dict[str, Any]]]) -> set:
@@ -546,10 +655,13 @@ def _match_locals(
 
         match_list: List[Dict] = []
         unmatched_source = []
+        used_names: set = set()
 
         for src_var in source_locals:
             normalized = _normalize_type(src_var.get("type"))
             src_var["normalized_type"] = normalized
+            src_size_hint = _size_hint_from_normalized(normalized)
+            src_var["size_hint"] = src_size_hint
             src_calls = _call_signature(src_var.get("call_sites"))
             src_returned = bool(src_var.get("returned"))
             def _score(candidate):
@@ -587,6 +699,18 @@ def _match_locals(
                     loc_type = loc.get("normalized_type", "")
                     if _pointer_depth(normalized) != _pointer_depth(loc_type):
                         penalty += 3
+                    base_close = _types_close(normalized, loc_type)
+                    if base_close:
+                        penalty = max(0, penalty - 1)
+                    else:
+                        penalty += 4
+                    # Penalize large type-size mismatches for stack storage.
+                    loc_size = loc.get("data_size")
+                    if isinstance(src_size_hint, int) and isinstance(loc_size, int) and src_size_hint > 0 and loc_size > 0:
+                        diff = abs(src_size_hint - loc_size)
+                        min_size = min(src_size_hint, loc_size)
+                        if diff >= max(4, min_size * 2):
+                            penalty += 8
                     fallback_options.append((penalty, loc))
 
             chosen = None
@@ -599,14 +723,16 @@ def _match_locals(
                 if fallback_options:
                     fallback_options.sort(key=lambda item: (_score(item[1]) + item[0], item[0]))
                     best_penalty, candidate = fallback_options[0]
-                    total_score = _score(candidate) + best_penalty
-                    if total_score <= 6:
-                        chosen = candidate
-                        notes.append(
-                            "Fallback match by storage/usage despite type mismatch ({} vs {}).".format(
-                                normalized or "unknown", candidate.get("normalized_type") or "unknown"
+                    storage = candidate.get("storage") or {}
+                    if not storage.get("is_register"):
+                        total_score = _score(candidate) + best_penalty
+                        if total_score <= 5:
+                            chosen = candidate
+                            notes.append(
+                                "Fallback match by storage/usage despite type mismatch ({} vs {}).".format(
+                                    normalized or "unknown", candidate.get("normalized_type") or "unknown"
+                                )
                             )
-                        )
 
             if chosen is None:
                 unmatched_source.append(src_var)
@@ -614,13 +740,14 @@ def _match_locals(
 
             ghidra_remaining.remove(chosen)
 
+            suggested_name = _allocate_name(src_var["name"], used_names)
             match_entry = {
                 "source": src_var,
                 "assigned": [
                     {
                         "ghidra_name": chosen["name"],
                         "ghidra_type": chosen.get("data_type"),
-                        "suggested_name": src_var["name"],
+                        "suggested_name": suggested_name,
                         "storage": chosen.get("storage"),
                         "use_addresses": chosen.get("use_addresses"),
                     }
@@ -636,9 +763,8 @@ def _match_locals(
             for match in match_list:
                 src_type = match["source"].get("normalized_type")
                 if src_type and src_type == candidate.get("normalized_type"):
-                    suffix = len(match["assigned"])
                     base_name = match["source"]["name"]
-                    suggested = base_name if suffix == 0 else "{}_{}".format(base_name, suffix)
+                    suggested = _allocate_name(base_name, used_names)
                     match["assigned"].append(
                         {
                             "ghidra_name": candidate["name"],
@@ -658,6 +784,9 @@ def _match_locals(
                 unmatched_source,
                 still_unmatched,
             )
+            for match in register_matches:
+                for assignment in match.get("assigned", []):
+                    assignment["suggested_name"] = _allocate_name(assignment["suggested_name"], used_names)
             match_list.extend(register_matches)
 
         function_result = {

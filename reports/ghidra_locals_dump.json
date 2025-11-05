@@ -14,8 +14,8 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_4c", 
-          "data_type": "uint", 
+          "name": "d", 
+          "data_type": "u32", 
           "call_sites": []
         }, 
         {
@@ -33,7 +33,7 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_48", 
+          "name": "state", 
           "data_type": "elf_entry_ctx_t", 
           "call_sites": []
         }, 
@@ -52,8 +52,8 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_54", 
-          "data_type": "uint", 
+          "name": "b", 
+          "data_type": "u32", 
           "call_sites": []
         }, 
         {
@@ -66,8 +66,8 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_50", 
-          "data_type": "uint", 
+          "name": "c", 
+          "data_type": "u32", 
           "call_sites": []
         }
       ]
@@ -90,8 +90,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "lVar1", 
-          "data_type": "long", 
+          "name": "local_RCX_33", 
+          "data_type": "size_t", 
           "call_sites": []
         }, 
         {
@@ -108,7 +108,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "sVar2", 
+          "name": "curr", 
           "data_type": "size_t", 
           "call_sites": []
         }
@@ -131,8 +131,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "lVar1", 
-          "data_type": "long", 
+          "name": "len", 
+          "data_type": "ssize_t", 
           "call_sites": []
         }
       ]
@@ -155,8 +155,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "sVar1", 
-          "data_type": "size_t", 
+          "name": "len", 
+          "data_type": "ssize_t", 
           "call_sites": []
         }
       ]
@@ -188,6 +188,22 @@
           }, 
           "name": "local_3c", 
           "data_type": "uint[3]", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010725b"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "outl", 
+          "data_type": "int", 
           "call_sites": []
         }, 
         {
@@ -223,24 +239,6 @@
           "call_sites": []
         }, 
         {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00107221", 
-            "0010723c", 
-            "0010725b"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "iVar3", 
-          "data_type": "int", 
-          "call_sites": []
-        }, 
-        {
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
@@ -265,6 +263,22 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
+            "001071e2"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R9:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "piVar3", 
+          "data_type": "imported_funcs_t *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
             "00107206"
           ], 
           "source_type": null, 
@@ -273,7 +287,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "type", 
+          "name": "cipher", 
           "data_type": "EVP_CIPHER *", 
           "call_sites": [
             {
@@ -283,19 +297,35 @@
           ]
         }, 
         {
-          "data_size": 8, 
+          "data_size": 4, 
           "is_returned": false, 
           "use_addresses": [
-            "001071e2"
+            "00107221"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "R9:8", 
+            "repr": "EAX:4", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "piVar4", 
-          "data_type": "imported_funcs_t *", 
+          "name": "outl_1", 
+          "data_type": "int", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010723c"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "local_EAX_172", 
+          "data_type": "int", 
           "call_sites": []
         }
       ]
@@ -318,7 +348,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar1", 
+          "name": "result", 
           "data_type": "u32", 
           "call_sites": []
         }
@@ -342,8 +372,24 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar3", 
-          "data_type": "ulong", 
+          "name": "i", 
+          "data_type": "size_t", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001074cc"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "nWords", 
+          "data_type": "size_t", 
           "call_sites": []
         }, 
         {
@@ -360,8 +406,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar4", 
-          "data_type": "ulong", 
+          "name": "blockSize", 
+          "data_type": "size_t", 
           "call_sites": []
         }, 
         {
@@ -381,22 +427,6 @@
           "name": "BVar1", 
           "data_type": "BOOL", 
           "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001074cc"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "sVar2", 
-          "data_type": "size_t", 
-          "call_sites": []
         }
       ]
     }, 
@@ -405,23 +435,60 @@
       "entry_point": "00108d50", 
       "locals": [
         {
-          "data_size": 8, 
+          "data_size": 4, 
           "is_returned": false, 
           "use_addresses": [
-            "00108dc9", 
             "00108ddd", 
             "00108e09", 
             "00108e74"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "Stack[-0x81]:8", 
-            "is_register": false, 
-            "is_stack": true
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
           }, 
-          "name": "local_81", 
-          "data_type": "undefined8", 
+          "name": "BVar2", 
+          "data_type": "BOOL", 
           "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108d59", 
+            "00108d7c"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RCX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "lVar3", 
+          "data_type": "long", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108dea"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R14D:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "inl", 
+          "data_type": "int", 
+          "call_sites": [
+            {
+              "arg_index": 1, 
+              "callee": "chacha_decrypt"
+            }
+          ]
         }, 
         {
           "data_size": 65, 
@@ -446,6 +513,23 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
+            "00108d77", 
+            "00108d7c"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RDI:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "data_1", 
+          "data_type": "u8 *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
             "00108dc9", 
             "00108ddd", 
             "00108e09", 
@@ -457,8 +541,77 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "uStack_79", 
-          "data_type": "undefined8", 
+          "name": "header_size", 
+          "data_type": "size_t", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108e48", 
+            "00108e4a", 
+            "00108e58"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "header_size_2", 
+          "data_type": "size_t", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108e39"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:5ff90ce99c:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "temp_5ff90ce99c", 
+          "data_type": "u8 *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108e12"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RDX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "header_size_3", 
+          "data_type": "size_t", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108dc9", 
+            "00108ddd", 
+            "00108e09", 
+            "00108e74"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "Stack[-0x81]:8", 
+            "is_register": false, 
+            "is_stack": true
+          }, 
+          "name": "local_81", 
+          "data_type": "size_t", 
           "call_sites": []
         }, 
         {
@@ -492,114 +645,6 @@
           "name": "uVar1", 
           "data_type": "u64", 
           "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108ddd", 
-            "00108e09", 
-            "00108e74"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "BVar2", 
-          "data_type": "BOOL", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108e48", 
-            "00108e4a", 
-            "00108e58"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "uVar3", 
-          "data_type": "ulong", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108d59", 
-            "00108d7c"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RCX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "lVar4", 
-          "data_type": "long", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108e12"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RDX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "uVar5", 
-          "data_type": "ulong", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108d77", 
-            "00108d7c", 
-            "00108e39"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RDI:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "puVar6", 
-          "data_type": "u8 *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00108dea"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "R14D:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "inl", 
-          "data_type": "int", 
-          "call_sites": [
-            {
-              "arg_index": 1, 
-              "callee": "chacha_decrypt"
-            }
-          ]
         }
       ]
     }, 
@@ -830,8 +875,6 @@
           "data_size": 4, 
           "is_returned": false, 
           "use_addresses": [
-            "0010145a", 
-            "001014d9", 
             "0010179a", 
             "001017bb", 
             "001017df", 
@@ -848,43 +891,6 @@
           "call_sites": []
         }, 
         {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001014d2"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "iVar14", 
-          "data_type": "int", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001014bd"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "vaddr", 
-          "data_type": "Elf64_Dyn *", 
-          "call_sites": [
-            {
-              "arg_index": 1, 
-              "callee": "elf_contains_vaddr"
-            }
-          ]
-        }, 
-        {
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
@@ -898,26 +904,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "p_Var15", 
+          "name": "p_Var14", 
           "data_type": "_union_4 *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001014fe", 
-            "0010154b", 
-            "00101551"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "ECX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "iVar16", 
-          "data_type": "int", 
           "call_sites": []
         }, 
         {
@@ -939,7 +927,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "lVar17", 
+          "name": "lVar15", 
           "data_type": "long", 
           "call_sites": []
         }, 
@@ -947,7 +935,6 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "00101475", 
             "001014f0", 
             "0010154b", 
             "00101551", 
@@ -959,7 +946,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "EVar18", 
+          "name": "size", 
           "data_type": "Elf64_Xword", 
           "call_sites": [
             {
@@ -967,42 +954,6 @@
               "callee": "elf_contains_vaddr"
             }
           ]
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010140b", 
-            "0010140e"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RDI:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "puVar19", 
-          "data_type": "u64 *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00101422", 
-            "00101431", 
-            "0010145a", 
-            "00101484"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "R8:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "pEVar20", 
-          "data_type": "Elf64_Phdr *", 
-          "call_sites": []
         }, 
         {
           "data_size": 8, 
@@ -1023,28 +974,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar21", 
+          "name": "uVar16", 
           "data_type": "ulong", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010142e", 
-            "00101431", 
-            "0010145a", 
-            "00101484", 
-            "00101487"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "R10:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "pEVar22", 
-          "data_type": "Elf64_Phdr *", 
           "call_sites": []
         }, 
         {
@@ -1063,7 +994,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar23", 
+          "name": "uVar17", 
           "data_type": "ulong", 
           "call_sites": [
             {
@@ -1071,6 +1002,27 @@
               "callee": "elf_contains_vaddr"
             }
           ]
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001014f4", 
+            "0010154b", 
+            "00101551", 
+            "00101593", 
+            "0010176b", 
+            "0010176e"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R15:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "hash_buckets", 
+          "data_type": "u32 *", 
+          "call_sites": []
         }, 
         {
           "data_size": 4, 
@@ -1087,8 +1039,25 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar24", 
+          "name": "uVar18", 
           "data_type": "uint", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010140b", 
+            "0010140e"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RDI:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "hash_bloom", 
+          "data_type": "u64 *", 
           "call_sites": []
         }, 
         {
@@ -1106,7 +1075,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "size", 
+          "name": "size_00", 
           "data_type": "Elf64_Xword", 
           "call_sites": [
             {
@@ -1114,6 +1083,22 @@
               "callee": "elf_contains_vaddr"
             }
           ]
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010145a"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "have_verdef_num_2", 
+          "data_type": "BOOL", 
+          "call_sites": []
         }, 
         {
           "data_size": 8, 
@@ -1130,7 +1115,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "size_00", 
+          "name": "size_01", 
           "data_type": "Elf64_Xword", 
           "call_sites": [
             {
@@ -1143,22 +1128,142 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "001014f4", 
+            "001014bd"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "dyn", 
+          "data_type": "Elf64_Dyn *", 
+          "call_sites": [
+            {
+              "arg_index": 1, 
+              "callee": "elf_contains_vaddr"
+            }
+          ]
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00101422", 
+            "00101431", 
+            "0010145a", 
+            "00101484"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R8:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "dyn_phdr", 
+          "data_type": "Elf64_Phdr *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001014fe", 
             "0010154b", 
-            "00101551", 
-            "00101593", 
-            "0010176b", 
-            "0010176e", 
+            "00101551"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "ECX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "dynamic_idx", 
+          "data_type": "int", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010142e", 
+            "00101431", 
+            "0010145a", 
+            "00101484", 
+            "00101487"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R10:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "phdr", 
+          "data_type": "Elf64_Phdr *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001014d2"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "i", 
+          "data_type": "int", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
             "0010183a"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "R15:8", 
+            "repr": "HASH:62e9a0a6c5:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "temp_62e9a0a6c5", 
+          "data_type": "u32 *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001014d9"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar25", 
-          "data_type": "uint *", 
+          "name": "local_EAX_265", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00101475"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:5fa153aee2:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "d_relrsz", 
+          "data_type": "u64", 
           "call_sites": []
         }
       ]
@@ -1182,7 +1287,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "pEVar1", 
+          "name": "sym", 
           "data_type": "Elf64_Sym *", 
           "call_sites": []
         }
@@ -1192,6 +1297,63 @@
       "name": "extract_payload_message", 
       "entry_point": "00107f20", 
       "locals": [
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107f8d", 
+            "00107fcf", 
+            "00107fd1"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "R14:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "modulus_length", 
+          "data_type": "size_t", 
+          "call_sites": [
+            {
+              "arg_index": 1, 
+              "callee": "c_strnlen"
+            }
+          ]
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107f87", 
+            "00107fcf", 
+            "00107fd1"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RBX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "modulus_data", 
+          "data_type": "u8 *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00108005"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "cert_type_namelen", 
+          "data_type": "size_t", 
+          "call_sites": []
+        }, 
         {
           "data_size": 8, 
           "is_returned": false, 
@@ -1206,6 +1368,22 @@
           }, 
           "name": "puVar1", 
           "data_type": "uint *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107f70"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:5f8a917373:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "sshbuf_end", 
+          "data_type": "u8 *", 
           "call_sites": []
         }, 
         {
@@ -1226,39 +1404,19 @@
           "call_sites": []
         }, 
         {
-          "data_size": 8, 
+          "data_size": 4, 
           "is_returned": false, 
           "use_addresses": [
-            "00107f70"
+            "00107fe9"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "unique:00012000:8", 
-            "is_register": false, 
-            "is_stack": false
-          }, 
-          "name": "puVar3", 
-          "data_type": "u8 *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00107f82", 
-            "00107f84", 
-            "00107fc0", 
-            "00107fd1", 
-            "00108005"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
+            "repr": "EDX:4", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar4", 
-          "data_type": "ulong", 
+          "name": "length_1", 
+          "data_type": "u32", 
           "call_sites": []
         }, 
         {
@@ -1275,8 +1433,26 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar5", 
+          "name": "puVar3", 
           "data_type": "uint *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107f8b", 
+            "00107f90", 
+            "00107f9c"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RDX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "remaining", 
+          "data_type": "size_t", 
           "call_sites": []
         }, 
         {
@@ -1284,9 +1460,7 @@
           "is_returned": false, 
           "use_addresses": [
             "00107fe4", 
-            "00107fe9", 
             "0010801c", 
-            "0010801e", 
             "00108035", 
             "00108037", 
             "00108059", 
@@ -1298,7 +1472,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "uVar6", 
+          "name": "uVar4", 
           "data_type": "uint", 
           "call_sites": []
         }, 
@@ -1306,9 +1480,6 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "00107f8b", 
-            "00107f90", 
-            "00107f9c", 
             "00107fa7", 
             "00107fa9", 
             "00107fb5"
@@ -1319,26 +1490,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "lVar7", 
+          "name": "lVar5", 
           "data_type": "long", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00107f87", 
-            "00107fcf", 
-            "00107fd1"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RBX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "str", 
-          "data_type": "u8 *", 
           "call_sites": []
         }, 
         {
@@ -1354,32 +1507,44 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar8", 
+          "name": "puVar6", 
           "data_type": "uint *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010801e"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EDX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "local_EDX_254", 
+          "data_type": "u32", 
           "call_sites": []
         }, 
         {
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "00107f8d", 
-            "00107fcf", 
+            "00107f82", 
+            "00107f84", 
+            "00107fc0", 
             "00107fd1"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "R14:8", 
+            "repr": "RAX:8", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "max_len", 
-          "data_type": "ulong", 
-          "call_sites": [
-            {
-              "arg_index": 1, 
-              "callee": "c_strnlen"
-            }
-          ]
+          "name": "i", 
+          "data_type": "size_t", 
+          "call_sites": []
         }
       ]
     }, 
@@ -1388,19 +1553,19 @@
       "entry_point": "00101b80", 
       "locals": [
         {
-          "data_size": 8, 
+          "data_size": 4, 
           "is_returned": true, 
           "use_addresses": [
             "00101b86"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "RAX:8", 
+            "repr": "EAX:4", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "pvVar1", 
-          "data_type": "void *", 
+          "name": "string_id", 
+          "data_type": "EncodedStringId", 
           "call_sites": []
         }
       ]
@@ -1475,7 +1640,7 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_80", 
+          "name": "ctx", 
           "data_type": "dasm_ctx_t", 
           "call_sites": []
         }, 
@@ -1522,9 +1687,6 @@
           "data_size": 4, 
           "is_returned": false, 
           "use_addresses": [
-            "00100bff", 
-            "00100c1e", 
-            "00100c4d", 
             "00100c6f"
           ], 
           "source_type": null, 
@@ -1533,7 +1695,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "BVar1", 
+          "name": "local_EAX_207", 
           "data_type": "BOOL", 
           "call_sites": []
         }, 
@@ -1543,19 +1705,15 @@
           "use_addresses": [
             "00100bd4", 
             "00100bdf", 
-            "00100be4", 
-            "00100c0b", 
-            "00100c2e", 
-            "00100c56", 
-            "00100c59"
+            "00100c08"
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "RBX:8", 
+            "repr": "R15:8", 
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar2", 
+          "name": "search_from", 
           "data_type": "u8 *", 
           "call_sites": [
             {
@@ -1587,6 +1745,78 @@
           }, 
           "name": "local_40", 
           "data_type": "u8 *[2]", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00100c1e"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "found_1", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00100c2e", 
+            "00100c56", 
+            "00100c59"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RBX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "search_to", 
+          "data_type": "u8 *", 
+          "call_sites": [
+            {
+              "arg_index": 0, 
+              "callee": "find_function_prologue"
+            }
+          ]
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00100be4"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "unique:100000ca:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "puVar1", 
+          "data_type": "u8 *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00100bff", 
+            "00100c4d"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "BVar2", 
+          "data_type": "BOOL", 
           "call_sites": []
         }
       ]
@@ -1746,24 +1976,6 @@
           "call_sites": []
         }, 
         {
-          "data_size": 96, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00101037", 
-            "00101047", 
-            "NO ADDRESS"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "Stack[-0x60]:96", 
-            "is_register": false, 
-            "is_stack": true
-          }, 
-          "name": "local_60", 
-          "data_type": "dasm_ctx_t", 
-          "call_sites": []
-        }, 
-        {
           "data_size": 8, 
           "is_returned": true, 
           "use_addresses": [
@@ -1814,6 +2026,24 @@
           "name": "pdVar4", 
           "data_type": "dasm_ctx_t *", 
           "call_sites": []
+        }, 
+        {
+          "data_size": 96, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00101037", 
+            "00101047", 
+            "NO ADDRESS"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "Stack[-0x60]:96", 
+            "is_register": false, 
+            "is_stack": true
+          }, 
+          "name": "dctx", 
+          "data_type": "dasm_ctx_t", 
+          "call_sites": []
         }
       ]
     }, 
@@ -1844,54 +2074,6 @@
       "entry_point": "0010a240", 
       "locals": [
         {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010a267"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "unique:00012000:8", 
-            "is_register": false, 
-            "is_stack": false
-          }, 
-          "name": "UNRECOVERED_JUMPTABLE", 
-          "data_type": "pfn_RSA_public_decrypt_t", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010a292"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "BVar1", 
-          "data_type": "BOOL", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010a2bd"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "iVar2", 
-          "data_type": "int", 
-          "call_sites": []
-        }, 
-        {
           "data_size": 12, 
           "is_returned": false, 
           "use_addresses": [
@@ -1909,6 +2091,54 @@
           }, 
           "name": "local_2c", 
           "data_type": "BOOL[3]", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": true, 
+          "use_addresses": [
+            "0010a2bd"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "result", 
+          "data_type": "int", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010a292"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "call_orig", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010a267"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:5f640b85f6:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "RSA_public_decrypt", 
+          "data_type": "pfn_RSA_public_decrypt_t", 
           "call_sites": []
         }
       ]
@@ -1954,11 +2184,11 @@
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "unique:00012000:8", 
+            "repr": "HASH:5f1a788b42:8", 
             "is_register": false, 
             "is_stack": false
           }, 
-          "name": "elf", 
+          "name": "dynamic_linker", 
           "data_type": "elf_info_t *", 
           "call_sites": [
             {
@@ -1966,6 +2196,22 @@
               "callee": "process_is_sshd"
             }
           ]
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00103d14"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "libc_stack_end_sym", 
+          "data_type": "Elf64_Sym *", 
+          "call_sites": []
         }, 
         {
           "data_size": 4, 
@@ -1988,22 +2234,6 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "00103d14"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "pEVar2", 
-          "data_type": "Elf64_Sym *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
             "00103d29"
           ], 
           "source_type": null, 
@@ -2012,7 +2242,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar3", 
+          "name": "puVar2", 
           "data_type": "uchar *", 
           "call_sites": []
         }
@@ -2022,6 +2252,27 @@
       "name": "resolve_libc_imports", 
       "entry_point": "001045e0", 
       "locals": [
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001045fa"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RAX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "resolver", 
+          "data_type": "lzma_allocator *", 
+          "call_sites": [
+            {
+              "arg_index": 1, 
+              "callee": "lzma_alloc"
+            }
+          ]
+        }, 
         {
           "data_size": 4, 
           "is_returned": false, 
@@ -2039,27 +2290,6 @@
           "name": "uVar1", 
           "data_type": "uint", 
           "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001045fa"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RAX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "allocator", 
-          "data_type": "lzma_allocator *", 
-          "call_sites": [
-            {
-              "arg_index": 1, 
-              "callee": "lzma_alloc"
-            }
-          ]
         }, 
         {
           "data_size": 8, 
@@ -2100,6 +2330,58 @@
       "entry_point": "00107510", 
       "locals": [
         {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001075e2"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "result_1", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107610"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "local_EAX_256", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107548", 
+            "00107588", 
+            "001075b4", 
+            "001075e2", 
+            "00107610"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "Stack[-0x1060]:8", 
+            "is_register": false, 
+            "is_stack": true
+          }, 
+          "name": "expSize", 
+          "data_type": "u64", 
+          "call_sites": []
+        }, 
+        {
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
@@ -2115,7 +2397,7 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_1058", 
+          "name": "e", 
           "data_type": "BIGNUM *", 
           "call_sites": [
             {
@@ -2123,40 +2405,6 @@
               "callee": "bignum_serialize"
             }
           ]
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001075b4"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "unique:10000161:8", 
-            "is_register": false, 
-            "is_stack": false
-          }, 
-          "name": "uVar1", 
-          "data_type": "u64", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 4, 
-          "is_returned": false, 
-          "use_addresses": [
-            "001075b4", 
-            "001075e2", 
-            "00107610"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "EAX:4", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "BVar2", 
-          "data_type": "BOOL", 
-          "call_sites": []
         }, 
         {
           "data_size": 8, 
@@ -2174,7 +2422,7 @@
             "is_register": false, 
             "is_stack": true
           }, 
-          "name": "local_1050", 
+          "name": "n", 
           "data_type": "BIGNUM *", 
           "call_sites": [
             {
@@ -2182,23 +2430,6 @@
               "callee": "bignum_serialize"
             }
           ]
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "0010753a", 
-            "0010753f"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "RCX:8", 
-            "is_register": true, 
-            "is_stack": false
-          }, 
-          "name": "lVar3", 
-          "data_type": "long", 
-          "call_sites": []
         }, 
         {
           "data_size": 4114, 
@@ -2221,6 +2452,55 @@
           "call_sites": []
         }, 
         {
+          "data_size": 4, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001075b4"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "EAX:4", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "result", 
+          "data_type": "BOOL", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "001075b4"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:3f81cdf30c:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "written", 
+          "data_type": "u64", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "0010753a", 
+            "0010753f"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "RCX:8", 
+            "is_register": true, 
+            "is_stack": false
+          }, 
+          "name": "lVar1", 
+          "data_type": "long", 
+          "call_sites": []
+        }, 
+        {
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
@@ -2233,28 +2513,8 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "puVar4", 
+          "name": "puVar2", 
           "data_type": "u8 *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00107548", 
-            "00107588", 
-            "001075b4", 
-            "001075e2", 
-            "00107610"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "Stack[-0x1060]:8", 
-            "is_register": false, 
-            "is_stack": true
-          }, 
-          "name": "local_1060", 
-          "data_type": "u64", 
           "call_sites": []
         }
       ]
@@ -2310,11 +2570,11 @@
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "Stack[0x0]:8", 
+            "repr": "HASH:20d9992b56:8", 
             "is_register": false, 
-            "is_stack": true
+            "is_stack": false
           }, 
-          "name": "unaff_retaddr", 
+          "name": "code_1", 
           "data_type": "u8 *", 
           "call_sites": []
         }
@@ -2529,7 +2789,7 @@
             "is_register": true, 
             "is_stack": false
           }, 
-          "name": "type", 
+          "name": "md", 
           "data_type": "EVP_MD *", 
           "call_sites": [
             {
@@ -2564,7 +2824,7 @@
           "data_size": 8, 
           "is_returned": false, 
           "use_addresses": [
-            "00107d5c"
+            "00107da4"
           ], 
           "source_type": null, 
           "storage": {
@@ -2572,7 +2832,23 @@
             "is_register": false, 
             "is_stack": false
           }, 
-          "name": "psVar2", 
+          "name": "puVar2", 
+          "data_type": "uint *", 
+          "call_sites": []
+        }, 
+        {
+          "data_size": 8, 
+          "is_returned": false, 
+          "use_addresses": [
+            "00107d5c"
+          ], 
+          "source_type": null, 
+          "storage": {
+            "repr": "HASH:5f19009e46:8", 
+            "is_register": false, 
+            "is_stack": false
+          }, 
+          "name": "sshd_ctx", 
           "data_type": "sshd_ctx_t *", 
           "call_sites": []
         }, 
@@ -2584,12 +2860,12 @@
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "unique:00012000:8", 
+            "repr": "HASH:5ffc17cd9c:8", 
             "is_register": false, 
             "is_stack": false
           }, 
-          "name": "psVar3", 
-          "data_type": "sshd_monitor_func_t", 
+          "name": "temp_5ffc17cd9c", 
+          "data_type": "sshd_ctx_t *", 
           "call_sites": []
         }, 
         {
@@ -2600,28 +2876,12 @@
           ], 
           "source_type": null, 
           "storage": {
-            "repr": "unique:00012000:8", 
+            "repr": "HASH:5f8725abb0:8", 
             "is_register": false, 
             "is_stack": false
           }, 
-          "name": "piVar4", 
+          "name": "use_pam", 
           "data_type": "int *", 
-          "call_sites": []
-        }, 
-        {
-          "data_size": 8, 
-          "is_returned": false, 
-          "use_addresses": [
-            "00107da4"
-          ], 
-          "source_type": null, 
-          "storage": {
-            "repr": "unique:00012000:8", 
-            "is_register": false, 
-            "is_stack": false
-          }, 
-          "name": "puVar5", 
-          "data_type": "uint *", 
           "call_sites": []
         }
       ]
