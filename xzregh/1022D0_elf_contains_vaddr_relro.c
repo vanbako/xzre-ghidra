@@ -4,6 +4,20 @@
 // Prototype: BOOL __stdcall elf_contains_vaddr_relro(elf_info_t * elf_info, u64 vaddr, u64 size, u32 p_flags)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief checks if given ELF file contains the range [vaddr, vaddr+size)
+ *   in the gnurelro segment
+ *
+ *   @param elf_info elf context
+ *   @param vaddr starting memory address
+ *   @param size memory size
+ *   @param p_flags the expected segment protection flags (PF_*). must be non-zero
+ *   @return BOOL TRUE if found, FALSE otherwise
+ */
+
 BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)
 
 {

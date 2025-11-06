@@ -4,6 +4,26 @@
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt(backdoor_data_handle_t * data, ptrdiff_t libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Find struct link_map offset required to modify ld.so's private link_map::l_audit_any_plt state.
+ *
+ *   First, this function disassembles ld.so's _dl_audit_symbind_alt() to search for a MOVZX instruction that fetches the link_map::l_audit_any_plt.
+ *   The first MOVZ instruction that uses an offset within the range from the start of struct link_map to libname_offset.
+ *
+ *   This function then calls find_link_map_l_audit_any_plt_bitmask() to get the bitmask required to modify link_map::l_audit_any_plt.
+ *
+ *   This function also resolves a libc function address.
+ *
+ *   @param data
+ *   @param libname_offset the offset from the start of the link_map to the location directly after where the link_map::l_name string data is stored
+ *   @param hooks
+ *   @param imported_funcs
+ *   @return BOOL TRUE if successful, FALSE otherwise
+ */
+
 BOOL find_link_map_l_audit_any_plt
                (backdoor_data_handle_t *data,ptrdiff_t libname_offset,backdoor_hooks_data_t *hooks,
                imported_funcs_t *imported_funcs)

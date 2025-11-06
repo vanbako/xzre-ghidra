@@ -4,6 +4,29 @@
 // Prototype: BOOL __stdcall find_reg2reg_instruction(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds a reg2reg instruction
+ *
+ *   a reg2reg instruction is an x64 instruction with one of the following characteristics:
+ *   - a primary opcode of 0x89 (MOV/JNS)
+ *   or, alternatively, passing the following filter:
+ *   - ((0x505050500000505uLL >> (((dctx->opcode) & 0xFF) + 0x7F)) & 1) != 0
+ *   NOTE: the opcode in 'dctx->opcode' is the actual opcode +0x80
+ *   TODO: inspect x64 manual to find the exact filter
+ *
+ *   the instruction must also satisfy the following conditions:
+ *   - NOT have REX.B and REX.R set (no extension bits)
+ *   - MODRM.mod must be 3 (register-direct addressing mode)
+ *
+ *   @param code_start address to start searching from
+ *   @param code_end address to stop searching at
+ *   @param dctx disassembler context to hold the state
+ *   @return BOOL TRUE if found, FALSE otherwise
+ */
+
 BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
 
 {

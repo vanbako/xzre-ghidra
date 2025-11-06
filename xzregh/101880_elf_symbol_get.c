@@ -4,6 +4,18 @@
 // Prototype: Elf64_Sym * __stdcall elf_symbol_get(elf_info_t * elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Looks up an ELF symbol from a parsed ELF
+ *
+ *   @param elf_info the parsed ELF context
+ *   @param encoded_string_id string ID of the symbol name
+ *   @param sym_version optional string representing the symbol version (e.g. "GLIBC_2.2.5")
+ *   @return Elf64_Sym* pointer to the ELF symbol, or NULL if not found
+ */
+
 Elf64_Sym *
 elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStringId sym_version)
 

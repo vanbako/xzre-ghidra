@@ -4,6 +4,40 @@
 // Prototype: void * __stdcall c_memmove(char * dest, char * src, size_t cnt)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief copies memory
+ *
+ *   @param dest destination buffer
+ *   @param src source buffer
+ *   @param cnt number of bytes to copy
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/c_memmove.c):
+ *     void *c_memmove(char *dest, char *src, size_t cnt) {
+ *         if ((src < dest) && (dest < (src + cnt))) {
+ *             size_t curr = cnt - 1;
+ *             if (cnt != 0) {
+ *                 do {
+ *                     *(dest + curr) = *(src + curr);
+ *                     --curr;
+ *                 } while (curr != -1);
+ *                 return dest;
+ *             }
+ *         } else {
+ *             if (cnt == 0)
+ *                 return dest;
+ *             size_t curr = 0;
+ *             do {
+ *                 *(dest + curr) = *(src + curr);
+ *                 ++curr;
+ *             } while (cnt != curr);
+ *         }
+ *         return dest;
+ *     }
+ */
+
 void * c_memmove(char *dest,char *src,size_t cnt)
 
 {

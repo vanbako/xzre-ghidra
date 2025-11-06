@@ -4,6 +4,17 @@
 // Prototype: BOOL __stdcall elf_contains_vaddr_impl(elf_info_t * elf_info, void * vaddr, u64 size, u32 p_flags)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Validates that the requested virtual address range is fully covered by a PT_LOAD segment whose flags include the supplied p_flags mask.
+ *
+ * Notes:
+ *   - Normalises the interval to page boundaries and recursively re-checks when a range straddles multiple segments.
+ *   - Returns FALSE if the ELF headers are missing, the recursion guard trips, or no matching segment exists.
+ */
+
 BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_flags)
 
 {

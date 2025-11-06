@@ -4,6 +4,16 @@
 // Prototype: BOOL __stdcall sshd_configure_log_hook(cmd_arguments_t * cmd_flags, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief configure the log hook
+ *
+ *   @param cmd_flags flags controlling the log hook configuration
+ *   @param ctx the global context
+ */
+
 BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
 
 {

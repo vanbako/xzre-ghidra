@@ -4,6 +4,16 @@
 // Prototype: BOOL __stdcall init_imported_funcs(imported_funcs_t * imported_funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Initializes the imported_funcs structure
+ *
+ *   @param funcs the imported_funcs structure
+ *   @return BOOL TRUE if successful, FALSE otherwise (if the resolve count is incorrect)
+ */
+
 BOOL init_imported_funcs(imported_funcs_t *imported_funcs)
 
 {

@@ -11,6 +11,16 @@
 - `ghidra_projects/xzre_ghidra_portable.zip`: Exported archive containing the consumable project snapshot.
 - `PROGRESS.md`: Rolling log for analysis milestones and outstanding follow-ups.
 
+## Source of Truth for Reverse-Engineering Metadata
+- Function documentation: `metadata/functions_autodoc.json` is the canonical store. Bootstrap it once with `scripts/build_autodoc_from_sources.py`; afterwards edit the JSON directly (Codex should update this file when refining names/descriptions). Do not hand-edit the derived files under `ghidra_scripts/generated/`.
+- Signatures and locals: `metadata/xzre_locals.json` holds the current mapping and gets copied into place during refresh runs so the project and text dumps stay in sync.
+- Refresh loop: `./scripts/refresh_xzre_project.sh` performs `metadata → Ghidra project → xzregh/`. It copies the JSON metadata into `ghidra_scripts/generated/`, applies it in a headless run, exports the project archive, and mirrors the updated comments back into `xzregh/*.c`. Any manual edits should hit the metadata JSON first, then re-run the refresh.
+- Verification: the refresh emits `ghidra_scripts/generated/xzre_autodoc.json` as a derived artifact; differences between it and `metadata/functions_autodoc.json` indicate that the project mutated comments that were not recorded in metadata.
+- Codex workflow:
+  1. Review the decomp in `xzregh/`.
+  2. Update `metadata/functions_autodoc.json` (and `metadata/xzre_locals.json` when renaming locals/parameters) with the improved insight.
+  3. Run `./scripts/refresh_xzre_project.sh` to apply the metadata to Ghidra and regenerate the text dumps.
+
 ## Working With Ghidra
 - Refresh the project with the bundled helper (runs the import, replays header types/signatures, and exports the portable snapshot so the System V calling convention fix is always applied):
   ```bash

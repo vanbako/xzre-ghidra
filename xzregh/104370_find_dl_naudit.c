@@ -4,6 +4,29 @@
 // Prototype: BOOL __stdcall find_dl_naudit(elf_info_t * dynamic_linker_elf, elf_info_t * libcrypto_elf, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Find __rtld_global_ro offsets required to modify ld.so's private struct audit_ifaces state.
+ *
+ *   First, this function disassembles ld.so to search for the assert(GLRO(dl_naudit) <= naudit) from _dl_main().
+ *   This assert has a LEA instruction with an offset to ld.so's __rtld_global_ro::_dl_naudit.
+ *
+ *   This function disassembles ld.so's _dl_audit_symbind_alt() to verify it contains a LEA instruction with an offset that matches __rtld_global_ro::_dl_naudit.
+ *
+ *   This function then sets ldso_ctx::dl_naudit_offset and ldso_ctx::dl_naudit_offset to the offset from the start of __rtld_global_ro to
+ *   __rtld_global_ro::_dl_naudit and __rtld_global_ro::_dl_audit respectively.
+ *
+ *   This function also resolves a number of libcrypto function addresses.
+ *
+ *   @param dynamic_linker_elf elf_info_t for ld.so
+ *   @param libcrypto_elf elf_info_t for libcrypto
+ *   @param hooks
+ *   @param imported_funcs
+ *   @return BOOL TRUE if successful, FALSE otherwise
+ */
+
 BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
                    backdoor_hooks_data_t *hooks,imported_funcs_t *imported_funcs)
 

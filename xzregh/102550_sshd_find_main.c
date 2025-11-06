@@ -4,6 +4,19 @@
 // Prototype: BOOL __stdcall sshd_find_main(u8 * * code_start_out, elf_info_t * sshd, elf_info_t * libcrypto, imported_funcs_t * imported_funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds the sshd_main function
+ *
+ *   @param code_start_out filled in with the function start, if found
+ *   @param sshd sshd elf info
+ *   @param libcrypto libcrypto elf info
+ *   @param imported_funcs imported funcs
+ *   @returns TRUE if found, FALSE otherwise
+ */
+
 BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
                    imported_funcs_t *imported_funcs)
 

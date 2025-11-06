@@ -4,6 +4,44 @@
 // Prototype: BOOL __stdcall rsa_key_hash(RSA * rsa, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief obtains a SHA256 hash of the supplied RSA key
+ *
+ *   @param rsa the RSA key to hash
+ *   @param mdBuf buffer to write the resulting digest to
+ *   @param mdBufSize size of the buffer indicated by @p mdBuf
+ *   @param funcs
+ *   @return BOOL TRUE if the hash was successfully generated, FALSE otherwise
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/rsa_key_hash.c):
+ *     BOOL rsa_key_hash(
+ *     	const RSA *rsa,
+ *     	u8 *mdBuf,
+ *     	u64 mdBufSize,
+ *     	imported_funcs_t *funcs
+ *     ){
+ *     	u8 buf[0x100A] = {0};
+ *     	u64 written = 0, expSize = 0;
+ *     	const BIGNUM *n = NULL, *e = NULL;
+ *     	BOOL result = (TRUE
+ *     		&& funcs && rsa && funcs->RSA_get0_key
+ *     		&& (funcs->RSA_get0_key(rsa, &n, &e, NULL), e != NULL && n != NULL)
+ *     		// get bytes of 'e'
+ *     		&& bignum_serialize(buf, sizeof(buf), &written, e, funcs)
+ *     		&& (expSize = written, written <= 0x1009)
+ *     		// get bytes of 'n'
+ *     		&& bignum_serialize(buf + written, sizeof(buf) - written, &written, n, funcs)
+ *     		&& written + expSize <= sizeof(buf)
+ *     		// hash e+n
+ *     		&& sha256(buf, written + expSize, mdBuf, mdBufSize, funcs)
+ *     	);
+ *     	return result;
+ *     }
+ */
+
 BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {

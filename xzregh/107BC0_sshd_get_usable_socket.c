@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall sshd_get_usable_socket(int * pSock, int socket_index, libc_imports_t * imports)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief gets the first usable socket fd
+ *
+ *   @param pSock output variable that will receive the socket fd
+ *   @param socket_index index `n` of the n-th usable socket that the function should return
+ *   @param imports imported libc functions
+ *   @return BOOL TRUE if the socket was found, FALSE otherwise
+ */
+
 BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)
 
 {

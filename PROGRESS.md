@@ -3,6 +3,21 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-06
+- Staged the metadata-first pipeline: added `scripts/build_autodoc_from_sources.py`, moved locals to `metadata/xzre_locals.json`, populated the canonical `metadata/functions_autodoc.json` (seeded from sources + existing plate comments), updated `scripts/refresh_xzre_project.sh` to copy metadata→Ghidra→xzregh, and documented the workflow in `AGENTS.md` — next: review the metadata JSON for completeness and begin refining entries (arguments, locals, struct details) there before re-running the refresh.
+
+## 2025-11-06
+- Pivoted the AutoDoc flow so the Ghidra project drives downstream docs: added `ghidra_scripts/ExportAutoDocComments.py`, `scripts/apply_ghidra_comments_to_decomp.py`, and taught `scripts/refresh_xzre_project.sh` to re-export plate comments from the project before syncing `xzregh/*.c` — next: run `./scripts/refresh_xzre_project.sh` to validate the round-trip and confirm the exported JSON feeds both Ghidra and the text dumps.
+
+## 2025-11-06
+- Wired AutoDoc into the headless pipeline: extended `scripts/annotate_xzre_decomp.py` to emit `ghidra_scripts/generated/xzre_autodoc.json`, added `ghidra_scripts/ApplyAutoDocComments.py`, and updated `scripts/refresh_xzre_project.sh` so refresh runs now stamp the comments directly into the Ghidra project — next: run the refresh script to bake the new plate comments into `xzre_ghidra.rep` and confirm they survive export.
+
+## 2025-11-06
+- Added `scripts/annotate_xzre_decomp.py` and ran it (`python3 scripts/annotate_xzre_decomp.py --max-snippet-lines 80`) so every `xzregh/*.c` gains an AutoDoc block with the upstream header docs plus an excerpt of the original implementation, giving analysts precise behavioural context for variable renaming — next: wire the annotator into the refresh/export flow to keep comments current whenever the Ghidra dump regenerates.
+
+## 2025-11-06
+- Mirrored the Ghidra type import into `xzregh/xzre_types.h` and added `xzregh/xzre_globals.c` with raw `.rodata`/`.bss` dumps so exported decompilations have matching struct definitions and data references — next: decide whether to automate regeneration of these artifacts inside `scripts/refresh_xzre_project.sh` to keep future updates in sync.
+
+## 2025-11-06
 - Added `ghidra_scripts/ExportUnmappedFunctionSummaries.py` and ran it headlessly to emit `reports/unmapped_functions.json`; the report captures four unmapped extern thunks (`lzma_alloc`/`lzma_free`/`lzma_check_init`/`__tls_get_addr`) with parameter/storage details plus brief descriptions so we can reconcile their prototypes against upstream before the next typing pass — next: decide whether to fold those externs into the linker map or treat them as imported helpers when applying argument names.
 - Extended the exporter to append mapped-but-missing functions from `xzre_locals.json`; the report now notes `backdoor_symbind64` (with its source path and locals) so the same pipeline can track future gaps when we start replaying local-variable fixes — next: repeat the run after each refresh to keep the missing-function list in sync.
 - Built `ghidra_scripts/ApplyFunctionAnnotationsFromJson.py` and ran it with `reports/unmapped_functions.json`; the headless pass updated parameter datatypes for the four extern thunks and re-exported `ghidra_projects/xzre_ghidra_portable.zip`, giving us a reproducible way to replay these annotations once additional function bodies arrive — next: expand the JSON entries with local-variable shapes as we ingest more objects so the script can rename stack slots automatically.

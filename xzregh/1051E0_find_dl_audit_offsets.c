@@ -4,6 +4,24 @@
 // Prototype: BOOL __stdcall find_dl_audit_offsets(backdoor_data_handle_t * data, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Find the various offsets in ld.so that need modification to trigger _dl_audit_symbind_alt() to call backdoor_symbind64().
+ *
+ *   First, this function finds the location and size of ld.so's _dl_audit_symbind_alt().
+ *
+ *   This function then calls find_link_map_l_name(), find_dl_naudit() and find_link_map_l_audit_any_plt() to get the various offsets required to modify ld.so's private audit state
+ *   so that _dl_audit_symbind_alt() will call backdoor_symbind64().
+ *
+ *   @param data
+ *   @param libname_offset output of the offset from the start of the link_map to the location directly after where the link_map::l_name string data is stored
+ *   @param hooks
+ *   @param imported_funcs
+ *   @return BOOL TRUE if successful, FALSE otherwise
+ */
+
 BOOL find_dl_audit_offsets
                (backdoor_data_handle_t *data,ptrdiff_t *libname_offset,backdoor_hooks_data_t *hooks,
                imported_funcs_t *imported_funcs)

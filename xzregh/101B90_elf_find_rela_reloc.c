@@ -4,6 +4,17 @@
 // Prototype: Elf64_Rela * __stdcall elf_find_rela_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id, u64 reloc_type)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Walks the RELA relocation table, looking for an entry that targets the provided encoded_string_id and, if requested, lands inside the caller-supplied address window.
+ *
+ * Notes:
+ *   - Supports an optional resume index pointer so callers can continue scanning across successive invocations.
+ *   - Returns NULL when the binary has no RELA records or the search falls off the end without a match.
+ */
+
 Elf64_Rela *
 elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 reloc_type)
 

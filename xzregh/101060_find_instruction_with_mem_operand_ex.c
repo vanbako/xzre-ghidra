@@ -4,6 +4,20 @@
 // Prototype: BOOL __stdcall find_instruction_with_mem_operand_ex(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, int opcode, void * mem_address)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds an instruction with an immediate memory operand
+ *
+ *   @param code_start address to start searching from
+ *   @param code_end address to stop searching at
+ *   @param dctx disassembler context to hold the state
+ *   @param opcode opcode to look for, in encoded form (+0x80)
+ *   @param mem_address the expected address of the memory access
+ *   @return BOOL TRUE if found, FALSE otherwise
+ */
+
 BOOL find_instruction_with_mem_operand_ex
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,int opcode,void *mem_address)
 

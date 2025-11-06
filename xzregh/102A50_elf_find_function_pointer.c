@@ -4,6 +4,23 @@
 // Prototype: BOOL __stdcall elf_find_function_pointer(StringXrefId xref_id, void * * pOutCodeStart, void * * pOutCodeEnd, void * * pOutFptrAddr, elf_info_t * elf_info, string_references_t * xrefs, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief this function searches for a function pointer, pointing to a function
+ *   designated by the given @p xref_id
+ *
+ *   @param xref_id the index to use to retrieve the function from @p xrefs
+ *   @param pOutCodeStart output variable that will receive the function start address
+ *   @param pOutCodeEnd output variable that will receive the function end address
+ *   @param pOutFptrAddr output variable that will receive the address of the function pointer
+ *   @param elf_info sshd elf context
+ *   @param xrefs array of resolved functions, filled by @ref elf_find_string_references
+ *   @param ctx the global context. used to retrieve the 'uses_endbr64' field
+ *   @return BOOL TRUE if the function pointer was found, FALSE otherwise
+ */
+
 BOOL elf_find_function_pointer
                (StringXrefId xref_id,void **pOutCodeStart,void **pOutCodeEnd,void **pOutFptrAddr,
                elf_info_t *elf_info,string_references_t *xrefs,global_context_t *ctx)

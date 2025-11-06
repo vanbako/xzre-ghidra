@@ -4,6 +4,18 @@
 // Prototype: void __stdcall mm_log_handler_hook(LogLevel level, int forced, char * msg, void * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief
+ *
+ *   @param level
+ *   @param forced
+ *   @param msg
+ *   @param ctx
+ */
+
 void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 
 {

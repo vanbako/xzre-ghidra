@@ -4,6 +4,21 @@
 // Prototype: EncodedStringId __stdcall get_string_id(char * string_begin, char * string_end)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Get the @see EncodedStringId for the given string
+ *   the string will be consumed until one of the following condition is reached (whichever happens first):
+ *   - 44 chars have been consumed (maximum string length)
+ *   - @p string_end is supplied and has been reached
+ *   - the string table has been exhausted
+ *
+ *   @param string_begin the string to get the ID for (max 44 chars)
+ *   @param string_end optional string end pointer
+ *   @return EncodedStringId the string ID matching the input string, or 0 if not found
+ */
+
 EncodedStringId get_string_id(char *string_begin,char *string_end)
 
 {

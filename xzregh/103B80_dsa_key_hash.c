@@ -4,6 +4,19 @@
 // Prototype: BOOL __stdcall dsa_key_hash(DSA * dsa, u8 * mdBuf, u64 mdBufSize, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief obtains a SHA256 hash of the supplied RSA key
+ *
+ *   @param dsa the DSA key to hash
+ *   @param mdBuf buffer to write the resulting digest to
+ *   @param mdBufSize size of the buffer indicated by @p mdBuf
+ *   @param ctx
+ *   @return BOOL TRUE if the hash was successfully generated, FALSE otherwise
+ */
+
 BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
 
 {

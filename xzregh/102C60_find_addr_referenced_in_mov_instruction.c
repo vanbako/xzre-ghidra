@@ -4,6 +4,21 @@
 // Prototype: void * __stdcall find_addr_referenced_in_mov_instruction(StringXrefId id, string_references_t * refs, void * mem_range_start, void * mem_range_end)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief find an address referenced in a function
+ *
+ *   Note: There are some additional requirements on the mov instruction.
+ *
+ *   @param id the id of the function to look in
+ *   @param refs the string references
+ *   @param mem_range_start the start of the range the address lies within
+ *   @param mem_range_end the end of the range the address lies within
+ *   @return the address referenced if the exepected mov is found, or NULL otherwise
+ */
+
 /* WARNING: Type propagation algorithm not settling */
 
 void * find_addr_referenced_in_mov_instruction

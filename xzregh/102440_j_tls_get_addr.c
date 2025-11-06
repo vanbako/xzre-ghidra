@@ -4,6 +4,13 @@
 // Prototype: void * __stdcall j_tls_get_addr(tls_index * ti)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Thin wrapper around the imported __tls_get_addr resolver so the loader can patch the GOT entry while still reaching the original implementation.
+ */
+
 void * j_tls_get_addr(tls_index *ti)
 
 {

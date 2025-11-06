@@ -4,6 +4,17 @@
 // Prototype: BOOL __stdcall elf_find_string_references(elf_info_t * elf_info, string_references_t * refs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief parses the ELF rodata section, looking for strings and the instructions that reference them
+ *
+ *   @param elf_info the executable to find strings in
+ *   @param refs structure that will be populated with the results
+ *   @return BOOL
+ */
+
 BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
 
 {

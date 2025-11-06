@@ -4,6 +4,17 @@
 // Prototype: char * __stdcall check_argument(char arg_first_char, char * arg_name)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Examines a command-line argument that began with '-' and returns the pointer to the character that matched '-d' style options, otherwise returns NULL.
+ *
+ * Notes:
+ *   - Advances through the string two bytes at a time when the first character is '-', guarding against malformed UTF-16 style input.
+ *   - Stops early when it encounters '=' or NUL terminators, treating those forms as unsupported switches.
+ */
+
 char * check_argument(char arg_first_char,char *arg_name)
 
 {

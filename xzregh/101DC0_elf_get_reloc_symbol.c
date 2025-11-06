@@ -4,6 +4,21 @@
 // Prototype: void * __stdcall elf_get_reloc_symbol(elf_info_t * elf_info, Elf64_Rela * relocs, u32 num_relocs, u64 reloc_type, EncodedStringId encoded_string_id)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Searches the ELF relocations for a symbol having name @p encoded_string id
+ *   and relocation of type @p reloc_type
+ *
+ *   @param elf_info the parsed ELF context
+ *   @param relocs array of relocations to search in
+ *   @param num_relocs number of items in the array pointed by @p relocs
+ *   @param reloc_type type of relocation to consider (R_X86_64_*)
+ *   @param encoded_string_id symbol to look for (encoded)
+ *   @return void* the address of the symbol, or NULL if not found
+ */
+
 void * elf_get_reloc_symbol
                  (elf_info_t *elf_info,Elf64_Rela *relocs,u32 num_relocs,u64 reloc_type,
                  EncodedStringId encoded_string_id)

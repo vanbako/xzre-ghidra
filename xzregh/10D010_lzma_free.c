@@ -3,6 +3,12 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall lzma_free(void * ptr, lzma_allocator * allocator)
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/lzma_free.c):
+ *     void fake_lzma_free(void *opaque, void *ptr){}
+ */
 
 /* WARNING: Control flow encountered bad instruction data */
 

@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall sshd_find_monitor_struct(elf_info_t * elf, string_references_t * refs, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds the pointer to `struct monitor`, and updates the global context in @p ctx with its location
+ *
+ *   @param elf sshd elf context
+ *   @param refs sshd string references
+ *   @param ctx global context
+ *   @return BOOL TRUE if the pointer has been found, FALSE otherwise
+ */
+
 BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_context_t *ctx)
 
 {

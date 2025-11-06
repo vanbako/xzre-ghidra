@@ -4,6 +4,16 @@
 // Prototype: void * __stdcall __tls_get_addr(tls_index * ti)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Placeholder for __tls_get_addr that merely raises halt_baddata(); the object relies on the dynamic loader to wire in the system resolver.
+ *
+ * Notes:
+ *   - Keeps the GOT slot and relocation records intact while preventing accidental execution of an unimplemented body.
+ */
+
 /* WARNING: Control flow encountered bad instruction data */
 
 void * __tls_get_addr(tls_index *ti)

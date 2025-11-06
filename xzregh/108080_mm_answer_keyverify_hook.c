@@ -4,6 +4,18 @@
 // Prototype: int __stdcall mm_answer_keyverify_hook(ssh * ssh, int sock, sshbuf * m)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief used in conjunction with @ref mm_answer_keyallowed_hook to bypass the key validity check
+ *
+ *   @param ssh
+ *   @param sock
+ *   @param m
+ *   @return int
+ */
+
 int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
 
 {

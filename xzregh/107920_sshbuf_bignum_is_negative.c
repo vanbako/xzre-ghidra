@@ -4,6 +4,16 @@
 // Prototype: BOOL __stdcall sshbuf_bignum_is_negative(sshbuf * buf)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief checks if the given serialized BIGNUM is negative
+ *
+ *   @param buf buffer containing a serialized BIGNUM
+ *   @return BOOL TRUE if the serialized BIGNUM is negative, FALSE otherwise
+ */
+
 BOOL sshbuf_bignum_is_negative(sshbuf *buf)
 
 {

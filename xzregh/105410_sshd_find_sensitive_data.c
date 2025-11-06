@@ -4,6 +4,21 @@
 // Prototype: BOOL __stdcall sshd_find_sensitive_data(elf_info_t * sshd, elf_info_t * libcrypto, string_references_t * refs, imported_funcs_t * funcs, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief locates `sensitive_data` within sshd,
+ *   and resolves some additional libcrypto functions
+ *
+ *   @param sshd sshfd ELF context
+ *   @param libcrypto libcrypto ELF context
+ *   @param refs string references
+ *   @param funcs imported functions
+ *   @param ctx global context
+ *   @return BOOL TRUE if sensitive_data was located successfully, FALSE otherwise
+ */
+
 BOOL sshd_find_sensitive_data
                (elf_info_t *sshd,elf_info_t *libcrypto,string_references_t *refs,
                imported_funcs_t *funcs,global_context_t *ctx)

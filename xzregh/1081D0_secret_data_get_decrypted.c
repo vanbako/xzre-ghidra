@@ -4,6 +4,42 @@
 // Prototype: BOOL __stdcall secret_data_get_decrypted(u8 * output, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief obtains a decrypted copy of the secret data
+ *
+ *   @param output output buffer that will receive the decrypted data
+ *   @param ctx the global context (for secret data and function imports)
+ *   @return BOOL TRUE if successful, FALSE otherwise
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/secret_data_get_decrypted.c):
+ *     struct key_buf {
+ *     	u8 key[CHACHA20_KEY_SIZE];
+ *     	u8 iv[CHACHA20_IV_SIZE];
+ *     };
+ *     
+ *     BOOL secret_data_get_decrypted(u8 *output, global_context_t *ctx){
+ *     	if(!output || !ctx || !ctx->imported_funcs){
+ *     		return FALSE;
+ *     	}
+ *     	struct key_buf buf1 = {0}, buf2 = {0};
+ *     	if(!chacha_decrypt(
+ *     		(u8 *)&buf1, sizeof(buf1),
+ *     		buf1.key, buf1.iv,
+ *     		(u8 *)&buf2, ctx->imported_funcs)
+ *     	){
+ *     		return FALSE;
+ *     	}
+ *     
+ *     	return chacha_decrypt(
+ *     		ctx->secret_data, sizeof(ctx->secret_data),
+ *     		buf2.key, buf2.iv,
+ *     		output, ctx->imported_funcs);
+ *     }
+ */
+
 BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
 
 {

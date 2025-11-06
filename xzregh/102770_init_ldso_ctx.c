@@ -4,6 +4,15 @@
 // Prototype: void __stdcall init_ldso_ctx(ldso_ctx_t * ldso_ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief initializes/resets ldso data
+ *
+ *   @param ldso_ctx
+ */
+
 void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
 
 {

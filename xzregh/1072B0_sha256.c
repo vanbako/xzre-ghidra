@@ -4,6 +4,41 @@
 // Prototype: BOOL __stdcall sha256(void * data, size_t count, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief computes the SHA256 hash of the supplied data
+ *
+ *   @param data buffer containing the data to hash
+ *   @param count number of bytes to hash from @p data
+ *   @param mdBuf buffer to write the resulting digest to
+ *   @param mdBufSize size of the buffer indicated by @p mdBuf
+ *   @param funcs
+ *   @return BOOL
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/sha256.c):
+ *     BOOL sha256(
+ *     	const void *data,
+ *     	size_t count,
+ *     	u8 *mdBuf,
+ *     	u64 mdBufSize,
+ *     	imported_funcs_t *funcs
+ *     ){
+ *     	if(!data || !count || mdBufSize < SHA256_DIGEST_SIZE || !funcs){
+ *     		return FALSE;
+ *     	}
+ *     	if(!funcs->EVP_Digest || !funcs->EVP_sha256){
+ *     		return FALSE;
+ *     	}
+ *     	const EVP_MD *md = funcs->EVP_sha256();
+ *     	if(!md){
+ *     		return FALSE;
+ *     	}
+ *     	return funcs->EVP_Digest(data, count, mdBuf, NULL, md, NULL) == TRUE;
+ *     }
+ */
+
 BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {

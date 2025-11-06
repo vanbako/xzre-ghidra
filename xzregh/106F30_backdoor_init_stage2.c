@@ -4,6 +4,19 @@
 // Prototype: BOOL __stdcall backdoor_init_stage2(elf_entry_ctx_t * ctx, u64 * caller_frame, void * * cpuid_got_addr, backdoor_cpuid_reloc_consts_t * reloc_consts)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief
+ *
+ *   @param ctx holds values needed to setup the _cpuid(), passed to backdoor_init_stage2()
+ *   @param caller_frame stores the value of __builtin_frame_address(0)-16 from within context of the INFUN resolver
+ *   @param cpuid_got_addr address of the cpuid() GOT entry
+ *   @param reloc_consts pointer to cpuid_reloc_consts
+ *   @return BOOL the value elf_entry_ctx_t::got_ptr if the cpuid() GOT entry was NULL, otherwise the return value of backdoor_init_stage2()
+ */
+
 /* WARNING: Removing unreachable block (ram,0x00106fe4) */
 /* WARNING: Removing unreachable block (ram,0x00106fd9) */
 

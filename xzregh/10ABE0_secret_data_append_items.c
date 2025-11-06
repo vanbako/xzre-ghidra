@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall secret_data_append_items(secret_data_item_t * items, u64 items_count, appender * appender)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief appends multiple secret data items at once
+ *
+ *   @param items items to append
+ *   @param items_count number of items to append
+ *   @param appender @ref secret_data_append_item
+ *   @return BOOL TRUE if all items have been appended successfully, FALSE otherwise
+ */
+
 BOOL secret_data_append_items(secret_data_item_t *items,u64 items_count,appender *appender)
 
 {

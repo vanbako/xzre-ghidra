@@ -4,6 +4,18 @@
 // Prototype: elf_functions_t * __stdcall get_elf_functions_address(void)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief gets the address of the elf_functions
+ *
+ *   uses elf_functions_offset to get the address 0x2a0 bytes before elf_functions
+ *   and then adds 0x268 to get the final address of elf_functions
+ *   *
+ *   @return elf_functions_t*
+ */
+
 elf_functions_t * get_elf_functions_address(void)
 
 {

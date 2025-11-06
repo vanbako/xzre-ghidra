@@ -4,6 +4,19 @@
 // Prototype: BOOL __stdcall find_function_prologue(u8 * code_start, u8 * code_end, u8 * * output, FuncFindType find_mode)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief locates the function prologue
+ *
+ *   @param code_start address to start searching from
+ *   @param code_end address to stop searching at
+ *   @param output pointer to receive the resulting prologue address, if found
+ *   @param find_mode prologue search mode/strategy
+ *   @return BOOL TRUE if found, FALSE otherwise
+ */
+
 BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType find_mode)
 
 {

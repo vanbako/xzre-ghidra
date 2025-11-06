@@ -6,6 +6,11 @@ ghidra_projects/*
 vendor/
 node_modules/
 
+# Derived metadata copies
+ghidra_scripts/generated/xzre_autodoc.json
+ghidra_scripts/generated/xzre_autodoc_generated.json
+ghidra_scripts/generated/xzre_locals.json
+
 # Python bytecode caches
 __pycache__/
 *.pyc

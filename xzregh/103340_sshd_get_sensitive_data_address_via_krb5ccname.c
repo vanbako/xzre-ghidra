@@ -4,6 +4,24 @@
 // Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_krb5ccname(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, void * * sensitive_data_out, elf_info_t * elf)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds the address of `sensitive_data.host_keys` in sshd by using
+ *   @ref getenv( @ref STR_KRB5CCNAME )
+ *
+ *   FIXME: add detail
+ *
+ *   @param data_start start of the sshd data segment
+ *   @param data_end end of the sshd data segment
+ *   @param code_start start of the sshd code segment
+ *   @param code_end end of the sshd code segment
+ *   @param string_refs info about resolved functions
+ *   @param sensitive_data_out pointer to receive the address of sensitive_data
+ *   @return BOOL TRUE if the address was found, FALSE otherwise
+ */
+
 BOOL sshd_get_sensitive_data_address_via_krb5ccname
                (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,void **sensitive_data_out,
                elf_info_t *elf)

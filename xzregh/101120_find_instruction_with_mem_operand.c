@@ -4,6 +4,19 @@
 // Prototype: BOOL __stdcall find_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief finds a LEA or MOV instruction with an immediate memory operand
+ *
+ *   @param code_start address to start searching from
+ *   @param code_end address to stop searching at
+ *   @param dctx disassembler context to hold the state
+ *   @param mem_address the address of the memory fetch (where the instruction will fetch from)
+ *   @return BOOL TRUE if an instruction was found, FALSE otherwise
+ */
+
 BOOL find_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
 

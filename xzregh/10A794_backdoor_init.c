@@ -4,6 +4,21 @@
 // Prototype: void * __stdcall backdoor_init(elf_entry_ctx_t * state, u64 * caller_frame)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief calls @ref backdoor_init_stage2 by disguising it as a call to cpuid.
+ *
+ *   @ref backdoor_init_stage2 is called by replacing the _cpuid() GOT entry to point to @ref backdoor_init_stage2
+ *
+ *   stores elf_entry_ctx_t::symbol_ptr - elf_entry_ctx_t::got_offset in elf_entry_ctx_t::got_ptr which is the GOT address .
+ *
+ *   @param state the entry context, filled by @ref backdoor_entry
+ *   @param caller_frame the value of __builtin_frame_address(0)-16 from within context of the INFUN resolver
+ *   @return void* the value elf_entry_ctx_t::got_ptr if the cpuid() GOT entry was NULL, otherwise the return value of backdoor_init_stage2()
+ */
+
 void * backdoor_init(elf_entry_ctx_t *state,u64 *caller_frame)
 
 {

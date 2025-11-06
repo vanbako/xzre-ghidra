@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall sshd_get_sshbuf(sshbuf * sshbuf, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Finds the right `sshbuf` (FIXME: which?), starting from:
+ *   `(*(ctx->struct_monitor_ptr_address))->kex->my`
+ *
+ *   @param sshbuf pointer to a sshbuf that will be filled with the values of the sshbuf
+ *   @param ctx the global context
+ *   @return BOOL TRUE if the sshbuf was found, FALSE otherwise
+ */
+
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
 
 {

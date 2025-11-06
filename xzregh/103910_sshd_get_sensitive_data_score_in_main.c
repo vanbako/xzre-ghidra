@@ -4,6 +4,19 @@
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_main(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief obtains a numeric score which indicates if `main`
+ *   accesses @p sensitive_data or not
+ *
+ *   @param sensitive_data pointer to suspsected SSH host keys
+ *   @param elf sshd elf instance
+ *   @param refs info about resolved functions
+ *   @return int
+ */
+
 int sshd_get_sensitive_data_score_in_main
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
 

@@ -4,6 +4,19 @@
 // Prototype: int __stdcall mm_answer_keyallowed_hook(ssh * ssh, int sock, sshbuf * m)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief runs the payload received from @ref sshd_proxy_elevate,
+ *   and then runs the original `mm_answer_keyallowed` function
+ *
+ *   @param ssh
+ *   @param sock
+ *   @param m
+ *   @return int
+ */
+
 int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
 
 {

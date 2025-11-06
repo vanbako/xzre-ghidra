@@ -4,6 +4,17 @@
 // Prototype: void * __stdcall elf_get_code_segment(elf_info_t * elf_info, u64 * pSize)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Obtains the address and size of the first executable segment in the given ELF file
+ *
+ *   @param elf_info the parsed ELF context, which will be updated with the address and size of the code segment
+ *   @param pSize variable that will be populated with the page-aligned segment size
+ *   @return void* the page-aligned starting address of the segment
+ */
+
 void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)
 
 {

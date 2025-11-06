@@ -4,6 +4,18 @@
 // Prototype: int __stdcall init_hooks_ctx(backdoor_hooks_ctx_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Initializes the structure with hooks-related data
+ *
+ *   Grabs the call addresses of the internal functions that will be installed into the hook locations.
+ *
+ *   @param funcs
+ *   @return int
+ */
+
 int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
 
 {

@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall x86_dasm(dasm_ctx_t * ctx, u8 * code_start, u8 * code_end)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief disassembles the given x64 code
+ *
+ *   @param ctx empty disassembler context to hold the state
+ *   @param code_start pointer to the start of buffer (first disassemblable location)
+ *   @param code_end pointer to the end of the buffer
+ *   @return BOOL TRUE if disassembly was successful, FALSE otherwise
+ */
+
 BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {

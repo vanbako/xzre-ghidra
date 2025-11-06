@@ -4,6 +4,18 @@
 // Prototype: int __stdcall mm_answer_authpassword_hook(ssh * ssh, int sock, sshbuf * m)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief used to bypass password authentication by replying with a successful `MONITOR_ANS_AUTHPASSWORD`
+ *
+ *   @param ssh
+ *   @param sock
+ *   @param m
+ *   @return int
+ */
+
 int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
 
 {

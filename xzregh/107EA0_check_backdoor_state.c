@@ -4,6 +4,16 @@
 // Prototype: BOOL __stdcall check_backdoor_state(global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief checks if the backdoor state is the expected one (FIXME: which?)
+ *
+ *   @param ctx the global context
+ *   @return BOOL TRUE if the backdoor state is in the expected state, FALSE otherwise
+ */
+
 BOOL check_backdoor_state(global_context_t *ctx)
 
 {

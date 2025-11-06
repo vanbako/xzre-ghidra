@@ -4,6 +4,37 @@
 // Prototype: BOOL __stdcall sshd_find_monitor_field_addr_in_function(u8 * code_start, u8 * code_end, u8 * data_start, u8 * data_end, void * * monitor_field_ptr_out, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief find a pointer to a field in `struct monitor` by examining code referencing it
+ *
+ *   Look for a sequence of instructions:
+ *
+ *   mov/lea [<addr>] -> reg1
+ *   ...
+ *   mov reg1 -> rdi
+ *   ...
+ *   call mm_request_send
+ *
+ *   where <addr> is in the the specified mem_range. Return the address
+ *   in @p monitor_field_ptr_out.
+ *
+ *   In other words, look for:
+ *
+ *   mm_request_send(pmonitor->m_recvfd, ...);
+ *
+ *   And return the @p &pmonitor->m_recvfd pointer.
+ *
+ *   @param code_start start of the sshd code segment
+ *   @param code_end end of the sshd code segment
+ *   @param data_start start of the (sshd) data segment
+ *   @param data_end end of the (sshd) data segment
+ *   @param monitor_ptr_out pointer to receive the address of the monitor struct
+ *   @param ctx the global context
+ */
+
 BOOL sshd_find_monitor_field_addr_in_function
                (u8 *code_start,u8 *code_end,u8 *data_start,u8 *data_end,void **monitor_field_ptr_out
                ,global_context_t *ctx)

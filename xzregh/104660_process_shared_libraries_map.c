@@ -4,6 +4,17 @@
 // Prototype: BOOL __stdcall process_shared_libraries_map(link_map * r_map, backdoor_shared_libraries_data_t * data)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief scans loaded libraries to identify interesting libraries and populate related data
+ *
+ *   @param r_map the linked list of loaded libraries obtained from `r_debug`
+ *   @param data pointer to data that will be populated by the function
+ *   @return BOOL TRUE if successful, FALSE otherwise
+ */
+
 BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data_t *data)
 
 {

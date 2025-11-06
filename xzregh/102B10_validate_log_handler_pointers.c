@@ -4,6 +4,44 @@
 // Prototype: BOOL __stdcall validate_log_handler_pointers(void * addr1, void * addr2, void * search_base, u8 * code_end, string_references_t * refs, global_context_t * global)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief Validate that the two addresses are the expected/correct ones
+ *
+ *   The addresses must be within 15 bytes of each other
+ *
+ *   1. Start looking in the XREF_Could_not_get_agent_socket function
+ *   2. Search for a lea refering mm_log_handler
+ *   3. If the next instruction after it is a call, switch to the target function
+ *   4. Look for a memory instruction referencing addr1
+ *   5. Look for a memory instruction referencing addr2
+ *
+ *   So, looking for the call to set_log_handler in sshd.c::privsep_preauth:
+ *
+ *   set_log_handler(mm_log_handler, pmonitor);
+ *
+ *   Which looks like this:
+ *
+ *   void
+ *   set_log_handler(log_handler_fn *handler, void *ctx)
+ *   {
+ *   log_handler = handler;
+ *   log_handler_ctx = ctx;
+ *   }
+ *
+ *   And the two addresses in question are log_handler and log_handler_ctx.
+ *
+ *   @param log_handler_addr1 first address to validate
+ *   @param log_handler_addr2 second address to validate
+ *   @param search_base lowest valid code address
+ *   @param code_end higest valid code address
+ *   @param refs string references
+ *   @param global the global context
+ *   @return TRUE if all checks pass, FALSE otherwise
+ */
+
 BOOL validate_log_handler_pointers
                (void *addr1,void *addr2,void *search_base,u8 *code_end,string_references_t *refs,
                global_context_t *global)

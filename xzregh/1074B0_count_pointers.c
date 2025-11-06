@@ -4,6 +4,37 @@
 // Prototype: BOOL __stdcall count_pointers(void * * ptrs, u64 * count_out, libc_imports_t * funcs)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief count the number of non-NULL pointers in the `malloc`'d memory block @p ptrs
+ *
+ *   @param ptrs pointer to a `malloc`'d memory block
+ *   @param count_out will be filled with the number of non-NULL pointers
+ *   @param funcs used for `malloc_usable_size`
+ *   @return BOOL TRUE if the operation succeeded, FALSE otherwise
+ *
+ * Upstream implementation excerpt (xzre/xzre_code/count_pointers.c):
+ *     BOOL count_pointers(
+ *     	void **ptrs,
+ *     	u64 *count_out, 
+ *     	libc_imports_t *funcs
+ *     ){
+ *     	if(!ptrs) return FALSE;
+ *     	if(!funcs) return FALSE;
+ *     	if(!funcs->malloc_usable_size) return FALSE;
+ *     	size_t blockSize = funcs->malloc_usable_size(ptrs);
+ *     	if(blockSize - 8 > 127) return FALSE;
+ *     	size_t nWords = blockSize >> 3;
+ *     	
+ *     	size_t i;
+ *     	for(i=0; i < nWords && ptrs[i]; ++i);
+ *     	*count_out = i;
+ *     	return TRUE;
+ *     }
+ */
+
 BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
 
 {

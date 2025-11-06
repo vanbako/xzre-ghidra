@@ -4,6 +4,27 @@
 // Prototype: BOOL __stdcall sshd_proxy_elevate(monitor_data_t * args, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief
+ *   forges a new `MONITOR_REQ_KEYALLOWED` packet, and injects it into the server to gain root privileges
+ *   through the sshd monitor.
+ *
+ *   this function is called if the calling function, @ref run_backdoor_commands , is invoked without root
+ *   (which is what normally happens when sshd is sandboxed)
+ *
+ *   the code will then construct a new packet and send a monitor request with type `MONITOR_REQ_KEYALLOWED` and the payload as key.
+ *   the receiving end (`mm_answer_keyallowed`) will then run the payload through @ref mm_answer_keyallowed_hook
+ *
+ *   the `disable_backdoor` flag is used to avoid running the payload more than once, in case of multiple calls
+ *
+ *   @param args arguments used to build the SSH packet
+ *   @param ctx the global context
+ *   @return BOOL TRUE if the packet was sent successfully, FALSE otherwise
+ */
+
 BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
 
 {

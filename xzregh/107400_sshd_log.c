@@ -4,6 +4,18 @@
 // Prototype: void __stdcall sshd_log(sshd_log_ctx_t * log_ctx, LogLevel level, char * fmt, ...)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief calls `sshlogv` from openssh, similarly to `sshlog` in openssh
+ *
+ *   @param log_ctx imported openssh log functions/data (to get the `sshlogv` function pointer)
+ *   @param level log level
+ *   @param fmt log format
+ *   @param ...
+ */
+
 void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
 
 {

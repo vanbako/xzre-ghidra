@@ -4,6 +4,18 @@
 // Prototype: BOOL __stdcall is_range_mapped(u8 * addr, u64 length, global_context_t * ctx)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief verify if a memory range is mapped
+ *
+ *   @param addr the start address
+ *   @param length the length of the range to check
+ *   @param ctx a structure with a libc_import_t field at offset 0x10
+ *   @return BOOL TRUE if the whole range is mapped, FALSE otherwise
+ */
+
 BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
 
 {

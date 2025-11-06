@@ -4,6 +4,17 @@
 // Prototype: BOOL __stdcall is_gnu_relro(Elf64_Word p_type, u32 addend)
 
 
+/*
+ * AutoDoc: Generated from upstream sources.
+ *
+ * Source summary (xzre/xzre.h):
+ *   @brief checks if the provided identifiers represent a `PT_GNU_RELRO`
+ *
+ *   @param p_type program header type
+ *   @param addend constant `0xA0000000`
+ *   @return BOOL TRUE if the supplied pt_type is `PT_GNU_RELRO`, FALSE otherwise
+ */
+
 BOOL is_gnu_relro(Elf64_Word p_type,u32 addend)
 
 {

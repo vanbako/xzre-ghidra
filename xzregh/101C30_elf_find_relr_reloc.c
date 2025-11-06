@@ -4,6 +4,17 @@
 // Prototype: Elf64_Relr * __stdcall elf_find_relr_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id)
 
 
+/*
+ * AutoDoc: Generated from reverse engineering.
+ *
+ * Summary:
+ *   Iterates RELR-packed relocations for encoded_string_id, unpacking bitmap runs and validating that each candidate address lies inside the expected PT_LOAD mapping.
+ *
+ * Notes:
+ *   - Accepts optional lower/upper bounds and an iteration cursor to support incremental searches.
+ *   - Falls back to NULL when the module does not advertise RELR relocations or no entry matches the encoded id.
+ */
+
 Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 
 {
