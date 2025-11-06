@@ -1,0 +1,30 @@
+// /home/kali/xzre-ghidra/xzregh/10AC40_find_reg2reg_instruction.c
+// Function: find_reg2reg_instruction @ 0x10AC40
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall find_reg2reg_instruction(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx)
+
+
+BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
+
+{
+  BOOL BVar1;
+  uint uVar2;
+  
+  if (dctx == (dasm_ctx_t *)0x0) {
+    return 0;
+  }
+  while( true ) {
+    if ((code_end <= code_start) || (BVar1 = x86_dasm(dctx,code_start,code_end), BVar1 == 0)) {
+      return 0;
+    }
+    if (((((*(uint *)dctx->_unknown810 & 0xfffffffd) == 0x109) ||
+         ((uVar2 = *(uint *)dctx->_unknown810 - 0x81, uVar2 < 0x3b &&
+          ((0x505050500000505U >> ((byte)uVar2 & 0x3f) & 1) != 0)))) &&
+        (((dctx->field2_0x10).flags_u16 & 0xf80) == 0)) &&
+       ((((dctx->field2_0x10).field0.field10_0xb.rex_byte & 5) == 0 &&
+        (*(char *)((long)&dctx->field2_0x10 + 0xd) == '\x03')))) break;
+    code_start = dctx->instruction + dctx->instruction_size;
+  }
+  return 1;
+}
+

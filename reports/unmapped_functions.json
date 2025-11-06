@@ -1,0 +1,173 @@
+{
+  "total_functions": 125, 
+  "missing_mapped_count": 1, 
+  "functions": [
+    {
+      "return_type": "void", 
+      "address": "0010d000", 
+      "description": "Thunk wrapper around lzma_check_init", 
+      "prototype": "void __stdcall lzma_check_init(lzma_check_state * state, lzma_check check_id)", 
+      "tags": [], 
+      "is_thunk": true, 
+      "entrypoint": "0x10D000", 
+      "has_custom_storage": true, 
+      "name": "lzma_check_init", 
+      "call_convention": "__stdcall", 
+      "decompilation": "\n/* WARNING: Control flow encountered bad instruction data */\n\nvoid lzma_check_init(lzma_check_state *state,lzma_check check_id)\n\n{\n                    /* WARNING: Bad instruction - Truncating control flow here */\n  halt_baddata();\n}\n\n", 
+      "parameters": [
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RDI", 
+          "type": "lzma_check_state *", 
+          "name": "state"
+        }, 
+        {
+          "has_assigned_storage": true, 
+          "length": 4, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:ESI", 
+          "type": "lzma_check", 
+          "name": "check_id"
+        }
+      ], 
+      "thunk_target": "lzma_check_init"
+    }, 
+    {
+      "return_type": "void *", 
+      "address": "0010d008", 
+      "description": "Thunk wrapper around __tls_get_addr", 
+      "prototype": "void * __stdcall __tls_get_addr(tls_index * ti)", 
+      "tags": [], 
+      "is_thunk": true, 
+      "entrypoint": "0x10D008", 
+      "has_custom_storage": true, 
+      "name": "__tls_get_addr", 
+      "call_convention": "__stdcall", 
+      "decompilation": "\n/* WARNING: Control flow encountered bad instruction data */\n\nvoid * __tls_get_addr(tls_index *ti)\n\n{\n                    /* WARNING: Bad instruction - Truncating control flow here */\n  halt_baddata();\n}\n\n", 
+      "parameters": [
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RDI", 
+          "type": "tls_index *", 
+          "name": "ti"
+        }
+      ], 
+      "thunk_target": "__tls_get_addr"
+    }, 
+    {
+      "return_type": "void", 
+      "address": "0010d010", 
+      "description": "Thunk wrapper around lzma_free", 
+      "prototype": "void __stdcall lzma_free(void * ptr, lzma_allocator * allocator)", 
+      "tags": [], 
+      "is_thunk": true, 
+      "entrypoint": "0x10D010", 
+      "has_custom_storage": true, 
+      "name": "lzma_free", 
+      "call_convention": "__stdcall", 
+      "decompilation": "\n/* WARNING: Control flow encountered bad instruction data */\n\nvoid lzma_free(void *ptr,lzma_allocator *allocator)\n\n{\n                    /* WARNING: Bad instruction - Truncating control flow here */\n  halt_baddata();\n}\n\n", 
+      "parameters": [
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RDI", 
+          "type": "void *", 
+          "name": "ptr"
+        }, 
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RSI", 
+          "type": "lzma_allocator *", 
+          "name": "allocator"
+        }
+      ], 
+      "thunk_target": "lzma_free"
+    }, 
+    {
+      "return_type": "void *", 
+      "address": "0010d018", 
+      "description": "Thunk wrapper around lzma_alloc", 
+      "prototype": "void * __stdcall lzma_alloc(size_t size, lzma_allocator * allocator)", 
+      "tags": [], 
+      "is_thunk": true, 
+      "entrypoint": "0x10D018", 
+      "has_custom_storage": true, 
+      "name": "lzma_alloc", 
+      "call_convention": "__stdcall", 
+      "decompilation": "\n/* WARNING: Control flow encountered bad instruction data */\n\nvoid * lzma_alloc(size_t size,lzma_allocator *allocator)\n\n{\n                    /* WARNING: Bad instruction - Truncating control flow here */\n  halt_baddata();\n}\n\n", 
+      "parameters": [
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RDI", 
+          "type": "size_t", 
+          "name": "size"
+        }, 
+        {
+          "has_assigned_storage": true, 
+          "length": 8, 
+          "source": "USER_DEFINED", 
+          "storage": "reg:RSI", 
+          "type": "lzma_allocator *", 
+          "name": "allocator"
+        }
+      ], 
+      "thunk_target": "lzma_alloc"
+    }, 
+    {
+      "description": "Function mapped from xzre sources but not present in current program", 
+      "source_file": "xzre/xzre_code/backdoor_symbind64.c", 
+      "name": "backdoor_symbind64", 
+      "locals": [
+        {
+          "type": "imported_funcs_t *", 
+          "name": "funcs"
+        }, 
+        {
+          "type": "ldso_ctx_t *", 
+          "name": "ldso"
+        }, 
+        {
+          "type": "void *", 
+          "name": "retaddr"
+        }, 
+        {
+          "type": "void *", 
+          "name": "_dl_audit_symbind_alt"
+        }, 
+        {
+          "type": "void *", 
+          "name": "__libc_stack_end"
+        }, 
+        {
+          "type": "uintptr_t", 
+          "name": "func_end_addr"
+        }, 
+        {
+          "type": "uintptr_t", 
+          "name": "offset_in_function"
+        }, 
+        {
+          "type": "EncodedStringId", 
+          "name": "string_id"
+        }, 
+        {
+          "type": "BOOL", 
+          "name": "plt_entry_valid"
+        }
+      ], 
+      "status": "mapped_missing"
+    }
+  ], 
+  "program": "liblzma_la-crc64-fast.o", 
+  "unmapped_count": 4, 
+  "known_function_count": 143
+}
