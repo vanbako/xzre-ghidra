@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-05
+- Added a quick headless helper (`ghidra_scripts/PrintFunctionDecompile.py`) to dump decompiler output plus raw instructions so we could sanity-check `backdoor_entry`; confirmed the binary writes the `_cpuid_gcc` EAX result to the local at `[rbp-0x4c]` and returns it, matching the source even though the applied locals currently label that slot as `b` — next: adjust the locals mapping (or tweak the apply script) so `a/b/c/d` land on their intended stack slots and avoid future confusion.
+- Reworked the locals pipeline so `map_locals.py` keeps declaration order stable and `ApplyMappedLocals.py` now stages conflicting renames through temporary placeholders; reran both scripts and confirmed `backdoor_entry` decompiles with `_cpuid_gcc(...,&a,&b,&c,&state)` and `return a` again — next: audit other functions with overlapping stack reuse to make sure the new rename logic doesn’t need additional heuristics.
+
 ## 2025-11-04
 - Adjusted `scripts/map_locals.py` so register-only locals defer to the dedicated matcher instead of the generic type-mismatch fallback, then ran `python scripts/map_locals.py --limit 200` to regenerate `reports/variable_mapping_report.json`; register temporaries now pick up confident matches without caveats — next: extend the alias heuristics again if future binaries surface new register edge cases.
 - Replayed `ApplyMappedLocals.py` headlessly with the refreshed report (`~/tools/ghidra_11.4.2_PUBLIC/support/analyzeHeadless ... mapping=reports/variable_mapping_report.json`); 51 locals updated and 52 noted for follow-up, lining up the remaining register-only names with the `c_strnlen::len` fix — next: audit the skipped entries to decide whether additional heuristics or manual reviews are warranted.

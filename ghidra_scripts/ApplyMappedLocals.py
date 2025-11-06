@@ -19,6 +19,118 @@ from ghidra.util.exception import (
 )  # type: ignore
 from ghidra.util.task import ConsoleTaskMonitor  # type: ignore
 
+
+def _build_local_map(func):
+    mapping = {}
+    try:
+        for local_var in func.getLocalVariables():
+            mapping[local_var.getName()] = local_var
+    except Exception:
+        pass
+    return mapping
+
+
+def _build_high_symbol_map(symbol_map):
+    mapping = {}
+    if symbol_map is None:
+        return mapping
+    try:
+        symbols = symbol_map.getSymbols()
+    except Exception:
+        return mapping
+    for symbol in symbols:
+        try:
+            if symbol.isParameter():
+                continue
+        except Exception:
+            pass
+        mapping[symbol.getName()] = symbol
+    return mapping
+
+
+def _generate_placeholder_name(counter_ref, func_locals, high_symbols):
+    while True:
+        candidate = "__tmp_local_{}".format(counter_ref[0])
+        counter_ref[0] += 1
+        if candidate in func_locals:
+            continue
+        if candidate in high_symbols:
+            continue
+        return candidate
+
+
+def _attempt_rename(func, symbol_map, func_locals, high_symbols, target_var, new_name, data_type, is_high):
+    renamed = False
+    high_update_used_local = False
+    if is_high:
+        try:
+            HighFunctionDBUtil.updateDBVariable(
+                target_var,
+                new_name,
+                data_type,
+                SourceType.USER_DEFINED,
+            )
+            renamed = True
+            high_update_used_local = True
+        except (DuplicateNameException, InvalidInputException, UsrException, Exception, Throwable):
+            renamed = False
+            high_update_used_local = False
+    if not renamed and is_high and symbol_map is not None:
+        try:
+            symbol_map.renameSymbol(target_var, new_name, SourceType.USER_DEFINED)
+            renamed = True
+        except (Exception, Throwable):
+            renamed = False
+    if not renamed:
+        rename_attempts = [
+            lambda obj: obj.setName(new_name, SourceType.USER_DEFINED),
+            lambda obj: obj.setName(new_name),
+            lambda obj: obj.rename(new_name, SourceType.USER_DEFINED),
+            lambda obj: obj.rename(new_name),
+        ]
+        for attempt in rename_attempts:
+            try:
+                attempt(target_var)
+                renamed = True
+                break
+            except (Exception, Throwable):
+                continue
+    if not renamed and is_high:
+        try:
+            storage = target_var.getStorage()
+            data_type_local = data_type or target_var.getDataType()
+            if data_type_local is None:
+                size = 1
+                try:
+                    size = storage.size()
+                except Exception:
+                    try:
+                        size = storage.getSize()
+                    except Exception:
+                        size = 1
+                data_type_local = Undefined.getUndefinedDataType(size)
+            func.createLocalVariable(
+                new_name,
+                data_type_local,
+                storage,
+                SourceType.USER_DEFINED,
+            )
+            func_locals = _build_local_map(func)
+            target_var = func_locals.get(new_name, target_var)
+            is_high = False
+            renamed = True
+        except (Exception, Throwable):
+            renamed = False
+    if renamed:
+        if is_high or (symbol_map is not None and new_name in high_symbols):
+            high_symbols = _build_high_symbol_map(symbol_map)
+            updated = high_symbols.get(new_name, target_var)
+            return True, updated, True, high_update_used_local, func_locals, high_symbols
+        func_locals = _build_local_map(func)
+        updated = func_locals.get(new_name, target_var)
+        return True, updated, False, high_update_used_local, func_locals, high_symbols
+    return False, target_var, is_high, high_update_used_local, func_locals, high_symbols
+
 try:
     from java.lang import Throwable  # type: ignore
 except ImportError:  # pragma: no cover
@@ -153,14 +265,8 @@ def main():
                 record_skip("Function {} missing from program ({} assignment(s) skipped)".format(func_name, skipped_count))
                 continue
 
-            func_locals = {}
-            try:
-                for local_var in func.getLocalVariables():
-                    func_locals[local_var.getName()] = local_var
-            except Exception:
-                func_locals = {}
+            func_locals = _build_local_map(func)
 
-            high_symbols = {}
             symbol_map = None
             try:
                 decomp_results = interface.decompileFunction(func, 60, ConsoleTaskMonitor())
@@ -171,16 +277,9 @@ def main():
                 if high_func is not None:
                     try:
                         symbol_map = high_func.getLocalSymbolMap()
-                        for symbol in symbol_map.getSymbols():
-                            try:
-                                if symbol.isParameter():
-                                    continue
-                            except Exception:
-                                pass
-                            high_symbols[symbol.getName()] = symbol
                     except Exception:
-                        high_symbols = {}
                         symbol_map = None
+            high_symbols = _build_high_symbol_map(symbol_map)
 
             assignment_tasks = []
             processed_match_ids = set()
@@ -205,6 +304,8 @@ def main():
                         }
                     )
 
+            temp_name_counter = [0]
+
             from_names = {
                 task["assignment"].get("ghidra_name")
                 for task in assignment_tasks
@@ -223,6 +324,8 @@ def main():
                 enumerate(assignment_tasks),
                 key=lambda pair: (_needs_delay(pair[1]), pair[0]),
             )
+
+            task_records = []
 
             for _, task in sorted_tasks:
                 match = task["match"]
@@ -244,8 +347,6 @@ def main():
                     skipped += 1
                     record_skip("Function {}: could not locate target variable '{}'".format(func_name, ghidra_name))
                     continue
-
-                processed_match_ids.add(id(match))
 
                 preserve_data_type = False
                 dt_for_update = task["target_dt"]
@@ -280,125 +381,112 @@ def main():
                     preserve_data_type = True
                     dt_for_update = None
 
-                high_update_used = False
-                original_name = ghidra_name
+                record = {
+                    "match": match,
+                    "var": var,
+                    "is_high": is_high_symbol,
+                    "current_name": ghidra_name,
+                    "suggested": suggested,
+                    "dt_for_update": dt_for_update,
+                    "preserve_data_type": preserve_data_type,
+                    "storage_repr": storage_repr,
+                    "rename_needed": (suggested != ghidra_name),
+                    "rename_possible": True,
+                    "high_update_used": False,
+                }
+                task_records.append(record)
+                processed_match_ids.add(id(match))
 
-                if not dry_run and suggested != ghidra_name:
-                    renamed = False
-                    if is_high_symbol:
-                        try:
-                            HighFunctionDBUtil.updateDBVariable(
-                                var,
-                                suggested,
-                                dt_for_update,
-                                SourceType.USER_DEFINED,
-                            )
-                            renamed = True
-                            high_update_used = True
-                            try:
-                                func_locals = {local_var.getName(): local_var for local_var in func.getLocalVariables()}
-                            except Exception:
-                                pass
-                            if symbol_map is not None:
-                                try:
-                                    high_symbols = {}
-                                    for symbol in symbol_map.getSymbols():
-                                        try:
-                                            if symbol.isParameter():
-                                                continue
-                                        except Exception:
-                                            pass
-                                        high_symbols[symbol.getName()] = symbol
-                                    var = high_symbols.get(suggested, var)
-                                    is_high_symbol = True
-                                except Exception:
-                                    pass
-                        except (DuplicateNameException, InvalidInputException, UsrException, Exception, Throwable):
-                            renamed = False
-                            high_update_used = False
-                    if not renamed and is_high_symbol and symbol_map is not None:
-                        try:
-                            symbol_map.renameSymbol(var, suggested, SourceType.USER_DEFINED)
-                            renamed = True
-                        except (Exception, Throwable):
-                            renamed = False
-                    if not renamed:
-                        rename_attempts = [
-                            lambda obj: obj.setName(suggested, SourceType.USER_DEFINED),
-                            lambda obj: obj.setName(suggested),
-                            lambda obj: obj.rename(suggested, SourceType.USER_DEFINED),
-                            lambda obj: obj.rename(suggested),
-                        ]
-                        for attempt in rename_attempts:
-                            try:
-                                attempt(var)
-                                renamed = True
-                                break
-                            except (Exception, Throwable):
-                                continue
-                    if not renamed and is_high_symbol:
-                        try:
-                            storage = var.getStorage()
-                            data_type = task["target_dt"] or var.getDataType()
-                            if data_type is None and hasattr(var, "getDataType"):
-                                data_type = var.getDataType()
-                            if data_type is None:
-                                size = 1
-                                try:
-                                    size = storage.size()
-                                except Exception:
-                                    try:
-                                        size = storage.getSize()
-                                    except Exception:
-                                        size = 1
-                                data_type = Undefined.getUndefinedDataType(size)
-                            func.createLocalVariable(suggested, data_type, storage, SourceType.USER_DEFINED)
-                            try:
-                                for local_var in func.getLocalVariables():
-                                    if local_var.getName() == suggested:
-                                        func_locals[suggested] = local_var
-                                        var = local_var
-                                        is_high_symbol = False
-                                        break
-                            except Exception:
-                                pass
-                            renamed = True
-                        except (DuplicateNameException, InvalidInputException, Exception, Throwable):
-                            renamed = False
-                    if not renamed:
-                        skipped += 1
-                        record_skip("Function {}: rename failed for '{}' -> '{}'".format(func_name, ghidra_name, suggested))
+            if not dry_run:
+                for record in task_records:
+                    if not record["rename_needed"]:
                         continue
+                    placeholder = _generate_placeholder_name(temp_name_counter, func_locals, high_symbols)
+                    (
+                        staged,
+                        updated_var,
+                        updated_is_high,
+                        high_used,
+                        func_locals,
+                        high_symbols,
+                    ) = _attempt_rename(
+                        func,
+                        symbol_map,
+                        func_locals,
+                        high_symbols,
+                        record["var"],
+                        placeholder,
+                        None,
+                        record["is_high"],
+                    )
+                    if not staged:
+                        skipped += 1
+                        record_skip(
+                            "Function {}: rename failed for '{}' while staging placeholder '{}'".format(
+                                func_name, record["current_name"], placeholder
+                            )
+                        )
+                        record["rename_possible"] = False
+                        continue
+                    record["var"] = updated_var
+                    record["is_high"] = updated_is_high
+                    record["current_name"] = placeholder
+                    record["high_update_used"] = record["high_update_used"] or high_used
 
-                    if original_name in func_locals and func_locals.get(original_name) == var:
-                        try:
-                            del func_locals[original_name]
-                        except Exception:
-                            pass
-                        func_locals[suggested] = var
-                    if is_high_symbol and original_name in high_symbols:
-                        try:
-                            del high_symbols[original_name]
-                        except Exception:
-                            pass
-                        high_symbols[suggested] = var
+                for record in task_records:
+                    if not record["rename_needed"] or not record["rename_possible"]:
+                        continue
+                    (
+                        success,
+                        updated_var,
+                        updated_is_high,
+                        high_used,
+                        func_locals,
+                        high_symbols,
+                    ) = _attempt_rename(
+                        func,
+                        symbol_map,
+                        func_locals,
+                        high_symbols,
+                        record["var"],
+                        record["suggested"],
+                        None,
+                        record["is_high"],
+                    )
+                    if not success:
+                        skipped += 1
+                        record_skip(
+                            "Function {}: rename failed for placeholder '{}' -> '{}'".format(
+                                func_name, record["current_name"], record["suggested"]
+                            )
+                        )
+                        record["rename_possible"] = False
+                        continue
+                    record["var"] = updated_var
+                    record["is_high"] = updated_is_high
+                    record["current_name"] = record["suggested"]
+                    record["high_update_used"] = record["high_update_used"] or high_used
 
-                if not dry_run and task["target_dt"] is not None and not preserve_data_type:
-                    if is_high_symbol:
-                        if high_update_used:
+                for record in task_records:
+                    if record["dt_for_update"] is None or record["preserve_data_type"]:
+                        continue
+                    if not record["rename_possible"]:
+                        continue
+                    if record["is_high"]:
+                        if record["high_update_used"]:
                             continue
                         try:
-                            var.setDataType(task["target_dt"])
+                            record["var"].setDataType(record["dt_for_update"])
                         except (Exception, Throwable):
-                            pass
+                            continue
                     else:
-                        data_attempts = [
-                            lambda obj: obj.setDataType(task["target_dt"], SourceType.USER_DEFINED),
-                            lambda obj: obj.setDataType(task["target_dt"]),
+                        attempts = [
+                            lambda obj: obj.setDataType(record["dt_for_update"], SourceType.USER_DEFINED),
+                            lambda obj: obj.setDataType(record["dt_for_update"]),
                         ]
-                        for attempt in data_attempts:
+                        for attempt in attempts:
                             try:
-                                attempt(var)
+                                attempt(record["var"])
                                 break
                             except (Exception, Throwable):
                                 continue

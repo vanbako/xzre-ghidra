@@ -58,6 +58,8 @@ EQUIVALENT_BASE_TYPES = {
     "ssize_t": {"ssize_t", "long"},
 }
 
+STACK_OFFSET_PATTERN = re.compile(r"Stack\[\s*([-+]?(?:0x[0-9a-fA-F]+|\d+))\s*\]")
+
 
 class ExtractionError(RuntimeError):
     """Raised when Clang AST parsing fails."""
@@ -251,7 +253,12 @@ def _collect_function_locals(
             line_no, _ = _offset_to_line(line_index, offset)
             seen_lines.add(line_no)
         var.use_lines = sorted(seen_lines)
-    return list(locals_out.values())
+    def _sort_key(var: SourceVariable):
+        line = var.decl_line if var.decl_line is not None else sys.maxsize
+        offset = var.decl_offset if var.decl_offset is not None else sys.maxsize
+        return (line, offset)
+    ordered_locals = sorted(locals_out.values(), key=_sort_key)
+    return ordered_locals
 
 
 def _collect_usage_context(body: Dict[str, Any], locals_out: Dict[str, SourceVariable]) -> None:
@@ -465,6 +472,19 @@ def _types_close(src_type: str, cand_type: str) -> bool:
     return cand_base in EQUIVALENT_BASE_TYPES.get(src_base, set())
 
 
+def _stack_offset(storage_repr: Optional[str]) -> Optional[int]:
+    if not storage_repr:
+        return None
+    match = STACK_OFFSET_PATTERN.search(storage_repr)
+    if not match:
+        return None
+    token = match.group(1)
+    try:
+        return int(token, 0)
+    except Exception:
+        return None
+
+
 def _allocate_name(base: str, used: set) -> str:
     if base not in used:
         used.add(base)
@@ -652,12 +672,17 @@ def _match_locals(
         for loc in ghidra_locals:
             loc["normalized_type"] = _normalize_type(loc.get("data_type"))
             ghidra_remaining.append(loc)
+        expected_offsets = sorted(
+            offset
+            for offset in (_stack_offset((loc.get("storage") or {}).get("repr")) for loc in ghidra_remaining)
+            if offset is not None
+        )
 
         match_list: List[Dict] = []
         unmatched_source = []
         used_names: set = set()
 
-        for src_var in source_locals:
+        for src_idx, src_var in enumerate(source_locals):
             normalized = _normalize_type(src_var.get("type"))
             src_var["normalized_type"] = normalized
             src_size_hint = _size_hint_from_normalized(normalized)
@@ -671,8 +696,16 @@ def _match_locals(
                     score -= 2
                 if storage.get("is_register"):
                     score += 1
+                src_use_count = len(src_var.get("uses") or [])
+                cand_use_count = len(candidate.get("use_addresses") or [])
                 usage_delta = abs(len(candidate.get("use_addresses") or []) - len(src_var.get("uses") or []))
                 score += usage_delta
+                if src_use_count > 0 and cand_use_count == 0:
+                    score += max(3, src_use_count)
+                cand_offset = _stack_offset(storage.get("repr"))
+                if src_idx < len(expected_offsets) and cand_offset is not None:
+                    expected_offset = expected_offsets[src_idx]
+                    score += abs(cand_offset - expected_offset)
                 cand_calls = _call_signature(candidate.get("call_sites"))
                 if src_calls:
                     matches = len(src_calls & cand_calls)
