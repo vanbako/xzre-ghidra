@@ -2,8 +2,6 @@
 // Function: sshd_find_monitor_struct @ 0x103DB0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_monitor_struct(elf_info_t * elf, string_references_t * refs, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

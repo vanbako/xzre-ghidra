@@ -2,8 +2,6 @@
 // Function: backdoor_init_stage2 @ 0x106F30
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall backdoor_init_stage2(elf_entry_ctx_t * ctx, u64 * caller_frame, void * * cpuid_got_addr, backdoor_cpuid_reloc_consts_t * reloc_consts)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

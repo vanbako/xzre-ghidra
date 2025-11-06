@@ -2,8 +2,6 @@
 // Function: find_link_map_l_audit_any_plt @ 0x104EE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt(backdoor_data_handle_t * data, ptrdiff_t libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

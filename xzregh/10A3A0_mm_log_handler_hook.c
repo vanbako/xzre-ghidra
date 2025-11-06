@@ -2,8 +2,6 @@
 // Function: mm_log_handler_hook @ 0x10A3A0
 // Calling convention: __stdcall
 // Prototype: void __stdcall mm_log_handler_hook(LogLevel level, int forced, char * msg, void * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

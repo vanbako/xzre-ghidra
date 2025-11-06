@@ -2,8 +2,6 @@
 // Function: sshd_get_client_socket @ 0x107C60
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_client_socket(global_context_t * ctx, int * pSocket, int socket_index, SocketMode socket_direction)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

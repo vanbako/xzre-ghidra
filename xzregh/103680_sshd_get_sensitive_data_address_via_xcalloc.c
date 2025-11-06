@@ -2,8 +2,6 @@
 // Function: sshd_get_sensitive_data_address_via_xcalloc @ 0x103680
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_xcalloc(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, string_references_t * string_refs, void * * sensitive_data_out)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

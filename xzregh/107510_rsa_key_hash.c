@@ -2,8 +2,6 @@
 // Function: rsa_key_hash @ 0x107510
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall rsa_key_hash(RSA * rsa, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

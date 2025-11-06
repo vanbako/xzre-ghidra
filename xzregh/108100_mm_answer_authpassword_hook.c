@@ -2,8 +2,6 @@
 // Function: mm_answer_authpassword_hook @ 0x108100
 // Calling convention: __stdcall
 // Prototype: int __stdcall mm_answer_authpassword_hook(ssh * ssh, int sock, sshbuf * m)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

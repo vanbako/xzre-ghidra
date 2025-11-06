@@ -2,8 +2,6 @@
 // Function: get_lzma_allocator @ 0x104060
 // Calling convention: __stdcall
 // Prototype: lzma_allocator * __stdcall get_lzma_allocator(void)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

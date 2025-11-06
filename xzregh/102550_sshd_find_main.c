@@ -2,8 +2,6 @@
 // Function: sshd_find_main @ 0x102550
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_main(u8 * * code_start_out, elf_info_t * sshd, elf_info_t * libcrypto, imported_funcs_t * imported_funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

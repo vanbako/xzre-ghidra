@@ -2,8 +2,6 @@
 // Function: secret_data_append_from_code @ 0x10AA00
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_from_code(void * code_start, void * code_end, secret_data_shift_cursor_t shift_cursor, uint shift_count, BOOL start_from_call)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

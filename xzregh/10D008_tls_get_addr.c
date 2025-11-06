@@ -2,8 +2,6 @@
 // Function: __tls_get_addr @ 0x10D008
 // Calling convention: __stdcall
 // Prototype: void * __stdcall __tls_get_addr(tls_index * ti)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

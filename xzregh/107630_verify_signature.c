@@ -2,8 +2,6 @@
 // Function: verify_signature @ 0x107630
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall verify_signature(sshkey * sshkey, u8 * signed_data, u64 sshkey_digest_offset, u64 signed_data_size, u8 * signature, u8 * ed448_raw_key, global_context_t * global_ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: elf_find_string_references @ 0x102D30
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_find_string_references(elf_info_t * elf_info, string_references_t * refs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: decrypt_payload_message @ 0x108D50
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall decrypt_payload_message(key_payload_t * payload, size_t payload_size, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: sshd_get_sensitive_data_address_via_krb5ccname @ 0x103340
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_krb5ccname(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, void * * sensitive_data_out, elf_info_t * elf)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

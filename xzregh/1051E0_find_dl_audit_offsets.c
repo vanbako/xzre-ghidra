@@ -2,8 +2,6 @@
 // Function: find_dl_audit_offsets @ 0x1051E0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_dl_audit_offsets(backdoor_data_handle_t * data, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

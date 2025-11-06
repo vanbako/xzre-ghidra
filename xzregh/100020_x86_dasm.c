@@ -2,8 +2,6 @@
 // Function: x86_dasm @ 0x100020
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall x86_dasm(dasm_ctx_t * ctx, u8 * code_start, u8 * code_end)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

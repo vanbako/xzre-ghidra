@@ -2,8 +2,6 @@
 // Function: get_string_id @ 0x10A880
 // Calling convention: __stdcall
 // Prototype: EncodedStringId __stdcall get_string_id(char * string_begin, char * string_end)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: _get_cpuid_modified @ 0x10A800
 // Calling convention: __stdcall
 // Prototype: uint __stdcall _get_cpuid_modified(uint leaf, uint * eax, uint * ebx, uint * ecx, uint * edx, u64 * caller_frame)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

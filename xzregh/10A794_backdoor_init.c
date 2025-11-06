@@ -2,8 +2,6 @@
 // Function: backdoor_init @ 0x10A794
 // Calling convention: __stdcall
 // Prototype: void * __stdcall backdoor_init(elf_entry_ctx_t * state, u64 * caller_frame)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

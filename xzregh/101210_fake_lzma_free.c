@@ -2,8 +2,6 @@
 // Function: fake_lzma_free @ 0x101210
 // Calling convention: __stdcall
 // Prototype: void __stdcall fake_lzma_free(void * opaque, void * ptr)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

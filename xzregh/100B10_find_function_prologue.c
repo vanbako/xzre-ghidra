@@ -2,8 +2,6 @@
 // Function: find_function_prologue @ 0x100B10
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_function_prologue(u8 * code_start, u8 * code_end, u8 * * output, FuncFindType find_mode)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

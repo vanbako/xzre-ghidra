@@ -2,8 +2,6 @@
 // Function: find_instruction_with_mem_operand_ex @ 0x101060
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_instruction_with_mem_operand_ex(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, int opcode, void * mem_address)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

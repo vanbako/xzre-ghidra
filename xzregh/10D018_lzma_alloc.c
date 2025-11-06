@@ -2,8 +2,6 @@
 // Function: lzma_alloc @ 0x10D018
 // Calling convention: __stdcall
 // Prototype: void * __stdcall lzma_alloc(size_t size, lzma_allocator * allocator)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

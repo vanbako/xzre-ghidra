@@ -2,8 +2,6 @@
 // Function: init_elf_entry_ctx @ 0x104030
 // Calling convention: __stdcall
 // Prototype: void __stdcall init_elf_entry_ctx(elf_entry_ctx_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

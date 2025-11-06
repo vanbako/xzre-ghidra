@@ -2,8 +2,6 @@
 // Function: find_call_instruction @ 0x100C90
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_call_instruction(u8 * code_start, u8 * code_end, u8 * call_target, dasm_ctx_t * dctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

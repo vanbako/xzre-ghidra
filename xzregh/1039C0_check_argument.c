@@ -2,8 +2,6 @@
 // Function: check_argument @ 0x1039C0
 // Calling convention: __stdcall
 // Prototype: char * __stdcall check_argument(char arg_first_char, char * arg_name)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

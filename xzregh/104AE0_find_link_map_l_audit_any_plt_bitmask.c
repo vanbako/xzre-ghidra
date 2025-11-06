@@ -2,8 +2,6 @@
 // Function: find_link_map_l_audit_any_plt_bitmask @ 0x104AE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt_bitmask(backdoor_data_handle_t * data, instruction_search_ctx_t * search_ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

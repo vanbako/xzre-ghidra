@@ -2,8 +2,6 @@
 // Function: sshd_patch_variables @ 0x107D50
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_patch_variables(BOOL skip_root_patch, BOOL disable_pam, BOOL replace_monitor_reqtype, int monitor_reqtype, global_context_t * global_ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

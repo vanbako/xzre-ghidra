@@ -2,8 +2,6 @@
 // Function: check_backdoor_state @ 0x107EA0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall check_backdoor_state(global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

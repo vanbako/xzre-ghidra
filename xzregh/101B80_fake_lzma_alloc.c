@@ -2,8 +2,6 @@
 // Function: fake_lzma_alloc @ 0x101B80
 // Calling convention: __stdcall
 // Prototype: void * __stdcall fake_lzma_alloc(void * opaque, size_t nmemb, size_t size)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

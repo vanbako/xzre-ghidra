@@ -2,8 +2,6 @@
 // Function: elf_contains_vaddr @ 0x1013A0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_contains_vaddr(elf_info_t * elf_info, void * vaddr, u64 size, u32 p_flags)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

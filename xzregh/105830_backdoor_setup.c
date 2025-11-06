@@ -2,8 +2,6 @@
 // Function: backdoor_setup @ 0x105830
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall backdoor_setup(backdoor_setup_params_t * params)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

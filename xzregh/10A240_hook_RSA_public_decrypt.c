@@ -2,8 +2,6 @@
 // Function: hook_RSA_public_decrypt @ 0x10A240
 // Calling convention: __stdcall
 // Prototype: int __stdcall hook_RSA_public_decrypt(int flen, uchar * from, uchar * to, RSA * rsa, int padding)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

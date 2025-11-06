@@ -2,8 +2,6 @@
 // Function: init_ldso_ctx @ 0x102770
 // Calling convention: __stdcall
 // Prototype: void __stdcall init_ldso_ctx(ldso_ctx_t * ldso_ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

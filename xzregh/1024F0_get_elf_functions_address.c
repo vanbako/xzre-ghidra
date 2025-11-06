@@ -2,8 +2,6 @@
 // Function: get_elf_functions_address @ 0x1024F0
 // Calling convention: __stdcall
 // Prototype: elf_functions_t * __stdcall get_elf_functions_address(void)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

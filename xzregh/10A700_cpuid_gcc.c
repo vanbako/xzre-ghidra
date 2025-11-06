@@ -2,8 +2,6 @@
 // Function: _cpuid_gcc @ 0x10A700
 // Calling convention: __stdcall
 // Prototype: void __stdcall _cpuid_gcc(uint level, uint * a, uint * b, uint * c, uint * d)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

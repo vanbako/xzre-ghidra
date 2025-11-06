@@ -2,8 +2,6 @@
 // Function: main_elf_parse @ 0x103CE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall main_elf_parse(main_elf_t * main_elf)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: sshd_proxy_elevate @ 0x108270
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_proxy_elevate(monitor_data_t * args, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

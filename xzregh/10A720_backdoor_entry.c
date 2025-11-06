@@ -2,8 +2,6 @@
 // Function: backdoor_entry @ 0x10A720
 // Calling convention: __stdcall
 // Prototype: uint __stdcall backdoor_entry(uint cpuid_request, u64 * caller_frame)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

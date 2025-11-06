@@ -2,8 +2,6 @@
 // Function: elf_find_relr_reloc @ 0x101C30
 // Calling convention: __stdcall
 // Prototype: Elf64_Relr * __stdcall elf_find_relr_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

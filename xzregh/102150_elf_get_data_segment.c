@@ -2,8 +2,6 @@
 // Function: elf_get_data_segment @ 0x102150
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_data_segment(elf_info_t * elf_info, u64 * pSize, BOOL get_alignment)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

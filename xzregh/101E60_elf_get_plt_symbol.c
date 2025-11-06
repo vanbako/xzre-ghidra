@@ -2,8 +2,6 @@
 // Function: elf_get_plt_symbol @ 0x101E60
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_plt_symbol(elf_info_t * elf_info, EncodedStringId encoded_string_id)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: secret_data_append_items @ 0x10ABE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_items(secret_data_item_t * items, u64 items_count, appender * appender)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

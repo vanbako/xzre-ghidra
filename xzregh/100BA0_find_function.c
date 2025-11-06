@@ -2,8 +2,6 @@
 // Function: find_function @ 0x100BA0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_function(u8 * code_start, void * * func_start, void * * func_end, u8 * search_base, u8 * code_end, FuncFindType find_mode)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

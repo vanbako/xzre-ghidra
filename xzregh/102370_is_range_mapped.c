@@ -2,8 +2,6 @@
 // Function: is_range_mapped @ 0x102370
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_range_mapped(u8 * addr, u64 length, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

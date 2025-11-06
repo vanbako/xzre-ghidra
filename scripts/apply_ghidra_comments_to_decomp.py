@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
-AUTODOC_TAG = "AutoDoc: Generated from upstream sources."
+AUTODOC_TAG = "AutoDoc:"
 
 
 def parse_args() -> argparse.Namespace:
@@ -54,7 +54,7 @@ def strip_existing_autodoc(text: str) -> str:
         r"(?:\n[ \t]*){0,2}/\*\n \* " + re.escape(AUTODOC_TAG) + r"(?:.|\n)*?\*/\n?",
         re.MULTILINE,
     )
-    return pattern.sub("", text, count=1)
+    return pattern.sub("", text)
 
 
 def wrap_comment(comment_text: str) -> List[str]:

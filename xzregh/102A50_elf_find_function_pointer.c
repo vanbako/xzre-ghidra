@@ -2,8 +2,6 @@
 // Function: elf_find_function_pointer @ 0x102A50
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_find_function_pointer(StringXrefId xref_id, void * * pOutCodeStart, void * * pOutCodeEnd, void * * pOutFptrAddr, elf_info_t * elf_info, string_references_t * xrefs, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

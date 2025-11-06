@@ -2,8 +2,6 @@
 // Function: update_got_address @ 0x103FA0
 // Calling convention: __stdcall
 // Prototype: void * __stdcall update_got_address(elf_entry_ctx_t * entry_ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

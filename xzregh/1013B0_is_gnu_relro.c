@@ -2,8 +2,6 @@
 // Function: is_gnu_relro @ 0x1013B0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_gnu_relro(Elf64_Word p_type, u32 addend)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

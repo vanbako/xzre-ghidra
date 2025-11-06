@@ -2,8 +2,6 @@
 // Function: fd_write @ 0x1070F0
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_write(int fd, void * buffer, size_t count, libc_imports_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

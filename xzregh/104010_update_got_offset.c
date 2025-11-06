@@ -2,8 +2,6 @@
 // Function: update_got_offset @ 0x104010
 // Calling convention: __stdcall
 // Prototype: void __stdcall update_got_offset(elf_entry_ctx_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: elf_find_rela_reloc @ 0x101B90
 // Calling convention: __stdcall
 // Prototype: Elf64_Rela * __stdcall elf_find_rela_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id, u64 reloc_type)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

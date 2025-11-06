@@ -2,8 +2,6 @@
 // Function: bignum_serialize @ 0x107320
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall bignum_serialize(u8 * buffer, u64 bufferSize, u64 * pOutSize, BIGNUM * bn, imported_funcs_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

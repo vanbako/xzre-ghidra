@@ -2,8 +2,6 @@
 // Function: sshd_get_sshbuf @ 0x107A20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sshbuf(sshbuf * sshbuf, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

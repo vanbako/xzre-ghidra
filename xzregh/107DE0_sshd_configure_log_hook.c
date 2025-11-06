@@ -2,8 +2,6 @@
 // Function: sshd_configure_log_hook @ 0x107DE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_configure_log_hook(cmd_arguments_t * cmd_flags, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

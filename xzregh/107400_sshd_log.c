@@ -2,8 +2,6 @@
 // Function: sshd_log @ 0x107400
 // Calling convention: __stdcall
 // Prototype: void __stdcall sshd_log(sshd_log_ctx_t * log_ctx, LogLevel level, char * fmt, ...)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

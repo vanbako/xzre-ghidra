@@ -2,8 +2,6 @@
 // Function: secret_data_append_from_instruction @ 0x10A990
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_from_instruction(dasm_ctx_t * dctx, secret_data_shift_cursor_t * cursor)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

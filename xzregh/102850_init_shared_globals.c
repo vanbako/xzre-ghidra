@@ -2,8 +2,6 @@
 // Function: init_shared_globals @ 0x102850
 // Calling convention: __stdcall
 // Prototype: int __stdcall init_shared_globals(backdoor_shared_globals_t * shared_globals)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

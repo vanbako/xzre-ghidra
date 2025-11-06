@@ -2,8 +2,6 @@
 // Function: find_lea_instruction @ 0x100EB0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_lea_instruction(u8 * code_start, u8 * code_end, u64 displacement)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

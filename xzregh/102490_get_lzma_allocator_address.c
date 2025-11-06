@@ -2,8 +2,6 @@
 // Function: get_lzma_allocator_address @ 0x102490
 // Calling convention: __stdcall
 // Prototype: fake_lzma_allocator_t * __stdcall get_lzma_allocator_address(void)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: c_memmove @ 0x101B30
 // Calling convention: __stdcall
 // Prototype: void * __stdcall c_memmove(char * dest, char * src, size_t cnt)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

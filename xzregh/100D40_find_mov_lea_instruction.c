@@ -2,8 +2,6 @@
 // Function: find_mov_lea_instruction @ 0x100D40
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_mov_lea_instruction(u8 * code_start, u8 * code_end, BOOL is_64bit_operand, BOOL load_flag, dasm_ctx_t * dctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

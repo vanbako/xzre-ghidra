@@ -2,7 +2,6 @@
 // Function: lzma_free @ 0x10D010
 // Calling convention: __stdcall
 // Prototype: void __stdcall lzma_free(void * ptr, lzma_allocator * allocator)
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

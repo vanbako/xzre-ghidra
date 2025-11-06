@@ -2,8 +2,6 @@
 // Function: elf_find_string @ 0x1020A0
 // Calling convention: __stdcall
 // Prototype: char * __stdcall elf_find_string(elf_info_t * elf_info, EncodedStringId * stringId_inOut, void * rodata_start_ptr)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

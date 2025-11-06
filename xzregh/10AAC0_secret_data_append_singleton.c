@@ -2,8 +2,6 @@
 // Function: secret_data_append_singleton @ 0x10AAC0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_singleton(u8 * call_site, u8 * code, secret_data_shift_cursor_t shift_cursor, uint shift_count, uint operation_index)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

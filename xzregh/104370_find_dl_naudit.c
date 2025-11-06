@@ -2,8 +2,6 @@
 // Function: find_dl_naudit @ 0x104370
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_dl_naudit(elf_info_t * dynamic_linker_elf, elf_info_t * libcrypto_elf, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -8,7 +8,7 @@ import os
 from ghidra.program.model.listing import Function
 
 
-AUTO_TAG = "AutoDoc: Generated from upstream sources."
+AUTO_TAG = "AutoDoc:"
 
 
 def parse_args(raw_args):
@@ -67,7 +67,22 @@ def main():
         func.setComment(new_comment)
         applied += 1
 
+    cleared = 0
+    for name, func in name_map.items():
+        if name in comment_map:
+            continue
+        existing = func.getComment()
+        if not existing or AUTO_TAG not in existing:
+            continue
+        base = strip_existing_autodoc(existing)
+        if base == existing:
+            continue
+        func.setComment(base)
+        cleared += 1
+
     print("AutoDoc comments applied: {}".format(applied))
+    if cleared:
+        print("AutoDoc comments cleared: {}".format(cleared))
     if missing:
         print("AutoDoc comments missing functions: {}".format(", ".join(sorted(missing))))
 

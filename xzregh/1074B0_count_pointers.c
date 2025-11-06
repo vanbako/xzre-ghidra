@@ -2,8 +2,6 @@
 // Function: count_pointers @ 0x1074B0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall count_pointers(void * * ptrs, u64 * count_out, libc_imports_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: process_is_sshd @ 0x103A20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_is_sshd(elf_info_t * elf, u8 * stack_end)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

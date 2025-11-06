@@ -2,8 +2,6 @@
 // Function: find_string_reference @ 0x101020
 // Calling convention: __stdcall
 // Prototype: u8 * __stdcall find_string_reference(u8 * code_start, u8 * code_end, char * str)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

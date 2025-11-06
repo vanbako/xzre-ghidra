@@ -2,8 +2,6 @@
 // Function: dsa_key_hash @ 0x103B80
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall dsa_key_hash(DSA * dsa, u8 * mdBuf, u64 mdBufSize, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

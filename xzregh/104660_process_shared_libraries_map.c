@@ -2,8 +2,6 @@
 // Function: process_shared_libraries_map @ 0x104660
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_shared_libraries_map(link_map * r_map, backdoor_shared_libraries_data_t * data)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

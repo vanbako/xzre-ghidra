@@ -2,8 +2,6 @@
 // Function: elf_get_code_segment @ 0x101EC0
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_code_segment(elf_info_t * elf_info, u64 * pSize)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

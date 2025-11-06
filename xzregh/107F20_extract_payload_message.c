@@ -2,8 +2,6 @@
 // Function: extract_payload_message @ 0x107F20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall extract_payload_message(sshbuf * sshbuf_data, size_t sshbuf_size, size_t * out_payload_size, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

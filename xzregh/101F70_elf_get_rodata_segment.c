@@ -2,8 +2,6 @@
 // Function: elf_get_rodata_segment @ 0x101F70
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_rodata_segment(elf_info_t * elf_info, u64 * pSize)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

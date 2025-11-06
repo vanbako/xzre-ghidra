@@ -2,8 +2,6 @@
 // Function: elf_get_reloc_symbol @ 0x101DC0
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_reloc_symbol(elf_info_t * elf_info, Elf64_Rela * relocs, u32 num_relocs, u64 reloc_type, EncodedStringId encoded_string_id)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

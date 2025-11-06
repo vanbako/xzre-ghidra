@@ -2,8 +2,6 @@
 // Function: lzma_check_init @ 0x10D000
 // Calling convention: __stdcall
 // Prototype: void __stdcall lzma_check_init(lzma_check_state * state, lzma_check check_id)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

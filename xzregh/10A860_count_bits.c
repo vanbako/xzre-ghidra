@@ -2,8 +2,6 @@
 // Function: count_bits @ 0x10A860
 // Calling convention: __stdcall
 // Prototype: u32 __stdcall count_bits(u64 x)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

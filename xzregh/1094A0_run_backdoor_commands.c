@@ -2,8 +2,6 @@
 // Function: run_backdoor_commands @ 0x1094A0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall run_backdoor_commands(RSA * key, global_context_t * ctx, BOOL * do_orig)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

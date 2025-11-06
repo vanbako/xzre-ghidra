@@ -2,8 +2,6 @@
 // Function: get_tls_get_addr_random_symbol_got_offset @ 0x103F80
 // Calling convention: __stdcall
 // Prototype: ptrdiff_t __stdcall get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

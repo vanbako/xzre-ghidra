@@ -2,8 +2,6 @@
 // Function: elf_contains_vaddr_relro @ 0x1022D0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_contains_vaddr_relro(elf_info_t * elf_info, u64 vaddr, u64 size, u32 p_flags)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: sshd_get_sensitive_data_score @ 0x103D50
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

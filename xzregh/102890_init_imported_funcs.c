@@ -2,8 +2,6 @@
 // Function: init_imported_funcs @ 0x102890
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall init_imported_funcs(imported_funcs_t * imported_funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

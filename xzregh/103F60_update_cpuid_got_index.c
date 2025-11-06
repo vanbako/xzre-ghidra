@@ -2,8 +2,6 @@
 // Function: update_cpuid_got_index @ 0x103F60
 // Calling convention: __stdcall
 // Prototype: void __stdcall update_cpuid_got_index(elf_entry_ctx_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

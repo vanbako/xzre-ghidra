@@ -2,8 +2,6 @@
 // Function: secret_data_get_decrypted @ 0x1081D0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_get_decrypted(u8 * output, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: c_strlen @ 0x107030
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall c_strlen(char * str)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

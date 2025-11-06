@@ -2,8 +2,6 @@
 // Function: elf_find_string_reference @ 0x1032C0
 // Calling convention: __stdcall
 // Prototype: u8 * __stdcall elf_find_string_reference(elf_info_t * elf_info, EncodedStringId encoded_string_id, u8 * code_start, u8 * code_end)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

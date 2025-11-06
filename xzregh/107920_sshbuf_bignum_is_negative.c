@@ -2,8 +2,6 @@
 // Function: sshbuf_bignum_is_negative @ 0x107920
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshbuf_bignum_is_negative(sshbuf * buf)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

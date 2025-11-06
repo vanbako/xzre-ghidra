@@ -2,8 +2,6 @@
 // Function: init_hooks_ctx @ 0x1027D0
 // Calling convention: __stdcall
 // Prototype: int __stdcall init_hooks_ctx(backdoor_hooks_ctx_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

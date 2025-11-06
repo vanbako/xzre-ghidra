@@ -2,8 +2,6 @@
 // Function: elf_parse @ 0x1013D0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_parse(Elf64_Ehdr * ehdr, elf_info_t * elf_info)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

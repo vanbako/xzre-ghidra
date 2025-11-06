@@ -2,8 +2,6 @@
 // Function: sshbuf_extract @ 0x107950
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshbuf_extract(sshbuf * buf, global_context_t * ctx, void * * p_sshbuf_d, size_t * p_sshbuf_size)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

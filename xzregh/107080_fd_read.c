@@ -2,8 +2,6 @@
 // Function: fd_read @ 0x107080
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_read(int fd, void * buffer, size_t count, libc_imports_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

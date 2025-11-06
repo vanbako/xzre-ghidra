@@ -2,8 +2,6 @@
 // Function: find_addr_referenced_in_mov_instruction @ 0x102C60
 // Calling convention: __stdcall
 // Prototype: void * __stdcall find_addr_referenced_in_mov_instruction(StringXrefId id, string_references_t * refs, void * mem_range_start, void * mem_range_end)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

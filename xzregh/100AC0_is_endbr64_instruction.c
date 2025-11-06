@@ -2,8 +2,6 @@
 // Function: is_endbr64_instruction @ 0x100AC0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_endbr64_instruction(u8 * code_start, u8 * code_end, u32 low_mask_part)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

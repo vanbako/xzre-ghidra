@@ -2,8 +2,6 @@
 // Function: elf_symbol_get_addr @ 0x101B00
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_symbol_get_addr(elf_info_t * elf_info, EncodedStringId encoded_string_id)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

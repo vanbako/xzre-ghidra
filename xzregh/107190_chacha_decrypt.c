@@ -2,8 +2,6 @@
 // Function: chacha_decrypt @ 0x107190
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall chacha_decrypt(u8 * in, int inl, u8 * key, u8 * iv, u8 * out, imported_funcs_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

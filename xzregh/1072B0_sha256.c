@@ -2,8 +2,6 @@
 // Function: sha256 @ 0x1072B0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sha256(void * data, size_t count, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

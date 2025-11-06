@@ -2,8 +2,6 @@
 // Function: hook_EVP_PKEY_set1_RSA @ 0x10A2D0
 // Calling convention: __stdcall
 // Prototype: int __stdcall hook_EVP_PKEY_set1_RSA(EVP_PKEY * pkey, RSA * key)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

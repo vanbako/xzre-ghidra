@@ -2,8 +2,6 @@
 // Function: secret_data_append_from_address @ 0x10AB90
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_from_address(void * addr, secret_data_shift_cursor_t shift_cursor, uint shift_count, uint operation_index)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

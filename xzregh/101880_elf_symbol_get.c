@@ -2,8 +2,6 @@
 // Function: elf_symbol_get @ 0x101880
 // Calling convention: __stdcall
 // Prototype: Elf64_Sym * __stdcall elf_symbol_get(elf_info_t * elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: sshd_get_usable_socket @ 0x107BC0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_usable_socket(int * pSock, int socket_index, libc_imports_t * imports)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

@@ -2,8 +2,6 @@
 // Function: contains_null_pointers @ 0x107170
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall contains_null_pointers(void * * pointers, uint num_pointers)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

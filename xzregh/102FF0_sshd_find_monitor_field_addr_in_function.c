@@ -2,8 +2,6 @@
 // Function: sshd_find_monitor_field_addr_in_function @ 0x102FF0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_monitor_field_addr_in_function(u8 * code_start, u8 * code_end, u8 * data_start, u8 * data_end, void * * monitor_field_ptr_out, global_context_t * ctx)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *

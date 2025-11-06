@@ -2,8 +2,6 @@
 // Function: hook_RSA_get0_key @ 0x10A330
 // Calling convention: __stdcall
 // Prototype: void __stdcall hook_RSA_get0_key(RSA * r, BIGNUM * * n, BIGNUM * * e, BIGNUM * * d)
-
-
 /*
  * AutoDoc: Generated from reverse engineering.
  *

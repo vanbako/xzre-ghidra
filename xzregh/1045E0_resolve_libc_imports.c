@@ -2,8 +2,6 @@
 // Function: resolve_libc_imports @ 0x1045E0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall resolve_libc_imports(link_map * libc, elf_info_t * libc_info, libc_imports_t * imports)
-
-
 /*
  * AutoDoc: Generated from upstream sources.
  *
