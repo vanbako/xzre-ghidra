@@ -3,7 +3,7 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-06
-- Pruned the pre-metadata tooling by deleting `scripts/annotate_xzre_decomp.py`; all documentation edits now happen in `metadata/functions_autodoc.json` before rerunning the refresh pipeline — next: backfill any lingering AutoDoc gaps directly in the metadata store.
+- Pruned the pre-metadata tooling by deleting `scripts/annotate_xzre_decomp.py` plus the legacy reports pipeline (`reports/*.json`, `scripts/map_locals.py`, `scripts/tolerant_signature_compare.py`, `ghidra_scripts/ExportUnmappedFunctionSummaries.py`, `ghidra_scripts/ApplyFunctionAnnotationsFromJson.py`, related docs); all documentation and locals updates now flow through the metadata JSONs before rerunning the refresh pipeline — next: backfill any lingering AutoDoc gaps directly in the metadata store.
 
 ## 2025-11-06
 - Staged the metadata-first pipeline: added `scripts/build_autodoc_from_sources.py`, moved locals to `metadata/xzre_locals.json`, populated the canonical `metadata/functions_autodoc.json` (seeded from sources + existing plate comments), updated `scripts/refresh_xzre_project.sh` to copy metadata→Ghidra→xzregh, and documented the workflow in `AGENTS.md` — next: review the metadata JSON for completeness and begin refining entries (arguments, locals, struct details) there before re-running the refresh.

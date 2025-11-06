@@ -7,6 +7,7 @@ type strings for each function defined under xzre/xzre_code. The resulting data
 is stored as JSON for consumption by the Ghidra automation pipeline.
 """
 
+import argparse
 import json
 import os
 import subprocess
@@ -16,7 +17,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 XZRE_CODE_DIR = os.path.join(REPO_ROOT, "xzre", "xzre_code")
-OUTPUT_PATH = os.path.join(REPO_ROOT, "ghidra_scripts", "generated", "xzre_locals.json")
+DEFAULT_OUTPUT_PATH = os.path.join(REPO_ROOT, "metadata", "xzre_locals.json")
 
 
 class AstParseError(RuntimeError):
@@ -181,7 +182,20 @@ def extract_from_source(path: str) -> Dict[str, List[Dict[str, Any]]]:
     return functions
 
 
+def parse_args(argv: List[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Extract local variable metadata from xzre sources."
+    )
+    parser.add_argument(
+        "--output",
+        default=DEFAULT_OUTPUT_PATH,
+        help="Destination JSON file (default: %(default)s).",
+    )
+    return parser.parse_args(argv)
+
+
 def main() -> None:
+    args = parse_args(sys.argv[1:])
     sources = []
     for entry in sorted(os.listdir(XZRE_CODE_DIR)):
         if entry.endswith(".c"):
@@ -212,12 +226,15 @@ def main() -> None:
                 locals=locals_list,
             )
 
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as outf:
+    output_path = os.path.abspath(args.output)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as outf:
         json.dump(all_functions, outf, indent=2)
         outf.write("\n")
 
-    print(f"Wrote local variable metadata for {len(all_functions)} functions to {OUTPUT_PATH}")
+    print(
+        f"Wrote local variable metadata for {len(all_functions)} functions to {output_path}"
+    )
 
 
 if __name__ == "__main__":

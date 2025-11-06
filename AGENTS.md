@@ -13,7 +13,7 @@
 
 ## Source of Truth for Reverse-Engineering Metadata
 - Function documentation: `metadata/functions_autodoc.json` is the canonical store. Bootstrap it once with `scripts/build_autodoc_from_sources.py`; afterwards edit the JSON directly (Codex should update this file when refining names/descriptions). Do not hand-edit the derived files under `ghidra_scripts/generated/`.
-- Signatures and locals: `metadata/xzre_locals.json` holds the current mapping and gets copied into place during refresh runs so the project and text dumps stay in sync.
+- Signatures and locals: `metadata/xzre_locals.json` holds the current mapping and gets copied into place during refresh runs so the project and text dumps stay in sync. Regenerate from the upstream sources with `scripts/extract_local_variables.py` when new functions land in `xzre/xzre_code/`.
 - Refresh loop: `./scripts/refresh_xzre_project.sh` performs `metadata → Ghidra project → xzregh/`. It copies the JSON metadata into `ghidra_scripts/generated/`, applies it in a headless run, exports the project archive, and mirrors the updated comments back into `xzregh/*.c`. Any manual edits should hit the metadata JSON first, then re-run the refresh.
 - Verification: the refresh emits `ghidra_scripts/generated/xzre_autodoc.json` as a derived artifact; differences between it and `metadata/functions_autodoc.json` indicate that the project mutated comments that were not recorded in metadata.
 - Codex workflow:
