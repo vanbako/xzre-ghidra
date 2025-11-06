@@ -15,6 +15,10 @@ AUTODOC_GENERATED="$SCRIPT_PATH/generated/xzre_autodoc_generated.json"
 AUTODOC_EXPORT="$SCRIPT_PATH/generated/xzre_autodoc.json"
 LOCALS_SOURCE="$META_DIR/xzre_locals.json"
 LOCALS_GENERATED="$SCRIPT_PATH/generated/xzre_locals.json"
+TYPES_SOURCE="$META_DIR/xzre_types.json"
+TYPES_HELPER="$ROOT_DIR/scripts/manage_types_metadata.py"
+XZREGH_TYPES="$ROOT_DIR/xzregh/xzre_types.h"
+TYPE_DOCS_SOURCE="$META_DIR/type_docs.json"
 
 if [[ ! -x "$GHIDRA/support/analyzeHeadless" ]]; then
   echo "error: analyzeHeadless not found under \$GHIDRA ($GHIDRA)" >&2
@@ -26,11 +30,6 @@ if [[ ! -f "$OBJECT_PATH" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$HEADER_PATH" ]]; then
-  echo "error: expected preprocessed header at $HEADER_PATH" >&2
-  exit 1
-fi
-
 if [[ ! -f "$AUTODOC_SOURCE" ]]; then
   echo "error: expected AutoDoc metadata at $AUTODOC_SOURCE" >&2
   exit 1
@@ -38,6 +37,33 @@ fi
 
 if [[ ! -f "$LOCALS_SOURCE" ]]; then
   echo "error: expected locals metadata at $LOCALS_SOURCE" >&2
+  exit 1
+fi
+
+if [[ ! -f "$TYPES_SOURCE" ]]; then
+  echo "error: expected type metadata at $TYPES_SOURCE" >&2
+  exit 1
+fi
+
+if [[ ! -f "$TYPES_HELPER" ]]; then
+  echo "error: expected type metadata helper at $TYPES_HELPER" >&2
+  exit 1
+fi
+
+TYPE_DOCS_ARGS=()
+TYPE_DOCS_POST=()
+if [[ -f "$TYPE_DOCS_SOURCE" ]]; then
+  TYPE_DOCS_ARGS=(--docs "$TYPE_DOCS_SOURCE")
+  TYPE_DOCS_POST=(-postScript ApplyTypeDocs.py "docs=$TYPE_DOCS_SOURCE")
+else
+  echo "warning: type documentation metadata missing at $TYPE_DOCS_SOURCE; type comments will be skipped." >&2
+fi
+
+python3 "$TYPES_HELPER" render --json "$TYPES_SOURCE" --output "$HEADER_PATH" --skip-preamble "${TYPE_DOCS_ARGS[@]}"
+python3 "$TYPES_HELPER" render --json "$TYPES_SOURCE" --output "$XZREGH_TYPES" "${TYPE_DOCS_ARGS[@]}"
+
+if [[ ! -f "$HEADER_PATH" ]]; then
+  echo "error: failed to render preprocessed header at $HEADER_PATH" >&2
   exit 1
 fi
 
@@ -53,7 +79,8 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -postScript RenameFromLinkerMap.py "$ROOT_DIR/xzre/xzre.lds.in" \
   -postScript ApplySignaturesFromHeader.py \
   -postScript InstallEnumEquates.py "$HEADER_PATH" \
-  -postScript FixAllParamStorage.py
+  -postScript FixAllParamStorage.py \
+  "${TYPE_DOCS_POST[@]}"
 
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process liblzma_la-crc64-fast.o \
