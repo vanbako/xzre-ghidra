@@ -16,7 +16,10 @@ from collections import OrderedDict
 from typing import Any, Dict, Iterable, List, Tuple
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-XZRE_CODE_DIR = os.path.join(REPO_ROOT, "xzre", "xzre_code")
+XZRE_SOURCE_DIRS = [
+    os.path.join(REPO_ROOT, "xzre", "xzre_code"),
+    os.path.join(REPO_ROOT, "xzre"),
+]
 DEFAULT_OUTPUT_PATH = os.path.join(REPO_ROOT, "metadata", "xzre_locals.json")
 
 
@@ -81,26 +84,21 @@ def _process_function(
     # Ignore forward declarations from headers.
     loc = node.get("loc") or {}
     node_file = _get_loc_file(loc)
-    if not node_file:
-        return ("", [])
+    node_abs = ""
     if node_file:
         node_abs = os.path.abspath(os.path.join(REPO_ROOT, node_file))
     else:
-        node_abs = ""
-    if not node_abs or os.path.normpath(node_abs) != os.path.normpath(abs_source):
-        # Some function definitions come through with a blank ``loc.file`` but
-        # still carry the originating file in the ``range`` metadata. Fall back
-        # to the range information when available.
-        if node_abs:
-            return ("", [])
         range_info = node.get("range") or {}
         range_begin = range_info.get("begin") or {}
         range_file = _get_loc_file(range_begin)
         if not range_file:
-            return ("", [])
-        node_abs = os.path.abspath(os.path.join(REPO_ROOT, range_file))
-        if os.path.normpath(node_abs) != os.path.normpath(abs_source):
-            return ("", [])
+            if node.get("isImplicit"):
+                return ("", [])
+            node_abs = abs_source
+        else:
+            node_abs = os.path.abspath(os.path.join(REPO_ROOT, range_file))
+    if os.path.normpath(node_abs) != os.path.normpath(abs_source):
+        return ("", [])
 
     body = None
     for child in node.get("inner") or []:
@@ -197,12 +195,25 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
 def main() -> None:
     args = parse_args(sys.argv[1:])
     sources = []
-    for entry in sorted(os.listdir(XZRE_CODE_DIR)):
-        if entry.endswith(".c"):
-            sources.append(os.path.join(XZRE_CODE_DIR, entry))
+    seen = set()
+    for directory in XZRE_SOURCE_DIRS:
+        if not os.path.isdir(directory):
+            continue
+        for entry in sorted(os.listdir(directory)):
+            if not entry.endswith(".c"):
+                continue
+            path = os.path.join(directory, entry)
+            if not os.path.isfile(path):
+                continue
+            norm = os.path.normpath(path)
+            if norm in seen:
+                continue
+            seen.add(norm)
+            sources.append(path)
 
     if not sources:
-        raise SystemExit(f"no C sources found under {XZRE_CODE_DIR}")
+        dirs = ", ".join(XZRE_SOURCE_DIRS)
+        raise SystemExit(f"no C sources found under {dirs}")
 
     all_functions: Dict[str, Dict[str, Any]] = OrderedDict()
     for source_path in sources:
@@ -210,9 +221,15 @@ def main() -> None:
         try:
             func_map = extract_from_source(source_path)
         except subprocess.CalledProcessError as exc:
-            raise SystemExit(
-                f"clang failed for {rel_source} with exit code {exc.returncode}"
-            ) from exc
+            sys.stderr.write(
+                f"warning: clang failed for {rel_source} (exit {exc.returncode}); skipping\n"
+            )
+            continue
+        except AstParseError as exc:
+            sys.stderr.write(
+                f"warning: failed to parse AST for {rel_source}: {exc}\n"
+            )
+            continue
 
         for func_name, locals_list in func_map.items():
             if func_name in all_functions:

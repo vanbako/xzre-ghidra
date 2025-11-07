@@ -24,6 +24,1394 @@
       }
     ]
   },
+  "OSSL_FUNC_store_open_ex": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_delete": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_export_object": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_close": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_eof": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_load": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_attach": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_store_open": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_export_object": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_decode": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_does_selection": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_decoder_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_free_object": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_import_object": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_encode": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_does_selection": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_encoder_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_decapsulate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_auth_decapsulate_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_decapsulate_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_encapsulate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_auth_encapsulate_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_encapsulate_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kem_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_decrypt": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_decrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_encrypt": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_encrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_asym_cipher_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_get_key_id": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_generate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_gen_settable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_export": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_import": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_imp_settable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_skeymgmt_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_query_key_types": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_settable_ctx_md_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_set_ctx_md_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_gettable_ctx_md_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_get_ctx_md_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_verify": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_verify_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_verify_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_verify_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_sign": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_sign_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_sign_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_digest_sign_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_recover": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_recover_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_message_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_message_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_message_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_verify_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_sign_message_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_sign_message_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_sign_message_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_sign": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_sign_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_signature_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_set_peer": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_derive": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keyexch_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_export_types_ex": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_import_types_ex": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_dup": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_export_types": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_export": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_import_types": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_import": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_match": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_validate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_has": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_query_operation_name": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_settable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_set_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_load": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_cleanup": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_settable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_set_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_set_template": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_gen_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_keymgmt_new": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_clear_seed": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_get_seed": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_verify_zeroization": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_set_callbacks": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_unlock": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_lock": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_enable_locking": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_nonce": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_reseed": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_generate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_uninstantiate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_instantiate": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_rand_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_derive": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_reset": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_kdf_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_init_skey": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_mac_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_decrypt_skey_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_encrypt_skey_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_pipeline_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_pipeline_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_pipeline_decrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_pipeline_encrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_cipher": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_decrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_encrypt_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cipher_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_gettable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_settable_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_get_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_set_ctx_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_copyctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_dupctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_freectx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_digest": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_squeeze": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_final": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_update": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_digest_newctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_alert": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_got_transport_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_yield_secret": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_crypto_release_rcd": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_crypto_recv_rcd": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_SSL_QUIC_TLS_crypto_send": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_random_bytes": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_self_test": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_get_capabilities": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_get_reason_strings": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_unquery_operation": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_query_operation": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_teardown": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_count_to_mark": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_up_ref": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_get0_dispatch": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_get0_provider_ctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_name": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_deregister_child_cb": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_provider_register_child_cb": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cleanup_user_nonce": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cleanup_nonce": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_get_user_nonce": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_get_nonce": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cleanup_user_entropy": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_cleanup_entropy": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_get_user_entropy": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_get_entropy": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_self_test_cb": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_indicator_cb": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_ctrl": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_vsnprintf": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_vprintf": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_up_ref": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_puts": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_gets": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_write_ex": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_read_ex": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_new_membuf": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_BIO_new_file": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_OPENSSL_cleanse": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_secure_allocated": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_secure_clear_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_secure_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_secure_zalloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_secure_malloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_clear_realloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_realloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_clear_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_free": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_zalloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_CRYPTO_malloc": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_obj_create": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_obj_add_sigid": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_pop_error_to_mark": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_clear_last_error_mark": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_set_error_mark": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_vset_error": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_set_error_debug": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_new_error": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_get_libctx": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_thread_start": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_get_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "OSSL_FUNC_core_gettable_params": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_GENERALSTRING_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_GENERALSTRING_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_GENERALSTRING_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_GENERALSTRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_GENERALSTRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_GENERALSTRING_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_UTF8STRING_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_UTF8STRING_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_UTF8STRING_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_UTF8STRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_UTF8STRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_UTF8STRING_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_INTEGER_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_INTEGER_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_INTEGER_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_INTEGER_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_INTEGER_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_INTEGER_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_OBJECT_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_OBJECT_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_OBJECT_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_OBJECT_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_OBJECT_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_OBJECT_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_TYPE_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_TYPE_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_TYPE_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_TYPE_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_TYPE_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_TYPE_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_STRING_TABLE_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_STRING_TABLE_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_STRING_TABLE_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_STRING_TABLE_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_ASN1_STRING_TABLE_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_ASN1_STRING_TABLE_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_X509_ALGOR_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_X509_ALGOR_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_X509_ALGOR_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_X509_ALGOR_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_X509_ALGOR_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_X509_ALGOR_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_BIO_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_BIO_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_BIO_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_BIO_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_BIO_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_BIO_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_void_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_void_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_void_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_void_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_void_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_void_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_BLOCK_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_BLOCK_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_BLOCK_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_BLOCK_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_OPENSSL_BLOCK_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_BLOCK_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_CSTRING_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_CSTRING_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_CSTRING_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_CSTRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_OPENSSL_CSTRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_CSTRING_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_STRING_freefunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_STRING_copyfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_STRING_compfunc_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_STRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_const_OPENSSL_STRING_sk_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "ossl_check_OPENSSL_STRING_type": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
   "backdoor_symbind64": {
     "source": "xzre/xzre_code/backdoor_symbind64.c",
     "locals": [
@@ -433,6 +1821,163 @@
       }
     ]
   },
+  "run_backdoor_commands": {
+    "source": "xzre/xzre_code/run_backdoor_commands.c",
+    "locals": [
+      {
+        "name": "f",
+        "type": "run_backdoor_commands_data_t"
+      },
+      {
+        "name": "num_n_bits",
+        "type": "int"
+      },
+      {
+        "name": "num_n_bytes",
+        "type": "int"
+      },
+      {
+        "name": "rsa_n_length",
+        "type": "int"
+      },
+      {
+        "name": "cmd_type",
+        "type": "u64"
+      },
+      {
+        "name": "hostkey_hash_offset",
+        "type": "int"
+      },
+      {
+        "name": "body_size",
+        "type": "int"
+      },
+      {
+        "name": "body_offset",
+        "type": "int"
+      },
+      {
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "name": "data_s1",
+        "type": "int"
+      },
+      {
+        "name": "data_s2",
+        "type": "int"
+      },
+      {
+        "name": "payload_size",
+        "type": "int"
+      },
+      {
+        "name": "data_ptr",
+        "type": "u8 *"
+      },
+      {
+        "name": "sigcheck_result",
+        "type": "BOOL"
+      },
+      {
+        "name": "key_idx",
+        "type": "int"
+      },
+      {
+        "name": "data_offset",
+        "type": "int"
+      },
+      {
+        "name": "size_location",
+        "type": "u16 *"
+      },
+      {
+        "name": "delta",
+        "type": "u64"
+      },
+      {
+        "name": "signature",
+        "type": "u8 *"
+      },
+      {
+        "name": "offsets",
+        "type": "sshd_offsets_t"
+      },
+      {
+        "name": "tmp",
+        "type": "sshd_offsets_t"
+      },
+      {
+        "name": "extra_data",
+        "type": "u8 *"
+      },
+      {
+        "name": "data_ptr2",
+        "type": "u8 *"
+      },
+      {
+        "name": "data_index",
+        "type": "u64"
+      },
+      {
+        "name": "v",
+        "type": "u32"
+      },
+      {
+        "name": "value",
+        "type": "u8"
+      },
+      {
+        "name": "tgt_uid",
+        "type": "uid_t"
+      },
+      {
+        "name": "tgt_gid",
+        "type": "uid_t"
+      },
+      {
+        "name": "packet_data_size",
+        "type": "u64"
+      },
+      {
+        "name": "res",
+        "type": "int"
+      },
+      {
+        "name": "body_r8",
+        "type": "u8 *"
+      },
+      {
+        "name": "permit_root_login",
+        "type": "int"
+      },
+      {
+        "name": "do_break",
+        "type": "BOOL"
+      },
+      {
+        "name": "res",
+        "type": "int"
+      },
+      {
+        "name": "monitor_reqtype",
+        "type": "int"
+      },
+      {
+        "name": "monitor_reqtype_ptr",
+        "type": "int *"
+      },
+      {
+        "name": "rsa_e",
+        "type": "BIGNUM *"
+      },
+      {
+        "name": "rsa_n",
+        "type": "BIGNUM *"
+      }
+    ]
+  },
   "secret_data_append_from_address": {
     "source": "xzre/xzre_code/secret_data_append_from_address.c",
     "locals": [
@@ -456,6 +2001,19 @@
       {
         "name": "func_start",
         "type": "void *"
+      }
+    ]
+  },
+  "secret_data_get_decrypted": {
+    "source": "xzre/xzre_code/secret_data_get_decrypted.c",
+    "locals": [
+      {
+        "name": "buf1",
+        "type": "struct key_buf"
+      },
+      {
+        "name": "buf2",
+        "type": "struct key_buf"
       }
     ]
   },
@@ -496,5 +2054,337 @@
   "update_got_offset": {
     "source": "xzre/xzre_code/update_got_offset.c",
     "locals": []
+  },
+  "hexdump": {
+    "source": "xzre/util.c",
+    "locals": [
+      {
+        "name": "buffer",
+        "type": "char[100]"
+      },
+      {
+        "name": "len_ascii",
+        "type": "long"
+      },
+      {
+        "name": "index_hex",
+        "type": "long"
+      },
+      {
+        "name": "index_str",
+        "type": "long"
+      },
+      {
+        "name": "remaining_ascii",
+        "type": "long"
+      },
+      {
+        "name": "byte_index",
+        "type": "long"
+      },
+      {
+        "name": "buf",
+        "type": "struct (unnamed struct at /home/kali/xzre-ghidra/xzre/util.c:11:2)",
+        "line": 14
+      },
+      {
+        "name": "p",
+        "type": "unsigned char *"
+      },
+      {
+        "name": "byte",
+        "type": "unsigned char"
+      },
+      {
+        "name": "OFFSET_HEX",
+        "type": "const int"
+      },
+      {
+        "name": "OFFSET_ASCII",
+        "type": "const int"
+      }
+    ]
+  },
+  "main": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "start",
+        "type": "u8 *"
+      },
+      {
+        "name": "i",
+        "type": "int"
+      },
+      {
+        "name": "res",
+        "type": "int"
+      },
+      {
+        "name": "i",
+        "type": "int"
+      },
+      {
+        "name": "fake_allocator",
+        "type": "lzma_allocator *"
+      }
+    ]
+  },
+  "print_opcode_masks": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "print_opcode_mask": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "i",
+        "type": "unsigned int"
+      },
+      {
+        "name": "allowed",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "main_shared": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "trigger",
+        "type": "char *"
+      },
+      {
+        "name": "elf_addr",
+        "type": "void *"
+      },
+      {
+        "name": "handles",
+        "type": "elf_handles_t"
+      },
+      {
+        "name": "einfo",
+        "type": "elf_info_t"
+      },
+      {
+        "name": "strings",
+        "type": "string_references_t"
+      },
+      {
+        "name": "i",
+        "type": "int"
+      },
+      {
+        "name": "item",
+        "type": "string_item_t *"
+      },
+      {
+        "name": "code_size",
+        "type": "u64"
+      },
+      {
+        "name": "data_size",
+        "type": "u64"
+      },
+      {
+        "name": "data_start",
+        "type": "void *"
+      },
+      {
+        "name": "data_end",
+        "type": "void *"
+      },
+      {
+        "name": "code_start",
+        "type": "void *"
+      },
+      {
+        "name": "code_end",
+        "type": "void *"
+      },
+      {
+        "name": "ssh_host_keys1",
+        "type": "void *"
+      },
+      {
+        "name": "ssh_host_keys2",
+        "type": "void *"
+      },
+      {
+        "name": "getenv_krb5ccname",
+        "type": "void *"
+      },
+      {
+        "name": "score",
+        "type": "int"
+      },
+      {
+        "name": "sshd_ctx",
+        "type": "sshd_ctx_t"
+      },
+      {
+        "name": "sshd_log_ctx",
+        "type": "sshd_log_ctx_t"
+      },
+      {
+        "name": "fn_start",
+        "type": "void *"
+      },
+      {
+        "name": "fn_end",
+        "type": "void *"
+      },
+      {
+        "name": "fn_fptr_addr",
+        "type": "void *"
+      },
+      {
+        "name": "ctx",
+        "type": "global_context_t",
+        "line": 321
+      }
+    ]
+  },
+  "xzre_backdoor_setup": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "linker_return",
+        "type": "void *"
+      },
+      {
+        "name": "ldso_elf",
+        "type": "void *"
+      },
+      {
+        "name": "fake_got",
+        "type": "u64[4]",
+        "line": 173
+      },
+      {
+        "name": "my_entry_ctx",
+        "type": "elf_entry_ctx_t",
+        "line": 179
+      },
+      {
+        "name": "jmp_buf",
+        "type": "u8[14]"
+      },
+      {
+        "name": "pagesz",
+        "type": "size_t"
+      },
+      {
+        "name": "pagemask",
+        "type": "size_t"
+      },
+      {
+        "name": "code",
+        "type": "u8 *"
+      },
+      {
+        "name": "code_addr",
+        "type": "uptr"
+      },
+      {
+        "name": "hook_params",
+        "type": "backdoor_hooks_ctx_t"
+      },
+      {
+        "name": "ret",
+        "type": "int"
+      },
+      {
+        "name": "shared",
+        "type": "backdoor_shared_globals_t",
+        "line": 203
+      },
+      {
+        "name": "para",
+        "type": "backdoor_setup_params_t",
+        "line": 206
+      }
+    ]
+  },
+  "hooked_update_got_address": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "inj_build_abs_jump": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "target",
+        "type": "uint64_t"
+      },
+      {
+        "name": "lo",
+        "type": "uint32_t"
+      },
+      {
+        "name": "hi",
+        "type": "uint32_t"
+      }
+    ]
+  },
+  "get_main_elf": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "get_ldso_elf": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "get_elf_base": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "cmdBuf",
+        "type": "char[128]"
+      },
+      {
+        "name": "template",
+        "type": "char[59]"
+      },
+      {
+        "name": "hProc",
+        "type": "FILE *"
+      },
+      {
+        "name": "s",
+        "type": "char *"
+      },
+      {
+        "name": "addr",
+        "type": "u64"
+      }
+    ]
+  },
+  "xzre_secret_data_test": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "cursor",
+        "type": "secret_data_shift_cursor_t",
+        "line": 84
+      }
+    ]
+  },
+  "xzre_secret_data_init": {
+    "source": "xzre/xzre.c",
+    "locals": []
+  },
+  "xzre_secret_data_bypass": {
+    "source": "xzre/xzre.c",
+    "locals": [
+      {
+        "name": "i",
+        "type": "int"
+      }
+    ]
   }
 }

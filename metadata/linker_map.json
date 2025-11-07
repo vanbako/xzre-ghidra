@@ -1,0 +1,712 @@
+[
+  {
+    "offset": 16,
+    "name": "x86_dasm",
+    "section": ".text.x86_codd"
+  },
+  {
+    "offset": 2736,
+    "name": "is_endbr64_instruction",
+    "section": ".text.lzma_block_buffer_encoda"
+  },
+  {
+    "offset": 2816,
+    "name": "find_function_prologue",
+    "section": ".text.lzma_raw_coder_memusaga"
+  },
+  {
+    "offset": 2960,
+    "name": "find_function",
+    "section": ".text.lzma2_encoder_inia"
+  },
+  {
+    "offset": 3200,
+    "name": "find_call_instruction",
+    "section": ".text.lzma_optimum_normaa"
+  },
+  {
+    "offset": 3376,
+    "name": "find_mov_lea_instruction",
+    "section": ".text.lzma_filters_updata"
+  },
+  {
+    "offset": 3568,
+    "name": "find_mov_instruction",
+    "section": ".text.lzma_filters_updata"
+  },
+  {
+    "offset": 3744,
+    "name": "find_lea_instruction",
+    "section": ".text.lzma_raw_encodea"
+  },
+  {
+    "offset": 3920,
+    "name": "find_lea_instruction_with_mem_operand",
+    "section": ".text.lzma_mt_block_siza"
+  },
+  {
+    "offset": 4112,
+    "name": "find_string_reference",
+    "section": ".text.stream_encoda"
+  },
+  {
+    "offset": 4176,
+    "name": "find_instruction_with_mem_operand_ex",
+    "section": ".text.lzma_properties_siza"
+  },
+  {
+    "offset": 4368,
+    "name": "find_instruction_with_mem_operand",
+    "section": ".text.stream_encoder_mt_inia"
+  },
+  {
+    "offset": 4448,
+    "name": "find_add_instruction_with_mem_operand",
+    "section": ".text.lzma_simple_x86_decoder_inif"
+  },
+  {
+    "offset": 4608,
+    "name": "fake_lzma_free",
+    "section": ".text.stream_decoda"
+  },
+  {
+    "offset": 4656,
+    "name": "elf_contains_vaddr_impl",
+    "section": ".text.powerpc_coda"
+  },
+  {
+    "offset": 5008,
+    "name": "elf_contains_vaddr",
+    "section": ".text.parse_bcz"
+  },
+  {
+    "offset": 5024,
+    "name": "is_gnu_relro",
+    "section": ".text.lzma_simple_props_sizd"
+  },
+  {
+    "offset": 5056,
+    "name": "elf_parse",
+    "section": ".text.get_literal_prica"
+  },
+  {
+    "offset": 6256,
+    "name": "elf_symbol_get",
+    "section": ".text.crc_inia"
+  },
+  {
+    "offset": 6896,
+    "name": "elf_symbol_get_addr",
+    "section": ".text.crc64_generia"
+  },
+  {
+    "offset": 6944,
+    "name": "c_memmove",
+    "section": ".text.crc64_generia"
+  },
+  {
+    "offset": 7024,
+    "name": "fake_lzma_alloc",
+    "section": ".text.init_pric_tabla"
+  },
+  {
+    "offset": 7040,
+    "name": "elf_find_rela_reloc",
+    "section": ".text.stream_encoder_updata"
+  },
+  {
+    "offset": 7200,
+    "name": "elf_find_relr_reloc",
+    "section": ".text.stream_encoder_updatz"
+  },
+  {
+    "offset": 7600,
+    "name": "elf_get_reloc_symbol",
+    "section": ".text.lz_encoda"
+  },
+  {
+    "offset": 7760,
+    "name": "elf_get_plt_symbol",
+    "section": ".text.delta_coder_ena"
+  },
+  {
+    "offset": 7808,
+    "name": "elf_get_got_symbol",
+    "section": ".text.delta_decoda"
+  },
+  {
+    "offset": 7856,
+    "name": "elf_get_code_segment",
+    "section": ".text.lzma_check_updata"
+  },
+  {
+    "offset": 8032,
+    "name": "elf_get_rodata_segment",
+    "section": ".text.index_tree_appena"
+  },
+  {
+    "offset": 8336,
+    "name": "elf_find_string",
+    "section": ".text.lzip_decoda"
+  },
+  {
+    "offset": 8512,
+    "name": "elf_get_data_segment",
+    "section": ".text.microlzma_decoda"
+  },
+  {
+    "offset": 8896,
+    "name": "elf_contains_vaddr_relro",
+    "section": ".text.auto_decoda"
+  },
+  {
+    "offset": 9056,
+    "name": "is_range_mapped",
+    "section": ".text.hc_find_funa"
+  },
+  {
+    "offset": 9264,
+    "name": "j_tls_get_addr",
+    "section": ".text.lzma_simple_props_encoda"
+  },
+  {
+    "offset": 9296,
+    "name": "dummy_tls_get_addr",
+    "section": ".text.lzma_simple_props_encoda"
+  },
+  {
+    "offset": 9344,
+    "name": "get_lzma_allocator_address",
+    "section": ".text.stream_decoder_mt_ena"
+  },
+  {
+    "offset": 9440,
+    "name": "get_elf_functions_address",
+    "section": ".text.lzma_lz_encoder_memusaga"
+  },
+  {
+    "offset": 9536,
+    "name": "sshd_find_main",
+    "section": ".text.lzma_lz_encoder_memusaga"
+  },
+  {
+    "offset": 10080,
+    "name": "init_ldso_ctx",
+    "section": ".text.lzma_block_buffer_bound63"
+  },
+  {
+    "offset": 10176,
+    "name": "init_hooks_ctx",
+    "section": ".text.lzma_delta_decoder_inis"
+  },
+  {
+    "offset": 10304,
+    "name": "init_shared_globals",
+    "section": ".text.lzma_delta_props_decodd"
+  },
+  {
+    "offset": 10368,
+    "name": "init_imported_funcs",
+    "section": ".text.microlzma_decoder_inia"
+  },
+  {
+    "offset": 10432,
+    "name": "backdoor_symbind64",
+    "section": ".text.lz_encoder_prepara"
+  },
+  {
+    "offset": 10816,
+    "name": "elf_find_function_pointer",
+    "section": ".text.reverse_seez"
+  },
+  {
+    "offset": 11008,
+    "name": "validate_log_handler_pointers",
+    "section": ".text.transfora"
+  },
+  {
+    "offset": 11344,
+    "name": "find_addr_referenced_in_mov_instruction",
+    "section": ".text.lzma_next_filter_inia"
+  },
+  {
+    "offset": 11552,
+    "name": "elf_find_string_references",
+    "section": ".text.auto_decoder_iniz"
+  },
+  {
+    "offset": 12256,
+    "name": "sshd_find_monitor_field_addr_in_function",
+    "section": ".text.lzma_lzma_set_out_limia"
+  },
+  {
+    "offset": 12976,
+    "name": "elf_find_string_reference",
+    "section": ".text.lzma_auto_decoda"
+  },
+  {
+    "offset": 13104,
+    "name": "sshd_get_sensitive_data_address_via_krb5ccname",
+    "section": ".text.lzma_lzma_encoder_resea"
+  },
+  {
+    "offset": 13936,
+    "name": "sshd_get_sensitive_data_address_via_xcalloc",
+    "section": ".text.lzma_bufcpa"
+  },
+  {
+    "offset": 14432,
+    "name": "sshd_get_sensitive_data_score_in_do_child",
+    "section": ".text.lzma_check_finisa"
+  },
+  {
+    "offset": 14592,
+    "name": "sshd_get_sensitive_data_score_in_main",
+    "section": ".text.lzma_decoder_inia"
+  },
+  {
+    "offset": 14720,
+    "name": "sshd_get_sensitive_data_score_in_demote_sensitive_data",
+    "section": ".text.lzma_delta_coder_inia"
+  },
+  {
+    "offset": 14768,
+    "name": "check_argument",
+    "section": ".text.lzma_encoder_inia"
+  },
+  {
+    "offset": 14864,
+    "name": "process_is_sshd",
+    "section": ".text.lzma_file_info_decodea"
+  },
+  {
+    "offset": 15216,
+    "name": "dsa_key_hash",
+    "section": ".text.lzma_file_info_decodea"
+  },
+  {
+    "offset": 15568,
+    "name": "main_elf_parse",
+    "section": ".text.lzma_filter_decoder_is_supportea"
+  },
+  {
+    "offset": 15680,
+    "name": "sshd_get_sensitive_data_score",
+    "section": ".text.lzma_lzma2_encoder_memusaga"
+  },
+  {
+    "offset": 15776,
+    "name": "sshd_find_monitor_struct",
+    "section": ".text.lzma_mf_bt4_fina"
+  },
+  {
+    "offset": 16208,
+    "name": "update_cpuid_got_index",
+    "section": ".text.lzma_stream_decoder_inia"
+  },
+  {
+    "offset": 16240,
+    "name": "get_tls_get_addr_random_symbol_got_offset",
+    "section": ".text.lzma_stream_flags_compara"
+  },
+  {
+    "offset": 16272,
+    "name": "update_got_address",
+    "section": ".text.lzma_stream_header_encoda"
+  },
+  {
+    "offset": 16384,
+    "name": "update_got_offset",
+    "section": ".text.parse_delt1"
+  },
+  {
+    "offset": 16416,
+    "name": "init_elf_entry_ctx",
+    "section": ".text.read_output_and_waia"
+  },
+  {
+    "offset": 16464,
+    "name": "get_lzma_allocator",
+    "section": ".text.stream_decoder_memconfia"
+  },
+  {
+    "offset": 16496,
+    "name": "find_link_map_l_name",
+    "section": ".text.lzma_delta_props_encoda"
+  },
+  {
+    "offset": 17248,
+    "name": "find_dl_naudit",
+    "section": ".text.lzma_filter_flags_decoda"
+  },
+  {
+    "offset": 17872,
+    "name": "resolve_libc_imports",
+    "section": ".text.lzma_index_buffer_encoda"
+  },
+  {
+    "offset": 18000,
+    "name": "process_shared_libraries_map",
+    "section": ".text.lzma_index_encoder_inia"
+  },
+  {
+    "offset": 18992,
+    "name": "process_shared_libraries",
+    "section": ".text.lzma_index_stream_flaga"
+  },
+  {
+    "offset": 19152,
+    "name": "find_link_map_l_audit_any_plt_bitmask",
+    "section": ".text.lzma_index_iter_locata"
+  },
+  {
+    "offset": 20176,
+    "name": "find_link_map_l_audit_any_plt",
+    "section": ".text.lzma_index_hash_inia"
+  },
+  {
+    "offset": 20944,
+    "name": "find_dl_audit_offsets",
+    "section": ".text.lzma_lz_decoder_inia"
+  },
+  {
+    "offset": 21504,
+    "name": "sshd_find_sensitive_data",
+    "section": ".text.lzma_lzma_optimum_fasa"
+  },
+  {
+    "offset": 22560,
+    "name": "backdoor_setup",
+    "section": ".text.microlzma_encoder_inia"
+  },
+  {
+    "offset": 28448,
+    "name": "backdoor_init_stage2",
+    "section": ".text.lzma_validate_chaia"
+  },
+  {
+    "offset": 28704,
+    "name": "c_strlen",
+    "section": ".text.parse_optiona"
+  },
+  {
+    "offset": 28736,
+    "name": "c_strnlen",
+    "section": ".text.parse_optiona"
+  },
+  {
+    "offset": 28784,
+    "name": "fd_read",
+    "section": ".text.auto_decoder_inia"
+  },
+  {
+    "offset": 28896,
+    "name": "fd_write",
+    "section": ".text.bt_find_funa"
+  },
+  {
+    "offset": 29024,
+    "name": "contains_null_pointers",
+    "section": ".text.bt_find_funa"
+  },
+  {
+    "offset": 29056,
+    "name": "chacha_decrypt",
+    "section": ".text.lzma_delta_encoder_inia"
+  },
+  {
+    "offset": 29344,
+    "name": "sha256",
+    "section": ".text.lzma_easy_encodea"
+  },
+  {
+    "offset": 29456,
+    "name": "bignum_serialize",
+    "section": ".text.lzma_block_decoder_inia"
+  },
+  {
+    "offset": 29680,
+    "name": "sshd_log",
+    "section": ".text.lzma_block_encoder_updatd"
+  },
+  {
+    "offset": 29856,
+    "name": "count_pointers",
+    "section": ".text.lzma_index_ena"
+  },
+  {
+    "offset": 29952,
+    "name": "rsa_key_hash",
+    "section": ".text.lzma_filters_copa"
+  },
+  {
+    "offset": 30240,
+    "name": "verify_signature",
+    "section": ".text.lzma_index_dua"
+  },
+  {
+    "offset": 30992,
+    "name": "sshbuf_bignum_is_negative",
+    "section": ".text.length_encoder_resez"
+  },
+  {
+    "offset": 31040,
+    "name": "sshbuf_extract",
+    "section": ".text.stream_decoder_mt_get_progresz"
+  },
+  {
+    "offset": 31248,
+    "name": "sshd_get_sshbuf",
+    "section": ".text.threads_stoz"
+  },
+  {
+    "offset": 31664,
+    "name": "sshd_get_usable_socket",
+    "section": ".text.index_decoda"
+  },
+  {
+    "offset": 31824,
+    "name": "sshd_get_client_socket",
+    "section": ".text.index_encoda"
+  },
+  {
+    "offset": 32064,
+    "name": "sshd_patch_variables",
+    "section": ".text.lzma_block_unpadded_siza"
+  },
+  {
+    "offset": 32208,
+    "name": "sshd_configure_log_hook",
+    "section": ".text.lzma_rc_pricea"
+  },
+  {
+    "offset": 32400,
+    "name": "check_backdoor_state",
+    "section": ".text.stream_encoder_mt_iniz"
+  },
+  {
+    "offset": 32528,
+    "name": "extract_payload_message",
+    "section": ".text.worker_stara"
+  },
+  {
+    "offset": 32880,
+    "name": "mm_answer_keyverify_hook",
+    "section": ".text.bt_skip_funz"
+  },
+  {
+    "offset": 33008,
+    "name": "mm_answer_authpassword_hook",
+    "section": ".text.lzma_coda"
+  },
+  {
+    "offset": 33216,
+    "name": "secret_data_get_decrypted",
+    "section": ".text.parse_lzma10"
+  },
+  {
+    "offset": 33376,
+    "name": "sshd_proxy_elevate",
+    "section": ".text.lzip_decoder_memconfia"
+  },
+  {
+    "offset": 36160,
+    "name": "decrypt_payload_message",
+    "section": ".text.decode_buffez"
+  },
+  {
+    "offset": 36496,
+    "name": "mm_answer_keyallowed_hook",
+    "section": ".text.file_info_decoda"
+  },
+  {
+    "offset": 38032,
+    "name": "run_backdoor_commands",
+    "section": ".text.lzma_index_stream_siza"
+  },
+  {
+    "offset": 41520,
+    "name": "hook_RSA_public_decrypt",
+    "section": ".text.lzma_index_prealloa"
+  },
+  {
+    "offset": 41664,
+    "name": "hook_EVP_PKEY_set1_RSA",
+    "section": ".text.lzma_index_memusaga"
+  },
+  {
+    "offset": 41760,
+    "name": "hook_RSA_get0_key",
+    "section": ".text.lzma_index_inia"
+  },
+  {
+    "offset": 41872,
+    "name": "mm_log_handler_hook",
+    "section": ".text.parse_lzma12z"
+  },
+  {
+    "offset": 42736,
+    "name": "_cpuid_gcc",
+    "section": ".text._cpuid"
+  },
+  {
+    "offset": 42768,
+    "name": "backdoor_entry",
+    "section": ".text._get_cpuia"
+  },
+  {
+    "offset": 42884,
+    "name": "backdoor_init",
+    "section": ".text._get_cpuia"
+  },
+  {
+    "offset": 42992,
+    "name": "_get_cpuid_modified",
+    "section": ".text._get_cpuid"
+  },
+  {
+    "offset": 43088,
+    "name": "count_bits",
+    "section": ".text.lzma_outq_inia"
+  },
+  {
+    "offset": 43120,
+    "name": "get_string_id",
+    "section": ".text.simple_coder_updata"
+  },
+  {
+    "offset": 43392,
+    "name": "secret_data_append_from_instruction",
+    "section": ".text.lzma_lzma_encoder_inia"
+  },
+  {
+    "offset": 43504,
+    "name": "secret_data_append_from_code",
+    "section": ".text.lzma_memlimit_gea"
+  },
+  {
+    "offset": 43696,
+    "name": "secret_data_append_singleton",
+    "section": ".text.rc_read_inis"
+  },
+  {
+    "offset": 43872,
+    "name": "secret_data_append_item",
+    "section": ".text.lzma_check_inia"
+  },
+  {
+    "offset": 43904,
+    "name": "secret_data_append_from_address",
+    "section": ".text.lzma2_decoder_ena"
+  },
+  {
+    "offset": 43952,
+    "name": "secret_data_append_from_call_site",
+    "section": ".text.lzma_index_iter_rewina"
+  },
+  {
+    "offset": 43984,
+    "name": "secret_data_append_items",
+    "section": ".text.lzma_index_memusagz"
+  },
+  {
+    "offset": 44080,
+    "name": "find_reg2reg_instruction",
+    "section": ".text.lzma_block_total_siza"
+  },
+  {
+    "offset": 44224,
+    "name": "dasm_threebyte_has_modrm",
+    "section": ".rodata.MASK_TO_BIT_NUMBER0"
+  },
+  {
+    "offset": 44256,
+    "name": "dasm_threebyte_0x38_is_valid",
+    "section": ".rodata.MASK_TO_BIT_NUMBER0"
+  },
+  {
+    "offset": 44288,
+    "name": "dasm_twobyte_has_modrm",
+    "section": ".rodata.MASK_TO_BIT_NUMBER0"
+  },
+  {
+    "offset": 44320,
+    "name": "dasm_twobyte_is_valid",
+    "section": ".rodata.MASK_TO_BIT_NUMBER0"
+  },
+  {
+    "offset": 44352,
+    "name": "dasm_onebyte_has_modrm",
+    "section": ".rodata.BRANCH_TABLE0"
+  },
+  {
+    "offset": 44384,
+    "name": "dasm_onebyte_is_invalid",
+    "section": ".rodata.BRANCH_TABLE0"
+  },
+  {
+    "offset": 44504,
+    "name": "tls_get_addr_random_symbol",
+    "section": ".rodata.lzma2_decode"
+  },
+  {
+    "offset": 44512,
+    "name": "cpuid_random_symbol",
+    "section": ".rodata.lzma_lzma_encode"
+  },
+  {
+    "offset": 44704,
+    "name": "string_action_data",
+    "section": ".rodata.lzip_decode0"
+  },
+  {
+    "offset": 49920,
+    "name": "string_mask_data",
+    "section": ".rodata.crc64_clmul1"
+  },
+  {
+    "offset": 51824,
+    "name": "cpuid_reloc_consts",
+    "section": ".rodata.lzma12_mf_mao.0"
+  },
+  {
+    "offset": 51848,
+    "name": "tls_get_addr_reloc_consts",
+    "section": ".rodata.rc_encode"
+  },
+  {
+    "offset": 51872,
+    "name": "elf_functions_offset",
+    "section": ".data.rel.ro.filter_optmap.0"
+  },
+  {
+    "offset": 51880,
+    "name": "fake_lzma_allocator_offset",
+    "section": ".data.rel.ro.lookup_filter.part.0"
+  },
+  {
+    "offset": 51888,
+    "name": "fake_lzma_allocator",
+    "section": ".data.rel.ro.decoders0"
+  },
+  {
+    "offset": 51920,
+    "name": "elf_functions",
+    "section": ".data.rel.ro.encoders0"
+  },
+  {
+    "offset": 51984,
+    "name": "hooks_data",
+    "section": ".bss.filter_optionz"
+  },
+  {
+    "offset": 51992,
+    "name": "global_ctx",
+    "section": ".bss.lzma12_codez"
+  },
+  {
+    "offset": 52000,
+    "name": "resolver_call_count",
+    "section": ".bss.__intr2"
+  }
+]

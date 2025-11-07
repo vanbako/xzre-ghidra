@@ -2,6 +2,17 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-07
+- Captured the linker-script map into `metadata/linker_map.json` (extracted from `xzre/xzre.lds.in`) so the refresh pipeline can restore function/data names without touching the upstream tree.
+- Updated `ghidra_scripts/RenameFromLinkerMap.py` to read that JSON (while keeping the legacy `.lds` parser as a fallback) and wired `scripts/refresh_xzre_project.sh` to require the metadata file, which removes the last pipeline dependency on `xzre/` aside from the object file itself.
+- Next: remove the `xzre/` checkout once the standalone `liblzma_la-crc64-fast.o` is cached someplace safe.
+
+## 2025-11-07
+- Expanded `scripts/extract_local_variables.py` so it now walks both `xzre/xzre_code/` and the top-level `xzre/*.c` sources (with fallbacks for missing `loc.file` metadata and graceful skips for files that can’t be parsed), enabling locals coverage for every exported function that has upstream C.
+- Regenerated `metadata/xzre_locals.json` via the updated script, which boosted the catalog from 33 to 396 functions and added 105 newly recovered local variable names for import into Ghidra/xzregh.
+- Ran `./scripts/refresh_xzre_project.sh` to copy the refreshed metadata into the headless project, apply the locals, and re-export the decompiled sources plus the portable archive.
+- Next: investigate how to capture locals for the remaining helper sources (e.g., `ssh_patch.c` currently skipped because `libunwind.h` isn’t installed) so the metadata stays complete.
+
 ## 2025-11-06
 - Introduced `metadata/type_docs.json` plus support in `scripts/manage_types_metadata.py` to inject structured comments before every typedef/enum/struct when regenerating `xzregh/xzre_types.h` and `ghidra_scripts/xzre_types_import_preprocessed.h`, then annotated the xzre-specific types and enums with summaries and usage notes.
 - Added `ghidra_scripts/ApplyTypeDocs.py` and taught `scripts/refresh_xzre_project.sh` to feed the doc JSON to both the header renderer and the Ghidra headless run so the descriptions now land inside the datatype manager as well as the exported header.

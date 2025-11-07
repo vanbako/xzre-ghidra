@@ -19,6 +19,7 @@ TYPES_SOURCE="$META_DIR/xzre_types.json"
 TYPES_HELPER="$ROOT_DIR/scripts/manage_types_metadata.py"
 XZREGH_TYPES="$ROOT_DIR/xzregh/xzre_types.h"
 TYPE_DOCS_SOURCE="$META_DIR/type_docs.json"
+LINKER_MAP_JSON="$META_DIR/linker_map.json"
 
 if [[ ! -x "$GHIDRA/support/analyzeHeadless" ]]; then
   echo "error: analyzeHeadless not found under \$GHIDRA ($GHIDRA)" >&2
@@ -50,6 +51,11 @@ if [[ ! -f "$TYPES_HELPER" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$LINKER_MAP_JSON" ]]; then
+  echo "error: expected linker map metadata at $LINKER_MAP_JSON" >&2
+  exit 1
+fi
+
 TYPE_DOCS_ARGS=()
 TYPE_DOCS_POST=()
 if [[ -f "$TYPE_DOCS_SOURCE" ]]; then
@@ -76,7 +82,7 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -overwrite \
   -scriptPath "$SCRIPT_PATH" \
   -postScript ImportXzreTypes.py "$HEADER_PATH" \
-  -postScript RenameFromLinkerMap.py "$ROOT_DIR/xzre/xzre.lds.in" \
+  -postScript RenameFromLinkerMap.py "$LINKER_MAP_JSON" \
   -postScript ApplySignaturesFromHeader.py \
   -postScript InstallEnumEquates.py "$HEADER_PATH" \
   -postScript FixAllParamStorage.py \

@@ -1,20 +1,33 @@
-# Renames functions to their xzre identifiers using the linker script map.
+# Renames functions to their xzre identifiers using a linker-map metadata file.
 # Usage inside headless Ghidra:
-#   -postScript RenameFromLinkerMap.py [optional path to xzre.lds.in]
+#   -postScript RenameFromLinkerMap.py [optional path to metadata/linker_map.json]
 # @category xzre
 
+import json
 import os
 import re
 
 from ghidra.program.model.symbol import SourceType
 
-MAP_DEFAULT = os.path.join("xzre", "xzre.lds.in")
+MAP_DEFAULT = os.path.join("metadata", "linker_map.json")
 MAP_PATTERN = re.compile(
     r"""/\*\s*([0-9A-Fa-f]+)\s*\*/\s*(DEFSYM2|DEFSYM)\(([^,]+),\s*([^)]+)\)"""
 )
 
 
-def load_map(path):
+def _load_from_json(path):
+    with open(path, "r") as handle:
+        data = json.load(handle)
+    entries = []
+    for entry in data:
+        offset = int(entry["offset"])
+        name = entry["name"]
+        section = entry.get("section", "")
+        entries.append((offset, name, section))
+    return entries
+
+
+def _load_from_lds(path):
     entries = []
     current_section = None
     with open(path, "r") as handle:
@@ -40,6 +53,12 @@ def load_map(path):
                 section = current_section
             entries.append((int(offset_hex, 16), name.strip(), section))
     return entries
+
+
+def load_map(path):
+    if path.lower().endswith(".json"):
+        return _load_from_json(path)
+    return _load_from_lds(path)
 
 
 def main():
