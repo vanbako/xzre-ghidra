@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Disassembles the `__tls_get_addr` PLT trampoline, derives the real GOT entry address, and caches it in the entry context. Stage two depends on that pointer to find ld.so's ELF header and to swap the cpuid GOT slot over to its handler.
+ * AutoDoc: Disassembles liblzma's `__tls_get_addr` PLT stub, accounts for the short/long JMP encodings,
+ * and then computes the true GOT entry by applying the stub's 32-bit displacement. The resulting
+ * pointer is cached in `ctx->got_ctx.got_ptr` and later consumed when swapping the cpuid GOT slot
+ * over to the implant's resolver.
  */
 #include "xzre_types.h"
 
@@ -17,6 +20,10 @@ void * update_got_address(elf_entry_ctx_t *entry_ctx)
   ulong uVar2;
   long lVar3;
   void *pvVar4;
+  void *got_entry;
+  long reloc_offset;
+  ulong jump_flags;
+  void *plt_entry;
   
   get_tls_get_addr_random_symbol_got_offset(entry_ctx);
   pvVar1 = (void *)((long)&_Lx86_coder_destroy +

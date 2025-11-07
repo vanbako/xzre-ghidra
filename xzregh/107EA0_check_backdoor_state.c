@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Sanity-checks the payload buffer and state machine before processing more command data, resetting the state on any inconsistency. The loader calls it before and after decryptions to avoid reusing corrupted payloads.
+ * AutoDoc: Guards the payload assembly state machine. States 1–2 require a populated
+ * `sshd_payload_ctx` and a minimum payload length (>=0xae) plus a sane body_length pulled from
+ * the decrypted header; state 3 tolerates either 3 or 4; and state 0 expects the staging buffer
+ * to be empty. Any inconsistency zeros the state and sets it to 0xffffffff so the hooks know to
+ * discard buffered data.
  */
 #include "xzre_types.h"
 
@@ -17,6 +21,8 @@ BOOL check_backdoor_state(global_context_t *ctx)
   ulong uVar2;
   bool bVar3;
   bool bVar4;
+  sshd_payload_ctx_t *payload_ctx;
+  u32 payload_length;
   
   if (ctx == (global_context_t *)0x0) {
     return 0;

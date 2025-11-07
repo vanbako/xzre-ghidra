@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Orchestrates the discovery of `l_name`, `_dl_naudit`, `_dl_audit`, and `l_audit_any_plt` offsets, resolving extra libcrypto helpers along the way. `backdoor_setup` relies on the resulting hooks context to rewire ld.so's audit plumbing to its own symbind handler.
+ * AutoDoc: Drives the full ld.so preparation sequence: resolves several EC/EVP helpers, maps
+ * `_dl_audit_symbind_alt`, finds the `l_name` displacement, extracts `_dl_naudit/_dl_audit`, and
+ * finally discovers the `l_audit_any_plt` byte plus its mask. It also copies the basename of
+ * libcrypto into `hooks->ldso_ctx` so the forged link_map name matches the original string.
  */
 #include "xzre_types.h"
 
@@ -33,6 +36,9 @@ BOOL find_dl_audit_offsets
   uchar *vaddr;
   backdoor_hooks_data_t *pbVar14;
   byte bVar15;
+  backdoor_hooks_data_t *hooks_ctx;
+  _func_64 *audit_stub;
+  lzma_allocator *libcrypto_allocator;
   
   bVar15 = 0;
   BVar8 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,0);

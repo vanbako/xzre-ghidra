@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Tweaks sshd’s in-memory configuration—optionally forcing PermitRootLogin, disabling PAM, and swapping in the authpassword hook—so the implant’s monitor stubs function regardless of the original sshd settings.
+ * AutoDoc: Requires the mm_answer_authpassword hook to be resolved, then optionally forces
+ * PermitRootLogin to 'yes', disables PAM when requested, and swaps the monitor authpassword
+ * function pointer to the implant's hook. If no explicit monitor_reqtype override is provided it
+ * derives the current request ID from the original function pointer so replies continue matching
+ * sshd's state machine.
  */
 #include "xzre_types.h"
 

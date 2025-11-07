@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Executes inside the hijacked cpuid resolver, initialises shared globals and hook contexts, and loops until they're ready; once prepared it jumps into `backdoor_setup` and then restores the cpuid context. If setup fails, it still harvests cpuid data so the resolver can fall back cleanly.
+ * AutoDoc: Runs inside the hijacked cpuid resolver. It builds temporary `backdoor_shared_globals_t`,
+ * `backdoor_hooks_ctx_t`, and `backdoor_setup_params_t` objects, repeatedly calls
+ * `init_hooks_ctx()` until the shared globals are available, and then hands the bundle to
+ * `backdoor_setup`. If setup succeeds it never returns (the hooks stay installed); if setup fails
+ * it zeroes the GOT context and falls back to issuing a real CPUID so liblzma’s resolver still
+ * fulfils glibc’s contract.
  */
 #include "xzre_types.h"
 
@@ -28,6 +33,9 @@ BOOL backdoor_init_stage2
   backdoor_hooks_ctx_t *pbVar10;
   backdoor_hooks_ctx_t *extraout_RDX_00;
   backdoor_setup_params_t *pbVar11;
+  backdoor_setup_params_t setup_params;
+  backdoor_hooks_ctx_t hooks_ctx;
+  backdoor_shared_globals_t shared_globals;
   backdoor_shared_globals_t local_140;
   backdoor_hooks_ctx_t local_128;
   backdoor_setup_params_t local_a0;

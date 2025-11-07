@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Wrapper around libc's read that retries on EINTR and honours the resolver-provided imports table. All socket reads during monitor spoofing go through it so the implant never depends on glibc symbols directly.
+ * AutoDoc: Wraps libc’s read with retry logic. It refuses to run without both `read` and
+ * `__errno_location`, loops on EINTR, and aborts with -1 when the helper sees EOF before the
+ * requested byte count. Successful reads consume the entire length so callers can treat any
+ * non-zero return as "buffer filled".
  */
 #include "xzre_types.h"
 
@@ -16,6 +19,9 @@ ssize_t fd_read(int fd,void *buffer,size_t count,libc_imports_t *funcs)
   ssize_t sVar1;
   int *piVar2;
   size_t count_00;
+  size_t remaining;
+  int *errno_slot;
+  ssize_t read_chunk;
   
   if (count == 0) {
     return 0;

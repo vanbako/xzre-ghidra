@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Parses libc via its link-map entry and resolves `read` plus `__errno_location` through the fake allocator shim. These imports feed helpers like `is_range_mapped`, enabling the backdoor to probe memory safely during setup.
+ * AutoDoc: Treats `link_map *libc` as another ELF image, runs `elf_parse` to populate `elf_info_t`, and
+ * then allocates trampolines for `read` and `__errno_location` via the fake allocator shim. Only
+ * when both imports succeed does it mark `libc_imports_t` as ready, ensuring subsequent socket
+ * I/O helpers can operate without touching the real PLT.
  */
 #include "xzre_types.h"
 

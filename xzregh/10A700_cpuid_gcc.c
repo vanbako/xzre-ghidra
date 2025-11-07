@@ -4,16 +4,10 @@
 // Prototype: void __stdcall _cpuid_gcc(uint level, uint * a, uint * b, uint * c, uint * d)
 
 
-/* AutoDoc: Generated from reverse engineering.
-   
-   Summary:
-     GCC-style CPUID helper that dispatches to the appropriate intrinsic wrapper for the requested
-   leaf before returning EAX/EBX/ECX/EDX as separate pointers.
-   
-   Notes:
-     - Mirrors libgcc's cpuid shim, covering base, extended, and cache-topology leaves with
-   dedicated helpers.
-     - Falls back to the raw __builtin_cpu_supports() thunk when a leaf is not special-cased. */
+/* WARNING: Variable defined which should be unmapped: leaf_info */
+/* GCC-style CPUID shim that dispatches through the individual helper thunks for every supported
+   leaf (basic, cache, topology, extended brand strings, etc.). Whatever leaf pointer it chooses
+   has EAX/EBX/ECX/EDX copied into the provided outputs so callers don’t need inline assembly. */
 
 void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
 
@@ -22,6 +16,7 @@ void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
   uint uVar2;
   uint uVar3;
   uint uVar4;
+  uint *leaf_info;
   
   if (level == 0) {
     puVar1 = (uint *)cpuid_basic_info(0);

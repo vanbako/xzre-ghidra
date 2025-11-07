@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Initialises the backdoor_hooks_ctx structure with pointers to the implant's hook stubs and shared data slots. backdoor_init_stage2 invokes it as a readiness check and interprets the 0x65 return value as "shared globals not wired yet" so setup can retry safely.
+ * AutoDoc:         Primes the transient `backdoor_hooks_ctx_t` with pointers to the shared hooks blob, the
+ * audit shim (`backdoor_symbind64`), and the mm/EVP hook entry points. When `shared` is still NULL it
+ *         seeds the structure with the static hook addresses and returns 0x65 so the caller can retry
+ *         once the shared globals are available; otherwise it returns 0 to signal that hook setup may
+ *         proceed.
+ *     
  */
 #include "xzre_types.h"
 
@@ -14,6 +19,7 @@ int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
 
 {
   int iVar1;
+  int status;
   
   iVar1 = 5;
   if (ctx != (backdoor_hooks_ctx_t *)0x0) {

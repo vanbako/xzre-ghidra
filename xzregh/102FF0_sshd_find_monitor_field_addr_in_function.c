@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Tracks how sshd loads a monitor field and passes it to mm_request_send, returning the field's address when the pattern matches. The implant leverages this to recover the monitor receive/transmit descriptors it later hijacks for its covert channel.
+ * AutoDoc: Sweeps a candidate sshd routine for MOV/LEA instructions that load a BSS slot into a
+ * register, confirms that the pointer flows unmodified into a nearby call to `mm_request_send`,
+ * and returns the underlying data-section address. The helper lets
+ * `sshd_find_monitor_struct` recover individual monitor fields (send/recv fds, sshbuf pointers,
+ * etc.) even when the surrounding function is stripped.
  */
 #include "xzre_types.h"
 
@@ -26,9 +30,13 @@ BOOL sshd_find_monitor_field_addr_in_function
   u8 *code_start_00;
   u8 **ppuVar9;
   u8 *code_end_00;
+  dasm_ctx_t insn_ctx;
+  u8 *monitor_field_addr;
+  u8 *mov_search_cursor;
+  u8 *call_window_end;
   u8 *local_80;
   u64 local_78;
-  _union_76 local_70;
+  _union_77 local_70;
   byte local_60;
   int local_58;
   u8 *local_50;

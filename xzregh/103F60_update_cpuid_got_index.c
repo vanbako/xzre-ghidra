@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Copies the cpuid relocation index from the constant table into `ctx->got_ctx.cpuid_fn`. Backdoor init uses it right before rewriting the GOT so it knows exactly which slot corresponds to the original cpuid resolver.
+ * AutoDoc: Copies the relocation constants baked into `tls_get_addr_reloc_consts` into
+ * `ctx->got_ctx.cpuid_fn`. That value is the GOT index of the cpuid resolver inside liblzma, so
+ * later code can patch the correct slot without rescanning the PLT stub.
  */
 #include "xzre_types.h"
 

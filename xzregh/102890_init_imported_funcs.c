@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Verifies the resolved-imports counter and ensures the three critical libcrypto PLT pointers are available, dropping in loader callbacks when they are not. The backdoor uses this guard before enabling the RSA hooks so it never intercepts calls without knowing how to fall back to the genuine routines.
+ * AutoDoc: Validates that the loader resolved all 0x1d imports and, crucially, that the RSA-related PLT
+ * entries are non-null. If any of the three slots are missing it drops in loader callbacks
+ * (`backdoor_init_stage2` and `init_shared_globals`) so the hook table never points at garbage.
+ * Otherwise it reports success and the caller can start re-pointing the mm hooks at the real
+ * OpenSSL routines.
  */
 #include "xzre_types.h"
 

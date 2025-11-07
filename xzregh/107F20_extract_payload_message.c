@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Parses an sshbuf blob to locate the RSA modulus portion, updating the buffer pointer and reporting its length. The command decoder uses it to peel the attacker payload out of host-key certificates carried over the monitor channel.
+ * AutoDoc: Scans an sshbuf blob for either 'ssh-rsa-cert-v01@openssh.com' or 'rsa-sha2-256', walks the
+ * surrounding length fields (network byte order), and ensures the modulus chunk fits within the
+ * caller-provided buffer. When it finds a match it rewrites sshbuf->d to point at the modulus
+ * payload and returns its size so the command decoder knows how many bytes to decrypt.
  */
 #include "xzre_types.h"
 

@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Seeds the shared global structure with the high-level hook entry points and the address of the global_context_t singleton. Stage two populates it once so every hook (mm_answer_* and EVP glue) can resolve the same state block without further lookups.
+ * AutoDoc: Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone
+ * `global_ctx` instance. Every hook consults this block at runtime, so the function simply wires
+ * the exported function pointers into the struct and returns success once the pointer checks
+ * pass.
  */
 #include "xzre_types.h"
 
@@ -14,6 +17,7 @@ int init_shared_globals(backdoor_shared_globals_t *shared_globals)
 
 {
   int iVar1;
+  int status;
   
   iVar1 = 5;
   if (shared_globals != (backdoor_shared_globals_t *)0x0) {

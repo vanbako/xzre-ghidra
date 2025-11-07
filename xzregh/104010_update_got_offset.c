@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Stores the cpuid random-symbol GOT offset constant in the entry context so absolute addresses can be reconstructed without relocations. It pairs with `update_got_address` when the loader patches the resolver slot.
+ * AutoDoc: Copies `_Llzma_block_buffer_decode_0` into `ctx->got_ctx.got_offset`, giving the loader a
+ * reproducible base when translating between the baked relocation constants and runtime
+ * addresses. It pairs with `update_got_address` during the cpuid GOT patch.
  */
 #include "xzre_types.h"
 

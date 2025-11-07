@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Checks sshd's main routine for loads and stores against the candidate sensitive-data slots and weights them into a score. The loader folds this signal into the overall confidence metric before exposing the pointer to other hooks.
+ * AutoDoc: Checks sshd's main() for memory operands that touch the candidate pointer at offsets 0, +8,
+ * and +0x10. The heuristic rewards routines that touch the base and +0x10 entries while
+ * penalising ones that never reference +8, generating a small signed score that later gets
+ * doubled in the aggregate calculation.
  */
 #include "xzre_types.h"
 
@@ -20,6 +23,8 @@ int sshd_get_sensitive_data_score_in_main
   BOOL BVar2;
   BOOL BVar3;
   int iVar4;
+  u8 *main_end;
+  u8 *main_start;
   
   iVar4 = 0;
   code_start = (u8 *)refs->entries[2].func_start;

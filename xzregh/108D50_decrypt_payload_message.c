@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Decrypts an incoming key_payload_t chunk with the recovered ChaCha key, appends it to the staged buffer, and advances the payload state machine. This is how multi-part attacker commands are reassembled before verification.
+ * AutoDoc: Decrypts a ChaCha-wrapped `key_payload_t` chunk, copies the plaintext body into the global
+ * staging buffer when the advertised length fits, and bumps `ctx->current_data_size`. The body
+ * is decrypted twice—the second pass keeps the keystream in sync with sshd's original consumer—
+ * so later packets can continue appending without tearing, and any failure forces the payload
+ * state back to 0xffffffff.
  */
 #include "xzre_types.h"
 

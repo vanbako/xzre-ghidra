@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Calls sshd's sshlogv via the resolved function pointer, mirroring OpenSSH's logging API. The hooks use it when they need to surface controlled diagnostics without relying on libc’s syslog wrappers.
+ * AutoDoc: Wraps sshd's sshlogv() implementation by rebuilding a va_list on the stack, saving/restoring
+ * XMM registers when necessary, and then tail-calling the resolved function pointer in the log
+ * context. Every monitor hook routes formatted log lines through here so it matches OpenSSH's
+ * logging ABI without needing libc wrappers.
  */
 #include "xzre_types.h"
 
@@ -25,7 +28,8 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   undefined8 in_XMM5_Qa;
   undefined8 in_XMM6_Qa;
   undefined8 in_XMM7_Qa;
-  undefined1 local_d1;
+  u64 saved_xmm [16];
+  undefined1 va_list_state;
   undefined4 local_d0;
   undefined4 local_cc;
   undefined1 *local_c8;
@@ -53,7 +57,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
     local_28 = in_XMM6_Qa;
     local_18 = in_XMM7_Qa;
   }
-  local_d1 = 0;
+  va_list_state = 0;
   local_c8 = &stack0x00000008;
   local_d0 = 0x18;
   local_c0 = local_b8;
@@ -61,7 +65,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   local_a0 = in_RCX;
   local_98 = in_R8;
   local_90 = in_R9;
-  (*(code *)log_ctx->sshlogv)(&local_d1,&local_d1,0,0,level,0,fmt,&local_d0);
+  (*(code *)log_ctx->sshlogv)(&va_list_state,&va_list_state,0,0,level,0,fmt,&local_d0);
   return;
 }
 

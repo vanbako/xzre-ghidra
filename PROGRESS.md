@@ -3,6 +3,18 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-07
+- Completed the `loader_rt` sweep: reread every loader/GOT/audit helper plus the cpuid bootstrap path, rewrote their AutoDoc entries with the new findings (GOT math, ld.so walk, hook orchestration, syscall wrappers, cpuid glue, etc.), and added a first-class description for the exported `xzre_globals` blob so downstream tools know what lives inside the liblzma data segment.
+- Added locals coverage for the same set—naming the key link_map pointers, audit helpers, shared context blocks, and libc import stubs—so the refresh now emits meaningful symbols instead of `puVar*` placeholders throughout `xzregh/10277*–10A80*`.
+- Ran `./scripts/refresh_xzre_project.sh` to push the documentation/locals into the headless project, regenerate the exported decompilations, and update `ghidra_projects/xzre_ghidra_portable.zip`.
+- Next: decide whether to resurrect the `xzre_globals.c` export (the cleaner wipes it each run) or keep documenting the data layout purely via `xzre_types.h` + metadata.
+
+## 2025-11-07
+- Finished a full RE pass over the `sshd_recon` batch: re-read every exported function under `xzregh/10255*–10A3A0` to document the monitor-struct locators, sensitive-data scorers, payload hooks, and log/command shims, then rewrote the matching entries in `metadata/functions_autodoc.json` so each one now spells out the heuristics, state transitions, and libcrypto/libc dependencies they rely on.
+- Added locals coverage for the same set inside `metadata/xzre_locals.json` (allocator state, monitor pointers, socket probes, payload buffers, etc.) so future refreshes stop emitting the generic `local_*` symbols in those recon routines.
+- Ran `./scripts/refresh_xzre_project.sh` to push the refreshed metadata through Ghidra, regenerate `xzregh/*.c`, and rebuild the portable project/archive with the richer docs and named locals.
+- Next: extend the same treatment to the remaining hook batches (`loader_rt` / `crypto_cmd`) once we need deeper coverage on those stages.
+
+## 2025-11-07
 - Pruned the stale metadata aliases in `metadata/functions_autodoc.json` (e.g., `call_instruction`, `data_append_*`, `payload_message`, `libc_imports`, etc.) and renamed the remaining stragglers (`cpuid_gcc`→`_cpuid_gcc`, `get_cpuid_modified`→`_get_cpuid_modified`, `tls_get_addr`→`__tls_get_addr`) so every AutoDoc key now maps to an actual symbol in `liblzma_la-crc64-fast.o`.
 - Ran `./scripts/refresh_xzre_project.sh` plus a `--check-only` pass to verify `ApplyAutoDocComments.py` reports zero “missing functions”; the headless export now attributes 125 comments with no warnings.
 - Next: if we re-import other binaries later, revisit the metadata to add entries for any newly discovered symbols rather than resurrecting the legacy alias scheme.

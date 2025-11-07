@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Locates the offset of `l_audit_any_plt` inside `struct link_map` and then invokes the bitmask helper to learn how to toggle it. Together they arm the backdoor with everything needed to mark target modules as audited.
+ * AutoDoc: Starting from the `_dl_audit_symbind_alt` body, it looks for the LEA that materialises
+ * `link_map::l_name`, confirms the register usage matches the displacement into the link_map, and
+ * then seeds an `instruction_search_ctx_t` that calls
+ * `find_link_map_l_audit_any_plt_bitmask`. Success means both the offset of the byte and the mask
+ * needed to set/clear it are recorded in `hooks->ldso_ctx`.
  */
 #include "xzre_types.h"
 
@@ -32,12 +36,16 @@ BOOL find_link_map_l_audit_any_plt
   undefined1 uVar13;
   _func_64 *code_end;
   byte bVar14;
+  instruction_search_ctx_t search_state;
+  _func_64 *audit_stub;
+  _func_23 *write_stub;
+  _func_24 *pselect_stub;
   undefined4 local_c8;
   undefined4 local_c4;
   instruction_search_ctx_t local_c0;
   u8 *local_80;
   u64 local_78;
-  _union_76 local_70;
+  _union_77 local_70;
   byte local_60;
   int local_58;
   u8 *local_50;

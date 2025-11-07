@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Bounded strlen helper used to cap string walks inside untrusted buffers. The backdoor leans on it while parsing ssh login structures so a malformed packet cannot drive the length probes out of bounds.
+ * AutoDoc: Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it
+ * sees a NUL or reaches `max_len`, returning the limit unchanged if the string is unterminated so
+ * callers can treat that as an error.
  */
 #include "xzre_types.h"
 

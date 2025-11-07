@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Seeds the entry context's GOT base and offset with the relocation constants tied to the canned `__tls_get_addr` symbol. Later code uses those values as the starting point when walking the PLT stub to discover the true GOT entry.
+ * AutoDoc: Seeds `ctx->got_ctx.got_ptr` and `ctx->got_ctx.got_offset` with the canned values associated
+ * with the fake `__tls_get_addr` symbol. The loader uses those numbers as the starting point for
+ * `update_got_address`, which refines them into the concrete GOT entry address.
  */
 #include "xzre_types.h"
 
@@ -14,6 +16,7 @@ ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx)
 
 {
   ptrdiff_t pVar1;
+  ptrdiff_t got_offset;
   
   (ctx->got_ctx).got_ptr = (void *)0x2600;
   pVar1 = elf_functions_offset;

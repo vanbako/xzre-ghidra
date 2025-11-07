@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Scans a dash-prefixed argv string for forbidden switches like '-d'/'-D' or unusual characters and returns a pointer only when a disallowed flag is present. `process_is_sshd` relies on it to detect debug or non-daemon modes so the implant can stand down in those cases.
+ * AutoDoc: Walks a dash-prefixed argv entry two bytes at a time, mirroring each character so it can flag
+ * both upper- and lower-case variants of '-d', '-D', '-E', '-Q', or any option that includes '='
+ * or '/'. It returns the offending pointer so `process_is_sshd` can treat those switches as a
+ * hard stop and avoid touching sshd instances launched in debug or non-daemon modes.
  */
 #include "xzre_types.h"
 
@@ -16,6 +19,8 @@ char * check_argument(char arg_first_char,char *arg_name)
   ushort uVar1;
   ushort uVar2;
   ushort uVar3;
+  u16 mirrored_word;
+  u16 flag_word;
   
   if (arg_first_char == '-') {
     while( true ) {

@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Uses malloc_usable_size to count populated pointer slots in a heap block without knowing the allocation size. Secret-data heuristics use it when walking monitor tables extracted from sshd memory.
+ * AutoDoc: Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries
+ * until it hits either a NULL or the allocation boundary. Sensitive-data heuristics call it when
+ * walking sshd tables whose length isn’t stored explicitly.
  */
 #include "xzre_types.h"
 

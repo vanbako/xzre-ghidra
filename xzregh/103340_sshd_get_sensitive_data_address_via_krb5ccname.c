@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Follows the code path that calls getenv("KRB5CCNAME") and watches how the result flows into sshd's globals, returning the address when it matches the `sensitive_data.host_keys` pattern. The backdoor falls back to this heuristic when the xcalloc pattern fails so it can still recover the host-key structure before arming its hooks.
+ * AutoDoc: Starts at the string reference to 'KRB5CCNAME', disassembles forward until it sees the
+ * getenv result copied into memory, and only accepts stores that land inside sshd's .data/.bss
+ * window with the expected -0x18 displacement pattern. That combination reliably identifies the
+ * sensitive_data struct that holds host key material after sshd propagates the Kerberos cache
+ * path.
  */
 #include "xzre_types.h"
 
@@ -28,10 +32,14 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   u8 **ppuVar10;
   undefined1 uVar11;
   byte bVar12;
+  dasm_ctx_t insn_ctx;
+  u8 *krb5_string_ref;
+  u8 *candidate_store;
+  u8 *data_cursor;
   undefined1 local_d8 [88];
   u8 *local_80;
   u64 local_78;
-  _union_76 local_70;
+  _union_77 local_70;
   byte local_60;
   int local_58;
   long local_50;

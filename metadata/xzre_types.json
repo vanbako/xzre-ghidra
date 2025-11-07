@@ -147,6 +147,62 @@
     {
       "kind": "typedef",
       "names": [
+        "sbyte"
+      ],
+      "code": "typedef signed char sbyte;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined"
+      ],
+      "code": "typedef unsigned char undefined;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined1"
+      ],
+      "code": "typedef unsigned char undefined1;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined2"
+      ],
+      "code": "typedef unsigned short undefined2;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined3"
+      ],
+      "code": "typedef uint32_t undefined3;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined4"
+      ],
+      "code": "typedef uint32_t undefined4;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined7"
+      ],
+      "code": "typedef uint64_t undefined7;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "undefined8"
+      ],
+      "code": "typedef uint64_t undefined8;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
         "u16"
       ],
       "code": "typedef uint16_t u16;"
@@ -458,6 +514,13 @@
       "code": "typedef struct link_map *lookup_t;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "link_map"
+      ],
+      "code": "typedef struct link_map {\n unsigned char _opaque;\n} link_map;"
+    },
+    {
       "kind": "struct",
       "names": [
         "gnu_hash_table_t"
@@ -554,6 +617,13 @@
         "BOOL"
       ],
       "code": "typedef int BOOL;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "bool"
+      ],
+      "code": "typedef BOOL bool;"
     },
     {
       "kind": "enum",

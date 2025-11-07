@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Companion wrapper for write with EINTR handling. It powers every forged monitor message the backdoor emits while replaying commands or proxying authentication traffic.
+ * AutoDoc: Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short
+ * writes as fatal so callers either send the entire buffer or receive -1. It is the plumbing used
+ * whenever the implant forges monitor messages.
  */
 #include "xzre_types.h"
 
@@ -16,6 +18,9 @@ ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)
   ssize_t sVar1;
   int *piVar2;
   size_t count_00;
+  size_t remaining;
+  int *errno_slot;
+  ssize_t write_chunk;
   
   if (count == 0) {
     return 0;

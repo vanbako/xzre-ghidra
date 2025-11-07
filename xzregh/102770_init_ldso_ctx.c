@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Restores saved ld.so bookkeeping values (audit flags, _dl_audit pointers, naudit count) back to their pre-hook state. The loader calls it whenever hook setup fails so the dynamic linker is left consistent before sshd resumes execution.
+ * AutoDoc: Restores every ld.so flag the implant may have touched: it writes the saved auditstate
+ * bindflags back to libcrypto/sshd, unsets the copied `l_name` byte, clears the
+ * `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit` so
+ * the dynamic linker no longer believes an audit module is registered. Stage two calls it on
+ * failure paths so sshd resumes with the original ld.so state.
  */
 #include "xzre_types.h"
 
@@ -15,6 +19,8 @@ void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
 {
   u32 *puVar1;
   byte *pbVar2;
+  byte *audit_flag_byte;
+  u32 *libcrypto_bindflags_ptr;
   
   if (ldso_ctx != (ldso_ctx_t *)0x0) {
     puVar1 = ldso_ctx->libcrypto_auditstate_bindflags_ptr;

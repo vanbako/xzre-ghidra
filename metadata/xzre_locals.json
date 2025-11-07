@@ -2386,5 +2386,804 @@
         "type": "int"
       }
     ]
+  },
+  "sshd_find_main": {
+    "source": "xzre/xzre_code/sshd_find_main.c",
+    "locals": [
+      {
+        "name": "allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "name": "code_segment_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "code_segment_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "libc_start_main_got",
+        "type": "u8 *"
+      },
+      {
+        "name": "sshd_main_candidate",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "sshd_find_monitor_field_addr_in_function": {
+    "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c",
+    "locals": [
+      {
+        "name": "monitor_field_addr",
+        "type": "u8 *"
+      },
+      {
+        "name": "mov_search_cursor",
+        "type": "u8 *"
+      },
+      {
+        "name": "call_window_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_address_via_krb5ccname": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c",
+    "locals": [
+      {
+        "name": "krb5_string_ref",
+        "type": "u8 *"
+      },
+      {
+        "name": "candidate_store",
+        "type": "u8 *"
+      },
+      {
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "data_cursor",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_address_via_xcalloc": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c",
+    "locals": [
+      {
+        "name": "xcalloc_call_target",
+        "type": "u8 *"
+      },
+      {
+        "name": "store_hits",
+        "type": "long[16]"
+      },
+      {
+        "name": "hit_count",
+        "type": "u8"
+      },
+      {
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_score_in_do_child": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_do_child.c",
+    "locals": [
+      {
+        "name": "do_child_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "do_child_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_score_in_main": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_main.c",
+    "locals": [
+      {
+        "name": "main_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "main_end",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_score_in_demote_sensitive_data": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_demote_sensitive_data.c",
+    "locals": [
+      {
+        "name": "demote_start",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_score": {
+    "source": "xzre/xzre_code/sshd_get_sensitive_data_score.c",
+    "locals": [
+      {
+        "name": "score_demote",
+        "type": "int"
+      },
+      {
+        "name": "score_main",
+        "type": "int"
+      },
+      {
+        "name": "score_do_child",
+        "type": "int"
+      }
+    ]
+  },
+  "sshd_find_monitor_struct": {
+    "source": "xzre/xzre_code/sshd_find_monitor_struct.c",
+    "locals": [
+      {
+        "name": "data_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "data_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "monitor_field_hits",
+        "type": "uint[10]"
+      },
+      {
+        "name": "monitor_candidates",
+        "type": "void *[10]"
+      }
+    ]
+  },
+  "sshd_find_sensitive_data": {
+    "source": "xzre/xzre_code/sshd_find_sensitive_data.c",
+    "locals": [
+      {
+        "name": "allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "name": "code_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "code_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "data_start",
+        "type": "u8 *"
+      },
+      {
+        "name": "xzcalloc_candidate",
+        "type": "sensitive_data *"
+      },
+      {
+        "name": "krb_candidate",
+        "type": "sensitive_data *"
+      },
+      {
+        "name": "winning_candidate",
+        "type": "sensitive_data *"
+      }
+    ]
+  },
+  "check_argument": {
+    "source": "xzre/xzre_code/check_argument.c",
+    "locals": [
+      {
+        "name": "flag_word",
+        "type": "u16"
+      },
+      {
+        "name": "mirrored_word",
+        "type": "u16"
+      }
+    ]
+  },
+  "process_is_sshd": {
+    "source": "xzre/xzre_code/process_is_sshd.c",
+    "locals": [
+      {
+        "name": "argc",
+        "type": "long"
+      },
+      {
+        "name": "argv0",
+        "type": "u8 *"
+      },
+      {
+        "name": "envp",
+        "type": "ulong *"
+      },
+      {
+        "name": "data_segment",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "sshd_log": {
+    "source": "xzre/xzre_code/sshd_log.c",
+    "locals": [
+      {
+        "name": "va_list_state",
+        "type": "va_list"
+      },
+      {
+        "name": "saved_xmm",
+        "type": "u64[16]"
+      }
+    ]
+  },
+  "sshd_get_usable_socket": {
+    "source": "xzre/xzre_code/sshd_get_usable_socket.c",
+    "locals": [
+      {
+        "name": "sockfd",
+        "type": "int"
+      },
+      {
+        "name": "errno_ptr",
+        "type": "int *"
+      },
+      {
+        "name": "shutdown_result",
+        "type": "int"
+      }
+    ]
+  },
+  "sshd_get_client_socket": {
+    "source": "xzre/xzre_code/sshd_get_client_socket.c",
+    "locals": [
+      {
+        "name": "monitor_ptr",
+        "type": "monitor *"
+      },
+      {
+        "name": "client_fd",
+        "type": "int"
+      },
+      {
+        "name": "errno_ptr",
+        "type": "int *"
+      }
+    ]
+  },
+  "sshd_configure_log_hook": {
+    "source": "xzre/xzre_code/sshd_configure_log_hook.c",
+    "locals": [
+      {
+        "name": "log_ctx",
+        "type": "sshd_log_ctx_t *"
+      },
+      {
+        "name": "handler_slot",
+        "type": "ulong *"
+      },
+      {
+        "name": "ctx_slot",
+        "type": "ulong *"
+      }
+    ]
+  },
+  "check_backdoor_state": {
+    "source": "xzre/xzre_code/check_backdoor_state.c",
+    "locals": [
+      {
+        "name": "payload_length",
+        "type": "u32"
+      },
+      {
+        "name": "payload_ctx",
+        "type": "sshd_payload_ctx_t *"
+      }
+    ]
+  },
+  "sshd_proxy_elevate": {
+    "source": "xzre/xzre_code/sshd_proxy_elevate.c",
+    "locals": [
+      {
+        "name": "cmd_flags",
+        "type": "cmd_arguments_t *"
+      },
+      {
+        "name": "monitor_fd",
+        "type": "int"
+      },
+      {
+        "name": "rsa_tmp",
+        "type": "RSA *"
+      },
+      {
+        "name": "payload_hash",
+        "type": "uchar[32]"
+      },
+      {
+        "name": "monitor_request",
+        "type": "u8[1800]"
+      }
+    ]
+  },
+  "mm_answer_keyverify_hook": {
+    "source": "xzre/xzre_code/mm_answer_keyverify_hook.c",
+    "locals": [
+      {
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "payload_ctx",
+        "type": "sshd_payload_ctx_t *"
+      }
+    ]
+  },
+  "mm_answer_authpassword_hook": {
+    "source": "xzre/xzre_code/mm_answer_authpassword_hook.c",
+    "locals": [
+      {
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "payload_ctx",
+        "type": "sshd_payload_ctx_t *"
+      },
+      {
+        "name": "auth_reply",
+        "type": "uint *"
+      }
+    ]
+  },
+  "mm_answer_keyallowed_hook": {
+    "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c",
+    "locals": [
+      {
+        "name": "global_ctx",
+        "type": "global_context_t *"
+      },
+      {
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "payload_ctx",
+        "type": "sshd_payload_ctx_t *"
+      },
+      {
+        "name": "orig_handler",
+        "type": "sshd_monitor_func_t"
+      },
+      {
+        "name": "payload_buf",
+        "type": "sshbuf"
+      }
+    ]
+  },
+  "mm_log_handler_hook": {
+    "source": "xzre/xzre_code/mm_log_handler_hook.c",
+    "locals": [
+      {
+        "name": "log_ctx",
+        "type": "sshd_log_ctx_t *"
+      },
+      {
+        "name": "sshlog_impl",
+        "type": "log_handler_fn"
+      },
+      {
+        "name": "rewritten_msg",
+        "type": "char[320]"
+      }
+    ]
+  },
+  "init_ldso_ctx": {
+    "source": "xzre/xzre_code/init_ldso_ctx.c",
+    "locals": [
+      {
+        "name": "libcrypto_bindflags_ptr",
+        "type": "u32 *"
+      },
+      {
+        "name": "audit_flag_byte",
+        "type": "byte *"
+      }
+    ]
+  },
+  "init_hooks_ctx": {
+    "source": "xzre/xzre_code/init_hooks_ctx.c",
+    "locals": [
+      {
+        "name": "status",
+        "type": "int"
+      }
+    ]
+  },
+  "init_shared_globals": {
+    "source": "xzre/xzre_code/init_shared_globals.c",
+    "locals": [
+      {
+        "name": "status",
+        "type": "int"
+      }
+    ]
+  },
+  "init_imported_funcs": {
+    "source": "xzre/xzre_code/init_imported_funcs.c",
+    "locals": []
+  },
+  "validate_log_handler_pointers": {
+    "source": "xzre/xzre_code/validate_log_handler_pointers.c",
+    "locals": [
+      {
+        "name": "log_handler_slot",
+        "type": "void *"
+      },
+      {
+        "name": "scan_success",
+        "type": "BOOL"
+      },
+      {
+        "name": "gap",
+        "type": "long"
+      },
+      {
+        "name": "insn_ptr",
+        "type": "u8 *"
+      },
+      {
+        "name": "scan_ctx",
+        "type": "u8 **"
+      },
+      {
+        "name": "block_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "function_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "dasm_ip",
+        "type": "u8 *"
+      },
+      {
+        "name": "insn_size",
+        "type": "u64"
+      },
+      {
+        "name": "opcode",
+        "type": "int"
+      },
+      {
+        "name": "branch_disp",
+        "type": "u64"
+      }
+    ]
+  },
+  "get_tls_get_addr_random_symbol_got_offset": {
+    "source": "xzre/xzre_code/get_tls_get_addr_random_symbol_got_offset.c",
+    "locals": [
+      {
+        "name": "got_offset",
+        "type": "ptrdiff_t"
+      }
+    ]
+  },
+  "update_got_address": {
+    "source": "xzre/xzre_code/update_got_address.c",
+    "locals": [
+      {
+        "name": "plt_entry",
+        "type": "void *"
+      },
+      {
+        "name": "jump_flags",
+        "type": "ulong"
+      },
+      {
+        "name": "reloc_offset",
+        "type": "long"
+      },
+      {
+        "name": "got_entry",
+        "type": "void *"
+      }
+    ]
+  },
+  "find_link_map_l_name": {
+    "source": "xzre/xzre_code/find_link_map_l_name.c",
+    "locals": [
+      {
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "ldso_elf",
+        "type": "elf_info_t *"
+      },
+      {
+        "name": "link_map_cursor",
+        "type": "link_map *"
+      },
+      {
+        "name": "audit_stub",
+        "type": "_func_64 *"
+      },
+      {
+        "name": "import_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "name": "libname_offset",
+        "type": "u64"
+      }
+    ]
+  },
+  "find_dl_naudit": {
+    "source": "xzre/xzre_code/find_dl_naudit.c",
+    "locals": [
+      {
+        "name": "rtld_global_ro",
+        "type": "uchar *"
+      },
+      {
+        "name": "naudit_string",
+        "type": "char *"
+      },
+      {
+        "name": "libcrypto_symbol",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "audit_stub",
+        "type": "_func_64 *"
+      },
+      {
+        "name": "naudit_slot",
+        "type": "uint *"
+      }
+    ]
+  },
+  "process_shared_libraries_map": {
+    "source": "xzre/xzre_code/process_shared_libraries_map.c",
+    "locals": [
+      {
+        "name": "link_map_cursor",
+        "type": "link_map *"
+      },
+      {
+        "name": "basename",
+        "type": "char *"
+      },
+      {
+        "name": "shared_data",
+        "type": "backdoor_data_t *"
+      },
+      {
+        "name": "string_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "name": "rtld_global_sym",
+        "type": "Elf64_Sym *"
+      }
+    ]
+  },
+  "process_shared_libraries": {
+    "source": "xzre/xzre_code/process_shared_libraries.c",
+    "locals": [
+      {
+        "name": "r_debug_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "debug_block",
+        "type": "uchar *"
+      },
+      {
+        "name": "tmp_state",
+        "type": "backdoor_shared_libraries_data_t"
+      }
+    ]
+  },
+  "find_link_map_l_audit_any_plt_bitmask": {
+    "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c",
+    "locals": [
+      {
+        "name": "code_ptr",
+        "type": "u8 *"
+      },
+      {
+        "name": "decrypt_stub",
+        "type": "_func_47 *"
+      },
+      {
+        "name": "libc_getuid_stub",
+        "type": "_func_18 *"
+      },
+      {
+        "name": "matched_field",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "find_link_map_l_audit_any_plt": {
+    "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c",
+    "locals": [
+      {
+        "name": "audit_stub",
+        "type": "_func_64 *"
+      },
+      {
+        "name": "search_state",
+        "type": "instruction_search_ctx_t"
+      },
+      {
+        "name": "write_stub",
+        "type": "_func_23 *"
+      },
+      {
+        "name": "pselect_stub",
+        "type": "_func_24 *"
+      }
+    ]
+  },
+  "find_dl_audit_offsets": {
+    "source": "xzre/xzre_code/find_dl_audit_offsets.c",
+    "locals": [
+      {
+        "name": "libcrypto_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "name": "audit_stub",
+        "type": "_func_64 *"
+      },
+      {
+        "name": "hooks_ctx",
+        "type": "backdoor_hooks_data_t *"
+      }
+    ]
+  },
+  "backdoor_setup": {
+    "source": "xzre/xzre_code/backdoor_setup.c",
+    "locals": [
+      {
+        "name": "backdoor_data",
+        "type": "backdoor_data_t"
+      },
+      {
+        "name": "shared_maps",
+        "type": "backdoor_shared_libraries_data_t"
+      },
+      {
+        "name": "hooks",
+        "type": "backdoor_hooks_data_t *"
+      },
+      {
+        "name": "global_ctx",
+        "type": "global_context_t *"
+      },
+      {
+        "name": "string_refs",
+        "type": "string_references_t"
+      }
+    ]
+  },
+  "backdoor_init_stage2": {
+    "source": "xzre/xzre_code/backdoor_init_stage2.c",
+    "locals": [
+      {
+        "name": "shared_globals",
+        "type": "backdoor_shared_globals_t"
+      },
+      {
+        "name": "hooks_ctx",
+        "type": "backdoor_hooks_ctx_t"
+      },
+      {
+        "name": "setup_params",
+        "type": "backdoor_setup_params_t"
+      }
+    ]
+  },
+  "fd_read": {
+    "source": "xzre/xzre_code/fd_read.c",
+    "locals": [
+      {
+        "name": "read_chunk",
+        "type": "ssize_t"
+      },
+      {
+        "name": "errno_slot",
+        "type": "int *"
+      },
+      {
+        "name": "remaining",
+        "type": "size_t"
+      }
+    ]
+  },
+  "fd_write": {
+    "source": "xzre/xzre_code/fd_write.c",
+    "locals": [
+      {
+        "name": "write_chunk",
+        "type": "ssize_t"
+      },
+      {
+        "name": "errno_slot",
+        "type": "int *"
+      },
+      {
+        "name": "remaining",
+        "type": "size_t"
+      }
+    ]
+  },
+  "contains_null_pointers": {
+    "source": "xzre/xzre_code/contains_null_pointers.c",
+    "locals": [
+      {
+        "name": "slot",
+        "type": "void **"
+      }
+    ]
+  },
+  "_cpuid_gcc": {
+    "source": "xzre/xzre_code/cpuid_gcc.c",
+    "locals": [
+      {
+        "name": "leaf_info",
+        "type": "uint *"
+      }
+    ]
+  },
+  "backdoor_init": {
+    "source": "xzre/xzre_code/backdoor_init.c",
+    "locals": [
+      {
+        "name": "plt_entry",
+        "type": "void *"
+      },
+      {
+        "name": "jump_flags",
+        "type": "long"
+      },
+      {
+        "name": "got_slot",
+        "type": "long *"
+      }
+    ]
+  },
+  "_get_cpuid_modified": {
+    "source": "xzre/xzre_code/get_cpuid_modified.c",
+    "locals": [
+      {
+        "name": "max_leaf",
+        "type": "uint"
+      }
+    ]
+  },
+  "xzre_globals": {
+    "source": "xzre/xzre_code/xzre_globals.c",
+    "locals": []
   }
 }
