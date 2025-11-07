@@ -1,25 +1,76 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/refresh_xzre_project.sh [--check-only]
+
+Refreshes the headless Ghidra project, reapplies metadata, exports the portable
+archive, and mirrors comments into xzregh/*.c. With --check-only, all work is
+performed inside a temporary project so the repository remains untouched.
+EOF
+}
+
+CHECK_ONLY=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check-only)
+      CHECK_ONLY=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "error: unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GHIDRA="${GHIDRA_HOME:-$HOME/tools/ghidra_11.4.2_PUBLIC}"
-PROJECT_DIR="$ROOT_DIR/ghidra_projects"
+PROJECT_PARENT="$ROOT_DIR/ghidra_projects"
+PROJECT_DIR="$PROJECT_PARENT"
 PROJECT_NAME="xzre_ghidra"
 OBJECT_PATH="$ROOT_DIR/xzre/liblzma_la-crc64-fast.o"
-HEADER_PATH="$ROOT_DIR/ghidra_scripts/xzre_types_import_preprocessed.h"
 SCRIPT_PATH="$ROOT_DIR/ghidra_scripts"
+HEADER_PATH="$SCRIPT_PATH/xzre_types_import_preprocessed.h"
+XZREGH_TYPES="$ROOT_DIR/xzregh/xzre_types.h"
+GENERATED_DIR="$SCRIPT_PATH/generated"
 ARCHIVE_PATH="$PROJECT_DIR/${PROJECT_NAME}_portable.zip"
+
+if [[ "$CHECK_ONLY" -eq 1 ]]; then
+  CHECK_TMP="$(mktemp -d "${TMPDIR:-/tmp}/xzre-ghidra-check.XXXXXX")"
+  trap 'rm -rf "$CHECK_TMP"' EXIT
+  PROJECT_DIR="$CHECK_TMP/ghidra_projects"
+  mkdir -p "$PROJECT_DIR"
+  PROJECT_NAME="xzre_ghidra_check"
+  HEADER_PATH="$CHECK_TMP/xzre_types_import_preprocessed.h"
+  XZREGH_TYPES="$CHECK_TMP/xzre_types.h"
+  GENERATED_DIR="$CHECK_TMP/generated"
+  ARCHIVE_PATH="$CHECK_TMP/${PROJECT_NAME}_portable.zip"
+  echo "[check-only] running refresh in sandbox: $CHECK_TMP"
+fi
+
 META_DIR="$ROOT_DIR/metadata"
 AUTODOC_SOURCE="$META_DIR/functions_autodoc.json"
-AUTODOC_GENERATED="$SCRIPT_PATH/generated/xzre_autodoc_generated.json"
-AUTODOC_EXPORT="$SCRIPT_PATH/generated/xzre_autodoc.json"
+AUTODOC_GENERATED="$GENERATED_DIR/xzre_autodoc_generated.json"
+AUTODOC_EXPORT="$GENERATED_DIR/xzre_autodoc.json"
 LOCALS_SOURCE="$META_DIR/xzre_locals.json"
-LOCALS_GENERATED="$SCRIPT_PATH/generated/xzre_locals.json"
+LOCALS_GENERATED="$GENERATED_DIR/xzre_locals.json"
 TYPES_SOURCE="$META_DIR/xzre_types.json"
-TYPES_HELPER="$ROOT_DIR/scripts/manage_types_metadata.py"
-XZREGH_TYPES="$ROOT_DIR/xzregh/xzre_types.h"
 TYPE_DOCS_SOURCE="$META_DIR/type_docs.json"
+TYPES_HELPER="$ROOT_DIR/scripts/manage_types_metadata.py"
 LINKER_MAP_JSON="$META_DIR/linker_map.json"
+
+mkdir -p "$PROJECT_DIR"
+mkdir -p "$(dirname "$HEADER_PATH")"
+mkdir -p "$(dirname "$XZREGH_TYPES")"
+mkdir -p "$GENERATED_DIR"
+mkdir -p "$(dirname "$ARCHIVE_PATH")"
 
 if [[ ! -x "$GHIDRA/support/analyzeHeadless" ]]; then
   echo "error: analyzeHeadless not found under \$GHIDRA ($GHIDRA)" >&2
@@ -73,7 +124,6 @@ if [[ ! -f "$HEADER_PATH" ]]; then
   exit 1
 fi
 
-mkdir -p "$SCRIPT_PATH/generated"
 cp "$AUTODOC_SOURCE" "$AUTODOC_GENERATED"
 cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
 
@@ -98,8 +148,22 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
 
 if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
   echo "warning: exported AutoDoc comments differ from metadata/functions_autodoc.json" >&2
+  if [[ "$CHECK_ONLY" -eq 1 ]]; then
+    echo "[check-only] diff between metadata/functions_autodoc.json and exported comments:" >&2
+    diff -u "$AUTODOC_SOURCE" "$AUTODOC_EXPORT" >&2 || true
+  fi
 fi
 
-python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
-  --comments-json "$AUTODOC_EXPORT" \
-  --xzregh-dir "$ROOT_DIR/xzregh"
+if [[ "$CHECK_ONLY" -eq 0 ]]; then
+  python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
+    --comments-json "$AUTODOC_EXPORT" \
+    --xzregh-dir "$ROOT_DIR/xzregh"
+else
+  echo "[check-only] skipped applying comments to xzregh; temporary artifacts removed on exit."
+fi
+
+if [[ "$CHECK_ONLY" -eq 1 ]]; then
+  echo "[check-only] Ghidra refresh completed without touching ghidra_projects/ or xzregh/."
+else
+  echo "Refresh complete. Portable archive updated at $ARCHIVE_PATH"
+fi
