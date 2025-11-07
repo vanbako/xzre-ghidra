@@ -3,35 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_from_address(void * addr, secret_data_shift_cursor_t shift_cursor, uint shift_count, uint operation_index)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief calls @ref secret_data_append_singleton
- *   with either the given code address or the return address, if @p addr is <= 1
- *
- *   @param addr the code address to use for the verification. NULL to use the return address
- *   @param shift_cursor the initial shift index
- *   @param shift_count how many '1' bits to shift
- *   @param operation_index identification for this shift operation
- *   @return BOOL
- *
- * Upstream implementation excerpt (xzre/xzre_code/secret_data_append_from_address.c):
- *     BOOL secret_data_append_from_address(
- *     	void *addr,
- *     	secret_data_shift_cursor_t shift_cursor,
- *     	unsigned shift_count, unsigned operation_index
- *     ){
- *     	u8 *code = (u8 *)addr;
- *     	if((uintptr_t)addr <= 1){
- *     		code = (u8 *)__builtin_return_address(0);
- *     	}
- *     	return secret_data_append_singleton(
- *     		addr, code,
- *     		shift_cursor, shift_count,
- *     		operation_index
- *     	);
- *     }
+ * AutoDoc: Runs the singleton appender against either a provided code pointer or the caller's return address, letting hooks fingerprint themselves at runtime. The recorded bits contribute to the secret_data blob used for payload decryption.
  */
+
+#include "xzre_types.h"
+
 
 BOOL secret_data_append_from_address
                (void *addr,secret_data_shift_cursor_t shift_cursor,uint shift_count,

@@ -3,24 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_data_segment(elf_info_t * elf_info, u64 * pSize, BOOL get_alignment)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Obtains the address and size of the last read-write segment in the given ELF file
- *   this is typically the segment that contains the following sections:
- *   - .init_array .fini_array .data.rel.ro .dynamic .got
- *
- *   the parameter @p get_alignment controls if @p pSize should be populated with the segment size (when FALSE),
- *   or with the segment alignment (when TRUE)
- *
- *   Used to store data in the free space after the segment created due to alignment:
- *   - for liblzma at (return value + 0x10) is the backdoor_hooks_data_t struct pointed to by hooks_data_addr
- *
- *   @param elf_info the parsed ELF context, which will be updated with the address and size of the data segment
- *   @param pSize variable that will be populated with either the page-aligned segment size, or the alignment size
- *   @param get_alignment controls if alignment size should be returned instead of segment size
- *   @return void* the page-aligned starting address of the segment
+ * AutoDoc: Walks every PT_LOAD segment looking for the last read/write mapping (PF_W|PF_R). Once found it caches three pieces of information: the base of the mapped data (`data_segment_start`), the amount of padding between the end of the file-backed bytes and the next page boundary (`data_segment_alignment`), and the total size of the aligned segment. Callers either request the true segment span (`get_alignment == FALSE`) or the padding region (when TRUE), which is where the implant later tucks the `backdoor_hooks_data_t` structure.
  */
+
+#include "xzre_types.h"
+
 
 void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
 

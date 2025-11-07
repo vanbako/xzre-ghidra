@@ -4,6 +4,7 @@
 
 import json
 import os
+import codecs
 
 from ghidra.program.model.listing import Function
 
@@ -38,7 +39,7 @@ def main():
         print("AutoDoc comments file not found: {}".format(comments_file))
         return
 
-    with open(comments_file, "r", encoding="utf-8") as fh:
+    with codecs.open(comments_file, "r", "utf-8") as fh:
         comment_map = json.load(fh)
 
     fm = currentProgram.getFunctionManager()

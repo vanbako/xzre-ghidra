@@ -3,14 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_configure_log_hook(cmd_arguments_t * cmd_flags, global_context_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief configure the log hook
- *
- *   @param cmd_flags flags controlling the log hook configuration
- *   @param ctx the global context
+ * AutoDoc: Installs the mm_log_handler hook and optionally suppresses logging unless the thread is privileged. This prevents sshd from spewing tell-tale errors while the backdoor intercepts monitor messages.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
 

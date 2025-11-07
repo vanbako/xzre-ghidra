@@ -3,36 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_is_sshd(elf_info_t * elf, u8 * stack_end)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the current process is sshd by inspecting `argv` and `envp`.
- *
- *   this is done by reading the top of the process stack ( represented by @p stack_end )
- *
- *   The following checks are performed:
- *   - that argv[0] is "/usr/sbin/sshd"
- *   - the remaining args all start with '-'
- *   - the args do not contain the '-d' or '-D' flags (which set sshd into debug or non-daemon mode)
- *   - that there is not any '\\t' or '=' characters in the args
- *   - the environment variable strings do not start with any string from the encoded string table
- *
- *   In particular these environment strings:
- *   - "DISPLAY="
- *   - "LD_AUDIT="
- *   - "LD_BIND_NOT="
- *   - "LD_DEBUG="
- *   - "LD_PROFILE="
- *   - "LD_USE_LOAD_BIAS="
- *   - "LINES="
- *   - "TERM="
- *   - "WAYLAND_DISPLAY="
- *   - "yolAbejyiejuvnup=Evjtgvsh5okmkAvj"
- *
- *   @param elf the main ELF context
- *   @param stack_end pointer to the top of the process stack, also known as `__libc_stack_end`
- *   @return BOOL TRUE if the process is `sshd`, FALSE otherwise
+ * AutoDoc: Walks argv and envp from the saved stack pointer to ensure the process really is sshd, no debug flags are active, and no suspicious environment settings are present. Backdoor setup treats this as a hard prerequisite before it touches ld.so or installs any hooks.
  */
+
+#include "xzre_types.h"
+
 
 BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
 

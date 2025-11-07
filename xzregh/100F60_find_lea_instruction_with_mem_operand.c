@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_lea_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds a LEA instruction with an immediate memory operand
- *
- *   @param code_start address to start searching from
- *   @param code_end address to stop searching at
- *   @param dctx disassembler context to hold the state
- *   @param mem_address the expected address of the memory access
- *   @return BOOL TRUE if found, FALSE otherwise
+ * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_lea_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)

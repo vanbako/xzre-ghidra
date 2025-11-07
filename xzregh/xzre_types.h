@@ -22,13 +22,23 @@ typedef int int32_t;
 
 typedef unsigned int uint32_t;
 
+typedef unsigned char uchar;
+
+typedef unsigned short ushort;
+
+typedef unsigned int uint;
+
 typedef long long int64_t;
 
 typedef unsigned long long uint64_t;
 
+typedef unsigned long ulong;
+
 void hexdump(void *pAddressIn, long lSize);
 
 typedef uint8_t u8;
+
+typedef unsigned char byte;
 
 typedef uint16_t u16;
 
@@ -252,6 +262,8 @@ struct audit_ifaces
  unsigned int (*objclose) (uintptr_t *);
  struct audit_ifaces *next;
 };
+
+typedef struct audit_ifaces audit_ifaces;
 
 typedef struct {
  uint32_t state[8];
@@ -813,6 +825,10 @@ typedef struct __attribute__((packed)) imported_funcs {
 struct ssh;
 
 struct sshbuf;
+
+typedef struct ssh ssh;
+
+typedef struct sshbuf sshbuf;
 
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
 

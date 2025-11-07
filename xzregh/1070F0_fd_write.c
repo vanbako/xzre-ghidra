@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_write(int fd, void * buffer, size_t count, libc_imports_t * funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief reads data to the specified file descriptor
- *
- *   @param fd the file descriptor to write to
- *   @param buffer data to write
- *   @param count number of bytes to write
- *   @param funcs imported libc functions
- *   @return ssize_t number of bytes written, or -1 on error
+ * AutoDoc: Companion wrapper for write with EINTR handling. It powers every forged monitor message the backdoor emits while replaying commands or proxying authentication traffic.
  */
+
+#include "xzre_types.h"
+
 
 ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)
 

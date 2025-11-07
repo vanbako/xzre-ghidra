@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall mm_log_handler_hook(LogLevel level, int forced, char * msg, void * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief
- *
- *   @param level
- *   @param forced
- *   @param msg
- *   @param ctx
+ * AutoDoc: Intercepts monitor log messages, filtering or rewriting lines that match attacker-selected strings before optionally forwarding them to the original handler. Command flags processed in `run_backdoor_commands` enable this to suppress giveaway log entries while the payload operates.
  */
+
+#include "xzre_types.h"
+
 
 void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 

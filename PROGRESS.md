@@ -3,6 +3,29 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-07
+- Enumerated every type token referenced across `xzregh/*.c` (all `_t` suffixed identifiers plus the ssh/BOOL/u8-style helpers) and compared the 52 unique names against `metadata/xzre_types.json`; only `uchar`, `ushort`, `uint`, `ssh`, and `sshbuf` lacked canonical typedefs.
+- Added those typedefs (including `typedef struct ssh ssh;` and `typedef struct sshbuf sshbuf;`) so the generated `xzregh/xzre_types.h` exposes the OpenSSH aliases and unsigned integer shorthands, then reran `./scripts/refresh_xzre_project.sh` to regenerate the Ghidra project, export header, and refreshed `.c` dumps.
+- Left a note that future cleanups should tackle the remaining `_func_*` placeholders so imported function pointers get readable typedefs instead of opaque auto names.
+- Next: follow up on the `_func_*` typedef mapping or continue expanding the metadata coverage for the other dependency batches.
+
+## 2025-11-07
+- Fixed the headless AutoDoc/TypeDoc sync: the Ghidra scripts still used CPython-only `encoding=` kwargs (and ASCII-only `str()` coercions) so every refresh silently failed under Jython, which is why `xzregh/*.c` never picked up the new metadata. Swapped the readers over to `codecs.open(...)` and removed the lossy coercions so ApplyAutoDoc/ApplyTypeDocs/ExportAutoDocComments now run end-to-end.
+- Added a `types=<path>` option to `ghidra_scripts/ExportFunctionDecompilations.py`, letting the export pass copy `xzre_types.h` (or any other header) alongside the per-function `.c` dumps so consumers always get the struct definitions with the decomp output.
+- Taught `scripts/apply_ghidra_comments_to_decomp.py` to enforce a `#include "xzre_types.h"` line (and to strip whatever AutoDoc block currently sits at the file prologue), so every exported function now carries the header include automatically whenever the refresh pipeline runs.
+- Reran `./scripts/refresh_xzre_project.sh` to confirm the patched pipeline applies the richer docs across the 120+ exported functions and to regenerate the portable project/archive with the synchronized comments.
+- Next: keep iterating on the remaining metadata batches now that the pipeline reliably propagates edits; the new CLI flag can be wired into any future export automation that needs the header materialized next to the functions.
+
+## 2025-11-07
+- Completed the `elf_mem` RE pass by rewriting 30 metadata entries covering the ELF parsers, relocation scanners, fake liblzma allocator, and TLS shims so the plate comments now spell out the recursion limits, range checks, and relocation bookkeeping the loader performs.
+- Re-ran `./scripts/refresh_xzre_project.sh` to propagate the richer documentation into the Ghidra project, regenerated `xzregh/*`, and built a fresh portable archive.
+- Next: tackle the remaining dependency batch (e.g., `sshd_recon` or `loader_rt`) to keep pushing detailed behaviour notes through the metadata store before diving into locals/type cleanups.
+
+## 2025-11-07
+- Reviewed the entire `opco_patt` batch and rewrote 18 entries in `metadata/functions_autodoc.json` with detailed behaviour notes for the custom decoder, call/MOV/LEA scanners, string-reference harvesters, and ELF helper routines so the plate comments mirror what the decompiler now shows.
+- Ran `./scripts/refresh_xzre_project.sh` to push the refreshed metadata through the headless import, regenerate `xzregh/*`, and export the portable snapshot with the new documentation in place.
+- Next: continue with the next dependency batch (e.g., `elf_mem`) so the remaining helper families gain the same level of coverage before tackling locals/typing follow-ups.
+
+## 2025-11-07
 - Captured the linker-script map into `metadata/linker_map.json` (extracted from `xzre/xzre.lds.in`) so the refresh pipeline can restore function/data names without touching the upstream tree.
 - Updated `ghidra_scripts/RenameFromLinkerMap.py` to read that JSON (while keeping the legacy `.lds` parser as a fallback) and wired `scripts/refresh_xzre_project.sh` to require the metadata file, which removes the last pipeline dependency on `xzre/` aside from the object file itself.
 - Next: remove the `xzre/` checkout once the standalone `liblzma_la-crc64-fast.o` is cached someplace safe.

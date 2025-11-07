@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshbuf_extract(sshbuf * buf, global_context_t * ctx, void * * p_sshbuf_d, size_t * p_sshbuf_size)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the provided @p buf is sane, then decomposes it into @p p_sshbuf_d and @p p_sshbuf_size
- *
- *   @param buf pointer to `struct sshbuf` to decompose
- *   @param ctx the global context
- *   @param p_sshbuf_d output variable that will receive the address of the sshbuf data
- *   @param p_sshbuf_size output variable that will receive the size of the sshbuf data
- *   @return BOOL TRUE if the sshbuf was decomposed successfully, FALSE otherwise
+ * AutoDoc: Validates a runtime sshbuf using offsets recorded in the global context and returns its data pointer and size. The backdoor uses it to access monitor messages safely even when structure layouts shift across builds.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *p_sshbuf_size)
 

@@ -3,30 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall backdoor_setup(backdoor_setup_params_t * params)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief the backdoor main method that installs the backdoor_symbind64() callback
- *
- *   If the backdoor initialization steps are successful the final step modifies some ld.so private structures
- *   to simulate a LD_AUDIT library and install the backdoor_symbind64() as a symbind callback.
- *
- *   To pass the various conditions in ld.so's _dl_audit_symbind_alt the following fields are modified:
- *   - the sshd and libcrypto struct link_map::l_audit_any_plt flag is set to 1
- *   - the sshd struct auditstate::bindflags is set to LA_FLG_BINDFROM
- *   - the libcrypto struct auditstate::bindflags is set to LA_FLG_BINDTO
- *   - _rtld_global_ro::_dl_audit is set to point to ldso_ctx_t::hooked_audit_iface
- *   - the struct audit_ifaces::symbind64 is set to backdoor_symbind64()
- *   - _rtld_global_ro::_dl_naudit is set to 1
- *
- *   After the modifications backdoor_symbind64() will be called for all symbol bindings from sshd to libcrypto.
- *
- *   @param params parameters from backdoor_init_stage()
- *   @return BOOL unused, always return FALSE
+ * AutoDoc: Performs the full installation workflow: gathers link_map handles, initialises shared globals, resolves libc/libcrypto imports, rewires ld.so's audit structures, updates GOT/PLT entries, and seeds secret-data tracking. On success it leaves `backdoor_symbind64` registered so every sshd→libcrypto call is mediated by the backdoor.
  */
 
-/* WARNING: Removing unreachable block (ram,0x00105ab2) */
-/* WARNING: Removing unreachable block (ram,0x00105aa3) */
+#include "xzre_types.h"
+
 
 BOOL backdoor_setup(backdoor_setup_params_t *params)
 

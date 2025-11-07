@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_monitor_struct(elf_info_t * elf, string_references_t * refs, global_context_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds the pointer to `struct monitor`, and updates the global context in @p ctx with its location
- *
- *   @param elf sshd elf context
- *   @param refs sshd string references
- *   @param ctx global context
- *   @return BOOL TRUE if the pointer has been found, FALSE otherwise
+ * AutoDoc: Collects monitor field references across multiple sshd routines, tallies the overlapping addresses, and picks the consensus location of `struct monitor`. Stage two writes that pointer into the global context so the mm_* hooks can reach sshd's privileged monitor state.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_context_t *ctx)
 

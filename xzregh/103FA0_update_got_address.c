@@ -3,26 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall update_got_address(elf_entry_ctx_t * entry_ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds the __tls_get_addr() GOT entry
- *
- *   this function first computes the location of the __tls_get_addr() PLT trampoline function by using
- *   the PLT offset constant from tls_get_addr_reloc_consts
- *
- *   then it decodes the PLT jmp instruction to get the address of the __tls_get_addr() GOT entry
- *
- *   the __tls_get_addr() GOT entry is used in backdoor_setup() to find the ELF header at the start of the memory mapped ld.so
- *
- *   calls get_tls_get_addr_random_symbol_got_offset() to update elf_entry_ctx_t::got_ptr and elf_entry_ctx_t::got_offset
- *   sets elf_entry_ctx_t::got_offset = 0
- *   sets elf_entry_ctx_t::cpuid_fn = 0
- *   stores the address of the __tls_get_addr() GOT entry in  elf_entry_ctx_t::got_ptr
- *
- *   @param entry_ctx
- *   @return void* the address of the __tls_get_addr() GOT entry
+ * AutoDoc: Disassembles the `__tls_get_addr` PLT trampoline, derives the real GOT entry address, and caches it in the entry context. Stage two depends on that pointer to find ld.so's ELF header and to swap the cpuid GOT slot over to its handler.
  */
+
+#include "xzre_types.h"
+
 
 void * update_got_address(elf_entry_ctx_t *entry_ctx)
 

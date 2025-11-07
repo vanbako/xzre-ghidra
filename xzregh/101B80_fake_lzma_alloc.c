@@ -3,23 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall fake_lzma_alloc(void * opaque, size_t nmemb, size_t size)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief a fake alloc function called by lzma_alloc() that then calls elf_symbol_get_addr()
- *
- *   @param opaque the parsed ELF context (elf_info_t*)
- *   @param nmemb not used
- *   @param size string ID of the symbol name (EncodedStringId)
- *   @return void* the address of the symbol
- *
- * Upstream implementation excerpt (xzre/xzre_code/fake_lzma_alloc.c):
- *     void *fake_lzma_alloc(void *opaque, size_t nmemb, size_t size){
- *     	elf_info_t *elf_info = (elf_info_t *)opaque;
- *     	EncodedStringId string_id = (EncodedStringId)size;
- *     	return elf_symbol_get_addr(elf_info, string_id);
- *     }
+ * AutoDoc: Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as an `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever `elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it only masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.
  */
+
+#include "xzre_types.h"
+
 
 void * fake_lzma_alloc(void *opaque,size_t nmemb,size_t size)
 

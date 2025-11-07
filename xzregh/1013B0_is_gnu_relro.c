@@ -3,15 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_gnu_relro(Elf64_Word p_type, u32 addend)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the provided identifiers represent a `PT_GNU_RELRO`
- *
- *   @param p_type program header type
- *   @param addend constant `0xA0000000`
- *   @return BOOL TRUE if the supplied pt_type is `PT_GNU_RELRO`, FALSE otherwise
+ * AutoDoc: Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller supplied `addend` (always `0xa0000000`) and checks for the magic constant, which makes the instruction stream look less like a straightforward RELRO probe in the object file.
  */
+
+#include "xzre_types.h"
+
 
 BOOL is_gnu_relro(Elf64_Word p_type,u32 addend)
 

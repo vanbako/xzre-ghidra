@@ -3,18 +3,12 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall lzma_free(void * ptr, lzma_allocator * allocator)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Upstream implementation excerpt (xzre/xzre_code/lzma_free.c):
- *     void fake_lzma_free(void *opaque, void *ptr){}
+ * AutoDoc: Placeholder export for `lzma_free()` that funnels straight into `halt_baddata()`. The backdoor never expects this stub to run because it always routes work through the fake allocator, so entering it implies the GOT was not repointed and the process halts rather than corrupting memory.
  */
 
-/* WARNING: Control flow encountered bad instruction data */
+#include "xzre_types.h"
 
-void lzma_free(void *ptr,lzma_allocator *allocator)
 
-{
-                    /* WARNING: Bad instruction - Truncating control flow here */
   halt_baddata();
 }
 

@@ -3,15 +3,13 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_contains_vaddr_impl(elf_info_t * elf_info, void * vaddr, u64 size, u32 p_flags)
 /*
- * AutoDoc: Generated from reverse engineering.
+ * AutoDoc: Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recurses when the range straddles multiple segments so partial overlaps are rechecked piecemeal.
  *
- * Summary:
- *   Validates that the requested virtual address range is fully covered by a PT_LOAD segment whose flags include the supplied p_flags mask.
- *
- * Notes:
- *   - Normalises the interval to page boundaries and recursively re-checks when a range straddles multiple segments.
- *   - Returns FALSE if the ELF headers are missing, the recursion guard trips, or no matching segment exists.
+ * It refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.
  */
+
+#include "xzre_types.h"
+
 
 BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_flags)
 

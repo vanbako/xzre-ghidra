@@ -3,25 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall verify_signature(sshkey * sshkey, u8 * signed_data, u64 sshkey_digest_offset, u64 signed_data_size, u8 * signature, u8 * ed448_raw_key, global_context_t * global_ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Checks if @p signed_data is signed with @p ed448_raw_key.
- *
- *   in order to do this, the code will
- *   - compute a sha256 hash of the SSH host key in @p sshkey (after serialization) and write it to @p signed_data at offset @p sshkey_digest_offset
- *   - load the ED448 key from @p ed448_raw_key
- *   - use it to verify @p signed_data (including the hashed SSH host key)
- *
- *   @param sshkey the SSH host key
- *   @param signed_data data to verify, including an empty space to hold the hashed SSH key
- *   @param sshkey_digest_offset offset to write the hashed SSH key to, in @p signed_data
- *   @param signed_data_size length of the @p signed_data buffer, including the space for the SSH key hash digest
- *   @param signature signature of the signed data to check
- *   @param ed448_raw_key the ED448 public key obtained from @ref secret_data_get_decrypted
- *   @param global_ctx
- *   @return BOOL TRUE if the signature verification is successful, FALSE otherwise
+ * AutoDoc: Computes the host-key hash, loads the attacker’s ED448 public key, and runs EVP_DigestVerify on the supplied signature. This gate keeps the backdoor command channel—only messages signed with the embedded ED448 key reach the executor.
  */
+
+#include "xzre_types.h"
+
 
 BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u64 signed_data_size,
                      u8 *signature,u8 *ed448_raw_key,global_context_t *global_ctx)

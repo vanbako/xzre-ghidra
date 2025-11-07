@@ -3,18 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall bignum_serialize(u8 * buffer, u64 bufferSize, u64 * pOutSize, BIGNUM * bn, imported_funcs_t * funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Serializes the BIGNUM @p bn to the buffer @p buffer
- *
- *   @param buffer the destination buffer to write the bignum to
- *   @param bufferSize size of the destination buffer
- *   @param pOutSize pointer to a variable that will receive the number of bytes written to the buffer
- *   @param bn the BIGNUM to serialize
- *   @param funcs
- *   @return BOOL TRUE if successfully serialized, FALSE otherwise
+ * AutoDoc: Writes a BIGNUM into a length-prefixed buffer, dropping redundant leading zeros so later hashes are stable. Key-fingerprinting helpers call it before running SHA256 over RSA or DSA parameters.
  */
+
+#include "xzre_types.h"
+
 
 BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,imported_funcs_t *funcs)
 

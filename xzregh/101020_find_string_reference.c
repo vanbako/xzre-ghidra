@@ -3,29 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: u8 * __stdcall find_string_reference(u8 * code_start, u8 * code_end, char * str)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds an instruction that references the given string
- *
- *   @param code_start address to start searching from
- *   @param code_end address to stop searching at
- *   @param str the target of the string reference (i.e. the target of the LEA instruction)
- *   @return u8* the address of the first instruction that references the given string, or NULL if not found
- *
- * Upstream implementation excerpt (xzre/xzre_code/find_string_reference.c):
- *     u8 *find_string_reference(
- *     	u8 *code_start,
- *     	u8 *code_end,
- *     	const char *str
- *     ){
- *     	dasm_ctx_t dctx = {0};
- *     	if(find_lea_instruction_with_mem_operand(code_start, code_end, &dctx, (void *)str)){
- *     		return dctx.instruction;
- *     	}
- *     	return NULL;
- *     }
+ * AutoDoc: Scans for instructions that reference a given string literal via RIP-relative addressing and records the instruction span. Secret-data hunters use it to line up code blocks that print or parse target strings so hooks can score them.
  */
+
+#include "xzre_types.h"
+
 
 u8 * find_string_reference(u8 *code_start,u8 *code_end,char *str)
 

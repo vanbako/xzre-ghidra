@@ -3,30 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_name(backdoor_data_handle_t * data_handle, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Find struct link_map offsets required to modify ld.so's private struct auditstate state.
- *
- *   This function inspects ld.so's private struct link_map for liblzma.
- *
- *   First, this function finds the end of the link_map by searching for the private link_map::l_relro_addr and
- *   link_map::l_relro_size with values that match liblzma's elf_info_t::gnurelro_vaddr and elf_info_t::gnurelro_memsize respectively.
- *
- *   This function then calculates libname_offset by searching for linkmap::l_name which points to a string stored just after the link_map by ld.so's _dl_new_object().
- *
- *   This function then sets ldso_ctx::libcrypto_l_name to the location of link_map::l_name for the libcrypto link_map.
- *
- *   This function disassembles ld.so's _dl_audit_preinit() and _dl_audit_symbind_alt() to verify both contain a LEA instruction with an offset that matches libname_offset.
- *
- *   This function also resolves a number of libc and libcrypto function addresses.
- *
- *   @param data_handle
- *   @param libname_offset output of the offset from the start of the link_map to the location directly after where the link_map::l_name string data is stored
- *   @param hooks
- *   @param imported_funcs
- *   @return BOOL TRUE if successful, FALSE otherwise
+ * AutoDoc: Walks ld.so's link_map records to locate the `l_name` string slot, verifies the offsets inside `_dl_audit_*`, and resolves several libc/libcrypto helpers. The backdoor needs that offset to rewrite libcrypto's link_map so the audit machinery accepts its injected interface.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_link_map_l_name
                (backdoor_data_handle_t *data_handle,ptrdiff_t *libname_offset,

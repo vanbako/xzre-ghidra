@@ -3,22 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_xcalloc(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, string_references_t * string_refs, void * * sensitive_data_out)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds the address of `sensitive_data.host_keys` in sshd by using
- *   @ref XREF_xcalloc_zero_size in `xcalloc`
- *
- *   FIXME: add detail
- *
- *   @param data_start start of the sshd data segment
- *   @param data_end end of the sshd data segment
- *   @param code_start start of the sshd code segment
- *   @param code_end end of the sshd code segment
- *   @param string_refs info about resolved functions
- *   @param sensitive_data_out pointer to receive the address of sensitive_data
- *   @return BOOL TRUE if the address was found, FALSE otherwise
+ * AutoDoc: Observes the xcalloc initialisation sequence that zeroes `sensitive_data` and records the data-section address that receives the result. This is the primary locator the implant uses to identify sshd's host-key container ahead of its scoring passes.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshd_get_sensitive_data_address_via_xcalloc
                (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,

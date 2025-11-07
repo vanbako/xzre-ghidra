@@ -3,15 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall hook_RSA_get0_key(RSA * r, BIGNUM * * n, BIGNUM * * e, BIGNUM * * d)
 /*
- * AutoDoc: Generated from reverse engineering.
- *
- * Summary:
- *   Wrapper around RSA_get0_key that lets the backdoor observe RSA key material before delegating to the real implementation.
- *
- * Notes:
- *   - Grabs the function pointer from global_ctx->imported_funcs and returns immediately if it is missing.
- *   - Calls run_backdoor_commands() with the RSA handle, then jumps to the genuine RSA_get0_key entry point.
+ * AutoDoc: Lets the backdoor inspect an RSA key whenever sshd queries it by calling `run_backdoor_commands` first, then invoking the genuine RSA_get0_key. The original behaviour is preserved, but the implant captures the key material for later use.
  */
+
+#include "xzre_types.h"
+
 
 void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)
 

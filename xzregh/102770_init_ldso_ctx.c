@@ -3,13 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall init_ldso_ctx(ldso_ctx_t * ldso_ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief initializes/resets ldso data
- *
- *   @param ldso_ctx
+ * AutoDoc: Restores saved ld.so bookkeeping values (audit flags, _dl_audit pointers, naudit count) back to their pre-hook state. The loader calls it whenever hook setup fails so the dynamic linker is left consistent before sshd resumes execution.
  */
+
+#include "xzre_types.h"
+
 
 void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
 

@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_main(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief obtains a numeric score which indicates if `main`
- *   accesses @p sensitive_data or not
- *
- *   @param sensitive_data pointer to suspsected SSH host keys
- *   @param elf sshd elf instance
- *   @param refs info about resolved functions
- *   @return int
+ * AutoDoc: Checks sshd's main routine for loads and stores against the candidate sensitive-data slots and weights them into a score. The loader folds this signal into the overall confidence metric before exposing the pointer to other hooks.
  */
+
+#include "xzre_types.h"
+
 
 int sshd_get_sensitive_data_score_in_main
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)

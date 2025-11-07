@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_do_child(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief obtains a numeric score which indicates if `do_child`
- *   accesses @p sensitive_data or not
- *
- *   @param sensitive_data pointer to suspsected SSH host keys
- *   @param elf sshd elf instance
- *   @param refs info about resolved functions
- *   @return int
+ * AutoDoc: Counts characteristic memory accesses to the candidate `sensitive_data` pointer inside `do_child` and produces a confidence score. The aggregate scorer uses this value to decide whether the pointer is safe to treat as the real host-key cache.
  */
+
+#include "xzre_types.h"
+
 
 int sshd_get_sensitive_data_score_in_do_child
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)

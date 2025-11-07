@@ -3,43 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_call_instruction(u8 * code_start, u8 * code_end, u8 * call_target, dasm_ctx_t * dctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds a call instruction
- *
- *   @param code_start address to start searching from
- *   @param code_end address to stop searching at
- *   @param call_target optional call target address. pass 0 to find any call
- *   @param dctx empty disassembler context to hold the state
- *   @return BOOL TRUE if found, FALSE otherwise
- *
- * Upstream implementation excerpt (xzre/xzre_code/find_call_instruction.c):
- *     BOOL find_call_instruction(u8 *code_start, u8 *code_end, u8 *call_target, dasm_ctx_t *dctx){
- *     	if(!secret_data_append_from_address(NULL, (secret_data_shift_cursor_t){ 0x81 }, 4, 7)){
- *     		return FALSE;
- *     	}
- *     	dasm_ctx_t ctx = {0};
- *     	if(!dctx){
- *     		dctx = &ctx;
- *     	}
- *     
- *     	while(code_start < code_end){
- *     		if(x86_dasm(dctx, code_start, code_end)){
- *     			if(XZDASM_OPC(dctx->opcode) == X86_OPCODE_CALL
- *     				&& (!call_target || &dctx->instruction[dctx->operand + dctx->instruction_size] == call_target)
- *     			){
- *     				return TRUE;
- *     			}
- *     			code_start += dctx->instruction_size;
- *     		} else {
- *     			code_start += 1;
- *     		}
- *     	}
- *     	return FALSE;
- *     }
- *     
+ * AutoDoc: Disassembles forward until it encounters a CALL opcode and reports both the instruction and target. The hook finder uses it to locate indirect dispatcher sites in sshd so the injected shims can be spliced in safely.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_t *dctx)
 

@@ -56,7 +56,7 @@
 - Correlate findings with the sources in `xzre/` and document insights or triage queues in `PROGRESS.md`.
 
 ## Quick Batch Handles
-When you are ready for more reversing you can simply ask, e.g., “Can you do a RE session of batch `opco_patt`?” and Codex will fan out the right stubs/scripts. The short names are:
+When you are ready for more reversing you can simply ask, e.g., “Can you do an RE session of batch `opco_patt`?” and Codex will fan out the right stubs/scripts. The short names are:
 - `opco_patt` – Opcode scanners & pattern utilities.
 - `elf_mem` – ELF introspection and allocator helpers.
 - `sshd_recon` – SSHD discovery and sensitive data scoring.

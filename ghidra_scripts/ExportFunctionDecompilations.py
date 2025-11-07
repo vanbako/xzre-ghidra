@@ -6,6 +6,7 @@
 
 import os
 import re
+import shutil
 
 from ghidra.app.decompiler import DecompInterface
 
@@ -70,12 +71,23 @@ def decompile_function(ifc, func, monitor):
 def main():
     args = getScriptArgs()
     out_dir = OUTPUT_DEFAULT
+    types_path = None
     for arg in args:
         if arg.startswith("out="):
             out_dir = arg.split("=", 1)[1]
+        elif arg.startswith("types="):
+            types_path = arg.split("=", 1)[1]
 
     out_dir = resolve_path(out_dir)
     ensure_directory(out_dir)
+    if types_path:
+        types_path = resolve_path(types_path)
+        if types_path and os.path.exists(types_path):
+            dest_name = os.path.basename(types_path) or "xzre_types.h"
+            shutil.copyfile(types_path, os.path.join(out_dir, dest_name))
+            print("Copied {} to {}".format(types_path, os.path.join(out_dir, dest_name)))
+        else:
+            printerr("Type header not found: {}".format(types_path))
 
     fm = currentProgram.getFunctionManager()
     functions = list(fm.getFunctions(True))

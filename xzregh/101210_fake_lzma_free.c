@@ -3,19 +3,13 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall fake_lzma_free(void * opaque, void * ptr)
 /*
- * AutoDoc: Generated from upstream sources.
+ * AutoDoc: No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other than prove that the fake allocator is still active.
  *
- * Source summary (xzre/xzre.h):
- *   @brief a fake free function called by lzma_free()
- *
- *   this function is a red herring as it is does nothing except make it look like lzma_alloc() is the real deal
- *
- *   @param opaque not used
- *   @param ptr not used
- *
- * Upstream implementation excerpt (xzre/xzre_code/fake_lzma_free.c):
- *     void fake_lzma_free(void *opaque, void *ptr){}
+ * Having an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.
  */
+
+#include "xzre_types.h"
+
 
 void fake_lzma_free(void *opaque,void *ptr)
 

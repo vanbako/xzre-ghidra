@@ -3,20 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_client_socket(global_context_t * ctx, int * pSocket, int socket_index, SocketMode socket_direction)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Get either the read or write end of the sshd connection.
- *
- *   this is done by using the `struct monitor` address in @p ctx or, if not set,
- *   by getting the first usable socket having index @p socket_index
- *
- *   @param ctx the global context
- *   @param pSocket output variable that will receive the socket fd
- *   @param socket_index index `n` of the n-th usable socket that the function should return
- *   @param socket_direction whether to get the receiving or the sending socket
- *   @return BOOL TRUE if the socket was found, FALSE otherwise
+ * AutoDoc: Returns either the read or write end of the client connection using the monitor struct when available, otherwise falling back to the socket scanner. It’s called right before forging or replaying monitor traffic.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshd_get_client_socket
                (global_context_t *ctx,int *pSocket,int socket_index,SocketMode socket_direction)

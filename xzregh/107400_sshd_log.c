@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void __stdcall sshd_log(sshd_log_ctx_t * log_ctx, LogLevel level, char * fmt, ...)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief calls `sshlogv` from openssh, similarly to `sshlog` in openssh
- *
- *   @param log_ctx imported openssh log functions/data (to get the `sshlogv` function pointer)
- *   @param level log level
- *   @param fmt log format
- *   @param ...
+ * AutoDoc: Calls sshd's sshlogv via the resolved function pointer, mirroring OpenSSH's logging API. The hooks use it when they need to surface controlled diagnostics without relying on libc’s syslog wrappers.
  */
+
+#include "xzre_types.h"
+
 
 void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
 

@@ -3,19 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_reloc_symbol(elf_info_t * elf_info, Elf64_Rela * relocs, u32 num_relocs, u64 reloc_type, EncodedStringId encoded_string_id)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Searches the ELF relocations for a symbol having name @p encoded_string id
- *   and relocation of type @p reloc_type
- *
- *   @param elf_info the parsed ELF context
- *   @param relocs array of relocations to search in
- *   @param num_relocs number of items in the array pointed by @p relocs
- *   @param reloc_type type of relocation to consider (R_X86_64_*)
- *   @param encoded_string_id symbol to look for (encoded)
- *   @return void* the address of the symbol, or NULL if not found
+ * AutoDoc: Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT) and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch GOT/PLT entries in place.
  */
+
+#include "xzre_types.h"
+
 
 void * elf_get_reloc_symbol
                  (elf_info_t *elf_info,Elf64_Rela *relocs,u32 num_relocs,u64 reloc_type,

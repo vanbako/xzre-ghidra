@@ -3,21 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: u32 __stdcall count_bits(u64 x)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief returns the number of 1 bits in x
- *
- *   @param x
- *   @return u32 number of 1 bits
- *
- * Upstream implementation excerpt (xzre/xzre_code/count_bits.c):
- *     u32 count_bits(u64 x){
- *     	u32 result;
- *     	for(result=0; x; ++result, x &= x-1);
- *     	return result;
- *     }
+ * AutoDoc: Classic popcount loop that returns the number of set bits in a 64-bit value. The string-id trie and several instruction filters rely on it when they compress lookup tables for pattern matching.
  */
+
+#include "xzre_types.h"
+
 
 u32 count_bits(u64 x)
 

@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall x86_dasm(dasm_ctx_t * ctx, u8 * code_start, u8 * code_end)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief disassembles the given x64 code
- *
- *   @param ctx empty disassembler context to hold the state
- *   @param code_start pointer to the start of buffer (first disassemblable location)
- *   @param code_end pointer to the end of the buffer
- *   @return BOOL TRUE if disassembly was successful, FALSE otherwise
+ * AutoDoc: Implements a minimal x86-64 decoder that walks a buffer while tracking instruction metadata. Every search helper in the loader uses it to reason about sshd and ld.so machine code without linking a full disassembler, giving the backdoor reliable patch coordinates at runtime.
  */
+
+#include "xzre_types.h"
+
 
 BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 

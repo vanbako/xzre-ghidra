@@ -3,18 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: fake_lzma_allocator_t * __stdcall get_lzma_allocator_address(void)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief gets the address of the fake LZMA allocator
- *
- *   uses fake_lzma_allocator_offset to get the address 0x180 bytes before fake_lzma_allocator
- *   and then adds 0x160 to get the final address of fake_lzma_allocator
- *
- *   called in get_lzma_allocator()
- *
- *   @return fake_lzma_allocator_t*
+ * AutoDoc: Manual pointer arithmetic that recovers the runtime address of the fake `fake_lzma_allocator_t` blob without requiring relocatable absolute addresses. The compiler emits a sentinel (`fake_lzma_allocator`) followed by padding, so this helper starts at that symbol and steps through the struct 12 times, effectively adding the baked-in 0x160-byte offset that lands on the real allocator instance the loader populated at build time.
  */
+
+#include "xzre_types.h"
+
 
 fake_lzma_allocator_t * get_lzma_allocator_address(void)
 

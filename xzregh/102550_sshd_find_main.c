@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_main(u8 * * code_start_out, elf_info_t * sshd, elf_info_t * libcrypto, imported_funcs_t * imported_funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds the sshd_main function
- *
- *   @param code_start_out filled in with the function start, if found
- *   @param sshd sshd elf info
- *   @param libcrypto libcrypto elf info
- *   @param imported_funcs imported funcs
- *   @returns TRUE if found, FALSE otherwise
+ * AutoDoc: Scans sshd's entry-point stub to locate the real sshd_main function and prefetch key libcrypto imports. The backdoor needs that entry address as the anchor for later monitor-structure searches and to seed its imported_funcs table before hooks fire.
  */
+
+#include "xzre_types.h"
+
 
 BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
                    imported_funcs_t *imported_funcs)

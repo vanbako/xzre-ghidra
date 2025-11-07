@@ -3,15 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_find_string_references(elf_info_t * elf_info, string_references_t * refs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief parses the ELF rodata section, looking for strings and the instructions that reference them
- *
- *   @param elf_info the executable to find strings in
- *   @param refs structure that will be populated with the results
- *   @return BOOL
+ * AutoDoc: Indexes interesting .rodata strings and the instructions that reference them, recording surrounding function bounds for later lookups. Many downstream heuristics consume this table to locate sshd routines and global pointers tied to sensitive behaviour.
  */
+
+#include "xzre_types.h"
+
 
 BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
 

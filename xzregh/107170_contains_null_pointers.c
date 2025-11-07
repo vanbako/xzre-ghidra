@@ -3,15 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall contains_null_pointers(void * * pointers, uint num_pointers)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the given array of pointers contains any NULL pointer
- *
- *   @param pointers array of pointers to check
- *   @param num_pointers number of pointers to check
- *   @return BOOL TRUE if @p pointers contains any NULL pointer, FALSE if all pointers are non-NULL
+ * AutoDoc: Scans a pointer array for NULL entries. The crypto helpers call it to ensure every required OpenSSL import was resolved before attempting decrypt or verify operations.
  */
+
+#include "xzre_types.h"
+
 
 BOOL contains_null_pointers(void **pointers,uint num_pointers)
 

@@ -3,18 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_mov_lea_instruction(u8 * code_start, u8 * code_end, BOOL is_64bit_operand, BOOL load_flag, dasm_ctx_t * dctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief like @ref find_mov_instruction, but also considers LEA instructions
- *
- *   @param code_start address to start searching from
- *   @param code_end address to stop searching at
- *   @param is_64bit_operand TRUE if MOV should have a 64bit operand, FALSE otherwise
- *   @param load_flag TRUE if searching for load, FALSE for a store
- *   @param dctx disassembler context to hold the state
- *   @return BOOL TRUE if found, FALSE otherwise
+ * AutoDoc: Iterates through MOV and LEA instructions that move pointers into registers, honouring load/store direction flags. The loader uses it to chase GOT writes and frame setups when it has to recover sensitive pointers for the backdoor context.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_mov_lea_instruction
                (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)

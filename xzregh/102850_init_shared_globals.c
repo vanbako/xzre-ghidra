@@ -3,14 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: int __stdcall init_shared_globals(backdoor_shared_globals_t * shared_globals)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Initializes the backdoor_shared_globals structure
- *
- *   @param shared_globals the backdoor_shared_globals structure
- *   @return int returns 0 on success, or 5 if @p shared_globals was NULL
+ * AutoDoc: Seeds the shared global structure with the high-level hook entry points and the address of the global_context_t singleton. Stage two populates it once so every hook (mm_answer_* and EVP glue) can resolve the same state block without further lookups.
  */
+
+#include "xzre_types.h"
+
 
 int init_shared_globals(backdoor_shared_globals_t *shared_globals)
 

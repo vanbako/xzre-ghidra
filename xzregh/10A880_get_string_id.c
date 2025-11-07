@@ -3,19 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: EncodedStringId __stdcall get_string_id(char * string_begin, char * string_end)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Get the @see EncodedStringId for the given string
- *   the string will be consumed until one of the following condition is reached (whichever happens first):
- *   - 44 chars have been consumed (maximum string length)
- *   - @p string_end is supplied and has been reached
- *   - the string table has been exhausted
- *
- *   @param string_begin the string to get the ID for (max 44 chars)
- *   @param string_end optional string end pointer
- *   @return EncodedStringId the string ID matching the input string, or 0 if not found
+ * AutoDoc: Traverses the embedded string-trie and returns the encoded identifier for a runtime string. Every heuristic that matches sshd literals—logging, monitor messages, protocol banners—goes through this to avoid shipping plaintext strings in the payload.
  */
+
+#include "xzre_types.h"
+
 
 EncodedStringId get_string_id(char *string_begin,char *string_end)
 

@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: u8 * __stdcall elf_find_string_reference(elf_info_t * elf_info, EncodedStringId encoded_string_id, u8 * code_start, u8 * code_end)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief finds an instruction that references the given string
- *
- *   @param elf_info the parsed ELF context
- *   @param encoded_string_id the string to search for, in encoded form
- *   @param code_start address to start searching from
- *   @param code_end address to stop searching at
- *   @return u8* the address of the first instruction that references the given string, or NULL if not found
+ * AutoDoc: Finds the first instruction that references a specific string literal between the supplied code bounds. The loader uses this pinpoint search to anchor subsequent pattern matching when triangulating hook targets from log messages and status strings.
  */
+
+#include "xzre_types.h"
+
 
 u8 * elf_find_string_reference
                (elf_info_t *elf_info,EncodedStringId encoded_string_id,u8 *code_start,u8 *code_end)

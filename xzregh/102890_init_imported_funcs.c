@@ -3,14 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall init_imported_funcs(imported_funcs_t * imported_funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Initializes the imported_funcs structure
- *
- *   @param funcs the imported_funcs structure
- *   @return BOOL TRUE if successful, FALSE otherwise (if the resolve count is incorrect)
+ * AutoDoc: Verifies the resolved-imports counter and ensures the three critical libcrypto PLT pointers are available, dropping in loader callbacks when they are not. The backdoor uses this guard before enabling the RSA hooks so it never intercepts calls without knowing how to fall back to the genuine routines.
  */
+
+#include "xzre_types.h"
+
 
 BOOL init_imported_funcs(imported_funcs_t *imported_funcs)
 

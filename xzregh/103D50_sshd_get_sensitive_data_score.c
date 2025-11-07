@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief obtains a numeric score which indicates if
- *   accesses @p sensitive_data or not
- *
- *   @param sensitive_data pointer to suspsected SSH host keys
- *   @param elf sshd elf instance
- *   @param refs info about resolved functions
- *   @return int
+ * AutoDoc: Combines the scores from `do_child`, `main`, and `demote_sensitive_data` to produce a single confidence value for the candidate pointer. Only when this aggregate passes the threshold does the backdoor store the address and proceed with secret-data extraction.
  */
+
+#include "xzre_types.h"
+
 
 int sshd_get_sensitive_data_score(void *sensitive_data,elf_info_t *elf,string_references_t *refs)
 

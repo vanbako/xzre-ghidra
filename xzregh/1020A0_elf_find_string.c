@@ -3,20 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: char * __stdcall elf_find_string(elf_info_t * elf_info, EncodedStringId * stringId_inOut, void * rodata_start_ptr)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Locates a string in the ELF .rodata section
- *
- *   @param elf_info the ELF context to use for the search
- *   @param stringId_inOut mandatory pointer to an encoded string ID.
- *   - if the referenced string ID is 0, the first matching string (in the string table) will stop the search,
- *   and the matching string ID will be written to the pointer.
- *   - if the referenced string ID is not 0, the search will look for that specific string ID,
- *   and the value will not be updated.
- *   @param rodata_start_ptr location in the rodata section to start the search from
- *   @return char* pointer to the string, or NULL if it couldn't be found
+ * AutoDoc: Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or constrain the search to a suffix of the segment.
  */
+
+#include "xzre_types.h"
+
 
 char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void *rodata_start_ptr)
 

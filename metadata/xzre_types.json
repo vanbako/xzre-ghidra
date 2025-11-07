@@ -84,6 +84,27 @@
     {
       "kind": "typedef",
       "names": [
+        "uchar"
+      ],
+      "code": "typedef unsigned char uchar;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "ushort"
+      ],
+      "code": "typedef unsigned short ushort;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "uint"
+      ],
+      "code": "typedef unsigned int uint;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
         "int64_t"
       ],
       "code": "typedef long long int64_t;"
@@ -94,6 +115,13 @@
         "uint64_t"
       ],
       "code": "typedef unsigned long long uint64_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "ulong"
+      ],
+      "code": "typedef unsigned long ulong;"
     },
     {
       "kind": "declaration",
@@ -108,6 +136,13 @@
         "u8"
       ],
       "code": "typedef uint8_t u8;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "byte"
+      ],
+      "code": "typedef unsigned char byte;"
     },
     {
       "kind": "typedef",
@@ -479,6 +514,13 @@
       "code": "struct audit_ifaces\n{\n void (*activity) (uintptr_t *, unsigned int);\n char *(*objsearch) (const char *, uintptr_t *, unsigned int);\n unsigned int (*objopen) (struct link_map *, Lmid_t, uintptr_t *);\n void (*preinit) (uintptr_t *);\n union\n {\n  uintptr_t (*symbind32) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n  uintptr_t (*symbind64) (Elf64_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n };\n union\n {\n  Elf32_Addr (*i86_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_i86_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf64_Addr (*x86_64_gnu_pltenter) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *, struct La_x86_64_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf32_Addr (*x32_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_x32_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n };\n union\n {\n   unsigned int (*i86_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, const struct La_i86_regs *,\n   struct La_i86_retval *, const char *);\n  unsigned int (*x86_64_gnu_pltexit) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *,\n   const struct La_x86_64_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n  unsigned int (*x32_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *,\n   const struct La_x32_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n };\n unsigned int (*objclose) (uintptr_t *);\n struct audit_ifaces *next;\n};"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "audit_ifaces"
+      ],
+      "code": "typedef struct audit_ifaces audit_ifaces;"
+    },
+    {
       "kind": "struct",
       "names": [
         "lzma_sha256_state"
@@ -694,6 +736,20 @@
         "sshbuf"
       ],
       "code": "struct sshbuf;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "ssh"
+      ],
+      "code": "typedef struct ssh ssh;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "sshbuf"
+      ],
+      "code": "typedef struct sshbuf sshbuf;"
     },
     {
       "kind": "typedef",

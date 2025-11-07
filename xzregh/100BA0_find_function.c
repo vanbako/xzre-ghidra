@@ -3,58 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_function(u8 * code_start, void * * func_start, void * * func_end, u8 * search_base, u8 * code_end, FuncFindType find_mode)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief locates the function boundaries.
- *
- *   @param code_start address to start searching from
- *   @param func_start if provided, will be filled with the function's start address
- *   @param func_end if provided, will be filled with the function's end address
- *   @param search_base lowest search address, where search will be aborted
- *   @param code_end address to stop searching at
- *   @param find_mode
- *   @return BOOL
- *
- * Upstream implementation excerpt (xzre/xzre_code/find_function.c):
- *     BOOL find_function(
- *     	u8 *code_start,
- *     	void **func_start,
- *     	void **func_end,
- *     	u8 *search_base,
- *     	u8 *code_end,
- *     	FuncFindType find_mode
- *     ){
- *     	u8 *res = NULL;
- *     	/** should we locate the function prologue? * /
- *     	if(func_start){
- *     		for(u8 *p = code_start;
- *     			search_base < p && !find_function_prologue(p, code_end, &res, find_mode);
- *     			--p);
- *     
- *     		if(!res || res == search_base && !find_function_prologue(search_base, code_end, NULL, find_mode)){
- *     			return FALSE;
- *     		}
- *     		*func_start = res;
- *     	}
- *     	/** should we locate the function epilogue? * /
- *     	if(func_end){
- *     		u8 *search_from = code_start + 1;
- *     		u8 *search_to = code_end - 4;
- *     		BOOL found;
- *     		for(;search_from < search_to && 
- *     			(found=find_function_prologue(search_from, code_end, NULL, find_mode)) == FALSE;
- *     			++search_from
- *     		);
- *     		// FIXME: in theory the first check is redundant, as it's covered by the second one
- *     		if(found || search_to != search_from || find_function_prologue(search_from, code_end, NULL, find_mode)){
- *     			code_end = search_from;
- *     		}
- *     		*func_end = code_end;
- *     	}
- *     	return TRUE;
- *     }
+ * AutoDoc: Combines the prologue scan with a forward sweep to determine both the start and end addresses of a function. Backdoor initialization relies on it when it needs exact bounds for copying original bytes or scheduling follow-up pattern searches.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_base,u8 *code_end,
                   FuncFindType find_mode)

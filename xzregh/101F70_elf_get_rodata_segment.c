@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_rodata_segment(elf_info_t * elf_info, u64 * pSize)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Obtains the address and size of the last readonly segment in the given ELF file
- *   this corresponds to the segment that typically contains .rodata
- *
- *   @param elf_info the parsed ELF context, which will be updated with the address and size of the rodata segment
- *   @param pSize variable that will be populated with the page-aligned segment size
- *   @return void* the page-aligned starting address of the segment
+ * AutoDoc: Locates the first read-only PT_LOAD segment that lives entirely after the executable code. It first asks `elf_get_code_segment` for the text range so it can ignore overlapping pages, then scans for PF_R-only segments, page-aligns their bounds, and picks the lowest segment whose start is beyond the end of `.text`. The result is cached in `elf_info_t` and handed to callers alongside its size so later routines (string searches, RELRO probes) can reuse the computed window.
  */
+
+#include "xzre_types.h"
+
 
 void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
 

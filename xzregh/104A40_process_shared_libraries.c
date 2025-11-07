@@ -3,14 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_shared_libraries(backdoor_shared_libraries_data_t * data)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief scans loaded libraries to identify interesting libraries
- *
- *   @param data input data for the function (will be duplicated, internally)
- *   @return BOOL TRUE if successful, FALSE otherwise
+ * AutoDoc: Wrapper that drives `process_shared_libraries_map`, fills the per-module elf_info structures, and exposes the hooks_data handle. `backdoor_setup` runs it up front to assemble all metadata required for later patching.
  */
+
+#include "xzre_types.h"
+
 
 BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
 

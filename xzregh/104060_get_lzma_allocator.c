@@ -3,19 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: lzma_allocator * __stdcall get_lzma_allocator(void)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief gets the fake LZMA allocator, used for imports resolution
- *   the "opaque" field of the structure holds a pointer to @see elf_info_t
- *
- *   @return lzma_allocator*
- *
- * Upstream implementation excerpt (xzre/xzre_code/get_lzma_allocator.c):
- *     lzma_allocator *get_lzma_allocator(void){
- *     	return &get_lzma_allocator_address()->allocator;
- *     }
+ * AutoDoc: Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand liblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the implant's `elf_info_t`.
  */
+
+#include "xzre_types.h"
+
 
 lzma_allocator * get_lzma_allocator(void)
 

@@ -3,23 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt_bitmask(backdoor_data_handle_t * data, instruction_search_ctx_t * search_ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Find the bitmask required to modify ld.so's private link_map::l_audit_any_plt state.
- *
- *   First, this function disassembles ld.so's _dl_audit_symbind_alt() to search for a sequence of MOVZ, OR, and TEST instructions that fetch the link_map::l_audit_any_plt.
- *
- *   This function then sets ldso_ctx::sshd_link_map_l_audit_any_plt_addr to the offset to the address of sshd's link_map::l_audit_any_plt flag;
- *
- *   This function also sets ldso_ctx::l_audit_any_plt_bitmask to the bitmask that sets the link_map::l_audit_any_plt flag.
- *
- *   This function also resolves a number of libc and libcrypto function addresses.
- *
- *   @param data
- *   @param search_ctx the instruction addresses to search as well as the offset and output registers of the instructions to match
- *   @return BOOL TRUE if successful, FALSE otherwise
+ * AutoDoc: Disassembles `_dl_audit_symbind_alt` to recover the load/test sequence for `link_map::l_audit_any_plt`, yielding both the flag address and the bitmask ld.so uses. The loader stores those values so it can flip the flag for sshd and libcrypto when masquerading as an audit module.
  */
+
+#include "xzre_types.h"
+
 
 BOOL find_link_map_l_audit_any_plt_bitmask
                (backdoor_data_handle_t *data,instruction_search_ctx_t *search_ctx)

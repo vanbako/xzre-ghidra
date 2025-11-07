@@ -155,9 +155,10 @@ if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
 fi
 
 if [[ "$CHECK_ONLY" -eq 0 ]]; then
-  python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
-    --comments-json "$AUTODOC_EXPORT" \
-    --xzregh-dir "$ROOT_DIR/xzregh"
+python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
+  --comments-json "$AUTODOC_EXPORT" \
+  --xzregh-dir "$ROOT_DIR/xzregh" \
+  --ensure-include '#include "xzre_types.h"'
 else
   echo "[check-only] skipped applying comments to xzregh; temporary artifacts removed on exit."
 fi

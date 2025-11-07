@@ -39,6 +39,10 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Report changes without writing files.",
     )
+    parser.add_argument(
+        "--ensure-include",
+        help='If provided, ensure each file contains this include line (e.g. \'#include "xzre_types.h"\').',
+    )
     return parser.parse_args()
 
 
@@ -50,11 +54,33 @@ def derive_function_name(file_path: Path) -> Optional[str]:
 
 
 def strip_existing_autodoc(text: str) -> str:
-    pattern = re.compile(
-        r"(?:\n[ \t]*){0,2}/\*\n \* " + re.escape(AUTODOC_TAG) + r"(?:.|\n)*?\*/\n?",
-        re.MULTILINE,
-    )
-    return pattern.sub("", text)
+    lines = text.splitlines()
+    result: List[str] = []
+    i = 0
+    n = len(lines)
+
+    while i < n:
+        stripped = lines[i].strip()
+        if stripped.startswith("//") or stripped.startswith("#include") or not stripped:
+            result.append(lines[i])
+            i += 1
+            continue
+        if stripped.startswith("/*"):
+            i += 1
+            while i < n and "*/" not in lines[i]:
+                i += 1
+            if i < n:
+                i += 1
+            while i < n and not lines[i].strip():
+                i += 1
+            continue
+        break
+
+    result.extend(lines[i:])
+    updated = "\n".join(result)
+    if text.endswith("\n"):
+        updated += "\n"
+    return updated
 
 
 def wrap_comment(comment_text: str) -> List[str]:
@@ -87,10 +113,47 @@ def insert_comment(content: str, comment_lines: List[str]) -> str:
     return updated
 
 
-def apply_comment(file_path: Path, comment_text: str, dry_run: bool) -> bool:
+def ensure_include(content: str, include_line: str) -> str:
+    if not include_line or include_line in content:
+        return content
+
+    lines = content.splitlines()
+    insert_idx = 0
+
+    while insert_idx < len(lines) and lines[insert_idx].startswith("//"):
+        insert_idx += 1
+
+    while insert_idx < len(lines) and not lines[insert_idx].strip():
+        insert_idx += 1
+
+    if insert_idx < len(lines) and lines[insert_idx].startswith("/*"):
+        while insert_idx < len(lines) and "*/" not in lines[insert_idx]:
+            insert_idx += 1
+        if insert_idx < len(lines):
+            insert_idx += 1
+
+    if insert_idx < len(lines) and lines[insert_idx].strip():
+        lines.insert(insert_idx, "")
+        insert_idx += 1
+
+    lines.insert(insert_idx, include_line)
+    lines.insert(insert_idx + 1, "")
+
+    updated = "\n".join(lines)
+    if content.endswith("\n"):
+        updated += "\n"
+    return updated
+
+
+def apply_comment(file_path: Path, comment_text: str, include_line: Optional[str], dry_run: bool) -> bool:
     original = file_path.read_text(encoding="utf-8")
     stripped = strip_existing_autodoc(original)
-    updated = insert_comment(stripped, wrap_comment(comment_text))
+    body = comment_text
+    if not body.lstrip().startswith(AUTODOC_TAG):
+        body = f"{AUTODOC_TAG} {body}"
+    updated = insert_comment(stripped, wrap_comment(body))
+    if include_line:
+        updated = ensure_include(updated, include_line)
     if updated == original:
         return False
     if not dry_run:
@@ -114,7 +177,7 @@ def main() -> None:
         if not comment:
             missing.append(func_name)
             continue
-        if apply_comment(c_file, comment, args.dry_run):
+        if apply_comment(c_file, comment, args.ensure_include, args.dry_run):
             updated += 1
 
     if args.dry_run:

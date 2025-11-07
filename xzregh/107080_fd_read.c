@@ -3,17 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_read(int fd, void * buffer, size_t count, libc_imports_t * funcs)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief reads data from the specified file descriptor
- *
- *   @param fd the file descriptor to read from
- *   @param buffer the buffer to read data to
- *   @param count number of bytes to read
- *   @param funcs imported libc functions
- *   @return ssize_t number of bytes read, or -1 on error
+ * AutoDoc: Wrapper around libc's read that retries on EINTR and honours the resolver-provided imports table. All socket reads during monitor spoofing go through it so the implant never depends on glibc symbols directly.
  */
+
+#include "xzre_types.h"
+
 
 ssize_t fd_read(int fd,void *buffer,size_t count,libc_imports_t *funcs)
 

@@ -3,40 +3,13 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_parse(Elf64_Ehdr * ehdr, elf_info_t * elf_info)
 /*
- * AutoDoc: Generated from upstream sources.
+ * AutoDoc: Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address, locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash buckets, version records, and GNU_RELRO metadata. Each pointer retrieved from the dynamic table is validated with `elf_contains_vaddr` so forged headers are rejected.
  *
- * Source summary (xzre/xzre.h):
- *   @brief Parses the given in-memory ELF file into elf_info
- *
- *   @param ehdr pointer to the beginning of the ELF header
- *   @param elf_info pointer to the structure that will hold the parsed information
- *   @return BOOL TRUE if parsing completed successfully, FALSE otherwise
- *
- * Upstream implementation excerpt (xzre/xzre_code/elf_parse.c):
- *     BOOL main_elf_parse(main_elf_t *main_elf){
- *     	if(!elf_parse(
- *     		main_elf->dynamic_linker_ehdr,
- *     		main_elf->elf_handles->dynamic_linker
- *     	)){
- *     		return FALSE;
- *     	}
- *     	Elf64_Sym *libc_stack_end_sym;
- *     	if(!(libc_stack_end_sym = elf_symbol_get(
- *     		main_elf->elf_handles->dynamic_linker,
- *     		STR_libc_stack_end,
- *     		STR_GLIBC_2_2_5
- *     	))){
- *     		return FALSE;
- *     	}
- *     	elf_info_t *dynamic_linker = main_elf->elf_handles->dynamic_linker;
- *     	void **libc_stack_end_ptr = (void *)PTRADD(dynamic_linker->elfbase, libc_stack_end_sym->st_value);
- *     	if(!process_is_sshd(dynamic_linker, *libc_stack_end_ptr)){
- *     		return FALSE;
- *     	}
- *     	*main_elf->__libc_stack_end = *libc_stack_end_ptr;
- *     	return TRUE;
- *     }
+ * It also enforces invariants such as 'only one PT_GNU_RELRO segment', derives the number of dynamic entries, and flips feature bits (`flags`) so later helpers know whether RELR, versym, or gnurelro data is present. Failure to locate the dynamic segment, find the required headers, or keep derived pointers inside mapped memory causes the parse to abort with FALSE.
  */
+
+#include "xzre_types.h"
+
 
 BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
 

@@ -3,26 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall c_strlen(char * str)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief returns length of c string
- *
- *   @param str pointer to c string
- *   @return ssize_t length of c string
- *
- * Upstream implementation excerpt (xzre/xzre_code/c_strlen.c):
- *     ssize_t c_strlen(char *str) {
- *         if (*str != '\0') {
- *             ssize_t len = 0;
- *             do {
- *                 ++len;
- *             } while (*(str + len) != '\0');
- *             return len;
- *         }
- *         return 0;
- *     }
+ * AutoDoc: Minimal strlen implementation that the loader can call before libc is safe to use. It shows up when scanning sshd buffers for protocol markers during the backdoor's environment checks.
  */
+
+#include "xzre_types.h"
+
 
 ssize_t c_strlen(char *str)
 

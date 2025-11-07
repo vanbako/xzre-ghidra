@@ -3,14 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall check_backdoor_state(global_context_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief checks if the backdoor state is the expected one (FIXME: which?)
- *
- *   @param ctx the global context
- *   @return BOOL TRUE if the backdoor state is in the expected state, FALSE otherwise
+ * AutoDoc: Sanity-checks the payload buffer and state machine before processing more command data, resetting the state on any inconsistency. The loader calls it before and after decryptions to avoid reusing corrupted payloads.
  */
+
+#include "xzre_types.h"
+
 
 BOOL check_backdoor_state(global_context_t *ctx)
 

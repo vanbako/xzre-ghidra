@@ -3,29 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_symbol_get_addr(elf_info_t * elf_info, EncodedStringId encoded_string_id)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief Looks up an ELF symbol from a parsed ELF, and returns its memory address
- *
- *   @param elf_info the parsed ELF context
- *   @param encoded_string_id string ID of the symbol name
- *   @return void* the address of the symbol
- *
- * Upstream implementation excerpt (xzre/xzre_code/elf_symbol_get_addr.c):
- *     void *elf_symbol_get_addr(elf_info_t *elf_info, EncodedStringId encoded_string_id){
- *     	Elf64_Sym *sym = elf_symbol_get(elf_info, encoded_string_id, 0);
- *     	if(!sym){
- *     		return NULL;
- *     	}
- *     
- *     	if(sym->st_value && sym->st_shndx){
- *     		return (void *)PTRADD(elf_info->elfbase, sym->st_value);
- *     	} else {
- *     		return NULL;
- *     	}
- *     }
+ * AutoDoc: Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are non-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates either the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.
  */
+
+#include "xzre_types.h"
+
 
 void * elf_symbol_get_addr(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 

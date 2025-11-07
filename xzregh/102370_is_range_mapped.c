@@ -3,16 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_range_mapped(u8 * addr, u64 length, global_context_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief verify if a memory range is mapped
- *
- *   @param addr the start address
- *   @param length the length of the range to check
- *   @param ctx a structure with a libc_import_t field at offset 0x10
- *   @return BOOL TRUE if the whole range is mapped, FALSE otherwise
+ * AutoDoc: Userland page-probe that avoids importing `mincore(2)`. The helper aligns the requested address downward, then walks one page at a time toward `addr + length`, invoking the host's `pselect` with NULL fd sets and the page pointer passed in as the signal mask argument. If `pselect` faults with EFAULT the page is unmapped, otherwise the loop continues until every page succeeds. The routine relies on `ctx->libc_imports` to surface both `pselect` and `__errno_location`, and it refuses to touch addresses below 0x01000000 to avoid probing NULL or vsyscall.
  */
+
+#include "xzre_types.h"
+
 
 BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
 

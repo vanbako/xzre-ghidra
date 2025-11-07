@@ -3,21 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_from_instruction(dasm_ctx_t * dctx, secret_data_shift_cursor_t * cursor)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Upstream implementation excerpt (xzre/xzre_code/secret_data_append_from_instruction.c):
- *     BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx, secret_data_shift_cursor_t *cursor){
- *     	if(cursor->index <= 0x1C7
- *     	&& XZDASM_OPC(dctx->opcode) != X86_OPCODE_MOV
- *     	&& XZDASM_OPC(dctx->opcode) != X86_OPCODE_CMP
- *     	&& !XZDASM_TEST_MASK(0x410100000101, 3, dctx->opcode)
- *     	){
- *     		global_ctx->secret_data[cursor->byte_index] |= 1 << (cursor->bit_index);
- *     	}
- *     	++cursor->index;
- *     	return TRUE;
- *     }
+ * AutoDoc: Evaluates a decoded instruction and, when it matches expected patterns, sets a bit inside `global_ctx->secret_data`. The loader uses it to encode "this function looks intact" attestation bits that are later consumed during payload decryption.
  */
+
+#include "xzre_types.h"
+
 
 BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_cursor_t *cursor)
 

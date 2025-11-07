@@ -3,6 +3,7 @@
 
 import json
 import os
+import codecs
 
 from ghidra.program.model.data import CategoryPath
 
@@ -20,12 +21,12 @@ def load_doc_map(path):
     if not path or not os.path.exists(path):
         printerr("Type doc metadata not found: {}".format(path))
         return {}
-    with open(path, "r", encoding="utf-8") as handle:
+    with codecs.open(path, "r", "utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
         printerr("Type doc metadata must be a JSON object.")
         return {}
-    return {str(k): str(v) for k, v in data.items()}
+    return dict((k, v) for k, v in data.items())
 
 
 def find_datatype(dtm, name):

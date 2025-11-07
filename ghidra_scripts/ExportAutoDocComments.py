@@ -4,6 +4,7 @@
 
 import json
 import os
+import codecs
 
 
 def parse_args(raw_args):
@@ -32,7 +33,7 @@ def main():
         if comment:
             comment_map[func.getName()] = comment
 
-    with open(output_file, "w", encoding="utf-8") as fh:
+    with codecs.open(output_file, "w", "utf-8") as fh:
         json.dump(comment_map, fh, indent=2, sort_keys=True, ensure_ascii=False)
 
     print("Exported {} comments to {}".format(len(comment_map), output_file))

@@ -3,11 +3,11 @@
 // Calling convention: __stdcall
 // Prototype: void * __stdcall j_tls_get_addr(tls_index * ti)
 /*
- * AutoDoc: Generated from reverse engineering.
- *
- * Summary:
- *   Thin wrapper around the imported __tls_get_addr resolver so the loader can patch the GOT entry while still reaching the original implementation.
+ * AutoDoc: Jumps straight into the real `__tls_get_addr` resolver. The backdoor keeps both this wrapper and the trapping stub exported so it can redirect GOT entries during setup: hooks call `j_tls_get_addr` when they want the legit resolver, while the relocation constants point at the trapping version until the loader patches things up.
  */
+
+#include "xzre_types.h"
+
 
 void * j_tls_get_addr(tls_index *ti)
 
