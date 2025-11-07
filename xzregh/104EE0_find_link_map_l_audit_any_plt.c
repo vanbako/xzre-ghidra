@@ -2,10 +2,11 @@
 // Function: find_link_map_l_audit_any_plt @ 0x104EE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt(backdoor_data_handle_t * data, ptrdiff_t libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+
+
 /*
  * AutoDoc: Locates the offset of `l_audit_any_plt` inside `struct link_map` and then invokes the bitmask helper to learn how to toggle it. Together they arm the backdoor with everything needed to mark target modules as audited.
  */
-
 #include "xzre_types.h"
 
 
@@ -36,7 +37,7 @@ BOOL find_link_map_l_audit_any_plt
   instruction_search_ctx_t local_c0;
   u8 *local_80;
   u64 local_78;
-  _union_75 local_70;
+  _union_76 local_70;
   byte local_60;
   int local_58;
   u8 *local_50;

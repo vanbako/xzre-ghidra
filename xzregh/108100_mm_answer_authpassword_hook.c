@@ -2,10 +2,11 @@
 // Function: mm_answer_authpassword_hook @ 0x108100
 // Calling convention: __stdcall
 // Prototype: int __stdcall mm_answer_authpassword_hook(ssh * ssh, int sock, sshbuf * m)
+
+
 /*
  * AutoDoc: Synthesises a `MONITOR_ANS_AUTHPASSWORD` reply and pushes it to the monitor channel, effectively granting password authentication. `run_backdoor_commands` drops this hook in when the attacker asks for a session without presenting real credentials.
  */
-
 #include "xzre_types.h"
 
 

@@ -2,10 +2,11 @@
 // Function: sshd_find_monitor_struct @ 0x103DB0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_monitor_struct(elf_info_t * elf, string_references_t * refs, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Collects monitor field references across multiple sshd routines, tallies the overlapping addresses, and picks the consensus location of `struct monitor`. Stage two writes that pointer into the global context so the mm_* hooks can reach sshd's privileged monitor state.
  */
-
 #include "xzre_types.h"
 
 

@@ -2,10 +2,11 @@
 // Function: init_ldso_ctx @ 0x102770
 // Calling convention: __stdcall
 // Prototype: void __stdcall init_ldso_ctx(ldso_ctx_t * ldso_ctx)
+
+
 /*
  * AutoDoc: Restores saved ld.so bookkeeping values (audit flags, _dl_audit pointers, naudit count) back to their pre-hook state. The loader calls it whenever hook setup fails so the dynamic linker is left consistent before sshd resumes execution.
  */
-
 #include "xzre_types.h"
 
 

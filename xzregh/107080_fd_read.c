@@ -2,10 +2,11 @@
 // Function: fd_read @ 0x107080
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_read(int fd, void * buffer, size_t count, libc_imports_t * funcs)
+
+
 /*
  * AutoDoc: Wrapper around libc's read that retries on EINTR and honours the resolver-provided imports table. All socket reads during monitor spoofing go through it so the implant never depends on glibc symbols directly.
  */
-
 #include "xzre_types.h"
 
 

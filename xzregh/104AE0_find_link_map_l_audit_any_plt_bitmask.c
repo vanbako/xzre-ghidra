@@ -2,10 +2,11 @@
 // Function: find_link_map_l_audit_any_plt_bitmask @ 0x104AE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_audit_any_plt_bitmask(backdoor_data_handle_t * data, instruction_search_ctx_t * search_ctx)
+
+
 /*
  * AutoDoc: Disassembles `_dl_audit_symbind_alt` to recover the load/test sequence for `link_map::l_audit_any_plt`, yielding both the flag address and the bitmask ld.so uses. The loader stores those values so it can flip the flag for sshd and libcrypto when masquerading as an audit module.
  */
-
 #include "xzre_types.h"
 
 
@@ -35,7 +36,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
   byte bVar17;
   u8 *local_80;
   u64 local_78;
-  _union_75 local_70;
+  _union_76 local_70;
   byte local_60;
   uint local_58;
   u8 *local_50;

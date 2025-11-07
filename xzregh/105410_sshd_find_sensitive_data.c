@@ -2,10 +2,11 @@
 // Function: sshd_find_sensitive_data @ 0x105410
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_sensitive_data(elf_info_t * sshd, elf_info_t * libcrypto, string_references_t * refs, imported_funcs_t * funcs, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Combines the xcalloc and getenv heuristics, evaluates scores across multiple sshd routines, and records the winning `sensitive_data` pointer in the global context. It also resolves additional libcrypto helpers that the payload extraction path requires.
  */
-
 #include "xzre_types.h"
 
 

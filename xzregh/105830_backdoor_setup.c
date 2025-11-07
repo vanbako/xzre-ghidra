@@ -2,10 +2,11 @@
 // Function: backdoor_setup @ 0x105830
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall backdoor_setup(backdoor_setup_params_t * params)
+
+
 /*
  * AutoDoc: Performs the full installation workflow: gathers link_map handles, initialises shared globals, resolves libc/libcrypto imports, rewires ld.so's audit structures, updates GOT/PLT entries, and seeds secret-data tracking. On success it leaves `backdoor_symbind64` registered so every sshd→libcrypto call is mediated by the backdoor.
  */
-
 #include "xzre_types.h"
 
 

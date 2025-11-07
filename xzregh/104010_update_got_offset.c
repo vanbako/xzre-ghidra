@@ -2,10 +2,11 @@
 // Function: update_got_offset @ 0x104010
 // Calling convention: __stdcall
 // Prototype: void __stdcall update_got_offset(elf_entry_ctx_t * ctx)
+
+
 /*
  * AutoDoc: Stores the cpuid random-symbol GOT offset constant in the entry context so absolute addresses can be reconstructed without relocations. It pairs with `update_got_address` when the loader patches the resolver slot.
  */
-
 #include "xzre_types.h"
 
 

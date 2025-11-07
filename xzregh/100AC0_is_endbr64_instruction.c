@@ -2,10 +2,11 @@
 // Function: is_endbr64_instruction @ 0x100AC0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall is_endbr64_instruction(u8 * code_start, u8 * code_end, u32 low_mask_part)
+
+
 /*
  * AutoDoc: Checks whether the bytes at the current cursor encode an ENDBR64 landing pad, including the CET prefix variations. The pattern scanners call it so the backdoor can safely step past CET trampolines while carving prologues to patch.
  */
-
 #include "xzre_types.h"
 
 

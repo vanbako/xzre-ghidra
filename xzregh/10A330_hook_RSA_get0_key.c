@@ -2,10 +2,11 @@
 // Function: hook_RSA_get0_key @ 0x10A330
 // Calling convention: __stdcall
 // Prototype: void __stdcall hook_RSA_get0_key(RSA * r, BIGNUM * * n, BIGNUM * * e, BIGNUM * * d)
+
+
 /*
  * AutoDoc: Lets the backdoor inspect an RSA key whenever sshd queries it by calling `run_backdoor_commands` first, then invoking the genuine RSA_get0_key. The original behaviour is preserved, but the implant captures the key material for later use.
  */
-
 #include "xzre_types.h"
 
 

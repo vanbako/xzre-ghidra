@@ -2,10 +2,11 @@
 // Function: bignum_serialize @ 0x107320
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall bignum_serialize(u8 * buffer, u64 bufferSize, u64 * pOutSize, BIGNUM * bn, imported_funcs_t * funcs)
+
+
 /*
  * AutoDoc: Writes a BIGNUM into a length-prefixed buffer, dropping redundant leading zeros so later hashes are stable. Key-fingerprinting helpers call it before running SHA256 over RSA or DSA parameters.
  */
-
 #include "xzre_types.h"
 
 

@@ -2,12 +2,13 @@
 // Function: elf_symbol_get @ 0x101880
 // Calling convention: __stdcall
 // Prototype: Elf64_Sym * __stdcall elf_symbol_get(elf_info_t * elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version)
+
+
 /*
  * AutoDoc: Symbol resolver that trusts the GNU hash table the loader extracted earlier. After setting a telemetry bit it walks each hash bucket, validates the bucket and chain addresses, and replays the classic GNU hash lookup to pull `Elf64_Sym` entries out of `.dynsym`. When a candidate symbol has a non-zero value and section index, the helper hashes the associated string with `get_string_id` and compares it against the requested encoded id.
  *
  * If a symbol version is supplied it additionally consults `.gnu.version`/`.gnu.version_d`: the version index is read from `versym`, then matched against the verifier definitions by walking the linked `verdef` list and comparing the underlying string id. Returning NULL means either the target symbol is missing, the module did not advertise GNU hash+version tables, or the string/relocation pointers failed validation.
  */
-
 #include "xzre_types.h"
 
 

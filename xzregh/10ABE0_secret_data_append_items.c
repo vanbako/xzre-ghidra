@@ -2,10 +2,11 @@
 // Function: secret_data_append_items @ 0x10ABE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall secret_data_append_items(secret_data_item_t * items, u64 items_count, appender * appender)
+
+
 /*
  * AutoDoc: Iterates an array of secret_data_item descriptors, assigning indexes on the fly and invoking the supplied appender for each. This batches the dozens of integrity checks that run during backdoor_setup into a single call.
  */
-
 #include "xzre_types.h"
 
 

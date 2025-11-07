@@ -39,6 +39,7 @@ OBJECT_PATH="$ROOT_DIR/xzre/liblzma_la-crc64-fast.o"
 SCRIPT_PATH="$ROOT_DIR/ghidra_scripts"
 HEADER_PATH="$SCRIPT_PATH/xzre_types_import_preprocessed.h"
 XZREGH_TYPES="$ROOT_DIR/xzregh/xzre_types.h"
+XZREGH_EXPORT_DIR="$ROOT_DIR/xzregh"
 GENERATED_DIR="$SCRIPT_PATH/generated"
 ARCHIVE_PATH="$PROJECT_DIR/${PROJECT_NAME}_portable.zip"
 
@@ -50,6 +51,7 @@ if [[ "$CHECK_ONLY" -eq 1 ]]; then
   PROJECT_NAME="xzre_ghidra_check"
   HEADER_PATH="$CHECK_TMP/xzre_types_import_preprocessed.h"
   XZREGH_TYPES="$CHECK_TMP/xzre_types.h"
+  XZREGH_EXPORT_DIR="$CHECK_TMP/xzregh"
   GENERATED_DIR="$CHECK_TMP/generated"
   ARCHIVE_PATH="$CHECK_TMP/${PROJECT_NAME}_portable.zip"
   echo "[check-only] running refresh in sandbox: $CHECK_TMP"
@@ -69,6 +71,7 @@ LINKER_MAP_JSON="$META_DIR/linker_map.json"
 mkdir -p "$PROJECT_DIR"
 mkdir -p "$(dirname "$HEADER_PATH")"
 mkdir -p "$(dirname "$XZREGH_TYPES")"
+mkdir -p "$XZREGH_EXPORT_DIR"
 mkdir -p "$GENERATED_DIR"
 mkdir -p "$(dirname "$ARCHIVE_PATH")"
 
@@ -136,6 +139,7 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -postScript ApplySignaturesFromHeader.py \
   -postScript InstallEnumEquates.py "$HEADER_PATH" \
   -postScript FixAllParamStorage.py \
+  -postScript ApplyLocalsFromXzreSources.py \
   "${TYPE_DOCS_POST[@]}"
 
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \
@@ -145,6 +149,15 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -postScript ApplyAutoDocComments.py comments="$AUTODOC_GENERATED" \
   -postScript ExportAutoDocComments.py output="$AUTODOC_EXPORT" \
   -postScript ExportProjectArchive.py archive="$ARCHIVE_PATH"
+
+echo "Clearing existing decomp files under $XZREGH_EXPORT_DIR"
+find "$XZREGH_EXPORT_DIR" -maxdepth 1 -type f -name '*.c' -delete
+
+"$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \
+  -process liblzma_la-crc64-fast.o \
+  -noanalysis \
+  -scriptPath "$SCRIPT_PATH" \
+  -postScript ExportFunctionDecompilations.py "out=$XZREGH_EXPORT_DIR" "types=$XZREGH_TYPES"
 
 if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
   echo "warning: exported AutoDoc comments differ from metadata/functions_autodoc.json" >&2
@@ -157,7 +170,7 @@ fi
 if [[ "$CHECK_ONLY" -eq 0 ]]; then
 python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
   --comments-json "$AUTODOC_EXPORT" \
-  --xzregh-dir "$ROOT_DIR/xzregh" \
+  --xzregh-dir "$XZREGH_EXPORT_DIR" \
   --ensure-include '#include "xzre_types.h"'
 else
   echo "[check-only] skipped applying comments to xzregh; temporary artifacts removed on exit."

@@ -2,10 +2,11 @@
 // Function: mm_answer_keyallowed_hook @ 0x108EA0
 // Calling convention: __stdcall
 // Prototype: int __stdcall mm_answer_keyallowed_hook(ssh * ssh, int sock, sshbuf * m)
+
+
 /*
  * AutoDoc: Runs the decrypted payload (including optional privilege escalation) and then tail-calls the genuine `mm_answer_keyallowed`. It is the final hook that executes attacker commands after the forged monitor packet crafted in `sshd_proxy_elevate` arrives.
  */
-
 #include "xzre_types.h"
 
 

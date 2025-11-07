@@ -2,10 +2,11 @@
 // Function: sshd_proxy_elevate @ 0x108270
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_proxy_elevate(monitor_data_t * args, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Crafts and transmits a forged MONITOR_REQ_KEYALLOWED packet through the monitor socket to obtain root privileges in sandboxed sshd instances. It’s invoked by run_backdoor_commands when the current context lacks the ability to execute the payload directly.
  */
-
 #include "xzre_types.h"
 
 

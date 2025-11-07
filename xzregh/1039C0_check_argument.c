@@ -2,10 +2,11 @@
 // Function: check_argument @ 0x1039C0
 // Calling convention: __stdcall
 // Prototype: char * __stdcall check_argument(char arg_first_char, char * arg_name)
+
+
 /*
  * AutoDoc: Scans a dash-prefixed argv string for forbidden switches like '-d'/'-D' or unusual characters and returns a pointer only when a disallowed flag is present. `process_is_sshd` relies on it to detect debug or non-daemon modes so the implant can stand down in those cases.
  */
-
 #include "xzre_types.h"
 
 

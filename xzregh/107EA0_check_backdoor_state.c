@@ -2,10 +2,11 @@
 // Function: check_backdoor_state @ 0x107EA0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall check_backdoor_state(global_context_t * ctx)
+
+
 /*
  * AutoDoc: Sanity-checks the payload buffer and state machine before processing more command data, resetting the state on any inconsistency. The loader calls it before and after decryptions to avoid reusing corrupted payloads.
  */
-
 #include "xzre_types.h"
 
 

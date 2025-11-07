@@ -2,10 +2,11 @@
 // Function: elf_get_code_segment @ 0x101EC0
 // Calling convention: __stdcall
 // Prototype: void * __stdcall elf_get_code_segment(elf_info_t * elf_info, u64 * pSize)
+
+
 /*
  * AutoDoc: Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent calls use the cached values to avoid rescanning the headers.
  */
-
 #include "xzre_types.h"
 
 

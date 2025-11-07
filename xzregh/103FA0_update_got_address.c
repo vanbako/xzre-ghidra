@@ -2,10 +2,11 @@
 // Function: update_got_address @ 0x103FA0
 // Calling convention: __stdcall
 // Prototype: void * __stdcall update_got_address(elf_entry_ctx_t * entry_ctx)
+
+
 /*
  * AutoDoc: Disassembles the `__tls_get_addr` PLT trampoline, derives the real GOT entry address, and caches it in the entry context. Stage two depends on that pointer to find ld.so's ELF header and to swap the cpuid GOT slot over to its handler.
  */
-
 #include "xzre_types.h"
 
 

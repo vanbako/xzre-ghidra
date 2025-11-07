@@ -1605,7 +1605,7 @@
       },
       {
         "name": "hash_buckets",
-        "type": "u32 *"
+        "type": "gnu_hash_table_t *"
       },
       {
         "name": "hash_chain",

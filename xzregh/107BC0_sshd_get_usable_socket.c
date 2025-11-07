@@ -2,10 +2,11 @@
 // Function: sshd_get_usable_socket @ 0x107BC0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_usable_socket(int * pSock, int socket_index, libc_imports_t * imports)
+
+
 /*
  * AutoDoc: Iterates file descriptors by probing shutdown() results to pick the next usable socket. This gives the implant a way to reuse sshd’s sockets even when the monitor pointer is unavailable.
  */
-
 #include "xzre_types.h"
 
 

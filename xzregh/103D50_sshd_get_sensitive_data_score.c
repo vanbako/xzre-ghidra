@@ -2,10 +2,11 @@
 // Function: sshd_get_sensitive_data_score @ 0x103D50
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+
+
 /*
  * AutoDoc: Combines the scores from `do_child`, `main`, and `demote_sensitive_data` to produce a single confidence value for the candidate pointer. Only when this aggregate passes the threshold does the backdoor store the address and proceed with secret-data extraction.
  */
-
 #include "xzre_types.h"
 
 

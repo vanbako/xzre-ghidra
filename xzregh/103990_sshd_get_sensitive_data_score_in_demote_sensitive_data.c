@@ -2,10 +2,11 @@
 // Function: sshd_get_sensitive_data_score_in_demote_sensitive_data @ 0x103990
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_demote_sensitive_data(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+
+
 /*
  * AutoDoc: Looks inside `demote_sensitive_data` for direct references to the candidate pointer and emits a high score when it finds them. That strong signal helps the backdoor confirm it has located the structure that carries host keys between privilege transitions.
  */
-
 #include "xzre_types.h"
 
 

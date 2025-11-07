@@ -2,10 +2,11 @@
 // Function: sshd_get_sensitive_data_score_in_do_child @ 0x103870
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_do_child(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+
+
 /*
  * AutoDoc: Counts characteristic memory accesses to the candidate `sensitive_data` pointer inside `do_child` and produces a confidence score. The aggregate scorer uses this value to decide whether the pointer is safe to treat as the real host-key cache.
  */
-
 #include "xzre_types.h"
 
 

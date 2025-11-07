@@ -2,10 +2,11 @@
 // Function: fd_write @ 0x1070F0
 // Calling convention: __stdcall
 // Prototype: ssize_t __stdcall fd_write(int fd, void * buffer, size_t count, libc_imports_t * funcs)
+
+
 /*
  * AutoDoc: Companion wrapper for write with EINTR handling. It powers every forged monitor message the backdoor emits while replaying commands or proxying authentication traffic.
  */
-
 #include "xzre_types.h"
 
 

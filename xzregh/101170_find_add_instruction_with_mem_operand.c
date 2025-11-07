@@ -2,10 +2,11 @@
 // Function: find_add_instruction_with_mem_operand @ 0x101170
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_add_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
+
+
 /*
  * AutoDoc: Locates ADD instructions that update memory at a given address, capturing the scale of the increment. The scoring logic uses it to observe how sshd mutates counters so the implant can tag sensitive buffers.
  */
-
 #include "xzre_types.h"
 
 

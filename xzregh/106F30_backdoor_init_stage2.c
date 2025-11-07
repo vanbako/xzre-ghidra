@@ -2,10 +2,11 @@
 // Function: backdoor_init_stage2 @ 0x106F30
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall backdoor_init_stage2(elf_entry_ctx_t * ctx, u64 * caller_frame, void * * cpuid_got_addr, backdoor_cpuid_reloc_consts_t * reloc_consts)
+
+
 /*
  * AutoDoc: Executes inside the hijacked cpuid resolver, initialises shared globals and hook contexts, and loops until they're ready; once prepared it jumps into `backdoor_setup` and then restores the cpuid context. If setup fails, it still harvests cpuid data so the resolver can fall back cleanly.
  */
-
 #include "xzre_types.h"
 
 

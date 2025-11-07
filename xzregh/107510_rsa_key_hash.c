@@ -2,31 +2,32 @@
 // Function: rsa_key_hash @ 0x107510
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall rsa_key_hash(RSA * rsa, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
+
+
 /*
  * AutoDoc: Serialises the RSA exponent and modulus and hashes them with SHA256 using the resolved imports. The monitor hooks rely on that digest to confirm that an attacker request refers to a known host key before acting.
  */
-
 #include "xzre_types.h"
 
 
 BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {
-  BOOL result_2;
-  BOOL result;
-  BOOL result_1;
-  long lVar1;
-  u8 *puVar2;
-  u64 expSize;
-  BIGNUM *e;
-  BIGNUM *n;
-  u8 local_1042 [4114];
+  u64 uVar1;
+  BOOL BVar2;
+  long lVar3;
+  BOOL *pBVar4;
+  u8 buf [4106];
   u64 written;
+  u64 expSize;
+  BIGNUM *n;
+  u8 local_1042 [16];
+  BOOL result;
   
-  puVar2 = local_1042 + 0x10;
-  for (lVar1 = 0xffa; lVar1 != 0; lVar1 = lVar1 + -1) {
-    *puVar2 = '\0';
-    puVar2 = puVar2 + 1;
+  pBVar4 = &result;
+  for (lVar3 = 0xffa; lVar3 != 0; lVar3 = lVar3 + -1) {
+    *(undefined1 *)pBVar4 = 0;
+    pBVar4 = (BOOL *)((long)pBVar4 + 1);
   }
   local_1042[0] = '\0';
   local_1042[1] = '\0';
@@ -44,21 +45,21 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   local_1042[0xd] = '\0';
   local_1042[0xe] = '\0';
   local_1042[0xf] = '\0';
-  expSize = 0;
+  written = 0;
   if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&
      (funcs->RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
-    e = (BIGNUM *)0x0;
+    expSize = 0;
     n = (BIGNUM *)0x0;
-    (*funcs->RSA_get0_key)(rsa,&n,&e,(BIGNUM **)0x0);
-    if ((e != (BIGNUM *)0x0) && (n != (BIGNUM *)0x0)) {
-      result_2 = bignum_serialize(local_1042,0x100a,&expSize,e,funcs);
-      written = expSize;
-      if (((result_2 != 0) &&
-          ((expSize < 0x100a &&
-           (result = bignum_serialize(local_1042 + expSize,0x100a - expSize,&expSize,n,funcs),
-           result != 0)))) && (written + expSize < 0x100b)) {
-        result_1 = sha256(local_1042,written + expSize,mdBuf,mdBufSize,funcs);
-        return result_1;
+    (*funcs->RSA_get0_key)(rsa,&n,(BIGNUM **)&expSize,(BIGNUM **)0x0);
+    if ((expSize != 0) && (n != (BIGNUM *)0x0)) {
+      BVar2 = bignum_serialize(local_1042,0x100a,&written,(BIGNUM *)expSize,funcs);
+      uVar1 = written;
+      if (((BVar2 != 0) &&
+          ((written < 0x100a &&
+           (BVar2 = bignum_serialize(local_1042 + written,0x100a - written,&written,n,funcs),
+           BVar2 != 0)))) && (uVar1 + written < 0x100b)) {
+        BVar2 = sha256(local_1042,uVar1 + written,mdBuf,mdBufSize,funcs);
+        return BVar2;
       }
     }
   }

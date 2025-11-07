@@ -2,10 +2,11 @@
 // Function: process_shared_libraries_map @ 0x104660
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_shared_libraries_map(link_map * r_map, backdoor_shared_libraries_data_t * data)
+
+
 /*
  * AutoDoc: Traverses the r_debug chain to collect link_map pointers for sshd, libcrypto, ld.so, liblzma, libc, and libsystemd, sanity-checking each and resolving RSA PLT stubs. The consolidated handles populate the shared data block consumed by the rest of the loader.
  */
-
 #include "xzre_types.h"
 
 

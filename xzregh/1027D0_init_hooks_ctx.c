@@ -2,10 +2,11 @@
 // Function: init_hooks_ctx @ 0x1027D0
 // Calling convention: __stdcall
 // Prototype: int __stdcall init_hooks_ctx(backdoor_hooks_ctx_t * ctx)
+
+
 /*
  * AutoDoc: Initialises the backdoor_hooks_ctx structure with pointers to the implant's hook stubs and shared data slots. backdoor_init_stage2 invokes it as a readiness check and interprets the 0x65 return value as "shared globals not wired yet" so setup can retry safely.
  */
-
 #include "xzre_types.h"
 
 

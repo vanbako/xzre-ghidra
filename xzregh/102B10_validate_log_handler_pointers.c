@@ -2,10 +2,11 @@
 // Function: validate_log_handler_pointers @ 0x102B10
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall validate_log_handler_pointers(void * addr1, void * addr2, void * search_base, u8 * code_end, string_references_t * refs, global_context_t * global)
+
+
 /*
  * AutoDoc: Walks the sshd code that assigns log_handler and log_handler_ctx to confirm a pair of addresses really correspond to those globals. Stage two performs this validation before patching the slots so the mm_log_handler hook does not corrupt unrelated memory.
  */
-
 #include "xzre_types.h"
 
 

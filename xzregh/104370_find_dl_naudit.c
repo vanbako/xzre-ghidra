@@ -2,10 +2,11 @@
 // Function: find_dl_naudit @ 0x104370
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_dl_naudit(elf_info_t * dynamic_linker_elf, elf_info_t * libcrypto_elf, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+
+
 /*
  * AutoDoc: Matches the `_dl_naudit` and `_dl_audit` references inside ld.so, records their offsets within `__rtld_global_ro`, and resolves a few extra crypto routines. Those offsets let the implant point ld.so's global audit state at its forged interface.
  */
-
 #include "xzre_types.h"
 
 

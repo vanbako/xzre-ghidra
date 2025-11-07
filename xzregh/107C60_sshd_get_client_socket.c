@@ -2,10 +2,11 @@
 // Function: sshd_get_client_socket @ 0x107C60
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_client_socket(global_context_t * ctx, int * pSocket, int socket_index, SocketMode socket_direction)
+
+
 /*
  * AutoDoc: Returns either the read or write end of the client connection using the monitor struct when available, otherwise falling back to the socket scanner. It’s called right before forging or replaying monitor traffic.
  */
-
 #include "xzre_types.h"
 
 

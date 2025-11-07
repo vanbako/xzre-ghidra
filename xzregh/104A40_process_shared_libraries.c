@@ -2,10 +2,11 @@
 // Function: process_shared_libraries @ 0x104A40
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_shared_libraries(backdoor_shared_libraries_data_t * data)
+
+
 /*
  * AutoDoc: Wrapper that drives `process_shared_libraries_map`, fills the per-module elf_info structures, and exposes the hooks_data handle. `backdoor_setup` runs it up front to assemble all metadata required for later patching.
  */
-
 #include "xzre_types.h"
 
 

@@ -2,10 +2,11 @@
 // Function: hook_EVP_PKEY_set1_RSA @ 0x10A2D0
 // Calling convention: __stdcall
 // Prototype: int __stdcall hook_EVP_PKEY_set1_RSA(EVP_PKEY * pkey, RSA * key)
+
+
 /*
  * AutoDoc: Observes when sshd wraps an RSA key in an EVP_PKEY, hands the key to `run_backdoor_commands`, and then falls through to the true OpenSSL routine. It guarantees the backdoor sees host keys even if the decrypt hook never fires.
  */
-
 #include "xzre_types.h"
 
 

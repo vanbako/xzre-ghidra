@@ -2,10 +2,11 @@
 // Function: find_instruction_with_mem_operand_ex @ 0x101060
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_instruction_with_mem_operand_ex(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, int opcode, void * mem_address)
+
+
 /*
  * AutoDoc: Performs a generic sweep for any instruction that touches memory, applying a caller-supplied predicate to filter the operands. The loader routes specialised searches through it when reconstructing complex data flows in sshd.
  */
-
 #include "xzre_types.h"
 
 

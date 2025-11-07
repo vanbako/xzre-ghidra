@@ -2,10 +2,11 @@
 // Function: sshd_get_sshbuf @ 0x107A20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sshbuf(sshbuf * sshbuf, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Walks the cached monitor structure to locate the sshbuf that carries key-exchange data, falling back to heuristics if necessary. The payload executor calls it before mining modulus bytes from the session state.
  */
-
 #include "xzre_types.h"
 
 

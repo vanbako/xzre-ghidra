@@ -2,10 +2,11 @@
 // Function: sshd_get_sensitive_data_score_in_main @ 0x103910
 // Calling convention: __stdcall
 // Prototype: int __stdcall sshd_get_sensitive_data_score_in_main(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+
+
 /*
  * AutoDoc: Checks sshd's main routine for loads and stores against the candidate sensitive-data slots and weights them into a score. The loader folds this signal into the overall confidence metric before exposing the pointer to other hooks.
  */
-
 #include "xzre_types.h"
 
 

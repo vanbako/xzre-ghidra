@@ -2,10 +2,11 @@
 // Function: elf_find_string_references @ 0x102D30
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall elf_find_string_references(elf_info_t * elf_info, string_references_t * refs)
+
+
 /*
  * AutoDoc: Indexes interesting .rodata strings and the instructions that reference them, recording surrounding function bounds for later lookups. Many downstream heuristics consume this table to locate sshd routines and global pointers tied to sensitive behaviour.
  */
-
 #include "xzre_types.h"
 
 

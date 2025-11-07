@@ -2,17 +2,18 @@
 // Function: x86_dasm @ 0x100020
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall x86_dasm(dasm_ctx_t * ctx, u8 * code_start, u8 * code_end)
+
+
 /*
  * AutoDoc: Implements a minimal x86-64 decoder that walks a buffer while tracking instruction metadata. Every search helper in the loader uses it to reason about sshd and ld.so machine code without linking a full disassembler, giving the backdoor reliable patch coordinates at runtime.
  */
-
 #include "xzre_types.h"
 
 
 BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  _union_77 *p_Var1;
+  _union_78 *p_Var1;
   u8 *puVar2;
   byte bVar3;
   byte bVar4;
@@ -35,7 +36,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   byte *pbVar21;
   dasm_ctx_t *pdVar22;
   ulong uVar23;
-  _union_75 *p_Var24;
+  _union_76 *p_Var24;
   bool bVar25;
   bool bVar26;
   byte bVar27;
@@ -105,7 +106,7 @@ LAB_001001c9:
               p_Var24 = &ctx->field2_0x10;
               for (lVar14 = 0x12; lVar14 != 0; lVar14 = lVar14 + -1) {
                 *(undefined4 *)p_Var24 = 0;
-                p_Var24 = (_union_75 *)((long)p_Var24 + (ulong)bVar27 * -8 + 4);
+                p_Var24 = (_union_76 *)((long)p_Var24 + (ulong)bVar27 * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;

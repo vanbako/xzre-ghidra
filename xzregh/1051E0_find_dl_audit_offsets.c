@@ -2,10 +2,11 @@
 // Function: find_dl_audit_offsets @ 0x1051E0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_dl_audit_offsets(backdoor_data_handle_t * data, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+
+
 /*
  * AutoDoc: Orchestrates the discovery of `l_name`, `_dl_naudit`, `_dl_audit`, and `l_audit_any_plt` offsets, resolving extra libcrypto helpers along the way. `backdoor_setup` relies on the resulting hooks context to rewire ld.so's audit plumbing to its own symbind handler.
  */
-
 #include "xzre_types.h"
 
 

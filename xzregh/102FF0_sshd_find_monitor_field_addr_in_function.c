@@ -2,10 +2,11 @@
 // Function: sshd_find_monitor_field_addr_in_function @ 0x102FF0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_find_monitor_field_addr_in_function(u8 * code_start, u8 * code_end, u8 * data_start, u8 * data_end, void * * monitor_field_ptr_out, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Tracks how sshd loads a monitor field and passes it to mm_request_send, returning the field's address when the pattern matches. The implant leverages this to recover the monitor receive/transmit descriptors it later hijacks for its covert channel.
  */
-
 #include "xzre_types.h"
 
 
@@ -27,7 +28,7 @@ BOOL sshd_find_monitor_field_addr_in_function
   u8 *code_end_00;
   u8 *local_80;
   u64 local_78;
-  _union_75 local_70;
+  _union_76 local_70;
   byte local_60;
   int local_58;
   u8 *local_50;

@@ -2,10 +2,11 @@
 // Function: find_reg2reg_instruction @ 0x10AC40
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_reg2reg_instruction(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx)
+
+
 /*
  * AutoDoc: Searches a code range for register-to-register moves while enforcing CET-safe constraints. The implant uses it when it needs to follow pointer copies without touching memory operands during its pattern hunts.
  */
-
 #include "xzre_types.h"
 
 

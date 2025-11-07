@@ -2,10 +2,11 @@
 // Function: contains_null_pointers @ 0x107170
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall contains_null_pointers(void * * pointers, uint num_pointers)
+
+
 /*
  * AutoDoc: Scans a pointer array for NULL entries. The crypto helpers call it to ensure every required OpenSSL import was resolved before attempting decrypt or verify operations.
  */
-
 #include "xzre_types.h"
 
 

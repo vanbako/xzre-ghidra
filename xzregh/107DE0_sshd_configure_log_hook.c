@@ -2,10 +2,11 @@
 // Function: sshd_configure_log_hook @ 0x107DE0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_configure_log_hook(cmd_arguments_t * cmd_flags, global_context_t * ctx)
+
+
 /*
  * AutoDoc: Installs the mm_log_handler hook and optionally suppresses logging unless the thread is privileged. This prevents sshd from spewing tell-tale errors while the backdoor intercepts monitor messages.
  */
-
 #include "xzre_types.h"
 
 

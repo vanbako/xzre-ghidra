@@ -2,17 +2,13 @@
 // Function: __tls_get_addr @ 0x10D008
 // Calling convention: __stdcall
 // Prototype: void * __stdcall __tls_get_addr(tls_index * ti)
-/*
- * AutoDoc: Generated from reverse engineering.
- *
- * Summary:
- *   Placeholder for __tls_get_addr that merely raises halt_baddata(); the object relies on the dynamic loader to wire in the system resolver.
- *
- * Notes:
- *   - Keeps the GOT slot and relocation records intact while preventing accidental execution of an unimplemented body.
- */
+
 
 /* WARNING: Control flow encountered bad instruction data */
+/* Same trap pattern as `lzma_check_init`: the compiled object ships a dummy `__tls_get_addr` that
+   halts if invoked. The loader adjusts the GOT to point at `j_tls_get_addr` (and eventually the
+   host's resolver); leaving this stub in place makes unexpected execution obvious and prevents the
+   payload from silently calling an incomplete resolver. */
 
 void * __tls_get_addr(tls_index *ti)
 

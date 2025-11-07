@@ -2,10 +2,11 @@
 // Function: find_lea_instruction @ 0x100EB0
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_lea_instruction(u8 * code_start, u8 * code_end, u64 displacement)
+
+
 /*
  * AutoDoc: Finds the next LEA instruction in the stream and returns operand details. The backdoor uses this to recover base-plus-offset calculations that point at data structures it later siphons.
  */
-
 #include "xzre_types.h"
 
 
@@ -16,6 +17,7 @@ BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
   long lVar2;
   undefined4 *puVar3;
   byte bVar4;
+  dasm_ctx_t dctx;
   undefined4 local_80 [10];
   int local_58;
   u64 local_50;

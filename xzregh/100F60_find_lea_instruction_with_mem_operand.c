@@ -2,10 +2,11 @@
 // Function: find_lea_instruction_with_mem_operand @ 0x100F60
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_lea_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
+
+
 /*
  * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
  */
-
 #include "xzre_types.h"
 
 

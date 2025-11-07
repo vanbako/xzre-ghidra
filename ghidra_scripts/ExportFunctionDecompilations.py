@@ -4,6 +4,9 @@
 # Defaults to writing under ./xzregh relative to the current working directory.
 # @category xzre
 
+from __future__ import unicode_literals
+
+import codecs
 import os
 import re
 import shutil
@@ -84,8 +87,12 @@ def main():
         types_path = resolve_path(types_path)
         if types_path and os.path.exists(types_path):
             dest_name = os.path.basename(types_path) or "xzre_types.h"
-            shutil.copyfile(types_path, os.path.join(out_dir, dest_name))
-            print("Copied {} to {}".format(types_path, os.path.join(out_dir, dest_name)))
+            dest_path = os.path.join(out_dir, dest_name)
+            if os.path.abspath(types_path) == os.path.abspath(dest_path):
+                print("Type header already present at {}; skipping copy".format(dest_path))
+            else:
+                shutil.copyfile(types_path, dest_path)
+                print("Copied {} to {}".format(types_path, dest_path))
         else:
             printerr("Type header not found: {}".format(types_path))
 
@@ -110,7 +117,7 @@ def main():
             entry_hex = "0x{:X}".format(entry)
             success, text = decompile_function(ifc, func, monitor)
             path = make_unique_path(out_dir, entry_hex[2:], func.getName())
-            with open(path, "w") as handle:
+            with codecs.open(path, "w", encoding="utf-8") as handle:
                 handle.write("// {}\n".format(path))
                 handle.write("// Function: {} @ {}\n".format(func.getName(), entry_hex))
                 handle.write("// Calling convention: {}\n".format(func.getCallingConventionName()))

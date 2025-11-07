@@ -2,10 +2,11 @@
 // Function: backdoor_init @ 0x10A794
 // Calling convention: __stdcall
 // Prototype: void * __stdcall backdoor_init(elf_entry_ctx_t * state, u64 * caller_frame)
+
+
 /*
  * AutoDoc: Initialises the IFUNC entry context, locates the cpuid GOT slot, and swaps it to point at `backdoor_init_stage2`. From here the loader can patch ld.so and install the audit-based hooks without leaving the resolver frame.
  */
-
 #include "xzre_types.h"
 
 

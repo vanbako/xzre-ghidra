@@ -2,10 +2,11 @@
 // Function: sshd_get_sensitive_data_address_via_krb5ccname @ 0x103340
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_krb5ccname(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, void * * sensitive_data_out, elf_info_t * elf)
+
+
 /*
  * AutoDoc: Follows the code path that calls getenv("KRB5CCNAME") and watches how the result flows into sshd's globals, returning the address when it matches the `sensitive_data.host_keys` pattern. The backdoor falls back to this heuristic when the xcalloc pattern fails so it can still recover the host-key structure before arming its hooks.
  */
-
 #include "xzre_types.h"
 
 
@@ -30,7 +31,7 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   undefined1 local_d8 [88];
   u8 *local_80;
   u64 local_78;
-  _union_75 local_70;
+  _union_76 local_70;
   byte local_60;
   int local_58;
   long local_50;

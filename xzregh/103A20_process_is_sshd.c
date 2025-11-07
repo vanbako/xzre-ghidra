@@ -2,10 +2,11 @@
 // Function: process_is_sshd @ 0x103A20
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall process_is_sshd(elf_info_t * elf, u8 * stack_end)
+
+
 /*
  * AutoDoc: Walks argv and envp from the saved stack pointer to ensure the process really is sshd, no debug flags are active, and no suspicious environment settings are present. Backdoor setup treats this as a hard prerequisite before it touches ld.so or installs any hooks.
  */
-
 #include "xzre_types.h"
 
 

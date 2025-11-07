@@ -2,10 +2,11 @@
 // Function: find_link_map_l_name @ 0x104080
 // Calling convention: __stdcall
 // Prototype: BOOL __stdcall find_link_map_l_name(backdoor_data_handle_t * data_handle, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+
+
 /*
  * AutoDoc: Walks ld.so's link_map records to locate the `l_name` string slot, verifies the offsets inside `_dl_audit_*`, and resolves several libc/libcrypto helpers. The backdoor needs that offset to rewrite libcrypto's link_map so the audit machinery accepts its injected interface.
  */
-
 #include "xzre_types.h"
 
 

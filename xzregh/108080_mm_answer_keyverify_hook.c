@@ -2,10 +2,11 @@
 // Function: mm_answer_keyverify_hook @ 0x108080
 // Calling convention: __stdcall
 // Prototype: int __stdcall mm_answer_keyverify_hook(ssh * ssh, int sock, sshbuf * m)
+
+
 /*
  * AutoDoc: Intercepts the monitor key-verify request and writes the prebuilt response stored in the global context directly to the socket, skipping sshd's verification logic. It is paired with the keyallowed hook so the forged monitor exchange looks legitimate while the backdoor takes over.
  */
-
 #include "xzre_types.h"
 
 
