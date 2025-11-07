@@ -69,3 +69,6 @@ Reference workspace for the headless Ghidra project that captures the `xzre` mal
 - If you only need to inspect or share the latest decomp, use the text exports under `xzregh/` and the portable archive instead of the live `.rep`.
 
 This README, `AGENTS.md`, and `PROGRESS.md` are the touchpoints for scaling the reverse-engineering effort across humans and AI operators. Keep them current, and the refresh pipeline will keep doing the heavy lifting.
+
+## Attribution
+- This workspace builds on public research from the [smx-smx/xzre](https://github.com/smx-smx/xzre) repository, whose published analysis and artifacts provided the starting knowledge base for the project.
