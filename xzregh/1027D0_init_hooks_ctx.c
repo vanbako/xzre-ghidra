@@ -34,7 +34,7 @@ int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
       ctx->_unknown1632[5] = '\0';
       ctx->_unknown1632[6] = '\0';
       ctx->_unknown1632[7] = '\0';
-      ctx->symbind64 = (_func_65 *)&LAB_001028d0;
+      ctx->symbind64 = (audit_symbind64_fn)&LAB_001028d0;
       ctx->hook_RSA_public_decrypt = hook_RSA_public_decrypt;
       ctx->hook_RSA_get0_key = hook_RSA_get0_key;
       ctx->mm_log_handler = mm_log_handler_hook;

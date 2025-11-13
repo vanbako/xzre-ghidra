@@ -69,13 +69,13 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     if (key == (EC_KEY *)0x0) {
       return FALSE;
     }
-    if (piVar1->EC_KEY_get0_public_key == (_func_36 *)0x0) {
+    if (piVar1->EC_KEY_get0_public_key == (pfn_EC_KEY_get0_public_key_t)0x0) {
       return FALSE;
     }
-    if (piVar1->EC_KEY_get0_group == (_func_37 *)0x0) {
+    if (piVar1->EC_KEY_get0_group == (pfn_EC_KEY_get0_group_t)0x0) {
       return FALSE;
     }
-    if (piVar1->EC_POINT_point2oct == (_func_35 *)0x0) {
+    if (piVar1->EC_POINT_point2oct == (pfn_EC_POINT_point2oct_t)0x0) {
       return FALSE;
     }
     p = (*piVar1->EC_KEY_get0_public_key)(key);

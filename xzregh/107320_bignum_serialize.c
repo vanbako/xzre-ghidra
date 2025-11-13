@@ -18,9 +18,9 @@ BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,importe
   ulong cnt;
   
   if (((funcs != (imported_funcs_t *)0x0 && 5 < bufferSize) && (bn != (BIGNUM *)0x0)) &&
-     (funcs->BN_bn2bin != (_func_58 *)0x0)) {
+     (funcs->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)) {
     *pOutSize = 0;
-    if (((funcs->BN_num_bits != (_func_39 *)0x0) &&
+    if (((funcs->BN_num_bits != (pfn_BN_num_bits_t)0x0) &&
         (uVar1 = (*funcs->BN_num_bits)(bn), uVar1 < 0x4001)) &&
        ((uVar1 = uVar1 + 7 >> 3, uVar1 != 0 && (cnt = (ulong)uVar1, cnt <= bufferSize - 6)))) {
       buffer[4] = '\0';

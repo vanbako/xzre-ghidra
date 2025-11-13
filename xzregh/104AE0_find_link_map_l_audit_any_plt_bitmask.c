@@ -26,50 +26,50 @@ BOOL find_link_map_l_audit_any_plt_bitmask
   BOOL BVar6;
   u32 uVar7;
   lzma_allocator *allocator;
-  _func_47 *p_Var8;
+  pfn_EVP_DecryptInit_ex_t ppVar8;
   lzma_allocator *allocator_00;
-  _func_18 *p_Var9;
+  pfn_getuid_t ppVar9;
   link_map *plVar10;
   undefined1 uVar11;
   byte bVar12;
   long lVar13;
-  _func_18 **pp_Var14;
+  pfn_getuid_t *pppVar14;
   int iVar15;
   u8 *code_start;
   byte bVar16;
   u8 *code_ptr;
-  _func_47 *decrypt_stub;
-  _func_18 *libc_getuid_stub;
+  pfn_EVP_DecryptInit_ex_t decrypt_stub;
+  pfn_getuid_t libc_getuid_stub;
   u8 *matched_field;
-  _union_78 local_70;
+  x86_prefix_state_t local_70;
   byte local_60;
   uint local_58;
-  _func_18 *local_50;
+  pfn_getuid_t local_50;
   ulong local_40;
   
   bVar16 = 0;
   BVar6 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);
   if (BVar6 != FALSE) {
     code_start = search_ctx->start_addr;
-    pp_Var14 = &libc_getuid_stub;
+    pppVar14 = &libc_getuid_stub;
     for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
-      *(undefined4 *)pp_Var14 = 0;
-      pp_Var14 = (_func_18 **)((long)pp_Var14 + (ulong)bVar16 * -8 + 4);
+      *(undefined4 *)pppVar14 = 0;
+      pppVar14 = (pfn_getuid_t *)((long)pppVar14 + (ulong)bVar16 * -8 + 4);
     }
     allocator = get_lzma_allocator();
     allocator->opaque = data->elf_handles->libcrypto;
-    p_Var8 = (_func_47 *)lzma_alloc(0xc08,allocator);
+    ppVar8 = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,allocator);
     piVar1 = search_ctx->imported_funcs;
-    piVar1->EVP_DecryptInit_ex = p_Var8;
-    if (p_Var8 != (_func_47 *)0x0) {
+    piVar1->EVP_DecryptInit_ex = ppVar8;
+    if (ppVar8 != (pfn_EVP_DecryptInit_ex_t)0x0) {
       piVar1->resolved_imports_count = piVar1->resolved_imports_count + 1;
     }
     plVar2 = piVar1->libc;
     allocator_00 = get_lzma_allocator();
     allocator_00->opaque = data->elf_handles->libc;
-    p_Var9 = (_func_18 *)lzma_alloc(0x348,allocator_00);
-    plVar2->getuid = p_Var9;
-    if (p_Var9 != (_func_18 *)0x0) {
+    ppVar9 = (pfn_getuid_t)lzma_alloc(0x348,allocator_00);
+    plVar2->getuid = ppVar9;
+    if (ppVar9 != (pfn_getuid_t)0x0) {
       plVar2->resolved_imports_count = plVar2->resolved_imports_count + 1;
     }
     iVar15 = 0;
@@ -112,12 +112,12 @@ BOOL find_link_map_l_audit_any_plt_bitmask
               }
             }
           }
-          p_Var9 = (_func_18 *)0x0;
+          ppVar9 = (pfn_getuid_t)0x0;
           if (((local_70._0_4_ & 0x100) != 0) &&
-             (p_Var9 = local_50, ((uint)local_70.decoded.modrm & 0xff00ff00) == 0x5000000)) {
-            p_Var9 = local_50 + (long)libc_getuid_stub + (long)matched_field;
+             (ppVar9 = local_50, ((uint)local_70.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+            ppVar9 = local_50 + (long)libc_getuid_stub + (long)matched_field;
           }
-          if (((_func_18 *)(ulong)*(uint *)&search_ctx->offset_to_match == p_Var9) &&
+          if (((pfn_getuid_t)(ulong)*(uint *)&search_ctx->offset_to_match == ppVar9) &&
              (((int)(uint)*(ushort *)search_ctx->output_register >> (uVar11 & 0x1f) & 1U) != 0)) {
             *(undefined1 *)((long)search_ctx->output_register + 2) = uVar5;
             iVar15 = 1;

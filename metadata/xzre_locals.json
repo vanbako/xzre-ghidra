@@ -3312,7 +3312,7 @@
       },
       {
         "name": "audit_stub",
-        "type": "_func_64 *"
+        "type": "dl_audit_symbind_alt_fn"
       },
       {
         "name": "import_allocator",
@@ -3341,7 +3341,7 @@
       },
       {
         "name": "audit_stub",
-        "type": "_func_64 *"
+        "type": "dl_audit_symbind_alt_fn"
       },
       {
         "name": "naudit_slot",
@@ -3400,11 +3400,11 @@
       },
       {
         "name": "decrypt_stub",
-        "type": "_func_47 *"
+        "type": "pfn_EVP_DecryptInit_ex_t"
       },
       {
         "name": "libc_getuid_stub",
-        "type": "_func_18 *"
+        "type": "pfn_getuid_t"
       },
       {
         "name": "matched_field",
@@ -3417,7 +3417,7 @@
     "locals": [
       {
         "name": "audit_stub",
-        "type": "_func_64 *"
+        "type": "dl_audit_symbind_alt_fn"
       },
       {
         "name": "search_state",
@@ -3425,11 +3425,11 @@
       },
       {
         "name": "write_stub",
-        "type": "_func_23 *"
+        "type": "pfn_write_t"
       },
       {
         "name": "pselect_stub",
-        "type": "_func_24 *"
+        "type": "pfn_pselect_t"
       }
     ]
   },
@@ -3442,7 +3442,7 @@
       },
       {
         "name": "audit_stub",
-        "type": "_func_64 *"
+        "type": "dl_audit_symbind_alt_fn"
       },
       {
         "name": "hooks_ctx",

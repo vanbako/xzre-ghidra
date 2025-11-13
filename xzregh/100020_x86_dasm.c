@@ -13,7 +13,7 @@
 BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  _union_80 *p_Var1;
+  x86_rex_prefix_t *pxVar1;
   u8 *puVar2;
   byte bVar3;
   byte bVar4;
@@ -35,7 +35,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   byte *pbVar20;
   dasm_ctx_t *pdVar21;
   ulong uVar22;
-  _union_78 *p_Var23;
+  x86_prefix_state_t *pxVar23;
   BOOL bVar24;
   BOOL has_bytes_remaining;
   byte bVar26;
@@ -88,10 +88,10 @@ LAB_001001c9:
           }
           if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (bVar6 == 0x1e)) {
             if (pbVar14 + 1 < code_end) {
-              p_Var23 = &ctx->prefix;
+              pxVar23 = &ctx->prefix;
               for (lVar13 = 0x12; lVar13 != 0; lVar13 = lVar13 + -1) {
-                *(undefined4 *)p_Var23 = 0;
-                p_Var23 = (_union_78 *)((long)p_Var23 + (ulong)bVar26 * -8 + 4);
+                *(undefined4 *)pxVar23 = 0;
+                pxVar23 = (x86_prefix_state_t *)((long)pxVar23 + (ulong)bVar26 * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
@@ -301,8 +301,8 @@ LAB_001004e1:
             (ctx->prefix).decoded.rex.rex_byte = bVar16 | 2;
           }
           if ((pbVar14[1] & 0x20) == 0) {
-            p_Var1 = &(ctx->prefix).decoded.rex;
-            p_Var1->rex_byte = p_Var1->rex_byte | 1;
+            pxVar1 = &(ctx->prefix).decoded.rex;
+            pxVar1->rex_byte = pxVar1->rex_byte | 1;
           }
           if (2 < (byte)((bVar3 & 0x1f) - 1)) {
             return FALSE;
@@ -312,8 +312,8 @@ LAB_001004e1:
           bVar6 = bVar6 & 0x1f;
           (ctx->prefix).decoded.vex_byte3 = bVar16;
           if (-1 < (char)bVar16) {
-            p_Var1 = &(ctx->prefix).decoded.rex;
-            p_Var1->rex_byte = p_Var1->rex_byte | 8;
+            pxVar1 = &(ctx->prefix).decoded.rex;
+            pxVar1->rex_byte = pxVar1->rex_byte | 8;
           }
           uVar11 = uVar11 << 8;
           *(uint *)(ctx->opcode_window + 3) = uVar11;

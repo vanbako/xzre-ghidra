@@ -35,8 +35,9 @@ LAB_00102393:
       do {
         local_38 = 0;
         plVar1 = ctx->libc_imports;
-        if (((plVar1 == (libc_imports_t *)0x0) || (plVar1->__errno_location == (_func_26 *)0x0)) ||
-           (plVar1->pselect == (_func_24 *)0x0)) goto LAB_00102393;
+        if (((plVar1 == (libc_imports_t *)0x0) ||
+            (plVar1->__errno_location == (pfn___errno_location_t)0x0)) ||
+           (plVar1->pselect == (pfn_pselect_t)0x0)) goto LAB_00102393;
         local_30 = 1;
         iVar3 = (*plVar1->pselect)(1,(fd_set *)0x0,(fd_set *)0x0,(fd_set *)0x0,(timespec *)&local_38
                                    ,sigmask);

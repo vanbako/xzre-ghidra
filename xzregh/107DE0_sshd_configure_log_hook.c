@@ -32,7 +32,8 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
   if (((((cmd_flags == (cmd_arguments_t *)0x0) || (psVar2 == (sshd_log_ctx_t *)0x0)) ||
        (puVar6 = (ulong *)psVar2->log_handler_ptr, puVar6 == (ulong *)0x0)) ||
       ((puVar3 = (ulong *)psVar2->log_handler_ctx_ptr, puVar3 == (ulong *)0x0 ||
-       (psVar2->mm_log_handler == (_func_63 *)0x0)))) || (psVar2->log_hooking_possible == FALSE)) {
+       (psVar2->mm_log_handler == (mm_log_handler_fn)0x0)))) ||
+     (psVar2->log_hooking_possible == FALSE)) {
     return FALSE;
   }
   bVar1 = cmd_flags->flags1;

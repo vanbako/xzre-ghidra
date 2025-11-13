@@ -26,8 +26,8 @@ ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)
     return 0;
   }
   if ((((funcs == (libc_imports_t *)0x0 || fd < 0) || (buffer == (void *)0x0)) ||
-      (funcs->write == (_func_23 *)0x0)) ||
-     (count_00 = count, funcs->__errno_location == (_func_26 *)0x0)) {
+      (funcs->write == (pfn_write_t)0x0)) ||
+     (count_00 = count, funcs->__errno_location == (pfn___errno_location_t)0x0)) {
 LAB_0010711f:
     count = 0xffffffffffffffff;
   }

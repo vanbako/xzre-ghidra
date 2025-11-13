@@ -49,7 +49,8 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
   local_660[0xf] = '\0';
   if ((((dsa != (DSA *)0x0) && (ctx != (global_context_t *)0x0)) &&
       (piVar1 = ctx->imported_funcs, piVar1 != (imported_funcs_t *)0x0)) &&
-     ((piVar1->DSA_get0_pqg != (_func_33 *)0x0 && (piVar1->DSA_get0_pub_key != (_func_34 *)0x0)))) {
+     ((piVar1->DSA_get0_pqg != (pfn_DSA_get0_pqg_t)0x0 &&
+      (piVar1->DSA_get0_pub_key != (pfn_DSA_get0_pub_key_t)0x0)))) {
     local_6a0 = (BIGNUM *)0x0;
     local_698 = (BIGNUM *)0x0;
     local_690 = (BIGNUM *)0x0;

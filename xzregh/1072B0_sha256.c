@@ -13,7 +13,7 @@
 BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {
-  _func_56 *p_Var1;
+  pfn_EVP_Digest_t ppVar1;
   int iVar2;
   BOOL BVar3;
   EVP_MD *type;
@@ -24,11 +24,12 @@ BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *fu
     BVar3 = FALSE;
   }
   else {
-    p_Var1 = funcs->EVP_Digest;
+    ppVar1 = funcs->EVP_Digest;
     BVar3 = FALSE;
-    if ((p_Var1 != (_func_56 *)0x0) && (BVar3 = FALSE, funcs->EVP_sha256 != (_func_38 *)0x0)) {
+    if ((ppVar1 != (pfn_EVP_Digest_t)0x0) &&
+       (BVar3 = FALSE, funcs->EVP_sha256 != (pfn_EVP_sha256_t)0x0)) {
       type = (*funcs->EVP_sha256)();
-      iVar2 = (*p_Var1)(data,count,mdBuf,(uint *)0x0,type,(ENGINE *)0x0);
+      iVar2 = (*ppVar1)(data,count,mdBuf,(uint *)0x0,type,(ENGINE *)0x0);
       BVar3 = (BOOL)(iVar2 == 1);
     }
   }

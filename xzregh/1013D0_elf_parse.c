@@ -19,7 +19,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   uint uVar1;
   uint uVar2;
   uint uVar3;
-  _union_4 _Var4;
+  Elf64_DynValue EVar4;
   Elf64_Rela *pEVar5;
   Elf64_Rela *pEVar6;
   Elf64_Relr *pEVar7;
@@ -31,7 +31,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   BOOL BVar13;
   int iVar14;
   Elf64_Dyn *vaddr;
-  _union_4 *p_Var15;
+  Elf64_DynValue *pEVar15;
   int iVar16;
   long lVar17;
   Elf64_Xword EVar18;
@@ -110,14 +110,14 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       *(int *)&elf_info->dyn_num_entries = iVar14;
       BVar13 = elf_contains_vaddr(elf_info,vaddr,uVar23,4);
       if (BVar13 != FALSE) {
-        p_Var15 = &vaddr->d_un;
+        pEVar15 = &vaddr->d_un;
         verdef_present = FALSE;
         size = 0xffffffffffffffff;
         size_00 = 0xffffffffffffffff;
         EVar18 = 0xffffffffffffffff;
         puVar25 = (uint *)0x0;
         for (iVar16 = 0; iVar14 != iVar16; iVar16 = iVar16 + 1) {
-          lVar17 = ((Elf64_Dyn *)(p_Var15 + -1))->d_tag;
+          lVar17 = ((Elf64_Dyn *)(pEVar15 + -1))->d_tag;
           if (lVar17 == 0) {
             *(int *)&elf_info->dyn_num_entries = iVar16;
             break;
@@ -126,41 +126,41 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
             if (lVar17 < 0x17) {
               switch(lVar17) {
               case 2:
-                EVar18 = p_Var15->d_val;
+                EVar18 = pEVar15->d_val;
                 break;
               case 5:
-                elf_info->strtab = (char *)*(Elf64_Xword *)p_Var15;
+                elf_info->strtab = (char *)*(Elf64_Xword *)pEVar15;
                 break;
               case 6:
-                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)p_Var15;
+                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)pEVar15;
                 break;
               case 7:
-                elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)p_Var15;
+                elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)pEVar15;
                 break;
               case 8:
-                size_00 = p_Var15->d_val;
+                size_00 = pEVar15->d_val;
               }
             }
             else {
               switch(lVar17) {
               case 0x17:
-                elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)p_Var15;
+                elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)pEVar15;
                 break;
               case 0x18:
                 goto switchD_0010157d_caseD_18;
               case 0x1e:
-                bVar11 = *(byte *)p_Var15 & 8;
+                bVar11 = *(byte *)pEVar15 & 8;
                 goto LAB_00101650;
               case 0x23:
-                size = p_Var15->d_val;
+                size = pEVar15->d_val;
                 break;
               case 0x24:
-                elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)p_Var15;
+                elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)pEVar15;
               }
             }
           }
           else if (lVar17 == 0x6ffffffb) {
-            bVar11 = *(byte *)p_Var15 & 1;
+            bVar11 = *(byte *)pEVar15 & 1;
 LAB_00101650:
             if (bVar11 != 0) {
 switchD_0010157d_caseD_18:
@@ -173,28 +173,28 @@ switchD_0010157d_caseD_18:
                 return FALSE;
               }
               if (lVar17 == 0x6ffffef5) {
-                puVar25 = (uint *)p_Var15->d_val;
+                puVar25 = (uint *)pEVar15->d_val;
               }
             }
             else if (lVar17 == 0x6ffffff0) {
-              _Var4.d_val = *(Elf64_Xword *)p_Var15;
+              EVar4.d_val = *(Elf64_Xword *)pEVar15;
               elf_info->flags = elf_info->flags | 0x10;
-              elf_info->versym = (Elf64_Versym *)_Var4;
+              elf_info->versym = (Elf64_Versym *)EVar4;
             }
           }
           else if (lVar17 == 0x6ffffffd) {
             verdef_present = TRUE;
-            elf_info->verdef_num = *(Elf64_Xword *)p_Var15;
+            elf_info->verdef_num = *(Elf64_Xword *)pEVar15;
           }
           else {
             if (lVar17 == 0x7fffffff) {
               return FALSE;
             }
             if (lVar17 == 0x6ffffffc) {
-              elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)p_Var15;
+              elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)pEVar15;
             }
           }
-          p_Var15 = p_Var15 + 2;
+          pEVar15 = pEVar15 + 2;
         }
         pEVar5 = elf_info->plt_relocs;
         if (pEVar5 != (Elf64_Rela *)0x0) {

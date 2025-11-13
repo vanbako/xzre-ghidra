@@ -26,8 +26,8 @@ ssize_t fd_read(int fd,void *buffer,size_t count,libc_imports_t *funcs)
   if (count == 0) {
     return 0;
   }
-  if ((((fd < 0) || (funcs == (libc_imports_t *)0x0)) || (funcs->read == (_func_25 *)0x0)) ||
-     (count_00 = count, funcs->__errno_location == (_func_26 *)0x0)) {
+  if ((((fd < 0) || (funcs == (libc_imports_t *)0x0)) || (funcs->read == (pfn_read_t)0x0)) ||
+     (count_00 = count, funcs->__errno_location == (pfn___errno_location_t)0x0)) {
 LAB_0010709e:
     count = 0xffffffffffffffff;
   }

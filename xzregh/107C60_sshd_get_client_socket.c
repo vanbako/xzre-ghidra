@@ -47,7 +47,8 @@ BOOL sshd_get_client_socket
       client_fd._0_1_ = 0;
       plVar4 = ctx->libc_imports;
       if (((-1 < fd) && (plVar4 != (libc_imports_t *)0x0)) &&
-         ((plVar4->read != (_func_25 *)0x0 && (plVar4->__errno_location != (_func_26 *)0x0)))) {
+         ((plVar4->read != (pfn_read_t)0x0 &&
+          (plVar4->__errno_location != (pfn___errno_location_t)0x0)))) {
         do {
           sVar2 = (*plVar4->read)(fd,&client_fd,0);
           piVar3 = (*plVar4->__errno_location)();

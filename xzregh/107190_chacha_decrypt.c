@@ -13,7 +13,7 @@
 BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *funcs)
 
 {
-  _func_47 *p_Var1;
+  pfn_EVP_DecryptInit_ex_t ppVar1;
   BOOL BVar2;
   int iVar3;
   EVP_CIPHER_CTX *ctx_00;
@@ -28,9 +28,9 @@ BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *func
       ((out != (u8 *)0x0 && (funcs != (imported_funcs_t *)0x0)))) &&
      ((piVar4 = funcs, BVar2 = contains_null_pointers(&funcs->EVP_CIPHER_CTX_new,6), BVar2 == FALSE
       && (ctx_00 = (*piVar4->EVP_CIPHER_CTX_new)(), ctx_00 != (EVP_CIPHER_CTX *)0x0)))) {
-    p_Var1 = funcs->EVP_DecryptInit_ex;
+    ppVar1 = funcs->EVP_DecryptInit_ex;
     type = (*funcs->EVP_chacha20)();
-    iVar3 = (*p_Var1)(ctx_00,type,(ENGINE *)0x0,key,iv);
+    iVar3 = (*ppVar1)(ctx_00,type,(ENGINE *)0x0,key,iv);
     if (iVar3 == 1) {
       iVar3 = (*funcs->EVP_DecryptUpdate)(ctx_00,out,&outl,in,inl);
       if (((iVar3 == 1) && (-1 < outl)) &&
@@ -40,7 +40,7 @@ BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *func
         return TRUE;
       }
     }
-    if (funcs->EVP_CIPHER_CTX_free != (_func_50 *)0x0) {
+    if (funcs->EVP_CIPHER_CTX_free != (pfn_EVP_CIPHER_CTX_free_t)0x0) {
       (*funcs->EVP_CIPHER_CTX_free)(ctx_00);
     }
   }

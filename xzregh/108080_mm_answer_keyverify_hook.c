@@ -35,7 +35,7 @@ int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
       **(undefined8 **)(lVar1 + 0xa0) = *(undefined8 *)(lVar1 + 0xd8);
       return 1;
     }
-    if (funcs->exit != (_func_19 *)0x0) {
+    if (funcs->exit != (pfn_exit_t)0x0) {
       (*funcs->exit)(0);
     }
   }

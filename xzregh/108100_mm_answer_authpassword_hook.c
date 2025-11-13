@@ -35,7 +35,7 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
   uStack_d = 0;
   uStack_c = 0;
   if ((m == (sshbuf *)0x0 || sock < 0) || (ssh == (ssh *)0x0)) {
-    if ((funcs != (libc_imports_t *)0x0) && (funcs->exit != (_func_19 *)0x0)) {
+    if ((funcs != (libc_imports_t *)0x0) && (funcs->exit != (pfn_exit_t)0x0)) {
       (*funcs->exit)(0);
     }
     iVar2 = 0;

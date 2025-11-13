@@ -28,7 +28,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   sshd_ctx_t *psVar7;
   void *pvVar8;
   undefined8 uVar9;
-  _func_19 *p_Var10;
+  pfn_exit_t ppVar10;
   global_context_t *ctx;
   BOOL BVar11;
   gid_t rgid;
@@ -122,7 +122,7 @@ LAB_00109216:
         }
       }
       else if (cVar2 == '\x03') {
-        if (((plVar4->system != (_func_22 *)0x0) && (8 < uVar18)) &&
+        if (((plVar4->system != (pfn_system_t)0x0) && (8 < uVar18)) &&
            (*(char *)((long)puVar22 + (uVar15 - 0x73)) == '\0')) {
           uVar9 = *(undefined8 *)(puVar22 + 0x57);
           rgid = (gid_t)((ulong)uVar9 >> 0x20);
@@ -242,7 +242,7 @@ LAB_001092e5:
         uVar6 = ctx->sock_read_buf_size;
         if ((uVar15 < uVar6) || (uVar18 = uVar18 - 0x72, uVar15 - uVar6 <= uVar18)) {
 LAB_00109471:
-          if (plVar4->exit != (_func_19 *)0x0) {
+          if (plVar4->exit != (pfn_exit_t)0x0) {
             (*plVar4->exit)(0);
           }
           return 0;
@@ -294,9 +294,9 @@ LAB_00109471:
   else if (uVar3 == 4) goto LAB_0010944f;
 LAB_00109429:
   if (((ctx->libc_imports != (libc_imports_t *)0x0) &&
-      (p_Var10 = ctx->libc_imports->exit, p_Var10 != (_func_19 *)0x0)) &&
+      (ppVar10 = ctx->libc_imports->exit, ppVar10 != (pfn_exit_t)0x0)) &&
      (ctx->payload_state = 0xffffffff, ctx->exit_flag != 0)) {
-    (*p_Var10)(0);
+    (*ppVar10)(0);
   }
 LAB_0010944f:
                     /* WARNING: Could not recover jumptable at 0x0010946f. Too many branches */

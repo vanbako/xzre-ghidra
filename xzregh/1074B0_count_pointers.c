@@ -24,7 +24,7 @@ BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
   size_t blockSize;
   
   if (((ptrs == (void **)0x0) || (funcs == (libc_imports_t *)0x0)) ||
-     (funcs->malloc_usable_size == (_func_17 *)0x0)) {
+     (funcs->malloc_usable_size == (pfn_malloc_usable_size_t)0x0)) {
     return FALSE;
   }
   sVar2 = (*funcs->malloc_usable_size)(ptrs);
