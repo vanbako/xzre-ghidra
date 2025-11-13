@@ -83,7 +83,7 @@ LAB_001001c9:
             pbVar14 = pbVar14 + 1;
             goto LAB_001003fa;
           }
-          if (((int)(uint)(byte)(&DAT_0010ad40)[bVar6 >> 3] >> (bVar6 & 7) & 1U) == 0) {
+          if (((int)(uint)(byte)(&dasm_twobyte_is_valid)[bVar6 >> 3] >> (bVar6 & 7) & 1U) == 0) {
             return FALSE;
           }
           if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (bVar6 == 0x1e)) {
@@ -130,7 +130,7 @@ LAB_001004a2:
             ctx->operand_size = 0;
           }
           pbVar15 = pbVar14;
-          if (((byte)(&DAT_0010ad20)[uVar17 >> 3 & 0x1f] >> (uVar17 & 7) & 1) == 0) {
+          if (((byte)(&dasm_twobyte_has_modrm)[uVar17 >> 3 & 0x1f] >> (uVar17 & 7) & 1) == 0) {
             if (((ctx->prefix).decoded.flags2 & 8) != 0) goto LAB_0010067d;
             ctx->instruction = code_start;
             pbVar14 = (byte *)(((long)pbVar14 - (long)code_start) + 1);
@@ -406,11 +406,11 @@ LAB_00100604:
             goto LAB_001008c5;
           }
           uVar12 = uVar17 >> 3 & 0x1f;
-          if (((byte)(&DAT_0010ad00)[uVar12] >> (uVar17 & 7) & 1) == 0) {
+          if (((byte)(&dasm_threebyte_0x38_is_valid)[uVar12] >> (uVar17 & 7) & 1) == 0) {
             return FALSE;
           }
           ctx->operand_size = 0;
-          bVar16 = (&DAT_0010ace0)[uVar12];
+          bVar16 = (&dasm_threebyte_has_modrm)[uVar12];
           ctx->insn_offset = (u8)((long)pbVar14 - (long)code_start);
           if ((bVar16 >> (uVar17 & 7) & 1) != 0) goto LAB_001008c5;
           if (((ctx->prefix).decoded.flags2 & 8) == 0) {
@@ -486,7 +486,7 @@ LAB_001001c5:
           }
           uVar11 = (uint)bVar16;
           uVar17 = bVar16 & 7;
-          if (((byte)(&DAT_0010ad80)[bVar16 >> 3] >> uVar17 & 1) != 0) {
+          if (((byte)(&dasm_onebyte_is_invalid)[bVar16 >> 3] >> uVar17 & 1) != 0) {
             return FALSE;
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)bVar16;
@@ -541,7 +541,7 @@ LAB_00100344:
           }
           sVar10 = (sbyte)uVar17;
           pbVar15 = pbVar14;
-          if (((int)(uint)(byte)(&DAT_0010ad60)[bVar16 >> 3] >> sVar10 & 1U) != 0)
+          if (((int)(uint)(byte)(&dasm_onebyte_has_modrm)[bVar16 >> 3] >> sVar10 & 1U) != 0)
           goto LAB_001008c5;
           if (3 < bVar16 - 0xa0) {
             bVar6 = (ctx->prefix).decoded.flags2;

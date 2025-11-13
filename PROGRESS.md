@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-13
+- Revalidated `xzregh/100020_x86_dasm.c` and found the helper still referenced `DAT_0010*` globals; traced the regression to the six opcode bitset entries in `metadata/linker_map.json` that were 0x50 bytes high relative to the actual rodata and rewrote their offsets to hit `dasm_threebyte_has_modrm`, `dasm_onebyte_is_invalid`, etc.
+- Ran `./scripts/refresh_xzre_project.sh` so the linker-map fix propagated through the headless project export; `xzregh/100020_x86_dasm.c` now pulls from the named bitset tables and no longer leaves undefined identifiers behind in helper builds.
+- Next: audit the rest of the `.rodata` entries inside `metadata/linker_map.json` for similar drift so future helpers never fall back to `DAT_*` placeholders.
+
+## 2025-11-13
 - Added the dasm opcode bitset globals to `metadata/linker_map.json`, corrected their offsets so the headless rename script stops aiming 0x10 bytes past the real rodata, and taught `metadata/xzre_types.json` to declare each table (`dasm_threebyte_has_modrm`, `dasm_onebyte_is_invalid`, etc.) for downstream helpers.
 - Compared every `.rodata*` DEFSYM in `xzre.lds.in` against the actual section offsets reported by `readelf -W -S xzre/liblzma_la-crc64-fast.o`; each one sits +0x60 from the linker-script value (e.g., `dasm_twobyte_is_valid` lives at 0xAD80 instead of 0xAD20, `string_action_data` starts at 0xAF00 instead of 0xAEA0). Updated `metadata/linker_map.json` with the measured offsets and reran `./scripts/refresh_xzre_project.sh` so RenameFromLinkerMap.py re-labels the right addresses.
 - Ran `./scripts/refresh_xzre_project.sh` twice (once to validate the metadata wiring, again after the offset fix); the exported `xzregh/100020_x86_dasm.c` now references the named tables instead of `DAT_0010*`, and the refreshed `xzre_types.h` advertises the new `extern const u8 [...]` declarations.

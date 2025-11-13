@@ -615,32 +615,32 @@
     "section": ".text.lzma_block_total_siza"
   },
   {
-    "offset": 44320,
+    "offset": 44240,
     "name": "dasm_threebyte_has_modrm",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44352,
+    "offset": 44272,
     "name": "dasm_threebyte_0x38_is_valid",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44384,
+    "offset": 44304,
     "name": "dasm_twobyte_has_modrm",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44416,
+    "offset": 44336,
     "name": "dasm_twobyte_is_valid",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44448,
+    "offset": 44368,
     "name": "dasm_onebyte_has_modrm",
     "section": ".rodata.BRANCH_TABLE0"
   },
   {
-    "offset": 44480,
+    "offset": 44400,
     "name": "dasm_onebyte_is_invalid",
     "section": ".rodata.BRANCH_TABLE0"
   },
