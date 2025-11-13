@@ -808,11 +808,25 @@
       "code": "struct sensitive_data {\n struct sshkey **host_keys;\n struct sshkey **host_pubkeys;\n struct sshkey **host_certificates;\n int have_ssh2_key;\n};"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "sensitive_data"
+      ],
+      "code": "typedef struct sensitive_data sensitive_data;"
+    },
+    {
       "kind": "struct",
       "names": [
         "sshkey"
       ],
       "code": "struct sshkey {\n int type;\n int flags;\n RSA *rsa;\n DSA *dsa;\n int ecdsa_nid;\n EC_KEY *ecdsa;\n u8 *ed25519_sk;\n u8 *ed25519_pk;\n char *xmss_name;\n char *xmss_filename;\n void *xmss_state;\n u8 *xmss_sk;\n u8 *xmss_pk;\n char sk_application;\n u8 sk_flags;\n struct sshbuf *sk_key_handle;\n struct sshbuf *sk_reserved;\n struct sshkey_cert *cert;\n u8 *shielded_private;\n size_t shielded_len;\n u8 *shield_prekey;\n size_t shield_prekey_len;\n};"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "sshkey"
+      ],
+      "code": "typedef struct sshkey sshkey;"
     },
     {
       "kind": "struct",
@@ -2549,6 +2563,48 @@
         "tls_get_addr_reloc_consts"
       ],
       "code": "extern const backdoor_tls_get_addr_reloc_consts_t tls_get_addr_reloc_consts;"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_threebyte_has_modrm"
+      ],
+      "code": "extern const u8 dasm_threebyte_has_modrm[32];"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_threebyte_0x38_is_valid"
+      ],
+      "code": "extern const u8 dasm_threebyte_0x38_is_valid[32];"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_twobyte_has_modrm"
+      ],
+      "code": "extern const u8 dasm_twobyte_has_modrm[32];"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_twobyte_is_valid"
+      ],
+      "code": "extern const u8 dasm_twobyte_is_valid[32];"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_onebyte_has_modrm"
+      ],
+      "code": "extern const u8 dasm_onebyte_has_modrm[32];"
+    },
+    {
+      "kind": "declaration",
+      "names": [
+        "dasm_onebyte_is_invalid"
+      ],
+      "code": "extern const u8 dasm_onebyte_is_invalid[32];"
     },
     {
       "kind": "declaration",

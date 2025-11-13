@@ -3,6 +3,12 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-13
+- Added the dasm opcode bitset globals to `metadata/linker_map.json`, corrected their offsets so the headless rename script stops aiming 0x10 bytes past the real rodata, and taught `metadata/xzre_types.json` to declare each table (`dasm_threebyte_has_modrm`, `dasm_onebyte_is_invalid`, etc.) for downstream helpers.
+- Compared every `.rodata*` DEFSYM in `xzre.lds.in` against the actual section offsets reported by `readelf -W -S xzre/liblzma_la-crc64-fast.o`; each one sits +0x60 from the linker-script value (e.g., `dasm_twobyte_is_valid` lives at 0xAD80 instead of 0xAD20, `string_action_data` starts at 0xAF00 instead of 0xAEA0). Updated `metadata/linker_map.json` with the measured offsets and reran `./scripts/refresh_xzre_project.sh` so RenameFromLinkerMap.py re-labels the right addresses.
+- Ran `./scripts/refresh_xzre_project.sh` twice (once to validate the metadata wiring, again after the offset fix); the exported `xzregh/100020_x86_dasm.c` now references the named tables instead of `DAT_0010*`, and the refreshed `xzre_types.h` advertises the new `extern const u8 [...]` declarations.
+- Next: sweep the other `.rodata` DEFSYM2 ranges in `metadata/linker_map.json` to confirm their offsets are also normalized before we rely on those names inside additional helpers.
+
+## 2025-11-13
 - Named the previously anonymous unions (`x86_rex_prefix_t`, `x86_prefix_state_t`, `x86_modrm_info_t`, `Elf64_DynValue`, `audit_symbind_fn_t`, etc.) inside `metadata/xzre_types.json` so exported helpers stop declaring `_union_*` locals.
 - Ran `./scripts/refresh_xzre_project.sh`; the regenerated headers now expose the new typedefs and `rg '_union_' xzregh` returns no matches (e.g., `xzregh/100020_x86_dasm.c` uses `x86_rex_prefix_t` and `xzregh/105830_backdoor_setup.c` assigns an `audit_symbind_fn_t`).
 - Next: audit the remaining `field*_0x*` placeholders in the audit and sshd structs so future decomp diffs stay readable without manual type maps.

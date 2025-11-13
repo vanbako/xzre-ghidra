@@ -15,7 +15,7 @@
 void update_cpuid_got_index(elf_entry_ctx_t *ctx)
 
 {
-  (ctx->got_ctx).cpuid_fn = tls_get_addr_reloc_consts;
+  (ctx->got_ctx).cpuid_fn = PTR_PTR_0010ca98;
   return;
 }
 

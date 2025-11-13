@@ -607,6 +607,8 @@ struct sensitive_data {
  int have_ssh2_key;
 };
 
+typedef struct sensitive_data sensitive_data;
+
 struct sshkey {
  int type;
  int flags;
@@ -631,6 +633,8 @@ struct sshkey {
  u8 *shield_prekey;
  size_t shield_prekey_len;
 };
+
+typedef struct sshkey sshkey;
 
 /*
  * Tracks the GOT slot that is currently being patched while hijacking liblzma’s resolver.
@@ -2112,6 +2116,18 @@ extern const u64 tls_get_addr_random_symbol;
 extern const backdoor_cpuid_reloc_consts_t cpuid_reloc_consts;
 
 extern const backdoor_tls_get_addr_reloc_consts_t tls_get_addr_reloc_consts;
+
+extern const u8 dasm_threebyte_has_modrm[32];
+
+extern const u8 dasm_threebyte_0x38_is_valid[32];
+
+extern const u8 dasm_twobyte_has_modrm[32];
+
+extern const u8 dasm_twobyte_is_valid[32];
+
+extern const u8 dasm_onebyte_has_modrm[32];
+
+extern const u8 dasm_onebyte_is_invalid[32];
 
 extern const u64 string_mask_data[238];
 

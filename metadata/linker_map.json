@@ -615,62 +615,62 @@
     "section": ".text.lzma_block_total_siza"
   },
   {
-    "offset": 44224,
+    "offset": 44320,
     "name": "dasm_threebyte_has_modrm",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44256,
+    "offset": 44352,
     "name": "dasm_threebyte_0x38_is_valid",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44288,
+    "offset": 44384,
     "name": "dasm_twobyte_has_modrm",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44320,
+    "offset": 44416,
     "name": "dasm_twobyte_is_valid",
     "section": ".rodata.MASK_TO_BIT_NUMBER0"
   },
   {
-    "offset": 44352,
+    "offset": 44448,
     "name": "dasm_onebyte_has_modrm",
     "section": ".rodata.BRANCH_TABLE0"
   },
   {
-    "offset": 44384,
+    "offset": 44480,
     "name": "dasm_onebyte_is_invalid",
     "section": ".rodata.BRANCH_TABLE0"
   },
   {
-    "offset": 44504,
+    "offset": 44600,
     "name": "tls_get_addr_random_symbol",
     "section": ".rodata.lzma2_decode"
   },
   {
-    "offset": 44512,
+    "offset": 44608,
     "name": "cpuid_random_symbol",
     "section": ".rodata.lzma_lzma_encode"
   },
   {
-    "offset": 44704,
+    "offset": 44800,
     "name": "string_action_data",
     "section": ".rodata.lzip_decode0"
   },
   {
-    "offset": 49920,
+    "offset": 50016,
     "name": "string_mask_data",
     "section": ".rodata.crc64_clmul1"
   },
   {
-    "offset": 51824,
+    "offset": 51920,
     "name": "cpuid_reloc_consts",
     "section": ".rodata.lzma12_mf_mao.0"
   },
   {
-    "offset": 51848,
+    "offset": 51944,
     "name": "tls_get_addr_reloc_consts",
     "section": ".rodata.rc_encode"
   },
