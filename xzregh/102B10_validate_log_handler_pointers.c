@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102B10_validate_log_handler_pointers.c
 // Function: validate_log_handler_pointers @ 0x102B10
-// Calling convention: unknown
-// Prototype: undefined validate_log_handler_pointers(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall validate_log_handler_pointers(void * addr1, void * addr2, void * search_base, u8 * code_end, string_references_t * refs, global_context_t * global)
 
 
 /*
@@ -15,51 +15,60 @@
 #include "xzre_types.h"
 
 
-bool validate_log_handler_pointers
-               (ulong param_1,ulong param_2,undefined8 param_3,undefined8 param_4,long param_5,
-               undefined4 *param_6)
+BOOL validate_log_handler_pointers
+               (void *addr1,void *addr2,void *search_base,u8 *code_end,string_references_t *refs,
+               global_context_t *global)
 
 {
-  int iVar1;
+  void *mem_address;
+  BOOL BVar1;
   long lVar2;
-  long *plVar3;
-  undefined8 uVar4;
+  u8 *puVar3;
+  u8 **ppuVar4;
+  u64 branch_disp;
   int opcode;
+  u64 insn_size;
   void *log_handler_slot;
   long gap;
-  undefined8 insn_ptr;
-  long scan_ctx;
-  long block_end;
-  int function_end;
-  long dasm_ip;
+  u8 *insn_ptr;
+  u8 **scan_ctx;
+  u8 *block_end;
+  u8 *function_end;
+  BOOL scan_success;
+  u8 *dasm_ip;
   
-  plVar3 = &scan_ctx;
+  ppuVar4 = &block_end;
   for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *(undefined4 *)plVar3 = 0;
-    plVar3 = (long *)((long)plVar3 + 4);
+    *(undefined4 *)ppuVar4 = 0;
+    ppuVar4 = (u8 **)((long)ppuVar4 + 4);
   }
-  if ((param_1 != param_2 && param_1 != 0) && (param_2 != 0)) {
-    lVar2 = param_2 - param_1;
-    if (param_2 <= param_1) {
-      lVar2 = param_1 - param_2;
+  if ((addr1 != addr2 && addr1 != (void *)0x0) && (addr2 != (void *)0x0)) {
+    lVar2 = (long)addr2 - (long)addr1;
+    if (addr2 <= addr1) {
+      lVar2 = (long)addr1 - (long)addr2;
     }
-    if (((lVar2 < 0x10) && (*(long *)(param_5 + 0x268) != 0)) && (*(long *)(param_5 + 0x288) != 0))
-    {
-      uVar4 = *(undefined8 *)(param_5 + 0x290);
-      iVar1 = find_lea_instruction_with_mem_operand(*(long *)(param_5 + 0x288),uVar4,&scan_ctx);
-      lVar2 = scan_ctx;
-      if (iVar1 != 0) {
-        iVar1 = x86_dasm(&scan_ctx,block_end + scan_ctx,uVar4);
-        if ((iVar1 != 0) && (function_end == 0x168)) {
-          insn_ptr = 0;
-          lVar2 = block_end + dasm_ip + scan_ctx;
-          find_function(lVar2,0,&insn_ptr,param_3,param_4,*param_6);
-          uVar4 = insn_ptr;
+    if (((lVar2 < 0x10) &&
+        (mem_address = refs->entries[0x13].func_start, mem_address != (void *)0x0)) &&
+       (puVar3 = (u8 *)refs->entries[0x14].func_start, puVar3 != (u8 *)0x0)) {
+      ppuVar4 = (u8 **)refs->entries[0x14].func_end;
+      BVar1 = find_lea_instruction_with_mem_operand
+                        (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)&block_end,mem_address);
+      puVar3 = block_end;
+      if (BVar1 != FALSE) {
+        BVar1 = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)ppuVar4);
+        if ((BVar1 != FALSE) && (scan_success == 0x168)) {
+          scan_ctx = (u8 **)0x0;
+          puVar3 = function_end + (long)dasm_ip + (long)block_end;
+          find_function(puVar3,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
+                        global->uses_endbr64);
+          ppuVar4 = scan_ctx;
         }
-        iVar1 = find_instruction_with_mem_operand_ex(lVar2,uVar4,0,0x109,param_1);
-        if (iVar1 != 0) {
-          iVar1 = find_instruction_with_mem_operand_ex(lVar2,uVar4,0,0x109,param_2);
-          return iVar1 != 0;
+        BVar1 = find_instruction_with_mem_operand_ex
+                          (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr1);
+        if (BVar1 != FALSE) {
+          BVar1 = find_instruction_with_mem_operand_ex
+                            (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr2);
+          return (uint)(BVar1 != FALSE);
         }
       }
     }

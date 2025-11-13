@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101B90_elf_find_rela_reloc.c
 // Function: elf_find_rela_reloc @ 0x101B90
-// Calling convention: unknown
-// Prototype: undefined elf_find_rela_reloc(void)
+// Calling convention: __stdcall
+// Prototype: Elf64_Rela * __stdcall elf_find_rela_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id, u64 reloc_type)
 
 
 /*
@@ -12,50 +12,54 @@
 #include "xzre_types.h"
 
 
-ulong elf_find_rela_reloc(long *param_1,long param_2,ulong param_3,ulong param_4,ulong *param_5)
+Elf64_Rela *
+elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 reloc_type)
 
 {
-  long lVar1;
-  ulong uVar2;
-  long *plVar3;
-  ulong uVar4;
+  Elf64_Ehdr *pEVar1;
+  Elf64_Rela *pEVar2;
+  Elf64_Rela *in_RCX;
+  ulong uVar3;
+  undefined4 in_register_00000034;
+  ulong *in_R8;
   
-  if (((*(byte *)(param_1 + 0x1a) & 2) == 0) || (*(uint *)(param_1 + 0x10) == 0)) {
-    return 0;
+  if (((elf_info->flags & 2) == 0) || (elf_info->rela_relocs_num == 0)) {
+    return (Elf64_Rela *)0x0;
   }
-  uVar4 = 0;
-  if (param_5 != (ulong *)0x0) {
-    uVar4 = *param_5;
+  uVar3 = 0;
+  if (in_R8 != (ulong *)0x0) {
+    uVar3 = *in_R8;
   }
-  lVar1 = *param_1;
+  pEVar1 = elf_info->elfbase;
   do {
-    if (*(uint *)(param_1 + 0x10) <= uVar4) {
-      if (param_5 != (ulong *)0x0) {
-        *param_5 = uVar4;
+    if (elf_info->rela_relocs_num <= uVar3) {
+      if (in_R8 != (ulong *)0x0) {
+        *in_R8 = uVar3;
       }
-      return 0;
+      return (Elf64_Rela *)0x0;
     }
-    plVar3 = (long *)(uVar4 * 0x18 + param_1[0xf]);
-    if ((int)plVar3[1] == 8) {
-      if (param_2 == 0) {
-        uVar2 = plVar3[2] + lVar1;
+    pEVar2 = elf_info->rela_relocs + uVar3;
+    if ((int)pEVar2->r_info == 8) {
+      if (CONCAT44(in_register_00000034,encoded_string_id) == 0) {
+        pEVar2 = (Elf64_Rela *)(pEVar1->e_ident + pEVar2->r_addend);
       }
       else {
-        if (plVar3[2] != param_2 - lVar1) goto LAB_00101c07;
-        uVar2 = *plVar3 + lVar1;
-        if (param_3 == 0) goto LAB_00101c18;
+        if (pEVar2->r_addend != CONCAT44(in_register_00000034,encoded_string_id) - (long)pEVar1)
+        goto LAB_00101c07;
+        pEVar2 = (Elf64_Rela *)(pEVar1->e_ident + pEVar2->r_offset);
+        if (reloc_type == 0) goto LAB_00101c18;
       }
-      if ((param_3 <= uVar2) && (uVar2 <= param_4)) {
+      if ((reloc_type <= pEVar2) && (pEVar2 <= in_RCX)) {
 LAB_00101c18:
-        if (param_5 == (ulong *)0x0) {
-          return uVar2;
+        if (in_R8 == (ulong *)0x0) {
+          return pEVar2;
         }
-        *param_5 = uVar4 + 1;
-        return uVar2;
+        *in_R8 = uVar3 + 1;
+        return pEVar2;
       }
     }
 LAB_00101c07:
-    uVar4 = uVar4 + 1;
+    uVar3 = uVar3 + 1;
   } while( TRUE );
 }
 

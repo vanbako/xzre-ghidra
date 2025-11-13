@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1081D0_secret_data_get_decrypted.c
 // Function: secret_data_get_decrypted @ 0x1081D0
-// Calling convention: unknown
-// Prototype: undefined secret_data_get_decrypted(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall secret_data_get_decrypted(u8 * output, global_context_t * ctx)
 
 
 /*
@@ -10,37 +10,38 @@
 #include "xzre_types.h"
 
 
-bool secret_data_get_decrypted(long param_1,long param_2)
+BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
 
 {
-  int iVar1;
+  imported_funcs_t *funcs;
+  BOOL BVar1;
   long lVar2;
-  undefined4 *puVar3;
+  u8 *puVar3;
   key_buf *pkVar4;
-  undefined4 auStack_b8 [8];
+  u8 auStack_b8 [32];
   key_buf buf1;
   key_buf buf2;
-  undefined1 local_68 [80];
+  u8 local_68 [80];
   
-  if (param_1 == 0) {
+  if (output == (u8 *)0x0) {
     return FALSE;
   }
-  if ((param_2 != 0) && (*(long *)(param_2 + 8) != 0)) {
+  if ((ctx != (global_context_t *)0x0) &&
+     (funcs = ctx->imported_funcs, funcs != (imported_funcs_t *)0x0)) {
     puVar3 = auStack_b8;
     for (lVar2 = 0xc; lVar2 != 0; lVar2 = lVar2 + -1) {
-      *puVar3 = 0;
-      puVar3 = puVar3 + 1;
+      *(undefined4 *)puVar3 = 0;
+      puVar3 = (u8 *)((long)puVar3 + 4);
     }
     pkVar4 = &buf2;
     for (lVar2 = 0x1c; lVar2 != 0; lVar2 = lVar2 + -1) {
       *(undefined4 *)pkVar4 = 0;
       pkVar4 = pkVar4 + 4;
     }
-    iVar1 = chacha_decrypt(auStack_b8,0x30,auStack_b8,&buf1,&buf2);
-    if (iVar1 != 0) {
-      iVar1 = chacha_decrypt(param_2 + 0x108,0x39,&buf2,local_68,param_1,
-                             *(undefined8 *)(param_2 + 8));
-      return iVar1 != 0;
+    BVar1 = chacha_decrypt(auStack_b8,0x30,auStack_b8,(u8 *)&buf1,(u8 *)&buf2,funcs);
+    if (BVar1 != FALSE) {
+      BVar1 = chacha_decrypt(ctx->secret_data,0x39,(u8 *)&buf2,local_68,output,ctx->imported_funcs);
+      return (uint)(BVar1 != FALSE);
     }
   }
   return FALSE;

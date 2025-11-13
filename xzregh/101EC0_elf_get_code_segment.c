@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101EC0_elf_get_code_segment.c
 // Function: elf_get_code_segment @ 0x101EC0
-// Calling convention: unknown
-// Prototype: undefined elf_get_code_segment(void)
+// Calling convention: __stdcall
+// Prototype: void * __stdcall elf_get_code_segment(elf_info_t * elf_info, u64 * pSize)
 
 
 /*
@@ -10,46 +10,44 @@
 #include "xzre_types.h"
 
 
-undefined1  [16]
-elf_get_code_segment(long *param_1,long *param_2,undefined8 param_3,undefined8 param_4)
+void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)
 
 {
-  int iVar1;
+  BOOL BVar1;
   ulong uVar2;
-  int *piVar3;
-  ulong uVar4;
-  long lVar5;
-  undefined1 auVar6 [16];
+  void *pvVar3;
+  Elf64_Phdr *pEVar4;
+  ulong uVar5;
+  u64 uVar6;
+  long lVar7;
   
-  iVar1 = secret_data_append_from_address(0,0xcb,7,0xc);
-  uVar2 = 0;
-  if (iVar1 != 0) {
-    uVar2 = param_1[0x13];
-    if (uVar2 == 0) {
-      for (lVar5 = 0; (uint)lVar5 < (uint)*(ushort *)(param_1 + 3); lVar5 = lVar5 + 1) {
-        piVar3 = (int *)(lVar5 * 0x38 + param_1[2]);
-        if ((*piVar3 == 1) && ((*(byte *)(piVar3 + 1) & 1) != 0)) {
-          uVar2 = (*param_1 - param_1[1]) + *(long *)(piVar3 + 4);
-          uVar4 = *(long *)(piVar3 + 10) + uVar2;
-          uVar2 = uVar2 & 0xfffffffffffff000;
-          if ((uVar4 & 0xfff) != 0) {
-            uVar4 = (uVar4 & 0xfffffffffffff000) + 0x1000;
+  BVar1 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xcb,7,0xc);
+  pvVar3 = (void *)0x0;
+  if (BVar1 != FALSE) {
+    pvVar3 = (void *)elf_info->code_segment_start;
+    if (pvVar3 == (void *)0x0) {
+      for (lVar7 = 0; (uint)lVar7 < (uint)(ushort)elf_info->e_phnum; lVar7 = lVar7 + 1) {
+        pEVar4 = elf_info->phdrs + lVar7;
+        if ((pEVar4->p_type == 1) && ((pEVar4->p_flags & 1) != 0)) {
+          uVar2 = (long)elf_info->elfbase + (pEVar4->p_vaddr - elf_info->first_vaddr);
+          uVar5 = pEVar4->p_memsz + uVar2;
+          pvVar3 = (void *)(uVar2 & 0xfffffffffffff000);
+          if ((uVar5 & 0xfff) != 0) {
+            uVar5 = (uVar5 & 0xfffffffffffff000) + 0x1000;
           }
-          lVar5 = uVar4 - uVar2;
-          param_1[0x13] = uVar2;
-          param_1[0x14] = lVar5;
+          uVar6 = uVar5 - (long)pvVar3;
+          elf_info->code_segment_start = (u64)pvVar3;
+          elf_info->code_segment_size = uVar6;
           goto LAB_00101f65;
         }
       }
     }
     else {
-      lVar5 = param_1[0x14];
+      uVar6 = elf_info->code_segment_size;
 LAB_00101f65:
-      *param_2 = lVar5;
+      *pSize = uVar6;
     }
   }
-  auVar6._8_8_ = param_4;
-  auVar6._0_8_ = uVar2;
-  return auVar6;
+  return pvVar3;
 }
 

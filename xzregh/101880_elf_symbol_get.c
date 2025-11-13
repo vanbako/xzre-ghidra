@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101880_elf_symbol_get.c
 // Function: elf_symbol_get @ 0x101880
-// Calling convention: unknown
-// Prototype: undefined elf_symbol_get(void)
+// Calling convention: __stdcall
+// Prototype: Elf64_Sym * __stdcall elf_symbol_get(elf_info_t * elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version)
 
 
 /*
@@ -12,90 +12,98 @@
 #include "xzre_types.h"
 
 
-uint * elf_symbol_get(long param_1,int param_2,int param_3)
+Elf64_Sym *
+elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStringId sym_version)
 
 {
-  byte bVar1;
-  ushort uVar2;
-  uint uVar3;
-  int iVar4;
-  long lVar5;
-  uint *puVar6;
-  ulong uVar7;
-  ushort *puVar8;
-  short *psVar9;
-  uint uVar10;
-  byte *local_40;
+  ushort uVar1;
+  uint uVar2;
+  u32 *puVar3;
+  char *pcVar4;
+  u32 uVar5;
+  BOOL BVar6;
+  EncodedStringId EVar7;
+  Elf64_Sym *vaddr;
+  ulong uVar8;
+  ushort *vaddr_00;
+  Elf64_Verdef *vaddr_01;
+  uint uVar9;
+  uint *vaddr_02;
+  u32 *local_40;
   uint local_34;
   
-  iVar4 = secret_data_append_from_call_site(0x58,0xf,3,0);
-  if ((iVar4 != 0) && ((param_3 == 0 || ((*(byte *)(param_1 + 0xd0) & 0x18) == 0x18)))) {
-    for (uVar10 = 0; uVar10 < *(uint *)(param_1 + 0xd8); uVar10 = uVar10 + 1) {
-      puVar6 = (uint *)(*(long *)(param_1 + 0xf0) + (ulong)uVar10 * 4);
-      iVar4 = elf_contains_vaddr(param_1,puVar6,4,4);
-      if (iVar4 == 0) {
-        return (uint *)0x0;
+  BVar6 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x58,0xf,3,FALSE);
+  if ((BVar6 != FALSE) && ((sym_version == 0 || ((elf_info->flags & 0x18) == 0x18)))) {
+    for (uVar9 = 0; uVar9 < elf_info->gnu_hash_nbuckets; uVar9 = uVar9 + 1) {
+      puVar3 = elf_info->gnu_hash_buckets;
+      BVar6 = elf_contains_vaddr(elf_info,puVar3 + uVar9,4,4);
+      if (BVar6 == FALSE) {
+        return (Elf64_Sym *)0x0;
       }
-      local_40 = (byte *)(*(long *)(param_1 + 0xf8) + (ulong)*puVar6 * 4);
-      iVar4 = elf_contains_vaddr(param_1,local_40,8,4);
-      if (iVar4 == 0) {
-        return (uint *)0x0;
+      uVar2 = puVar3[uVar9];
+      puVar3 = elf_info->gnu_hash_chain;
+      BVar6 = elf_contains_vaddr(elf_info,puVar3 + uVar2,8,4);
+      local_40 = puVar3 + uVar2;
+      if (BVar6 == FALSE) {
+        return (Elf64_Sym *)0x0;
       }
       do {
-        uVar7 = (long)local_40 - *(long *)(param_1 + 0xf8) >> 2 & 0xffffffff;
-        puVar6 = (uint *)(uVar7 * 0x18 + *(long *)(param_1 + 0x38));
-        iVar4 = elf_contains_vaddr(param_1,puVar6,0x18,4);
-        if (iVar4 == 0) {
-          return (uint *)0x0;
+        uVar8 = (long)local_40 - (long)elf_info->gnu_hash_chain >> 2 & 0xffffffff;
+        vaddr = elf_info->symtab + uVar8;
+        BVar6 = elf_contains_vaddr(elf_info,vaddr,0x18,4);
+        if (BVar6 == FALSE) {
+          return (Elf64_Sym *)0x0;
         }
-        if ((*(long *)(puVar6 + 2) != 0) && (*(short *)((long)puVar6 + 6) != 0)) {
-          lVar5 = (ulong)*puVar6 + *(long *)(param_1 + 0x30);
-          iVar4 = elf_contains_vaddr(param_1,lVar5,1,4);
-          if (iVar4 == 0) {
-            return (uint *)0x0;
+        if ((vaddr->st_value != 0) && (vaddr->st_shndx != 0)) {
+          uVar2 = vaddr->st_name;
+          pcVar4 = elf_info->strtab;
+          BVar6 = elf_contains_vaddr(elf_info,pcVar4 + uVar2,1,4);
+          if (BVar6 == FALSE) {
+            return (Elf64_Sym *)0x0;
           }
-          iVar4 = get_string_id(lVar5,0);
-          if (iVar4 == param_2) {
-            if (param_3 == 0) {
-              return puVar6;
+          EVar7 = get_string_id(pcVar4 + uVar2,(char *)0x0);
+          if (EVar7 == encoded_string_id) {
+            if (sym_version == 0) {
+              return vaddr;
             }
-            puVar8 = (ushort *)(uVar7 * 2 + *(long *)(param_1 + 0x70));
-            iVar4 = elf_contains_vaddr(param_1,puVar8,2,4);
-            if (iVar4 == 0) {
-              return (uint *)0x0;
+            vaddr_00 = (ushort *)(uVar8 * 2 + (long)elf_info->versym);
+            BVar6 = elf_contains_vaddr(elf_info,vaddr_00,2,4);
+            if (BVar6 == FALSE) {
+              return (Elf64_Sym *)0x0;
             }
-            uVar2 = *puVar8;
-            if (((*(byte *)(param_1 + 0xd0) & 0x18) == 0x18) && ((uVar2 & 0x7ffe) != 0)) {
-              psVar9 = *(short **)(param_1 + 0x60);
+            uVar1 = *vaddr_00;
+            if (((elf_info->flags & 0x18) == 0x18) && ((uVar1 & 0x7ffe) != 0)) {
+              vaddr_01 = elf_info->verdef;
               local_34 = 0;
               do {
-                if (((*(ulong *)(param_1 + 0x68) <= (ulong)local_34) ||
-                    (iVar4 = elf_contains_vaddr(param_1,psVar9,0x14,4), iVar4 == 0)) ||
-                   (*psVar9 != 1)) break;
-                if ((uVar2 & 0x7fff) == psVar9[2]) {
-                  uVar3 = *(uint *)(psVar9 + 6);
-                  iVar4 = elf_contains_vaddr(param_1,(uint *)((ulong)uVar3 + (long)psVar9),8,4);
-                  if (iVar4 == 0) break;
-                  lVar5 = (ulong)*(uint *)((ulong)uVar3 + (long)psVar9) + *(long *)(param_1 + 0x30);
-                  iVar4 = elf_contains_vaddr(param_1,lVar5,1,4);
-                  if (iVar4 == 0) break;
-                  iVar4 = get_string_id(lVar5,0);
-                  if (param_3 == iVar4) {
-                    return puVar6;
+                if (((elf_info->verdef_num <= (ulong)local_34) ||
+                    (BVar6 = elf_contains_vaddr(elf_info,vaddr_01,0x14,4), BVar6 == FALSE)) ||
+                   ((short)*vaddr_01 != 1)) break;
+                if ((uVar1 & 0x7fff) == *(ushort *)((long)vaddr_01 + 4)) {
+                  vaddr_02 = (uint *)((ulong)*(uint *)((long)vaddr_01 + 0xc) + (long)vaddr_01);
+                  BVar6 = elf_contains_vaddr(elf_info,vaddr_02,8,4);
+                  if (BVar6 == FALSE) break;
+                  uVar2 = *vaddr_02;
+                  pcVar4 = elf_info->strtab;
+                  BVar6 = elf_contains_vaddr(elf_info,pcVar4 + uVar2,1,4);
+                  if (BVar6 == FALSE) break;
+                  EVar7 = get_string_id(pcVar4 + uVar2,(char *)0x0);
+                  if (sym_version == EVar7) {
+                    return vaddr;
                   }
                 }
-                if (*(uint *)(psVar9 + 8) == 0) break;
+                if ((uint)vaddr_01[2] == 0) break;
                 local_34 = local_34 + 1;
-                psVar9 = (short *)((long)psVar9 + (ulong)*(uint *)(psVar9 + 8));
+                vaddr_01 = (Elf64_Verdef *)((long)vaddr_01 + (ulong)(uint)vaddr_01[2]);
               } while( TRUE );
             }
           }
         }
-        bVar1 = *local_40;
-        local_40 = local_40 + 4;
-      } while ((bVar1 & 1) == 0);
+        uVar5 = *local_40;
+        local_40 = local_40 + 1;
+      } while ((uVar5 & 1) == 0);
     }
   }
-  return (uint *)0x0;
+  return (Elf64_Sym *)0x0;
 }
 

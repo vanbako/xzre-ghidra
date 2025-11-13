@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107030_c_strlen.c
 // Function: c_strlen @ 0x107030
-// Calling convention: unknown
-// Prototype: undefined c_strlen(void)
+// Calling convention: __stdcall
+// Prototype: ssize_t __stdcall c_strlen(char * str)
 
 
 /*
@@ -12,16 +12,17 @@
 #include "xzre_types.h"
 
 
-long c_strlen(char *param_1)
+ssize_t c_strlen(char *str)
 
 {
   long lVar1;
+  ssize_t len;
   
-  if (*param_1 != '\0') {
+  if (*str != '\0') {
     lVar1 = 0;
     do {
       lVar1 = lVar1 + 1;
-    } while (param_1[lVar1] != '\0');
+    } while (str[lVar1] != '\0');
     return lVar1;
   }
   return 0;

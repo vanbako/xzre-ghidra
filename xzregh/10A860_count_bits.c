@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10A860_count_bits.c
 // Function: count_bits @ 0x10A860
-// Calling convention: unknown
-// Prototype: undefined count_bits(void)
+// Calling convention: __stdcall
+// Prototype: u32 __stdcall count_bits(u64 x)
 
 
 /*
@@ -10,15 +10,16 @@
 #include "xzre_types.h"
 
 
-int count_bits(ulong param_1)
+u32 count_bits(u64 x)
 
 {
-  int iVar1;
+  u32 uVar1;
+  u32 result;
   
-  iVar1 = 0;
-  for (; param_1 != 0; param_1 = param_1 & param_1 - 1) {
-    iVar1 = iVar1 + 1;
+  uVar1 = 0;
+  for (; x != 0; x = x & x - 1) {
+    uVar1 = uVar1 + 1;
   }
-  return iVar1;
+  return uVar1;
 }
 

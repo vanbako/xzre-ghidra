@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-13
+- Fixing the parameter/local regressions: `ImportXzreTypes.py` was aborting because `sshd_ctx_t` referenced `sshd_payload_ctx_t` before that typedef existed, so none of the downstream ApplySignatures/ApplyLocals steps ran and Ghidra fell back to default names. Added a simple `va_list` typedef and moved the payload typedef ahead of `sshd_ctx_t` in `metadata/xzre_types.json` so the parser completes again.
+- Reran `./scripts/refresh_xzre_project.sh`; the import now succeeds, and the exported helpers regained the real argument/local names (spot-checked `xzregh/100EB0_find_lea_instruction.c` and `100F60_find_lea_instruction_with_mem_operand.c`).
+- Next: resolve the lingering `metadata/functions_autodoc.json` vs `xzre_autodoc.json` diff so refresh stops warning about mismatched comments.
+
+## 2025-11-13
+- Synced `metadata/functions_autodoc.json` with the fresh `ghidra_scripts/generated/xzre_autodoc.json` export to clear the persistent refresh warning about mismatched AutoDoc text.
+- Re-ran `./scripts/refresh_xzre_project.sh --check-only`; the run now exits cleanly (only the usual external-function warnings) and no longer reports AutoDoc diffs.
+- Next: fold any new narrative edits into the metadata first before running refresh so the generated file never diverges again.
+
+## 2025-11-13
 - Replaced the last `_unknown*` blobs in the string/payload metadata and the sshd/global-context structs: `string_item_t` now exposes `entry_bytes`, `key_ctx_t` splits the digest/nonce scratch, `sshd_ctx_t` has named pending-payload fields plus an explicit `pending_authpayload` pointer, and `global_context_t`/`sshd_log_ctx_t` now use explicit padding/flags instead of raw offsets.
 - Updated the auxiliary structs (`elf_functions_t`, `fake_lzma_allocator_t`, `instruction_search_ctx_t`) to use reserved slots as well, then reran `./scripts/refresh_xzre_project.sh` so helpers like `elf_find_string_references.c` and `run_backdoor_commands.c` immediately pick up the new field names.
 - Next: keep peeling back the remaining padding arrays elsewhere in `xzre_types.h` so future diffs stay type-driven.

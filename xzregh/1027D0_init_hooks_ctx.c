@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1027D0_init_hooks_ctx.c
 // Function: init_hooks_ctx @ 0x1027D0
-// Calling convention: unknown
-// Prototype: undefined init_hooks_ctx(void)
+// Calling convention: __stdcall
+// Prototype: int __stdcall init_hooks_ctx(backdoor_hooks_ctx_t * ctx)
 
 
 /*
@@ -15,27 +15,34 @@
 #include "xzre_types.h"
 
 
-undefined8 init_hooks_ctx(long param_1)
+int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
 
 {
-  undefined8 uVar1;
+  int iVar1;
   int status;
   
-  uVar1 = 5;
-  if (param_1 != 0) {
-    *(undefined8 **)(param_1 + 0x38) = &hooks_data;
-    uVar1 = 0;
-    if (*(long *)(param_1 + 0x30) == 0) {
-      *(undefined8 *)(param_1 + 0x68) = 4;
-      *(undefined1 **)(param_1 + 0x40) = &LAB_001028d0;
-      *(code **)(param_1 + 0x48) = hook_RSA_public_decrypt;
-      *(code **)(param_1 + 0x50) = hook_RSA_get0_key;
-      *(code **)(param_1 + 0x58) = mm_log_handler_hook;
-      *(code **)(param_1 + 0x70) = mm_answer_keyallowed_hook;
-      *(code **)(param_1 + 0x78) = mm_answer_keyverify_hook;
-      uVar1 = 0x65;
+  iVar1 = 5;
+  if (ctx != (backdoor_hooks_ctx_t *)0x0) {
+    ctx->hooks_data_addr = (backdoor_hooks_data_t **)&hooks_data;
+    iVar1 = 0;
+    if (ctx->shared == (backdoor_shared_globals_t *)0x0) {
+      ctx->_unknown1632[0] = '\x04';
+      ctx->_unknown1632[1] = '\0';
+      ctx->_unknown1632[2] = '\0';
+      ctx->_unknown1632[3] = '\0';
+      ctx->_unknown1632[4] = '\0';
+      ctx->_unknown1632[5] = '\0';
+      ctx->_unknown1632[6] = '\0';
+      ctx->_unknown1632[7] = '\0';
+      ctx->symbind64 = (_func_65 *)&LAB_001028d0;
+      ctx->hook_RSA_public_decrypt = hook_RSA_public_decrypt;
+      ctx->hook_RSA_get0_key = hook_RSA_get0_key;
+      ctx->mm_log_handler = mm_log_handler_hook;
+      ctx->mm_answer_keyallowed = mm_answer_keyallowed_hook;
+      ctx->mm_answer_keyverify = mm_answer_keyverify_hook;
+      iVar1 = 0x65;
     }
   }
-  return uVar1;
+  return iVar1;
 }
 

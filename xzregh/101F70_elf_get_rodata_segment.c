@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101F70_elf_get_rodata_segment.c
 // Function: elf_get_rodata_segment @ 0x101F70
-// Calling convention: unknown
-// Prototype: undefined elf_get_rodata_segment(void)
+// Calling convention: __stdcall
+// Prototype: void * __stdcall elf_get_rodata_segment(elf_info_t * elf_info, u64 * pSize)
 
 
 /*
@@ -10,67 +10,68 @@
 #include "xzre_types.h"
 
 
-ulong elf_get_rodata_segment(long *param_1,long *param_2)
+void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
 
 {
-  long lVar1;
+  Elf64_Ehdr *pEVar1;
   BOOL rodata_segment_found;
-  int iVar3;
-  long lVar4;
-  ulong uVar5;
-  int *piVar6;
+  BOOL BVar3;
+  void *pvVar4;
+  void *pvVar5;
+  Elf64_Phdr *pEVar6;
   ulong uVar7;
-  long lVar8;
-  long lVar9;
-  ulong uVar10;
-  long local_20;
+  void *pvVar8;
+  u64 uVar9;
+  long lVar10;
+  ulong uVar11;
+  u64 local_20;
   
-  iVar3 = secret_data_append_from_call_site(0xbd,0xe,0xb,0);
-  if (iVar3 != 0) {
-    uVar5 = param_1[0x15];
-    lVar1 = *param_1;
+  BVar3 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xbd,0xe,0xb,FALSE);
+  if (BVar3 != FALSE) {
+    pvVar4 = (void *)elf_info->rodata_segment_start;
+    pEVar1 = elf_info->elfbase;
     local_20 = 0;
-    if (uVar5 != 0) {
-      *param_2 = param_1[0x16];
-      return uVar5;
+    if (pvVar4 != (void *)0x0) {
+      *pSize = elf_info->rodata_segment_size;
+      return pvVar4;
     }
-    lVar4 = elf_get_code_segment(param_1,&local_20);
-    if (lVar4 != 0) {
+    pvVar4 = elf_get_code_segment(elf_info,&local_20);
+    if (pvVar4 != (void *)0x0) {
       rodata_segment_found = FALSE;
-      lVar8 = 0;
-      uVar5 = 0;
-      for (lVar9 = 0; (uint)lVar9 < (uint)*(ushort *)(param_1 + 3); lVar9 = lVar9 + 1) {
-        piVar6 = (int *)(lVar9 * 0x38 + param_1[2]);
-        if ((*piVar6 == 1) && ((piVar6[1] & 7U) == 4)) {
-          uVar7 = (lVar1 - param_1[1]) + *(long *)(piVar6 + 4);
-          uVar10 = *(long *)(piVar6 + 10) + uVar7;
-          uVar7 = uVar7 & 0xfffffffffffff000;
-          if ((uVar10 & 0xfff) != 0) {
-            uVar10 = (uVar10 & 0xfffffffffffff000) + 0x1000;
+      uVar9 = 0;
+      pvVar5 = (void *)0x0;
+      for (lVar10 = 0; (uint)lVar10 < (uint)(ushort)elf_info->e_phnum; lVar10 = lVar10 + 1) {
+        pEVar6 = elf_info->phdrs + lVar10;
+        if ((pEVar6->p_type == 1) && ((pEVar6->p_flags & 7) == 4)) {
+          uVar7 = (long)pEVar1 + (pEVar6->p_vaddr - elf_info->first_vaddr);
+          uVar11 = pEVar6->p_memsz + uVar7;
+          pvVar8 = (void *)(uVar7 & 0xfffffffffffff000);
+          if ((uVar11 & 0xfff) != 0) {
+            uVar11 = (uVar11 & 0xfffffffffffff000) + 0x1000;
           }
-          if ((ulong)(lVar4 + local_20) <= uVar7) {
+          if ((void *)((long)pvVar4 + local_20) <= pvVar8) {
             if (rodata_segment_found) {
-              if (uVar7 < uVar5) {
-                lVar8 = uVar10 - uVar7;
-                uVar5 = uVar7;
+              if (pvVar8 < pvVar5) {
+                uVar9 = uVar11 - (long)pvVar8;
+                pvVar5 = pvVar8;
               }
             }
             else {
               rodata_segment_found = TRUE;
-              lVar8 = uVar10 - uVar7;
-              uVar5 = uVar7;
+              uVar9 = uVar11 - (long)pvVar8;
+              pvVar5 = pvVar8;
             }
           }
         }
       }
       if (rodata_segment_found) {
-        param_1[0x15] = uVar5;
-        param_1[0x16] = lVar8;
-        *param_2 = lVar8;
-        return uVar5;
+        elf_info->rodata_segment_start = (u64)pvVar5;
+        elf_info->rodata_segment_size = uVar9;
+        *pSize = uVar9;
+        return pvVar5;
       }
     }
   }
-  return 0;
+  return (void *)0x0;
 }
 

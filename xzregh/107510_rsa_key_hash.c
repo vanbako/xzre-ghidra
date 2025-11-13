@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107510_rsa_key_hash.c
 // Function: rsa_key_hash @ 0x107510
-// Calling convention: unknown
-// Prototype: undefined rsa_key_hash(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall rsa_key_hash(RSA * rsa, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
 
 
 /*
@@ -10,44 +10,59 @@
 #include "xzre_types.h"
 
 
-undefined8 rsa_key_hash(long param_1,undefined8 param_2,undefined8 param_3,long param_4)
+BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {
-  ulong uVar1;
-  int iVar2;
-  undefined8 uVar3;
-  long lVar4;
-  undefined1 *puVar5;
-  ulong buf;
-  long written;
-  long expSize;
-  undefined8 n [2];
-  undefined1 e [4098];
+  u64 uVar1;
+  BOOL BVar2;
+  long lVar3;
+  BOOL *pBVar4;
+  u8 buf [4106];
+  u64 written;
+  u64 expSize;
+  BIGNUM *n;
+  u8 local_1042 [16];
+  BOOL result;
   
-  puVar5 = e;
-  for (lVar4 = 0xffa; lVar4 != 0; lVar4 = lVar4 + -1) {
-    *puVar5 = 0;
-    puVar5 = puVar5 + 1;
+  pBVar4 = &result;
+  for (lVar3 = 0xffa; lVar3 != 0; lVar3 = lVar3 + -1) {
+    *(undefined1 *)pBVar4 = FALSE;
+    pBVar4 = (BOOL *)((long)pBVar4 + 1);
   }
-  n[0] = 0;
-  n[1] = 0;
-  buf = 0;
-  if (((param_4 != 0) && (param_1 != 0)) && (*(code **)(param_4 + 0x60) != (code *)0x0)) {
-    written = 0;
+  local_1042[0] = '\0';
+  local_1042[1] = '\0';
+  local_1042[2] = '\0';
+  local_1042[3] = '\0';
+  local_1042[4] = '\0';
+  local_1042[5] = '\0';
+  local_1042[6] = '\0';
+  local_1042[7] = '\0';
+  local_1042[8] = '\0';
+  local_1042[9] = '\0';
+  local_1042[10] = '\0';
+  local_1042[0xb] = '\0';
+  local_1042[0xc] = '\0';
+  local_1042[0xd] = '\0';
+  local_1042[0xe] = '\0';
+  local_1042[0xf] = '\0';
+  written = 0;
+  if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&
+     (funcs->RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
     expSize = 0;
-    (**(code **)(param_4 + 0x60))(param_1,&expSize,&written,0);
-    if ((written != 0) && (expSize != 0)) {
-      iVar2 = bignum_serialize(n,0x100a,&buf,written,param_4);
-      uVar1 = buf;
-      if (((iVar2 != 0) &&
-          ((buf < 0x100a &&
-           (iVar2 = bignum_serialize((long)n + buf,0x100a - buf,&buf,expSize,param_4), iVar2 != 0)))
-          ) && (uVar1 + buf < 0x100b)) {
-        uVar3 = sha256(n,uVar1 + buf,param_2,param_3,param_4);
-        return uVar3;
+    n = (BIGNUM *)0x0;
+    (*funcs->RSA_get0_key)(rsa,&n,(BIGNUM **)&expSize,(BIGNUM **)0x0);
+    if ((expSize != 0) && (n != (BIGNUM *)0x0)) {
+      BVar2 = bignum_serialize(local_1042,0x100a,&written,(BIGNUM *)expSize,funcs);
+      uVar1 = written;
+      if (((BVar2 != FALSE) &&
+          ((written < 0x100a &&
+           (BVar2 = bignum_serialize(local_1042 + written,0x100a - written,&written,n,funcs),
+           BVar2 != FALSE)))) && (uVar1 + written < 0x100b)) {
+        BVar2 = sha256(local_1042,uVar1 + written,mdBuf,mdBufSize,funcs);
+        return BVar2;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

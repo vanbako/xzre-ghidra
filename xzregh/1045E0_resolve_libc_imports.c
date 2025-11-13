@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1045E0_resolve_libc_imports.c
 // Function: resolve_libc_imports @ 0x1045E0
-// Calling convention: unknown
-// Prototype: undefined resolve_libc_imports(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall resolve_libc_imports(link_map * libc, elf_info_t * libc_info, libc_imports_t * imports)
 
 
 /*
@@ -13,33 +13,31 @@
 #include "xzre_types.h"
 
 
-undefined1  [16]
-resolve_libc_imports(undefined8 *param_1,undefined8 param_2,int *param_3,undefined8 param_4)
+BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *imports)
 
 {
-  long lVar1;
-  ulong uVar2;
-  long lVar3;
-  undefined1 auVar4 [16];
+  BOOL BVar1;
+  lzma_allocator *allocator;
+  _func_25 *p_Var2;
+  _func_26 *p_Var3;
+  lzma_allocator *resolver;
   
-  lVar1 = get_lzma_allocator(1);
-  uVar2 = elf_parse(*param_1,param_2);
-  if ((int)uVar2 != 0) {
-    *(undefined8 *)(lVar1 + 0x10) = param_2;
-    lVar3 = lzma_alloc(0x308,lVar1);
-    *(long *)(param_3 + 0x12) = lVar3;
-    if (lVar3 != 0) {
-      *param_3 = *param_3 + 1;
+  allocator = get_lzma_allocator();
+  BVar1 = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
+  if (BVar1 != FALSE) {
+    allocator->opaque = libc_info;
+    p_Var2 = (_func_25 *)lzma_alloc(0x308,allocator);
+    imports->read = p_Var2;
+    if (p_Var2 != (_func_25 *)0x0) {
+      imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    lVar1 = lzma_alloc(0x878,lVar1);
-    *(long *)(param_3 + 0x14) = lVar1;
-    if (lVar1 != 0) {
-      *param_3 = *param_3 + 1;
+    p_Var3 = (_func_26 *)lzma_alloc(0x878,allocator);
+    imports->__errno_location = p_Var3;
+    if (p_Var3 != (_func_26 *)0x0) {
+      imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    uVar2 = (ulong)(*param_3 == 2);
+    BVar1 = (BOOL)(imports->resolved_imports_count == 2);
   }
-  auVar4._8_8_ = param_4;
-  auVar4._0_8_ = uVar2;
-  return auVar4;
+  return BVar1;
 }
 

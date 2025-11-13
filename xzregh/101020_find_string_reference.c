@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101020_find_string_reference.c
 // Function: find_string_reference @ 0x101020
-// Calling convention: unknown
-// Prototype: undefined find_string_reference(void)
+// Calling convention: __stdcall
+// Prototype: u8 * __stdcall find_string_reference(u8 * code_start, u8 * code_end, char * str)
 
 
 /*
@@ -10,25 +10,26 @@
 #include "xzre_types.h"
 
 
-undefined8 find_string_reference(undefined8 param_1,undefined8 param_2,undefined8 param_3)
+u8 * find_string_reference(u8 *code_start,u8 *code_end,char *str)
 
 {
-  int iVar1;
-  undefined8 uVar2;
+  BOOL BVar1;
+  u8 *puVar2;
   long lVar3;
-  undefined8 *puVar4;
-  undefined8 dctx [12];
+  dasm_ctx_t *pdVar4;
+  dasm_ctx_t dctx;
+  dasm_ctx_t local_60;
   
-  puVar4 = dctx;
+  pdVar4 = &local_60;
   for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined4 *)puVar4 = 0;
-    puVar4 = (undefined8 *)((long)puVar4 + 4);
+    *(undefined4 *)&pdVar4->instruction = 0;
+    pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
   }
-  iVar1 = find_lea_instruction_with_mem_operand(param_1,param_2,dctx,param_3);
-  uVar2 = 0;
-  if (iVar1 != 0) {
-    uVar2 = dctx[0];
+  BVar1 = find_lea_instruction_with_mem_operand(code_start,code_end,&local_60,str);
+  puVar2 = (u8 *)0x0;
+  if (BVar1 != FALSE) {
+    puVar2 = local_60.instruction;
   }
-  return uVar2;
+  return puVar2;
 }
 

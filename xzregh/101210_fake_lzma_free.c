@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101210_fake_lzma_free.c
 // Function: fake_lzma_free @ 0x101210
-// Calling convention: unknown
-// Prototype: undefined fake_lzma_free(void)
+// Calling convention: __stdcall
+// Prototype: void __stdcall fake_lzma_free(void * opaque, void * ptr)
 
 
 /*
@@ -12,7 +12,7 @@
 #include "xzre_types.h"
 
 
-void fake_lzma_free(void)
+void fake_lzma_free(void *opaque,void *ptr)
 
 {
   return;

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/100D40_find_mov_lea_instruction.c
 // Function: find_mov_lea_instruction @ 0x100D40
-// Calling convention: unknown
-// Prototype: undefined find_mov_lea_instruction(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall find_mov_lea_instruction(u8 * code_start, u8 * code_end, BOOL is_64bit_operand, BOOL load_flag, dasm_ctx_t * dctx)
 
 
 /*
@@ -10,50 +10,52 @@
 #include "xzre_types.h"
 
 
-undefined8
-find_mov_lea_instruction(ulong param_1,ulong param_2,uint param_3,int param_4,undefined4 *param_5)
+BOOL find_mov_lea_instruction
+               (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)
 
 {
   int iVar1;
-  long lVar2;
-  undefined4 *puVar3;
-  BOOL bVar4;
-  undefined4 local_80 [22];
+  BOOL BVar2;
+  long lVar3;
+  dasm_ctx_t *pdVar4;
+  BOOL opcode_matches_direction;
+  dasm_ctx_t local_80;
   
-  puVar3 = local_80;
-  for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *puVar3 = 0;
-    puVar3 = puVar3 + 1;
+  pdVar4 = &local_80;
+  for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
+    *(undefined4 *)&pdVar4->instruction = 0;
+    pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
   }
-  if (param_5 == (undefined4 *)0x0) {
-    param_5 = local_80;
+  if (dctx == (dasm_ctx_t *)0x0) {
+    dctx = &local_80;
   }
   do {
     while( TRUE ) {
-      if (param_2 <= param_1) {
-        return 0;
+      if (code_end <= code_start) {
+        return FALSE;
       }
-      iVar1 = x86_dasm(param_5,param_1,param_2);
-      if (iVar1 != 0) break;
-      param_1 = param_1 + 1;
+      BVar2 = x86_dasm(dctx,code_start,code_end);
+      if (BVar2 != FALSE) break;
+      code_start = code_start + 1;
     }
-    if (((param_5[7] & 0xff00ff00) == 0x5000000) &&
-       ((((*(byte *)((long)param_5 + 0x1b) & 0x48) == 0x48) == param_3 || (param_4 == 0)))) {
-      iVar1 = param_5[10];
+    if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
+       (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+        (load_flag == FALSE)))) {
+      iVar1 = *(int *)(dctx->opcode_window + 3);
       if (iVar1 == 0x10d) {
-        return 1;
+        return TRUE;
       }
-      if (param_4 == 0) {
-        bVar4 = iVar1 == 0x109;
+      if (load_flag == FALSE) {
+        opcode_matches_direction = iVar1 == 0x109;
       }
       else {
-        bVar4 = iVar1 == 0x10b;
+        opcode_matches_direction = iVar1 == 0x10b;
       }
-      if (bVar4) {
-        return 1;
+      if (opcode_matches_direction) {
+        return TRUE;
       }
     }
-    param_1 = param_1 + *(long *)(param_5 + 2);
+    code_start = code_start + dctx->instruction_size;
   } while( TRUE );
 }
 

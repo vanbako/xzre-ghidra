@@ -42,6 +42,13 @@
     {
       "kind": "typedef",
       "names": [
+        "va_list"
+      ],
+      "code": "typedef void *va_list;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
         "int8_t"
       ],
       "code": "typedef signed char int8_t;"
@@ -824,6 +831,13 @@
     {
       "kind": "struct",
       "names": [
+        "sshd_payload_ctx_t"
+      ],
+      "code": "typedef u8 sshd_payload_ctx_t;"
+    },
+    {
+      "kind": "struct",
+      "names": [
         "sshd_ctx_t"
       ],
       "code": "typedef struct __attribute__((packed)) sshd_ctx {\n BOOL have_mm_answer_keyallowed;\n BOOL have_mm_answer_authpassword;\n BOOL have_mm_answer_keyverify;\n u8 hook_flags_padding[4];\n sshd_monitor_func_t mm_answer_authpassword_hook;\n void *mm_answer_keyallowed;\n void *mm_answer_keyverify;\n void *mm_answer_authpassword_start;\n void *mm_answer_authpassword_end;\n sshd_monitor_func_t *mm_answer_authpassword_ptr;\n int monitor_reqtype_authpassword;\n u8 authpassword_padding[4];\n sshd_monitor_func_t *mm_answer_keyallowed_start;\n void *mm_answer_keyallowed_end;\n void *mm_answer_keyallowed_ptr;\n u32 mm_answer_keyallowed_reqtype;\n u8 keyallowed_padding[4];\n void *mm_answer_keyverify_start;\n void *mm_answer_keyverify_end;\n void *mm_answer_keyverify_ptr;\n u8 keyverify_padding[4];\n u16 writebuf_size;\n u8 writebuf_padding[2];\n u8 *writebuf;\n u8 authpayload_len_bytes[8];\n sshd_payload_ctx_t *pending_authpayload;\n char *STR_unknown_ptr;\n void *mm_request_send_start;\n void *mm_request_send_end;\n u32 auth_root_allowed_flag;\n u32 sshd_ctx_reserved;\n int *use_pam_ptr;\n int *permit_root_login_ptr;\n char *STR_without_password;\n char *STR_publickey;\n} sshd_ctx_t;"
@@ -876,13 +890,6 @@
         "sshd_offsets_t"
       ],
       "code": "typedef struct __attribute__((packed)) sshd_offsets {\n union {\n  struct {\n   union {\n    sshd_offsets_fields_t fields;\n    u32 value;\n   };\n  };\n  u32 raw_value;\n };\n} sshd_offsets_t;"
-    },
-    {
-      "kind": "struct",
-      "names": [
-        "sshd_payload_ctx_t"
-      ],
-      "code": "typedef u8 sshd_payload_ctx_t;"
     },
     {
       "kind": "struct",

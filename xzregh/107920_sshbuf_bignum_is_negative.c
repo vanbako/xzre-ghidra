@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107920_sshbuf_bignum_is_negative.c
 // Function: sshbuf_bignum_is_negative @ 0x107920
-// Calling convention: unknown
-// Prototype: undefined sshbuf_bignum_is_negative(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall sshbuf_bignum_is_negative(sshbuf * buf)
 
 
 /*
@@ -10,23 +10,23 @@
 #include "xzre_types.h"
 
 
-undefined8 sshbuf_bignum_is_negative(long *param_1)
+BOOL sshbuf_bignum_is_negative(sshbuf *buf)
 
 {
-  long lVar1;
-  undefined8 uVar2;
+  BOOL BVar1;
+  size_t sVar2;
   
-  uVar2 = 0;
-  if (param_1[3] - 0x20U < 0x21) {
-    lVar1 = 0;
-    while (-1 < *(char *)(*param_1 + lVar1)) {
-      lVar1 = lVar1 + 1;
-      if (param_1[3] == lVar1) {
-        return 0;
+  BVar1 = FALSE;
+  if (buf->size - 0x20 < 0x21) {
+    sVar2 = 0;
+    while (-1 < (char)buf->d[sVar2]) {
+      sVar2 = sVar2 + 1;
+      if (buf->size == sVar2) {
+        return FALSE;
       }
     }
-    uVar2 = 1;
+    BVar1 = TRUE;
   }
-  return uVar2;
+  return BVar1;
 }
 

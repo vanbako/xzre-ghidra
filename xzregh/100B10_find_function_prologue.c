@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/100B10_find_function_prologue.c
 // Function: find_function_prologue @ 0x100B10
-// Calling convention: unknown
-// Prototype: undefined find_function_prologue(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall find_function_prologue(u8 * code_start, u8 * code_end, u8 * * output, FuncFindType find_mode)
 
 
 /*
@@ -10,41 +10,40 @@
 #include "xzre_types.h"
 
 
-undefined8 find_function_prologue(ulong param_1,undefined8 param_2,ulong *param_3,int param_4)
+BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType find_mode)
 
 {
-  int iVar1;
-  undefined8 uVar2;
+  BOOL BVar1;
+  BOOL BVar2;
   long lVar3;
-  long *plVar4;
-  long local_70;
-  long local_68;
-  int local_48;
+  dasm_ctx_t *pdVar4;
+  dasm_ctx_t local_70;
   
-  if (param_4 == 0) {
-    uVar2 = 0;
-    plVar4 = &local_70;
+  if (find_mode == FIND_ENDBR64) {
+    pdVar4 = &local_70;
     for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-      *(undefined4 *)plVar4 = 0;
-      plVar4 = (long *)((long)plVar4 + 4);
+      *(undefined4 *)&pdVar4->instruction = 0;
+      pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
     }
-    iVar1 = x86_dasm(&local_70,param_1,param_2);
-    if (((iVar1 != 0) && (local_48 == 3999)) && ((local_68 + local_70 & 0xfU) == 0)) {
-      if (param_3 != (ulong *)0x0) {
-        *param_3 = local_68 + local_70;
+    BVar2 = x86_dasm(&local_70,code_start,code_end);
+    BVar1 = FALSE;
+    if (((BVar2 != FALSE) && (local_70._40_4_ == 3999)) &&
+       (((ulong)(local_70.instruction + local_70.instruction_size) & 0xf) == 0)) {
+      if (output != (u8 **)0x0) {
+        *output = local_70.instruction + local_70.instruction_size;
       }
-      uVar2 = 1;
+      BVar1 = TRUE;
     }
   }
   else {
-    uVar2 = is_endbr64_instruction(param_1,param_2,0xe230);
-    if ((int)uVar2 != 0) {
-      if (param_3 != (ulong *)0x0) {
-        *param_3 = param_1;
+    BVar1 = is_endbr64_instruction(code_start,code_end,0xe230);
+    if (BVar1 != FALSE) {
+      if (output != (u8 **)0x0) {
+        *output = code_start;
       }
-      uVar2 = 1;
+      BVar1 = TRUE;
     }
   }
-  return uVar2;
+  return BVar1;
 }
 

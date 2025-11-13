@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102850_init_shared_globals.c
 // Function: init_shared_globals @ 0x102850
-// Calling convention: unknown
-// Prototype: undefined init_shared_globals(void)
+// Calling convention: __stdcall
+// Prototype: int __stdcall init_shared_globals(backdoor_shared_globals_t * shared_globals)
 
 
 /*
@@ -13,19 +13,19 @@
 #include "xzre_types.h"
 
 
-undefined8 init_shared_globals(undefined8 *param_1)
+int init_shared_globals(backdoor_shared_globals_t *shared_globals)
 
 {
-  undefined8 uVar1;
+  int iVar1;
   int status;
   
-  uVar1 = 5;
-  if (param_1 != (undefined8 *)0x0) {
-    *param_1 = mm_answer_authpassword_hook;
-    param_1[1] = hook_EVP_PKEY_set1_RSA;
-    param_1[2] = &global_ctx;
-    uVar1 = 0;
+  iVar1 = 5;
+  if (shared_globals != (backdoor_shared_globals_t *)0x0) {
+    shared_globals->mm_answer_authpassword_hook = mm_answer_authpassword_hook;
+    shared_globals->hook_EVP_PKEY_set1_RSA = hook_EVP_PKEY_set1_RSA;
+    shared_globals->globals = (global_context_t **)&global_ctx;
+    iVar1 = 0;
   }
-  return uVar1;
+  return iVar1;
 }
 

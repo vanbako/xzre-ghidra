@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102A50_elf_find_function_pointer.c
 // Function: elf_find_function_pointer @ 0x102A50
-// Calling convention: unknown
-// Prototype: undefined elf_find_function_pointer(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall elf_find_function_pointer(StringXrefId xref_id, void * * pOutCodeStart, void * * pOutCodeEnd, void * * pOutFptrAddr, elf_info_t * elf_info, string_references_t * xrefs, global_context_t * ctx)
 
 
 /*
@@ -10,37 +10,38 @@
 #include "xzre_types.h"
 
 
-bool elf_find_function_pointer
-               (uint param_1,long *param_2,undefined8 *param_3,long *param_4,undefined8 param_5,
-               long param_6,int *param_7)
+BOOL elf_find_function_pointer
+               (StringXrefId xref_id,void **pOutCodeStart,void **pOutCodeEnd,void **pOutFptrAddr,
+               elf_info_t *elf_info,string_references_t *xrefs,global_context_t *ctx)
 
 {
-  int iVar1;
-  long lVar2;
+  void *pvVar1;
+  BOOL BVar2;
+  Elf64_Rela *pEVar3;
+  Elf64_Relr *pEVar4;
   
-  param_6 = param_6 + (ulong)param_1 * 0x20;
-  lVar2 = *(long *)(param_6 + 8);
-  if (lVar2 == 0) {
+  pvVar1 = xrefs->entries[xref_id].func_start;
+  if (pvVar1 == (void *)0x0) {
     return FALSE;
   }
-  *param_2 = lVar2;
-  *param_3 = *(undefined8 *)(param_6 + 0x10);
-  lVar2 = elf_find_rela_reloc(param_5,*param_2,0,0,0);
-  *param_4 = lVar2;
-  if (lVar2 == 0) {
-    lVar2 = elf_find_relr_reloc(param_5,*param_2,0,0,0);
-    *param_4 = lVar2;
-    if (lVar2 == 0) {
+  *pOutCodeStart = pvVar1;
+  *pOutCodeEnd = xrefs->entries[xref_id].func_end;
+  pEVar3 = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
+  *pOutFptrAddr = pEVar3;
+  if (pEVar3 == (Elf64_Rela *)0x0) {
+    pEVar4 = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
+    *pOutFptrAddr = pEVar4;
+    if (pEVar4 == (Elf64_Relr *)0x0) {
       return FALSE;
     }
   }
-  iVar1 = elf_contains_vaddr_relro(param_5,*param_4 + -8,0x10,1);
-  if (iVar1 == 0) {
+  BVar2 = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
+  if (BVar2 == FALSE) {
     return FALSE;
   }
-  if (*param_7 != 0) {
-    iVar1 = is_endbr64_instruction(*param_2,*param_2 + 4,0xe230);
-    return iVar1 != 0;
+  if (ctx->uses_endbr64 != FALSE) {
+    BVar2 = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
+    return (uint)(BVar2 != FALSE);
   }
   return TRUE;
 }

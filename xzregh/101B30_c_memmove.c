@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101B30_c_memmove.c
 // Function: c_memmove @ 0x101B30
-// Calling convention: unknown
-// Prototype: undefined c_memmove(void)
+// Calling convention: __stdcall
+// Prototype: void * __stdcall c_memmove(char * dest, char * src, size_t cnt)
 
 
 /*
@@ -10,31 +10,33 @@
 #include "xzre_types.h"
 
 
-void c_memmove(ulong param_1,ulong param_2,long param_3)
+void * c_memmove(char *dest,char *src,size_t cnt)
 
 {
   long lVar1;
+  size_t sVar2;
+  size_t curr;
   
-  if ((param_2 < param_1) && (param_1 < param_2 + param_3)) {
-    lVar1 = param_3 + -1;
-    if (param_3 != 0) {
+  if ((src < dest) && (dest < src + cnt)) {
+    lVar1 = cnt - 1;
+    if (cnt != 0) {
       do {
-        *(undefined1 *)(param_1 + lVar1) = *(undefined1 *)(param_2 + lVar1);
+        dest[lVar1] = src[lVar1];
         lVar1 = lVar1 + -1;
       } while (lVar1 != -1);
-      return;
+      return dest;
     }
   }
   else {
-    lVar1 = 0;
-    if (param_3 == 0) {
-      return;
+    sVar2 = 0;
+    if (cnt == 0) {
+      return dest;
     }
     do {
-      *(undefined1 *)(param_1 + lVar1) = *(undefined1 *)(param_2 + lVar1);
-      lVar1 = lVar1 + 1;
-    } while (param_3 != lVar1);
+      dest[sVar2] = src[sVar2];
+      sVar2 = sVar2 + 1;
+    } while (cnt != sVar2);
   }
-  return;
+  return dest;
 }
 

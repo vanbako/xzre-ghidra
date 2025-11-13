@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107400_sshd_log.c
 // Function: sshd_log @ 0x107400
-// Calling convention: unknown
-// Prototype: undefined sshd_log(void)
+// Calling convention: __stdcall
+// Prototype: void __stdcall sshd_log(sshd_log_ctx_t * log_ctx, LogLevel level, char * fmt, ...)
 
 
 /*
@@ -13,17 +13,26 @@
 #include "xzre_types.h"
 
 
-void sshd_log(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,
-             undefined8 param_5,undefined8 param_6,undefined8 param_7,undefined8 param_8,
-             long param_9,undefined4 param_10,undefined8 param_11,undefined8 param_12,
-             undefined8 param_13,undefined8 param_14)
+void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
 
 {
   char in_AL;
-  undefined1 va_list_state;
-  undefined4 saved_xmm;
+  undefined8 in_RCX;
+  undefined8 in_R8;
+  undefined8 in_R9;
+  undefined8 in_XMM0_Qa;
+  undefined8 in_XMM1_Qa;
+  undefined8 in_XMM2_Qa;
+  undefined8 in_XMM3_Qa;
+  undefined8 in_XMM4_Qa;
+  undefined8 in_XMM5_Qa;
+  undefined8 in_XMM6_Qa;
+  undefined8 in_XMM7_Qa;
+  u64 saved_xmm [16];
+  undefined1 local_d1;
+  undefined4 local_d0;
   undefined4 local_cc;
-  undefined1 *local_c8;
+  va_list va_list_state;
   undefined1 *local_c0;
   undefined1 local_b8 [24];
   undefined8 local_a0;
@@ -39,24 +48,24 @@ void sshd_log(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined
   undefined8 local_18;
   
   if (in_AL != '\0') {
-    local_88 = param_1;
-    local_78 = param_2;
-    local_68 = param_3;
-    local_58 = param_4;
-    local_48 = param_5;
-    local_38 = param_6;
-    local_28 = param_7;
-    local_18 = param_8;
+    local_88 = in_XMM0_Qa;
+    local_78 = in_XMM1_Qa;
+    local_68 = in_XMM2_Qa;
+    local_58 = in_XMM3_Qa;
+    local_48 = in_XMM4_Qa;
+    local_38 = in_XMM5_Qa;
+    local_28 = in_XMM6_Qa;
+    local_18 = in_XMM7_Qa;
   }
-  va_list_state = 0;
-  local_c8 = &stack0x00000008;
-  saved_xmm = 0x18;
+  local_d1 = 0;
+  va_list_state = &stack0x00000008;
+  local_d0 = 0x18;
   local_c0 = local_b8;
   local_cc = 0x30;
-  local_a0 = param_12;
-  local_98 = param_13;
-  local_90 = param_14;
-  (**(code **)(param_9 + 0x58))(&va_list_state,&va_list_state,0,0,param_10,0,param_11,&saved_xmm);
+  local_a0 = in_RCX;
+  local_98 = in_R8;
+  local_90 = in_R9;
+  (*(code *)log_ctx->sshlogv)(&local_d1,&local_d1,0,0,level,0,fmt,&local_d0);
   return;
 }
 

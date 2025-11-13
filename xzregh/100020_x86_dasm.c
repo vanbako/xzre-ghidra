@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/100020_x86_dasm.c
 // Function: x86_dasm @ 0x100020
-// Calling convention: unknown
-// Prototype: undefined x86_dasm(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall x86_dasm(dasm_ctx_t * ctx, u8 * code_start, u8 * code_end)
 
 
 /*
@@ -10,584 +10,608 @@
 #include "xzre_types.h"
 
 
-undefined8 x86_dasm(undefined8 *param_1,byte *param_2,byte *param_3)
+BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  byte bVar1;
-  ushort uVar2;
+  _union_80 *p_Var1;
+  u8 *puVar2;
   byte bVar3;
-  int iVar4;
-  uint uVar5;
-  sbyte sVar6;
-  byte bVar7;
-  uint uVar8;
-  long lVar9;
-  undefined8 uVar10;
-  byte *pbVar11;
-  byte *pbVar12;
-  byte bVar13;
-  uint uVar14;
-  ulong uVar15;
-  ulong uVar16;
-  byte *pbVar17;
+  byte bVar4;
+  ushort uVar5;
+  byte bVar6;
+  BOOL BVar7;
+  int iVar8;
+  u64 uVar9;
+  sbyte sVar10;
+  uint uVar11;
+  uint uVar12;
+  long lVar13;
+  byte *pbVar14;
+  byte *pbVar15;
+  byte bVar16;
+  uint uVar17;
   ulong uVar18;
-  undefined8 *puVar19;
-  BOOL bVar20;
-  BOOL bVar21;
-  byte bVar22;
+  ulong uVar19;
+  byte *pbVar20;
+  dasm_ctx_t *pdVar21;
+  ulong uVar22;
+  _union_78 *p_Var23;
+  BOOL bVar24;
+  BOOL has_bytes_remaining;
+  byte bVar26;
   ulong local_38 [4];
   
-  bVar22 = 0;
-  iVar4 = secret_data_append_from_address(0,0x12,0x46,2);
-  if (iVar4 == 0) {
-    return 0;
+  bVar26 = 0;
+  BVar7 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
+  if (BVar7 == FALSE) {
+    return FALSE;
   }
-  puVar19 = param_1;
-  for (lVar9 = 0x16; lVar9 != 0; lVar9 = lVar9 + -1) {
-    *(undefined4 *)puVar19 = 0;
-    puVar19 = (undefined8 *)((long)puVar19 + (ulong)bVar22 * -8 + 4);
+  pdVar21 = ctx;
+  for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
+    *(undefined4 *)&pdVar21->instruction = 0;
+    pdVar21 = (dasm_ctx_t *)((long)pdVar21 + (ulong)bVar26 * -8 + 4);
   }
-  bVar20 = param_2 < param_3;
-  pbVar11 = param_2;
+  bVar24 = code_start < code_end;
+  pbVar14 = code_start;
   do {
-    if (!bVar20) {
+    if (!bVar24) {
 LAB_00100aa5:
-      for (lVar9 = 0x16; lVar9 != 0; lVar9 = lVar9 + -1) {
-        *(undefined4 *)param_1 = 0;
-        param_1 = (undefined8 *)((long)param_1 + (ulong)bVar22 * -8 + 4);
+      for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
+        *(undefined4 *)&ctx->instruction = 0;
+        ctx = (dasm_ctx_t *)((long)ctx + (ulong)bVar26 * -8 + 4);
       }
-      return 0;
+      return FALSE;
     }
-    bVar13 = *pbVar11;
-    if (bVar13 < 0x68) {
-      if (bVar13 < 0x2e) {
-        if (bVar13 == 0xf) {
-          *(undefined4 *)(param_1 + 5) = 0xf;
-          pbVar11 = pbVar11 + 1;
+    bVar16 = *pbVar14;
+    if (bVar16 < 0x68) {
+      if (bVar16 < 0x2e) {
+        if (bVar16 == 0xf) {
+          *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
+          pbVar14 = pbVar14 + 1;
 LAB_001001c9:
-          if (param_3 <= pbVar11) goto LAB_00100aa5;
-          iVar4 = *(int *)(param_1 + 5);
-          *(int *)(param_1 + 5) = iVar4 << 8;
-          bVar13 = *pbVar11;
-          uVar5 = (uint)bVar13 | iVar4 << 8;
-          *(uint *)(param_1 + 5) = uVar5;
-          bVar3 = *pbVar11;
-          if ((bVar3 & 0xfd) == 0x38) {
-            if ((*(byte *)(param_1 + 2) & 0x10) != 0) {
-              return 0;
+          if (code_end <= pbVar14) goto LAB_00100aa5;
+          uVar11 = *(int *)(ctx->opcode_window + 3) << 8;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          bVar16 = *pbVar14;
+          uVar11 = bVar16 | uVar11;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          bVar6 = *pbVar14;
+          if ((bVar6 & 0xfd) == 0x38) {
+            if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+              return FALSE;
             }
-            pbVar11 = pbVar11 + 1;
+            pbVar14 = pbVar14 + 1;
             goto LAB_001003fa;
           }
-          if (((int)(uint)(byte)(&DAT_0010ad40)[bVar3 >> 3] >> (bVar3 & 7) & 1U) == 0) {
-            return 0;
+          if (((int)(uint)(byte)(&DAT_0010ad40)[bVar6 >> 3] >> (bVar6 & 7) & 1U) == 0) {
+            return FALSE;
           }
-          if ((*(char *)((long)param_1 + 0x14) == -0xd) && (bVar3 == 0x1e)) {
-            if (pbVar11 + 1 < param_3) {
-              puVar19 = param_1 + 2;
-              for (lVar9 = 0x12; lVar9 != 0; lVar9 = lVar9 + -1) {
-                *(undefined4 *)puVar19 = 0;
-                puVar19 = (undefined8 *)((long)puVar19 + (ulong)bVar22 * -8 + 4);
+          if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (bVar6 == 0x1e)) {
+            if (pbVar14 + 1 < code_end) {
+              p_Var23 = &ctx->prefix;
+              for (lVar13 = 0x12; lVar13 != 0; lVar13 = lVar13 + -1) {
+                *(undefined4 *)p_Var23 = 0;
+                p_Var23 = (_union_78 *)((long)p_Var23 + (ulong)bVar26 * -8 + 4);
               }
-              *param_1 = param_2;
-              param_1[1] = 4;
-              iVar4 = (pbVar11[1] == 0xfa) + 0xa5fc + (uint)(pbVar11[1] == 0xfa);
+              ctx->instruction = code_start;
+              ctx->instruction_size = 4;
+              iVar8 = (pbVar14[1] == 0xfa) + 0xa5fc + (uint)(pbVar14[1] == 0xfa);
 LAB_001004f1:
-              *(int *)(param_1 + 5) = iVar4;
-              return 1;
+              *(int *)(ctx->opcode_window + 3) = iVar8;
+              return TRUE;
             }
             goto LAB_00100aa5;
           }
-          *(char *)(param_1 + 10) = (char)((long)pbVar11 - (long)param_2);
-          uVar14 = uVar5;
-          if ((*(byte *)(param_1 + 2) & 0x10) != 0) {
-            uVar14 = (uint)bVar13;
+          ctx->insn_offset = (u8)((long)pbVar14 - (long)code_start);
+          uVar17 = uVar11;
+          if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+            uVar17 = (uint)bVar16;
           }
-          if ((uVar14 & 0xf0) == 0x80) {
-            uVar10 = 4;
+          if ((uVar17 & 0xf0) == 0x80) {
+            uVar9 = 4;
 LAB_001004a7:
-            *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 8;
-            param_1[9] = uVar10;
+            puVar2 = &(ctx->prefix).decoded.flags2;
+            *puVar2 = *puVar2 | 8;
+            ctx->operand_size = uVar9;
           }
           else {
-            if ((byte)uVar14 < 0x74) {
-              if (0x6f < (uVar14 & 0xff)) {
+            if ((byte)uVar17 < 0x74) {
+              if (0x6f < (uVar17 & 0xff)) {
 LAB_001004a2:
-                uVar10 = 1;
+                uVar9 = 1;
                 goto LAB_001004a7;
               }
             }
             else {
-              uVar8 = (uVar14 & 0xff) - 0xa4;
-              if ((uVar8 < 0x23) && ((0x740400101U >> ((byte)uVar8 & 0x3f) & 1) != 0))
+              uVar12 = (uVar17 & 0xff) - 0xa4;
+              if ((uVar12 < 0x23) && ((0x740400101U >> ((byte)uVar12 & 0x3f) & 1) != 0))
               goto LAB_001004a2;
             }
-            param_1[9] = 0;
+            ctx->operand_size = 0;
           }
-          pbVar12 = pbVar11;
-          if (((byte)(&DAT_0010ad20)[uVar14 >> 3 & 0x1f] >> (uVar14 & 7) & 1) == 0) {
-            if ((*(byte *)((long)param_1 + 0x11) & 8) != 0) goto LAB_0010067d;
-            *param_1 = param_2;
-            pbVar11 = (byte *)(((long)pbVar11 - (long)param_2) + 1);
+          pbVar15 = pbVar14;
+          if (((byte)(&DAT_0010ad20)[uVar17 >> 3 & 0x1f] >> (uVar17 & 7) & 1) == 0) {
+            if (((ctx->prefix).decoded.flags2 & 8) != 0) goto LAB_0010067d;
+            ctx->instruction = code_start;
+            pbVar14 = (byte *)(((long)pbVar14 - (long)code_start) + 1);
           }
           else {
 LAB_001008c5:
-            pbVar11 = pbVar12 + 1;
-            if (param_3 <= pbVar11) goto LAB_00100aa5;
-            bVar13 = *(byte *)(param_1 + 2);
-            *(byte *)(param_1 + 2) = bVar13 | 0x40;
-            bVar3 = *pbVar11;
-            *(byte *)((long)param_1 + 0x1c) = bVar3;
-            bVar3 = bVar3 >> 6;
-            *(byte *)((long)param_1 + 0x1d) = bVar3;
-            bVar7 = *pbVar11;
-            *(byte *)((long)param_1 + 0x1e) = (byte)((int)(uint)bVar7 >> 3) & 7;
-            bVar1 = *pbVar11;
-            *(byte *)((long)param_1 + 0x1f) = bVar1 & 7;
-            if (bVar3 == 3) {
+            pbVar14 = pbVar15 + 1;
+            if (code_end <= pbVar14) goto LAB_00100aa5;
+            bVar16 = (ctx->prefix).decoded.flags;
+            (ctx->prefix).decoded.flags = bVar16 | 0x40;
+            bVar6 = *pbVar14;
+            *(byte *)((long)&ctx->prefix + 0xc) = bVar6;
+            bVar6 = bVar6 >> 6;
+            *(byte *)((long)&ctx->prefix + 0xd) = bVar6;
+            bVar3 = *pbVar14;
+            *(byte *)((long)&ctx->prefix + 0xe) = (byte)((int)(uint)bVar3 >> 3) & 7;
+            bVar4 = *pbVar14;
+            *(byte *)((long)&ctx->prefix + 0xf) = bVar4 & 7;
+            if (bVar6 == 3) {
 LAB_00100902:
-              if ((*(uint *)((long)param_1 + 0x1c) & 0xff00ff00) == 0x5000000) {
+              if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {
 LAB_0010092e:
-                *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 1;
+                puVar2 = &(ctx->prefix).decoded.flags2;
+                *puVar2 = *puVar2 | 1;
               }
             }
             else {
-              if ((bVar1 & 7) == 4) {
-                *(byte *)(param_1 + 2) = bVar13 | 0xc0;
+              if ((bVar4 & 7) == 4) {
+                (ctx->prefix).decoded.flags = bVar16 | 0xc0;
               }
-              if (bVar3 != 1) {
-                if (bVar3 != 2) goto LAB_00100902;
+              if (bVar6 != 1) {
+                if (bVar6 != 2) goto LAB_00100902;
                 goto LAB_0010092e;
               }
-              *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 3;
+              puVar2 = &(ctx->prefix).decoded.flags2;
+              *puVar2 = *puVar2 | 3;
             }
-            uVar5 = *(uint *)(param_1 + 5);
-            if ((uVar5 - 0xf6 < 2) && (((int)(uint)bVar7 >> 3 & 7U) != 0)) {
-              *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) & 0xf7;
-              param_1[9] = 0;
+            uVar11 = *(uint *)(ctx->opcode_window + 3);
+            if ((uVar11 - 0xf6 < 2) && (((int)(uint)bVar3 >> 3 & 7U) != 0)) {
+              puVar2 = &(ctx->prefix).decoded.flags2;
+              *puVar2 = *puVar2 & 0xf7;
+              ctx->operand_size = 0;
             }
-            if (*(char *)(param_1 + 2) < '\0') {
-              if (param_3 <= pbVar12 + 2) goto LAB_00100aa5;
-              bVar13 = pbVar12[2];
-              *(byte *)((long)param_1 + 0x21) = bVar13;
-              *(byte *)((long)param_1 + 0x22) = bVar13 >> 6;
-              *(byte *)((long)param_1 + 0x23) = (byte)((int)(uint)pbVar12[2] >> 3) & 7;
-              bVar13 = pbVar12[2];
-              *(byte *)((long)param_1 + 0x24) = bVar13 & 7;
-              if ((bVar13 & 7) == 5) {
-                if ((*(byte *)((long)param_1 + 0x1d) & 0xfd) == 0) {
-                  *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 1;
+            if ((char)(ctx->prefix).decoded.flags < '\0') {
+              if (code_end <= pbVar15 + 2) goto LAB_00100aa5;
+              bVar16 = pbVar15[2];
+              ctx->sib_byte = bVar16;
+              ctx->sib_scale_bits = bVar16 >> 6;
+              ctx->sib_index_bits = (byte)((int)(uint)pbVar15[2] >> 3) & 7;
+              bVar16 = pbVar15[2];
+              ctx->sib_base_bits = bVar16 & 7;
+              if ((bVar16 & 7) == 5) {
+                bVar16 = *(byte *)((long)&ctx->prefix + 0xd);
+                if ((bVar16 & 0xfd) == 0) {
+                  puVar2 = &(ctx->prefix).decoded.flags2;
+                  *puVar2 = *puVar2 | 1;
                 }
-                else if (*(byte *)((long)param_1 + 0x1d) == 1) {
-                  *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 3;
+                else if (bVar16 == 1) {
+                  puVar2 = &(ctx->prefix).decoded.flags2;
+                  *puVar2 = *puVar2 | 3;
                 }
               }
-              bVar13 = *(byte *)((long)param_1 + 0x11);
-              if ((bVar13 & 2) == 0) {
-                if ((bVar13 & 1) != 0) {
-                  pbVar12 = pbVar12 + 3;
+              bVar16 = (ctx->prefix).decoded.flags2;
+              if ((bVar16 & 2) == 0) {
+                if ((bVar16 & 1) != 0) {
+                  pbVar15 = pbVar15 + 3;
                   goto LAB_0010073c;
                 }
-                if ((bVar13 & 8) != 0) {
-                  pbVar11 = pbVar12 + 3;
+                if ((bVar16 & 8) != 0) {
+                  pbVar14 = pbVar15 + 3;
                   goto LAB_00100680;
                 }
-                *param_1 = param_2;
-                pbVar11 = pbVar12 + 2 + (1 - (long)param_2);
+                ctx->instruction = code_start;
+                pbVar14 = pbVar15 + 2 + (1 - (long)code_start);
                 goto LAB_001004e1;
               }
-              pbVar11 = pbVar12 + 3;
+              pbVar14 = pbVar15 + 3;
 LAB_001009ea:
-              if (param_3 <= pbVar11) goto LAB_00100aa5;
-              bVar13 = *(byte *)((long)param_1 + 0x11);
-              param_1[6] = (long)(char)*pbVar11;
+              if (code_end <= pbVar14) goto LAB_00100aa5;
+              bVar16 = (ctx->prefix).decoded.flags2;
+              ctx->mem_disp = (long)(char)*pbVar14;
             }
             else {
-              bVar13 = *(byte *)((long)param_1 + 0x11);
-              if ((bVar13 & 2) != 0) {
-                pbVar11 = pbVar12 + 2;
+              bVar16 = (ctx->prefix).decoded.flags2;
+              if ((bVar16 & 2) != 0) {
+                pbVar14 = pbVar15 + 2;
                 goto LAB_001009ea;
               }
-              if ((bVar13 & 1) != 0) goto LAB_0010065f;
+              if ((bVar16 & 1) != 0) goto LAB_0010065f;
             }
-            if ((bVar13 & 8) != 0) goto LAB_0010067d;
-            *param_1 = param_2;
-            pbVar11 = pbVar11 + (1 - (long)param_2);
+            if ((bVar16 & 8) != 0) goto LAB_0010067d;
+            ctx->instruction = code_start;
+            pbVar14 = pbVar14 + (1 - (long)code_start);
           }
 LAB_001004e1:
-          param_1[1] = pbVar11;
-          if (pbVar11 == (byte *)0x0) {
-            return 0;
+          ctx->instruction_size = (u64)pbVar14;
+          if (pbVar14 == (byte *)0x0) {
+            return FALSE;
           }
           goto LAB_001004ee;
         }
-        if (bVar13 != 0x26) goto LAB_00100191;
+        if (bVar16 != 0x26) goto LAB_00100191;
       }
-      else if ((0xc0000000010101U >> ((ulong)(bVar13 - 0x2e) & 0x3f) & 1) == 0) {
-        if (bVar13 == 0x67) {
-          if ((*(byte *)(param_1 + 2) & 8) != 0) {
-            return 0;
+      else if ((0xc0000000010101U >> ((ulong)(bVar16 - 0x2e) & 0x3f) & 1) == 0) {
+        if (bVar16 == 0x67) {
+          bVar16 = (ctx->prefix).decoded.flags;
+          if ((bVar16 & 8) != 0) {
+            return FALSE;
           }
-          *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 8;
-          *(byte *)((long)param_1 + 0x17) = *pbVar11;
+          (ctx->prefix).decoded.flags = bVar16 | 8;
+          (ctx->prefix).decoded.asize_byte = *pbVar14;
         }
         else {
-          if (bVar13 != 0x66) {
-            if ((bVar13 & 0xf0) == 0x40) {
-              *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 0x20;
-              bVar13 = *pbVar11;
-              pbVar11 = pbVar11 + 1;
-              *(byte *)((long)param_1 + 0x1b) = bVar13;
+          if (bVar16 != 0x66) {
+            if ((bVar16 & 0xf0) == 0x40) {
+              (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 0x20;
+              bVar16 = *pbVar14;
+              pbVar14 = pbVar14 + 1;
+              (ctx->prefix).decoded.rex.rex_byte = bVar16;
             }
             goto LAB_00100191;
           }
-          if (((*(byte *)(param_1 + 2) & 4) != 0) && (*(char *)((long)param_1 + 0x16) != 'f')) {
-            return 0;
+          bVar16 = (ctx->prefix).decoded.flags;
+          if (((bVar16 & 4) != 0) && ((ctx->prefix).decoded.osize_byte != 'f')) {
+            return FALSE;
           }
-          if ((*(byte *)(param_1 + 2) & 0x20) == 0) {
-            *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 4;
-            *(byte *)((long)param_1 + 0x16) = *pbVar11;
+          if ((bVar16 & 0x20) == 0) {
+            (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 4;
+            (ctx->prefix).decoded.osize_byte = *pbVar14;
           }
         }
         goto LAB_00100675;
       }
-      if ((*(byte *)(param_1 + 2) & 2) != 0) {
-        return 0;
+      bVar16 = (ctx->prefix).decoded.flags;
+      if ((bVar16 & 2) != 0) {
+        return FALSE;
       }
-      *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 2;
-      *(byte *)((long)param_1 + 0x15) = *pbVar11;
+      (ctx->prefix).decoded.flags = bVar16 | 2;
+      (ctx->prefix).decoded.seg_byte = *pbVar14;
     }
     else {
-      if (bVar13 != 0xf0) {
-        if (bVar13 < 0xf1) {
-          if (1 < (byte)(bVar13 + 0x3c)) goto LAB_00100191;
-          if ((*(byte *)(param_1 + 2) & 0x20) != 0) {
-            return 0;
+      if (bVar16 != 0xf0) {
+        if (bVar16 < 0xf1) {
+          if (1 < (byte)(bVar16 + 0x3c)) goto LAB_00100191;
+          bVar6 = (ctx->prefix).decoded.flags;
+          if ((bVar6 & 0x20) != 0) {
+            return FALSE;
           }
-          *(uint *)(param_1 + 5) = (uint)bVar13;
-          bVar3 = *pbVar11;
-          pbVar12 = pbVar11 + 1;
-          *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 0x10;
-          *(byte *)(param_1 + 3) = bVar3;
-          if (param_3 <= pbVar12) goto LAB_00100aa5;
-          bVar7 = pbVar11[1];
-          *(undefined1 *)((long)param_1 + 0x1b) = 0x40;
-          uVar5 = (uint)bVar13 << 8 | 0xf;
-          *(byte *)((long)param_1 + 0x19) = bVar7;
-          *(uint *)(param_1 + 5) = uVar5;
-          bVar13 = ((char)pbVar11[1] >> 7 & 0xfcU) + 0x44;
-          *(byte *)((long)param_1 + 0x1b) = bVar13;
+          *(uint *)(ctx->opcode_window + 3) = (uint)bVar16;
+          bVar3 = *pbVar14;
+          pbVar15 = pbVar14 + 1;
+          (ctx->prefix).decoded.flags = bVar6 | 0x10;
+          (ctx->prefix).decoded.vex_byte = bVar3;
+          if (code_end <= pbVar15) goto LAB_00100aa5;
+          bVar6 = pbVar14[1];
+          (ctx->prefix).decoded.rex.rex_byte = '@';
+          uVar11 = (uint)bVar16 << 8 | 0xf;
+          (ctx->prefix).decoded.vex_byte2 = bVar6;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          bVar16 = ((char)pbVar14[1] >> 7 & 0xfcU) + 0x44;
+          *(byte *)((long)&ctx->prefix + 0xb) = bVar16;
           if (bVar3 == 0xc5) goto LAB_001001c5;
           if (bVar3 != 0xc4) {
-            return 0;
+            return FALSE;
           }
-          bVar3 = pbVar11[1];
+          bVar3 = pbVar14[1];
           if ((bVar3 & 0x40) == 0) {
-            *(byte *)((long)param_1 + 0x1b) = bVar13 | 2;
+            (ctx->prefix).decoded.rex.rex_byte = bVar16 | 2;
           }
-          if ((pbVar11[1] & 0x20) == 0) {
-            *(byte *)((long)param_1 + 0x1b) = *(byte *)((long)param_1 + 0x1b) | 1;
+          if ((pbVar14[1] & 0x20) == 0) {
+            p_Var1 = &(ctx->prefix).decoded.rex;
+            p_Var1->rex_byte = p_Var1->rex_byte | 1;
           }
           if (2 < (byte)((bVar3 & 0x1f) - 1)) {
-            return 0;
+            return FALSE;
           }
-          if (param_3 <= pbVar11 + 2) goto LAB_00100aa5;
-          bVar13 = pbVar11[2];
-          bVar7 = bVar7 & 0x1f;
-          *(byte *)((long)param_1 + 0x1a) = bVar13;
-          if (-1 < (char)bVar13) {
-            *(byte *)((long)param_1 + 0x1b) = *(byte *)((long)param_1 + 0x1b) | 8;
+          if (code_end <= pbVar14 + 2) goto LAB_00100aa5;
+          bVar16 = pbVar14[2];
+          bVar6 = bVar6 & 0x1f;
+          (ctx->prefix).decoded.vex_byte3 = bVar16;
+          if (-1 < (char)bVar16) {
+            p_Var1 = &(ctx->prefix).decoded.rex;
+            p_Var1->rex_byte = p_Var1->rex_byte | 8;
           }
-          uVar5 = uVar5 << 8;
-          *(uint *)(param_1 + 5) = uVar5;
-          if (bVar7 == 2) {
-            uVar5 = uVar5 | 0x38;
+          uVar11 = uVar11 << 8;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          if (bVar6 == 2) {
+            uVar11 = uVar11 | 0x38;
           }
           else {
-            if (bVar7 != 3) {
-              if (bVar7 != 1) {
-                return 0;
+            if (bVar6 != 3) {
+              if (bVar6 != 1) {
+                return FALSE;
               }
-              pbVar11 = pbVar11 + 3;
+              pbVar14 = pbVar14 + 3;
               goto LAB_001001c9;
             }
-            uVar5 = uVar5 | 0x3a;
+            uVar11 = uVar11 | 0x3a;
           }
-          *(uint *)(param_1 + 5) = uVar5;
-          pbVar11 = pbVar11 + 3;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          pbVar14 = pbVar14 + 3;
 LAB_001003fa:
-          if (param_3 <= pbVar11) goto LAB_00100aa5;
-          uVar8 = *(int *)(param_1 + 5) << 8;
-          *(uint *)(param_1 + 5) = uVar8;
-          bVar13 = *pbVar11;
-          uVar5 = bVar13 | uVar8;
-          *(uint *)(param_1 + 5) = uVar5;
-          uVar14 = uVar5;
-          if ((*(byte *)(param_1 + 2) & 0x10) != 0) {
-            uVar14 = (uint)bVar13 | uVar8 & 0xffffff;
+          if (code_end <= pbVar14) goto LAB_00100aa5;
+          uVar12 = *(int *)(ctx->opcode_window + 3) << 8;
+          *(uint *)(ctx->opcode_window + 3) = uVar12;
+          bVar16 = *pbVar14;
+          uVar11 = bVar16 | uVar12;
+          *(uint *)(ctx->opcode_window + 3) = uVar11;
+          uVar17 = uVar11;
+          if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+            uVar17 = (uint)bVar16 | uVar12 & 0xffffff;
           }
-          uVar8 = uVar14 & 0xff00;
-          pbVar12 = pbVar11;
-          if (uVar8 != 0x3800) {
-            uVar5 = uVar14 & 0xff;
-            bVar13 = (byte)uVar14;
-            if (bVar13 < 0xf1) {
-              if (uVar5 < 0xcc) {
-                if (uVar5 < 0x3a) {
-                  if (0x37 < uVar5) goto LAB_001005bf;
-                  bVar20 = uVar5 - 0x20 < 2;
-                  bVar21 = uVar5 - 0x20 == 2;
+          uVar12 = uVar17 & 0xff00;
+          pbVar15 = pbVar14;
+          if (uVar12 != 0x3800) {
+            uVar11 = uVar17 & 0xff;
+            bVar16 = (byte)uVar17;
+            if (bVar16 < 0xf1) {
+              if (uVar11 < 0xcc) {
+                if (uVar11 < 0x3a) {
+                  if (0x37 < uVar11) goto LAB_001005bf;
+                  bVar24 = uVar11 - 0x20 < 2;
+                  has_bytes_remaining = uVar11 - 0x20 == 2;
                 }
                 else {
-                  bVar20 = uVar5 - 0x60 < 3;
-                  bVar21 = uVar5 - 0x60 == 3;
+                  bVar24 = uVar11 - 0x60 < 3;
+                  has_bytes_remaining = uVar11 - 0x60 == 3;
                 }
-                if (!bVar20 && !bVar21) goto LAB_001005d6;
+                if (!bVar24 && !has_bytes_remaining) goto LAB_001005d6;
               }
-              else if ((0x1000080001U >> (bVar13 + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
+              else if ((0x1000080001U >> (bVar16 + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
-              *(char *)(param_1 + 10) = (char)pbVar11 - (char)param_2;
-              if (uVar8 == 0x3a00) {
+              ctx->insn_offset = (char)pbVar14 - (char)code_start;
+              if (uVar12 == 0x3a00) {
 LAB_0010063c:
-                *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 8;
-                param_1[9] = 1;
+                puVar2 = &(ctx->prefix).decoded.flags2;
+                *puVar2 = *puVar2 | 8;
+                ctx->operand_size = 1;
                 goto LAB_001008c5;
               }
             }
             else {
 LAB_001005d6:
-              bVar3 = bVar13 & 0xf;
-              if (bVar13 >> 4 == 1) {
-                if (bVar3 < 10) {
-                  bVar20 = (uVar14 & 0xc) == 0;
+              bVar6 = bVar16 & 0xf;
+              if (bVar16 >> 4 == 1) {
+                if (bVar6 < 10) {
+                  bVar24 = (uVar17 & 0xc) == 0;
                   goto LAB_00100604;
                 }
-                if (bVar3 != 0xd) {
-                  return 0;
+                if (bVar6 != 0xd) {
+                  return FALSE;
                 }
               }
               else {
-                if (bVar13 >> 4 == 4) {
-                  bVar20 = (0x1c57UL >> bVar3 & 1) == 0;
+                if (bVar16 >> 4 == 4) {
+                  bVar24 = (0x1c57UL >> bVar6 & 1) == 0;
                 }
                 else {
-                  if (bVar13 >> 4 != 0) {
-                    return 0;
+                  if (bVar16 >> 4 != 0) {
+                    return FALSE;
                   }
-                  bVar20 = (bVar13 & 0xb) == 3;
+                  bVar24 = (bVar16 & 0xb) == 3;
                 }
 LAB_00100604:
-                if (bVar20) {
-                  return 0;
+                if (bVar24) {
+                  return FALSE;
                 }
               }
-              *(char *)(param_1 + 10) = (char)pbVar11 - (char)param_2;
-              if ((uVar8 == 0x3a00) && (2 < uVar5 - 0x4a)) goto LAB_0010063c;
+              ctx->insn_offset = (char)pbVar14 - (char)code_start;
+              if ((uVar12 == 0x3a00) && (2 < uVar11 - 0x4a)) goto LAB_0010063c;
             }
-            param_1[9] = 0;
+            ctx->operand_size = 0;
             goto LAB_001008c5;
           }
-          uVar8 = uVar14 >> 3 & 0x1f;
-          if (((byte)(&DAT_0010ad00)[uVar8] >> (uVar14 & 7) & 1) == 0) {
-            return 0;
+          uVar12 = uVar17 >> 3 & 0x1f;
+          if (((byte)(&DAT_0010ad00)[uVar12] >> (uVar17 & 7) & 1) == 0) {
+            return FALSE;
           }
-          param_1[9] = 0;
-          bVar13 = (&DAT_0010ace0)[uVar8];
-          *(char *)(param_1 + 10) = (char)((long)pbVar11 - (long)param_2);
-          if ((bVar13 >> (uVar14 & 7) & 1) != 0) goto LAB_001008c5;
-          if ((*(byte *)((long)param_1 + 0x11) & 8) == 0) {
-            *param_1 = param_2;
-            pbVar11 = (byte *)(((long)pbVar11 - (long)param_2) + 1);
+          ctx->operand_size = 0;
+          bVar16 = (&DAT_0010ace0)[uVar12];
+          ctx->insn_offset = (u8)((long)pbVar14 - (long)code_start);
+          if ((bVar16 >> (uVar17 & 7) & 1) != 0) goto LAB_001008c5;
+          if (((ctx->prefix).decoded.flags2 & 8) == 0) {
+            ctx->instruction = code_start;
+            pbVar14 = (byte *)(((long)pbVar14 - (long)code_start) + 1);
             goto LAB_001004e1;
           }
 LAB_0010067d:
-          pbVar11 = pbVar11 + 1;
+          pbVar14 = pbVar14 + 1;
 LAB_00100680:
-          if (param_3 <= pbVar11) goto LAB_00100aa5;
-          lVar9 = param_1[9];
-          bVar13 = *pbVar11;
-          if (lVar9 != 1) {
-            pbVar12 = pbVar11 + 1;
-            if ((param_1[2] & 0xff000000000004) == 0x66000000000004) {
-              if (lVar9 == 2) {
-                param_1[9] = 4;
+          if (code_end <= pbVar14) goto LAB_00100aa5;
+          uVar9 = ctx->operand_size;
+          bVar16 = *pbVar14;
+          if (uVar9 != 1) {
+            pbVar15 = pbVar14 + 1;
+            if (((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==
+                (undefined1  [16])0x66000000000004) {
+              if (uVar9 == 2) {
+                ctx->operand_size = 4;
               }
-              else if (lVar9 == 4) {
-                param_1[9] = 2;
+              else if (uVar9 == 4) {
+                ctx->operand_size = 2;
               }
             }
-            if (param_3 <= pbVar12) goto LAB_00100aa5;
-            uVar2 = CONCAT11(*pbVar12,bVar13);
-            if (param_1[9] == 2) {
-              param_1[8] = (ulong)uVar2;
-              param_1[7] = (long)(short)uVar2;
-              pbVar11 = pbVar12 + (1 - (long)param_2);
-              *param_1 = param_2;
+            if (code_end <= pbVar15) goto LAB_00100aa5;
+            uVar5 = CONCAT11(*pbVar15,bVar16);
+            if (ctx->operand_size == 2) {
+              ctx->operand_zeroextended = (ulong)uVar5;
+              ctx->operand = (long)(short)uVar5;
+              pbVar14 = pbVar15 + (1 - (long)code_start);
+              ctx->instruction = code_start;
               goto LAB_001007e4;
             }
-            if (param_3 <= pbVar11 + 2) goto LAB_00100aa5;
-            pbVar17 = pbVar11 + 3;
-            if (param_3 <= pbVar17) goto LAB_00100aa5;
-            uVar5 = CONCAT13(pbVar11[3],CONCAT12(pbVar11[2],uVar2));
-            if (param_1[9] == 4) {
-              param_1[8] = (ulong)uVar5;
-              lVar9 = (long)(int)uVar5;
+            if (code_end <= pbVar14 + 2) goto LAB_00100aa5;
+            pbVar20 = pbVar14 + 3;
+            if (code_end <= pbVar20) goto LAB_00100aa5;
+            uVar11 = CONCAT13(pbVar14[3],CONCAT12(pbVar14[2],uVar5));
+            if (ctx->operand_size == 4) {
+              ctx->operand_zeroextended = (ulong)uVar11;
+              uVar9 = (u64)(int)uVar11;
             }
             else {
-              if (((param_3 <= pbVar11 + 4) || (param_3 <= pbVar11 + 5)) || (param_3 <= pbVar11 + 6)
-                 ) goto LAB_00100aa5;
-              pbVar17 = pbVar11 + 7;
-              if (param_3 <= pbVar17) goto LAB_00100aa5;
-              lVar9 = CONCAT17(pbVar11[7],
-                               CONCAT16(pbVar11[6],CONCAT15(pbVar11[5],CONCAT14(pbVar11[4],uVar5))))
-              ;
-              param_1[8] = lVar9;
+              if (((code_end <= pbVar14 + 4) || (code_end <= pbVar14 + 5)) ||
+                 (code_end <= pbVar14 + 6)) goto LAB_00100aa5;
+              pbVar20 = pbVar14 + 7;
+              if (code_end <= pbVar20) goto LAB_00100aa5;
+              uVar9 = CONCAT17(pbVar14[7],
+                               CONCAT16(pbVar14[6],CONCAT15(pbVar14[5],CONCAT14(pbVar14[4],uVar11)))
+                              );
+              ctx->operand_zeroextended = uVar9;
             }
-            param_1[7] = lVar9;
+            ctx->operand = uVar9;
             goto LAB_0010089f;
           }
-          param_1[8] = (ulong)bVar13;
-          pbVar11 = pbVar11 + (1 - (long)param_2);
-          param_1[7] = (long)(char)bVar13;
-          *param_1 = param_2;
-          param_1[1] = pbVar11;
+          ctx->operand_zeroextended = (ulong)bVar16;
+          pbVar14 = pbVar14 + (1 - (long)code_start);
+          ctx->operand = (long)(char)bVar16;
+          ctx->instruction = code_start;
+          ctx->instruction_size = (u64)pbVar14;
         }
         else {
-          if ((byte)(bVar13 + 0xe) < 2) goto LAB_001000cf;
+          if ((byte)(bVar16 + 0xe) < 2) goto LAB_001000cf;
 LAB_00100191:
-          if (param_3 <= pbVar11) goto LAB_00100aa5;
-          bVar13 = *pbVar11;
-          uVar18 = (ulong)bVar13;
-          if (bVar13 == 0xf) {
-            *(undefined4 *)(param_1 + 5) = 0xf;
-            pbVar12 = pbVar11;
+          if (code_end <= pbVar14) goto LAB_00100aa5;
+          bVar16 = *pbVar14;
+          uVar22 = (ulong)bVar16;
+          if (bVar16 == 0xf) {
+            *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
+            pbVar15 = pbVar14;
 LAB_001001c5:
-            pbVar11 = pbVar12 + 1;
+            pbVar14 = pbVar15 + 1;
             goto LAB_001001c9;
           }
-          uVar5 = (uint)bVar13;
-          uVar14 = bVar13 & 7;
-          if (((byte)(&DAT_0010ad80)[bVar13 >> 3] >> uVar14 & 1) != 0) {
-            return 0;
+          uVar11 = (uint)bVar16;
+          uVar17 = bVar16 & 7;
+          if (((byte)(&DAT_0010ad80)[bVar16 >> 3] >> uVar17 & 1) != 0) {
+            return FALSE;
           }
-          *(uint *)(param_1 + 5) = (uint)bVar13;
+          *(uint *)(ctx->opcode_window + 3) = (uint)bVar16;
           local_38[0] = 0x3030303030303030;
-          *(char *)(param_1 + 10) = (char)((long)pbVar11 - (long)param_2);
+          ctx->insn_offset = (u8)((long)pbVar14 - (long)code_start);
           local_38[1] = 0xffff0fc000000000;
           local_38[2] = 0xffff03000000000b;
           local_38[3] = 0xc00bff000025c7;
-          uVar15 = local_38[bVar13 >> 6] >> (bVar13 & 0x3f);
-          uVar16 = (ulong)((uint)uVar15 & 1);
-          if ((uVar15 & 1) == 0) {
-            param_1[9] = 0;
+          uVar18 = local_38[bVar16 >> 6] >> (bVar16 & 0x3f);
+          uVar19 = (ulong)((uint)uVar18 & 1);
+          if ((uVar18 & 1) == 0) {
+            ctx->operand_size = 0;
           }
           else {
-            if (bVar13 < 0xf8) {
-              if (bVar13 < 0xc2) {
-                if (bVar13 < 0x6a) {
-                  if (bVar13 < 0x2d) {
-                    if (0x20 < (byte)(bVar13 - 5)) goto LAB_00100344;
-                    uVar15 = 0x2020202020;
+            if (bVar16 < 0xf8) {
+              if (bVar16 < 0xc2) {
+                if (bVar16 < 0x6a) {
+                  if (bVar16 < 0x2d) {
+                    if (0x20 < (byte)(bVar16 - 5)) goto LAB_00100344;
+                    uVar18 = 0x2020202020;
                   }
                   else {
-                    uVar15 = 0x1800000000010101;
-                    uVar18 = (ulong)(bVar13 - 0x2d);
+                    uVar18 = 0x1800000000010101;
+                    uVar22 = (ulong)(bVar16 - 0x2d);
                   }
                 }
                 else {
-                  uVar15 = 0x7f80010000000001;
-                  uVar18 = (ulong)(bVar13 + 0x7f);
-                  if (0x3e < (byte)(bVar13 + 0x7f)) goto LAB_00100344;
+                  uVar18 = 0x7f80010000000001;
+                  uVar22 = (ulong)(bVar16 + 0x7f);
+                  if (0x3e < (byte)(bVar16 + 0x7f)) goto LAB_00100344;
                 }
-                if ((uVar15 >> (uVar18 & 0x3f) & 1) != 0) {
-                  uVar16 = 4;
+                if ((uVar18 >> (uVar22 & 0x3f) & 1) != 0) {
+                  uVar19 = 4;
                 }
               }
               else {
-                uVar18 = 1L << (bVar13 + 0x3e & 0x3f);
-                if ((uVar18 & 0x2000c800000020) == 0) {
-                  if ((uVar18 & 0x101) != 0) {
-                    uVar16 = 2;
+                uVar22 = 1L << (bVar16 + 0x3e & 0x3f);
+                if ((uVar22 & 0x2000c800000020) == 0) {
+                  if ((uVar22 & 0x101) != 0) {
+                    uVar19 = 2;
                   }
                 }
                 else {
-                  uVar16 = 4;
+                  uVar19 = 4;
                 }
               }
             }
 LAB_00100344:
-            *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 8;
-            param_1[9] = uVar16;
+            puVar2 = &(ctx->prefix).decoded.flags2;
+            *puVar2 = *puVar2 | 8;
+            ctx->operand_size = uVar19;
           }
-          sVar6 = (sbyte)uVar14;
-          pbVar12 = pbVar11;
-          if (((int)(uint)(byte)(&DAT_0010ad60)[bVar13 >> 3] >> sVar6 & 1U) != 0) goto LAB_001008c5;
-          if (3 < bVar13 - 0xa0) {
-            if ((*(byte *)((long)param_1 + 0x11) & 8) != 0) {
-              if ((((*(byte *)(param_1 + 2) & 0x20) != 0) &&
-                  ((*(byte *)((long)param_1 + 0x1b) & 8) != 0)) && ((bVar13 & 0xf8) == 0xb8)) {
-                param_1[9] = 8;
-                *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 0x10;
-                *(sbyte *)(param_1 + 4) = sVar6;
-                *(undefined4 *)(param_1 + 5) = 0xb8;
+          sVar10 = (sbyte)uVar17;
+          pbVar15 = pbVar14;
+          if (((int)(uint)(byte)(&DAT_0010ad60)[bVar16 >> 3] >> sVar10 & 1U) != 0)
+          goto LAB_001008c5;
+          if (3 < bVar16 - 0xa0) {
+            bVar6 = (ctx->prefix).decoded.flags2;
+            if ((bVar6 & 8) != 0) {
+              if (((((ctx->prefix).decoded.flags & 0x20) != 0) &&
+                  (((ctx->prefix).decoded.rex.rex_byte & 8) != 0)) && ((bVar16 & 0xf8) == 0xb8)) {
+                ctx->operand_size = 8;
+                (ctx->prefix).decoded.flags2 = bVar6 | 0x10;
+                ctx->imm64_reg = sVar10;
+                *(undefined4 *)(ctx->opcode_window + 3) = 0xb8;
               }
               goto LAB_0010067d;
             }
-            *param_1 = param_2;
-            pbVar11 = (byte *)(((long)pbVar11 - (long)param_2) + 1);
+            ctx->instruction = code_start;
+            pbVar14 = (byte *)(((long)pbVar14 - (long)code_start) + 1);
             goto LAB_001004e1;
           }
-          *(byte *)((long)param_1 + 0x11) = *(byte *)((long)param_1 + 0x11) | 5;
+          puVar2 = &(ctx->prefix).decoded.flags2;
+          *puVar2 = *puVar2 | 5;
 LAB_0010065f:
-          pbVar12 = pbVar11 + 1;
+          pbVar15 = pbVar14 + 1;
 LAB_0010073c:
-          if (((param_3 <= pbVar12) || (param_3 <= pbVar12 + 1)) || (param_3 <= pbVar12 + 2))
+          if (((code_end <= pbVar15) || (code_end <= pbVar15 + 1)) || (code_end <= pbVar15 + 2))
           goto LAB_00100aa5;
-          pbVar17 = pbVar12 + 3;
-          if (param_3 <= pbVar17) goto LAB_00100aa5;
-          bVar13 = *(byte *)((long)param_1 + 0x11);
-          param_1[6] = (long)CONCAT13(pbVar12[3],CONCAT12(pbVar12[2],CONCAT11(pbVar12[1],*pbVar12)))
-          ;
-          if ((bVar13 & 4) == 0) {
-            if ((bVar13 & 8) != 0) {
-              pbVar11 = pbVar12 + 4;
+          pbVar20 = pbVar15 + 3;
+          if (code_end <= pbVar20) goto LAB_00100aa5;
+          bVar16 = (ctx->prefix).decoded.flags2;
+          ctx->mem_disp =
+               (long)CONCAT13(pbVar15[3],CONCAT12(pbVar15[2],CONCAT11(pbVar15[1],*pbVar15)));
+          if ((bVar16 & 4) == 0) {
+            if ((bVar16 & 8) != 0) {
+              pbVar14 = pbVar15 + 4;
               goto LAB_00100680;
             }
 LAB_0010089f:
-            *param_1 = param_2;
-            pbVar11 = pbVar17 + (1 - (long)param_2);
+            ctx->instruction = code_start;
+            pbVar14 = pbVar20 + (1 - (long)code_start);
           }
           else {
-            if (((param_3 <= pbVar12 + 4) || (param_3 <= pbVar12 + 5)) ||
-               ((param_3 <= pbVar12 + 6 || (param_3 <= pbVar12 + 7)))) goto LAB_00100aa5;
-            if ((bVar13 & 8) != 0) {
-              pbVar11 = pbVar12 + 8;
+            if (((code_end <= pbVar15 + 4) || (code_end <= pbVar15 + 5)) ||
+               ((code_end <= pbVar15 + 6 || (code_end <= pbVar15 + 7)))) goto LAB_00100aa5;
+            if ((bVar16 & 8) != 0) {
+              pbVar14 = pbVar15 + 8;
               goto LAB_00100680;
             }
-            *param_1 = param_2;
-            pbVar11 = pbVar12 + 7 + (1 - (long)param_2);
+            ctx->instruction = code_start;
+            pbVar14 = pbVar15 + 7 + (1 - (long)code_start);
           }
 LAB_001007e4:
-          param_1[1] = pbVar11;
+          ctx->instruction_size = (u64)pbVar14;
         }
-        if (pbVar11 == (byte *)0x0) {
-          return 0;
+        if (pbVar14 == (byte *)0x0) {
+          return FALSE;
         }
-        uVar5 = *(uint *)(param_1 + 5);
+        uVar11 = *(uint *)(ctx->opcode_window + 3);
 LAB_001004ee:
-        iVar4 = uVar5 + 0x80;
+        iVar8 = uVar11 + 0x80;
         goto LAB_001004f1;
       }
 LAB_001000cf:
-      if ((*(byte *)(param_1 + 2) & 1) != 0) {
-        return 0;
+      bVar16 = (ctx->prefix).decoded.flags;
+      if ((bVar16 & 1) != 0) {
+        return FALSE;
       }
-      *(byte *)(param_1 + 2) = *(byte *)(param_1 + 2) | 1;
-      *(byte *)((long)param_1 + 0x14) = *pbVar11;
+      (ctx->prefix).decoded.flags = bVar16 | 1;
+      (ctx->prefix).decoded.lock_rep_byte = *pbVar14;
     }
 LAB_00100675:
-    pbVar11 = pbVar11 + 1;
-    bVar20 = pbVar11 < param_3;
+    pbVar14 = pbVar14 + 1;
+    bVar24 = pbVar14 < code_end;
   } while( TRUE );
 }
 

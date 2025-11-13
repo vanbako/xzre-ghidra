@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107320_bignum_serialize.c
 // Function: bignum_serialize @ 0x107320
-// Calling convention: unknown
-// Prototype: undefined bignum_serialize(void)
+// Calling convention: __stdcall
+// Prototype: BOOL __stdcall bignum_serialize(u8 * buffer, u64 bufferSize, u64 * pOutSize, BIGNUM * bn, imported_funcs_t * funcs)
 
 
 /*
@@ -10,34 +10,36 @@
 #include "xzre_types.h"
 
 
-undefined8 bignum_serialize(uint *param_1,ulong param_2,long *param_3,long param_4,long param_5)
+BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,imported_funcs_t *funcs)
 
 {
   uint uVar1;
   int iVar2;
-  ulong uVar3;
+  ulong cnt;
   
-  if (((param_5 != 0 && 5 < param_2) && (param_4 != 0)) && (*(long *)(param_5 + 0x100) != 0)) {
-    *param_3 = 0;
-    if (((*(code **)(param_5 + 0x68) != (code *)0x0) &&
-        (uVar1 = (**(code **)(param_5 + 0x68))(param_4), uVar1 < 0x4001)) &&
-       ((uVar1 = uVar1 + 7 >> 3, uVar1 != 0 && (uVar3 = (ulong)uVar1, uVar3 <= param_2 - 6)))) {
-      *(undefined1 *)(param_1 + 1) = 0;
-      iVar2 = (**(code **)(param_5 + 0x100))(param_4,(long)param_1 + 5);
-      if ((long)iVar2 == uVar3) {
-        if (*(char *)((long)param_1 + 5) < '\0') {
-          uVar3 = uVar3 + 1;
+  if (((funcs != (imported_funcs_t *)0x0 && 5 < bufferSize) && (bn != (BIGNUM *)0x0)) &&
+     (funcs->BN_bn2bin != (_func_58 *)0x0)) {
+    *pOutSize = 0;
+    if (((funcs->BN_num_bits != (_func_39 *)0x0) &&
+        (uVar1 = (*funcs->BN_num_bits)(bn), uVar1 < 0x4001)) &&
+       ((uVar1 = uVar1 + 7 >> 3, uVar1 != 0 && (cnt = (ulong)uVar1, cnt <= bufferSize - 6)))) {
+      buffer[4] = '\0';
+      iVar2 = (*funcs->BN_bn2bin)(bn,buffer + 5);
+      if ((long)iVar2 == cnt) {
+        if ((char)buffer[5] < '\0') {
+          cnt = cnt + 1;
           uVar1 = uVar1 + 1;
         }
         else {
-          c_memmove(param_1 + 1,(long)param_1 + 5,uVar3);
+          c_memmove((char *)(buffer + 4),(char *)(buffer + 5),cnt);
         }
-        *param_1 = uVar1 >> 0x18 | (uVar1 & 0xff0000) >> 8 | (uVar1 & 0xff00) << 8 | uVar1 << 0x18;
-        *param_3 = uVar3 + 4;
-        return 1;
+        *(uint *)buffer =
+             uVar1 >> 0x18 | (uVar1 & 0xff0000) >> 8 | (uVar1 & 0xff00) << 8 | uVar1 << 0x18;
+        *pOutSize = cnt + 4;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

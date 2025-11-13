@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/104060_get_lzma_allocator.c
 // Function: get_lzma_allocator @ 0x104060
-// Calling convention: unknown
-// Prototype: undefined get_lzma_allocator(void)
+// Calling convention: __stdcall
+// Prototype: lzma_allocator * __stdcall get_lzma_allocator(void)
 
 
 /*
@@ -10,12 +10,12 @@
 #include "xzre_types.h"
 
 
-long get_lzma_allocator(void)
+lzma_allocator * get_lzma_allocator(void)
 
 {
-  long lVar1;
+  fake_lzma_allocator_t *pfVar1;
   
-  lVar1 = get_lzma_allocator_address(0x21);
-  return lVar1 + 8;
+  pfVar1 = get_lzma_allocator_address();
+  return &pfVar1->allocator;
 }
 

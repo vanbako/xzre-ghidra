@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102150_elf_get_data_segment.c
 // Function: elf_get_data_segment @ 0x102150
-// Calling convention: unknown
-// Prototype: undefined elf_get_data_segment(void)
+// Calling convention: __stdcall
+// Prototype: void * __stdcall elf_get_data_segment(elf_info_t * elf_info, u64 * pSize, BOOL get_alignment)
 
 
 /*
@@ -10,86 +10,91 @@
 #include "xzre_types.h"
 
 
-ulong elf_get_data_segment(long *param_1,long *param_2,int param_3)
+void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
 
 {
-  BOOL bVar1;
-  long lVar2;
-  int *piVar3;
-  long lVar4;
-  ulong uVar5;
-  ulong uVar6;
-  ulong uVar7;
+  Elf64_Ehdr *pEVar1;
+  BOOL data_segment_found;
+  ulong uVar3;
+  Elf64_Phdr *pEVar4;
+  void *pvVar5;
+  void *pvVar6;
+  u64 uVar7;
   ulong uVar8;
   ulong uVar9;
+  void *pvVar10;
+  ulong uVar11;
+  ulong uVar12;
+  long lVar13;
   
-  uVar6 = param_1[0x17];
-  if (uVar6 != 0) {
-    if (param_3 != 0) {
-      lVar2 = param_1[0x19];
-      *param_2 = lVar2;
-      uVar6 = uVar6 - lVar2;
-      if (lVar2 == 0) {
-        uVar6 = 0;
+  pvVar6 = (void *)elf_info->data_segment_start;
+  pEVar1 = elf_info->elfbase;
+  if (pvVar6 != (void *)0x0) {
+    if (get_alignment != FALSE) {
+      uVar7 = elf_info->data_segment_alignment;
+      *pSize = uVar7;
+      pvVar6 = (void *)((long)pvVar6 - uVar7);
+      if (uVar7 == 0) {
+        pvVar6 = (void *)0x0;
       }
-      return uVar6;
+      return pvVar6;
     }
-    *param_2 = param_1[0x18];
-    return uVar6;
+    *pSize = elf_info->data_segment_size;
+    return pvVar6;
   }
-  bVar1 = FALSE;
-  lVar2 = 0;
-  uVar5 = 0;
-  uVar6 = 0;
-  for (uVar8 = 0; (uint)uVar8 < (uint)*(ushort *)(param_1 + 3); uVar8 = uVar8 + 1) {
-    piVar3 = (int *)(uVar8 * 0x38 + param_1[2]);
-    if ((*piVar3 == 1) && ((piVar3[1] & 7U) == 6)) {
-      if (*(ulong *)(piVar3 + 10) < *(ulong *)(piVar3 + 8)) {
-        return 0;
+  data_segment_found = FALSE;
+  lVar13 = 0;
+  uVar8 = 0;
+  uVar3 = 0;
+  for (uVar11 = 0; (uint)uVar11 < (uint)(ushort)elf_info->e_phnum; uVar11 = uVar11 + 1) {
+    pEVar4 = elf_info->phdrs + uVar11;
+    if ((pEVar4->p_type == 1) && ((pEVar4->p_flags & 7) == 6)) {
+      if (pEVar4->p_memsz < pEVar4->p_filesz) {
+        return (void *)0x0;
       }
-      uVar7 = (*param_1 - param_1[1]) + *(long *)(piVar3 + 4);
-      uVar9 = *(ulong *)(piVar3 + 10) + uVar7;
-      uVar7 = uVar7 & 0xfffffffffffff000;
-      if ((uVar9 & 0xfff) != 0) {
-        uVar9 = (uVar9 & 0xfffffffffffff000) + 0x1000;
+      uVar9 = (long)pEVar1 + (pEVar4->p_vaddr - elf_info->first_vaddr);
+      uVar12 = pEVar4->p_memsz + uVar9;
+      uVar9 = uVar9 & 0xfffffffffffff000;
+      if ((uVar12 & 0xfff) != 0) {
+        uVar12 = (uVar12 & 0xfffffffffffff000) + 0x1000;
       }
-      if (bVar1) {
-        if (uVar5 + lVar2 < uVar9) {
-          lVar2 = uVar9 - uVar7;
-          uVar6 = uVar8 & 0xffffffff;
-          uVar5 = uVar7;
+      if (data_segment_found) {
+        if (uVar8 + lVar13 < uVar12) {
+          lVar13 = uVar12 - uVar9;
+          uVar3 = uVar11 & 0xffffffff;
+          uVar8 = uVar9;
         }
       }
       else {
-        lVar2 = uVar9 - uVar7;
-        bVar1 = TRUE;
-        uVar6 = uVar8 & 0xffffffff;
-        uVar5 = uVar7;
+        lVar13 = uVar12 - uVar9;
+        data_segment_found = TRUE;
+        uVar3 = uVar11 & 0xffffffff;
+        uVar8 = uVar9;
       }
     }
   }
-  if (bVar1) {
-    lVar2 = uVar6 * 0x38 + param_1[2];
-    lVar4 = (*param_1 - param_1[1]) + *(long *)(lVar2 + 0x10);
-    uVar8 = *(long *)(lVar2 + 0x28) + lVar4;
-    uVar5 = lVar4 + *(long *)(lVar2 + 0x20);
-    uVar6 = uVar8;
-    if ((uVar8 & 0xfff) != 0) {
-      uVar6 = (uVar8 & 0xfffffffffffff000) + 0x1000;
+  if (data_segment_found) {
+    pEVar4 = elf_info->phdrs;
+    lVar13 = pEVar4[uVar3].p_vaddr - elf_info->first_vaddr;
+    pvVar10 = (void *)((long)pEVar1 + pEVar4[uVar3].p_memsz + lVar13);
+    pvVar5 = (void *)((long)pEVar1 + pEVar4[uVar3].p_filesz + lVar13);
+    pvVar6 = pvVar10;
+    if (((ulong)pvVar10 & 0xfff) != 0) {
+      pvVar6 = (void *)(((ulong)pvVar10 & 0xfffffffffffff000) + 0x1000);
     }
-    lVar2 = uVar6 - uVar8;
-    param_1[0x17] = uVar5;
-    param_1[0x19] = lVar2;
-    param_1[0x18] = uVar6 - uVar5;
-    if (param_3 == 0) {
-      *param_2 = uVar6 - uVar5;
-      return uVar5;
+    uVar7 = (long)pvVar6 - (long)pvVar10;
+    elf_info->data_segment_start = (u64)pvVar5;
+    elf_info->data_segment_alignment = uVar7;
+    elf_info->data_segment_size = (long)pvVar6 - (long)pvVar5;
+    if (get_alignment == FALSE) {
+      *pSize = (long)pvVar6 - (long)pvVar5;
+      return pvVar5;
     }
-    *param_2 = lVar2;
-    if (lVar2 != 0) {
-      return uVar8;
+    *pSize = uVar7;
+    if (uVar7 != 0) {
+      return pvVar10;
     }
   }
-  return 0;
+  return (void *)0x0;
 }
 

