@@ -48,7 +48,6 @@ BOOL find_link_map_l_name
   link_map *link_map_cursor;
   dl_audit_symbind_alt_fn audit_stub;
   lzma_allocator *import_allocator;
-  u64 local_38;
   
   BVar4 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
   if (BVar4 != FALSE) {
