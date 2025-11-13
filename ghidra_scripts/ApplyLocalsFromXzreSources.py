@@ -517,13 +517,18 @@ def main():
     applied_total = 0
     skipped_total = 0
     missing_total = 0
+    missing_names = []
+    skipped_by_flag = 0
     try:
         for func_name, payload in mapping.items():
             monitor.checkCanceled()
+            if payload.get("skip_locals"):
+                skipped_by_flag += 1
+                continue
             func = _find_function_by_name(fm, func_name)
             if func is None:
-                printerr("Function {} not found in current program".format(func_name))
                 missing_total += 1
+                missing_names.append(func_name)
                 continue
             locals_data = payload.get("locals") or []
             updated, skipped = _apply_locals_to_function(func, locals_data, resolver)
@@ -538,6 +543,20 @@ def main():
             applied_total, skipped_total, missing_total
         )
     )
+
+    if skipped_by_flag:
+        println("Skipped {} functions via skip_locals flag".format(skipped_by_flag))
+
+    if missing_names:
+        preview_count = min(len(missing_names), 10)
+        preview = ", ".join(missing_names[:preview_count])
+        if preview_count < len(missing_names):
+            preview += ", ..."
+        println(
+            "Missing functions above are absent from the current object (first {}): {}".format(
+                preview_count, preview
+            )
+        )
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ Reference workspace for the headless Ghidra project that captures the `xzre` mal
 ## Metadata & Comment Guardrails
 - `metadata/functions_autodoc.json` and `metadata/xzre_locals.json` are the only sources that should be hand-edited. Everything under `ghidra_scripts/generated/` is derived—if it differs from metadata after a refresh, treat that as a regression and re-run the pipeline.
 - Locals are harvested from both `xzre/xzre_code/` and the top-level `xzre/*.c` files. Missing functions are logged (expected when an object does not contain the symbol). Update `metadata/xzre_locals.json` when renaming locals/parameters so ApplyLocals can replay the new names. Use the optional `register_temps` array inside each entry to describe Ghidra-only temporaries (`bVar*`/`uVar*`); the refresh pipeline reads that data to rename and re-type the register temps inside the exported `.c`.
+- When a function exists in the metadata but is absent from the currently imported object, set `"skip_locals": true` on that entry so the refresh pipeline skips it until the relevant binary is added. `scripts/extract_local_variables.py` preserves the flag across regenerations.
 - `metadata/linker_map.json` decouples name restoration from the upstream linker script; keep it synchronized if we ingest new symbols.
 - Type aliases live in `metadata/xzre_types.json`. The exported header (`xzregh/xzre_types.h`) is rebuilt by the refresh script so downstream decompilations always include the latest typedefs.
 

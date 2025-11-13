@@ -139,7 +139,7 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -postScript ApplySignaturesFromHeader.py \
   -postScript InstallEnumEquates.py "$HEADER_PATH" \
   -postScript FixAllParamStorage.py \
-  -postScript ApplyLocalsFromXzreSources.py \
+  -postScript ApplyLocalsFromXzreSources.py "map=$LOCALS_GENERATED" \
   "${TYPE_DOCS_POST[@]}"
 
 "$GHIDRA/support/analyzeHeadless" "$PROJECT_DIR" "$PROJECT_NAME" \

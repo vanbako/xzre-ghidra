@@ -215,6 +215,15 @@ def main() -> None:
         dirs = ", ".join(XZRE_SOURCE_DIRS)
         raise SystemExit(f"no C sources found under {dirs}")
 
+    existing_data: Dict[str, Dict[str, Any]] = {}
+    output_path = os.path.abspath(args.output)
+    if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as existing_file:
+            try:
+                existing_data = json.load(existing_file)
+            except json.JSONDecodeError:
+                existing_data = {}
+
     all_functions: Dict[str, Dict[str, Any]] = OrderedDict()
     for source_path in sources:
         rel_source = os.path.relpath(source_path, REPO_ROOT).replace(os.sep, "/")
@@ -238,12 +247,18 @@ def main() -> None:
                 sys.stderr.write(
                     f"warning: duplicate definition for {func_name}; overwriting\n"
                 )
-            all_functions[func_name] = OrderedDict(
+            entry = OrderedDict(
                 source=rel_source,
                 locals=locals_list,
             )
+            existing_entry = existing_data.get(func_name)
+            if isinstance(existing_entry, dict):
+                for key, value in existing_entry.items():
+                    if key in entry:
+                        continue
+                    entry[key] = value
+            all_functions[func_name] = entry
 
-    output_path = os.path.abspath(args.output)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as outf:
         json.dump(all_functions, outf, indent=2)

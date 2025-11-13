@@ -2,6 +2,12 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-08
+- Added a `skip_locals` flag to `metadata/xzre_locals.json`, updated `ApplyLocalsFromXzreSources.py` to honor it, and taught `scripts/extract_local_variables.py` to carry arbitrary extra keys forward when regenerating the metadata, so we can intentionally suppress symbols that don’t exist in `liblzma_la-crc64-fast.o` without losing the annotations on the next rebuild.
+- Marked all 363 functions that currently fail the locals pass (OpenSSL provider hooks, ossl_check helpers, dormant loader utilities, etc.) with `skip_locals: true` so the headless refresh now skips them quietly until we import binaries that actually define those symbols.
+- Documented the workflow tweak in `AGENTS.md`/`README.md` so future analysts know how to re-enable the entries once additional objects are brought into the project.
+- Next: re-enable individual entries by clearing `skip_locals` whenever we begin analyzing a binary that contains the corresponding function.
+
 ## 2025-11-07
 - Added `register_temps` metadata to `metadata/xzre_locals.json` (loader helpers, ELF walkers, state guards, etc.) and introduced `scripts/postprocess_register_temps.py` so the refresh pipeline renames Ghidra’s synthetic `bVar*` temps (and fixes `(bool *)` casts) immediately after each export. The new step runs automatically inside `refresh_xzre_project.sh`.
 - Updated `AGENTS.md` and `README.md` with instructions for recording register temps and documented the new post-processing phase so future runs stay metadata-driven.
