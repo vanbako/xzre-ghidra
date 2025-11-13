@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-07
+- Added `register_temps` metadata to `metadata/xzre_locals.json` (loader helpers, ELF walkers, state guards, etc.) and introduced `scripts/postprocess_register_temps.py` so the refresh pipeline renames Ghidra’s synthetic `bVar*` temps (and fixes `(bool *)` casts) immediately after each export. The new step runs automatically inside `refresh_xzre_project.sh`.
+- Updated `AGENTS.md` and `README.md` with instructions for recording register temps and documented the new post-processing phase so future runs stay metadata-driven.
+- Next: capture any additional temp rename requests inside the JSON rather than editing `xzregh/*.c` by hand.
+
+## 2025-11-07
 - Completed the `loader_rt` sweep: reread every loader/GOT/audit helper plus the cpuid bootstrap path, rewrote their AutoDoc entries with the new findings (GOT math, ld.so walk, hook orchestration, syscall wrappers, cpuid glue, etc.), and added a first-class description for the exported `xzre_globals` blob so downstream tools know what lives inside the liblzma data segment.
 - Added locals coverage for the same set—naming the key link_map pointers, audit helpers, shared context blocks, and libc import stubs—so the refresh now emits meaningful symbols instead of `puVar*` placeholders throughout `xzregh/10277*–10A80*`.
 - Ran `./scripts/refresh_xzre_project.sh` to push the documentation/locals into the headless project, regenerate the exported decompilations, and update `ghidra_projects/xzre_ghidra_portable.zip`.

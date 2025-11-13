@@ -159,6 +159,10 @@ find "$XZREGH_EXPORT_DIR" -maxdepth 1 -type f -name '*.c' -delete
   -scriptPath "$SCRIPT_PATH" \
   -postScript ExportFunctionDecompilations.py "out=$XZREGH_EXPORT_DIR" "types=$XZREGH_TYPES"
 
+python3 "$ROOT_DIR/scripts/postprocess_register_temps.py" \
+  --metadata "$LOCALS_SOURCE" \
+  --xzregh-dir "$XZREGH_EXPORT_DIR"
+
 if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
   echo "warning: exported AutoDoc comments differ from metadata/functions_autodoc.json" >&2
   if [[ "$CHECK_ONLY" -eq 1 ]]; then

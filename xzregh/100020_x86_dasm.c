@@ -37,8 +37,8 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   dasm_ctx_t *pdVar22;
   ulong uVar23;
   _union_77 *p_Var24;
-  bool bVar25;
-  bool bVar26;
+  BOOL has_bytes_remaining;
+  BOOL is_two_byte_opcode;
   byte bVar27;
   ulong local_38 [4];
   
@@ -52,10 +52,10 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
     *(undefined4 *)&pdVar22->instruction = 0;
     pdVar22 = (dasm_ctx_t *)((long)pdVar22 + (ulong)bVar27 * -8 + 4);
   }
-  bVar25 = code_start < code_end;
+  has_bytes_remaining = code_start < code_end;
   pbVar15 = code_start;
   do {
-    if (!bVar25) {
+    if (!has_bytes_remaining) {
 LAB_00100aa5:
       for (lVar14 = 0x16; lVar14 != 0; lVar14 = lVar14 + -1) {
         *(undefined4 *)&ctx->instruction = 0;
@@ -397,14 +397,14 @@ LAB_001003fa:
               if (uVar12 < 0xcc) {
                 if (uVar12 < 0x3a) {
                   if (0x37 < uVar12) goto LAB_001005bf;
-                  bVar25 = uVar12 - 0x20 < 2;
-                  bVar26 = uVar12 - 0x20 == 2;
+                  has_bytes_remaining = uVar12 - 0x20 < 2;
+                  is_two_byte_opcode = uVar12 - 0x20 == 2;
                 }
                 else {
-                  bVar25 = uVar12 - 0x60 < 3;
-                  bVar26 = uVar12 - 0x60 == 3;
+                  has_bytes_remaining = uVar12 - 0x60 < 3;
+                  is_two_byte_opcode = uVar12 - 0x60 == 3;
                 }
-                if (!bVar25 && !bVar26) goto LAB_001005d6;
+                if (!has_bytes_remaining && !is_two_byte_opcode) goto LAB_001005d6;
               }
               else if ((0x1000080001U >> (bVar17 + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
@@ -422,7 +422,7 @@ LAB_001005d6:
               bVar7 = bVar17 & 0xf;
               if (bVar17 >> 4 == 1) {
                 if (bVar7 < 10) {
-                  bVar25 = (uVar18 & 0xc) == 0;
+                  has_bytes_remaining = (uVar18 & 0xc) == 0;
                   goto LAB_00100604;
                 }
                 if (bVar7 != 0xd) {
@@ -431,16 +431,16 @@ LAB_001005d6:
               }
               else {
                 if (bVar17 >> 4 == 4) {
-                  bVar25 = (0x1c57UL >> bVar7 & 1) == 0;
+                  has_bytes_remaining = (0x1c57UL >> bVar7 & 1) == 0;
                 }
                 else {
                   if (bVar17 >> 4 != 0) {
                     return 0;
                   }
-                  bVar25 = (bVar17 & 0xb) == 3;
+                  has_bytes_remaining = (bVar17 & 0xb) == 3;
                 }
 LAB_00100604:
-                if (bVar25) {
+                if (has_bytes_remaining) {
                   return 0;
                 }
               }
@@ -674,7 +674,7 @@ LAB_001000cf:
     }
 LAB_00100675:
     pbVar15 = pbVar15 + 1;
-    bVar25 = pbVar15 < code_end;
+    has_bytes_remaining = pbVar15 < code_end;
   } while( true );
 }
 

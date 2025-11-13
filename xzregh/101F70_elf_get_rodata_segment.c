@@ -14,7 +14,7 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
 
 {
   Elf64_Ehdr *pEVar1;
-  bool bVar2;
+  BOOL rodata_segment_found;
   BOOL BVar3;
   void *pvVar4;
   void *pvVar5;
@@ -37,7 +37,7 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
     }
     pvVar4 = elf_get_code_segment(elf_info,&local_20);
     if (pvVar4 != (void *)0x0) {
-      bVar2 = false;
+      rodata_segment_found = false;
       uVar9 = 0;
       pvVar5 = (void *)0x0;
       for (lVar10 = 0; (uint)lVar10 < (uint)(ushort)elf_info->e_phnum; lVar10 = lVar10 + 1) {
@@ -50,21 +50,21 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
             uVar11 = (uVar11 & 0xfffffffffffff000) + 0x1000;
           }
           if ((void *)((long)pvVar4 + local_20) <= pvVar8) {
-            if (bVar2) {
+            if (rodata_segment_found) {
               if (pvVar8 < pvVar5) {
                 uVar9 = uVar11 - (long)pvVar8;
                 pvVar5 = pvVar8;
               }
             }
             else {
-              bVar2 = true;
+              rodata_segment_found = true;
               uVar9 = uVar11 - (long)pvVar8;
               pvVar5 = pvVar8;
             }
           }
         }
       }
-      if (bVar2) {
+      if (rodata_segment_found) {
         elf_info->rodata_segment_start = (u64)pvVar5;
         elf_info->rodata_segment_size = uVar9;
         *pSize = uVar9;

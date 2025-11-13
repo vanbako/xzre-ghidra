@@ -14,7 +14,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
 
 {
   Elf64_Ehdr *pEVar1;
-  bool bVar2;
+  BOOL data_segment_found;
   ulong uVar3;
   Elf64_Phdr *pEVar4;
   void *pvVar5;
@@ -42,7 +42,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
     *pSize = elf_info->data_segment_size;
     return pvVar6;
   }
-  bVar2 = false;
+  data_segment_found = false;
   lVar13 = 0;
   uVar8 = 0;
   uVar3 = 0;
@@ -58,7 +58,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
       if ((uVar12 & 0xfff) != 0) {
         uVar12 = (uVar12 & 0xfffffffffffff000) + 0x1000;
       }
-      if (bVar2) {
+      if (data_segment_found) {
         if (uVar8 + lVar13 < uVar12) {
           lVar13 = uVar12 - uVar9;
           uVar3 = uVar11 & 0xffffffff;
@@ -67,13 +67,13 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
       }
       else {
         lVar13 = uVar12 - uVar9;
-        bVar2 = true;
+        data_segment_found = true;
         uVar3 = uVar11 & 0xffffffff;
         uVar8 = uVar9;
       }
     }
   }
-  if (bVar2) {
+  if (data_segment_found) {
     pEVar4 = elf_info->phdrs;
     lVar13 = pEVar4[uVar3].p_vaddr - elf_info->first_vaddr;
     pvVar10 = (void *)((long)pEVar1 + pEVar4[uVar3].p_memsz + lVar13);

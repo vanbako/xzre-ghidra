@@ -18,7 +18,7 @@ BOOL find_mov_instruction
   BOOL BVar2;
   long lVar3;
   undefined4 *puVar4;
-  bool bVar5;
+  BOOL opcode_matches_direction;
   undefined4 local_80 [22];
   
   puVar4 = local_80;
@@ -46,12 +46,12 @@ BOOL find_mov_instruction
       iVar1._2_1_ = dctx->_unknown810[2];
       iVar1._3_1_ = dctx->field_0x2b;
       if (load_flag == 0) {
-        bVar5 = iVar1 == 0x109;
+        opcode_matches_direction = iVar1 == 0x109;
       }
       else {
-        bVar5 = iVar1 == 0x10b;
+        opcode_matches_direction = iVar1 == 0x10b;
       }
-      if (bVar5) {
+      if (opcode_matches_direction) {
         return 1;
       }
     }

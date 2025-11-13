@@ -27,7 +27,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   undefined1 auVar9 [16];
   undefined1 auVar10 [16];
   byte bVar11;
-  bool bVar12;
+  BOOL verdef_present;
   BOOL BVar13;
   int iVar14;
   Elf64_Dyn *vaddr;
@@ -111,7 +111,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       BVar13 = elf_contains_vaddr(elf_info,vaddr,uVar23,4);
       if (BVar13 != 0) {
         p_Var15 = &vaddr->d_un;
-        bVar12 = false;
+        verdef_present = false;
         size = 0xffffffffffffffff;
         size_00 = 0xffffffffffffffff;
         EVar18 = 0xffffffffffffffff;
@@ -183,7 +183,7 @@ switchD_0010157d_caseD_18:
             }
           }
           else if (lVar17 == 0x6ffffffd) {
-            bVar12 = true;
+            verdef_present = true;
             elf_info->verdef_num = *(Elf64_Xword *)p_Var15;
           }
           else {
@@ -225,7 +225,7 @@ switchD_0010157d_caseD_18:
           elf_info->relr_relocs_num = (u32)(size >> 3);
         }
         if (elf_info->verdef != (Elf64_Verdef *)0x0) {
-          if (bVar12) {
+          if (verdef_present) {
             elf_info->flags = elf_info->flags | 8;
           }
           else {

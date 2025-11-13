@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""
+Apply register-temp renames and bool cleanup to exported Ghidra decompilations.
+
+The replacements are driven by the optional "register_temps" blocks inside
+metadata/xzre_locals.json so we can keep type/name fixes alongside the rest
+of the locals metadata.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List
+
+
+def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
+    with metadata_path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    register_map: Dict[str, List[dict]] = {}
+    for func, payload in data.items():
+        temps = payload.get("register_temps") or []
+        if temps:
+            register_map[func] = temps
+    return register_map
+
+
+def find_decomp_file(xzregh_dir: Path, func_name: str) -> Path:
+    matches = [
+        path
+        for path in xzregh_dir.glob(f"*_{func_name}.c")
+        if path.name.split("_", 1)[1] == f"{func_name}.c"
+    ]
+    if not matches:
+        raise FileNotFoundError(f"no exported C file found for function '{func_name}'")
+    if len(matches) > 1:
+        raise RuntimeError(
+            f"ambiguous match for function '{func_name}': {', '.join(str(p) for p in matches)}"
+        )
+    return matches[0]
+
+
+def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> str:
+    changed = False
+    for temp in temps:
+        original = temp["original"]
+        new_name = temp["name"]
+        new_type = temp["type"]
+
+        decl_pattern = re.compile(rf"\bbool\s+{re.escape(original)}\b")
+        text, decl_count = decl_pattern.subn(f"{new_type} {new_name}", text, count=1)
+        if decl_count == 0:
+            if f"{new_type} {new_name}" in text:
+                # Already rewritten in a previous run.
+                continue
+            print(
+                f"[postprocess] warning: could not rewrite declaration of '{original}' "
+                f"in {file_path}",
+                file=sys.stderr,
+            )
+            continue
+
+        word_pattern = re.compile(rf"\b{re.escape(original)}\b")
+        text, name_count = word_pattern.subn(new_name, text)
+        if name_count == 0:
+            if new_name not in text:
+                print(
+                    f"[postprocess] warning: declaration of '{original}' changed "
+                    f"but no references were rewritten in {file_path}",
+                    file=sys.stderr,
+                )
+        changed = True
+
+    if changed:
+        return text
+    return text
+
+
+def scrub_remaining_bool(text: str, file_path: Path) -> str:
+    pattern = re.compile(r"\bbool\b")
+    if not pattern.search(text):
+        return text
+    text = pattern.sub("BOOL", text)
+    print(
+        f"[postprocess] info: replaced remaining bare 'bool' tokens in {file_path}",
+        file=sys.stderr,
+    )
+    return text
+
+
+def process_file(path: Path, temps: List[dict]) -> None:
+    text = path.read_text(encoding="utf-8")
+    updated = apply_register_rewrites(text, temps, path)
+    updated = updated.replace("(bool *)", "(BOOL *)")
+    updated = scrub_remaining_bool(updated, path)
+    if updated != text:
+        path.write_text(updated, encoding="utf-8")
+
+
+def cleanup_pointer_casts(xzregh_dir: Path) -> None:
+    for path in sorted(xzregh_dir.glob("*.c")):
+        text = path.read_text(encoding="utf-8")
+        if "(bool *)" not in text:
+            continue
+        updated = text.replace("(bool *)", "(BOOL *)")
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Apply register-temp renames/types to exported Ghidra sources."
+    )
+    parser.add_argument("--metadata", required=True, type=Path, help="Path to xzre_locals.json")
+    parser.add_argument(
+        "--xzregh-dir", required=True, type=Path, help="Directory containing exported .c files"
+    )
+    args = parser.parse_args()
+
+    register_map = load_register_temps(args.metadata)
+    if not register_map:
+        print("[postprocess] no register temp metadata found; nothing to do.", file=sys.stderr)
+        return 0
+
+    for func, temps in register_map.items():
+        try:
+            target = find_decomp_file(args.xzregh_dir, func)
+        except (FileNotFoundError, RuntimeError) as exc:
+            print(f"[postprocess] warning: {exc}", file=sys.stderr)
+            continue
+        process_file(target, temps)
+    cleanup_pointer_casts(args.xzregh_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -63,7 +63,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     uStack_b9 = 0;
     puVar9 = local_b1;
     for (lVar7 = 0x79; lVar7 != 0; lVar7 = lVar7 + -1) {
-      *(bool *)puVar9 = signed_data_size < tbslen;
+      *(BOOL *)puVar9 = signed_data_size < tbslen;
       puVar9 = (undefined4 *)((long)puVar9 + 1);
     }
     if (key == (EC_KEY *)0x0) {

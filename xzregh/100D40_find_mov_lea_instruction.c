@@ -18,7 +18,7 @@ BOOL find_mov_lea_instruction
   BOOL BVar2;
   long lVar3;
   undefined4 *puVar4;
-  bool bVar5;
+  BOOL opcode_matches_direction;
   undefined4 local_80 [22];
   
   puVar4 = local_80;
@@ -49,12 +49,12 @@ BOOL find_mov_lea_instruction
         return 1;
       }
       if (load_flag == 0) {
-        bVar5 = iVar1 == 0x109;
+        opcode_matches_direction = iVar1 == 0x109;
       }
       else {
-        bVar5 = iVar1 == 0x10b;
+        opcode_matches_direction = iVar1 == 0x10b;
       }
-      if (bVar5) {
+      if (opcode_matches_direction) {
         return 1;
       }
     }

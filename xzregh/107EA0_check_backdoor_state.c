@@ -19,8 +19,8 @@ BOOL check_backdoor_state(global_context_t *ctx)
 {
   u32 uVar1;
   ulong uVar2;
-  bool bVar3;
-  bool bVar4;
+  BOOL state_in_expected_range;
+  BOOL state_matches_exact;
   sshd_payload_ctx_t *payload_ctx;
   u32 payload_length;
   
@@ -42,14 +42,14 @@ BOOL check_backdoor_state(global_context_t *ctx)
       goto LAB_00107f11;
     }
     if (uVar1 != 0) goto LAB_00107f11;
-    bVar3 = ctx->current_data_size < 0xae;
-    bVar4 = ctx->current_data_size == 0xae;
+    state_in_expected_range = ctx->current_data_size < 0xae;
+    state_matches_exact = ctx->current_data_size == 0xae;
   }
   else {
-    bVar3 = uVar1 == 3;
-    bVar4 = uVar1 == 4;
+    state_in_expected_range = uVar1 == 3;
+    state_matches_exact = uVar1 == 4;
   }
-  if (bVar3 || bVar4) {
+  if (state_in_expected_range || state_matches_exact) {
     return 1;
   }
 LAB_00107f11:

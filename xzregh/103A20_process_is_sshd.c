@@ -25,7 +25,7 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
   u8 *puVar5;
   long lVar6;
   ulong *puVar7;
-  bool bVar8;
+  BOOL more_args_to_scan;
   u8 *data_segment;
   ulong *envp;
   long argc;
@@ -39,7 +39,7 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
     EVar3 = get_string_id((char *)puVar2,(char *)0x0);
     lVar6 = 1;
     if (EVar3 == STR_usr_sbin_sshd) {
-      while (bVar8 = lVar6 != lVar1, lVar6 = lVar6 + 1, bVar8) {
+      while (more_args_to_scan = lVar6 != lVar1, lVar6 = lVar6 + 1, more_args_to_scan) {
         puVar2 = *(u8 **)(stack_end + lVar6 * 8);
         if (puVar2 <= stack_end) {
           return 0;

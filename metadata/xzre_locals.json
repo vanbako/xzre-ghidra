@@ -1611,6 +1611,13 @@
         "name": "hash_chain",
         "type": "u32 *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "bVar12",
+        "name": "verdef_present",
+        "type": "BOOL"
+      }
     ]
   },
   "elf_symbol_get_addr": {
@@ -2617,6 +2624,13 @@
         "name": "data_segment",
         "type": "u8 *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "bVar8",
+        "name": "more_args_to_scan",
+        "type": "BOOL"
+      }
     ]
   },
   "sshd_log": {
@@ -2693,6 +2707,18 @@
       {
         "name": "payload_ctx",
         "type": "sshd_payload_ctx_t *"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "bVar3",
+        "name": "state_in_expected_range",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar4",
+        "name": "state_matches_exact",
+        "type": "BOOL"
       }
     ]
   },
@@ -3085,6 +3111,13 @@
         "name": "string_refs",
         "type": "string_references_t"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "bVar22",
+        "name": "used_relr_lookup",
+        "type": "BOOL"
+      }
     ]
   },
   "backdoor_init_stage2": {
@@ -3185,5 +3218,65 @@
   "xzre_globals": {
     "source": "xzre/xzre_code/xzre_globals.c",
     "locals": []
+  },
+  "x86_dasm": {
+    "source": "xzre/xzre_code/x86_dasm.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar25",
+        "name": "has_bytes_remaining",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar26",
+        "name": "is_two_byte_opcode",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "find_mov_lea_instruction": {
+    "source": "xzre/xzre_code/find_mov_lea_instruction.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar5",
+        "name": "opcode_matches_direction",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "find_mov_instruction": {
+    "source": "xzre/xzre_code/find_mov_instruction.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar5",
+        "name": "opcode_matches_direction",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "elf_get_rodata_segment": {
+    "source": "xzre/xzre_code/elf_get_rodata_segment.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar2",
+        "name": "rodata_segment_found",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "elf_get_data_segment": {
+    "source": "xzre/xzre_code/elf_get_data_segment.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar2",
+        "name": "data_segment_found",
+        "type": "BOOL"
+      }
+    ]
   }
 }
