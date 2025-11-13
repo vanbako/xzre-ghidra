@@ -13,7 +13,7 @@
 BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  _union_79 *p_Var1;
+  _union_80 *p_Var1;
   u8 *puVar2;
   byte bVar3;
   byte bVar4;
@@ -36,7 +36,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   byte *pbVar21;
   dasm_ctx_t *pdVar22;
   ulong uVar23;
-  _union_77 *p_Var24;
+  _union_78 *p_Var24;
   BOOL has_bytes_remaining;
   BOOL is_two_byte_opcode;
   byte bVar27;
@@ -44,8 +44,8 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   
   bVar27 = 0;
   BVar8 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
-  if (BVar8 == 0) {
-    return 0;
+  if (BVar8 == FALSE) {
+    return FALSE;
   }
   pdVar22 = ctx;
   for (lVar14 = 0x16; lVar14 != 0; lVar14 = lVar14 + -1) {
@@ -61,7 +61,7 @@ LAB_00100aa5:
         *(undefined4 *)&ctx->instruction = 0;
         ctx = (dasm_ctx_t *)((long)ctx + (ulong)bVar27 * -8 + 4);
       }
-      return 0;
+      return FALSE;
     }
     bVar17 = *pbVar15;
     uVar12 = (uint)bVar17;
@@ -93,20 +93,20 @@ LAB_001001c9:
           bVar7 = *pbVar15;
           if ((bVar7 & 0xfd) == 0x38) {
             if (((ctx->field2_0x10).field0.flags & 0x10) != 0) {
-              return 0;
+              return FALSE;
             }
             pbVar15 = pbVar15 + 1;
             goto LAB_001003fa;
           }
           if (((int)(uint)(byte)(&DAT_0010ad40)[bVar7 >> 3] >> (bVar7 & 7) & 1U) == 0) {
-            return 0;
+            return FALSE;
           }
           if (((ctx->field2_0x10).field0.lock_rep_byte == 0xf3) && (bVar7 == 0x1e)) {
             if (pbVar15 + 1 < code_end) {
               p_Var24 = &ctx->field2_0x10;
               for (lVar14 = 0x12; lVar14 != 0; lVar14 = lVar14 + -1) {
                 *(undefined4 *)p_Var24 = 0;
-                p_Var24 = (_union_77 *)((long)p_Var24 + (ulong)bVar27 * -8 + 4);
+                p_Var24 = (_union_78 *)((long)p_Var24 + (ulong)bVar27 * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
@@ -116,7 +116,7 @@ LAB_001004f1:
               ctx->_unknown810[1] = (char)((uint)iVar9 >> 8);
               ctx->_unknown810[2] = (char)((uint)iVar9 >> 0x10);
               ctx->field_0x2b = (char)((uint)iVar9 >> 0x18);
-              return 1;
+              return TRUE;
             }
             goto LAB_00100aa5;
           }
@@ -251,7 +251,7 @@ LAB_001009ea:
 LAB_001004e1:
           ctx->instruction_size = (u64)pbVar15;
           if (pbVar15 == (byte *)0x0) {
-            return 0;
+            return FALSE;
           }
           goto LAB_001004ee;
         }
@@ -261,7 +261,7 @@ LAB_001004e1:
         if (bVar17 == 0x67) {
           bVar17 = (ctx->field2_0x10).field0.flags;
           if ((bVar17 & 8) != 0) {
-            return 0;
+            return FALSE;
           }
           (ctx->field2_0x10).field0.flags = bVar17 | 8;
           (ctx->field2_0x10).field0.asize_byte = *pbVar15;
@@ -278,7 +278,7 @@ LAB_001004e1:
           }
           bVar17 = (ctx->field2_0x10).field0.flags;
           if (((bVar17 & 4) != 0) && ((ctx->field2_0x10).field0.osize_byte != 'f')) {
-            return 0;
+            return FALSE;
           }
           if ((bVar17 & 0x20) == 0) {
             (ctx->field2_0x10).field0.flags = (ctx->field2_0x10).field0.flags | 4;
@@ -289,7 +289,7 @@ LAB_001004e1:
       }
       bVar17 = (ctx->field2_0x10).field0.flags;
       if ((bVar17 & 2) != 0) {
-        return 0;
+        return FALSE;
       }
       (ctx->field2_0x10).field0.flags = bVar17 | 2;
       (ctx->field2_0x10).field0.seg_byte = *pbVar15;
@@ -300,7 +300,7 @@ LAB_001004e1:
           if (1 < (byte)(bVar17 + 0x3c)) goto LAB_00100191;
           bVar7 = (ctx->field2_0x10).field0.flags;
           if ((bVar7 & 0x20) != 0) {
-            return 0;
+            return FALSE;
           }
           ctx->_unknown810[0] = (char)uVar12;
           ctx->_unknown810[1] = (char)(uVar12 >> 8);
@@ -323,7 +323,7 @@ LAB_001004e1:
           *(byte *)((long)&ctx->field2_0x10 + 0xb) = bVar17;
           if (bVar3 == 0xc5) goto LAB_001001c5;
           if (bVar3 != 0xc4) {
-            return 0;
+            return FALSE;
           }
           bVar3 = pbVar15[1];
           if ((bVar3 & 0x40) == 0) {
@@ -334,7 +334,7 @@ LAB_001004e1:
             p_Var1->rex_byte = p_Var1->rex_byte | 1;
           }
           if (2 < (byte)((bVar3 & 0x1f) - 1)) {
-            return 0;
+            return FALSE;
           }
           if (code_end <= pbVar15 + 2) goto LAB_00100aa5;
           bVar17 = pbVar15[2];
@@ -355,7 +355,7 @@ LAB_001004e1:
           else {
             if (bVar7 != 3) {
               if (bVar7 != 1) {
-                return 0;
+                return FALSE;
               }
               pbVar15 = pbVar15 + 3;
               goto LAB_001001c9;
@@ -426,7 +426,7 @@ LAB_001005d6:
                   goto LAB_00100604;
                 }
                 if (bVar7 != 0xd) {
-                  return 0;
+                  return FALSE;
                 }
               }
               else {
@@ -435,13 +435,13 @@ LAB_001005d6:
                 }
                 else {
                   if (bVar17 >> 4 != 0) {
-                    return 0;
+                    return FALSE;
                   }
                   has_bytes_remaining = (bVar17 & 0xb) == 3;
                 }
 LAB_00100604:
                 if (has_bytes_remaining) {
-                  return 0;
+                  return FALSE;
                 }
               }
               *(char *)&ctx->operand_size = (char)pbVar15 - (char)code_start;
@@ -452,7 +452,7 @@ LAB_00100604:
           }
           uVar13 = uVar18 >> 3 & 0x1f;
           if (((byte)(&DAT_0010ad00)[uVar13] >> (uVar18 & 7) & 1) == 0) {
-            return 0;
+            return FALSE;
           }
           ctx->operand_zeroextended = 0;
           bVar17 = (&DAT_0010ace0)[uVar13];
@@ -536,7 +536,7 @@ LAB_001001c5:
           uVar18 = (uint)bVar17;
           uVar13 = bVar17 & 7;
           if (((byte)(&DAT_0010ad80)[bVar17 >> 3] >> uVar13 & 1) != 0) {
-            return 0;
+            return FALSE;
           }
           ctx->_unknown810[0] = (char)uVar18;
           ctx->_unknown810[1] = (char)(uVar18 >> 8);
@@ -654,7 +654,7 @@ LAB_001007e4:
           ctx->instruction_size = (u64)pbVar15;
         }
         if (pbVar15 == (byte *)0x0) {
-          return 0;
+          return FALSE;
         }
         uVar12._0_1_ = ctx->_unknown810[0];
         uVar12._1_1_ = ctx->_unknown810[1];
@@ -667,7 +667,7 @@ LAB_001004ee:
 LAB_001000cf:
       bVar17 = (ctx->field2_0x10).field0.flags;
       if ((bVar17 & 1) != 0) {
-        return 0;
+        return FALSE;
       }
       (ctx->field2_0x10).field0.flags = bVar17 | 1;
       (ctx->field2_0x10).field0.lock_rep_byte = *pbVar15;
@@ -675,6 +675,6 @@ LAB_001000cf:
 LAB_00100675:
     pbVar15 = pbVar15 + 1;
     has_bytes_remaining = pbVar15 < code_end;
-  } while( true );
+  } while( TRUE );
 }
 

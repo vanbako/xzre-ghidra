@@ -16,16 +16,16 @@ BOOL sshbuf_bignum_is_negative(sshbuf *buf)
   BOOL BVar1;
   size_t sVar2;
   
-  BVar1 = 0;
+  BVar1 = FALSE;
   if (buf->size - 0x20 < 0x21) {
     sVar2 = 0;
     while (-1 < (char)buf->d[sVar2]) {
       sVar2 = sVar2 + 1;
       if (buf->size == sVar2) {
-        return 0;
+        return FALSE;
       }
     }
-    BVar1 = 1;
+    BVar1 = TRUE;
   }
   return BVar1;
 }

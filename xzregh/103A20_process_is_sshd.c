@@ -42,17 +42,17 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
       while (more_args_to_scan = lVar6 != lVar1, lVar6 = lVar6 + 1, more_args_to_scan) {
         puVar2 = *(u8 **)(stack_end + lVar6 * 8);
         if (puVar2 <= stack_end) {
-          return 0;
+          return FALSE;
         }
         if (puVar2 == (u8 *)0x0) {
-          return 0;
+          return FALSE;
         }
         if (0x4000 < (ulong)((long)puVar2 - (long)stack_end)) {
-          return 0;
+          return FALSE;
         }
         pcVar4 = check_argument((char)*(undefined2 *)puVar2,(char *)puVar2);
         if (pcVar4 != (char *)0x0) {
-          return 0;
+          return FALSE;
         }
       }
       if (*(long *)(stack_end + lVar6 * 8) == 0) {
@@ -60,31 +60,31 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
         do {
           puVar2 = (u8 *)*puVar7;
           if (puVar2 == (u8 *)0x0) {
-            return 0;
+            return FALSE;
           }
           if ((puVar2 <= stack_end) || (0x4000 < (ulong)((long)puVar2 - (long)stack_end))) {
             argv0 = (u8 *)0x0;
-            puVar5 = (u8 *)elf_get_data_segment(elf,(u64 *)&argv0,1);
+            puVar5 = (u8 *)elf_get_data_segment(elf,(u64 *)&argv0,TRUE);
             if (puVar5 == (u8 *)0x0) {
-              return 0;
+              return FALSE;
             }
             if (argv0 + (long)puVar5 < puVar2 + 0x2c) {
-              return 0;
+              return FALSE;
             }
             if (puVar2 < puVar5) {
-              return 0;
+              return FALSE;
             }
           }
           EVar3 = get_string_id((char *)*puVar7,(char *)0x0);
           if (EVar3 != 0) {
-            return 0;
+            return FALSE;
           }
           puVar7 = puVar7 + 1;
         } while (*puVar7 != 0);
-        return 1;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

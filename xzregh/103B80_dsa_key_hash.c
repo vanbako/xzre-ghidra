@@ -65,19 +65,19 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
       if (ctx->imported_funcs != (imported_funcs_t *)0x0) {
         lVar3 = 0;
         count = 0;
-        while( true ) {
+        while( TRUE ) {
           BVar2 = bignum_serialize(local_660 + count,0x628 - count,&local_688,local_680[lVar3],
                                    ctx->imported_funcs);
-          if ((BVar2 == 0) || (count = count + local_688, 0x628 < count)) break;
+          if ((BVar2 == FALSE) || (count = count + local_688, 0x628 < count)) break;
           lVar3 = lVar3 + 1;
           if (lVar3 == 4) {
             BVar2 = sha256(local_660,count,mdBuf,mdBufSize,ctx->imported_funcs);
-            return (uint)(BVar2 != 0);
+            return (uint)(BVar2 != FALSE);
           }
         }
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

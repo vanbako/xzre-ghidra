@@ -23,7 +23,7 @@ char * check_argument(char arg_first_char,char *arg_name)
   u16 flag_word;
   
   if (arg_first_char == '-') {
-    while( true ) {
+    while( TRUE ) {
       uVar1 = *(ushort *)arg_name;
       uVar3 = uVar1 << 8;
       uVar2 = uVar1 & 0xff00;

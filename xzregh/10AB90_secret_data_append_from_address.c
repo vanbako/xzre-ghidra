@@ -24,6 +24,6 @@ BOOL secret_data_append_from_address
     code_00 = code;
   }
   BVar1 = secret_data_append_singleton((u8 *)addr,code_00,shift_cursor,shift_count,operation_index);
-  return (BOOL)(0 < BVar1);
+  return (BOOL)(0 < (int)BVar1);
 }
 

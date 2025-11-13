@@ -35,7 +35,7 @@ int sshd_get_sensitive_data_score_in_main
                       (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 0x10));
     BVar3 = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 8));
-    iVar4 = (((uint)(BVar1 != 0) - (uint)(BVar2 == 0)) + 2) - (uint)(BVar3 == 0);
+    iVar4 = (((uint)(BVar1 != FALSE) - (uint)(BVar2 == FALSE)) + 2) - (uint)(BVar3 == FALSE);
   }
   return iVar4;
 }

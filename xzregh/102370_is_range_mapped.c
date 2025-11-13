@@ -22,11 +22,11 @@ BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
   undefined8 local_30;
   
   if (length == 0) {
-    return 0;
+    return FALSE;
   }
   if (addr < (u8 *)0x1000000) {
 LAB_00102393:
-    BVar2 = 0;
+    BVar2 = FALSE;
   }
   else {
     sigmask = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
@@ -49,7 +49,7 @@ LAB_00102393:
         sigmask = sigmask + 0x200;
       } while (sigmask < addr + length);
     }
-    BVar2 = 1;
+    BVar2 = TRUE;
   }
   return BVar2;
 }

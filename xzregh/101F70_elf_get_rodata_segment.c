@@ -26,8 +26,8 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
   ulong uVar11;
   u64 local_20;
   
-  BVar3 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xbd,0xe,0xb,0);
-  if (BVar3 != 0) {
+  BVar3 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xbd,0xe,0xb,FALSE);
+  if (BVar3 != FALSE) {
     pvVar4 = (void *)elf_info->rodata_segment_start;
     pEVar1 = elf_info->elfbase;
     local_20 = 0;
@@ -37,7 +37,7 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
     }
     pvVar4 = elf_get_code_segment(elf_info,&local_20);
     if (pvVar4 != (void *)0x0) {
-      rodata_segment_found = false;
+      rodata_segment_found = FALSE;
       uVar9 = 0;
       pvVar5 = (void *)0x0;
       for (lVar10 = 0; (uint)lVar10 < (uint)(ushort)elf_info->e_phnum; lVar10 = lVar10 + 1) {
@@ -57,7 +57,7 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
               }
             }
             else {
-              rodata_segment_found = true;
+              rodata_segment_found = TRUE;
               uVar9 = uVar11 - (long)pvVar8;
               pvVar5 = pvVar8;
             }

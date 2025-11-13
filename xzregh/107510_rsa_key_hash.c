@@ -26,7 +26,7 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   
   pBVar4 = &result;
   for (lVar3 = 0xffa; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined1 *)pBVar4 = 0;
+    *(undefined1 *)pBVar4 = FALSE;
     pBVar4 = (BOOL *)((long)pBVar4 + 1);
   }
   local_1042[0] = '\0';
@@ -54,15 +54,15 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
     if ((expSize != 0) && (n != (BIGNUM *)0x0)) {
       BVar2 = bignum_serialize(local_1042,0x100a,&written,(BIGNUM *)expSize,funcs);
       uVar1 = written;
-      if (((BVar2 != 0) &&
+      if (((BVar2 != FALSE) &&
           ((written < 0x100a &&
            (BVar2 = bignum_serialize(local_1042 + written,0x100a - written,&written,n,funcs),
-           BVar2 != 0)))) && (uVar1 + written < 0x100b)) {
+           BVar2 != FALSE)))) && (uVar1 + written < 0x100b)) {
         BVar2 = sha256(local_1042,uVar1 + written,mdBuf,mdBufSize,funcs);
         return BVar2;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

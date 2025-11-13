@@ -27,7 +27,7 @@ u8 * find_string_reference(u8 *code_start,u8 *code_end,char *str)
   }
   BVar1 = find_lea_instruction_with_mem_operand(code_start,code_end,&local_60,str);
   puVar2 = (u8 *)0x0;
-  if (BVar1 != 0) {
+  if (BVar1 != FALSE) {
     puVar2 = local_60.instruction;
   }
   return puVar2;

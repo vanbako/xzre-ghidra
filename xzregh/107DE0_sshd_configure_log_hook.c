@@ -32,8 +32,8 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
   if (((((cmd_flags == (cmd_arguments_t *)0x0) || (psVar2 == (sshd_log_ctx_t *)0x0)) ||
        (puVar6 = (ulong *)psVar2->log_handler_ptr, puVar6 == (ulong *)0x0)) ||
       ((puVar3 = (ulong *)psVar2->log_handler_ctx_ptr, puVar3 == (ulong *)0x0 ||
-       (psVar2->mm_log_handler == (_func_63 *)0x0)))) || (psVar2->log_hooking_possible == 0)) {
-    return 0;
+       (psVar2->mm_log_handler == (_func_63 *)0x0)))) || (psVar2->log_hooking_possible == FALSE)) {
+    return FALSE;
   }
   bVar1 = cmd_flags->flags1;
   bVar7 = bVar1 & 8;
@@ -51,21 +51,21 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
     psVar2->orig_log_handler = (log_handler_fn)*puVar6;
     psVar2->orig_log_handler_ctx = pvVar4;
     if (bVar7 == 0) {
-      psVar2->logging_disabled = 1;
+      psVar2->logging_disabled = TRUE;
     }
     else if ((bVar1 & 0x10) != 0) {
       if (psVar2->STR_percent_s == (char *)0x0) {
-        return 0;
+        return FALSE;
       }
       if (psVar2->STR_Connection_closed_by == (char *)0x0) {
-        return 0;
+        return FALSE;
       }
       if (psVar2->STR_preauth == (char *)0x0) {
-        return 0;
+        return FALSE;
       }
     }
     *puVar6 = (ulong)psVar2->mm_log_handler;
   }
-  return 1;
+  return TRUE;
 }
 

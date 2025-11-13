@@ -17,7 +17,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 
 {
   char *pcVar1;
-  int iVar2;
+  BOOL BVar2;
   sshd_log_ctx_t *log_ctx_00;
   long lVar3;
   EncodedStringId EVar4;
@@ -83,7 +83,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
     puVar10 = puVar10 + 1;
   }
   if (msg != (char *)0x0) {
-    if (log_ctx_00->logging_disabled == 1) {
+    if (log_ctx_00->logging_disabled == TRUE) {
       return;
     }
     if (*(int *)(global_ctx + 0x90) != 0) {
@@ -95,7 +95,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
     }
     sVar5 = c_strlen(msg);
     pcVar1 = msg + sVar5;
-    while( true ) {
+    while( TRUE ) {
       if (pcVar1 <= msg) {
         return;
       }
@@ -114,13 +114,13 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
       msg = msg + 1;
     }
     local_238 = CONCAT62(local_238._2_6_,*(undefined2 *)log_ctx_00->STR_percent_s);
-    log_ctx_00->logging_disabled = 1;
-    if (((log_ctx_00->syslog_disabled != 0) && (lVar3 != 0)) &&
+    log_ctx_00->logging_disabled = TRUE;
+    if (((log_ctx_00->syslog_disabled != FALSE) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
     sshd_log(log_ctx_00,level,(char *)&local_238,msg);
-    iVar2 = log_ctx_00->syslog_disabled;
+    BVar2 = log_ctx_00->syslog_disabled;
     goto joined_r0x0010a4c2;
   }
   goto LAB_0010a6da;
@@ -190,15 +190,15 @@ LAB_0010a504:
       lVar7 = lVar7 + 1;
     } while (lVar7 != 7);
     local_201 = 0x5d;
-    log_ctx_00->logging_disabled = 1;
-    if (((log_ctx_00->syslog_disabled != 0) && (lVar3 != 0)) &&
+    log_ctx_00->logging_disabled = TRUE;
+    if (((log_ctx_00->syslog_disabled != FALSE) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
     sshd_log(log_ctx_00,SYSLOG_LEVEL_INFO,(char *)&local_238,&local_338,&local_438);
-    iVar2 = log_ctx_00->syslog_disabled;
+    BVar2 = log_ctx_00->syslog_disabled;
 joined_r0x0010a4c2:
-    if (iVar2 == 0) {
+    if (BVar2 == FALSE) {
       return;
     }
     if (lVar3 == 0) {
@@ -211,7 +211,7 @@ joined_r0x0010a4c2:
     return;
   }
 LAB_0010a6da:
-  log_ctx_00->logging_disabled = 1;
+  log_ctx_00->logging_disabled = TRUE;
   return;
 }
 

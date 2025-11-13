@@ -15,11 +15,11 @@ BOOL secret_data_append_from_call_site
                BOOL bypass)
 
 {
-  uint uVar1;
+  BOOL BVar1;
   u8 *unaff_retaddr;
   
-  uVar1 = secret_data_append_singleton
+  BVar1 = secret_data_append_singleton
                     ((u8 *)0x0,unaff_retaddr,shift_cursor,shift_count,operation_index);
-  return uVar1 | bypass;
+  return BVar1 | bypass;
 }
 

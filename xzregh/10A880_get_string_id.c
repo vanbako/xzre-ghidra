@@ -27,7 +27,7 @@ EncodedStringId get_string_id(char *string_begin,char *string_end)
   ulong uVar12;
   
   BVar5 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xa,8,1);
-  if (BVar5 != 0) {
+  if (BVar5 != FALSE) {
     pbVar10 = (byte *)(string_begin + 0x2c);
     if ((string_end != (char *)0x0) && (string_end < pbVar10)) {
       pbVar10 = (byte *)string_end;
@@ -51,7 +51,7 @@ EncodedStringId get_string_id(char *string_begin,char *string_end)
         }
         uVar6 = count_bits(*puVar9);
       }
-      while( true ) {
+      while( TRUE ) {
         lVar2 = 0;
         if (uVar12 != 0) {
           for (; (uVar12 >> lVar2 & 1) == 0; lVar2 = lVar2 + 1) {

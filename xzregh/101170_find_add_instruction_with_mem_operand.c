@@ -28,12 +28,12 @@ BOOL find_add_instruction_with_mem_operand
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &local_80;
   }
-  while( true ) {
+  while( TRUE ) {
     if (code_end <= code_start) {
-      return 0;
+      return FALSE;
     }
     BVar2 = x86_dasm(dctx,code_start,code_end);
-    if ((((BVar2 != 0) &&
+    if ((((BVar2 != FALSE) &&
          (iVar1._0_1_ = dctx->_unknown810[0], iVar1._1_1_ = dctx->_unknown810[1],
          iVar1._2_1_ = dctx->_unknown810[2], iVar1._3_1_ = dctx->field_0x2b, iVar1 == 0x103)) &&
         (((dctx->field2_0x10).field0.field11_0xc.modrm_word & 0xff00ff00) == 0x5000000)) &&
@@ -43,6 +43,6 @@ BOOL find_add_instruction_with_mem_operand
           dctx->instruction + dctx->instruction_size + *(long *)dctx->_unknown812)))))) break;
     code_start = code_start + 1;
   }
-  return 1;
+  return TRUE;
 }
 

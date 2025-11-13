@@ -60,7 +60,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   int i;
   
   if (ehdr == (Elf64_Ehdr *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (elf_info != (elf_info_t *)0x0) {
     uVar21 = 0xffffffffffffffff;
@@ -89,13 +89,13 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       }
       else {
         BVar13 = is_gnu_relro(p_type,0xa0000000);
-        if (BVar13 != 0) {
-          if (elf_info->gnurelro_found != 0) {
-            return 0;
+        if (BVar13 != FALSE) {
+          if (elf_info->gnurelro_found != FALSE) {
+            return FALSE;
           }
           elf_info->gnurelro_vaddr = pEVar22->p_vaddr;
           EVar18 = pEVar22->p_memsz;
-          elf_info->gnurelro_found = 1;
+          elf_info->gnurelro_found = TRUE;
           elf_info->gnurelro_memsize = EVar18;
         }
       }
@@ -109,9 +109,9 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       iVar14 = (int)(uVar23 >> 4);
       *(int *)&elf_info->dyn_num_entries = iVar14;
       BVar13 = elf_contains_vaddr(elf_info,vaddr,uVar23,4);
-      if (BVar13 != 0) {
+      if (BVar13 != FALSE) {
         p_Var15 = &vaddr->d_un;
-        verdef_present = false;
+        verdef_present = FALSE;
         size = 0xffffffffffffffff;
         size_00 = 0xffffffffffffffff;
         EVar18 = 0xffffffffffffffff;
@@ -170,7 +170,7 @@ switchD_0010157d_caseD_18:
           else if (lVar17 < 0x6ffffffc) {
             if (lVar17 < 0x6ffffefd) {
               if (0x6ffffefa < lVar17) {
-                return 0;
+                return FALSE;
               }
               if (lVar17 == 0x6ffffef5) {
                 puVar25 = (uint *)p_Var15->d_val;
@@ -183,12 +183,12 @@ switchD_0010157d_caseD_18:
             }
           }
           else if (lVar17 == 0x6ffffffd) {
-            verdef_present = true;
+            verdef_present = TRUE;
             elf_info->verdef_num = *(Elf64_Xword *)p_Var15;
           }
           else {
             if (lVar17 == 0x7fffffff) {
-              return 0;
+              return FALSE;
             }
             if (lVar17 == 0x6ffffffc) {
               elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)p_Var15;
@@ -199,7 +199,7 @@ switchD_0010157d_caseD_18:
         pEVar5 = elf_info->plt_relocs;
         if (pEVar5 != (Elf64_Rela *)0x0) {
           if (EVar18 == 0xffffffffffffffff) {
-            return 0;
+            return FALSE;
           }
           elf_info->flags = elf_info->flags | 1;
           auVar9._8_8_ = 0;
@@ -209,7 +209,7 @@ switchD_0010157d_caseD_18:
         pEVar6 = elf_info->rela_relocs;
         if (pEVar6 != (Elf64_Rela *)0x0) {
           if (size_00 == 0xffffffffffffffff) {
-            return 0;
+            return FALSE;
           }
           elf_info->flags = elf_info->flags | 2;
           auVar10._8_8_ = 0;
@@ -219,7 +219,7 @@ switchD_0010157d_caseD_18:
         pEVar7 = elf_info->relr_relocs;
         if (pEVar7 != (Elf64_Relr *)0x0) {
           if (size == 0xffffffffffffffff) {
-            return 0;
+            return FALSE;
           }
           elf_info->flags = elf_info->flags | 4;
           elf_info->relr_relocs_num = (u32)(size >> 3);
@@ -257,15 +257,17 @@ switchD_0010157d_caseD_18:
             elf_info->verdef = (Elf64_Verdef *)(pEVar8->e_ident + (long)ehdr->e_ident);
           }
           if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,EVar18,4), BVar13 != 0))
-               && ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
-                   (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,size_00,4),
-                   BVar13 != 0)))) &&
+                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,EVar18,4),
+                BVar13 != FALSE)) &&
+               ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
+                (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,size_00,4),
+                BVar13 != FALSE)))) &&
               ((elf_info->relr_relocs == (Elf64_Relr *)0x0 ||
-               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,size,4), BVar13 != 0))))
-             && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
-                 (BVar13 = elf_contains_vaddr(elf_info,elf_info->verdef,elf_info->verdef_num * 0x14,
-                                              4), BVar13 != 0)))) {
+               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,size,4), BVar13 != FALSE)
+               ))) && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
+                       (BVar13 = elf_contains_vaddr(elf_info,elf_info->verdef,
+                                                    elf_info->verdef_num * 0x14,4), BVar13 != FALSE)
+                       ))) {
             uVar24 = *puVar25;
             elf_info->gnu_hash_nbuckets = uVar24;
             uVar1 = puVar25[2];
@@ -277,12 +279,12 @@ switchD_0010157d_caseD_18:
             elf_info->gnu_hash_bloom_shift = uVar3;
             elf_info->gnu_hash_buckets = puVar25;
             elf_info->gnu_hash_chain = puVar25 + ((ulong)uVar24 - (ulong)uVar2);
-            return 1;
+            return TRUE;
           }
         }
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

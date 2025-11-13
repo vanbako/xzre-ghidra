@@ -54,9 +54,9 @@ BOOL validate_log_handler_pointers
       BVar1 = find_lea_instruction_with_mem_operand
                         (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)&block_end,mem_address);
       puVar3 = block_end;
-      if (BVar1 != 0) {
+      if (BVar1 != FALSE) {
         BVar1 = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)ppuVar4);
-        if ((BVar1 != 0) && (scan_success == 0x168)) {
+        if ((BVar1 != FALSE) && (scan_success == 0x168)) {
           scan_ctx = (u8 **)0x0;
           puVar3 = function_end + (long)dasm_ip + (long)block_end;
           find_function(puVar3,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
@@ -65,14 +65,14 @@ BOOL validate_log_handler_pointers
         }
         BVar1 = find_instruction_with_mem_operand_ex
                           (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr1);
-        if (BVar1 != 0) {
+        if (BVar1 != FALSE) {
           BVar1 = find_instruction_with_mem_operand_ex
                             (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr2);
-          return (uint)(BVar1 != 0);
+          return (uint)(BVar1 != FALSE);
         }
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

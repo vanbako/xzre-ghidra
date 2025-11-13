@@ -15,23 +15,23 @@ BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *fu
 {
   _func_56 *p_Var1;
   int iVar2;
-  uint uVar3;
+  BOOL BVar3;
   EVP_MD *type;
   EVP_MD *md;
   
   if ((((data == (void *)0x0) || (count == 0)) || (mdBufSize < 0x20)) ||
      (funcs == (imported_funcs_t *)0x0)) {
-    uVar3 = 0;
+    BVar3 = FALSE;
   }
   else {
     p_Var1 = funcs->EVP_Digest;
-    uVar3 = 0;
-    if ((p_Var1 != (_func_56 *)0x0) && (uVar3 = 0, funcs->EVP_sha256 != (_func_38 *)0x0)) {
+    BVar3 = FALSE;
+    if ((p_Var1 != (_func_56 *)0x0) && (BVar3 = FALSE, funcs->EVP_sha256 != (_func_38 *)0x0)) {
       type = (*funcs->EVP_sha256)();
       iVar2 = (*p_Var1)(data,count,mdBuf,(uint *)0x0,type,(ENGINE *)0x0);
-      uVar3 = (uint)(iVar2 == 1);
+      BVar3 = (BOOL)(iVar2 == 1);
     }
   }
-  return uVar3;
+  return BVar3;
 }
 

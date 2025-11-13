@@ -90,6 +90,6 @@ BOOL backdoor_init_stage2
     *(undefined4 *)&(ctx->got_ctx).cpuid_fn = uVar5;
     *(undefined4 *)&(ctx->got_ctx).got_offset = uVar4;
   }
-  return 0;
+  return FALSE;
 }
 

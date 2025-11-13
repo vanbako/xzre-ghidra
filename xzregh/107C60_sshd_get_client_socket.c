@@ -29,18 +29,18 @@ BOOL sshd_get_client_socket
   
   if (((ctx == (global_context_t *)0x0) ||
       (plVar4 = ctx->libc_imports, plVar4 == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
-    return 0;
+    return FALSE;
   }
   if (ctx->struct_monitor_ptr_address != (monitor **)0x0) {
     addr = *ctx->struct_monitor_ptr_address;
     BVar1 = is_range_mapped((u8 *)addr,4,ctx);
-    if (BVar1 != 0) {
+    if (BVar1 != FALSE) {
       if (socket_direction == DIR_WRITE) {
         fd = addr->m_recvfd;
       }
       else {
         if (socket_direction != DIR_READ) {
-          return 0;
+          return FALSE;
         }
         fd = addr->m_sendfd;
       }
@@ -56,7 +56,7 @@ BOOL sshd_get_client_socket
         if (*piVar3 != 9) {
 LAB_00107d34:
           *pSocket = fd;
-          return 1;
+          return TRUE;
         }
       }
     }

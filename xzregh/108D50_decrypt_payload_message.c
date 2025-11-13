@@ -41,26 +41,26 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
   }
   if (payload == (key_payload_t *)0x0) {
     if (ctx == (global_context_t *)0x0) {
-      return 0;
+      return FALSE;
     }
   }
   else {
     if (ctx == (global_context_t *)0x0) {
-      return 0;
+      return FALSE;
     }
     if (ctx->payload_state == 3) {
-      return 1;
+      return TRUE;
     }
     if ((0x12 < payload_size) && (ctx->payload_state < 2)) {
       hdr.field0_0x0._0_8_ = *(undefined8 *)&payload->field0_0x0;
       hdr.field0_0x0.field1.field_c = *(u64 *)((long)&payload->field0_0x0 + 8);
       BVar3 = secret_data_get_decrypted((u8 *)&data,ctx);
-      if (BVar3 != 0) {
+      if (BVar3 != FALSE) {
         puVar7 = &(payload->field0_0x0).field1.body_length;
         inl = (int)payload_size + -0x10;
         BVar3 = chacha_decrypt((u8 *)puVar7,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)puVar7,
                                ctx->imported_funcs);
-        if (((BVar3 != 0) &&
+        if (((BVar3 != FALSE) &&
             (uVar6 = (ulong)(payload->field0_0x0).field1.body_length, uVar6 <= payload_size - 0x12))
            && (uVar1 = ctx->current_data_size, uVar6 < ctx->payload_data_size - uVar1)) {
           puVar2 = ctx->payload_data;
@@ -70,14 +70,14 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
           ctx->current_data_size = ctx->current_data_size + uVar6;
           BVar3 = chacha_decrypt((u8 *)puVar7,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)puVar7,
                                  ctx->imported_funcs);
-          if (BVar3 != 0) {
-            return 1;
+          if (BVar3 != FALSE) {
+            return TRUE;
           }
         }
       }
     }
   }
   ctx->payload_state = 0xffffffff;
-  return 0;
+  return FALSE;
 }
 

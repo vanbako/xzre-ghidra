@@ -25,14 +25,15 @@ BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_b
   puVar2 = code_start;
   if (func_start != (void **)0x0) {
     while ((search_base < puVar2 &&
-           (BVar1 = find_function_prologue(puVar2,code_end,&p,find_mode), BVar1 == 0))) {
+           (BVar1 = find_function_prologue(puVar2,code_end,&p,find_mode), BVar1 == FALSE))) {
       puVar2 = puVar2 + -1;
     }
     puVar2 = p;
     if ((p == (u8 *)0x0) ||
        ((p == search_base &&
-        (BVar1 = find_function_prologue(search_base,code_end,(u8 **)0x0,find_mode), BVar1 == 0)))) {
-      return 0;
+        (BVar1 = find_function_prologue(search_base,code_end,(u8 **)0x0,find_mode), BVar1 == FALSE))
+       )) {
+      return FALSE;
     }
     *func_start = puVar2;
   }
@@ -40,15 +41,15 @@ BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_b
   if (func_end != (void **)0x0) {
     for (; puVar2 < code_end + -4; puVar2 = puVar2 + 1) {
       BVar1 = find_function_prologue(puVar2,code_end,(u8 **)0x0,find_mode);
-      if (BVar1 != 0) goto LAB_00100c78;
+      if (BVar1 != FALSE) goto LAB_00100c78;
     }
     if ((code_end + -4 != puVar2) ||
-       (BVar1 = find_function_prologue(puVar2,code_end,(u8 **)0x0,find_mode), BVar1 != 0)) {
+       (BVar1 = find_function_prologue(puVar2,code_end,(u8 **)0x0,find_mode), BVar1 != FALSE)) {
 LAB_00100c78:
       code_end = puVar2;
     }
     *func_end = code_end;
   }
-  return 1;
+  return TRUE;
 }
 

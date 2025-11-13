@@ -17,11 +17,11 @@ BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
   uint uVar2;
   
   if (dctx == (dasm_ctx_t *)0x0) {
-    return 0;
+    return FALSE;
   }
-  while( true ) {
-    if ((code_end <= code_start) || (BVar1 = x86_dasm(dctx,code_start,code_end), BVar1 == 0)) {
-      return 0;
+  while( TRUE ) {
+    if ((code_end <= code_start) || (BVar1 = x86_dasm(dctx,code_start,code_end), BVar1 == FALSE)) {
+      return FALSE;
     }
     if (((((*(uint *)dctx->_unknown810 & 0xfffffffd) == 0x109) ||
          ((uVar2 = *(uint *)dctx->_unknown810 - 0x81, uVar2 < 0x3b &&
@@ -31,6 +31,6 @@ BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
         (*(char *)((long)&dctx->field2_0x10 + 0xd) == '\x03')))) break;
     code_start = dctx->instruction + dctx->instruction_size;
   }
-  return 1;
+  return TRUE;
 }
 

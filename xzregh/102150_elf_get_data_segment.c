@@ -30,7 +30,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   pvVar6 = (void *)elf_info->data_segment_start;
   pEVar1 = elf_info->elfbase;
   if (pvVar6 != (void *)0x0) {
-    if (get_alignment != 0) {
+    if (get_alignment != FALSE) {
       uVar7 = elf_info->data_segment_alignment;
       *pSize = uVar7;
       pvVar6 = (void *)((long)pvVar6 - uVar7);
@@ -42,7 +42,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
     *pSize = elf_info->data_segment_size;
     return pvVar6;
   }
-  data_segment_found = false;
+  data_segment_found = FALSE;
   lVar13 = 0;
   uVar8 = 0;
   uVar3 = 0;
@@ -67,7 +67,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
       }
       else {
         lVar13 = uVar12 - uVar9;
-        data_segment_found = true;
+        data_segment_found = TRUE;
         uVar3 = uVar11 & 0xffffffff;
         uVar8 = uVar9;
       }
@@ -86,7 +86,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
     elf_info->data_segment_start = (u64)pvVar5;
     elf_info->data_segment_alignment = uVar7;
     elf_info->data_segment_size = (long)pvVar6 - (long)pvVar5;
-    if (get_alignment == 0) {
+    if (get_alignment == FALSE) {
       *pSize = (long)pvVar6 - (long)pvVar5;
       return pvVar5;
     }

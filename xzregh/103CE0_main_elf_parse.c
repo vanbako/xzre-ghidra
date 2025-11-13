@@ -22,17 +22,17 @@ BOOL main_elf_parse(main_elf_t *main_elf)
   Elf64_Sym *libc_stack_end_sym;
   
   BVar1 = elf_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->dynamic_linker);
-  if ((BVar1 != 0) &&
+  if ((BVar1 != FALSE) &&
      (pEVar2 = elf_symbol_get(main_elf->elf_handles->dynamic_linker,STR_libc_stack_end,
                               STR_GLIBC_2_2_5), pEVar2 != (Elf64_Sym *)0x0)) {
     elf = main_elf->elf_handles->dynamic_linker;
     puVar3 = elf->elfbase->e_ident + pEVar2->st_value;
     BVar1 = process_is_sshd(elf,*(u8 **)puVar3);
-    if (BVar1 != 0) {
+    if (BVar1 != FALSE) {
       *main_elf->__libc_stack_end = *(void **)puVar3;
-      return 1;
+      return TRUE;
     }
   }
-  return 0;
+  return FALSE;
 }
 

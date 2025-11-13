@@ -60,6 +60,6 @@ LAB_00101c18:
     }
 LAB_00101c07:
     uVar3 = uVar3 + 1;
-  } while( true );
+  } while( TRUE );
 }
 

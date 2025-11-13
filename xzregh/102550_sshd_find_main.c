@@ -84,7 +84,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
       puVar11 = (u8 *)0x0;
       while (code_start < code_end) {
         BVar3 = x86_dasm((dasm_ctx_t *)&local_80,code_start,code_end);
-        if (BVar3 == 0) {
+        if (BVar3 == FALSE) {
           code_start = code_start + 1;
         }
         else {
@@ -105,7 +105,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
               imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
             }
             *code_start_out = puVar11;
-            return 1;
+            return TRUE;
           }
           code_start = code_start + local_78;
         }
@@ -113,6 +113,6 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
     }
     lzma_free(imported_funcs->EVP_PKEY_new_raw_public_key,allocator_00);
   }
-  return 0;
+  return FALSE;
 }
 

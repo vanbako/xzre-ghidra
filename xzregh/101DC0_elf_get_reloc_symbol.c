@@ -21,7 +21,7 @@ void * elf_get_reloc_symbol
   
   BVar1 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x67,5,4);
   uVar3 = 0;
-  if (BVar1 != 0) {
+  if (BVar1 != FALSE) {
     for (; uVar3 < num_relocs; uVar3 = uVar3 + 1) {
       if ((((relocs->r_info & 0xffffffff) == reloc_type) &&
           (elf_info->symtab[relocs->r_info >> 0x20].st_shndx == 0)) &&

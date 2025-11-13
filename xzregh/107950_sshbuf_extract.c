@@ -22,7 +22,7 @@ BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *
   u8 *addr;
   
   if (ctx == (global_context_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (((buf != (sshbuf *)0x0) && (p_sshbuf_d != (void **)0x0)) && (p_sshbuf_size != (size_t *)0x0))
   {
@@ -42,7 +42,7 @@ BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *
       }
     }
     BVar3 = is_range_mapped((u8 *)buf,uVar6,ctx);
-    if (BVar3 != 0) {
+    if (BVar3 != FALSE) {
       if (*(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 2) < '\0') {
         addr = buf->d;
       }
@@ -58,9 +58,9 @@ BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *
       }
       *p_sshbuf_size = uVar6;
       BVar3 = is_range_mapped(addr,uVar6,ctx);
-      return (uint)(BVar3 != 0);
+      return (uint)(BVar3 != FALSE);
     }
   }
-  return 0;
+  return FALSE;
 }
 

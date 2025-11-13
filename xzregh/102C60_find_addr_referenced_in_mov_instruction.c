@@ -39,7 +39,7 @@ void * find_addr_referenced_in_mov_instruction
     while (code_start < code_end) {
       BVar1 = find_instruction_with_mem_operand_ex
                         (code_start,code_end,(dasm_ctx_t *)&local_80,0x10b,(void *)0x0);
-      if (BVar1 == 0) {
+      if (BVar1 == FALSE) {
         code_start = code_start + 1;
       }
       else {

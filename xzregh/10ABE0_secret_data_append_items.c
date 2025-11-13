@@ -21,10 +21,10 @@ BOOL secret_data_append_items(secret_data_item_t *items,u64 items_count,appender
   
   uVar3 = 0;
   uVar5 = 0;
-  while( true ) {
-    while( true ) {
+  while( TRUE ) {
+    while( TRUE ) {
       if (items_count <= uVar5) {
-        return 1;
+        return TRUE;
       }
       uVar4 = (int)uVar5 + 1;
       psVar2 = items + uVar5;
@@ -34,9 +34,9 @@ BOOL secret_data_append_items(secret_data_item_t *items,u64 items_count,appender
     }
     BVar1 = (*appender)((secret_data_shift_cursor_t)(psVar2->shift_cursor).index,
                         psVar2->operation_index,psVar2->shift_count,uVar4,psVar2->code);
-    if (BVar1 == 0) break;
+    if (BVar1 == FALSE) break;
     uVar3 = uVar3 + 1;
   }
-  return 0;
+  return FALSE;
 }
 

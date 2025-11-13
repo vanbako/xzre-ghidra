@@ -42,7 +42,7 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
         if ((uVar7 & 1) == 0) {
           vaddr = pEVar2->e_ident + uVar7;
           BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-          if (BVar3 == 0) {
+          if (BVar3 == FALSE) {
             return (Elf64_Relr *)0x0;
           }
           if ((*(Elf64_Relr *)vaddr == EVar6) &&
@@ -60,7 +60,7 @@ LAB_00101d98:
           while (uVar7 = uVar7 >> 1, uVar7 != 0) {
             if ((uVar7 & 1) != 0) {
               BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-              if (BVar3 == 0) {
+              if (BVar3 == FALSE) {
                 return (Elf64_Relr *)0x0;
               }
               if ((*(Elf64_Relr *)vaddr == EVar6) &&

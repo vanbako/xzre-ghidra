@@ -34,7 +34,7 @@ int sshd_get_sensitive_data_score_in_do_child
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)refs->entries[1].func_end;
     BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
-    uVar4 = (uint)(BVar1 != 0);
+    uVar4 = (uint)(BVar1 != FALSE);
     ppuVar3 = &do_child_start;
     for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
       *(undefined4 *)ppuVar3 = 0;
@@ -43,11 +43,11 @@ int sshd_get_sensitive_data_score_in_do_child
     BVar1 = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)&do_child_start,
                        (void *)((long)sensitive_data + 0x10));
-    if (BVar1 != 0) {
+    if (BVar1 != FALSE) {
       BVar1 = find_instruction_with_mem_operand
                         (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
                          (void *)((long)sensitive_data + 0x10));
-      if (BVar1 == 0) {
+      if (BVar1 == FALSE) {
         uVar4 = uVar4 + 1;
       }
       else {

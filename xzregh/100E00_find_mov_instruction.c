@@ -30,32 +30,32 @@ BOOL find_mov_instruction
     dctx = (dasm_ctx_t *)local_80;
   }
   do {
-    while( true ) {
+    while( TRUE ) {
       if (code_end <= code_start) {
-        return 0;
+        return FALSE;
       }
       BVar2 = x86_dasm(dctx,code_start,code_end);
-      if (BVar2 != 0) break;
+      if (BVar2 != FALSE) break;
       code_start = code_start + 1;
     }
     if ((((dctx->field2_0x10).field0.field11_0xc.modrm_word & 0xff00ff00) == 0x5000000) &&
-       (((uint)(((dctx->field2_0x10).field0.field10_0xb.rex_byte & 0x48) == 0x48) ==
-         is_64bit_operand || (load_flag == 0)))) {
+       (((((dctx->field2_0x10).field0.field10_0xb.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+        (load_flag == FALSE)))) {
       iVar1._0_1_ = dctx->_unknown810[0];
       iVar1._1_1_ = dctx->_unknown810[1];
       iVar1._2_1_ = dctx->_unknown810[2];
       iVar1._3_1_ = dctx->field_0x2b;
-      if (load_flag == 0) {
+      if (load_flag == FALSE) {
         opcode_matches_direction = iVar1 == 0x109;
       }
       else {
         opcode_matches_direction = iVar1 == 0x10b;
       }
       if (opcode_matches_direction) {
-        return 1;
+        return TRUE;
       }
     }
     code_start = code_start + dctx->instruction_size;
-  } while( true );
+  } while( TRUE );
 }
 

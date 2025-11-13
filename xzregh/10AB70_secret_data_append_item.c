@@ -21,6 +21,6 @@ BOOL secret_data_append_item
     BVar1 = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
     return BVar1;
   }
-  return 0;
+  return FALSE;
 }
 

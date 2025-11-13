@@ -25,7 +25,7 @@ BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)
   int sockfd;
   
   if (pSock == (int *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (imports != (libc_imports_t *)0x0) {
     iVar3 = -1;
@@ -47,13 +47,13 @@ LAB_00107c21:
         iVar3 = iVar3 + 1;
         if (iVar3 == socket_index) {
           *pSock = sockfd_00;
-          return 1;
+          return TRUE;
         }
       }
 LAB_00107c40:
       sockfd_00 = sockfd_00 + 1;
     } while (sockfd_00 != 0x40);
   }
-  return 0;
+  return FALSE;
 }
 

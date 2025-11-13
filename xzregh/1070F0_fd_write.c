@@ -33,7 +33,7 @@ LAB_0010711f:
   }
   else {
     do {
-      while( true ) {
+      while( TRUE ) {
         sVar1 = (*funcs->write)(fd,buffer,count_00);
         if (-1 < sVar1) break;
         piVar2 = (*funcs->__errno_location)();

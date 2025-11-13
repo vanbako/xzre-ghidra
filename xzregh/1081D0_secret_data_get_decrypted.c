@@ -24,7 +24,7 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   u8 local_68 [80];
   
   if (output == (u8 *)0x0) {
-    return 0;
+    return FALSE;
   }
   if ((ctx != (global_context_t *)0x0) &&
      (funcs = ctx->imported_funcs, funcs != (imported_funcs_t *)0x0)) {
@@ -39,11 +39,11 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
       pkVar4 = pkVar4 + 4;
     }
     BVar1 = chacha_decrypt(auStack_b8,0x30,auStack_b8,(u8 *)&buf1,(u8 *)&buf2,funcs);
-    if (BVar1 != 0) {
+    if (BVar1 != FALSE) {
       BVar1 = chacha_decrypt(ctx->secret_data,0x39,(u8 *)&buf2,local_68,output,ctx->imported_funcs);
-      return (uint)(BVar1 != 0);
+      return (uint)(BVar1 != FALSE);
     }
   }
-  return 0;
+  return FALSE;
 }
 

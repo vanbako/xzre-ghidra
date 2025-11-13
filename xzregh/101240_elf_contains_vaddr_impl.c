@@ -29,7 +29,7 @@ LAB_00101254:
   pEVar1 = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);
   if (size == 0) {
 LAB_0010138e:
-    BVar2 = 1;
+    BVar2 = TRUE;
   }
   else {
     pEVar5 = pEVar1;
@@ -53,13 +53,13 @@ LAB_0010138e:
             if ((pEVar6 <= vaddr) || (vaddr < pEVar5)) {
               if ((pEVar6 < pEVar1) && (pEVar5 > vaddr)) {
                 BVar2 = elf_contains_vaddr_impl(elf_info,vaddr,(long)pEVar5 - (long)vaddr,p_flags);
-                if (BVar2 == 0) {
-                  return 0;
+                if (BVar2 == FALSE) {
+                  return FALSE;
                 }
                 BVar2 = elf_contains_vaddr_impl
                                   (elf_info,pEVar6->e_ident + 1,(long)pEVar1 + (-1 - (long)pEVar6),
                                    p_flags);
-                return (uint)(BVar2 != 0);
+                return (uint)(BVar2 != FALSE);
               }
             }
             else if (pEVar6 < pEVar1) {
@@ -71,9 +71,9 @@ LAB_0010138e:
           else if (pEVar5 < pEVar1) goto code_r0x00101313;
         }
         lVar7 = lVar7 + 1;
-      } while( true );
+      } while( TRUE );
     }
-    BVar2 = 0;
+    BVar2 = FALSE;
   }
   return BVar2;
 code_r0x00101313:

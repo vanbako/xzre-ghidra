@@ -27,6 +27,6 @@ BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_curs
     }
     cursor->index = uVar2 + 1;
   }
-  return 1;
+  return TRUE;
 }
 

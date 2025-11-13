@@ -19,8 +19,8 @@ char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void
   char *string_end;
   u64 local_30 [2];
   
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xb6,7,10,0);
-  if (BVar1 != 0) {
+  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xb6,7,10,FALSE);
+  if (BVar1 != FALSE) {
     local_30[0] = 0;
     string_begin = (char *)elf_get_rodata_segment(elf_info,local_30);
     if ((string_begin != (char *)0x0) && (0x2b < local_30[0])) {

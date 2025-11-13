@@ -17,10 +17,10 @@ BOOL find_instruction_with_mem_operand
   BOOL BVar1;
   
   BVar1 = find_lea_instruction_with_mem_operand(code_start,code_end,dctx,mem_address);
-  if (BVar1 == 0) {
+  if (BVar1 == FALSE) {
     BVar1 = find_instruction_with_mem_operand_ex(code_start,code_end,dctx,0x10b,mem_address);
     return BVar1;
   }
-  return 1;
+  return TRUE;
 }
 

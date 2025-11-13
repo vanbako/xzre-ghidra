@@ -16,15 +16,15 @@
 BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *imports)
 
 {
-  uint uVar1;
+  BOOL BVar1;
   lzma_allocator *allocator;
   _func_25 *p_Var2;
   _func_26 *p_Var3;
   lzma_allocator *resolver;
   
   allocator = get_lzma_allocator();
-  uVar1 = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
-  if (uVar1 != 0) {
+  BVar1 = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
+  if (BVar1 != FALSE) {
     allocator->opaque = libc_info;
     p_Var2 = (_func_25 *)lzma_alloc(0x308,allocator);
     imports->read = p_Var2;
@@ -36,8 +36,8 @@ BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *i
     if (p_Var3 != (_func_26 *)0x0) {
       imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    uVar1 = (uint)(imports->resolved_imports_count == 2);
+    BVar1 = (BOOL)(imports->resolved_imports_count == 2);
   }
-  return uVar1;
+  return BVar1;
 }
 

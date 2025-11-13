@@ -25,7 +25,7 @@ BOOL check_backdoor_state(global_context_t *ctx)
   u32 payload_length;
   
   if (ctx == (global_context_t *)0x0) {
-    return 0;
+    return FALSE;
   }
   uVar1 = ctx->payload_state;
   if ((int)uVar1 < 3) {
@@ -36,7 +36,7 @@ BOOL check_backdoor_state(global_context_t *ctx)
           uVar2 = uVar2 + 0x60;
         }
         if (uVar2 <= ctx->payload_data_size) {
-          return 1;
+          return TRUE;
         }
       }
       goto LAB_00107f11;
@@ -50,10 +50,10 @@ BOOL check_backdoor_state(global_context_t *ctx)
     state_matches_exact = uVar1 == 4;
   }
   if (state_in_expected_range || state_matches_exact) {
-    return 1;
+    return TRUE;
   }
 LAB_00107f11:
   ctx->payload_state = 0xffffffff;
-  return 0;
+  return FALSE;
 }
 
