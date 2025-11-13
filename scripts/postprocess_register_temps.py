@@ -14,7 +14,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
@@ -91,10 +91,115 @@ def scrub_remaining_bool(text: str, file_path: Path) -> str:
     return text
 
 
+def _uppercase_bool_literals(text: str) -> Tuple[str, int]:
+    result: List[str] = []
+    length = len(text)
+    i = 0
+    state = "code"
+    replacements = 0
+
+    def is_ident_char(ch: str) -> bool:
+        return ch == "_" or ch.isalnum()
+
+    while i < length:
+        ch = text[i]
+        if state == "code":
+            if ch == "/" and i + 1 < length:
+                nxt = text[i + 1]
+                if nxt == "/":
+                    result.append("//")
+                    state = "line_comment"
+                    i += 2
+                    continue
+                if nxt == "*":
+                    result.append("/*")
+                    state = "block_comment"
+                    i += 2
+                    continue
+            if ch == '"':
+                result.append(ch)
+                state = "string"
+                i += 1
+                continue
+            if ch == "'":
+                result.append(ch)
+                state = "char"
+                i += 1
+                continue
+            if ch == "_" or ch.isalpha():
+                j = i + 1
+                while j < length and is_ident_char(text[j]):
+                    j += 1
+                token = text[i:j]
+                if token == "true":
+                    result.append("TRUE")
+                    replacements += 1
+                elif token == "false":
+                    result.append("FALSE")
+                    replacements += 1
+                else:
+                    result.append(token)
+                i = j
+                continue
+            result.append(ch)
+            i += 1
+            continue
+
+        if state == "string":
+            result.append(ch)
+            i += 1
+            if ch == "\\" and i < length:
+                result.append(text[i])
+                i += 1
+            elif ch == '"':
+                state = "code"
+            continue
+
+        if state == "char":
+            result.append(ch)
+            i += 1
+            if ch == "\\" and i < length:
+                result.append(text[i])
+                i += 1
+            elif ch == "'":
+                state = "code"
+            continue
+
+        if state == "line_comment":
+            result.append(ch)
+            i += 1
+            if ch == "\n":
+                state = "code"
+            continue
+
+        if state == "block_comment":
+            result.append(ch)
+            i += 1
+            if ch == "*" and i < length and text[i] == "/":
+                result.append("/")
+                i += 1
+                state = "code"
+            continue
+
+    return "".join(result), replacements
+
+
+def rewrite_bool_literals(text: str, file_path: Path) -> str:
+    updated, replacements = _uppercase_bool_literals(text)
+    if replacements:
+        plural = "s" if replacements != 1 else ""
+        print(
+            f"[postprocess] info: uppercased {replacements} bool literal{plural} in {file_path}",
+            file=sys.stderr,
+        )
+    return updated
+
+
 def process_file(path: Path, temps: List[dict]) -> None:
     text = path.read_text(encoding="utf-8")
     updated = apply_register_rewrites(text, temps, path)
     updated = updated.replace("(bool *)", "(BOOL *)")
+    updated = rewrite_bool_literals(updated, path)
     updated = scrub_remaining_bool(updated, path)
     if updated != text:
         path.write_text(updated, encoding="utf-8")
@@ -104,8 +209,10 @@ def cleanup_pointer_casts(xzregh_dir: Path) -> None:
     for path in sorted(xzregh_dir.glob("*.c")):
         text = path.read_text(encoding="utf-8")
         if "(bool *)" not in text:
-            continue
-        updated = text.replace("(bool *)", "(BOOL *)")
+            updated = text
+        else:
+            updated = text.replace("(bool *)", "(BOOL *)")
+        updated = rewrite_bool_literals(updated, path)
         if updated != text:
             path.write_text(updated, encoding="utf-8")
 
@@ -122,16 +229,18 @@ def main() -> int:
 
     register_map = load_register_temps(args.metadata)
     if not register_map:
-        print("[postprocess] no register temp metadata found; nothing to do.", file=sys.stderr)
-        return 0
-
-    for func, temps in register_map.items():
-        try:
-            target = find_decomp_file(args.xzregh_dir, func)
-        except (FileNotFoundError, RuntimeError) as exc:
-            print(f"[postprocess] warning: {exc}", file=sys.stderr)
-            continue
-        process_file(target, temps)
+        print(
+            "[postprocess] no register temp metadata found; skipping targeted rewrites.",
+            file=sys.stderr,
+        )
+    else:
+        for func, temps in register_map.items():
+            try:
+                target = find_decomp_file(args.xzregh_dir, func)
+            except (FileNotFoundError, RuntimeError) as exc:
+                print(f"[postprocess] warning: {exc}", file=sys.stderr)
+                continue
+            process_file(target, temps)
     cleanup_pointer_casts(args.xzregh_dir)
     return 0
 

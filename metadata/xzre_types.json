@@ -612,18 +612,11 @@
       "code": "enum X86_REG {\n X86_REG_RBP = 5\n};"
     },
     {
-      "kind": "typedef",
+      "kind": "enum",
       "names": [
         "BOOL"
       ],
-      "code": "typedef int BOOL;"
-    },
-    {
-      "kind": "typedef",
-      "names": [
-        "bool"
-      ],
-      "code": "typedef BOOL bool;"
+      "code": "typedef enum {\n FALSE = 0,\n TRUE = 1\n} BOOL;"
     },
     {
       "kind": "enum",
