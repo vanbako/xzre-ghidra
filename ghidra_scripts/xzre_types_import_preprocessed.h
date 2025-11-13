@@ -1308,6 +1308,7 @@ typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
  */
 typedef union {
  u32 index;
+ int signed_index;
  struct {
   u32 bit_index : 3;
   u32 byte_index : 29;
