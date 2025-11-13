@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103CE0_main_elf_parse.c
 // Function: main_elf_parse @ 0x103CE0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall main_elf_parse(main_elf_t * main_elf)
+// Calling convention: unknown
+// Prototype: undefined main_elf_parse(void)
 
 
 /*
@@ -10,29 +10,35 @@
 #include "xzre_types.h"
 
 
-BOOL main_elf_parse(main_elf_t *main_elf)
+undefined1  [16]
+main_elf_parse(long *param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4)
 
 {
-  elf_info_t *elf;
-  BOOL BVar1;
-  Elf64_Sym *pEVar2;
-  uchar *puVar3;
+  int iVar1;
+  long lVar2;
+  undefined8 uVar3;
+  undefined8 *puVar4;
+  undefined1 auVar5 [16];
   void **libc_stack_end_ptr;
-  elf_info_t *dynamic_linker;
   Elf64_Sym *libc_stack_end_sym;
   
-  BVar1 = elf_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->dynamic_linker);
-  if ((BVar1 != FALSE) &&
-     (pEVar2 = elf_symbol_get(main_elf->elf_handles->dynamic_linker,STR_libc_stack_end,
-                              STR_GLIBC_2_2_5), pEVar2 != (Elf64_Sym *)0x0)) {
-    elf = main_elf->elf_handles->dynamic_linker;
-    puVar3 = elf->elfbase->e_ident + pEVar2->st_value;
-    BVar1 = process_is_sshd(elf,*(u8 **)puVar3);
-    if (BVar1 != FALSE) {
-      *main_elf->__libc_stack_end = *(void **)puVar3;
-      return TRUE;
+  iVar1 = elf_parse(param_1[1],*(undefined8 *)(*param_1 + 8));
+  if (iVar1 != 0) {
+    lVar2 = elf_symbol_get(*(undefined8 *)(*param_1 + 8),0x2b0,0x8c0);
+    if (lVar2 != 0) {
+      puVar4 = (undefined8 *)(*(long *)(lVar2 + 8) + **(long **)(*param_1 + 8));
+      iVar1 = process_is_sshd(*(long **)(*param_1 + 8),*puVar4);
+      if (iVar1 != 0) {
+        *(undefined8 *)param_1[2] = *puVar4;
+        uVar3 = 1;
+        goto LAB_00103d49;
+      }
     }
   }
-  return FALSE;
+  uVar3 = 0;
+LAB_00103d49:
+  auVar5._8_8_ = param_4;
+  auVar5._0_8_ = uVar3;
+  return auVar5;
 }
 

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10AA00_secret_data_append_from_code.c
 // Function: secret_data_append_from_code @ 0x10AA00
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall secret_data_append_from_code(void * code_start, void * code_end, secret_data_shift_cursor_t shift_cursor, uint shift_count, BOOL start_from_call)
+// Calling convention: unknown
+// Prototype: undefined secret_data_append_from_code(void)
 
 
 /*
@@ -10,50 +10,50 @@
 #include "xzre_types.h"
 
 
-BOOL secret_data_append_from_code
-               (void *code_start,void *code_end,secret_data_shift_cursor_t shift_cursor,
-               uint shift_count,BOOL start_from_call)
+bool secret_data_append_from_code
+               (long param_1,undefined8 param_2,undefined4 param_3,uint param_4,int param_5)
 
 {
-  BOOL BVar1;
+  int iVar1;
   long lVar2;
-  dasm_ctx_t *pdVar3;
+  long *plVar3;
   ulong uVar4;
-  secret_data_shift_cursor_t local_9c [3];
-  dasm_ctx_t local_90;
+  undefined4 local_9c [3];
+  long local_90;
+  long local_88;
   
-  pdVar3 = &local_90;
+  plVar3 = &local_90;
   for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *(undefined4 *)&pdVar3->instruction = 0;
-    pdVar3 = (dasm_ctx_t *)((long)&pdVar3->instruction + 4);
+    *(undefined4 *)plVar3 = 0;
+    plVar3 = (long *)((long)plVar3 + 4);
   }
-  local_9c[0] = shift_cursor;
-  if (start_from_call != FALSE) {
-    BVar1 = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&local_90);
-    if (BVar1 == FALSE) {
+  local_9c[0] = param_3;
+  if (param_5 != 0) {
+    iVar1 = find_call_instruction(param_1,param_2,0,&local_90);
+    if (iVar1 == 0) {
       return FALSE;
     }
-    code_start = local_90.instruction + local_90.instruction_size;
+    param_1 = local_88 + local_90;
   }
   uVar4 = 0;
   do {
-    BVar1 = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&local_90);
-    if (BVar1 == FALSE) {
+    iVar1 = find_reg2reg_instruction(param_1,param_2,&local_90);
+    if (iVar1 == 0) {
 LAB_0010aa80:
-      return (uint)(shift_count == (uint)uVar4);
+      return param_4 == (uint)uVar4;
     }
-    if (uVar4 == shift_count) {
-      if (shift_count < (uint)uVar4) {
+    if (uVar4 == param_4) {
+      if (param_4 < (uint)uVar4) {
         return FALSE;
       }
       goto LAB_0010aa80;
     }
     uVar4 = uVar4 + 1;
-    BVar1 = secret_data_append_from_instruction(&local_90,local_9c);
-    if (BVar1 == FALSE) {
+    iVar1 = secret_data_append_from_instruction(&local_90,local_9c);
+    if (iVar1 == 0) {
       return FALSE;
     }
-    code_start = local_90.instruction + local_90.instruction_size;
+    param_1 = local_88 + local_90;
   } while( TRUE );
 }
 

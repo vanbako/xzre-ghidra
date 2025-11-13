@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101C30_elf_find_relr_reloc.c
 // Function: elf_find_relr_reloc @ 0x101C30
-// Calling convention: __stdcall
-// Prototype: Elf64_Relr * __stdcall elf_find_relr_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id)
+// Calling convention: unknown
+// Prototype: undefined elf_find_relr_reloc(void)
 
 
 /*
@@ -10,73 +10,67 @@
 #include "xzre_types.h"
 
 
-Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id)
+long * elf_find_relr_reloc(long *param_1,long param_2,long *param_3,long *param_4,ulong *param_5)
 
 {
   uint uVar1;
-  Elf64_Ehdr *pEVar2;
-  BOOL BVar3;
-  Elf64_Relr *in_RCX;
-  Elf64_Relr *in_RDX;
+  long lVar2;
+  int iVar3;
   ulong uVar4;
-  undefined4 in_register_00000034;
-  uchar *vaddr;
-  ulong *in_R8;
-  long lVar5;
-  Elf64_Relr EVar6;
+  long *plVar5;
+  long lVar6;
   ulong uVar7;
   
-  pEVar2 = elf_info->elfbase;
-  if ((elf_info->flags & 4) != 0) {
-    uVar1 = elf_info->relr_relocs_num;
-    if ((CONCAT44(in_register_00000034,encoded_string_id) != 0) && (uVar1 != 0)) {
+  lVar2 = *param_1;
+  if ((*(byte *)(param_1 + 0x1a) & 4) != 0) {
+    uVar1 = *(uint *)(param_1 + 0x12);
+    if ((param_2 != 0) && (uVar1 != 0)) {
       uVar4 = 0;
-      if (in_R8 != (ulong *)0x0) {
-        uVar4 = *in_R8;
+      if (param_5 != (ulong *)0x0) {
+        uVar4 = *param_5;
       }
-      EVar6 = CONCAT44(in_register_00000034,encoded_string_id) - (long)pEVar2;
-      lVar5 = 0;
+      lVar6 = 0;
       for (; uVar4 < uVar1; uVar4 = uVar4 + 1) {
-        vaddr = pEVar2->e_ident + lVar5;
-        uVar7 = elf_info->relr_relocs[uVar4];
+        plVar5 = (long *)(lVar2 + lVar6);
+        uVar7 = *(ulong *)(param_1[0x11] + uVar4 * 8);
         if ((uVar7 & 1) == 0) {
-          vaddr = pEVar2->e_ident + uVar7;
-          BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-          if (BVar3 == FALSE) {
-            return (Elf64_Relr *)0x0;
+          plVar5 = (long *)(lVar2 + uVar7);
+          iVar3 = elf_contains_vaddr(param_1,plVar5,8,4);
+          if (iVar3 == 0) {
+            return (long *)0x0;
           }
-          if ((*(Elf64_Relr *)vaddr == EVar6) &&
-             ((in_RDX == (Elf64_Relr *)0x0 || ((in_RDX <= vaddr && (vaddr <= in_RCX)))))) {
+          if ((*plVar5 == param_2 - lVar2) &&
+             ((param_3 == (long *)0x0 || ((param_3 <= plVar5 && (plVar5 <= param_4)))))) {
 LAB_00101d98:
-            if (in_R8 != (ulong *)0x0) {
-              *in_R8 = uVar4 + 1;
-              return (Elf64_Relr *)vaddr;
+            if (param_5 != (ulong *)0x0) {
+              *param_5 = uVar4 + 1;
+              return plVar5;
             }
-            return (Elf64_Relr *)vaddr;
+            return plVar5;
           }
-          lVar5 = uVar7 + 8;
+          lVar6 = uVar7 + 8;
         }
         else {
           while (uVar7 = uVar7 >> 1, uVar7 != 0) {
             if ((uVar7 & 1) != 0) {
-              BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-              if (BVar3 == FALSE) {
-                return (Elf64_Relr *)0x0;
+              iVar3 = elf_contains_vaddr(param_1,plVar5,8,4);
+              if (iVar3 == 0) {
+                return (long *)0x0;
               }
-              if ((*(Elf64_Relr *)vaddr == EVar6) &&
-                 ((in_RDX == (Elf64_Relr *)0x0 || ((in_RDX <= vaddr && (vaddr <= in_RCX))))))
+              if ((*plVar5 == param_2 - lVar2) &&
+                 ((param_3 == (long *)0x0 || ((param_3 <= plVar5 && (plVar5 <= param_4))))))
               goto LAB_00101d98;
             }
-            vaddr = vaddr + 8;
+            plVar5 = plVar5 + 1;
           }
-          lVar5 = lVar5 + 0x1f8;
+          lVar6 = lVar6 + 0x1f8;
         }
       }
-      if (in_R8 != (ulong *)0x0) {
-        *in_R8 = uVar4;
+      if (param_5 != (ulong *)0x0) {
+        *param_5 = uVar4;
       }
     }
   }
-  return (Elf64_Relr *)0x0;
+  return (long *)0x0;
 }
 

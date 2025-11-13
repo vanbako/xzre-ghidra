@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1074B0_count_pointers.c
 // Function: count_pointers @ 0x1074B0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall count_pointers(void * * ptrs, u64 * count_out, libc_imports_t * funcs)
+// Calling convention: unknown
+// Prototype: undefined count_pointers(void)
 
 
 /*
@@ -12,36 +12,38 @@
 #include "xzre_types.h"
 
 
-BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
+undefined1  [16] count_pointers(long param_1,ulong *param_2,ulong param_3,undefined8 param_4)
 
 {
-  BOOL BVar1;
-  size_t sVar2;
-  ulong uVar3;
+  undefined1 auVar1 [16];
+  ulong uVar2;
+  undefined8 uVar3;
   ulong uVar4;
-  size_t i;
-  size_t nWords;
-  size_t blockSize;
+  ulong uVar5;
+  undefined1 auVar6 [16];
   
-  if (((ptrs == (void **)0x0) || (funcs == (libc_imports_t *)0x0)) ||
-     (funcs->malloc_usable_size == (_func_17 *)0x0)) {
-    return FALSE;
+  if (((param_1 == 0) || (param_3 == 0)) || (*(code **)(param_3 + 8) == (code *)0x0)) {
+    auVar1._8_8_ = 0;
+    auVar1._0_8_ = param_3;
+    return auVar1 << 0x40;
   }
-  sVar2 = (*funcs->malloc_usable_size)(ptrs);
-  if (sVar2 - 8 < 0x80) {
-    uVar3 = 0;
+  uVar2 = (**(code **)(param_3 + 8))();
+  if (uVar2 - 8 < 0x80) {
+    uVar4 = 0;
     do {
-      uVar4 = uVar3;
-      if (ptrs[uVar3] == (void *)0x0) break;
-      uVar3 = (ulong)((int)uVar3 + 1);
-      uVar4 = sVar2 >> 3;
-    } while (uVar3 < sVar2 >> 3);
-    *count_out = uVar4;
-    BVar1 = TRUE;
+      uVar5 = uVar4;
+      if (*(long *)(param_1 + uVar4 * 8) == 0) break;
+      uVar4 = (ulong)((int)uVar4 + 1);
+      uVar5 = uVar2 >> 3;
+    } while (uVar4 < uVar2 >> 3);
+    *param_2 = uVar5;
+    uVar3 = 1;
   }
   else {
-    BVar1 = FALSE;
+    uVar3 = 0;
   }
-  return BVar1;
+  auVar6._8_8_ = param_4;
+  auVar6._0_8_ = uVar3;
+  return auVar6;
 }
 

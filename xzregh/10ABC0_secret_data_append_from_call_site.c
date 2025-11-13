@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10ABC0_secret_data_append_from_call_site.c
 // Function: secret_data_append_from_call_site @ 0x10ABC0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall secret_data_append_from_call_site(secret_data_shift_cursor_t shift_cursor, uint shift_count, uint operation_index, BOOL bypass)
+// Calling convention: unknown
+// Prototype: undefined secret_data_append_from_call_site(void)
 
 
 /*
@@ -10,16 +10,14 @@
 #include "xzre_types.h"
 
 
-BOOL secret_data_append_from_call_site
-               (secret_data_shift_cursor_t shift_cursor,uint shift_count,uint operation_index,
-               BOOL bypass)
+uint secret_data_append_from_call_site
+               (undefined4 param_1,undefined4 param_2,undefined4 param_3,uint param_4)
 
 {
-  BOOL BVar1;
-  u8 *unaff_retaddr;
+  uint uVar1;
+  undefined8 unaff_retaddr;
   
-  BVar1 = secret_data_append_singleton
-                    ((u8 *)0x0,unaff_retaddr,shift_cursor,shift_count,operation_index);
-  return BVar1 | bypass;
+  uVar1 = secret_data_append_singleton(0,unaff_retaddr,param_1,param_2,param_3);
+  return uVar1 | param_4;
 }
 

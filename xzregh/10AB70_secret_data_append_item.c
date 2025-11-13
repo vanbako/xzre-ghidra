@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10AB70_secret_data_append_item.c
 // Function: secret_data_append_item @ 0x10AB70
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall secret_data_append_item(secret_data_shift_cursor_t shift_cursor, uint operation_index, uint shift_count, int index, u8 * code)
+// Calling convention: unknown
+// Prototype: undefined secret_data_append_item(void)
 
 
 /*
@@ -10,17 +10,17 @@
 #include "xzre_types.h"
 
 
-BOOL secret_data_append_item
-               (secret_data_shift_cursor_t shift_cursor,uint operation_index,uint shift_count,
-               int index,u8 *code)
+undefined8
+secret_data_append_item
+          (undefined4 param_1,undefined4 param_2,undefined4 param_3,int param_4,undefined8 param_5)
 
 {
-  BOOL BVar1;
+  undefined8 uVar1;
   
-  if (index != 0) {
-    BVar1 = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
-    return BVar1;
+  if (param_4 != 0) {
+    uVar1 = secret_data_append_singleton(param_5,param_5,param_1,param_3,param_2);
+    return uVar1;
   }
-  return FALSE;
+  return 0;
 }
 

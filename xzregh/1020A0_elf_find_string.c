@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1020A0_elf_find_string.c
 // Function: elf_find_string @ 0x1020A0
-// Calling convention: __stdcall
-// Prototype: char * __stdcall elf_find_string(elf_info_t * elf_info, EncodedStringId * stringId_inOut, void * rodata_start_ptr)
+// Calling convention: unknown
+// Prototype: undefined elf_find_string(void)
 
 
 /*
@@ -10,43 +10,42 @@
 #include "xzre_types.h"
 
 
-char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void *rodata_start_ptr)
+ulong elf_find_string(undefined8 param_1,int *param_2,ulong param_3)
 
 {
-  BOOL BVar1;
-  EncodedStringId EVar2;
-  char *string_begin;
-  char *string_end;
-  u64 local_30 [2];
+  int iVar1;
+  ulong uVar2;
+  ulong uVar3;
+  ulong local_30 [2];
   
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xb6,7,10,FALSE);
-  if (BVar1 != FALSE) {
+  iVar1 = secret_data_append_from_call_site(0xb6,7,10,0);
+  if (iVar1 != 0) {
     local_30[0] = 0;
-    string_begin = (char *)elf_get_rodata_segment(elf_info,local_30);
-    if ((string_begin != (char *)0x0) && (0x2b < local_30[0])) {
-      string_end = string_begin + local_30[0];
-      if (rodata_start_ptr != (void *)0x0) {
-        if (string_end <= rodata_start_ptr) {
-          return (char *)0x0;
+    uVar2 = elf_get_rodata_segment(param_1,local_30);
+    if ((uVar2 != 0) && (0x2b < local_30[0])) {
+      uVar3 = local_30[0] + uVar2;
+      if (param_3 != 0) {
+        if (uVar3 <= param_3) {
+          return 0;
         }
-        if (string_begin < rodata_start_ptr) {
-          string_begin = (char *)rodata_start_ptr;
+        if (uVar2 < param_3) {
+          uVar2 = param_3;
         }
       }
-      for (; string_begin < string_end; string_begin = string_begin + 1) {
-        EVar2 = get_string_id(string_begin,string_end);
-        if (EVar2 != 0) {
-          if (*stringId_inOut == 0) {
-            *stringId_inOut = EVar2;
-            return string_begin;
+      for (; uVar2 < uVar3; uVar2 = uVar2 + 1) {
+        iVar1 = get_string_id(uVar2,uVar3);
+        if (iVar1 != 0) {
+          if (*param_2 == 0) {
+            *param_2 = iVar1;
+            return uVar2;
           }
-          if (*stringId_inOut == EVar2) {
-            return string_begin;
+          if (*param_2 == iVar1) {
+            return uVar2;
           }
         }
       }
     }
   }
-  return (char *)0x0;
+  return 0;
 }
 

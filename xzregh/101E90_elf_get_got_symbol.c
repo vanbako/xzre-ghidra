@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101E90_elf_get_got_symbol.c
 // Function: elf_get_got_symbol @ 0x101E90
-// Calling convention: __stdcall
-// Prototype: void * __stdcall elf_get_got_symbol(elf_info_t * elf_info, EncodedStringId encoded_string_id)
+// Calling convention: unknown
+// Prototype: undefined elf_get_got_symbol(void)
 
 
 /*
@@ -10,17 +10,16 @@
 #include "xzre_types.h"
 
 
-void * elf_get_got_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id)
+undefined8 elf_get_got_symbol(long param_1,undefined4 param_2)
 
 {
-  void *pvVar1;
+  undefined8 uVar1;
   
-  if (((elf_info->flags & 2) != 0) && (elf_info->rela_relocs_num != 0)) {
-    pvVar1 = elf_get_reloc_symbol
-                       (elf_info,elf_info->rela_relocs,elf_info->rela_relocs_num,6,encoded_string_id
-                       );
-    return pvVar1;
+  if (((*(byte *)(param_1 + 0xd0) & 2) != 0) && (*(int *)(param_1 + 0x80) != 0)) {
+    uVar1 = elf_get_reloc_symbol
+                      (param_1,*(undefined8 *)(param_1 + 0x78),*(int *)(param_1 + 0x80),6,param_2);
+    return uVar1;
   }
-  return (void *)0x0;
+  return 0;
 }
 

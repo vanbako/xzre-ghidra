@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1022D0_elf_contains_vaddr_relro.c
 // Function: elf_contains_vaddr_relro @ 0x1022D0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall elf_contains_vaddr_relro(elf_info_t * elf_info, u64 vaddr, u64 size, u32 p_flags)
+// Calling convention: unknown
+// Prototype: undefined elf_contains_vaddr_relro(void)
 
 
 /*
@@ -10,25 +10,29 @@
 #include "xzre_types.h"
 
 
-BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)
+undefined1  [16]
+elf_contains_vaddr_relro(long *param_1,ulong param_2,long param_3,int param_4,undefined8 param_5)
 
 {
-  BOOL BVar1;
+  ulong uVar1;
   ulong uVar2;
   ulong uVar3;
+  undefined1 auVar4 [16];
   
-  BVar1 = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);
-  if (((BVar1 != FALSE) && (BVar1 = TRUE, p_flags != 0)) && (elf_info->gnurelro_found != FALSE)) {
-    uVar3 = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->first_vaddr);
-    uVar2 = elf_info->gnurelro_memsize + uVar3;
+  uVar1 = elf_contains_vaddr();
+  if ((((int)uVar1 != 0) && (uVar1 = 1, param_4 != 0)) && (*(int *)((long)param_1 + 0x4c) != 0)) {
+    uVar3 = (*param_1 - param_1[1]) + param_1[10];
+    uVar2 = param_1[0xb] + uVar3;
     uVar3 = uVar3 & 0xfffffffffffff000;
     if ((uVar2 & 0xfff) != 0) {
       uVar2 = (uVar2 & 0xfffffffffffff000) + 0x1000;
     }
-    if ((uVar2 <= vaddr) || (BVar1 = FALSE, vaddr < uVar3)) {
-      BVar1 = (BOOL)(vaddr + size <= uVar3 && vaddr < uVar3 || uVar2 < vaddr + size);
+    if ((uVar2 <= param_2) || (uVar1 = 0, param_2 < uVar3)) {
+      uVar1 = (ulong)(param_2 + param_3 <= uVar3 && param_2 < uVar3 || uVar2 < param_2 + param_3);
     }
   }
-  return BVar1;
+  auVar4._8_8_ = param_5;
+  auVar4._0_8_ = uVar1;
+  return auVar4;
 }
 

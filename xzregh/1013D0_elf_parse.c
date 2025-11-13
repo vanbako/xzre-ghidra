@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1013D0_elf_parse.c
 // Function: elf_parse @ 0x1013D0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall elf_parse(Elf64_Ehdr * ehdr, elf_info_t * elf_info)
+// Calling convention: unknown
+// Prototype: undefined elf_parse(void)
 
 
 /*
@@ -12,279 +12,257 @@
 #include "xzre_types.h"
 
 
-BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
+undefined8 elf_parse(ulong param_1,ulong *param_2)
 
 {
-  Elf64_Word p_type;
-  uint uVar1;
+  uint *puVar1;
   uint uVar2;
   uint uVar3;
-  _union_4 _Var4;
-  Elf64_Rela *pEVar5;
-  Elf64_Rela *pEVar6;
-  Elf64_Relr *pEVar7;
-  Elf64_Ehdr *pEVar8;
+  uint uVar4;
+  ulong uVar5;
+  ulong uVar6;
+  ulong uVar7;
+  ulong uVar8;
   undefined1 auVar9 [16];
   undefined1 auVar10 [16];
   byte bVar11;
   BOOL verdef_present;
-  BOOL BVar13;
+  int iVar13;
   int iVar14;
-  Elf64_Dyn *vaddr;
-  _union_4 *p_Var15;
-  int iVar16;
-  long lVar17;
-  Elf64_Xword EVar18;
-  u64 *puVar19;
-  Elf64_Phdr *pEVar20;
+  ulong *puVar15;
+  long lVar16;
+  int *piVar17;
+  ulong uVar18;
+  int *piVar19;
+  uint uVar20;
   ulong uVar21;
-  Elf64_Phdr *pEVar22;
-  ulong uVar23;
-  uint uVar24;
-  Elf64_Xword size;
-  Elf64_Xword size_00;
-  uint *puVar25;
-  u32 *hash_chain;
-  gnu_hash_table_t *hash_buckets;
-  u64 *hash_bloom;
-  BOOL have_verdef_num;
-  u64 d_relrsz;
-  u64 d_relasz;
-  u64 d_pltrelsz;
-  gnu_hash_table_t *gnu_hash;
-  Elf64_Dyn *dyn;
-  Elf64_Phdr *dyn_phdr;
+  ulong uVar22;
+  uint *puVar23;
   int dynamic_idx;
-  u64 first_vaddr;
-  Elf64_Phdr *phdr;
   int i;
   
-  if (ehdr == (Elf64_Ehdr *)0x0) {
-    return FALSE;
+  if (param_1 == 0) {
+    return 0;
   }
-  if (elf_info != (elf_info_t *)0x0) {
-    uVar21 = 0xffffffffffffffff;
-    uVar24 = 0;
-    puVar19 = &elf_info->first_vaddr;
-    for (lVar17 = 0x3e; lVar17 != 0; lVar17 = lVar17 + -1) {
-      *(undefined4 *)puVar19 = 0;
-      puVar19 = (u64 *)((long)puVar19 + 4);
+  if (param_2 != (ulong *)0x0) {
+    uVar18 = 0xffffffffffffffff;
+    uVar20 = 0;
+    puVar15 = param_2 + 1;
+    for (lVar16 = 0x3e; lVar16 != 0; lVar16 = lVar16 + -1) {
+      *(undefined4 *)puVar15 = 0;
+      puVar15 = (ulong *)((long)puVar15 + 4);
     }
-    elf_info->elfbase = ehdr;
-    lVar17 = -1;
-    uVar23 = (ulong)ehdr->e_phnum;
-    pEVar20 = (Elf64_Phdr *)(ehdr->e_ident + ehdr->e_phoff);
-    *(Elf64_Half *)&elf_info->e_phnum = ehdr->e_phnum;
-    elf_info->phdrs = pEVar20;
-    pEVar22 = pEVar20;
-    for (; uVar24 < (uint)uVar23; uVar24 = uVar24 + 1) {
-      p_type = pEVar22->p_type;
-      if (p_type == 1) {
-        if (pEVar22->p_vaddr < uVar21) {
-          uVar21 = pEVar22->p_vaddr;
+    *param_2 = param_1;
+    lVar16 = -1;
+    uVar22 = (ulong)*(ushort *)(param_1 + 0x38);
+    piVar17 = (int *)(*(long *)(param_1 + 0x20) + param_1);
+    *(ushort *)(param_2 + 3) = *(ushort *)(param_1 + 0x38);
+    param_2[2] = (ulong)piVar17;
+    piVar19 = piVar17;
+    for (; uVar20 < (uint)uVar22; uVar20 = uVar20 + 1) {
+      iVar13 = *piVar19;
+      if (iVar13 == 1) {
+        if (*(ulong *)(piVar19 + 4) < uVar18) {
+          uVar18 = *(ulong *)(piVar19 + 4);
         }
       }
-      else if (p_type == 2) {
-        lVar17 = (long)(int)uVar24;
+      else if (iVar13 == 2) {
+        lVar16 = (long)(int)uVar20;
       }
       else {
-        BVar13 = is_gnu_relro(p_type,0xa0000000);
-        if (BVar13 != FALSE) {
-          if (elf_info->gnurelro_found != FALSE) {
-            return FALSE;
+        iVar13 = is_gnu_relro(iVar13,0xa0000000);
+        if (iVar13 != 0) {
+          if (*(int *)((long)param_2 + 0x4c) != 0) {
+            return 0;
           }
-          elf_info->gnurelro_vaddr = pEVar22->p_vaddr;
-          EVar18 = pEVar22->p_memsz;
-          elf_info->gnurelro_found = TRUE;
-          elf_info->gnurelro_memsize = EVar18;
+          param_2[10] = *(ulong *)(piVar19 + 4);
+          uVar21 = *(ulong *)(piVar19 + 10);
+          *(undefined4 *)((long)param_2 + 0x4c) = 1;
+          param_2[0xb] = uVar21;
         }
       }
-      pEVar22 = pEVar22 + 1;
+      piVar19 = piVar19 + 0xe;
     }
-    if ((uVar21 != 0xffffffffffffffff) && ((int)lVar17 != -1)) {
-      elf_info->first_vaddr = uVar21;
-      uVar23 = pEVar20[lVar17].p_memsz;
-      vaddr = (Elf64_Dyn *)((long)ehdr + (pEVar20[lVar17].p_vaddr - uVar21));
-      elf_info->dyn = vaddr;
-      iVar14 = (int)(uVar23 >> 4);
-      *(int *)&elf_info->dyn_num_entries = iVar14;
-      BVar13 = elf_contains_vaddr(elf_info,vaddr,uVar23,4);
-      if (BVar13 != FALSE) {
-        p_Var15 = &vaddr->d_un;
+    if ((uVar18 != 0xffffffffffffffff) && ((int)lVar16 != -1)) {
+      param_2[1] = uVar18;
+      uVar22 = *(ulong *)(piVar17 + lVar16 * 0xe + 10);
+      uVar18 = (param_1 - uVar18) + *(long *)(piVar17 + lVar16 * 0xe + 4);
+      param_2[4] = uVar18;
+      iVar13 = (int)(uVar22 >> 4);
+      *(int *)(param_2 + 5) = iVar13;
+      iVar14 = elf_contains_vaddr();
+      if (iVar14 != 0) {
+        puVar15 = (ulong *)(uVar18 + 8);
         verdef_present = FALSE;
-        size = 0xffffffffffffffff;
-        size_00 = 0xffffffffffffffff;
-        EVar18 = 0xffffffffffffffff;
-        puVar25 = (uint *)0x0;
-        for (iVar16 = 0; iVar14 != iVar16; iVar16 = iVar16 + 1) {
-          lVar17 = ((Elf64_Dyn *)(p_Var15 + -1))->d_tag;
-          if (lVar17 == 0) {
-            *(int *)&elf_info->dyn_num_entries = iVar16;
+        uVar21 = 0xffffffffffffffff;
+        uVar22 = 0xffffffffffffffff;
+        uVar18 = 0xffffffffffffffff;
+        puVar23 = (uint *)0x0;
+        for (iVar14 = 0; iVar13 != iVar14; iVar14 = iVar14 + 1) {
+          uVar5 = puVar15[-1];
+          if (uVar5 == 0) {
+            *(int *)(param_2 + 5) = iVar14;
             break;
           }
-          if (lVar17 < 0x25) {
-            if (lVar17 < 0x17) {
-              switch(lVar17) {
+          if ((long)uVar5 < 0x25) {
+            if ((long)uVar5 < 0x17) {
+              switch(uVar5) {
               case 2:
-                EVar18 = p_Var15->d_val;
+                uVar18 = *puVar15;
                 break;
               case 5:
-                elf_info->strtab = (char *)*(Elf64_Xword *)p_Var15;
+                param_2[6] = *puVar15;
                 break;
               case 6:
-                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)p_Var15;
+                param_2[7] = *puVar15;
                 break;
               case 7:
-                elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)p_Var15;
+                param_2[0xf] = *puVar15;
                 break;
               case 8:
-                size_00 = p_Var15->d_val;
+                uVar22 = *puVar15;
               }
             }
             else {
-              switch(lVar17) {
+              switch(uVar5) {
               case 0x17:
-                elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)p_Var15;
+                param_2[8] = *puVar15;
                 break;
               case 0x18:
                 goto switchD_0010157d_caseD_18;
               case 0x1e:
-                bVar11 = *(byte *)p_Var15 & 8;
+                bVar11 = (byte)*puVar15 & 8;
                 goto LAB_00101650;
               case 0x23:
-                size = p_Var15->d_val;
+                uVar21 = *puVar15;
                 break;
               case 0x24:
-                elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)p_Var15;
+                param_2[0x11] = *puVar15;
               }
             }
           }
-          else if (lVar17 == 0x6ffffffb) {
-            bVar11 = *(byte *)p_Var15 & 1;
+          else if (uVar5 == 0x6ffffffb) {
+            bVar11 = (byte)*puVar15 & 1;
 LAB_00101650:
             if (bVar11 != 0) {
 switchD_0010157d_caseD_18:
-              elf_info->flags = elf_info->flags | 0x20;
+              *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 0x20;
             }
           }
-          else if (lVar17 < 0x6ffffffc) {
-            if (lVar17 < 0x6ffffefd) {
-              if (0x6ffffefa < lVar17) {
-                return FALSE;
+          else if ((long)uVar5 < 0x6ffffffc) {
+            if ((long)uVar5 < 0x6ffffefd) {
+              if (0x6ffffefa < (long)uVar5) {
+                return 0;
               }
-              if (lVar17 == 0x6ffffef5) {
-                puVar25 = (uint *)p_Var15->d_val;
+              if (uVar5 == 0x6ffffef5) {
+                puVar23 = (uint *)*puVar15;
               }
             }
-            else if (lVar17 == 0x6ffffff0) {
-              _Var4.d_val = *(Elf64_Xword *)p_Var15;
-              elf_info->flags = elf_info->flags | 0x10;
-              elf_info->versym = (Elf64_Versym *)_Var4;
+            else if (uVar5 == 0x6ffffff0) {
+              uVar5 = *puVar15;
+              *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 0x10;
+              param_2[0xe] = uVar5;
             }
           }
-          else if (lVar17 == 0x6ffffffd) {
+          else if (uVar5 == 0x6ffffffd) {
             verdef_present = TRUE;
-            elf_info->verdef_num = *(Elf64_Xword *)p_Var15;
+            param_2[0xd] = *puVar15;
           }
           else {
-            if (lVar17 == 0x7fffffff) {
-              return FALSE;
+            if (uVar5 == 0x7fffffff) {
+              return 0;
             }
-            if (lVar17 == 0x6ffffffc) {
-              elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)p_Var15;
+            if (uVar5 == 0x6ffffffc) {
+              param_2[0xc] = *puVar15;
             }
           }
-          p_Var15 = p_Var15 + 2;
+          puVar15 = puVar15 + 2;
         }
-        pEVar5 = elf_info->plt_relocs;
-        if (pEVar5 != (Elf64_Rela *)0x0) {
-          if (EVar18 == 0xffffffffffffffff) {
-            return FALSE;
+        uVar5 = param_2[8];
+        if (uVar5 != 0) {
+          if (uVar18 == 0xffffffffffffffff) {
+            return 0;
           }
-          elf_info->flags = elf_info->flags | 1;
+          *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 1;
           auVar9._8_8_ = 0;
-          auVar9._0_8_ = EVar18;
-          elf_info->plt_relocs_num = SUB164(auVar9 / ZEXT816(0x18),0);
+          auVar9._0_8_ = uVar18;
+          *(int *)(param_2 + 9) = SUB164(auVar9 / ZEXT816(0x18),0);
         }
-        pEVar6 = elf_info->rela_relocs;
-        if (pEVar6 != (Elf64_Rela *)0x0) {
-          if (size_00 == 0xffffffffffffffff) {
-            return FALSE;
+        uVar6 = param_2[0xf];
+        if (uVar6 != 0) {
+          if (uVar22 == 0xffffffffffffffff) {
+            return 0;
           }
-          elf_info->flags = elf_info->flags | 2;
+          *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 2;
           auVar10._8_8_ = 0;
-          auVar10._0_8_ = size_00;
-          elf_info->rela_relocs_num = SUB164(auVar10 / ZEXT816(0x18),0);
+          auVar10._0_8_ = uVar22;
+          *(int *)(param_2 + 0x10) = SUB164(auVar10 / ZEXT816(0x18),0);
         }
-        pEVar7 = elf_info->relr_relocs;
-        if (pEVar7 != (Elf64_Relr *)0x0) {
-          if (size == 0xffffffffffffffff) {
-            return FALSE;
+        uVar7 = param_2[0x11];
+        if (uVar7 != 0) {
+          if (uVar21 == 0xffffffffffffffff) {
+            return 0;
           }
-          elf_info->flags = elf_info->flags | 4;
-          elf_info->relr_relocs_num = (u32)(size >> 3);
+          *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 4;
+          *(int *)(param_2 + 0x12) = (int)(uVar21 >> 3);
         }
-        if (elf_info->verdef != (Elf64_Verdef *)0x0) {
+        if (param_2[0xc] != 0) {
           if (verdef_present) {
-            elf_info->flags = elf_info->flags | 8;
+            *(byte *)(param_2 + 0x1a) = (byte)param_2[0x1a] | 8;
           }
           else {
-            elf_info->verdef = (Elf64_Verdef *)0x0;
+            param_2[0xc] = 0;
           }
         }
-        pEVar8 = (Elf64_Ehdr *)elf_info->strtab;
-        if (((pEVar8 != (Elf64_Ehdr *)0x0) && (puVar25 != (uint *)0x0)) &&
-           (elf_info->symtab != (Elf64_Sym *)0x0)) {
-          if (pEVar8 <= ehdr) {
-            elf_info->strtab = (char *)(ehdr->e_ident + (long)pEVar8->e_ident);
-            elf_info->symtab = (Elf64_Sym *)(ehdr->e_ident + (long)&elf_info->symtab->st_name);
-            if (pEVar5 != (Elf64_Rela *)0x0) {
-              elf_info->plt_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&pEVar5->r_offset);
+        uVar8 = param_2[6];
+        if (((uVar8 != 0) && (puVar23 != (uint *)0x0)) && (param_2[7] != 0)) {
+          if (uVar8 <= param_1) {
+            param_2[6] = uVar8 + param_1;
+            param_2[7] = param_2[7] + param_1;
+            if (uVar5 != 0) {
+              param_2[8] = uVar5 + param_1;
             }
-            if (pEVar6 != (Elf64_Rela *)0x0) {
-              elf_info->rela_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&pEVar6->r_offset);
+            if (uVar6 != 0) {
+              param_2[0xf] = uVar6 + param_1;
             }
-            if (pEVar7 != (Elf64_Relr *)0x0) {
-              elf_info->relr_relocs = (Elf64_Relr *)((long)pEVar7 + (long)ehdr);
+            if (uVar7 != 0) {
+              param_2[0x11] = uVar7 + param_1;
             }
-            if (elf_info->versym != (Elf64_Versym *)0x0) {
-              elf_info->versym = (Elf64_Versym *)((long)elf_info->versym + (long)ehdr);
+            if (param_2[0xe] != 0) {
+              param_2[0xe] = param_2[0xe] + param_1;
             }
-            puVar25 = (uint *)((long)puVar25 + (long)ehdr);
+            puVar23 = (uint *)((long)puVar23 + param_1);
           }
-          pEVar8 = (Elf64_Ehdr *)elf_info->verdef;
-          if ((pEVar8 != (Elf64_Ehdr *)0x0) && (pEVar8 < ehdr)) {
-            elf_info->verdef = (Elf64_Verdef *)(pEVar8->e_ident + (long)ehdr->e_ident);
+          uVar5 = param_2[0xc];
+          if ((uVar5 != 0) && (uVar5 < param_1)) {
+            param_2[0xc] = param_1 + uVar5;
           }
-          if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,EVar18,4),
-                BVar13 != FALSE)) &&
-               ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,size_00,4),
-                BVar13 != FALSE)))) &&
-              ((elf_info->relr_relocs == (Elf64_Relr *)0x0 ||
-               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,size,4), BVar13 != FALSE)
-               ))) && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
-                       (BVar13 = elf_contains_vaddr(elf_info,elf_info->verdef,
-                                                    elf_info->verdef_num * 0x14,4), BVar13 != FALSE)
-                       ))) {
-            uVar24 = *puVar25;
-            elf_info->gnu_hash_nbuckets = uVar24;
-            uVar1 = puVar25[2];
-            uVar2 = puVar25[1];
-            elf_info->gnu_hash_last_bloom = uVar1 - 1;
-            uVar3 = puVar25[3];
-            elf_info->gnu_hash_bloom = (u64 *)(puVar25 + 4);
-            puVar25 = (uint *)((long)(puVar25 + 4) + (ulong)(uVar1 * 2) * 4);
-            elf_info->gnu_hash_bloom_shift = uVar3;
-            elf_info->gnu_hash_buckets = puVar25;
-            elf_info->gnu_hash_chain = puVar25 + ((ulong)uVar24 - (ulong)uVar2);
-            return TRUE;
+          if (((((param_2[8] == 0) ||
+                (iVar13 = elf_contains_vaddr(param_2,param_2[8],uVar18,4), iVar13 != 0)) &&
+               ((param_2[0xf] == 0 ||
+                (iVar13 = elf_contains_vaddr(param_2,param_2[0xf],uVar22,4), iVar13 != 0)))) &&
+              ((param_2[0x11] == 0 ||
+               (iVar13 = elf_contains_vaddr(param_2,param_2[0x11],uVar21,4), iVar13 != 0)))) &&
+             ((param_2[0xc] == 0 ||
+              (iVar13 = elf_contains_vaddr(param_2,param_2[0xc],param_2[0xd] * 0x14,4), iVar13 != 0)
+              ))) {
+            uVar20 = *puVar23;
+            *(uint *)(param_2 + 0x1b) = uVar20;
+            uVar2 = puVar23[2];
+            uVar3 = puVar23[1];
+            *(uint *)((long)param_2 + 0xdc) = uVar2 - 1;
+            puVar1 = puVar23 + 4;
+            uVar4 = puVar23[3];
+            param_2[0x1d] = (ulong)puVar1;
+            *(uint *)(param_2 + 0x1c) = uVar4;
+            param_2[0x1e] = (ulong)(puVar1 + uVar2 * 2);
+            param_2[0x1f] = (ulong)(puVar1 + uVar2 * 2 + ((ulong)uVar20 - (ulong)uVar3));
+            return 1;
           }
         }
       }
     }
   }
-  return FALSE;
+  return 0;
 }
 

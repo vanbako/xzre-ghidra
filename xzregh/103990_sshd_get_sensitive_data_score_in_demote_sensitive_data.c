@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103990_sshd_get_sensitive_data_score_in_demote_sensitive_data.c
 // Function: sshd_get_sensitive_data_score_in_demote_sensitive_data @ 0x103990
-// Calling convention: __stdcall
-// Prototype: int __stdcall sshd_get_sensitive_data_score_in_demote_sensitive_data(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Calling convention: unknown
+// Prototype: undefined sshd_get_sensitive_data_score_in_demote_sensitive_data(void)
 
 
 /*
@@ -12,27 +12,31 @@
 #include "xzre_types.h"
 
 
-int sshd_get_sensitive_data_score_in_demote_sensitive_data
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+undefined1  [16]
+sshd_get_sensitive_data_score_in_demote_sensitive_data
+          (undefined8 param_1,undefined8 param_2,ulong param_3)
 
 {
-  u8 *code_start;
-  BOOL BVar1;
+  undefined1 auVar1 [16];
   int iVar2;
-  u8 *demote_start;
+  undefined8 uVar3;
+  undefined1 auVar4 [16];
   
-  code_start = (u8 *)refs->entries[3].func_start;
-  if (code_start != (u8 *)0x0) {
-    BVar1 = find_instruction_with_mem_operand
-                      (code_start,(u8 *)refs->entries[3].func_end,(dasm_ctx_t *)0x0,sensitive_data);
-    if (BVar1 == FALSE) {
-      iVar2 = 0;
+  if (*(long *)(param_3 + 0x68) != 0) {
+    iVar2 = find_instruction_with_mem_operand
+                      (*(long *)(param_3 + 0x68),*(undefined8 *)(param_3 + 0x70),0,param_1);
+    if (iVar2 == 0) {
+      uVar3 = 0;
     }
     else {
-      iVar2 = 3;
+      uVar3 = 3;
     }
-    return iVar2;
+    auVar4._8_8_ = param_2;
+    auVar4._0_8_ = uVar3;
+    return auVar4;
   }
-  return 0;
+  auVar1._8_8_ = 0;
+  auVar1._0_8_ = param_3;
+  return auVar1 << 0x40;
 }
 

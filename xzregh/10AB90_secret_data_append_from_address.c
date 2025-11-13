@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10AB90_secret_data_append_from_address.c
 // Function: secret_data_append_from_address @ 0x10AB90
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall secret_data_append_from_address(void * addr, secret_data_shift_cursor_t shift_cursor, uint shift_count, uint operation_index)
+// Calling convention: unknown
+// Prototype: undefined secret_data_append_from_address(void)
 
 
 /*
@@ -10,20 +10,25 @@
 #include "xzre_types.h"
 
 
-BOOL secret_data_append_from_address
-               (void *addr,secret_data_shift_cursor_t shift_cursor,uint shift_count,
-               uint operation_index)
+undefined1  [16]
+secret_data_append_from_address
+          (ulong param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,undefined8 param_5
+          )
 
 {
-  BOOL BVar1;
-  u8 *code_00;
-  u8 *code;
+  int iVar1;
+  ulong uVar2;
+  undefined1 auVar3 [16];
+  ulong unaff_retaddr;
   
-  code_00 = (u8 *)addr;
-  if (addr < (void *)0x2) {
-    code_00 = code;
+  uVar2 = param_1;
+  if (param_1 < 2) {
+    uVar2 = unaff_retaddr;
   }
-  BVar1 = secret_data_append_singleton((u8 *)addr,code_00,shift_cursor,shift_count,operation_index);
-  return (BOOL)(0 < (int)BVar1);
+  iVar1 = secret_data_append_singleton(param_1,uVar2,param_2,param_3,param_4);
+  auVar3._1_7_ = 0;
+  auVar3[0] = 0 < iVar1;
+  auVar3._8_8_ = param_5;
+  return auVar3;
 }
 

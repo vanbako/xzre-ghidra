@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/104EE0_find_link_map_l_audit_any_plt.c
 // Function: find_link_map_l_audit_any_plt @ 0x104EE0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall find_link_map_l_audit_any_plt(backdoor_data_handle_t * data, ptrdiff_t libname_offset, backdoor_hooks_data_t * hooks, imported_funcs_t * imported_funcs)
+// Calling convention: unknown
+// Prototype: undefined find_link_map_l_audit_any_plt(void)
 
 
 /*
@@ -14,154 +14,153 @@
 #include "xzre_types.h"
 
 
-BOOL find_link_map_l_audit_any_plt
-               (backdoor_data_handle_t *data,ptrdiff_t libname_offset,backdoor_hooks_data_t *hooks,
-               imported_funcs_t *imported_funcs)
+undefined8 find_link_map_l_audit_any_plt(long param_1,ulong param_2,long param_3,long param_4)
 
 {
-  libc_imports_t *plVar1;
-  u32 uVar2;
-  u64 uVar3;
-  BOOL BVar4;
-  lzma_allocator *allocator;
-  _func_23 *p_Var5;
-  _func_24 *p_Var6;
-  long lVar7;
-  undefined1 uVar8;
-  _func_64 *code_start;
-  u8 *puVar9;
-  u8 **ppuVar10;
-  instruction_search_ctx_t *piVar11;
-  undefined4 *puVar12;
-  undefined1 uVar13;
-  _func_64 *code_end;
-  byte bVar14;
-  instruction_search_ctx_t search_state;
-  _func_64 *audit_stub;
-  _func_23 *write_stub;
-  _func_24 *pselect_stub;
+  int *piVar1;
+  undefined4 uVar2;
+  int iVar3;
+  long lVar4;
+  long lVar5;
+  byte bVar6;
+  ulong uVar7;
+  ulong uVar8;
+  long *plVar9;
+  undefined4 *puVar10;
+  byte bVar11;
+  ulong uVar12;
+  byte bVar13;
   undefined4 local_c8;
   undefined4 local_c4;
-  instruction_search_ctx_t local_c0;
-  u8 *local_80;
-  u64 local_78;
-  _union_78 local_70;
+  long local_c0;
+  ulong local_b8;
+  undefined4 local_b0;
+  undefined4 local_ac;
+  undefined4 *local_a8;
+  undefined4 *local_a0;
+  int local_98;
+  long local_90;
+  long local_88;
+  long local_80;
+  long local_78;
+  undefined4 local_70;
+  byte local_65;
+  undefined4 local_64;
   byte local_60;
   int local_58;
-  u8 *local_50;
+  ulong local_50;
   
-  bVar14 = 0;
-  BVar4 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x85,0x12,8,FALSE);
-  if (BVar4 != FALSE) {
-    plVar1 = imported_funcs->libc;
-    ppuVar10 = &local_80;
-    for (lVar7 = 0x16; lVar7 != 0; lVar7 = lVar7 + -1) {
-      *(undefined4 *)ppuVar10 = 0;
-      ppuVar10 = (u8 **)((long)ppuVar10 + (ulong)bVar14 * -8 + 4);
+  bVar13 = 0;
+  iVar3 = secret_data_append_from_call_site(0x85,0x12,8,0);
+  if (iVar3 != 0) {
+    piVar1 = *(int **)(param_4 + 0x118);
+    plVar9 = &local_80;
+    for (lVar5 = 0x16; lVar5 != 0; lVar5 = lVar5 + -1) {
+      *(undefined4 *)plVar9 = 0;
+      plVar9 = (long *)((long)plVar9 + (ulong)bVar13 * -8 + 4);
     }
     local_c8 = 0;
     local_c4 = 0;
-    allocator = get_lzma_allocator();
-    allocator->opaque = data->elf_handles->libc;
-    p_Var5 = (_func_23 *)lzma_alloc(0x380,allocator);
+    lVar5 = get_lzma_allocator(1);
+    *(undefined8 *)(lVar5 + 0x10) = *(undefined8 *)(*(long *)(param_1 + 8) + 0x10);
+    lVar4 = lzma_alloc(0x380);
     uVar2 = local_c4;
-    plVar1->write = p_Var5;
-    if (p_Var5 != (_func_23 *)0x0) {
-      plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
+    *(long *)(piVar1 + 0xe) = lVar4;
+    if (lVar4 != 0) {
+      *piVar1 = *piVar1 + 1;
     }
-    code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
+    uVar7 = *(ulong *)(param_3 + 0x100);
     local_c8._0_3_ = CONCAT12(0xff,(undefined2)local_c8);
     local_c8 = CONCAT22(local_c8._2_2_,(undefined2)local_c8) | 0x80;
     local_c4._0_2_ = (ushort)local_c4 | 2;
-    code_end = code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
+    uVar12 = *(long *)(param_3 + 0x108) + uVar7;
     local_c4._3_1_ = SUB41(uVar2,3);
     local_c4._0_3_ = CONCAT12(0xff,(ushort)local_c4);
-    p_Var6 = (_func_24 *)lzma_alloc(0x690,allocator);
-    plVar1->pselect = p_Var6;
-    if (p_Var6 != (_func_24 *)0x0) {
-      plVar1->resolved_imports_count = plVar1->resolved_imports_count + 1;
+    lVar5 = lzma_alloc(0x690,lVar5);
+    *(long *)(piVar1 + 0x10) = lVar5;
+    if (lVar5 != 0) {
+      *piVar1 = *piVar1 + 1;
     }
-    while ((code_start < code_end &&
-           (BVar4 = x86_dasm((dasm_ctx_t *)&local_80,(u8 *)code_start,(u8 *)code_end),
-           uVar3 = local_78, BVar4 != FALSE))) {
+    while ((uVar7 < uVar12 &&
+           (iVar3 = x86_dasm(&local_80,uVar7,uVar12), lVar5 = local_78, iVar3 != 0))) {
       if ((local_58 == 0x1036) &&
-         ((((ushort)local_70._0_4_ & 0x140) == 0x140 && ((byte)(local_70._13_1_ - 1) < 2)))) {
-        uVar13 = 0;
-        if ((local_70._0_4_ & 0x40) == 0) {
-          uVar8 = 0;
-          if ((((local_70._0_4_ & 0x1040) != 0) &&
-              (uVar8 = local_70.field0.flags2 & 0x10, (local_70._0_4_ & 0x1000) != 0)) &&
-             (uVar8 = local_60, (local_70._0_4_ & 0x20) != 0)) {
-            uVar8 = local_60 | ((byte)local_70.field0.field10_0xb & 1) << 3;
+         ((((ushort)local_70 & 0x140) == 0x140 && ((byte)(local_64._1_1_ - 1U) < 2)))) {
+        bVar11 = 0;
+        if ((local_70 & 0x40) == 0) {
+          bVar6 = 0;
+          if ((((local_70 & 0x1040) != 0) &&
+              (bVar6 = local_70._1_1_ & 0x10, (local_70 & 0x1000) != 0)) &&
+             (bVar6 = local_60, (local_70 & 0x20) != 0)) {
+            bVar6 = local_60 | (local_65 & 1) << 3;
           }
         }
         else {
-          uVar8 = local_70.field0.flags & 0x20;
-          if ((local_70._0_4_ & 0x20) == 0) {
-            uVar13 = local_70._15_1_;
-            if ((local_70._0_4_ & 0x1040) != 0) {
-              uVar8 = local_70._14_1_;
+          bVar6 = (byte)local_70 & 0x20;
+          if ((local_70 & 0x20) == 0) {
+            bVar11 = local_64._3_1_;
+            if ((local_70 & 0x1040) != 0) {
+              bVar6 = local_64._2_1_;
             }
           }
           else {
-            uVar13 = local_70._15_1_ | (char)local_70.field0.field10_0xb * '\b' & 8U;
-            uVar8 = 0;
-            if ((local_70._0_4_ & 0x1040) != 0) {
-              uVar8 = (char)local_70.field0.field10_0xb * '\x02' & 8U | local_70._14_1_;
+            bVar11 = local_64._3_1_ | local_65 * '\b' & 8;
+            bVar6 = 0;
+            if ((local_70 & 0x1040) != 0) {
+              bVar6 = local_65 * '\x02' & 8 | local_64._2_1_;
             }
           }
         }
-        if ((local_70._0_4_ & 0x100) != 0) {
-          puVar9 = local_50;
-          if (((uint)local_70.field0.field11_0xc & 0xff00ff00) == 0x5000000) {
-            puVar9 = local_80 + (long)(local_50 + local_78);
+        if ((local_70 & 0x100) != 0) {
+          uVar8 = local_50;
+          if ((local_64 & 0xff00ff00) == 0x5000000) {
+            uVar8 = local_50 + local_80 + local_78;
           }
-          if ((puVar9 < (ulong)libname_offset) && (puVar9 != (u8 *)0x0)) {
-            piVar11 = &local_c0;
-            for (lVar7 = 0x10; lVar7 != 0; lVar7 = lVar7 + -1) {
-              *(undefined4 *)&piVar11->start_addr = 0;
-              piVar11 = (instruction_search_ctx_t *)((long)piVar11 + (ulong)bVar14 * -8 + 4);
+          if ((uVar8 < param_2) && (uVar8 != 0)) {
+            plVar9 = &local_c0;
+            for (lVar4 = 0x10; lVar4 != 0; lVar4 = lVar4 + -1) {
+              *(undefined4 *)plVar9 = 0;
+              plVar9 = (long *)((long)plVar9 + (ulong)bVar13 * -8 + 4);
             }
-            if (((int)(local_c8 & 0xffff) >> (uVar13 & 0x1f) & 1U) == 0) {
-              if (((int)(local_c4 & 0xffff) >> (uVar13 & 0x1f) & 1U) == 0) goto LAB_00104fd8;
-              local_c4._0_3_ = CONCAT12(uVar8,(ushort)local_c4);
-              puVar12 = (undefined4 *)((long)&local_c0.offset_to_match + 4);
-              for (lVar7 = 7; lVar7 != 0; lVar7 = lVar7 + -1) {
-                *puVar12 = 0;
-                puVar12 = puVar12 + (ulong)bVar14 * -2 + 1;
+            if (((int)(local_c8 & 0xffff) >> (bVar11 & 0x1f) & 1U) == 0) {
+              if (((int)(local_c4 & 0xffff) >> (bVar11 & 0x1f) & 1U) == 0) goto LAB_00104fd8;
+              local_c4._0_3_ = CONCAT12(bVar6,(ushort)local_c4);
+              puVar10 = &local_ac;
+              for (lVar4 = 7; lVar4 != 0; lVar4 = lVar4 + -1) {
+                *puVar10 = 0;
+                puVar10 = puVar10 + (ulong)bVar13 * -2 + 1;
               }
-              local_c0.output_register_to_match = &local_c4;
-              local_c0.output_register = (u8 *)&local_c8;
+              local_a8 = &local_c4;
+              local_a0 = &local_c8;
             }
             else {
-              local_c8._0_3_ = CONCAT12(uVar8,(undefined2)local_c8);
-              puVar12 = (undefined4 *)((long)&local_c0.offset_to_match + 4);
-              for (lVar7 = 7; lVar7 != 0; lVar7 = lVar7 + -1) {
-                *puVar12 = 0;
-                puVar12 = puVar12 + (ulong)bVar14 * -2 + 1;
+              local_c8._0_3_ = CONCAT12(bVar6,(undefined2)local_c8);
+              puVar10 = &local_ac;
+              for (lVar4 = 7; lVar4 != 0; lVar4 = lVar4 + -1) {
+                *puVar10 = 0;
+                puVar10 = puVar10 + (ulong)bVar13 * -2 + 1;
               }
-              local_c0.output_register_to_match = &local_c8;
-              local_c0.output_register = (u8 *)&local_c4;
+              local_a8 = &local_c8;
+              local_a0 = &local_c4;
             }
-            local_c0.start_addr = (u8 *)(code_start + uVar3);
-            local_c0.end_addr = (u8 *)code_end;
-            local_c0.offset_to_match._0_4_ = (int)puVar9;
-            local_c0.hooks = hooks;
-            local_c0.imported_funcs = imported_funcs;
-            BVar4 = find_link_map_l_audit_any_plt_bitmask(data,&local_c0);
-            if (BVar4 != FALSE) {
-              return TRUE;
+            local_c0 = lVar5 + uVar7;
+            local_b8 = uVar12;
+            local_b0 = (int)uVar8;
+            local_90 = param_3;
+            local_88 = param_4;
+            iVar3 = find_link_map_l_audit_any_plt_bitmask(param_1,&local_c0);
+            if (iVar3 != 0) {
+              return 1;
             }
-            if (local_c0.result != FALSE) {
-              return FALSE;
+            if (local_98 != 0) {
+              return 0;
             }
           }
         }
       }
 LAB_00104fd8:
-      code_start = code_start + local_78;
+      uVar7 = uVar7 + local_78;
     }
   }
-  return FALSE;
+  return 0;
 }
 

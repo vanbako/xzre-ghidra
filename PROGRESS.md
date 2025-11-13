@@ -2,6 +2,22 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-13
+- Replaced the last `_unknown*` blobs in the string/payload metadata and the sshd/global-context structs: `string_item_t` now exposes `entry_bytes`, `key_ctx_t` splits the digest/nonce scratch, `sshd_ctx_t` has named pending-payload fields plus an explicit `pending_authpayload` pointer, and `global_context_t`/`sshd_log_ctx_t` now use explicit padding/flags instead of raw offsets.
+- Updated the auxiliary structs (`elf_functions_t`, `fake_lzma_allocator_t`, `instruction_search_ctx_t`) to use reserved slots as well, then reran `./scripts/refresh_xzre_project.sh` so helpers like `elf_find_string_references.c` and `run_backdoor_commands.c` immediately pick up the new field names.
+- Next: keep peeling back the remaining padding arrays elsewhere in `xzre_types.h` so future diffs stay type-driven.
+
+## 2025-11-13
+- Finished mapping the dasm-context scratch space: `metadata/xzre_types.json` now exposes the SIB byte (`sib_byte`, `sib_scale_bits`, `sib_index_bits`, `sib_base_bits`), the four-byte opcode window, and a named branch-displacement buffer, so the decomp no longer references `field_0x21`/`_unknown81*`.
+- Reran `./scripts/refresh_xzre_project.sh`; the regenerated helpers show the new names in action (e.g., `x86_dasm` assigns into `ctx->sib_*` at xzregh/100020_x86_dasm.c:180 and the MOV/LEA scanners read the opcode window via `*(int *)(dctx->opcode_window + 3)` while consuming `dctx->mem_disp` for branch targets at xzregh/100F60_find_lea_instruction_with_mem_operand.c:36).
+- Next: tackle the remaining `_unknown*` blobs inside the `string_item_t`/`backdoor_data_t` chain so the string-reference bookkeeping stops relying on raw byte offsets.
+
+## 2025-11-13
+- Reworked the `dasm_ctx_t` metadata so the prefix/REX/ModRM and SIB unions have descriptive field names, eliminating the bogus `field2_0x10` accessors that leaked into the decompilations.
+- Ran `./scripts/refresh_xzre_project.sh` to push the updated types into Ghidra, regenerate `xzregh/*.c`, and refresh the portable project archive; the MOV/LEA helpers now reference `prefix.decoded.*` as expected.
+- Added explicit opcode window fields (`opcode_history[]`, `opcode_window_high`, and `opcode_signature_bytes[]`) so the exported helpers no longer reference the imaginary `field_0x2b` byte; verified via another full refresh.
+- Next: keep mapping the remaining anonymous decoder scratch bytes (e.g., `_unknown810`, `field_0x2b`) back to their real opcode state so future cleanups stay metadata-driven.
+
 ## 2025-11-08
 - Added a `skip_locals` flag to `metadata/xzre_locals.json`, updated `ApplyLocalsFromXzreSources.py` to honor it, and taught `scripts/extract_local_variables.py` to carry arbitrary extra keys forward when regenerating the metadata, so we can intentionally suppress symbols that don’t exist in `liblzma_la-crc64-fast.o` without losing the annotations on the next rebuild.
 - Marked all 363 functions that currently fail the locals pass (OpenSSL provider hooks, ossl_check helpers, dormant loader utilities, etc.) with `skip_locals: true` so the headless refresh now skips them quietly until we import binaries that actually define those symbols.

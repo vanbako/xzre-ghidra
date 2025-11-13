@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107190_chacha_decrypt.c
 // Function: chacha_decrypt @ 0x107190
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall chacha_decrypt(u8 * in, int inl, u8 * key, u8 * iv, u8 * out, imported_funcs_t * funcs)
+// Calling convention: unknown
+// Prototype: undefined chacha_decrypt(void)
 
 
 /*
@@ -10,40 +10,36 @@
 #include "xzre_types.h"
 
 
-BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *funcs)
+undefined4
+chacha_decrypt(long param_1,uint param_2,undefined8 param_3,long param_4,long param_5,long param_6)
 
 {
-  _func_47 *p_Var1;
-  BOOL BVar2;
-  int iVar3;
-  EVP_CIPHER_CTX *ctx_00;
-  EVP_CIPHER *type;
-  imported_funcs_t *piVar4;
-  EVP_CIPHER_CTX *ctx;
-  EVP_CIPHER *cipher;
+  code *pcVar1;
+  int iVar2;
+  long lVar3;
+  undefined8 uVar4;
   int outl;
   
   outl = 0;
-  if (((((in != (u8 *)0x0) && (inl != 0)) && (iv != (u8 *)0x0)) &&
-      ((out != (u8 *)0x0 && (funcs != (imported_funcs_t *)0x0)))) &&
-     ((piVar4 = funcs, BVar2 = contains_null_pointers(&funcs->EVP_CIPHER_CTX_new,6), BVar2 == FALSE
-      && (ctx_00 = (*piVar4->EVP_CIPHER_CTX_new)(), ctx_00 != (EVP_CIPHER_CTX *)0x0)))) {
-    p_Var1 = funcs->EVP_DecryptInit_ex;
-    type = (*funcs->EVP_chacha20)();
-    iVar3 = (*p_Var1)(ctx_00,type,(ENGINE *)0x0,key,iv);
-    if (iVar3 == 1) {
-      iVar3 = (*funcs->EVP_DecryptUpdate)(ctx_00,out,&outl,in,inl);
-      if (((iVar3 == 1) && (-1 < outl)) &&
-         ((iVar3 = (*funcs->EVP_DecryptFinal_ex)(ctx_00,out + outl,&outl), iVar3 == 1 &&
-          ((-1 < outl && ((uint)outl <= (uint)inl)))))) {
-        (*funcs->EVP_CIPHER_CTX_free)(ctx_00);
-        return TRUE;
+  if (((((param_1 != 0) && (param_2 != 0)) && (param_4 != 0)) && ((param_5 != 0 && (param_6 != 0))))
+     && ((lVar3 = param_6, iVar2 = contains_null_pointers(param_6 + 0xa0,6), iVar2 == 0 &&
+         (lVar3 = (**(code **)(lVar3 + 0xa0))(), lVar3 != 0)))) {
+    pcVar1 = *(code **)(param_6 + 0xa8);
+    uVar4 = (**(code **)(param_6 + 200))();
+    iVar2 = (*pcVar1)(lVar3,uVar4,0,param_3,param_4);
+    if (iVar2 == 1) {
+      iVar2 = (**(code **)(param_6 + 0xb0))(lVar3,param_5,&outl,param_1,param_2);
+      if (((iVar2 == 1) && (-1 < outl)) &&
+         ((iVar2 = (**(code **)(param_6 + 0xb8))(lVar3,param_5 + outl,&outl), iVar2 == 1 &&
+          ((-1 < outl && ((uint)outl <= param_2)))))) {
+        (**(code **)(param_6 + 0xc0))(lVar3);
+        return 1;
       }
     }
-    if (funcs->EVP_CIPHER_CTX_free != (_func_50 *)0x0) {
-      (*funcs->EVP_CIPHER_CTX_free)(ctx_00);
+    if (*(code **)(param_6 + 0xc0) != (code *)0x0) {
+      (**(code **)(param_6 + 0xc0))(lVar3);
     }
   }
-  return FALSE;
+  return 0;
 }
 

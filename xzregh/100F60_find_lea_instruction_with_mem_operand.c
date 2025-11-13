@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/100F60_find_lea_instruction_with_mem_operand.c
 // Function: find_lea_instruction_with_mem_operand @ 0x100F60
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall find_lea_instruction_with_mem_operand(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, void * mem_address)
+// Calling convention: unknown
+// Prototype: undefined find_lea_instruction_with_mem_operand(void)
 
 
 /*
@@ -10,42 +10,37 @@
 #include "xzre_types.h"
 
 
-BOOL find_lea_instruction_with_mem_operand
-               (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
+undefined8
+find_lea_instruction_with_mem_operand(ulong param_1,ulong param_2,long *param_3,long param_4)
 
 {
   int iVar1;
-  BOOL BVar2;
-  long lVar3;
-  dasm_ctx_t *pdVar4;
-  byte bVar5;
-  dasm_ctx_t local_80;
+  long lVar2;
+  long *plVar3;
+  byte bVar4;
+  long local_80 [12];
   
-  bVar5 = 0;
-  BVar2 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);
-  if (BVar2 != FALSE) {
-    pdVar4 = &local_80;
-    for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-      *(undefined4 *)&pdVar4->instruction = 0;
-      pdVar4 = (dasm_ctx_t *)((long)pdVar4 + ((ulong)bVar5 * -2 + 1) * 4);
+  bVar4 = 0;
+  iVar1 = secret_data_append_from_call_site(0x1c8,0,0x1e,0);
+  if (iVar1 != 0) {
+    plVar3 = local_80;
+    for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
+      *(undefined4 *)plVar3 = 0;
+      plVar3 = (long *)((long)plVar3 + ((ulong)bVar4 * -2 + 1) * 4);
     }
-    if (dctx == (dasm_ctx_t *)0x0) {
-      dctx = &local_80;
+    if (param_3 == (long *)0x0) {
+      param_3 = local_80;
     }
-    for (; code_start < code_end; code_start = code_start + 1) {
-      BVar2 = x86_dasm(dctx,code_start,code_end);
-      if ((((BVar2 != FALSE) &&
-           (iVar1._0_1_ = dctx->_unknown810[0], iVar1._1_1_ = dctx->_unknown810[1],
-           iVar1._2_1_ = dctx->_unknown810[2], iVar1._3_1_ = dctx->field_0x2b, iVar1 == 0x10d)) &&
-          (((dctx->field2_0x10).field0.field10_0xb.rex_byte & 0x48) == 0x48)) &&
-         ((((dctx->field2_0x10).field0.field11_0xc.modrm_word & 0xff00ff00) == 0x5000000 &&
-          ((mem_address == (void *)0x0 ||
-           (dctx->instruction + *(long *)dctx->_unknown812 + dctx->instruction_size ==
-            (u8 *)mem_address)))))) {
-        return TRUE;
+    for (; param_1 < param_2; param_1 = param_1 + 1) {
+      iVar1 = x86_dasm(param_3,param_1,param_2);
+      if ((((iVar1 != 0) && ((int)param_3[5] == 0x10d)) &&
+          ((*(byte *)((long)param_3 + 0x1b) & 0x48) == 0x48)) &&
+         (((*(uint *)((long)param_3 + 0x1c) & 0xff00ff00) == 0x5000000 &&
+          ((param_4 == 0 || (param_3[1] + *param_3 + param_3[6] == param_4)))))) {
+        return 1;
       }
     }
   }
-  return FALSE;
+  return 0;
 }
 

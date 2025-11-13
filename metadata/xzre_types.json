@@ -742,7 +742,7 @@
       "names": [
         "dasm_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction;\n u64 instruction_size;\n union {\n  struct __attribute__((packed)) {\n   u8 flags;\n   u8 flags2;\n   u8 _unknown767[2];\n   u8 lock_rep_byte;\n   u8 seg_byte;\n   u8 osize_byte;\n   u8 asize_byte;\n   u8 vex_byte;\n   u8 vex_byte2;\n   u8 vex_byte3;\n   union {\n    struct __attribute__((packed)) {\n     u8 B : 1;\n     u8 X : 1;\n     u8 R : 1;\n     u8 W : 1;\n     u8 BitPattern : 4;\n    };\n    u8 rex_byte;\n   };\n   union {\n    struct __attribute__((packed)) {\n             u8 modrm;\n             u8 modrm_mod;\n             u8 modrm_reg;\n             u8 modrm_rm;\n    };\n    u32 modrm_word;\n   };\n  };\n  u16 flags_u16;\n        };\n u8 imm64_reg;\n struct __attribute__((packed)) {\n  union {\n   struct __attribute__((packed)) {\n    u8 sib;\n    u8 sib_scale;\n    u8 sib_index;\n    u8 sib_base;\n   };\n   u32 sib_word;\n  };\n };\n u8 _unknown810[3];\n u32 opcode;\n u8 _unknown812[4];\n u64 mem_disp;\n u64 operand;\n u64 operand_zeroextended;\n u64 operand_size;\n u8 insn_offset;\n u8 _unknown819[7];\n} dasm_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction;\n u64 instruction_size;\n union {\n  struct __attribute__((packed)) {\n   u8 flags;\n   u8 flags2;\n   u8 prefix_padding[2];\n   u8 lock_rep_byte;\n   u8 seg_byte;\n   u8 osize_byte;\n   u8 asize_byte;\n   u8 vex_byte;\n   u8 vex_byte2;\n   u8 vex_byte3;\n   union {\n    struct __attribute__((packed)) {\n     u8 B : 1;\n     u8 X : 1;\n     u8 R : 1;\n     u8 W : 1;\n     u8 BitPattern : 4;\n    } bits;\n    u8 rex_byte;\n   } rex;\n   union {\n    struct __attribute__((packed)) {\n             u8 modrm;\n             u8 modrm_mod;\n             u8 modrm_reg;\n             u8 modrm_rm;\n    } breakdown;\n    u32 modrm_word;\n   } modrm;\n  } decoded;\n  u16 flags_u16;\n } prefix;\n u8 imm64_reg;\n u8 sib_byte;\n u8 sib_scale_bits;\n u8 sib_index_bits;\n u8 sib_base_bits;\n u8 opcode_window[4];\n u8 branch_disp_scratch[4];\n u64 mem_disp;\n u64 operand;\n u64 operand_zeroextended;\n u64 operand_size;\n u8 insn_offset;\n u8 scratch_bytes[7];\n} dasm_ctx_t;"
     },
     {
       "kind": "struct",
@@ -784,7 +784,7 @@
       "names": [
         "imported_funcs_t"
       ],
-      "code": "typedef struct __attribute__((packed)) imported_funcs {\n pfn_RSA_public_decrypt_t RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;\n void (*RSA_get0_key_null)(\n  const RSA *r, const BIGNUM **n,\n  const BIGNUM **e, const BIGNUM **d);\n pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;\n pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;\n pfn_RSA_get0_key_t *RSA_get0_key_plt;\n void (*DSA_get0_pqg)(\n  const DSA *d, const BIGNUM **p,\n  const BIGNUM **q, const BIGNUM **g);\n const BIGNUM *(*DSA_get0_pub_key)(const DSA *d);\n size_t (*EC_POINT_point2oct)(\n  const EC_GROUP *group, const EC_POINT *p,\n  point_conversion_form_t form, unsigned char *buf,\n  size_t len, BN_CTX *ctx);\n EC_POINT *(*EC_KEY_get0_public_key)(const EC_KEY *key);\n const EC_GROUP *(*EC_KEY_get0_group)(const EC_KEY *key);\n EVP_MD *(*EVP_sha256)(void);\n pfn_RSA_get0_key_t RSA_get0_key;\n int (*BN_num_bits)(const BIGNUM *a);\n EVP_PKEY *(*EVP_PKEY_new_raw_public_key)(\n  int type, ENGINE *e,\n  const unsigned char *key, size_t keylen);\n EVP_MD_CTX *(*EVP_MD_CTX_new)(void);\n int (*EVP_DigestVerifyInit)(\n  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,\n  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);\n int (*EVP_DigestVerify)(\n  EVP_MD_CTX *ctx, const unsigned char *sig,\n  size_t siglen, const unsigned char *tbs, size_t tbslen);\n void (*EVP_MD_CTX_free)(EVP_MD_CTX *ctx);\n void (*EVP_PKEY_free)(EVP_PKEY *key);\n EVP_CIPHER_CTX *(*EVP_CIPHER_CTX_new)(void);\n int (*EVP_DecryptInit_ex)(\n  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,\n  ENGINE *impl, const unsigned char *key, const unsigned char *iv);\n int (*EVP_DecryptUpdate)(\n  EVP_CIPHER_CTX *ctx, unsigned char *out,\n  int *outl, const unsigned char *in, int inl);\n int (*EVP_DecryptFinal_ex)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);\n void (*EVP_CIPHER_CTX_free)(EVP_CIPHER_CTX *ctx);\n const EVP_CIPHER *(*EVP_chacha20)(void);\n RSA *(*RSA_new)(void);\n BIGNUM *(*BN_dup)(const BIGNUM *from);\n BIGNUM *(*BN_bin2bn)(const unsigned char *s, int len, BIGNUM *ret);\n int (*RSA_set0_key)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);\n int (*EVP_Digest)(\n  const void *data, size_t count, unsigned char *md,\n  unsigned int *size, const EVP_MD *type, ENGINE *impl);\n int (*RSA_sign)(\n  int type,\n  const unsigned char *m, unsigned int m_len,\n  unsigned char *sigret, unsigned int *siglen, RSA *rsa);\n int (*BN_bn2bin)(const BIGNUM *a, unsigned char *to);\n void (*RSA_free)(RSA *rsa);\n void (*BN_free)(BIGNUM *a);\n libc_imports_t *libc;\n u32 resolved_imports_count;\n u8 _unknown1109[4];\n} imported_funcs_t;"
+      "code": "typedef struct __attribute__((packed)) imported_funcs {\n pfn_RSA_public_decrypt_t RSA_public_decrypt;\n pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;\n void (*RSA_get0_key_null)(\n  const RSA *r, const BIGNUM **n,\n  const BIGNUM **e, const BIGNUM **d);\n pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;\n pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;\n pfn_RSA_get0_key_t *RSA_get0_key_plt;\n void (*DSA_get0_pqg)(\n  const DSA *d, const BIGNUM **p,\n  const BIGNUM **q, const BIGNUM **g);\n const BIGNUM *(*DSA_get0_pub_key)(const DSA *d);\n size_t (*EC_POINT_point2oct)(\n  const EC_GROUP *group, const EC_POINT *p,\n  point_conversion_form_t form, unsigned char *buf,\n  size_t len, BN_CTX *ctx);\n EC_POINT *(*EC_KEY_get0_public_key)(const EC_KEY *key);\n const EC_GROUP *(*EC_KEY_get0_group)(const EC_KEY *key);\n EVP_MD *(*EVP_sha256)(void);\n pfn_RSA_get0_key_t RSA_get0_key;\n int (*BN_num_bits)(const BIGNUM *a);\n EVP_PKEY *(*EVP_PKEY_new_raw_public_key)(\n  int type, ENGINE *e,\n  const unsigned char *key, size_t keylen);\n EVP_MD_CTX *(*EVP_MD_CTX_new)(void);\n int (*EVP_DigestVerifyInit)(\n  EVP_MD_CTX *ctx, EVP_PKEY_CTX **pctx,\n  const EVP_MD *type, ENGINE *e, EVP_PKEY *pkey);\n int (*EVP_DigestVerify)(\n  EVP_MD_CTX *ctx, const unsigned char *sig,\n  size_t siglen, const unsigned char *tbs, size_t tbslen);\n void (*EVP_MD_CTX_free)(EVP_MD_CTX *ctx);\n void (*EVP_PKEY_free)(EVP_PKEY *key);\n EVP_CIPHER_CTX *(*EVP_CIPHER_CTX_new)(void);\n int (*EVP_DecryptInit_ex)(\n  EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,\n  ENGINE *impl, const unsigned char *key, const unsigned char *iv);\n int (*EVP_DecryptUpdate)(\n  EVP_CIPHER_CTX *ctx, unsigned char *out,\n  int *outl, const unsigned char *in, int inl);\n int (*EVP_DecryptFinal_ex)(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);\n void (*EVP_CIPHER_CTX_free)(EVP_CIPHER_CTX *ctx);\n const EVP_CIPHER *(*EVP_chacha20)(void);\n RSA *(*RSA_new)(void);\n BIGNUM *(*BN_dup)(const BIGNUM *from);\n BIGNUM *(*BN_bin2bn)(const unsigned char *s, int len, BIGNUM *ret);\n int (*RSA_set0_key)(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d);\n int (*EVP_Digest)(\n  const void *data, size_t count, unsigned char *md,\n  unsigned int *size, const EVP_MD *type, ENGINE *impl);\n int (*RSA_sign)(\n  int type,\n  const unsigned char *m, unsigned int m_len,\n  unsigned char *sigret, unsigned int *siglen, RSA *rsa);\n int (*BN_bn2bin)(const BIGNUM *a, unsigned char *to);\n void (*RSA_free)(RSA *rsa);\n void (*BN_free)(BIGNUM *a);\n libc_imports_t *libc;\n u32 resolved_imports_count;\n u32 reserved_imports_padding;\n} imported_funcs_t;"
     },
     {
       "kind": "struct",
@@ -826,7 +826,7 @@
       "names": [
         "sshd_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) sshd_ctx {\n BOOL have_mm_answer_keyallowed;\n BOOL have_mm_answer_authpassword;\n BOOL have_mm_answer_keyverify;\n u8 _unknown1160[0x4];\n sshd_monitor_func_t mm_answer_authpassword_hook;\n void *mm_answer_keyallowed;\n void *mm_answer_keyverify;\n void *mm_answer_authpassword_start;\n void *mm_answer_authpassword_end;\n sshd_monitor_func_t *mm_answer_authpassword_ptr;\n int monitor_reqtype_authpassword;\n u8 _unknown1168[4];\n sshd_monitor_func_t *mm_answer_keyallowed_start;\n void *mm_answer_keyallowed_end;\n void *mm_answer_keyallowed_ptr;\n u32 mm_answer_keyallowed_reqtype;\n u8 _unknown1173[4];\n void *mm_answer_keyverify_start;\n void *mm_answer_keyverify_end;\n void *mm_answer_keyverify_ptr;\n u8 _unknown1177[0x4];\n u16 writebuf_size;\n u8 _unknown1179[0x2];\n u8 *writebuf;\n u8 _unknown1181[0x8];\n u8 _unknown1182[0x8];\n char *STR_unknown_ptr;\n void *mm_request_send_start;\n void *mm_request_send_end;\n u8 _unknown1186[sizeof(u32)];\n u8 _unknown1187[sizeof(u32)];\n int *use_pam_ptr;\n int *permit_root_login_ptr;\n char *STR_without_password;\n char *STR_publickey;\n} sshd_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) sshd_ctx {\n BOOL have_mm_answer_keyallowed;\n BOOL have_mm_answer_authpassword;\n BOOL have_mm_answer_keyverify;\n u8 hook_flags_padding[4];\n sshd_monitor_func_t mm_answer_authpassword_hook;\n void *mm_answer_keyallowed;\n void *mm_answer_keyverify;\n void *mm_answer_authpassword_start;\n void *mm_answer_authpassword_end;\n sshd_monitor_func_t *mm_answer_authpassword_ptr;\n int monitor_reqtype_authpassword;\n u8 authpassword_padding[4];\n sshd_monitor_func_t *mm_answer_keyallowed_start;\n void *mm_answer_keyallowed_end;\n void *mm_answer_keyallowed_ptr;\n u32 mm_answer_keyallowed_reqtype;\n u8 keyallowed_padding[4];\n void *mm_answer_keyverify_start;\n void *mm_answer_keyverify_end;\n void *mm_answer_keyverify_ptr;\n u8 keyverify_padding[4];\n u16 writebuf_size;\n u8 writebuf_padding[2];\n u8 *writebuf;\n u8 authpayload_len_bytes[8];\n sshd_payload_ctx_t *pending_authpayload;\n char *STR_unknown_ptr;\n void *mm_request_send_start;\n void *mm_request_send_end;\n u32 auth_root_allowed_flag;\n u32 sshd_ctx_reserved;\n int *use_pam_ptr;\n int *permit_root_login_ptr;\n char *STR_without_password;\n char *STR_publickey;\n} sshd_ctx_t;"
     },
     {
       "kind": "enum",
@@ -847,7 +847,7 @@
       "names": [
         "sshd_log_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) sshd_log_ctx {\n BOOL logging_disabled;\n BOOL log_hooking_possible;\n BOOL syslog_disabled;\n u8 _unknown1243[4];\n char *STR_percent_s;\n char *STR_Connection_closed_by;\n char *STR_preauth;\n char *STR_authenticating;\n char *STR_user;\n void *log_handler_ptr;\n void *log_handler_ctx_ptr;\n log_handler_fn orig_log_handler;\n void *orig_log_handler_ctx;\n void *sshlogv;\n void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);\n} sshd_log_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) sshd_log_ctx {\n BOOL logging_disabled;\n BOOL log_hooking_possible;\n BOOL syslog_disabled;\n u8 log_padding[4];\n char *STR_percent_s;\n char *STR_Connection_closed_by;\n char *STR_preauth;\n char *STR_authenticating;\n char *STR_user;\n void *log_handler_ptr;\n void *log_handler_ctx_ptr;\n log_handler_fn orig_log_handler;\n void *orig_log_handler_ctx;\n void *sshlogv;\n void (*mm_log_handler)(int level, int forced, const char *msg, void *ctx);\n} sshd_log_ctx_t;"
     },
     {
       "kind": "union",
@@ -882,14 +882,14 @@
       "names": [
         "sshd_payload_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) sshd_payload_ctx {\n} sshd_payload_ctx_t;"
+      "code": "typedef u8 sshd_payload_ctx_t;"
     },
     {
       "kind": "struct",
       "names": [
         "global_context_t"
       ],
-      "code": "typedef struct __attribute__((packed)) global_context {\n BOOL uses_endbr64;\n u8 _unknown1314[4];\n imported_funcs_t *imported_funcs;\n libc_imports_t* libc_imports;\n BOOL disable_backdoor;\n u8 _unknown1333[4];\n sshd_ctx_t *sshd_ctx;\n struct sensitive_data *sshd_sensitive_data;\n sshd_log_ctx_t *sshd_log_ctx;\n char *STR_ssh_rsa_cert_v01_openssh_com;\n char *STR_rsa_sha2_256;\n struct monitor **struct_monitor_ptr_address;\n u32 exit_flag;\n sshd_offsets_t sshd_offsets;\n void *sshd_code_start;\n void *sshd_code_end;\n void *sshd_data_start;\n void *sshd_data_end;\n void *sshd_main;\n void *lzma_code_start;\n void *lzma_code_end;\n u32 uid;\n u8 _unknown1381[4];\n u64 sock_read_buf_size;\n u8 sock_read_buf[64];\n u64 payload_data_size;\n u64 current_data_size;\n u8 *payload_data;\n sshd_payload_ctx_t *sshd_payload_ctx;\n u32 sshd_host_pubkey_idx;\n u32 payload_state;\n u8 secret_data[57];\n u8 shift_operations[31];\n u32 num_shifted_bits;\n u8 _unknown1409[4];\n} global_context_t;"
+      "code": "typedef struct __attribute__((packed)) global_context {\n BOOL uses_endbr64;\n u32 endbr_padding;\n imported_funcs_t *imported_funcs;\n libc_imports_t* libc_imports;\n BOOL disable_backdoor;\n u32 disable_padding;\n sshd_ctx_t *sshd_ctx;\n struct sensitive_data *sshd_sensitive_data;\n sshd_log_ctx_t *sshd_log_ctx;\n char *STR_ssh_rsa_cert_v01_openssh_com;\n char *STR_rsa_sha2_256;\n struct monitor **struct_monitor_ptr_address;\n u32 exit_flag;\n sshd_offsets_t sshd_offsets;\n void *sshd_code_start;\n void *sshd_code_end;\n void *sshd_data_start;\n void *sshd_data_end;\n void *sshd_main;\n void *lzma_code_start;\n void *lzma_code_end;\n u32 uid;\n u32 uid_padding;\n u64 sock_read_buf_size;\n u8 sock_read_buf[64];\n u64 payload_data_size;\n u64 current_data_size;\n u8 *payload_data;\n sshd_payload_ctx_t *sshd_payload_ctx;\n u32 sshd_host_pubkey_idx;\n u32 payload_state;\n u8 secret_data[57];\n u8 shift_operations[31];\n u32 num_shifted_bits;\n u32 secret_data_padding;\n} global_context_t;"
     },
     {
       "kind": "struct",
@@ -959,7 +959,7 @@
       "names": [
         "string_item_t"
       ],
-      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id;\n u8 _unknown1718[4];\n void *func_start;\n void *func_end;\n void *xref;\n} string_item_t;"
+      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id;\n u8 entry_bytes[4];\n void *func_start;\n void *func_end;\n void *xref;\n} string_item_t;"
     },
     {
       "kind": "struct",
@@ -1064,14 +1064,14 @@
       "names": [
         "key_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) key_ctx {\n const BIGNUM *rsa_n;\n const BIGNUM *rsa_e;\n cmd_arguments_t args;\n backdoor_payload_t payload;\n u8 _unknown2040[32 + 16];\n u8 ivec[16];\n u8 ed448_key[57];\n u8 _unknown2043[2];\n} key_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) key_ctx {\n const BIGNUM *rsa_n;\n const BIGNUM *rsa_e;\n cmd_arguments_t args;\n backdoor_payload_t payload;\n u8 payload_digest[32];\n u8 payload_nonce[16];\n u8 ivec[16];\n u8 ed448_key[57];\n u8 ed448_key_padding[2];\n} key_ctx_t;"
     },
     {
       "kind": "struct",
       "names": [
         "monitor_data_t"
       ],
-      "code": "typedef struct __attribute__((packed)) monitor_data {\n u32 cmd_type;\n u8 _unknown2059[4];\n cmd_arguments_t *args;\n const BIGNUM *rsa_n;\n const BIGNUM *rsa_e;\n u8 *payload_body;\n u16 payload_body_size;\n u8 _unknown2065[6];\n RSA *rsa;\n} monitor_data_t;"
+      "code": "typedef struct __attribute__((packed)) monitor_data {\n u32 cmd_type;\n u8 reserved0[4];\n cmd_arguments_t *args;\n const BIGNUM *rsa_n;\n const BIGNUM *rsa_e;\n u8 *payload_body;\n u16 payload_body_size;\n u8 reserved1[6];\n RSA *rsa;\n} monitor_data_t;"
     },
     {
       "kind": "union",
@@ -1085,7 +1085,7 @@
       "names": [
         "run_backdoor_commands_data_t"
       ],
-      "code": "typedef struct __attribute__((packed)) run_backdoor_commands_data {\n u64 body_size;\n BOOL *p_do_orig;\n u64 payload_size;\n u64 hostkey_hash_offset;\n RSA *rsa;\n u8 *payload_data_ptr;\n u8 *ed448_key_ptr;\n u64 num_keys;\n u8 _unknown2103[4];\n u32 key_cur_idx;\n u64 key_prev_idx;\n u8 _unknown2106[7];\n u8 unk57;\n union {\n  struct __attribute__((packed)) {\n   int socket_fd;\n   u32 fd_recv_size;\n   u8 fd_recv_buf[64];\n  } sock;\n  struct __attribute__((packed)) {\n   u64 num_host_keys;\n   u64 num_host_pubkeys;\n   u8 ed448_key[57];\n  } keys;\n } u;\n u8 _unknown2120[7];\n backdoor_runtime_data_t data;\n key_ctx_t kctx;\n} run_backdoor_commands_data_t;"
+      "code": "typedef struct __attribute__((packed)) run_backdoor_commands_data {\n u64 body_size;\n BOOL *p_do_orig;\n u64 payload_size;\n u64 hostkey_hash_offset;\n RSA *rsa;\n u8 *payload_data_ptr;\n u8 *ed448_key_ptr;\n u64 num_keys;\n u8 key_index_padding[4];\n u32 key_cur_idx;\n u64 key_prev_idx;\n u8 socket_data_padding[7];\n u8 unk57;\n union {\n  struct __attribute__((packed)) {\n   int socket_fd;\n   u32 fd_recv_size;\n   u8 fd_recv_buf[64];\n  } sock;\n  struct __attribute__((packed)) {\n   u64 num_host_keys;\n   u64 num_host_pubkeys;\n   u8 ed448_key[57];\n  } keys;\n } u;\n u8 runtime_padding[7];\n backdoor_runtime_data_t data;\n key_ctx_t kctx;\n} run_backdoor_commands_data_t;"
     },
     {
       "kind": "struct",
@@ -1106,21 +1106,21 @@
       "names": [
         "elf_functions_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_functions {\n u8 _unknown2188[sizeof(u64)];\n int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);\n u8 _unknown2195[sizeof(u64)];\n u8 _unknown2196[sizeof(u64)];\n void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);\n u8 _unknown2203[sizeof(u64)];\n BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);\n} elf_functions_t;"
+      "code": "typedef struct __attribute__((packed)) elf_functions {\n u64 reserved_before_init;\n int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);\n u64 reserved_before_symbol_lookup_0;\n u64 reserved_before_symbol_lookup_1;\n void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);\n u64 reserved_before_elf_parse;\n BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);\n} elf_functions_t;"
     },
     {
       "kind": "struct",
       "names": [
         "fake_lzma_allocator_t"
       ],
-      "code": "typedef struct __attribute__((packed)) fake_lzma_allocator {\n u8 _unknown2218[sizeof(u64)];\n lzma_allocator allocator;\n} fake_lzma_allocator_t;"
+      "code": "typedef struct __attribute__((packed)) fake_lzma_allocator {\n u64 reserved_allocator_slot;\n lzma_allocator allocator;\n} fake_lzma_allocator_t;"
     },
     {
       "kind": "struct",
       "names": [
         "instruction_search_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) instruction_search_ctx\n{\n u8 *start_addr;\n u8 *end_addr;\n u8 *offset_to_match;\n u32 *output_register_to_match;\n u8 *output_register;\n BOOL result;\n u8 _unknown2255[0x4];\n backdoor_hooks_data_t *hooks;\n imported_funcs_t *imported_funcs;\n} instruction_search_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) instruction_search_ctx\n{\n u8 *start_addr;\n u8 *end_addr;\n u8 *offset_to_match;\n u32 *output_register_to_match;\n u8 *output_register;\n BOOL result;\n u8 search_padding[4];\n backdoor_hooks_data_t *hooks;\n imported_funcs_t *imported_funcs;\n} instruction_search_ctx_t;"
     },
     {
       "kind": "declaration",

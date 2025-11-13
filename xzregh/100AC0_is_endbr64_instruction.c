@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/100AC0_is_endbr64_instruction.c
 // Function: is_endbr64_instruction @ 0x100AC0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall is_endbr64_instruction(u8 * code_start, u8 * code_end, u32 low_mask_part)
+// Calling convention: unknown
+// Prototype: undefined is_endbr64_instruction(void)
 
 
 /*
@@ -10,15 +10,15 @@
 #include "xzre_types.h"
 
 
-BOOL is_endbr64_instruction(u8 *code_start,u8 *code_end,u32 low_mask_part)
+bool is_endbr64_instruction(int *param_1,long param_2,uint param_3)
 
 {
-  BOOL BVar1;
+  bool bVar1;
   
-  BVar1 = FALSE;
-  if (3 < (long)code_end - (long)code_start) {
-    BVar1 = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
+  bVar1 = FALSE;
+  if (3 < param_2 - (long)param_1) {
+    bVar1 = (param_3 | 0x5e20000) + *param_1 == 0xf223;
   }
-  return BVar1;
+  return bVar1;
 }
 

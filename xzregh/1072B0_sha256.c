@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/1072B0_sha256.c
 // Function: sha256 @ 0x1072B0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall sha256(void * data, size_t count, u8 * mdBuf, u64 mdBufSize, imported_funcs_t * funcs)
+// Calling convention: unknown
+// Prototype: undefined sha256(void)
 
 
 /*
@@ -10,28 +10,26 @@
 #include "xzre_types.h"
 
 
-BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
+bool sha256(long param_1,long param_2,undefined8 param_3,ulong param_4,long param_5)
 
 {
-  _func_56 *p_Var1;
+  code *pcVar1;
   int iVar2;
-  BOOL BVar3;
-  EVP_MD *type;
-  EVP_MD *md;
+  undefined8 uVar3;
+  bool bVar4;
   
-  if ((((data == (void *)0x0) || (count == 0)) || (mdBufSize < 0x20)) ||
-     (funcs == (imported_funcs_t *)0x0)) {
-    BVar3 = FALSE;
+  if ((((param_1 == 0) || (param_2 == 0)) || (param_4 < 0x20)) || (param_5 == 0)) {
+    bVar4 = FALSE;
   }
   else {
-    p_Var1 = funcs->EVP_Digest;
-    BVar3 = FALSE;
-    if ((p_Var1 != (_func_56 *)0x0) && (BVar3 = FALSE, funcs->EVP_sha256 != (_func_38 *)0x0)) {
-      type = (*funcs->EVP_sha256)();
-      iVar2 = (*p_Var1)(data,count,mdBuf,(uint *)0x0,type,(ENGINE *)0x0);
-      BVar3 = (BOOL)(iVar2 == 1);
+    pcVar1 = *(code **)(param_5 + 0xf0);
+    bVar4 = FALSE;
+    if ((pcVar1 != (code *)0x0) && (*(code **)(param_5 + 0x58) != (code *)0x0)) {
+      uVar3 = (**(code **)(param_5 + 0x58))();
+      iVar2 = (*pcVar1)(param_1,param_2,param_3,0,uVar3,0);
+      bVar4 = iVar2 == 1;
     }
   }
-  return BVar3;
+  return bVar4;
 }
 

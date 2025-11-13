@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102370_is_range_mapped.c
 // Function: is_range_mapped @ 0x102370
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall is_range_mapped(u8 * addr, u64 length, global_context_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined is_range_mapped(void)
 
 
 /*
@@ -10,47 +10,46 @@
 #include "xzre_types.h"
 
 
-BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
+undefined8 is_range_mapped(ulong param_1,long param_2,long param_3)
 
 {
-  libc_imports_t *plVar1;
-  BOOL BVar2;
-  int iVar3;
-  int *piVar4;
-  sigset_t *sigmask;
+  long lVar1;
+  int iVar2;
+  int *piVar3;
+  undefined8 uVar4;
+  ulong uVar5;
   undefined8 local_38;
   undefined8 local_30;
   
-  if (length == 0) {
-    return FALSE;
+  if (param_2 == 0) {
+    return 0;
   }
-  if (addr < (u8 *)0x1000000) {
+  if (param_1 < 0x1000000) {
 LAB_00102393:
-    BVar2 = FALSE;
+    uVar4 = 0;
   }
   else {
-    sigmask = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
-    if (sigmask < addr + length) {
-      if (ctx == (global_context_t *)0x0) goto LAB_00102393;
+    uVar5 = param_1 & 0xfffffffffffff000;
+    if (uVar5 < param_1 + param_2) {
+      if (param_3 == 0) goto LAB_00102393;
       do {
         local_38 = 0;
-        plVar1 = ctx->libc_imports;
-        if (((plVar1 == (libc_imports_t *)0x0) || (plVar1->__errno_location == (_func_26 *)0x0)) ||
-           (plVar1->pselect == (_func_24 *)0x0)) goto LAB_00102393;
+        lVar1 = *(long *)(param_3 + 0x10);
+        if (((lVar1 == 0) || (*(long *)(lVar1 + 0x50) == 0)) ||
+           (*(code **)(lVar1 + 0x40) == (code *)0x0)) goto LAB_00102393;
         local_30 = 1;
-        iVar3 = (*plVar1->pselect)(1,(fd_set *)0x0,(fd_set *)0x0,(fd_set *)0x0,(timespec *)&local_38
-                                   ,sigmask);
-        if ((iVar3 < 0) &&
-           ((piVar4 = (*ctx->libc_imports->__errno_location)(), *piVar4 == 0xe ||
-            (sigmask == (sigset_t *)0x0)))) {
-          *piVar4 = 0;
+        iVar2 = (**(code **)(lVar1 + 0x40))(1,0,0,0,&local_38,uVar5);
+        if ((iVar2 < 0) &&
+           ((piVar3 = (int *)(**(code **)(*(long *)(param_3 + 0x10) + 0x50))(), *piVar3 == 0xe ||
+            (uVar5 == 0)))) {
+          *piVar3 = 0;
           goto LAB_00102393;
         }
-        sigmask = sigmask + 0x200;
-      } while (sigmask < addr + length);
+        uVar5 = uVar5 + 0x1000;
+      } while (uVar5 < param_1 + param_2);
     }
-    BVar2 = TRUE;
+    uVar4 = 1;
   }
-  return BVar2;
+  return uVar4;
 }
 

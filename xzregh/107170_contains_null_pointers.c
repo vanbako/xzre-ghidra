@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107170_contains_null_pointers.c
 // Function: contains_null_pointers @ 0x107170
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall contains_null_pointers(void * * pointers, uint num_pointers)
+// Calling convention: unknown
+// Prototype: undefined contains_null_pointers(void)
 
 
 /*
@@ -12,21 +12,19 @@
 #include "xzre_types.h"
 
 
-BOOL contains_null_pointers(void **pointers,uint num_pointers)
+undefined8 contains_null_pointers(long param_1,uint param_2)
 
 {
-  void **ppvVar1;
-  long lVar2;
+  long lVar1;
   void **slot;
   
-  lVar2 = 0;
+  lVar1 = 0;
   do {
-    if (num_pointers <= (uint)lVar2) {
-      return FALSE;
+    if (param_2 <= (uint)lVar1) {
+      return 0;
     }
-    ppvVar1 = pointers + lVar2;
-    lVar2 = lVar2 + 1;
-  } while (*ppvVar1 != (void *)0x0);
-  return TRUE;
+    lVar1 = lVar1 + 1;
+  } while (*(long *)(param_1 + -8 + lVar1 * 8) != 0);
+  return 1;
 }
 

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101B80_fake_lzma_alloc.c
 // Function: fake_lzma_alloc @ 0x101B80
-// Calling convention: __stdcall
-// Prototype: void * __stdcall fake_lzma_alloc(void * opaque, size_t nmemb, size_t size)
+// Calling convention: unknown
+// Prototype: undefined fake_lzma_alloc(void)
 
 
 /*
@@ -10,14 +10,10 @@
 #include "xzre_types.h"
 
 
-void * fake_lzma_alloc(void *opaque,size_t nmemb,size_t size)
+void fake_lzma_alloc(undefined8 param_1,undefined8 param_2,undefined4 param_3)
 
 {
-  void *pvVar1;
-  EncodedStringId string_id;
-  elf_info_t *elf_info;
-  
-  pvVar1 = elf_symbol_get_addr((elf_info_t *)opaque,(EncodedStringId)size);
-  return pvVar1;
+  elf_symbol_get_addr(param_1,param_3);
+  return;
 }
 

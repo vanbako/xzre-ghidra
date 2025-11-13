@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/102770_init_ldso_ctx.c
 // Function: init_ldso_ctx @ 0x102770
-// Calling convention: __stdcall
-// Prototype: void __stdcall init_ldso_ctx(ldso_ctx_t * ldso_ctx)
+// Calling convention: unknown
+// Prototype: undefined init_ldso_ctx(void)
 
 
 /*
@@ -14,34 +14,33 @@
 #include "xzre_types.h"
 
 
-void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
+void init_ldso_ctx(long param_1)
 
 {
-  u32 *puVar1;
+  undefined4 *puVar1;
   byte *pbVar2;
   byte *audit_flag_byte;
-  u32 *libcrypto_bindflags_ptr;
   
-  if (ldso_ctx != (ldso_ctx_t *)0x0) {
-    puVar1 = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
-    if (puVar1 != (u32 *)0x0) {
-      *puVar1 = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
-      if (ldso_ctx->libcrypto_l_name != (char **)0x0) {
-        *ldso_ctx->libcrypto_l_name = (char *)puVar1;
+  if (param_1 != 0) {
+    puVar1 = *(undefined4 **)(param_1 + 0x40);
+    if (puVar1 != (undefined4 *)0x0) {
+      *puVar1 = *(undefined4 *)(param_1 + 0x48);
+      if (*(undefined8 **)(param_1 + 0xf8) != (undefined8 *)0x0) {
+        **(undefined8 **)(param_1 + 0xf8) = puVar1;
       }
     }
-    if (ldso_ctx->sshd_auditstate_bindflags_ptr != (u32 *)0x0) {
-      *ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;
+    if (*(undefined4 **)(param_1 + 0x50) != (undefined4 *)0x0) {
+      **(undefined4 **)(param_1 + 0x50) = *(undefined4 *)(param_1 + 0x58);
     }
-    pbVar2 = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
+    pbVar2 = *(byte **)(param_1 + 0x60);
     if (pbVar2 != (byte *)0x0) {
-      *pbVar2 = *pbVar2 & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;
+      *pbVar2 = *pbVar2 & ~*(byte *)(param_1 + 0x68);
     }
-    if (ldso_ctx->_dl_naudit_ptr != (uint *)0x0) {
-      *ldso_ctx->_dl_naudit_ptr = 0;
+    if (*(undefined4 **)(param_1 + 0x78) != (undefined4 *)0x0) {
+      **(undefined4 **)(param_1 + 0x78) = 0;
     }
-    if (ldso_ctx->_dl_audit_ptr != (audit_ifaces **)0x0) {
-      *ldso_ctx->_dl_audit_ptr = (audit_ifaces *)0x0;
+    if (*(undefined8 **)(param_1 + 0x70) != (undefined8 *)0x0) {
+      **(undefined8 **)(param_1 + 0x70) = 0;
     }
   }
   return;

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/108080_mm_answer_keyverify_hook.c
 // Function: mm_answer_keyverify_hook @ 0x108080
-// Calling convention: __stdcall
-// Prototype: int __stdcall mm_answer_keyverify_hook(ssh * ssh, int sock, sshbuf * m)
+// Calling convention: unknown
+// Prototype: undefined mm_answer_keyverify_hook(void)
 
 
 /*
@@ -14,31 +14,44 @@
 #include "xzre_types.h"
 
 
-int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
+undefined1  [16]
+mm_answer_keyverify_hook(undefined8 param_1,undefined8 param_2,ulong param_3,undefined8 param_4)
 
 {
-  libc_imports_t *funcs;
   long lVar1;
-  ssize_t sVar2;
-  sshd_payload_ctx_t *payload_ctx;
-  libc_imports_t *libc_imports;
+  long lVar2;
+  code *pcVar3;
+  undefined1 auVar4 [16];
+  long lVar5;
+  undefined8 uVar6;
+  undefined1 auVar7 [16];
   
   if (global_ctx == 0) {
-    return 0;
+    auVar4._8_8_ = 0;
+    auVar4._0_8_ = param_3;
+    return auVar4 << 0x40;
   }
-  funcs = *(libc_imports_t **)(global_ctx + 0x10);
-  if ((funcs != (libc_imports_t *)0x0) && (lVar1 = *(long *)(global_ctx + 0x20), lVar1 != 0)) {
-    if ((*(ushort *)(lVar1 + 0x84) != 0) &&
-       ((*(void **)(lVar1 + 0x88) != (void *)0x0 &&
-        (sVar2 = fd_write(sock,*(void **)(lVar1 + 0x88),(ulong)*(ushort *)(lVar1 + 0x84),funcs),
-        -1 < sVar2)))) {
-      **(undefined8 **)(lVar1 + 0xa0) = *(undefined8 *)(lVar1 + 0xd8);
-      return 1;
+  lVar1 = *(long *)(global_ctx + 0x10);
+  if ((lVar1 != 0) && (lVar2 = *(long *)(global_ctx + 0x20), lVar2 != 0)) {
+    if (*(short *)(lVar2 + 0x84) != 0) {
+      if (*(long *)(lVar2 + 0x88) != 0) {
+        lVar5 = fd_write();
+        if (-1 < lVar5) {
+          **(undefined8 **)(lVar2 + 0xa0) = *(undefined8 *)(lVar2 + 0xd8);
+          uVar6 = 1;
+          goto LAB_001080f3;
+        }
+      }
     }
-    if (funcs->exit != (_func_19 *)0x0) {
-      (*funcs->exit)(0);
+    pcVar3 = *(code **)(lVar1 + 0x18);
+    if (pcVar3 != (code *)0x0) {
+      (*pcVar3)(0);
     }
   }
-  return 0;
+  uVar6 = 0;
+LAB_001080f3:
+  auVar7._8_8_ = param_4;
+  auVar7._0_8_ = uVar6;
+  return auVar7;
 }
 

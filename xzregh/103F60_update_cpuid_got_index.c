@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103F60_update_cpuid_got_index.c
 // Function: update_cpuid_got_index @ 0x103F60
-// Calling convention: __stdcall
-// Prototype: void __stdcall update_cpuid_got_index(elf_entry_ctx_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined update_cpuid_got_index(void)
 
 
 /*
@@ -12,10 +12,10 @@
 #include "xzre_types.h"
 
 
-void update_cpuid_got_index(elf_entry_ctx_t *ctx)
+void update_cpuid_got_index(long param_1)
 
 {
-  (ctx->got_ctx).cpuid_fn = tls_get_addr_reloc_consts;
+  *(undefined **)(param_1 + 0x18) = tls_get_addr_reloc_consts;
   return;
 }
 

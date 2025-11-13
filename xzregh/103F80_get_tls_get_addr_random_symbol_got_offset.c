@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103F80_get_tls_get_addr_random_symbol_got_offset.c
 // Function: get_tls_get_addr_random_symbol_got_offset @ 0x103F80
-// Calling convention: __stdcall
-// Prototype: ptrdiff_t __stdcall get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined get_tls_get_addr_random_symbol_got_offset(void)
 
 
 /*
@@ -12,15 +12,11 @@
 #include "xzre_types.h"
 
 
-ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx)
+void get_tls_get_addr_random_symbol_got_offset(long param_1)
 
 {
-  ptrdiff_t pVar1;
-  ptrdiff_t got_offset;
-  
-  (ctx->got_ctx).got_ptr = (void *)0x2600;
-  pVar1 = elf_functions_offset;
-  (ctx->got_ctx).got_offset = elf_functions_offset;
-  return pVar1;
+  *(undefined8 *)(param_1 + 8) = 0x2600;
+  *(undefined8 *)(param_1 + 0x20) = elf_functions_offset;
+  return;
 }
 

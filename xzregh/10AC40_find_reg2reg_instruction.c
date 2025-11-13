@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10AC40_find_reg2reg_instruction.c
 // Function: find_reg2reg_instruction @ 0x10AC40
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall find_reg2reg_instruction(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx)
+// Calling convention: unknown
+// Prototype: undefined find_reg2reg_instruction(void)
 
 
 /*
@@ -10,27 +10,27 @@
 #include "xzre_types.h"
 
 
-BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
+undefined8 find_reg2reg_instruction(ulong param_1,ulong param_2,long *param_3)
 
 {
-  BOOL BVar1;
+  int iVar1;
   uint uVar2;
   
-  if (dctx == (dasm_ctx_t *)0x0) {
-    return FALSE;
+  if (param_3 == (long *)0x0) {
+    return 0;
   }
   while( TRUE ) {
-    if ((code_end <= code_start) || (BVar1 = x86_dasm(dctx,code_start,code_end), BVar1 == FALSE)) {
-      return FALSE;
+    if ((param_2 <= param_1) || (iVar1 = x86_dasm(param_3,param_1,param_2), iVar1 == 0)) {
+      return 0;
     }
-    if (((((*(uint *)dctx->_unknown810 & 0xfffffffd) == 0x109) ||
-         ((uVar2 = *(uint *)dctx->_unknown810 - 0x81, uVar2 < 0x3b &&
+    if (((((*(uint *)(param_3 + 5) & 0xfffffffd) == 0x109) ||
+         ((uVar2 = *(uint *)(param_3 + 5) - 0x81, uVar2 < 0x3b &&
           ((0x505050500000505U >> ((byte)uVar2 & 0x3f) & 1) != 0)))) &&
-        (((dctx->field2_0x10).flags_u16 & 0xf80) == 0)) &&
-       ((((dctx->field2_0x10).field0.field10_0xb.rex_byte & 5) == 0 &&
-        (*(char *)((long)&dctx->field2_0x10 + 0xd) == '\x03')))) break;
-    code_start = dctx->instruction + dctx->instruction_size;
+        ((*(ushort *)(param_3 + 2) & 0xf80) == 0)) &&
+       (((*(byte *)((long)param_3 + 0x1b) & 5) == 0 && (*(char *)((long)param_3 + 0x1d) == '\x03')))
+       ) break;
+    param_1 = param_3[1] + *param_3;
   }
-  return TRUE;
+  return 1;
 }
 

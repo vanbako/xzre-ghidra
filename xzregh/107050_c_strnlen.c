@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107050_c_strnlen.c
 // Function: c_strnlen @ 0x107050
-// Calling convention: __stdcall
-// Prototype: ssize_t __stdcall c_strnlen(char * str, size_t max_len)
+// Calling convention: unknown
+// Prototype: undefined c_strnlen(void)
 
 
 /*
@@ -12,22 +12,21 @@
 #include "xzre_types.h"
 
 
-ssize_t c_strnlen(char *str,size_t max_len)
+long c_strnlen(long param_1,long param_2)
 
 {
-  size_t sVar1;
-  ssize_t len;
+  long lVar1;
   
-  sVar1 = 0;
-  if (max_len == 0) {
-    return max_len;
+  lVar1 = 0;
+  if (param_2 == 0) {
+    return param_2;
   }
   do {
-    if (str[sVar1] == '\0') {
-      return sVar1;
+    if (*(char *)(param_1 + lVar1) == '\0') {
+      return lVar1;
     }
-    sVar1 = sVar1 + 1;
-  } while (max_len != sVar1);
-  return max_len;
+    lVar1 = lVar1 + 1;
+  } while (param_2 != lVar1);
+  return param_2;
 }
 

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10ABE0_secret_data_append_items.c
 // Function: secret_data_append_items @ 0x10ABE0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall secret_data_append_items(secret_data_item_t * items, u64 items_count, appender * appender)
+// Calling convention: unknown
+// Prototype: undefined secret_data_append_items(void)
 
 
 /*
@@ -10,33 +10,33 @@
 #include "xzre_types.h"
 
 
-BOOL secret_data_append_items(secret_data_item_t *items,u64 items_count,appender *appender)
+undefined8 secret_data_append_items(long param_1,ulong param_2,code *param_3)
 
 {
-  BOOL BVar1;
-  secret_data_item_t *psVar2;
-  u32 uVar3;
-  uint uVar4;
+  long lVar1;
+  undefined8 *puVar2;
+  undefined8 uVar3;
+  int iVar4;
   ulong uVar5;
   
-  uVar3 = 0;
   uVar5 = 0;
+  iVar4 = 0;
   while( TRUE ) {
     while( TRUE ) {
-      if (items_count <= uVar5) {
-        return TRUE;
+      if (param_2 <= uVar5) {
+        return 1;
       }
-      uVar4 = (int)uVar5 + 1;
-      psVar2 = items + uVar5;
-      uVar5 = (ulong)uVar4;
-      if (psVar2->index != 0) break;
-      psVar2->index = uVar3;
+      lVar1 = uVar5 * 0x18;
+      uVar5 = (ulong)((int)uVar5 + 1);
+      puVar2 = (undefined8 *)(lVar1 + param_1);
+      if (*(int *)((long)puVar2 + 0x14) != 0) break;
+      *(int *)((long)puVar2 + 0x14) = iVar4;
     }
-    BVar1 = (*appender)((secret_data_shift_cursor_t)(psVar2->shift_cursor).index,
-                        psVar2->operation_index,psVar2->shift_count,uVar4,psVar2->code);
-    if (BVar1 == FALSE) break;
-    uVar3 = uVar3 + 1;
+    uVar3 = (*param_3)(*(undefined4 *)(puVar2 + 1),*(undefined4 *)((long)puVar2 + 0xc),
+                       *(undefined4 *)(puVar2 + 2),uVar5,*puVar2);
+    if ((int)uVar3 == 0) break;
+    iVar4 = iVar4 + 1;
   }
-  return FALSE;
+  return uVar3;
 }
 

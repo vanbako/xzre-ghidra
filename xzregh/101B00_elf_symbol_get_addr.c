@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101B00_elf_symbol_get_addr.c
 // Function: elf_symbol_get_addr @ 0x101B00
-// Calling convention: __stdcall
-// Prototype: void * __stdcall elf_symbol_get_addr(elf_info_t * elf_info, EncodedStringId encoded_string_id)
+// Calling convention: unknown
+// Prototype: undefined elf_symbol_get_addr(void)
 
 
 /*
@@ -10,21 +10,21 @@
 #include "xzre_types.h"
 
 
-void * elf_symbol_get_addr(elf_info_t *elf_info,EncodedStringId encoded_string_id)
+long elf_symbol_get_addr(long *param_1,undefined8 param_2)
 
 {
-  Elf64_Sym *pEVar1;
+  long lVar1;
   Elf64_Sym *sym;
   
-  pEVar1 = elf_symbol_get(elf_info,encoded_string_id,0);
-  if (pEVar1 != (Elf64_Sym *)0x0) {
-    if ((pEVar1->st_value == 0) || (pEVar1->st_shndx == 0)) {
-      pEVar1 = (Elf64_Sym *)0x0;
+  lVar1 = elf_symbol_get(param_1,param_2,0);
+  if (lVar1 != 0) {
+    if ((*(long *)(lVar1 + 8) == 0) || (*(short *)(lVar1 + 6) == 0)) {
+      lVar1 = 0;
     }
     else {
-      pEVar1 = (Elf64_Sym *)(elf_info->elfbase->e_ident + pEVar1->st_value);
+      lVar1 = *param_1 + *(long *)(lVar1 + 8);
     }
   }
-  return pEVar1;
+  return lVar1;
 }
 

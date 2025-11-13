@@ -648,7 +648,7 @@ typedef struct __attribute__((packed)) dasm_ctx {
   struct __attribute__((packed)) {
    u8 flags;
    u8 flags2;
-   u8 _unknown767[2];
+   u8 prefix_padding[2];
    u8 lock_rep_byte;
    u8 seg_byte;
    u8 osize_byte;
@@ -663,42 +663,34 @@ typedef struct __attribute__((packed)) dasm_ctx {
      u8 R : 1;
      u8 W : 1;
      u8 BitPattern : 4;
-    };
+    } bits;
     u8 rex_byte;
-   };
+   } rex;
    union {
     struct __attribute__((packed)) {
              u8 modrm;
              u8 modrm_mod;
              u8 modrm_reg;
              u8 modrm_rm;
-    };
+    } breakdown;
     u32 modrm_word;
-   };
-  };
+   } modrm;
+  } decoded;
   u16 flags_u16;
-        };
+ } prefix;
  u8 imm64_reg;
- struct __attribute__((packed)) {
-  union {
-   struct __attribute__((packed)) {
-    u8 sib;
-    u8 sib_scale;
-    u8 sib_index;
-    u8 sib_base;
-   };
-   u32 sib_word;
-  };
- };
- u8 _unknown810[3];
- u32 opcode;
- u8 _unknown812[4];
+ u8 sib_byte;
+ u8 sib_scale_bits;
+ u8 sib_index_bits;
+ u8 sib_base_bits;
+ u8 opcode_window[4];
+ u8 branch_disp_scratch[4];
  u64 mem_disp;
  u64 operand;
  u64 operand_zeroextended;
  u64 operand_size;
  u8 insn_offset;
- u8 _unknown819[7];
+ u8 scratch_bytes[7];
 } dasm_ctx_t;
 
 /*
@@ -842,7 +834,7 @@ typedef struct __attribute__((packed)) imported_funcs {
  void (*BN_free)(BIGNUM *a);
  libc_imports_t *libc;
  u32 resolved_imports_count;
- u8 _unknown1109[4];
+ u32 reserved_imports_padding;
 } imported_funcs_t;
 
 struct ssh;
@@ -862,7 +854,7 @@ typedef struct __attribute__((packed)) sshd_ctx {
  BOOL have_mm_answer_keyallowed;
  BOOL have_mm_answer_authpassword;
  BOOL have_mm_answer_keyverify;
- u8 _unknown1160[0x4];
+ u8 hook_flags_padding[4];
  sshd_monitor_func_t mm_answer_authpassword_hook;
  void *mm_answer_keyallowed;
  void *mm_answer_keyverify;
@@ -870,26 +862,26 @@ typedef struct __attribute__((packed)) sshd_ctx {
  void *mm_answer_authpassword_end;
  sshd_monitor_func_t *mm_answer_authpassword_ptr;
  int monitor_reqtype_authpassword;
- u8 _unknown1168[4];
+ u8 authpassword_padding[4];
  sshd_monitor_func_t *mm_answer_keyallowed_start;
  void *mm_answer_keyallowed_end;
  void *mm_answer_keyallowed_ptr;
  u32 mm_answer_keyallowed_reqtype;
- u8 _unknown1173[4];
+ u8 keyallowed_padding[4];
  void *mm_answer_keyverify_start;
  void *mm_answer_keyverify_end;
  void *mm_answer_keyverify_ptr;
- u8 _unknown1177[0x4];
+ u8 keyverify_padding[4];
  u16 writebuf_size;
- u8 _unknown1179[0x2];
+ u8 writebuf_padding[2];
  u8 *writebuf;
- u8 _unknown1181[0x8];
- u8 _unknown1182[0x8];
+ u8 authpayload_len_bytes[8];
+ sshd_payload_ctx_t *pending_authpayload;
  char *STR_unknown_ptr;
  void *mm_request_send_start;
  void *mm_request_send_end;
- u8 _unknown1186[sizeof(u32)];
- u8 _unknown1187[sizeof(u32)];
+ u32 auth_root_allowed_flag;
+ u32 sshd_ctx_reserved;
  int *use_pam_ptr;
  int *permit_root_login_ptr;
  char *STR_without_password;
@@ -924,7 +916,7 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
  BOOL logging_disabled;
  BOOL log_hooking_possible;
  BOOL syslog_disabled;
- u8 _unknown1243[4];
+ u8 log_padding[4];
  char *STR_percent_s;
  char *STR_Connection_closed_by;
  char *STR_preauth;
@@ -986,8 +978,7 @@ typedef struct __attribute__((packed)) sshd_offsets {
 /*
  * Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.
  */
-typedef struct __attribute__((packed)) sshd_payload_ctx {
-} sshd_payload_ctx_t;
+typedef u8 sshd_payload_ctx_t;
 
 /*
  * Authoritative runtime state for the backdoor.
@@ -995,11 +986,11 @@ typedef struct __attribute__((packed)) sshd_payload_ctx {
  */
 typedef struct __attribute__((packed)) global_context {
  BOOL uses_endbr64;
- u8 _unknown1314[4];
+ u32 endbr_padding;
  imported_funcs_t *imported_funcs;
  libc_imports_t* libc_imports;
  BOOL disable_backdoor;
- u8 _unknown1333[4];
+ u32 disable_padding;
  sshd_ctx_t *sshd_ctx;
  struct sensitive_data *sshd_sensitive_data;
  sshd_log_ctx_t *sshd_log_ctx;
@@ -1016,7 +1007,7 @@ typedef struct __attribute__((packed)) global_context {
  void *lzma_code_start;
  void *lzma_code_end;
  u32 uid;
- u8 _unknown1381[4];
+ u32 uid_padding;
  u64 sock_read_buf_size;
  u8 sock_read_buf[64];
  u64 payload_data_size;
@@ -1028,7 +1019,7 @@ typedef struct __attribute__((packed)) global_context {
  u8 secret_data[57];
  u8 shift_operations[31];
  u32 num_shifted_bits;
- u8 _unknown1409[4];
+ u32 secret_data_padding;
 } global_context_t;
 
 /*
@@ -1152,7 +1143,7 @@ typedef struct __attribute__((packed)) backdoor_data_handle {
  */
 typedef struct __attribute__((packed)) string_item {
  EncodedStringId string_id;
- u8 _unknown1718[4];
+ u8 entry_bytes[4];
  void *func_start;
  void *func_end;
  void *xref;
@@ -1330,10 +1321,11 @@ typedef struct __attribute__((packed)) key_ctx {
  const BIGNUM *rsa_e;
  cmd_arguments_t args;
  backdoor_payload_t payload;
- u8 _unknown2040[32 + 16];
+ u8 payload_digest[32];
+ u8 payload_nonce[16];
  u8 ivec[16];
  u8 ed448_key[57];
- u8 _unknown2043[2];
+ u8 ed448_key_padding[2];
 } key_ctx_t;
 
 /*
@@ -1341,13 +1333,13 @@ typedef struct __attribute__((packed)) key_ctx {
  */
 typedef struct __attribute__((packed)) monitor_data {
  u32 cmd_type;
- u8 _unknown2059[4];
+ u8 reserved0[4];
  cmd_arguments_t *args;
  const BIGNUM *rsa_n;
  const BIGNUM *rsa_e;
  u8 *payload_body;
  u16 payload_body_size;
- u8 _unknown2065[6];
+ u8 reserved1[6];
  RSA *rsa;
 } monitor_data_t;
 
@@ -1371,10 +1363,10 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
  u8 *payload_data_ptr;
  u8 *ed448_key_ptr;
  u64 num_keys;
- u8 _unknown2103[4];
+ u8 key_index_padding[4];
  u32 key_cur_idx;
  u64 key_prev_idx;
- u8 _unknown2106[7];
+ u8 socket_data_padding[7];
  u8 unk57;
  union {
   struct __attribute__((packed)) {
@@ -1388,7 +1380,7 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
    u8 ed448_key[57];
   } keys;
  } u;
- u8 _unknown2120[7];
+ u8 runtime_padding[7];
  backdoor_runtime_data_t data;
  key_ctx_t kctx;
 } run_backdoor_commands_data_t;
@@ -1414,12 +1406,12 @@ typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
  * Mini vtable exported back into liblzma that holds callable helpers (initializing hook structs, parsing an ELF header, resolving symbols) so the stage-two code can reuse our C helpers.
  */
 typedef struct __attribute__((packed)) elf_functions {
- u8 _unknown2188[sizeof(u64)];
+ u64 reserved_before_init;
  int (*init_hook_functions)(backdoor_hooks_ctx_t *funcs);
- u8 _unknown2195[sizeof(u64)];
- u8 _unknown2196[sizeof(u64)];
+ u64 reserved_before_symbol_lookup_0;
+ u64 reserved_before_symbol_lookup_1;
  void *(*elf_symbol_get_addr)(elf_info_t *elf_info, EncodedStringId encoded_string_id);
- u8 _unknown2203[sizeof(u64)];
+ u64 reserved_before_elf_parse;
  BOOL (*elf_parse)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 } elf_functions_t;
 
@@ -1427,7 +1419,7 @@ typedef struct __attribute__((packed)) elf_functions {
  * Dummy `lzma_allocator` instance that mimics the original callback table; used when the implant needs to satisfy allocation requests without delegating to libc.
  */
 typedef struct __attribute__((packed)) fake_lzma_allocator {
- u8 _unknown2218[sizeof(u64)];
+ u64 reserved_allocator_slot;
  lzma_allocator allocator;
 } fake_lzma_allocator_t;
 
@@ -1442,7 +1434,7 @@ typedef struct __attribute__((packed)) instruction_search_ctx
  u32 *output_register_to_match;
  u8 *output_register;
  BOOL result;
- u8 _unknown2255[0x4];
+ u8 search_padding[4];
  backdoor_hooks_data_t *hooks;
  imported_funcs_t *imported_funcs;
 } instruction_search_ctx_t;

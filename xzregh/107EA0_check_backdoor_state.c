@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107EA0_check_backdoor_state.c
 // Function: check_backdoor_state @ 0x107EA0
-// Calling convention: __stdcall
-// Prototype: BOOL __stdcall check_backdoor_state(global_context_t * ctx)
+// Calling convention: unknown
+// Prototype: undefined check_backdoor_state(void)
 
 
 /*
@@ -14,46 +14,44 @@
 #include "xzre_types.h"
 
 
-BOOL check_backdoor_state(global_context_t *ctx)
+undefined8 check_backdoor_state(long param_1)
 
 {
-  u32 uVar1;
+  int iVar1;
   ulong uVar2;
   BOOL state_in_expected_range;
   BOOL state_matches_exact;
-  sshd_payload_ctx_t *payload_ctx;
-  u32 payload_length;
   
-  if (ctx == (global_context_t *)0x0) {
-    return FALSE;
+  if (param_1 == 0) {
+    return 0;
   }
-  uVar1 = ctx->payload_state;
-  if ((int)uVar1 < 3) {
-    if (0 < (int)uVar1) {
-      if (((ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0) && (0xad < ctx->current_data_size))
-         && (uVar2 = (ulong)*(ushort *)ctx->sshd_payload_ctx, ctx->current_data_size <= uVar2)) {
+  iVar1 = *(int *)(param_1 + 0x104);
+  if (iVar1 < 3) {
+    if (0 < iVar1) {
+      if (((*(ushort **)(param_1 + 0xf8) != (ushort *)0x0) && (0xad < *(ulong *)(param_1 + 0xe8)))
+         && (uVar2 = (ulong)**(ushort **)(param_1 + 0xf8), *(ulong *)(param_1 + 0xe8) <= uVar2)) {
         if (uVar2 <= uVar2 + 0x60) {
           uVar2 = uVar2 + 0x60;
         }
-        if (uVar2 <= ctx->payload_data_size) {
-          return TRUE;
+        if (uVar2 <= *(ulong *)(param_1 + 0xe0)) {
+          return 1;
         }
       }
       goto LAB_00107f11;
     }
-    if (uVar1 != 0) goto LAB_00107f11;
-    state_in_expected_range = ctx->current_data_size < 0xae;
-    state_matches_exact = ctx->current_data_size == 0xae;
+    if (iVar1 != 0) goto LAB_00107f11;
+    state_in_expected_range = *(ulong *)(param_1 + 0xe8) < 0xae;
+    state_matches_exact = *(ulong *)(param_1 + 0xe8) == 0xae;
   }
   else {
-    state_in_expected_range = uVar1 == 3;
-    state_matches_exact = uVar1 == 4;
+    state_in_expected_range = iVar1 == 3;
+    state_matches_exact = iVar1 == 4;
   }
   if (state_in_expected_range || state_matches_exact) {
-    return TRUE;
+    return 1;
   }
 LAB_00107f11:
-  ctx->payload_state = 0xffffffff;
-  return FALSE;
+  *(undefined4 *)(param_1 + 0x104) = 0xffffffff;
+  return 0;
 }
 
