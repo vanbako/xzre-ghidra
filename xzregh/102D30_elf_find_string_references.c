@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Indexes interesting .rodata strings and the instructions that reference them, recording surrounding function bounds for later lookups. Many downstream heuristics consume this table to locate sshd routines and global pointers tied to sensitive behaviour.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
 

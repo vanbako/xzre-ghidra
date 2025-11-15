@@ -10,8 +10,8 @@
  * still choosing a cpuid implementation. Regardless of setup, it finally delegates to
  * `_cpuid_gcc` to satisfy liblzma’s original resolver contract.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 uint backdoor_entry(uint cpuid_request,u64 *caller_frame)
 

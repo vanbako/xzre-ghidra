@@ -9,8 +9,8 @@
  * `ctx->got_ctx.cpuid_fn`. That value is the GOT index of the cpuid resolver inside liblzma, so
  * later code can patch the correct slot without rescanning the PLT stub.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void update_cpuid_got_index(elf_entry_ctx_t *ctx)
 

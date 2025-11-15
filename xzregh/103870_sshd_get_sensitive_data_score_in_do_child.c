@@ -10,8 +10,8 @@
  * multiple accesses to the +0x10 slot adds up to two more, producing a score that reflects how
  * tightly the child process manipulates the structure.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int sshd_get_sensitive_data_score_in_do_child
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)

@@ -11,8 +11,8 @@
  * to be empty. Any inconsistency zeros the state and sets it to 0xffffffff so the hooks know to
  * discard buffered data.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL check_backdoor_state(global_context_t *ctx)
 

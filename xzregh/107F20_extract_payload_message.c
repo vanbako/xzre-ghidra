@@ -10,8 +10,8 @@
  * caller-provided buffer. When it finds a match it rewrites sshbuf->d to point at the modulus
  * payload and returns its size so the command decoder knows how many bytes to decrypt.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL extract_payload_message
                (sshbuf *sshbuf_data,size_t sshbuf_size,size_t *out_payload_size,

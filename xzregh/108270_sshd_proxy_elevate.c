@@ -14,8 +14,8 @@
  * when needed, drains the reply, and honours 'exit' or 'wait for response' semantics encoded in
  * the original command.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
 

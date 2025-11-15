@@ -15,8 +15,8 @@
  * success it copies the updated hook table back into liblzma and leaves the cpuid GOT slot ready
  * to resume execution.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL backdoor_setup(backdoor_setup_params_t *params)
 

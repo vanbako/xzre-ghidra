@@ -11,8 +11,8 @@
  * `sshd_main`, resolves EVP_Digest/EVP_sha256, and caches the stub pointers inside
  * `imported_funcs` so later recon code can reuse them without reopening libcrypto.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
                    imported_funcs_t *imported_funcs)

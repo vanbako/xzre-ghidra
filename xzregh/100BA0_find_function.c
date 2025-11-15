@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Combines the prologue scan with a forward sweep to determine both the start and end addresses of a function. Backdoor initialization relies on it when it needs exact bounds for copying original bytes or scheduling follow-up pattern searches.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_base,u8 *code_end,
                   FuncFindType find_mode)

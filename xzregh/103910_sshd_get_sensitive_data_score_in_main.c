@@ -10,8 +10,8 @@
  * penalising ones that never reference +8, generating a small signed score that later gets
  * doubled in the aggregate calculation.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int sshd_get_sensitive_data_score_in_main
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)

@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Checks whether the bytes at the current cursor encode an ENDBR64 landing pad, including the CET prefix variations. The pattern scanners call it so the backdoor can safely step past CET trampolines while carving prologues to patch.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL is_endbr64_instruction(u8 *code_start,u8 *code_end,u32 low_mask_part)
 

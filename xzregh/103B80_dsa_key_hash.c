@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Serialises the DSA public parameters and computes a SHA-256 digest using the resolved libcrypto helpers. The monitor hooks use that fingerprint to recognise host keys referenced by attacker commands without leaking the private material.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
 

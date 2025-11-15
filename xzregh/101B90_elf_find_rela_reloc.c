@@ -9,8 +9,8 @@
  *
  * A pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present they force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index. Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was provided, stores the position it stopped at.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 Elf64_Rela *
 elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 reloc_type)

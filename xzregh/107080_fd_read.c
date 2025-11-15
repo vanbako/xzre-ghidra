@@ -10,8 +10,8 @@
  * requested byte count. Successful reads consume the entire length so callers can treat any
  * non-zero return as "buffer filled".
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 ssize_t fd_read(int fd,void *buffer,size_t count,libc_imports_t *funcs)
 

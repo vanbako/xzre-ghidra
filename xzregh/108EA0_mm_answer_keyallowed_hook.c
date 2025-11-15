@@ -12,8 +12,8 @@
  * mm_answer_keyallowed. On failure it resets the payload_state and, if instructed, exits sshd
  * entirely.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
 

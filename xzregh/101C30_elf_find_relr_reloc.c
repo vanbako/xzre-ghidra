@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Performs the same search as `elf_find_rela_reloc` but against the packed RELR format. It replays the RELR decoding algorithm (literal entry vs bitmap entry), sanity-checks each decoded pointer with `elf_contains_vaddr`, compares the pointed-to value against the requested target address, and optionally enforces a lower/upper bound plus an iteration cursor via the extra argument registers. Returning NULL means there were no RELR records, the address never appeared in the run, or one of the decoded pointers failed validation.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 

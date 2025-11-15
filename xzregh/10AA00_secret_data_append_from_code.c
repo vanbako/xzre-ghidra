@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Walks a trusted code range, optionally skipping until the first CALL, and records bits for each qualifying register-to-register instruction. The backdoor uses it to encode integrity fingerprints into the secret_data bitmap before decrypting payload material.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_from_code
                (void *code_start,void *code_end,secret_data_shift_cursor_t shift_cursor,

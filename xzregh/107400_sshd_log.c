@@ -10,8 +10,8 @@
  * context. Every monitor hook routes formatted log lines through here so it matches OpenSSH's
  * logging ABI without needing libc wrappers.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
 

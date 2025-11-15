@@ -11,8 +11,8 @@
  * lVar1+0xa0, and returns 1 so the monitor thread believes password authentication succeeded
  * without ever consulting sshd.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
 

@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Validates a runtime sshbuf using offsets recorded in the global context and returns its data pointer and size. The backdoor uses it to access monitor messages safely even when structure layouts shift across builds.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *p_sshbuf_size)
 

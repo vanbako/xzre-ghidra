@@ -12,8 +12,8 @@
  * it zeroes the GOT context and falls back to issuing a real CPUID so liblzma’s resolver still
  * fulfils glibc’s contract.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL backdoor_init_stage2
                (elf_entry_ctx_t *ctx,u64 *caller_frame,void **cpuid_got_addr,

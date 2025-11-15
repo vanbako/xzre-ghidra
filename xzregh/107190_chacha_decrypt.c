@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Thin wrapper around OpenSSL's ChaCha20 decrypt primitives that operates through the resolved imports table. The backdoor uses it both to unwrap its embedded secrets and to decrypt attacker payloads after they arrive via the monitor channel.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *funcs)
 

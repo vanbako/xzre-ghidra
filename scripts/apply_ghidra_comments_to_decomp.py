@@ -102,10 +102,7 @@ def insert_comment(content: str, comment_lines: List[str]) -> str:
     while insert_idx < len(lines) and not lines[insert_idx].strip():
         insert_idx += 1
 
-    separator: List[str] = []
-    if insert_idx >= len(lines) or lines[insert_idx].strip():
-        separator = [""]
-    new_lines = lines[:insert_idx] + comment_lines + separator + lines[insert_idx:]
+    new_lines = lines[:insert_idx] + comment_lines + lines[insert_idx:]
     trailing_newline = content.endswith("\n")
     updated = "\n".join(new_lines)
     if trailing_newline:
@@ -173,10 +170,25 @@ def main() -> None:
         func_name = derive_function_name(c_file)
         if not func_name:
             continue
-        comment = comment_map.get(func_name)
+
+        lookup_names = [func_name]
+        if func_name.startswith("_"):
+            stripped = func_name.lstrip("_")
+            if stripped:
+                lookup_names.append(stripped)
+        else:
+            lookup_names.append(f"_{func_name}")
+
+        comment = None
+        for candidate in lookup_names:
+            comment = comment_map.get(candidate)
+            if comment:
+                break
+
         if not comment:
             missing.append(func_name)
             continue
+
         if apply_comment(c_file, comment, args.ensure_include, args.dry_run):
             updated += 1
 

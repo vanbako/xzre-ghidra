@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Userland page-probe that avoids importing `mincore(2)`. The helper aligns the requested address downward, then walks one page at a time toward `addr + length`, invoking the host's `pselect` with NULL fd sets and the page pointer passed in as the signal mask argument. If `pselect` faults with EFAULT the page is unmapped, otherwise the loop continues until every page succeeds. The routine relies on `ctx->libc_imports` to surface both `pselect` and `__errno_location`, and it refuses to touch addresses below 0x01000000 to avoid probing NULL or vsyscall.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
 

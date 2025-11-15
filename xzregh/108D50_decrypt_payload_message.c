@@ -11,8 +11,8 @@
  * so later packets can continue appending without tearing, and any failure forces the payload
  * state back to 0xffffffff.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_context_t *ctx)
 

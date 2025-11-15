@@ -9,8 +9,8 @@
  *
  * Having an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void fake_lzma_free(void *opaque,void *ptr)
 

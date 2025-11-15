@@ -9,8 +9,8 @@
  * sees a NUL or reaches `max_len`, returning the limit unchanged if the string is unterminated so
  * callers can treat that as an error.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 ssize_t c_strnlen(char *str,size_t max_len)
 

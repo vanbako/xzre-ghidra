@@ -10,8 +10,8 @@
  * pointer is cached in `ctx->got_ctx.got_ptr` and later consumed when swapping the cpuid GOT slot
  * over to the implant's resolver.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void * update_got_address(elf_entry_ctx_t *entry_ctx)
 

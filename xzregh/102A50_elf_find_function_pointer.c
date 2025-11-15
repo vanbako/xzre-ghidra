@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Takes a string-reference catalogue entry, locates the associated RELRO slot, and checks CET landing requirements before returning the pointer. The loader relies on it to identify sshd callback tables—such as monitor handlers—that it will later overwrite with backdoor functions.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL elf_find_function_pointer
                (StringXrefId xref_id,void **pOutCodeStart,void **pOutCodeEnd,void **pOutFptrAddr,

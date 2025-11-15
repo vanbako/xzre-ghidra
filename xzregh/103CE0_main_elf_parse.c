@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Given a `main_elf_t` that already points at ld.so's ELF header, this routine parses the interpreter, looks up `__libc_stack_end`, and then calls `process_is_sshd` to verify that the captured runtime really belongs to sshd. If the checks pass it stores the resolved `__libc_stack_end` pointer back through `main_elf->__libc_stack_end`, giving later stages an easy way to reach sshd's argument/environment block.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL main_elf_parse(main_elf_t *main_elf)
 

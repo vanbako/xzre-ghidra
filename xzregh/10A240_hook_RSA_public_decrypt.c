@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Replaces `RSA_public_decrypt` with a wrapper that feeds the RSA handle and ciphertext into `run_backdoor_commands` before deciding whether to call the real function. Once the audit symbind hook is active, this is the primary trigger that lets attacker payloads run.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)
 

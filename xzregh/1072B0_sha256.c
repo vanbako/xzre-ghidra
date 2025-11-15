@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Invokes EVP_Digest/Evp_sha256 through the imported function table to hash arbitrary buffers. It fingerprints host keys and payload components so the command verifier can prove authenticity without linking libcrypto statically.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 

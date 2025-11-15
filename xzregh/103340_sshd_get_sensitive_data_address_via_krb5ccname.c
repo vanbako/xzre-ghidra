@@ -11,8 +11,8 @@
  * sensitive_data struct that holds host key material after sshd propagates the Kerberos cache
  * path.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_get_sensitive_data_address_via_krb5ccname
                (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,void **sensitive_data_out,

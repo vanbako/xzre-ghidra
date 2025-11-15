@@ -791,7 +791,14 @@
       "names": [
         "kex"
       ],
-      "code": "struct kex;"
+      "code": "struct kex {\n u8 opaque;\n};"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "kex"
+      ],
+      "code": "typedef struct kex kex;"
     },
     {
       "kind": "struct",
@@ -799,6 +806,13 @@
         "monitor"
       ],
       "code": "struct monitor {\n int m_recvfd;\n int m_sendfd;\n int m_log_recvfd;\n int m_log_sendfd;\n struct kex **m_pkex;\n pid_t m_pid;\n};"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "monitor"
+      ],
+      "code": "typedef struct monitor monitor;"
     },
     {
       "kind": "struct",

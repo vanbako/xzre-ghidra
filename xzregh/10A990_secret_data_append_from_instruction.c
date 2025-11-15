@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Evaluates a decoded instruction and, when it matches expected patterns, sets a bit inside `global_ctx->secret_data`. The loader uses it to encode "this function looks intact" attestation bits that are later consumed during payload decryption.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_cursor_t *cursor)
 

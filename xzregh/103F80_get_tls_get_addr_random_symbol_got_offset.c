@@ -9,8 +9,8 @@
  * with the fake `__tls_get_addr` symbol. The loader uses those numbers as the starting point for
  * `update_got_address`, which refines them into the concrete GOT entry address.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx)
 

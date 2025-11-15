@@ -9,8 +9,8 @@
  * buffer one byte at a time and returns the length as a signed size, allowing other helpers to
  * sanity-check argv/envp strings without resolving libc symbols.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 ssize_t c_strlen(char *str)
 

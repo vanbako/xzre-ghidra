@@ -5,14 +5,10 @@
 
 
 /*
- * AutoDoc: Validates that the loader resolved all 0x1d imports and, crucially, that the RSA-related PLT
- * entries are non-null. If any of the three slots are missing it drops in loader callbacks
- * (`backdoor_init_stage2` and `init_shared_globals`) so the hook table never points at garbage.
- * Otherwise it reports success and the caller can start re-pointing the mm hooks at the real
- * OpenSSL routines.
+ * AutoDoc: Sanity-checks the OpenSSL import table before the hooks are allowed to run. It requires `resolved_imports_count` to equal 0x1d and then inspects the `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key` PLT shims. If at least one of them is resolved it returns TRUE so later code can jump through the host's libcrypto. When all three slots are still NULL it plants `backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps waiting until the imports are ready.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL init_imported_funcs(imported_funcs_t *imported_funcs)
 

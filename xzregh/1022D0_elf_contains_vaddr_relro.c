@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Combines `elf_contains_vaddr` with the GNU_RELRO metadata harvested during `elf_parse`. The range must sit inside a read-only PT_LOAD (PF_R), and the module must have advertised a RELRO segment; if so the helper also verifies that `[vaddr, vaddr+size)` falls within the page-aligned RELRO window cached in `elf_info_t`. Anything outside that protected span returns FALSE, which prevents the loader from treating writable data as RELRO by mistake.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)
 

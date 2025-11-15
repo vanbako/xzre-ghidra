@@ -11,8 +11,8 @@
  * succeeded, and if the write fails it terminates sshd via the libc exit import to avoid leaving
  * a half-patched state.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
 

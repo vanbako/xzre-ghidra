@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Runs the singleton appender against either a provided code pointer or the caller's return address, letting hooks fingerprint themselves at runtime. The recorded bits contribute to the secret_data blob used for payload decryption.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_from_address
                (void *addr,secret_data_shift_cursor_t shift_cursor,uint shift_count,

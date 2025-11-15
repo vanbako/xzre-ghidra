@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Disassembles forward until it encounters a CALL opcode and reports both the instruction and target. The hook finder uses it to locate indirect dispatcher sites in sshd so the injected shims can be spliced in safely.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_t *dctx)
 

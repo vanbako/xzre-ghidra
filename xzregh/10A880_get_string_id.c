@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Traverses the embedded string-trie and returns the encoded identifier for a runtime string. Every heuristic that matches sshd literals—logging, monitor messages, protocol banners—goes through this to avoid shipping plaintext strings in the payload.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 EncodedStringId get_string_id(char *string_begin,char *string_end)
 

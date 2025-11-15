@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Iterates an array of secret_data_item descriptors, assigning indexes on the fly and invoking the supplied appender for each. This batches the dozens of integrity checks that run during backdoor_setup into a single call.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_items
                (secret_data_item_t *items,u64 items_count,secret_data_appender_fn appender)

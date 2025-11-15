@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Searches for MOV instructions with configurable load/store semantics and hands back the matched operands. It underpins many of the signature searches the implant runs while deriving addresses for secret data or resolver trampolines.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_mov_instruction
                (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)

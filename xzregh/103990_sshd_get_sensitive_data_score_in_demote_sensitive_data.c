@@ -9,8 +9,8 @@
  * three points if it ever references the candidate pointer. That routine is highly specific to
  * the real sensitive_data block, so even a single hit is treated as strong evidence.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int sshd_get_sensitive_data_score_in_demote_sensitive_data
               (void *sensitive_data,elf_info_t *elf,string_references_t *refs)

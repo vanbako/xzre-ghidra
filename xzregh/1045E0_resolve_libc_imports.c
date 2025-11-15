@@ -10,8 +10,8 @@
  * when both imports succeed does it mark `libc_imports_t` as ready, ensuring subsequent socket
  * I/O helpers can operate without touching the real PLT.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *imports)
 

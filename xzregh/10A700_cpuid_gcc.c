@@ -4,10 +4,13 @@
 // Prototype: void __stdcall _cpuid_gcc(uint level, uint * a, uint * b, uint * c, uint * d)
 
 
-/* WARNING: Variable defined which should be unmapped: leaf_info */
-/* GCC-style CPUID shim that dispatches through the individual helper thunks for every supported
-   leaf (basic, cache, topology, extended brand strings, etc.). Whatever leaf pointer it chooses
-   has EAX/EBX/ECX/EDX copied into the provided outputs so callers don’t need inline assembly. */
+/*
+ * AutoDoc: GCC-style CPUID shim that dispatches through the individual helper thunks for every supported
+ * leaf (basic, cache, topology, extended brand strings, etc.). Whatever leaf pointer it chooses
+ * has EAX/EBX/ECX/EDX copied into the provided outputs so callers don’t need inline assembly.
+ */
+
+#include "xzre_types.h"
 
 void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
 

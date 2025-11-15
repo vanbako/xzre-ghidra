@@ -10,8 +10,8 @@
  * or '/'. It returns the offending pointer so `process_is_sshd` can treat those switches as a
  * hard stop and avoid touching sshd instances launched in debug or non-daemon modes.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 char * check_argument(char arg_first_char,char *arg_name)
 

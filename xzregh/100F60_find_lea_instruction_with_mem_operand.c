@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_lea_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)

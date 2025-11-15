@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Calls the singleton appender only when a supplied index is non-zero, making it easy to gate optional fingerprint operations. The various secret-data tables use it to share common code while respecting per-item enable flags.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_item
                (secret_data_shift_cursor_t shift_cursor,uint operation_index,uint shift_count,

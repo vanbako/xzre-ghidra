@@ -11,8 +11,8 @@
  * pointer+8, pointer+0x10) it treats the lowest address as the sensitive_data candidate
  * generated during sshd's early zero-initialisation.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_get_sensitive_data_address_via_xcalloc
                (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,

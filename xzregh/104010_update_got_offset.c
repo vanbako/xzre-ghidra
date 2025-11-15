@@ -9,8 +9,8 @@
  * reproducible base when translating between the baked relocation constants and runtime
  * addresses. It pairs with `update_got_address` during the cpuid GOT patch.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void update_got_offset(elf_entry_ctx_t *ctx)
 

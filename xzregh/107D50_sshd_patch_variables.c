@@ -11,8 +11,8 @@
  * derives the current request ID from the original function pointer so replies continue matching
  * sshd's state machine.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_patch_variables
                (BOOL skip_root_patch,BOOL disable_pam,BOOL replace_monitor_reqtype,

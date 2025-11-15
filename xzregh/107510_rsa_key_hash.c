@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Serialises the RSA exponent and modulus and hashes them with SHA256 using the resolved imports. The monitor hooks rely on that digest to confirm that an attacker request refers to a known host key before acting.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 

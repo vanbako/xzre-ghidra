@@ -11,8 +11,8 @@
  * in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->m_sendfd/m_recvfd
  * directly.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_context_t *ctx)
 

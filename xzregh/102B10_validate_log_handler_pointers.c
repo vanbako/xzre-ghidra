@@ -5,15 +5,10 @@
 
 
 /*
- * AutoDoc: Replays sshd's code that writes `log_handler` and `log_handler_ctx`: starting from the
- * string-reference index for the logging functions it walks forward, verifies the LEA that
- * materialises the handler storage, re-identifies the function via `find_function`, and then
- * confirms that both candidate pointers are written via MOV [mem],reg instructions in that
- * window. Only when both stores are observed does it accept the pair as the real
- * log_handler/log_handler_ctx slots.
+ * AutoDoc: Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them. The helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference entries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then searches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept the pair as the genuine log-handler slots.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL validate_log_handler_pointers
                (void *addr1,void *addr2,void *search_base,u8 *code_end,string_references_t *refs,

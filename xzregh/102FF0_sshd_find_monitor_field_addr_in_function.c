@@ -11,8 +11,8 @@
  * `sshd_find_monitor_struct` recover individual monitor fields (send/recv fds, sshbuf pointers,
  * etc.) even when the surrounding function is stripped.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_find_monitor_field_addr_in_function
                (u8 *code_start,u8 *code_end,u8 *data_start,u8 *data_end,void **monitor_field_ptr_out

@@ -10,8 +10,8 @@
  * descriptor increments a counter, and when it matches `socket_index` the fd is returned so the
  * implant can recycle sshd's sockets without holding a monitor struct.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)
 

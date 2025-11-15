@@ -9,8 +9,8 @@
  * until it hits either a NULL or the allocation boundary. Sensitive-data heuristics call it when
  * walking sshd tables whose length isn’t stored explicitly.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
 

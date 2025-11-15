@@ -5,13 +5,10 @@
 
 
 /*
- * AutoDoc: Drives the full ld.so preparation sequence: resolves several EC/EVP helpers, maps
- * `_dl_audit_symbind_alt`, finds the `l_name` displacement, extracts `_dl_naudit/_dl_audit`, and
- * finally discovers the `l_audit_any_plt` byte plus its mask. It also copies the basename of
- * libcrypto into `hooks->ldso_ctx` so the forged link_map name matches the original string.
+ * AutoDoc: Coordinates the entire ld.so reconnaissance pass. It resolves the necessary EC/EVP helpers via the fake allocator, copies `_dl_audit_symbind_alt`’s address/size out of ld.so, and uses `find_link_map_l_name` to compute the displacement between the cached and live link_map entries. With that offset it invokes `find_dl_naudit` to capture the `_dl_naudit`/`_dl_audit` pointers and `find_link_map_l_audit_any_plt` to learn where the audit bit lives. Finally it copies libcrypto’s basename into `hooks->ldso_ctx` so the forged `l_name` string looks correct. Any failure frees the temporary imports and aborts the audit-hook install path.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_dl_audit_offsets
                (backdoor_data_handle_t *data,ptrdiff_t *libname_offset,backdoor_hooks_data_t *hooks,
@@ -36,9 +33,6 @@ BOOL find_dl_audit_offsets
   uchar *vaddr;
   backdoor_hooks_data_t *pbVar14;
   byte bVar15;
-  backdoor_hooks_data_t *hooks_ctx;
-  dl_audit_symbind_alt_fn audit_stub;
-  lzma_allocator *libcrypto_allocator;
   
   bVar15 = 0;
   BVar8 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,FALSE);

@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Checks whether a serialized BIGNUM is negative by inspecting its buffer layout. Secret-data scanners invoke it to ignore malformed key material pulled from sshd buffers.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshbuf_bignum_is_negative(sshbuf *buf)
 

@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Runs a two-stage ChaCha20 decrypt to recover the embedded secret-data blob using keys stored alongside the payload. Other helpers request it whenever they need the ED448 key or command constants.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
 

@@ -10,8 +10,8 @@
  * EINTR, and returns it on success. If the monitor pointer is missing or the fd is bad/EBADF it
  * falls back to `sshd_get_usable_socket`'s fd scanner.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_get_client_socket
                (global_context_t *ctx,int *pSocket,int socket_index,SocketMode socket_direction)

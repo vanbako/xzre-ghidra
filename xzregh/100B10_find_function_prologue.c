@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Sweeps backward from a code pointer looking for a plausible function prologue based on decoded instruction patterns. The runtime loader uses it to recover entry points in stripped sshd/libc images before installing hooks.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType find_mode)
 

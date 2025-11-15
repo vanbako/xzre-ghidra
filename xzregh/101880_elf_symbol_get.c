@@ -9,8 +9,8 @@
  *
  * If a symbol version is supplied it additionally consults `.gnu.version`/`.gnu.version_d`: the version index is read from `versym`, then matched against the verifier definitions by walking the linked `verdef` list and comparing the underlying string id. Returning NULL means either the target symbol is missing, the module did not advertise GNU hash+version tables, or the string/relocation pointers failed validation.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 Elf64_Sym *
 elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStringId sym_version)

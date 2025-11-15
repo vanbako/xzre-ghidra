@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Finds the next LEA instruction in the stream and returns operand details. The backdoor uses this to recover base-plus-offset calculations that point at data structures it later siphons.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
 

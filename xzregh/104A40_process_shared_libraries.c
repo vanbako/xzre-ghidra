@@ -10,8 +10,8 @@
  * the map-walker. On success it propagates the filled-in handles (and libc import table) back to
  * the caller so later stages never have to read `r_debug` again.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
 

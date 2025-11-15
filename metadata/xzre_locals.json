@@ -3495,78 +3495,51 @@
   },
   "find_link_map_l_name": {
     "source": "xzre/xzre_code/find_link_map_l_name.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "libc_imports",
-        "type": "libc_imports_t *"
+        "original": "plVar18",
+        "replacement": "liblzma_snapshot"
       },
       {
-        "name": "ldso_elf",
-        "type": "elf_info_t *"
+        "original": "plVar17",
+        "replacement": "relro_limit"
       },
       {
-        "name": "link_map_cursor",
-        "type": "link_map *"
+        "original": "plVar16",
+        "replacement": "snapshot_iter"
       },
       {
-        "name": "audit_stub",
-        "type": "dl_audit_symbind_alt_fn"
+        "original": "plVar15",
+        "replacement": "runtime_entry"
       },
       {
-        "name": "import_allocator",
-        "type": "lzma_allocator *"
+        "original": "plVar14",
+        "replacement": "snapshot_entry"
+      },
+      {
+        "original": "plVar3",
+        "replacement": "candidate_map"
+      },
+      {
+        "original": "plVar1",
+        "replacement": "libc_imports"
+      },
+      {
+        "original": "peVar2",
+        "replacement": "ldso_elf"
       }
     ]
   },
   "find_dl_naudit": {
     "source": "xzre/xzre_code/find_dl_naudit.c",
-    "locals": [
-      {
-        "name": "rtld_global_ro",
-        "type": "uchar *"
-      },
-      {
-        "name": "naudit_string",
-        "type": "char *"
-      },
-      {
-        "name": "libcrypto_symbol",
-        "type": "Elf64_Sym *"
-      },
-      {
-        "name": "audit_stub",
-        "type": "dl_audit_symbind_alt_fn"
-      },
-      {
-        "name": "naudit_slot",
-        "type": "uint *"
-      }
-    ]
+    "locals": [],
+    "register_temps": []
   },
   "process_shared_libraries_map": {
     "source": "xzre/xzre_code/process_shared_libraries_map.c",
-    "locals": [
-      {
-        "name": "link_map_cursor",
-        "type": "link_map *"
-      },
-      {
-        "name": "basename",
-        "type": "char *"
-      },
-      {
-        "name": "shared_data",
-        "type": "backdoor_data_t *"
-      },
-      {
-        "name": "string_id",
-        "type": "EncodedStringId"
-      },
-      {
-        "name": "rtld_global_sym",
-        "type": "Elf64_Sym *"
-      }
-    ]
+    "locals": [],
+    "register_temps": []
   },
   "process_shared_libraries": {
     "source": "xzre/xzre_code/process_shared_libraries.c",
@@ -3587,118 +3560,18 @@
   },
   "find_link_map_l_audit_any_plt_bitmask": {
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c",
-    "locals": [
-      {
-        "name": "code_ptr",
-        "type": "u8 *"
-      },
-      {
-        "name": "decrypt_stub",
-        "type": "pfn_EVP_DecryptInit_ex_t"
-      },
-      {
-        "name": "libc_getuid_stub",
-        "type": "pfn_getuid_t"
-      },
-      {
-        "name": "matched_field",
-        "type": "u8 *"
-      }
-    ],
-    "register_temps": [
-      {
-        "original": "local_70._0_4_",
-        "replacement": "local_70.flags_u16"
-      },
-      {
-        "original": "local_70._13_1_",
-        "replacement": "local_70.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "local_70._14_1_",
-        "replacement": "local_70.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_70._15_1_",
-        "replacement": "local_70.decoded.modrm.breakdown.modrm_rm"
-      }
-    ]
+    "locals": [],
+    "register_temps": []
   },
   "find_link_map_l_audit_any_plt": {
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c",
-    "locals": [
-      {
-        "name": "audit_stub",
-        "type": "dl_audit_symbind_alt_fn"
-      },
-      {
-        "name": "search_state",
-        "type": "instruction_search_ctx_t"
-      },
-      {
-        "name": "write_stub",
-        "type": "pfn_write_t"
-      },
-      {
-        "name": "pselect_stub",
-        "type": "pfn_pselect_t"
-      }
-    ],
-    "register_temps": [
-      {
-        "original": "local_c4._0_2_",
-        "replacement": "*(ushort *)&local_c4"
-      },
-      {
-        "original": "local_c4._3_1_",
-        "replacement": "*(((u8 *)&local_c4) + 3)"
-      },
-      {
-        "original": "local_c8._2_2_",
-        "replacement": "*(ushort *)((u8 *)&local_c8 + 2)"
-      },
-      {
-        "original": "offset_to_match._0_4_",
-        "replacement": "*(uint *)&local_c0.offset_to_match"
-      },
-      {
-        "original": "local_80.prefix._0_4_",
-        "replacement": "local_80.prefix.flags_u16"
-      },
-      {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
-      },
-      {
-        "original": "local_80.prefix._13_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "local_80.prefix._14_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_80.prefix._15_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
-      }
-    ]
+    "locals": [],
+    "register_temps": []
   },
   "find_dl_audit_offsets": {
     "source": "xzre/xzre_code/find_dl_audit_offsets.c",
-    "locals": [
-      {
-        "name": "libcrypto_allocator",
-        "type": "lzma_allocator *"
-      },
-      {
-        "name": "audit_stub",
-        "type": "dl_audit_symbind_alt_fn"
-      },
-      {
-        "name": "hooks_ctx",
-        "type": "backdoor_hooks_data_t *"
-      }
-    ]
+    "locals": [],
+    "register_temps": []
   },
   "backdoor_setup": {
     "source": "xzre/xzre_code/backdoor_setup.c",

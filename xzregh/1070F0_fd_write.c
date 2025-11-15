@@ -9,8 +9,8 @@
  * writes as fatal so callers either send the entire buffer or receive -1. It is the plumbing used
  * whenever the implant forges monitor messages.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)
 

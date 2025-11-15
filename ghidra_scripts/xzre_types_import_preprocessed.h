@@ -589,7 +589,11 @@ struct sshbuf {
  struct sshbuf *parent;
 };
 
-struct kex;
+struct kex {
+ u8 opaque;
+};
+
+typedef struct kex kex;
 
 struct monitor {
  int m_recvfd;
@@ -599,6 +603,8 @@ struct monitor {
  struct kex **m_pkex;
  pid_t m_pid;
 };
+
+typedef struct monitor monitor;
 
 struct sensitive_data {
  struct sshkey **host_keys;

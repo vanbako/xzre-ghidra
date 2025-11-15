@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Performs a one-off fingerprint of a function: finds its start, validates the instruction stream, shifts the requested number of bits, and marks the operation id as complete. Setup routines call it to attest critical helpers before relying on them for decryption.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_singleton
                (u8 *call_site,u8 *code,secret_data_shift_cursor_t shift_cursor,uint shift_count,

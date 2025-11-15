@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Scans a referenced function for MOV instructions that materialise an address inside the supplied data window. The backdoor uses it to recover struct-field pointers (for example the monitor sockets) so it can redirect them to its own handlers.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void * find_addr_referenced_in_mov_instruction
                  (StringXrefId id,string_references_t *refs,void *mem_range_start,

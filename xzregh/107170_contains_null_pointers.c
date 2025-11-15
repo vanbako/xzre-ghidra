@@ -9,8 +9,8 @@
  * reports 1 as soon as it encounters a NULL slot, letting callers bail out if any required import
  * failed to resolve.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL contains_null_pointers(void **pointers,uint num_pointers)
 

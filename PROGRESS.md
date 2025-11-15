@@ -2,6 +2,14 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-15
+- Ran a fresh loader_rt RE sprint: regenerated the per-function stubs, reread every helper under `xzregh/10277*–10A80*`, and captured concise notes describing the GOT math, ld.so manipulation, cpuid glue, and runtime plumbing so the scratch files now reflect the latest understanding.
+- Rewrote the AutoDoc metadata for the loader orchestrators (`init_hooks_ctx`, `init_imported_funcs`, `validate_log_handler_pointers`, `find_link_map_l_name`, `find_dl_naudit`, `process_shared_libraries_map`, `find_link_map_l_audit_any_plt*`, `find_dl_audit_offsets`) and added an explicit `xzre_globals` entry so the hooks blob/global context layout is documented inside `metadata/functions_autodoc.json`.
+- Ran `./scripts/refresh_xzre_project.sh` to push the new metadata through Ghidra, regenerate `ghidra_scripts/generated/xzre_autodoc.json`, refresh `xzregh/*.c`, and update the portable project archive.
+- Extended the locals metadata for the ld.so walkers and audit helpers (link_map candidates, naudit slot pointers, allocator handles, etc.) so the refresh now reuses descriptive names instead of `plVar*` placeholders, then re-ran the refresh to apply the new mapping.
+- Fixed `scripts/apply_ghidra_comments_to_decomp.py` to fall back to `_name` variants so symbols like `_cpuid_gcc` finally pick up their AutoDoc blocks; re-applied the comments, confirmed both cpuid wrappers now render the tagged narrative, and re-exported the project archive.
+- Next: chase down the lone function that still lacks an AutoDoc export per `apply_ghidra_comments_to_decomp.py` so the refresh stops emitting warnings.
+
 ## 2025-11-13
 - Revalidated `xzregh/100020_x86_dasm.c` and found the helper still referenced `DAT_0010*` globals; traced the regression to the six opcode bitset entries in `metadata/linker_map.json` that were 0x50 bytes high relative to the actual rodata and rewrote their offsets to hit `dasm_threebyte_has_modrm`, `dasm_onebyte_is_invalid`, etc.
 - Ran `./scripts/refresh_xzre_project.sh` so the linker-map fix propagated through the headless project export; `xzregh/100020_x86_dasm.c` now pulls from the named bitset tables and no longer leaves undefined identifiers behind in helper builds.

@@ -10,8 +10,8 @@
  * enabled. It rebuilds safe format strings on the stack, calls sshd_log() to emit the sanitised
  * message, and leaves syslog alone unless the caller requested suppression via cmd flags.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 

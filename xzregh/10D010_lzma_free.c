@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Placeholder export for `lzma_free()` that funnels straight into `halt_baddata()`. The backdoor never expects this stub to run because it always routes work through the fake allocator, so entering it implies the GOT was not repointed and the process halts rather than corrupting memory.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 void lzma_free(void *ptr,lzma_allocator *allocator)
 

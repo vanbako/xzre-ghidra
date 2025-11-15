@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Validates the caller site, shifts the requested bits, and returns TRUE (or the bypass flag). It is sprinkled at sensitive call sites so the secret_data ledger captures that execution passed through trusted glue.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL secret_data_append_from_call_site
                (secret_data_shift_cursor_t shift_cursor,uint shift_count,uint operation_index,

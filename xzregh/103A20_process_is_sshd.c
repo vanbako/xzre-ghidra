@@ -12,8 +12,8 @@
  * aborts the run, which keeps the loader from running inside unexpected binaries or
  * instrumentation harnesses.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
 

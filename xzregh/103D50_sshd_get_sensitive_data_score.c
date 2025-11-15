@@ -9,8 +9,8 @@
  * scores get doubled and added together, then the `do_child` score is tacked on. Candidates must
  * exceed the global threshold (>=8) before the pointer is published to the rest of the implant.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 int sshd_get_sensitive_data_score(void *sensitive_data,elf_info_t *elf,string_references_t *refs)
 

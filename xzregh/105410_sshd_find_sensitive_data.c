@@ -12,8 +12,8 @@
  * higher-confidence candidate, and writes it into `ctx->sshd_sensitive_data` before returning
  * success.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL sshd_find_sensitive_data
                (elf_info_t *sshd,elf_info_t *libcrypto,string_references_t *refs,

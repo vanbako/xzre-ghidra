@@ -7,8 +7,8 @@
 /*
  * AutoDoc: Central dispatcher invoked from the RSA hooks: it parses the forged modulus, decrypts staged payload chunks, verifies the ED448 signature, toggles sshd configuration/logging, and, if necessary, escalates through `sshd_proxy_elevate`. Every command the backdoor accepts flows through this routine before control returns to libcrypto.
  */
-#include "xzre_types.h"
 
+#include "xzre_types.h"
 
 BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
 
