@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them. The helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference entries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then searches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept the pair as the genuine log-handler slots.
+ * AutoDoc: Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.
+ * The helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference
+ * entries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then
+ * searches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept
+ * the pair as the genuine log-handler slots.
  */
 
 #include "xzre_types.h"

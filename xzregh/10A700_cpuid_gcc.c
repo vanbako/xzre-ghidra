@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: GCC-style CPUID shim that dispatches through the individual helper thunks for every supported
- * leaf (basic, cache, topology, extended brand strings, etc.). Whatever leaf pointer it chooses
- * has EAX/EBX/ECX/EDX copied into the provided outputs so callers don’t need inline assembly.
+ * AutoDoc: GCC-style CPUID shim that dispatches through the individual helper thunks for every supported leaf (basic, cache, topology,
+ * extended brand strings, etc.). Whatever leaf pointer it chooses has EAX/EBX/ECX/EDX copied into the provided outputs so callers
+ * don’t need inline assembly.
  */
 
 #include "xzre_types.h"

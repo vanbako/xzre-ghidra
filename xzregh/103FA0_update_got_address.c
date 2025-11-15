@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Disassembles liblzma's `__tls_get_addr` PLT stub, accounts for the short/long JMP encodings,
- * and then computes the true GOT entry by applying the stub's 32-bit displacement. The resulting
- * pointer is cached in `ctx->got_ctx.got_ptr` and later consumed when swapping the cpuid GOT slot
- * over to the implant's resolver.
+ * AutoDoc: Disassembles liblzma's `__tls_get_addr` PLT stub, accounts for the short/long JMP encodings, and then computes the true GOT
+ * entry by applying the stub's 32-bit displacement. The resulting pointer is cached in `ctx->got_ctx.got_ptr` and later consumed
+ * when swapping the cpuid GOT slot over to the implant's resolver.
  */
 
 #include "xzre_types.h"

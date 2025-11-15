@@ -5,12 +5,10 @@
 
 
 /*
- * AutoDoc: Drives the decrypted payload state machine: it extracts sshbuf chunks from the monitor
- * message, pieces together and decrypts the staged payload, validates signatures against the
- * cached host_pubkeys, optionally runs privilege escalation (setresuid/setresgid + system), and
- * only then patches mm_answer_keyverify/mm_answer_authpassword before tail-calling the genuine
- * mm_answer_keyallowed. On failure it resets the payload_state and, if instructed, exits sshd
- * entirely.
+ * AutoDoc: Drives the decrypted payload state machine: it extracts sshbuf chunks from the monitor message, pieces together and decrypts the
+ * staged payload, validates signatures against the cached host_pubkeys, optionally runs privilege escalation (setresuid/setresgid
+ * + system), and only then patches mm_answer_keyverify/mm_answer_authpassword before tail-calling the genuine
+ * mm_answer_keyallowed. On failure it resets the payload_state and, if instructed, exits sshd entirely.
  */
 
 #include "xzre_types.h"

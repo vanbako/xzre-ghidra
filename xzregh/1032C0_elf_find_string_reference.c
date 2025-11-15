@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Finds the first instruction that references a specific string literal between the supplied code bounds. The loader uses this pinpoint search to anchor subsequent pattern matching when triangulating hook targets from log messages and status strings.
+ * AutoDoc: Finds the first instruction that references a specific string literal between the supplied code bounds. The loader uses this
+ * pinpoint search to anchor subsequent pattern matching when triangulating hook targets from log messages and status strings.
  */
 
 #include "xzre_types.h"

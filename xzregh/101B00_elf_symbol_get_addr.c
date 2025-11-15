@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are non-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates either the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.
+ * AutoDoc: Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are
+ * non-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates
+ * either the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.
  */
 
 #include "xzre_types.h"

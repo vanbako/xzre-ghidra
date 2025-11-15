@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Serialises the RSA exponent and modulus and hashes them with SHA256 using the resolved imports. The monitor hooks rely on that digest to confirm that an attacker request refers to a known host key before acting.
+ * AutoDoc: Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into
+ * a ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the
+ * 0x100a-byte scratch cancels the fingerprint.
  */
 
 #include "xzre_types.h"

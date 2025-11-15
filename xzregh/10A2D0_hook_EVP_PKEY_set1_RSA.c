@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Observes when sshd wraps an RSA key in an EVP_PKEY, hands the key to `run_backdoor_commands`, and then falls through to the true OpenSSL routine. It guarantees the backdoor sees host keys even if the decrypt hook never fires.
+ * AutoDoc: Tap point for EVP_PKEY_set1_RSA so the backdoor sees every RSA handle even when the decrypt hook never fires. It simply calls
+ * run_backdoor_commands on the key and then invokes the preserved OpenSSL routine.
  */
 
 #include "xzre_types.h"

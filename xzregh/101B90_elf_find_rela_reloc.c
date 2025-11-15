@@ -5,9 +5,15 @@
 
 
 /*
- * AutoDoc: Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated as an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns the relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper immediately returns `elfbase + r_addend`.
+ * AutoDoc: Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated
+ * as an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns
+ * the relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper
+ * immediately returns `elfbase + r_addend`.
  *
- * A pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present they force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index. Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was provided, stores the position it stopped at.
+ * A pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present
+ * they force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index.
+ * Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was
+ * provided, stores the position it stopped at.
  */
 
 #include "xzre_types.h"

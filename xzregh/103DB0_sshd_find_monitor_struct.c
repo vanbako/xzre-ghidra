@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Calls `sshd_find_monitor_field_addr_in_function` across ten monitor-related routines
- * (accept/recv/send helpers, channel handlers, etc.), tallies how many times each BSS address
- * shows up, and picks the consensus pointer when at least five hits agree. The winner is stored
- * in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->m_sendfd/m_recvfd
+ * AutoDoc: Calls `sshd_find_monitor_field_addr_in_function` across ten monitor-related routines (accept/recv/send helpers, channel
+ * handlers, etc.), tallies how many times each BSS address shows up, and picks the consensus pointer when at least five hits
+ * agree. The winner is stored in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->m_sendfd/m_recvfd
  * directly.
  */
 

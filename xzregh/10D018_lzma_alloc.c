@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Counterpart to `lzma_free` that also traps. Once the loader installs the fake allocator the GOT entry is overwritten with `fake_lzma_alloc`; if execution ever reaches this stub it means the relocation failed and the safest option is to abort immediately.
+ * AutoDoc: Counterpart to `lzma_free` that also traps. Once the loader installs the fake allocator the GOT entry is overwritten with
+ * `fake_lzma_alloc`; if execution ever reaches this stub it means the relocation failed and the safest option is to abort
+ * immediately.
  */
 
 #include "xzre_types.h"

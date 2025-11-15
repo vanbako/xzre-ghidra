@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller supplied `addend` (always `0xa0000000`) and checks for the magic constant, which makes the instruction stream look less like a straightforward RELRO probe in the object file.
+ * AutoDoc: Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller
+ * supplied `addend` (always `0xa0000000`) and checks for the magic constant, which makes the instruction stream look less like a
+ * straightforward RELRO probe in the object file.
  */
 
 #include "xzre_types.h"

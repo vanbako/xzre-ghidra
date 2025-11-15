@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Takes the displacement from `find_link_map_l_name` and hunts for the byte and mask that back ld.so’s `link_map::l_audit_any_plt` flag. It temporarily resolves `EVP_DecryptInit_ex` and libc’s `getuid`, decodes `_dl_audit_symbind_alt` with `x86_dasm`, and tracks which register holds the computed pointer. Once it sees the MOV-from-link_map followed by a TEST/BT it validates that the mask is a single set bit, records the absolute address in `hooks->ldso_ctx.sshd_link_map_l_audit_any_plt_addr`, stores the byte-wide mask, and insists the bit is still clear; otherwise the helper sets the search context’s `result` flag and bails out.
+ * AutoDoc: Takes the displacement from `find_link_map_l_name` and hunts for the byte and mask that back ld.so’s `link_map::l_audit_any_plt`
+ * flag. It temporarily resolves `EVP_DecryptInit_ex` and libc’s `getuid`, decodes `_dl_audit_symbind_alt` with `x86_dasm`, and
+ * tracks which register holds the computed pointer. Once it sees the MOV-from-link_map followed by a TEST/BT it validates that the
+ * mask is a single set bit, records the absolute address in `hooks->ldso_ctx.sshd_link_map_l_audit_any_plt_addr`, stores the byte-
+ * wide mask, and insists the bit is still clear; otherwise the helper sets the search context’s `result` flag and bails out.
  */
 
 #include "xzre_types.h"

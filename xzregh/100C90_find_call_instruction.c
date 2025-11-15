@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Disassembles forward until it encounters a CALL opcode and reports both the instruction and target. The hook finder uses it to locate indirect dispatcher sites in sshd so the injected shims can be spliced in safely.
+ * AutoDoc: Disassembles forward until it encounters a CALL opcode and reports both the instruction and target. The hook finder uses it to
+ * locate indirect dispatcher sites in sshd so the injected shims can be spliced in safely.
  */
 
 #include "xzre_types.h"

@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Private implementation of `memmove` so the object never has to import libc for something this trivial. It detects backwards overlap (`src < dest < src+cnt`) and copies from the end towards the beginning in that case; every other scenario devolves into a forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with the libc version.
+ * AutoDoc: Private implementation of `memmove` so the object never has to import libc for something this trivial. It detects backwards
+ * overlap (`src < dest < src+cnt`) and copies from the end towards the beginning in that case; every other scenario devolves into
+ * a forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with
+ * the libc version.
  */
 
 #include "xzre_types.h"

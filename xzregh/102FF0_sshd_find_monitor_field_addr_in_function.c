@@ -5,11 +5,10 @@
 
 
 /*
- * AutoDoc: Sweeps a candidate sshd routine for MOV/LEA instructions that load a BSS slot into a
- * register, confirms that the pointer flows unmodified into a nearby call to `mm_request_send`,
- * and returns the underlying data-section address. The helper lets
- * `sshd_find_monitor_struct` recover individual monitor fields (send/recv fds, sshbuf pointers,
- * etc.) even when the surrounding function is stripped.
+ * AutoDoc: Sweeps a candidate sshd routine for MOV/LEA instructions that load a BSS slot into a register, confirms that the pointer flows
+ * unmodified into a nearby call to `mm_request_send`, and returns the underlying data-section address. The helper lets
+ * `sshd_find_monitor_struct` recover individual monitor fields (send/recv fds, sshbuf pointers, etc.) even when the surrounding
+ * function is stripped.
  */
 
 #include "xzre_types.h"

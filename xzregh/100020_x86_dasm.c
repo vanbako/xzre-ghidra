@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Implements a minimal x86-64 decoder that walks a buffer while tracking instruction metadata. Every search helper in the loader uses it to reason about sshd and ld.so machine code without linking a full disassembler, giving the backdoor reliable patch coordinates at runtime.
+ * AutoDoc: Implements a minimal x86-64 decoder that walks a buffer while tracking instruction metadata. Every search helper in the loader
+ * uses it to reason about sshd and ld.so machine code without linking a full disassembler, giving the backdoor reliable patch
+ * coordinates at runtime.
  */
 
 #include "xzre_types.h"

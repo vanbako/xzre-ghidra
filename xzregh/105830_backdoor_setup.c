@@ -5,15 +5,12 @@
 
 
 /*
- * AutoDoc: The loader’s main workhorse. It snapshots the caller’s GOT/stack, builds a local
- * `backdoor_data_t` describing all observed modules, resolves sshd/libcrypto/liblzma/libc/ld.so
- * via `process_shared_libraries`, initialises the shared globals, and pulls in the
- * `backdoor_hooks_data_t` blob sitting inside liblzma. With those pieces it refreshes the
- * string-reference catalogue, configures the global context (payload buffers, sshd/log contexts,
- * import tables), runs the sensitive-data + sshd-metadata discovery routines, and finally rewires
- * ld.so’s audit tables so `backdoor_symbind64` is invoked for every sshd→libcrypto PLT call. On
- * success it copies the updated hook table back into liblzma and leaves the cpuid GOT slot ready
- * to resume execution.
+ * AutoDoc: The loader’s main workhorse. It snapshots the caller’s GOT/stack, builds a local `backdoor_data_t` describing all observed
+ * modules, resolves sshd/libcrypto/liblzma/libc/ld.so via `process_shared_libraries`, initialises the shared globals, and pulls in
+ * the `backdoor_hooks_data_t` blob sitting inside liblzma. With those pieces it refreshes the string-reference catalogue,
+ * configures the global context (payload buffers, sshd/log contexts, import tables), runs the sensitive-data + sshd-metadata
+ * discovery routines, and finally rewires ld.so’s audit tables so `backdoor_symbind64` is invoked for every sshd→libcrypto PLT
+ * call. On success it copies the updated hook table back into liblzma and leaves the cpuid GOT slot ready to resume execution.
  */
 
 #include "xzre_types.h"

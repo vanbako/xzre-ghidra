@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Checks whether a serialized BIGNUM is negative by inspecting its buffer layout. Secret-data scanners invoke it to ignore malformed key material pulled from sshd buffers.
+ * AutoDoc: Treats an sshbuf as a serialized big integer. When the payload is between 0x20 and 0x40 bytes it scans forward until it finds a
+ * byte with the sign bit set; encountering such a byte before hitting the end marks the buffer as “negative” and therefore
+ * suitable for modulus harvesting.
  */
 
 #include "xzre_types.h"

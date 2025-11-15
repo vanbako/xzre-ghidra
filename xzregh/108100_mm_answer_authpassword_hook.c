@@ -5,11 +5,10 @@
 
 
 /*
- * AutoDoc: Responds to MONITOR_REQ_AUTHPASSWORD by either replaying the canned buffer stored in the
- * global payload context or synthesising a minimal success packet on the fly. The hook emits the
- * reply through fd_write(), mirrors sshd's bookkeeping by updating the monitor context at
- * lVar1+0xa0, and returns 1 so the monitor thread believes password authentication succeeded
- * without ever consulting sshd.
+ * AutoDoc: Responds to MONITOR_REQ_AUTHPASSWORD by either replaying the canned buffer stored in the global payload context or synthesising
+ * a minimal success packet on the fly. The hook emits the reply through fd_write(), mirrors sshd's bookkeeping by updating the
+ * monitor context at lVar1+0xa0, and returns 1 so the monitor thread believes password authentication succeeded without ever
+ * consulting sshd.
  */
 
 #include "xzre_types.h"

@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Runs a two-stage ChaCha20 decrypt to recover the embedded secret-data blob using keys stored alongside the payload. Other helpers request it whenever they need the ED448 key or command constants.
+ * AutoDoc: Unwraps the 57-byte global_ctx->secret_data blob with two ChaCha passes. A baked-in key/IV pair (the key_buf constants) decrypts
+ * a 0x30-byte seed, that seed becomes the real ChaCha key, and a second decrypt peels the runtime secret into the caller buffer
+ * using another static IV. All operations go through the resolved EVP entry points so no static crypto ships with the implant.
  */
 
 #include "xzre_types.h"

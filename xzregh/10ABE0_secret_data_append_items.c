@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Iterates an array of secret_data_item descriptors, assigning indexes on the fly and invoking the supplied appender for each. This batches the dozens of integrity checks that run during backdoor_setup into a single call.
+ * AutoDoc: Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,
+ * calls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the
+ * first failure so callers know whether the entire batch completed.
  */
 
 #include "xzre_types.h"

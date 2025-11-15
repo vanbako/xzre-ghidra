@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the
- * buffer one byte at a time and returns the length as a signed size, allowing other helpers to
- * sanity-check argv/envp strings without resolving libc symbols.
+ * AutoDoc: Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the buffer one byte at a time and
+ * returns the length as a signed size, allowing other helpers to sanity-check argv/envp strings without resolving libc symbols.
  */
 
 #include "xzre_types.h"

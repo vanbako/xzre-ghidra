@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Classic popcount loop that returns the number of set bits in a 64-bit value. The string-id trie and several instruction filters rely on it when they compress lookup tables for pattern matching.
+ * AutoDoc: Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into
+ * child indexes without storing per-node counts.
  */
 
 #include "xzre_types.h"

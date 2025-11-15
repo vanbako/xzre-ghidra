@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Invokes EVP_Digest/Evp_sha256 through the imported function table to hash arbitrary buffers. It fingerprints host keys and payload components so the command verifier can prove authenticity without linking libcrypto statically.
+ * AutoDoc: Thin wrapper around EVP_Digest/Evp_sha256: it rejects empty buffers, refuses to write unless mdBuf has at least 32 bytes of
+ * space, looks up OpenSSL’s SHA-256 implementation via the import table, and hashes the supplied payload in place.
  */
 
 #include "xzre_types.h"

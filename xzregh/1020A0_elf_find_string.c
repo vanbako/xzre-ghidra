@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or constrain the search to a suffix of the segment.
+ * AutoDoc: Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable
+ * encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search
+ * continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or
+ * constrain the search to a suffix of the segment.
  */
 
 #include "xzre_types.h"

@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Traverses the embedded string-trie and returns the encoded identifier for a runtime string. Every heuristic that matches sshd literals—logging, monitor messages, protocol banners—goes through this to avoid shipping plaintext strings in the payload.
+ * AutoDoc: Maps runtime strings to EncodedStringId identifiers without shipping plaintext literals. Each call logs itself via
+ * secret_data_append_from_address, clamps the scan to 0x2c bytes, and walks two packed bitmaps (_Lcrc64_clmul_1+0x760 and the
+ * string_action_data trie) while repeatedly calling count_bits to compute the next child index. It returns the encoded ID when it
+ * reaches a terminal node or 0 when the bytes miss the trie, and is used to find SSH banner strings during sshd heuristics.
  */
 
 #include "xzre_types.h"

@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Walks every PT_LOAD segment looking for the last read/write mapping (PF_W|PF_R). Once found it caches three pieces of information: the base of the mapped data (`data_segment_start`), the amount of padding between the end of the file-backed bytes and the next page boundary (`data_segment_alignment`), and the total size of the aligned segment. Callers either request the true segment span (`get_alignment == FALSE`) or the padding region (when TRUE), which is where the implant later tucks the `backdoor_hooks_data_t` structure.
+ * AutoDoc: Walks every PT_LOAD segment looking for the last read/write mapping (PF_W|PF_R). Once found it caches three pieces of
+ * information: the base of the mapped data (`data_segment_start`), the amount of padding between the end of the file-backed bytes
+ * and the next page boundary (`data_segment_alignment`), and the total size of the aligned segment. Callers either request the
+ * true segment span (`get_alignment == FALSE`) or the padding region (when TRUE), which is where the implant later tucks the
+ * `backdoor_hooks_data_t` structure.
  */
 
 #include "xzre_types.h"

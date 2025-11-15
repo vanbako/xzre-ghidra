@@ -5,11 +5,10 @@
 
 
 /*
- * AutoDoc: Converts the IFUNC entry context into a GOT patch: it initialises the GOT bookkeeping, locates
- * the cpuid GOT slot via `update_got_address`, swaps the resolver pointer to
- * `backdoor_init_stage2`, calls the genuine cpuid to finish initialisation, and then restores the
- * slot back to its original target so future calls run the attacker’s resolver without tripping
- * sanity checks.
+ * AutoDoc: Converts the IFUNC entry context into a GOT patch: it initialises the GOT bookkeeping, locates the cpuid GOT slot via
+ * `update_got_address`, swaps the resolver pointer to `backdoor_init_stage2`, calls the genuine cpuid to finish initialisation,
+ * and then restores the slot back to its original target so future calls run the attacker’s resolver without tripping sanity
+ * checks.
  */
 
 #include "xzre_types.h"

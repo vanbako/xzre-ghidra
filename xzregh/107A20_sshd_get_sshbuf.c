@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Walks the cached monitor structure to locate the sshbuf that carries key-exchange data, falling back to heuristics if necessary. The payload executor calls it before mining modulus bytes from the session state.
+ * AutoDoc: Finds the sshbuf inside sshd’s monitor structure that now holds the forged modulus. It dereferences
+ * global_ctx->struct_monitor_ptr_address, uses the packed sshd_offsets to identify the m_pkex pointer and the sshbuf data/size
+ * fields, and validates any candidate via sshbuf_extract. When offsets are unknown it brute-forces the pkex table: two buffers
+ * must decode to “SSH-2.0”/“ssh-2.0” string IDs and the next buffer must look like a negative bignum (sshbuf_bignum_is_negative).
+ * Only then does it return the mapped sshbuf->d pointer and length.
  */
 
 #include "xzre_types.h"

@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Wraps libc’s read with retry logic. It refuses to run without both `read` and
- * `__errno_location`, loops on EINTR, and aborts with -1 when the helper sees EOF before the
- * requested byte count. Successful reads consume the entire length so callers can treat any
- * non-zero return as "buffer filled".
+ * AutoDoc: Wraps libc’s read with retry logic. It refuses to run without both `read` and `__errno_location`, loops on EINTR, and aborts
+ * with -1 when the helper sees EOF before the requested byte count. Successful reads consume the entire length so callers can
+ * treat any non-zero return as "buffer filled".
  */
 
 #include "xzre_types.h"

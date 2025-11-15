@@ -5,11 +5,9 @@
 
 
 /*
- * AutoDoc: Uses the cached monitor payload context to send the prebuilt MONITOR_ANS_KEYVERIFY reply
- * directly to the requesting socket. After the write it restores the original
- * mm_answer_keyverify function pointer so sshd's dispatcher advances as if the verifier
- * succeeded, and if the write fails it terminates sshd via the libc exit import to avoid leaving
- * a half-patched state.
+ * AutoDoc: Uses the cached monitor payload context to send the prebuilt MONITOR_ANS_KEYVERIFY reply directly to the requesting socket.
+ * After the write it restores the original mm_answer_keyverify function pointer so sshd's dispatcher advances as if the verifier
+ * succeeded, and if the write fails it terminates sshd via the libc exit import to avoid leaving a half-patched state.
  */
 
 #include "xzre_types.h"

@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Convenience wrapper that searches for MOV/LEA forms touching a specific address and reports the displacement. It feeds higher-level routines that locate struct fields for the backdoor's runtime patch table.
+ * AutoDoc: Convenience wrapper that searches for MOV/LEA forms touching a specific address and reports the displacement. It feeds higher-
+ * level routines that locate struct fields for the backdoor's runtime patch table.
  */
 
 #include "xzre_types.h"

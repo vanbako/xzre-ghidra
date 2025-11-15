@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Replaces `RSA_public_decrypt` with a wrapper that feeds the RSA handle and ciphertext into `run_backdoor_commands` before deciding whether to call the real function. Once the audit symbind hook is active, this is the primary trigger that lets attacker payloads run.
+ * AutoDoc: Replacement for RSA_public_decrypt: it ensures the PLT pointer is resolved, hands the RSA key to run_backdoor_commands (passing
+ * a do_orig flag by reference), and either returns the backdoor’s result or forwards the call to the genuine OpenSSL symbol
+ * depending on whether the dispatcher consumed the ciphertext.
  */
 
 #include "xzre_types.h"

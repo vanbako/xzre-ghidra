@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Performs a generic sweep for any instruction that touches memory, applying a caller-supplied predicate to filter the operands. The loader routes specialised searches through it when reconstructing complex data flows in sshd.
+ * AutoDoc: Performs a generic sweep for any instruction that touches memory, applying a caller-supplied predicate to filter the operands.
+ * The loader routes specialised searches through it when reconstructing complex data flows in sshd.
  */
 
 #include "xzre_types.h"

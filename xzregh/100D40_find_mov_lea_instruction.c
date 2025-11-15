@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Iterates through MOV and LEA instructions that move pointers into registers, honouring load/store direction flags. The loader uses it to chase GOT writes and frame setups when it has to recover sensitive pointers for the backdoor context.
+ * AutoDoc: Iterates through MOV and LEA instructions that move pointers into registers, honouring load/store direction flags. The loader
+ * uses it to chase GOT writes and frame setups when it has to recover sensitive pointers for the backdoor context.
  */
 
 #include "xzre_types.h"

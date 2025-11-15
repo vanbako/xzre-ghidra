@@ -5,11 +5,10 @@
 
 
 /*
- * AutoDoc: Locates the call site that matches the cached xcalloc reference, walks the following basic
- * block looking for the MOV/LEA that parks the return value in .bss, and collects up to sixteen
- * such stores. Whenever it sees three consecutive slots separated by 8 bytes (pointer,
- * pointer+8, pointer+0x10) it treats the lowest address as the sensitive_data candidate
- * generated during sshd's early zero-initialisation.
+ * AutoDoc: Locates the call site that matches the cached xcalloc reference, walks the following basic block looking for the MOV/LEA that
+ * parks the return value in .bss, and collects up to sixteen such stores. Whenever it sees three consecutive slots separated by 8
+ * bytes (pointer, pointer+8, pointer+0x10) it treats the lowest address as the sensitive_data candidate generated during sshd's
+ * early zero-initialisation.
  */
 
 #include "xzre_types.h"

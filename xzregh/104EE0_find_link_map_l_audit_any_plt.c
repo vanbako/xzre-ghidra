@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Primes an `instruction_search_ctx_t` before invoking the bitmask helper. It sweeps `_dl_audit_symbind_alt` for the LEA that materialises `link_map::l_name` using the caller-provided displacement, records which registers capture the pointer versus the mask, initialises the register filters/output buffers, and then calls `find_link_map_l_audit_any_plt_bitmask`. Success means both the byte offset and AND mask are now stored in `hooks->ldso_ctx`; failure either means the pattern never appeared or the bit was already non-zero.
+ * AutoDoc: Primes an `instruction_search_ctx_t` before invoking the bitmask helper. It sweeps `_dl_audit_symbind_alt` for the LEA that
+ * materialises `link_map::l_name` using the caller-provided displacement, records which registers capture the pointer versus the
+ * mask, initialises the register filters/output buffers, and then calls `find_link_map_l_audit_any_plt_bitmask`. Success means
+ * both the byte offset and AND mask are now stored in `hooks->ldso_ctx`; failure either means the pattern never appeared or the
+ * bit was already non-zero.
  */
 
 #include "xzre_types.h"

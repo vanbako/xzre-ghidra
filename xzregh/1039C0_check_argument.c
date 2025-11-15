@@ -5,10 +5,10 @@
 
 
 /*
- * AutoDoc: Walks a dash-prefixed argv entry two bytes at a time, mirroring each character so it can flag
- * both upper- and lower-case variants of '-d', '-D', '-E', '-Q', or any option that includes '='
- * or '/'. It returns the offending pointer so `process_is_sshd` can treat those switches as a
- * hard stop and avoid touching sshd instances launched in debug or non-daemon modes.
+ * AutoDoc: Walks a dash-prefixed argv entry two bytes at a time, mirroring each character so it can flag both upper- and lower-case
+ * variants of '-d', '-D', '-E', '-Q', or any option that includes '=' or '/'. It returns the offending pointer so
+ * `process_is_sshd` can treat those switches as a hard stop and avoid touching sshd instances launched in debug or non-daemon
+ * modes.
  */
 
 #include "xzre_types.h"

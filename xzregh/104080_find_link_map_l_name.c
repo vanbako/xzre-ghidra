@@ -5,7 +5,12 @@
 
 
 /*
- * AutoDoc: Locates the live `link_map::l_name` byte inside ld.so and gathers the libc/libcrypto imports needed later in the run. It piggybacks on the fake `lzma_alloc` resolver to look up `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`, and `BN_num_bits`, then walks the cached liblzma link_map snapshot inside the binary until it finds the entry whose RELRO tuple matches the running liblzma image. The resulting displacement becomes both `*libname_offset` and the pointer used to index `hooks->ldso_ctx.libcrypto_l_name`, and the helper double-checks that `_dl_audit_symbind_alt` references the same offset so later code can safely rewrite the `l_name` field when posing as an audit module.
+ * AutoDoc: Locates the live `link_map::l_name` byte inside ld.so and gathers the libc/libcrypto imports needed later in the run. It
+ * piggybacks on the fake `lzma_alloc` resolver to look up `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`,
+ * and `BN_num_bits`, then walks the cached liblzma link_map snapshot inside the binary until it finds the entry whose RELRO tuple
+ * matches the running liblzma image. The resulting displacement becomes both `*libname_offset` and the pointer used to index
+ * `hooks->ldso_ctx.libcrypto_l_name`, and the helper double-checks that `_dl_audit_symbind_alt` references the same offset so
+ * later code can safely rewrite the `l_name` field when posing as an audit module.
  */
 
 #include "xzre_types.h"

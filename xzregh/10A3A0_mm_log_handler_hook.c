@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Interposes on sshd's log handler, ignoring every message when logging is globally disabled or
- * selectively rewriting the 'Connection closed by ... (preauth)' lines when filtering mode is
- * enabled. It rebuilds safe format strings on the stack, calls sshd_log() to emit the sanitised
- * message, and leaves syslog alone unless the caller requested suppression via cmd flags.
+ * AutoDoc: Interposes on sshd's log handler, ignoring every message when logging is globally disabled or selectively rewriting the
+ * 'Connection closed by ... (preauth)' lines when filtering mode is enabled. It rebuilds safe format strings on the stack, calls
+ * sshd_log() to emit the sanitised message, and leaves syslog alone unless the caller requested suppression via cmd flags.
  */
 
 #include "xzre_types.h"

@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-15
+- Normalized all AutoDoc entries to wrap at 128 characters by scripting a metadata rewrite and re-running the headless refresh, so every `xzregh/*.c` block now renders as a readable multi-line comment that mirrors the JSON source of truth.
+- Next: consider applying the same wrapping rules to any future helper scripts (e.g., stub generators) so manual edits keep the formatting consistent.
+
+## 2025-11-15
+- Completed the `crypto_cmd` batch RE pass: taught `scripts/generate_function_stubs.py` to fall back to short names, regenerated all 23 stubs, and filled in detailed notes covering the secret-data attestation helpers, sshbuf scanners, crypto primitives, and RSA/MM hooks.
+- Rewrote the corresponding entries in `metadata/functions_autodoc.json` so every crypto_cmd function now documents the exact control flow (secret-data gating, sshbuf heuristics, Ed448 verification, etc.).
+- Ran `./scripts/refresh_xzre_project.sh` to push the new metadata through headless Ghidra, regenerate the exported sources, and refresh the portable project snapshot.
+- Next: extend `metadata/xzre_locals.json` for the sshbuf/secret_data helpers to replace the remaining `local_*` register temps before the next batch of exports.
+
+## 2025-11-15
 - Ran a fresh loader_rt RE sprint: regenerated the per-function stubs, reread every helper under `xzregh/10277*–10A80*`, and captured concise notes describing the GOT math, ld.so manipulation, cpuid glue, and runtime plumbing so the scratch files now reflect the latest understanding.
 - Rewrote the AutoDoc metadata for the loader orchestrators (`init_hooks_ctx`, `init_imported_funcs`, `validate_log_handler_pointers`, `find_link_map_l_name`, `find_dl_naudit`, `process_shared_libraries_map`, `find_link_map_l_audit_any_plt*`, `find_dl_audit_offsets`) and added an explicit `xzre_globals` entry so the hooks blob/global context layout is documented inside `metadata/functions_autodoc.json`.
 - Ran `./scripts/refresh_xzre_project.sh` to push the new metadata through Ghidra, regenerate `ghidra_scripts/generated/xzre_autodoc.json`, refresh `xzregh/*.c`, and update the portable project archive.

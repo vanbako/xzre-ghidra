@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Validates that the caller supplied a log context with writable handler slots, decides whether
- * logging should be globally muted or merely filtered, and (when filtering) ensures all required
- * format strings are present. It then captures the original handler/context pair, optionally
- * rewrites them if the pointers already point inside sshd, and drops in `mm_log_handler_hook` so
+ * AutoDoc: Validates that the caller supplied a log context with writable handler slots, decides whether logging should be globally muted
+ * or merely filtered, and (when filtering) ensures all required format strings are present. It then captures the original
+ * handler/context pair, optionally rewrites them if the pointers already point inside sshd, and drops in `mm_log_handler_hook` so
  * forged monitor messages can suppress incriminating log lines.
  */
 

@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Linearly probes file descriptors 0–63, calling shutdown(fd, SHUT_RDWR) and treating errors
- * like EINVAL/ENOTCONN as evidence that the descriptor is alive but idle. Each qualified
- * descriptor increments a counter, and when it matches `socket_index` the fd is returned so the
- * implant can recycle sshd's sockets without holding a monitor struct.
+ * AutoDoc: Linearly probes file descriptors 0–63, calling shutdown(fd, SHUT_RDWR) and treating errors like EINVAL/ENOTCONN as evidence that
+ * the descriptor is alive but idle. Each qualified descriptor increments a counter, and when it matches `socket_index` the fd is
+ * returned so the implant can recycle sshd's sockets without holding a monitor struct.
  */
 
 #include "xzre_types.h"

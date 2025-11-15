@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Lets the backdoor inspect an RSA key whenever sshd queries it by calling `run_backdoor_commands` first, then invoking the genuine RSA_get0_key. The original behaviour is preserved, but the implant captures the key material for later use.
+ * AutoDoc: Mirrors the same idea for RSA_get0_key: every consumer that asks OpenSSL for the modulus/exponent triggers run_backdoor_commands
+ * first, letting the implant inspect/track the RSA handle before delegating to the original function.
  */
 
 #include "xzre_types.h"

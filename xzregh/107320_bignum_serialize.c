@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Writes a BIGNUM into a length-prefixed buffer, dropping redundant leading zeros so later hashes are stable. Key-fingerprinting helpers call it before running SHA256 over RSA or DSA parameters.
+ * AutoDoc: Normalises a BIGNUM into the [len||value] format used by the fingerprinting code. It caps inputs at 0x4000 bits, emits a 4-byte
+ * big-endian length, copies the magnitude, and prepends a zero byte (or memmoves the data) whenever the top bit would otherwise
+ * make the number negative so SHA-256 sees a canonical stream.
  */
 
 #include "xzre_types.h"

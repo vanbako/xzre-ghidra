@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Identical pattern but aimed at the main RELA table: it requires `flags & 2` (meaning RELA records were found) and then calls `elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT). Successful lookups hand back the writable GOT slot for the symbol so the loader can redirect it; failure means the symbol was not imported through a GOT relocation.
+ * AutoDoc: Identical pattern but aimed at the main RELA table: it requires `flags & 2` (meaning RELA records were found) and then calls
+ * `elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT). Successful lookups hand back the writable GOT slot for the
+ * symbol so the loader can redirect it; failure means the symbol was not imported through a GOT relocation.
  */
 
 #include "xzre_types.h"

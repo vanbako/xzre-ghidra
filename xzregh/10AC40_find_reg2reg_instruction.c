@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Searches a code range for register-to-register moves while enforcing CET-safe constraints. The implant uses it when it needs to follow pointer copies without touching memory operands during its pattern hunts.
+ * AutoDoc: Searches a code range for register-to-register moves while enforcing CET-safe constraints. The implant uses it when it needs to
+ * follow pointer copies without touching memory operands during its pattern hunts.
  */
 
 #include "xzre_types.h"

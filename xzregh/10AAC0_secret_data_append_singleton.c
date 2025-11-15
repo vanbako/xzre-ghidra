@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Performs a one-off fingerprint of a function: finds its start, validates the instruction stream, shifts the requested number of bits, and marks the operation id as complete. Setup routines call it to attest critical helpers before relying on them for decryption.
+ * AutoDoc: Guarantees each attestation slot runs at most once. It uses the per-operation byte array inside global_ctx->shift_operations to
+ * guard entry, resolves the function boundaries with find_function relative to the recorded sshd code limits, invokes
+ * secret_data_append_from_code (starting after the call site if present), and increments global_ctx->num_shifted_bits by
+ * shift_count on success.
  */
 
 #include "xzre_types.h"

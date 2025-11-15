@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
+ * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is
+ * invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
  */
 
 #include "xzre_types.h"

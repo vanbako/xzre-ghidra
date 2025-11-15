@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Linear check used before invoking crypto helpers. Given an array of pointers and a count, it
- * reports 1 as soon as it encounters a NULL slot, letting callers bail out if any required import
- * failed to resolve.
+ * AutoDoc: Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters
+ * a NULL slot, letting callers bail out if any required import failed to resolve.
  */
 
 #include "xzre_types.h"

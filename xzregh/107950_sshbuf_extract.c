@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Validates a runtime sshbuf using offsets recorded in the global context and returns its data pointer and size. The backdoor uses it to access monitor messages safely even when structure layouts shift across builds.
+ * AutoDoc: Reads out an sshbuf’s d pointer and size field using the dynamic layout encoded in global_ctx->sshd_offsets. Depending on
+ * whether each qword index is negative it either uses the struct fields directly or walks to the encoded offset, confirms both the
+ * struct and the pointed-to range are mapped with is_range_mapped, and hands the caller the live pointer/length pair.
  */
 
 #include "xzre_types.h"

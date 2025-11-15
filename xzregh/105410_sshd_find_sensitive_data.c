@@ -5,12 +5,10 @@
 
 
 /*
- * AutoDoc: Bootstraps the entire sensitive-data discovery pipeline: emits bookkeeping entries for the
- * secret-data mirroring code, allocates libcrypto stubs (EVP_DigestVerify*, EVP_CIPHER_CTX_new,
- * EVP_chacha20), finds `sshd_main`/`uses_endbr64`, gathers code/data segment bounds, and runs
- * both the xcalloc and KRB5CCNAME heuristics. It scores whichever pointers were found, keeps the
- * higher-confidence candidate, and writes it into `ctx->sshd_sensitive_data` before returning
- * success.
+ * AutoDoc: Bootstraps the entire sensitive-data discovery pipeline: emits bookkeeping entries for the secret-data mirroring code, allocates
+ * libcrypto stubs (EVP_DigestVerify*, EVP_CIPHER_CTX_new, EVP_chacha20), finds `sshd_main`/`uses_endbr64`, gathers code/data
+ * segment bounds, and runs both the xcalloc and KRB5CCNAME heuristics. It scores whichever pointers were found, keeps the higher-
+ * confidence candidate, and writes it into `ctx->sshd_sensitive_data` before returning success.
  */
 
 #include "xzre_types.h"

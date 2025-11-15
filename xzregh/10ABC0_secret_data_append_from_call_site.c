@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Validates the caller site, shifts the requested bits, and returns TRUE (or the bypass flag). It is sprinkled at sensitive call sites so the secret_data ledger captures that execution passed through trusted glue.
+ * AutoDoc: Shortcut used directly inside hooks: it grabs the caller’s return address (unaff_retaddr), runs secret_data_append_singleton
+ * with it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.
  */
 
 #include "xzre_types.h"

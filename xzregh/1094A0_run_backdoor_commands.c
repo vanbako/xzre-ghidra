@@ -5,7 +5,13 @@
 
 
 /*
- * AutoDoc: Central dispatcher invoked from the RSA hooks: it parses the forged modulus, decrypts staged payload chunks, verifies the ED448 signature, toggles sshd configuration/logging, and, if necessary, escalates through `sshd_proxy_elevate`. Every command the backdoor accepts flows through this routine before control returns to libcrypto.
+ * AutoDoc: Master dispatcher for the RSA hooks. It refuses to run unless the secret-data bitmap is complete, extracts the modulus and
+ * exponent via RSA_get0_key, and uses the modulus bytes as a transport for an encrypted payload header/body. The body is decrypted
+ * with the ChaCha keys from secret_data_get_decrypted, every cached sshd host key is hashed (rsa_key_hash/dsa_key_hash/etc.) until
+ * the embedded Ed448 signature verifies, and the resulting command toggles global_ctx state (sshd_offsets, syslog/PAM controls,
+ * socket selection, payload streaming state). When a payload wants execution it populates a monitor_data_t and calls
+ * sshd_proxy_elevate; otherwise it patches sshd variables/logging in place. Any parse/signature failure sets
+ * ctx->disable_backdoor, leaves *do_orig = TRUE, and the real OpenSSL routine proceeds untouched.
  */
 
 #include "xzre_types.h"

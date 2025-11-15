@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader funnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a pointer falls outside the parsed ELF image.
+ * AutoDoc: Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader
+ * funnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a
+ * pointer falls outside the parsed ELF image.
  */
 
 #include "xzre_types.h"

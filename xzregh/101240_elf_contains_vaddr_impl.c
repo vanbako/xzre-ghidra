@@ -5,9 +5,13 @@
 
 
 /*
- * AutoDoc: Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recurses when the range straddles multiple segments so partial overlaps are rechecked piecemeal.
+ * AutoDoc: Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the
+ * requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recurses when the
+ * range straddles multiple segments so partial overlaps are rechecked piecemeal.
  *
- * It refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.
+ * It refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside
+ * the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to
+ * differentiate text, data, and RELRO spans.
  */
 
 #include "xzre_types.h"

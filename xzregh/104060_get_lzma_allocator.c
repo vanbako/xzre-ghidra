@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand liblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the implant's `elf_info_t`.
+ * AutoDoc: Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand
+ * liblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the
+ * implant's `elf_info_t`.
  */
 
 #include "xzre_types.h"

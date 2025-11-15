@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Uses the string-reference catalogue to find `do_child`, then counts how often it dereferences
- * the candidate pointer at offsets 0 and +0x10. A hit on the base yields one point, and seeing
- * multiple accesses to the +0x10 slot adds up to two more, producing a score that reflects how
- * tightly the child process manipulates the structure.
+ * AutoDoc: Uses the string-reference catalogue to find `do_child`, then counts how often it dereferences the candidate pointer at offsets 0
+ * and +0x10. A hit on the base yields one point, and seeing multiple accesses to the +0x10 slot adds up to two more, producing a
+ * score that reflects how tightly the child process manipulates the structure.
  */
 
 #include "xzre_types.h"

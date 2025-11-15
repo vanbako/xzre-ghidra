@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Intentional trap stub for liblzma's `lzma_check_init()`. Until the loader patches this export to the real liblzma routine it simply calls `halt_baddata()`, guaranteeing that any accidental execution stops immediately and signalling that someone tried to run the object outside the curated runtime.
+ * AutoDoc: Intentional trap stub for liblzma's `lzma_check_init()`. Until the loader patches this export to the real liblzma routine it
+ * simply calls `halt_baddata()`, guaranteeing that any accidental execution stops immediately and signalling that someone tried to
+ * run the object outside the curated runtime.
  */
 
 #include "xzre_types.h"

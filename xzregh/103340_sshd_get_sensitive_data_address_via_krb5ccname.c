@@ -5,11 +5,9 @@
 
 
 /*
- * AutoDoc: Starts at the string reference to 'KRB5CCNAME', disassembles forward until it sees the
- * getenv result copied into memory, and only accepts stores that land inside sshd's .data/.bss
- * window with the expected -0x18 displacement pattern. That combination reliably identifies the
- * sensitive_data struct that holds host key material after sshd propagates the Kerberos cache
- * path.
+ * AutoDoc: Starts at the string reference to 'KRB5CCNAME', disassembles forward until it sees the getenv result copied into memory, and
+ * only accepts stores that land inside sshd's .data/.bss window with the expected -0x18 displacement pattern. That combination
+ * reliably identifies the sensitive_data struct that holds host key material after sshd propagates the Kerberos cache path.
  */
 
 #include "xzre_types.h"

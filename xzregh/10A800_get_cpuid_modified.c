@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Wrapper around `_cpuid_gcc` that first invokes `backdoor_entry` with the high-bit leaf to make
- * sure the loader ran, checks the returned maximum leaf, and only executes the requested CPUID if
- * the CPU claims to support it. This is the exported symbol glibc binds, so the loader’s work is
- * triggered before any sshd thread asks for cpuid data.
+ * AutoDoc: Wrapper around `_cpuid_gcc` that first invokes `backdoor_entry` with the high-bit leaf to make sure the loader ran, checks the
+ * returned maximum leaf, and only executes the requested CPUID if the CPU claims to support it. This is the exported symbol glibc
+ * binds, so the loader’s work is triggered before any sshd thread asks for cpuid data.
  */
 
 #include "xzre_types.h"

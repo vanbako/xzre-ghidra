@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Evaluates a decoded instruction and, when it matches expected patterns, sets a bit inside `global_ctx->secret_data`. The loader uses it to encode "this function looks intact" attestation bits that are later consumed during payload decryption.
+ * AutoDoc: Sets the next bit inside global_ctx->secret_data based on a decoded instruction. The cursor enforces the 0x1C8-bit ceiling,
+ * skips certain opcodes (0x109, 0xBB, and entries in the precomputed 0x83–0xB1 mask), and otherwise locates the byte/bit inside
+ * the secret_data array and ORs it in before advancing the cursor.
  */
 
 #include "xzre_types.h"

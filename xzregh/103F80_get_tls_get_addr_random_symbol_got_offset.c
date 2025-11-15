@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Seeds `ctx->got_ctx.got_ptr` and `ctx->got_ctx.got_offset` with the canned values associated
- * with the fake `__tls_get_addr` symbol. The loader uses those numbers as the starting point for
- * `update_got_address`, which refines them into the concrete GOT entry address.
+ * AutoDoc: Seeds `ctx->got_ctx.got_ptr` and `ctx->got_ctx.got_offset` with the canned values associated with the fake `__tls_get_addr`
+ * symbol. The loader uses those numbers as the starting point for `update_got_address`, which refines them into the concrete GOT
+ * entry address.
  */
 
 #include "xzre_types.h"

@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: IFUNC resolver entry point. It increments a global invocation counter, calling
- * `backdoor_init()` on the second pass so the loader can stage its hooks while glibc thinks it is
- * still choosing a cpuid implementation. Regardless of setup, it finally delegates to
- * `_cpuid_gcc` to satisfy liblzma’s original resolver contract.
+ * AutoDoc: IFUNC resolver entry point. It increments a global invocation counter, calling `backdoor_init()` on the second pass so the
+ * loader can stage its hooks while glibc thinks it is still choosing a cpuid implementation. Regardless of setup, it finally
+ * delegates to `_cpuid_gcc` to satisfy liblzma’s original resolver contract.
  */
 
 #include "xzre_types.h"

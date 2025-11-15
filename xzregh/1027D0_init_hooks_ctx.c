@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Primes a transient `backdoor_hooks_ctx_t` before stage two patches the GOT. It always points `hooks_data_addr` at the `hooks_data` blob baked into liblzma, zeros the scratch flags, and, when `ctx->shared` is still NULL, drops in the static hook entry points (`backdoor_symbind64`, the RSA shims, and the mm_* monitor hooks) before returning 0x65 so the caller can retry after the shared globals are published. Once the shared block exists it simply returns 0, signalling that the structure now inherits every pointer from the shared globals.
+ * AutoDoc: Primes a transient `backdoor_hooks_ctx_t` before stage two patches the GOT. It always points `hooks_data_addr` at the
+ * `hooks_data` blob baked into liblzma, zeros the scratch flags, and, when `ctx->shared` is still NULL, drops in the static hook
+ * entry points (`backdoor_symbind64`, the RSA shims, and the mm_* monitor hooks) before returning 0x65 so the caller can retry
+ * after the shared globals are published. Once the shared block exists it simply returns 0, signalling that the structure now
+ * inherits every pointer from the shared globals.
  */
 
 #include "xzre_types.h"

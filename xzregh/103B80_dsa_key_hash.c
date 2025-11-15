@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Serialises the DSA public parameters and computes a SHA-256 digest using the resolved libcrypto helpers. The monitor hooks use that fingerprint to recognise host keys referenced by attacker commands without leaking the private material.
+ * AutoDoc: Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with
+ * bignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized
+ * BIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.
  */
 
 #include "xzre_types.h"

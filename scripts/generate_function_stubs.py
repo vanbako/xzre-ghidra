@@ -12,6 +12,7 @@ import textwrap
 from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
+import string
 
 
 BATCHES: "OrderedDict[str, Dict[str, object]]" = OrderedDict(
@@ -343,6 +344,20 @@ def write_stub(path: Path, content: str, force: bool) -> bool:
     return True
 
 
+def lookup_with_suffix(mapping: Dict, name: str):
+    entry = mapping.get(name)
+    if entry is not None:
+        return entry
+    prefix, sep, suffix = name.partition("_")
+    if not sep:
+        return None
+    if len(prefix) < 5:
+        return None
+    if not all(ch in string.hexdigits for ch in prefix):
+        return None
+    return mapping.get(suffix)
+
+
 def main() -> int:
     args = parse_args()
     functions = build_function_list(args)
@@ -358,8 +373,8 @@ def main() -> int:
     wrote_any = False
     for func in functions:
         batch_key = find_batch_for_function(func)
-        autodoc_text = autodoc_data.get(func)
-        locals_entry = locals_data.get(func)
+        autodoc_text = lookup_with_suffix(autodoc_data, func)
+        locals_entry = lookup_with_suffix(locals_data, func)
         stub_text = render_stub(func, batch_key, autodoc_text, locals_entry)
         sanitized_name = func.replace("/", "_")
         output_path = args.output_dir / f"{sanitized_name}.md"

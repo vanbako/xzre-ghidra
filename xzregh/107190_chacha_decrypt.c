@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Thin wrapper around OpenSSL's ChaCha20 decrypt primitives that operates through the resolved imports table. The backdoor uses it both to unwrap its embedded secrets and to decrypt attacker payloads after they arrive via the monitor channel.
+ * AutoDoc: Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null
+ * (contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that
+ * the final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls
+ * succeed.
  */
 
 #include "xzre_types.h"

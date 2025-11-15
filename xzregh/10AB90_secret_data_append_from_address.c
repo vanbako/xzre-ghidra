@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Runs the singleton appender against either a provided code pointer or the caller's return address, letting hooks fingerprint themselves at runtime. The recorded bits contribute to the secret_data blob used for payload decryption.
+ * AutoDoc: Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller’s return address,
+ * otherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to
+ * secret_data_append_singleton.
  */
 
 #include "xzre_types.h"

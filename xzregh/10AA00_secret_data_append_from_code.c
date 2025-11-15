@@ -5,7 +5,10 @@
 
 
 /*
- * AutoDoc: Walks a trusted code range, optionally skipping until the first CALL, and records bits for each qualifying register-to-register instruction. The backdoor uses it to encode integrity fingerprints into the secret_data bitmap before decrypting payload material.
+ * AutoDoc: Sweeps a code range and feeds instructions to secret_data_append_from_instruction. When start_from_call is TRUE it first finds
+ * the next CALL via find_call_instruction, then loops up to shift_count times, each time calling find_reg2reg_instruction to
+ * locate a qualifying instruction and shifting the supplied cursor. Returning FALSE means it could not find enough instructions in
+ * the provided span.
  */
 
 #include "xzre_types.h"

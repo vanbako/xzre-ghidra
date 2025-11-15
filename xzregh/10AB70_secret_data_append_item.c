@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Calls the singleton appender only when a supplied index is non-zero, making it easy to gate optional fingerprint operations. The various secret-data tables use it to share common code while respecting per-item enable flags.
+ * AutoDoc: Convenience wrapper used by the secret-data descriptor tables: when the supplied index is non-zero it simply calls
+ * secret_data_append_singleton with the provided code pointer and cursor, otherwise it treats the entry as disabled and reports
+ * FALSE so the batch runner can bail out early.
  */
 
 #include "xzre_types.h"

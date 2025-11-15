@@ -5,9 +5,14 @@
 
 
 /*
- * AutoDoc: Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address, locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash buckets, version records, and GNU_RELRO metadata. Each pointer retrieved from the dynamic table is validated with `elf_contains_vaddr` so forged headers are rejected.
+ * AutoDoc: Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address,
+ * locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash
+ * buckets, version records, and GNU_RELRO metadata. Each pointer retrieved from the dynamic table is validated with
+ * `elf_contains_vaddr` so forged headers are rejected.
  *
- * It also enforces invariants such as 'only one PT_GNU_RELRO segment', derives the number of dynamic entries, and flips feature bits (`flags`) so later helpers know whether RELR, versym, or gnurelro data is present. Failure to locate the dynamic segment, find the required headers, or keep derived pointers inside mapped memory causes the parse to abort with FALSE.
+ * It also enforces invariants such as 'only one PT_GNU_RELRO segment', derives the number of dynamic entries, and flips feature
+ * bits (`flags`) so later helpers know whether RELR, versym, or gnurelro data is present. Failure to locate the dynamic segment,
+ * find the required headers, or keep derived pointers inside mapped memory causes the parse to abort with FALSE.
  */
 
 #include "xzre_types.h"

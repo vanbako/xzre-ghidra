@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Disassembles the `demote_sensitive_data` helper referenced in the string table and returns
- * three points if it ever references the candidate pointer. That routine is highly specific to
- * the real sensitive_data block, so even a single hit is treated as strong evidence.
+ * AutoDoc: Disassembles the `demote_sensitive_data` helper referenced in the string table and returns three points if it ever references
+ * the candidate pointer. That routine is highly specific to the real sensitive_data block, so even a single hit is treated as
+ * strong evidence.
  */
 
 #include "xzre_types.h"

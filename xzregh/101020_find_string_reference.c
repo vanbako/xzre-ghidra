@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Scans for instructions that reference a given string literal via RIP-relative addressing and records the instruction span. Secret-data hunters use it to line up code blocks that print or parse target strings so hooks can score them.
+ * AutoDoc: Scans for instructions that reference a given string literal via RIP-relative addressing and records the instruction span.
+ * Secret-data hunters use it to line up code blocks that print or parse target strings so hooks can score them.
  */
 
 #include "xzre_types.h"

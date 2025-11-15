@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Checks sshd's main() for memory operands that touch the candidate pointer at offsets 0, +8,
- * and +0x10. The heuristic rewards routines that touch the base and +0x10 entries while
- * penalising ones that never reference +8, generating a small signed score that later gets
- * doubled in the aggregate calculation.
+ * AutoDoc: Checks sshd's main() for memory operands that touch the candidate pointer at offsets 0, +8, and +0x10. The heuristic rewards
+ * routines that touch the base and +0x10 entries while penalising ones that never reference +8, generating a small signed score
+ * that later gets doubled in the aggregate calculation.
  */
 
 #include "xzre_types.h"

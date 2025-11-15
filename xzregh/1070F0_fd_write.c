@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short
- * writes as fatal so callers either send the entire buffer or receive -1. It is the plumbing used
- * whenever the implant forges monitor messages.
+ * AutoDoc: Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short writes as fatal so callers
+ * either send the entire buffer or receive -1. It is the plumbing used whenever the implant forges monitor messages.
  */
 
 #include "xzre_types.h"

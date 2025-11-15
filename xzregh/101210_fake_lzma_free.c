@@ -5,9 +5,12 @@
 
 
 /*
- * AutoDoc: No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other than prove that the fake allocator is still active.
+ * AutoDoc: No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub
+ * into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other
+ * than prove that the fake allocator is still active.
  *
- * Having an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.
+ * Having an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a
+ * reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.
  */
 
 #include "xzre_types.h"

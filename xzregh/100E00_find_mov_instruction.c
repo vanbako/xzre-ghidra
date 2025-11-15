@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Searches for MOV instructions with configurable load/store semantics and hands back the matched operands. It underpins many of the signature searches the implant runs while deriving addresses for secret data or resolver trampolines.
+ * AutoDoc: Searches for MOV instructions with configurable load/store semantics and hands back the matched operands. It underpins many of
+ * the signature searches the implant runs while deriving addresses for secret data or resolver trampolines.
  */
 
 #include "xzre_types.h"

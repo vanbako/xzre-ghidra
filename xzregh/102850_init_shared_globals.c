@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone
- * `global_ctx` instance. Every hook consults this block at runtime, so the function simply wires
- * the exported function pointers into the struct and returns success once the pointer checks
- * pass.
+ * AutoDoc: Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone `global_ctx` instance. Every hook
+ * consults this block at runtime, so the function simply wires the exported function pointers into the struct and returns success
+ * once the pointer checks pass.
  */
 
 #include "xzre_types.h"

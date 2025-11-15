@@ -5,7 +5,9 @@
 
 
 /*
- * AutoDoc: Takes a string-reference catalogue entry, locates the associated RELRO slot, and checks CET landing requirements before returning the pointer. The loader relies on it to identify sshd callback tables—such as monitor handlers—that it will later overwrite with backdoor functions.
+ * AutoDoc: Takes a string-reference catalogue entry, locates the associated RELRO slot, and checks CET landing requirements before
+ * returning the pointer. The loader relies on it to identify sshd callback tables—such as monitor handlers—that it will later
+ * overwrite with backdoor functions.
  */
 
 #include "xzre_types.h"

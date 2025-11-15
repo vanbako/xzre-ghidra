@@ -5,7 +5,8 @@
 
 
 /*
- * AutoDoc: Combines the prologue scan with a forward sweep to determine both the start and end addresses of a function. Backdoor initialization relies on it when it needs exact bounds for copying original bytes or scheduling follow-up pattern searches.
+ * AutoDoc: Combines the prologue scan with a forward sweep to determine both the start and end addresses of a function. Backdoor
+ * initialization relies on it when it needs exact bounds for copying original bytes or scheduling follow-up pattern searches.
  */
 
 #include "xzre_types.h"

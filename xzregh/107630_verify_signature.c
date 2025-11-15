@@ -5,7 +5,11 @@
 
 
 /*
- * AutoDoc: Computes the host-key hash, loads the attacker’s ED448 public key, and runs EVP_DigestVerify on the supplied signature. This gate keeps the backdoor command channel—only messages signed with the embedded ED448 key reach the executor.
+ * AutoDoc: Computes the host-key digest that sits at sshkey_digest_offset inside the signed blob and then verifies the Ed448 command
+ * signature. RSA and DSA keys delegate to rsa_key_hash/dsa_key_hash, ECDSA serialises the EC_POINT in uncompressed form with a
+ * 32-bit length prefix, and Ed25519 prepends a 0x20000000 tag plus the raw 32-byte key. Once the digest is spliced into
+ * signed_data the helper loads the attacker’s Ed448 public key with EVP_PKEY_new_raw_public_key(0x440, …) and invokes
+ * EVP_DigestVerify over the signed_data[0:tbslen) region; only a valid Ed448 signature lets the caller continue.
  */
 
 #include "xzre_types.h"

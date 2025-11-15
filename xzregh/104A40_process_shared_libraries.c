@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Wrapper around `process_shared_libraries_map` that first resolves `r_debug` out of ld.so,
- * copies the caller-provided struct into a local scratch copy, and feeds the scratch copy into
- * the map-walker. On success it propagates the filled-in handles (and libc import table) back to
- * the caller so later stages never have to read `r_debug` again.
+ * AutoDoc: Wrapper around `process_shared_libraries_map` that first resolves `r_debug` out of ld.so, copies the caller-provided struct into
+ * a local scratch copy, and feeds the scratch copy into the map-walker. On success it propagates the filled-in handles (and libc
+ * import table) back to the caller so later stages never have to read `r_debug` again.
  */
 
 #include "xzre_types.h"
