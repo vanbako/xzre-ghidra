@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Iterates through MOV and LEA instructions that move pointers into registers, honouring load/store direction flags. The loader
- * uses it to chase GOT writes and frame setups when it has to recover sensitive pointers for the backdoor context.
+ * AutoDoc: Scans a code range for MOV/LEA instructions that move pointer values between registers and memory.
+ * Each decoded instruction must expose the expected RIP/base-plus-displacement addressing form, satisfy the caller’s `is_64bit_operand` requirement via the REX bits (unless the caller is hunting for stores), and then match either the shared LEA opcode (`0x10d`) or the directional MOV opcode selected by `load_flag` (`mov reg,[mem]` vs `mov [mem],reg`).
+ * When those checks pass the populated `dctx` is left pointing at the instruction so later pointer-chasing code can read back the operands.
  */
 
 #include "xzre_types.h"

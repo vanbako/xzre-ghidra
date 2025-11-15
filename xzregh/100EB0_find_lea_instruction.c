@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Finds the next LEA instruction in the stream and returns operand details. The backdoor uses this to recover base-plus-offset
- * calculations that point at data structures it later siphons.
+ * AutoDoc: Looks for LEA instructions that generate a specific displacement.
+ * For every byte offset it runs the decoder, insists on opcode `0x10d`, checks that DF2 reports a plain displacement operand, and compares `mem_disp` against the requested `displacement`, treating `-displacement` as equivalent so mirrored scans still match.
+ * Once found the helper returns TRUE with the stack-resident decoder context capturing the instruction.
  */
 
 #include "xzre_types.h"

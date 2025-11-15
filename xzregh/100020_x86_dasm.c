@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Implements a minimal x86-64 decoder that walks a buffer while tracking instruction metadata. Every search helper in the loader
- * uses it to reason about sshd and ld.so machine code without linking a full disassembler, giving the backdoor reliable patch
- * coordinates at runtime.
+ * AutoDoc: Hand-rolled x86-64 decoder that rewinds the supplied `dasm_ctx_t`, walks forward from `code_start`, and normalises every prefix/modRM/SIB combination the implant cares about.
+ * It understands legacy lock/rep/segment overrides, operand/address-size prefixes, REX and both two- and three-byte VEX sequences, and fills out `opcode_window`, ModRM/SIB, displacement and immediate widths, and the derived `operand`/`mem_disp` fields.
+ * Bad encodings or truncated buffers clear the context and return FALSE so the caller can advance by a byte; a clean decode leaves `instruction`, `instruction_size`, and all prefix/flag bits populated so higher-level pattern searches can reason about the instruction without linking a full disassembler.
  */
 
 #include "xzre_types.h"

@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Scans a referenced function for MOV instructions that materialise an address inside the supplied data window. The backdoor uses
- * it to recover struct-field pointers (for example the monitor sockets) so it can redirect them to its own handlers.
+ * AutoDoc: Takes a string-reference entry and hunts through the owning function for MOV loads that reference a caller-supplied data range.
+ * It repeatedly invokes `find_instruction_with_mem_operand_ex` for opcode `0x10b`, skips instructions that use the 64-bit register-only form, and recomputes RIP-relative addresses by adding `mem_disp` to the current instruction pointer when the ModRM demands it.
+ * The first computed address that falls within `[mem_range_start, mem_range_end)` is returned, giving the loader the exact struct field a particular status string touches.
  */
 
 #include "xzre_types.h"

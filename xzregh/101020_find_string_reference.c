@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Scans for instructions that reference a given string literal via RIP-relative addressing and records the instruction span.
- * Secret-data hunters use it to line up code blocks that print or parse target strings so hooks can score them.
+ * AutoDoc: Convenience wrapper that returns the instruction which first references a given string literal.
+ * It simply calls `find_lea_instruction_with_mem_operand` across `[code_start, code_end)` with `str` as the desired absolute address and, when successful, yields the LEA’s address so later heuristics can treat it as the anchor for the surrounding function.
  */
 
 #include "xzre_types.h"

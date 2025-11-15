@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Indexes interesting .rodata strings and the instructions that reference them, recording surrounding function bounds for later
- * lookups. Many downstream heuristics consume this table to locate sshd routines and global pointers tied to sensitive behaviour.
+ * AutoDoc: Builds the 27-entry `string_references_t` catalogue for sshd’s interesting status strings.
+ * It seeds each slot with its `EncodedStringId`, walks .rodata via `elf_find_string`, and for every match calls `find_string_reference` to capture the referencing instruction plus provisional function bounds.
+ * The routine then sweeps `.text`, following direct CALLs, PLT trampolines, and RIP-relative LEAs so each entry’s `func_start`/`func_end` brackets the owning routine, finally reconciling the recorded ranges with RELA/RELR relocations and the code-segment limits so later analyses can trust the table.
  */
 
 #include "xzre_types.h"

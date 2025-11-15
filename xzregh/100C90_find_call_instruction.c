@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Disassembles forward until it encounters a CALL opcode and reports both the instruction and target. The hook finder uses it to
- * locate indirect dispatcher sites in sshd so the injected shims can be spliced in safely.
+ * AutoDoc: Initialises a scratch decoder (or reuses the caller’s `dctx`) and decodes forward from `code_start` to `code_end`, skipping undecodable bytes along the way.
+ * It looks for the normalised CALL opcode (`0x168`) and, when `call_target` is non-null, requires that the rel32 destination computed from `instruction + instruction_size + operand` matches that target.
+ * The function returns TRUE with the context still describing the CALL so that higher-level code can splice hooks immediately after the call site.
  */
 
 #include "xzre_types.h"

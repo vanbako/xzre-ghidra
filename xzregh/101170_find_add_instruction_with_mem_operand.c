@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Locates ADD instructions that update memory at a given address, capturing the scale of the increment. The scoring logic uses it
- * to observe how sshd mutates counters so the implant can tag sensitive buffers.
+ * AutoDoc: Specialised search for ADDs that modify a memory location.
+ * The helper runs the decoder until opcode `0x103` (the loader’s normalised add [mem],reg form) shows up, ensures the ModRM bits encode a memory destination, and, when `mem_address` is provided, recomputes the effective address via `mem_disp` to make sure it matches.
+ * It returns TRUE with `dctx` still referencing the ADD so callers can read back the increment constant.
  */
 
 #include "xzre_types.h"

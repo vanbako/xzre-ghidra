@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Searches for MOV instructions with configurable load/store semantics and hands back the matched operands. It underpins many of
- * the signature searches the implant runs while deriving addresses for secret data or resolver trampolines.
+ * AutoDoc: MOV-only variant of the pointer scan.
+ * It linearly decodes instructions, requires the ModRM bits to encode the loader’s expected register↔memory form, enforces the 64-bit width test when `is_64bit_operand` is TRUE (again waived for stores), and then matches the opcode against either the load (`0x10b`) or store (`0x109`) flavor depending on `load_flag`.
+ * Successful matches stop the sweep immediately with `dctx` describing the MOV; failures either advance by the instruction size or peg forward one byte when decoding fails.
  */
 
 #include "xzre_types.h"

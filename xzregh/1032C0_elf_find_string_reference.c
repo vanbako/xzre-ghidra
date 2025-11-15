@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Finds the first instruction that references a specific string literal between the supplied code bounds. The loader uses this
- * pinpoint search to anchor subsequent pattern matching when triangulating hook targets from log messages and status strings.
+ * AutoDoc: Single-shot helper for the string catalogue.
+ * It repeatedly calls `elf_find_string` until it finds the requested `encoded_string_id`, and for each candidate occurrence it runs `find_string_reference` between `code_start` and `code_end`, returning the first instruction that materialises the literal.
+ * Callers fall back to NULL when no xref exists in the supplied range.
  */
 
 #include "xzre_types.h"

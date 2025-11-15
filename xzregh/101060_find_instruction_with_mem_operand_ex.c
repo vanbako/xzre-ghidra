@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Performs a generic sweep for any instruction that touches memory, applying a caller-supplied predicate to filter the operands.
- * The loader routes specialised searches through it when reconstructing complex data flows in sshd.
+ * AutoDoc: Generic memory-operand predicate used by higher-level pattern matchers.
+ * It decodes forward, watches for the requested opcode, demands that the ModRM describe a memory operand, and optionally replays the RIP-relative calculation so `mem_address` can filter the effective address.
+ * When the DF2 displacement bit is set the helper writes the full context back to `dctx` and returns TRUE, allowing downstream code to introspect registers or immediates without re-decoding.
  */
 
 #include "xzre_types.h"

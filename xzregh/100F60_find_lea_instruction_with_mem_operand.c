@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Restricts the LEA search to instructions that materialize a specific memory address, including displacement checks. It is
- * invoked when the implant needs to confirm the exact offset of sshd globals before patching them.
+ * AutoDoc: General-purpose LEA finder that optionally reuses a caller-supplied decoder context.
+ * It scans until `x86_dasm` reports opcode `0x10d`, requires a 64-bit operand (`REX.W`), and checks the ModRM bits to make sure the instruction actually reads memory rather than a register-form.
+ * If `mem_address` is supplied it replays the RIP-relative calculation (`instruction + instruction_size + mem_disp`) and only returns TRUE when that absolute address matches, letting callers home in on a specific global.
  */
 
 #include "xzre_types.h"

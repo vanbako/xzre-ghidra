@@ -3,6 +3,15 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-15
+- Corrected the `opco_patt` AutoDoc updates: the JSON keys had been written with `0xADDR_name` prefixes, so the refresh ignored the new descriptions. Renamed the entries back to their `x86_dasm`/`find_*` identifiers and re-ran `./scripts/refresh_xzre_project.sh` so the richer comments now propagate into `xzregh/*.c` and the portable project archive.
+- Next: audit the other metadata helpers for similar naming drift before adding more batch edits.
+
+## 2025-11-15
+- Completed the `opco_patt` batch RE pass: reread the x86 disassembler, prologue detectors, MOV/LEA/ADD pattern scanners, string-xref catalog builders, and reg-only helpers, then captured detailed AutoDoc narratives for all 18 functions in `metadata/functions_autodoc.json` so the descriptions now match the behaviour observed in `xzregh/*.c`.
+- Ran `./scripts/refresh_xzre_project.sh` to replay the metadata into Ghidra, regenerate the exported C sources, and update `ghidra_projects/xzre_ghidra_portable.zip`.
+- Next: extend `metadata/xzre_locals.json` for the opcode-scanner helpers so the refresh can rename the lingering `local_*` register temps inside the exported pattern-search routines.
+
+## 2025-11-15
 - Normalized all AutoDoc entries to wrap at 128 characters by scripting a metadata rewrite and re-running the headless refresh, so every `xzregh/*.c` block now renders as a readable multi-line comment that mirrors the JSON source of truth.
 - Next: consider applying the same wrapping rules to any future helper scripts (e.g., stub generators) so manual edits keep the formatting consistent.
 

@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Sweeps backward from a code pointer looking for a plausible function prologue based on decoded instruction patterns. The runtime
- * loader uses it to recover entry points in stripped sshd/libc images before installing hooks.
+ * AutoDoc: Validates that a cursor points at the requested prologue style.
+ * When `find_mode` asks for CET entries it runs `x86_dasm`, insists the opcode matches the ENDBR64 sequence, and only succeeds if the landing pad ends on a 16-byte boundary (returning the first post-pad instruction through `output`).
+ * In the legacy/NOP mode it falls back to `is_endbr64_instruction` with the simpler mask and returns the address itself, allowing callers to keep sweeping until one of the checks passes.
  */
 
 #include "xzre_types.h"

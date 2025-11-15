@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Convenience wrapper that searches for MOV/LEA forms touching a specific address and reports the displacement. It feeds higher-
- * level routines that locate struct fields for the backdoor's runtime patch table.
+ * AutoDoc: Funnel that hides the distinction between LEA- and MOV-based references.
+ * It first asks `find_lea_instruction_with_mem_operand` to locate a LEA that materialises `mem_address`; if that fails it calls `find_instruction_with_mem_operand_ex` with opcode `0x10b` so a plain MOV load qualifies.
+ * Either path returning TRUE guarantees that `dctx` now describes an instruction that touches the supplied absolute address.
  */
 
 #include "xzre_types.h"

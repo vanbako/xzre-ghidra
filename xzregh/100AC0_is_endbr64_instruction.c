@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Checks whether the bytes at the current cursor encode an ENDBR64 landing pad, including the CET prefix variations. The pattern
- * scanners call it so the backdoor can safely step past CET trampolines while carving prologues to patch.
+ * AutoDoc: Sanity-checks that at least four bytes remain at `code_start` and then tests the dword against the ENDBR64 opcode, folding in the caller supplied `low_mask_part` so both CET prefix variants collapse to the same comparison.
+ * The loader’s pattern scanners use it to cheaply confirm CET landing pads before treating the site as a safe function prologue.
  */
 
 #include "xzre_types.h"

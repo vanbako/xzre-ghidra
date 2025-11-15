@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Combines the prologue scan with a forward sweep to determine both the start and end addresses of a function. Backdoor
- * initialization relies on it when it needs exact bounds for copying original bytes or scheduling follow-up pattern searches.
+ * AutoDoc: Walks both directions from an instruction to recover a function’s bounds.
+ * If `func_start` is requested it steps backward toward `search_base`, invoking `find_function_prologue` at each byte until it finds a matching entry pad and records it.
+ * If `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that address as the end marker, giving the loader dependable start/end pointers for whatever instruction kicked off the search.
  */
 
 #include "xzre_types.h"
