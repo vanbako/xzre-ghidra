@@ -96,7 +96,7 @@ LAB_00102e64:
       if (BVar5 != FALSE) {
         pdVar15 = (dasm_ctx_t *)
                   ((u8 *)((long)local_80.instruction + 0x25) + (local_80.instruction_size - 0x25));
-        if (local_80._40_4_ == 0x168) {
+        if (*(u32 *)&local_80.opcode_window[3] == 0x168) {
           if (local_80.operand == 0) goto LAB_00102e64;
           pdVar9 = (dasm_ctx_t *)
                    ((u8 *)((long)local_80.instruction + 0x25) +
@@ -106,8 +106,8 @@ LAB_00102ee5:
         }
         else {
           pdVar9 = (dasm_ctx_t *)local_80.instruction;
-          if (local_80._40_4_ == 0xa5fe) goto LAB_00102ee5;
-          if (((local_80._40_4_ != 0x10d) || (((byte)local_80.prefix.decoded.rex & 0x48) != 0x48))
+          if (*(u32 *)&local_80.opcode_window[3] == 0xa5fe) goto LAB_00102ee5;
+          if (((*(u32 *)&local_80.opcode_window[3] != 0x10d) || (((byte)local_80.prefix.decoded.rex & 0x48) != 0x48))
              || (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
           goto LAB_00102e64;
           pdVar9 = (dasm_ctx_t *)(pdVar15->opcode_window + (local_80.mem_disp - 0x25));

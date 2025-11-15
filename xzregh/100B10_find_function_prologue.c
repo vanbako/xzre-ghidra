@@ -27,7 +27,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
     }
     BVar2 = x86_dasm(&local_70,code_start,code_end);
     BVar1 = FALSE;
-    if (((BVar2 != FALSE) && (local_70._40_4_ == 3999)) &&
+    if (((BVar2 != FALSE) && (*(u32 *)&local_70.opcode_window[3] == 3999)) &&
        (((ulong)(local_70.instruction + local_70.instruction_size) & 0xf) == 0)) {
       if (output != (u8 **)0x0) {
         *output = local_70.instruction + local_70.instruction_size;

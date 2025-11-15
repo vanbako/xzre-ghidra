@@ -47,6 +47,23 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
     changed = False
     for temp in temps:
         original = temp["original"]
+        replacement = temp.get("replacement")
+
+        if replacement is not None:
+            literal_pattern = re.compile(re.escape(original))
+            text, literal_count = literal_pattern.subn(replacement, text)
+            if literal_count == 0:
+                if replacement in text:
+                    continue
+                print(
+                    f"[postprocess] warning: could not rewrite literal '{original}' "
+                    f"in {file_path}",
+                    file=sys.stderr,
+                )
+                continue
+            changed = True
+            continue
+
         new_name = temp["name"]
         new_type = temp["type"]
 

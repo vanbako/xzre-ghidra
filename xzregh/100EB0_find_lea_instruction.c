@@ -30,7 +30,7 @@ BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
     }
     for (; code_start < code_end; code_start = code_start + 1) {
       BVar1 = x86_dasm(&local_80,code_start,code_end);
-      if ((((BVar1 != FALSE) && (local_80._40_4_ == 0x10d)) &&
+      if ((((BVar1 != FALSE) && (*(u32 *)&local_80.opcode_window[3] == 0x10d)) &&
           ((local_80.prefix.decoded.flags2 & 7) == 1)) &&
          ((local_80.mem_disp == displacement || (local_80.mem_disp == -displacement)))) {
         return TRUE;
