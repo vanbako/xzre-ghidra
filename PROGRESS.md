@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-15
+- Captured the telemetry/cursor semantics from the `elf_mem` RE pass: updated `metadata/functions_autodoc.json` so `elf_get_reloc_symbol`, `elf_get_code_segment`, `elf_get_rodata_segment`, and `elf_find_string` now document the `secret_data_*` gates, and taught `metadata/xzre_locals.json` to rename the RELA/RELR resume pointers plus range bounds.
+- Skipped `./scripts/refresh_xzre_project.sh` this round; follow-up run needed once we’re ready to push the metadata back into Ghidra and the exported sources.
+- Next: kick off a refresh (at least `--check-only`) to confirm the renamed register temps stick inside `xzregh/101B90*.c` and `101C30*.c`, then decide if any additional `elf_mem` helpers need similar instrumentation notes.
+
+## 2025-11-15
+- Ran an `elf_mem` RE session: generated the batch stubs, reread the allocator shims, ELF walkers, relocation scanners, segment finders, and TLS/lzma trap stubs under `xzregh/1012*–10D01*`, and populated each `notes/*.md` scratchpad with concrete observations (recursion guard limits, RELR decoding, secret-data telemetry gates, etc.) so the next analyst can jump directly to the nuanced behaviour.
+- Verified the existing AutoDoc/locals metadata already reflect the observed behaviour, so no JSON edits or refresh run were required this round.
+- Next: hook these notes back into the canonical metadata if we decide to capture the telemetry instrumentation or rename the RELA/RELR cursor parameters so future refreshes can apply the richer nomenclature.
+
+## 2025-11-15
 - Corrected the `opco_patt` AutoDoc updates: the JSON keys had been written with `0xADDR_name` prefixes, so the refresh ignored the new descriptions. Renamed the entries back to their `x86_dasm`/`find_*` identifiers and re-ran `./scripts/refresh_xzre_project.sh` so the richer comments now propagate into `xzregh/*.c` and the portable project archive.
 - Next: audit the other metadata helpers for similar naming drift before adding more batch edits.
 

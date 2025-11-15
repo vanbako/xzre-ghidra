@@ -2151,6 +2151,46 @@
       }
     ]
   },
+  "elf_find_rela_reloc": {
+    "source": "xzre/xzre_code/elf_find_rela_reloc.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "in_RCX",
+        "replacement": "result_high_bound"
+      },
+      {
+        "original": "in_R8",
+        "replacement": "resume_index_ptr"
+      },
+      {
+        "original": "in_register_00000034",
+        "replacement": "target_addr_high"
+      }
+    ]
+  },
+  "elf_find_relr_reloc": {
+    "source": "xzre/xzre_code/elf_find_relr_reloc.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "in_RDX",
+        "replacement": "result_low_bound"
+      },
+      {
+        "original": "in_RCX",
+        "replacement": "result_high_bound"
+      },
+      {
+        "original": "in_R8",
+        "replacement": "resume_index_ptr"
+      },
+      {
+        "original": "in_register_00000034",
+        "replacement": "target_addr_high"
+      }
+    ]
+  },
   "get_lzma_allocator": {
     "source": "xzre/xzre_code/get_lzma_allocator.c",
     "locals": []

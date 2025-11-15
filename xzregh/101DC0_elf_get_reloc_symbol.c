@@ -5,11 +5,9 @@
 
 
 /*
- * AutoDoc: Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT)
- * and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the
- * associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing
- * it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch
- * GOT/PLT entries in place.
+ * AutoDoc: Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT) and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch GOT/PLT entries in place.
+ *
+ * Each call starts by logging the lookup with `secret_data_append_from_address`, and it immediately aborts if the telemetry helper reports failure. That keeps relocation patching tied to the secret-data accounting path so the loader never quietly rewrites GOT/PLT entries when the recorder is disabled.
  */
 
 #include "xzre_types.h"

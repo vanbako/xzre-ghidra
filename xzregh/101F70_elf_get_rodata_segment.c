@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Locates the first read-only PT_LOAD segment that lives entirely after the executable code. It first asks `elf_get_code_segment`
- * for the text range so it can ignore overlapping pages, then scans for PF_R-only segments, page-aligns their bounds, and picks
- * the lowest segment whose start is beyond the end of `.text`. The result is cached in `elf_info_t` and handed to callers
- * alongside its size so later routines (string searches, RELRO probes) can reuse the computed window.
+ * AutoDoc: Locates the first read-only PT_LOAD segment that lives entirely after the executable code. It first asks `elf_get_code_segment` for the text range so it can ignore overlapping pages, then scans for PF_R-only segments, page-aligns their bounds, and picks the lowest segment whose start is beyond the end of `.text`. The result is cached in `elf_info_t` and handed to callers alongside its size so later routines (string searches, RELRO probes) can reuse the computed window.
+ *
+ * The helper begins by logging a `secret_data_append_from_call_site` record; failure to emit that telemetry causes the search to abort, so the rodata queries only run when the secret-data recorder is active.
  */
 
 #include "xzre_types.h"

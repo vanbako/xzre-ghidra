@@ -5,10 +5,9 @@
 
 
 /*
- * AutoDoc: Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X
- * set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores
- * the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent
- * calls use the cached values to avoid rescanning the headers.
+ * AutoDoc: Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent calls use the cached values to avoid rescanning the headers.
+ *
+ * Before touching the headers it emits a `secret_data_append_from_address` telemetry record and refuses to proceed if that hook fails, keeping the text-range discovery tied to the secret-data accounting path.
  */
 
 #include "xzre_types.h"

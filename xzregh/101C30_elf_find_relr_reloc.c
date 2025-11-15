@@ -20,12 +20,12 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   uint uVar1;
   Elf64_Ehdr *pEVar2;
   BOOL BVar3;
-  Elf64_Relr *in_RCX;
-  Elf64_Relr *in_RDX;
+  Elf64_Relr *result_high_bound;
+  Elf64_Relr *result_low_bound;
   ulong uVar4;
-  undefined4 in_register_00000034;
+  undefined4 target_addr_high;
   uchar *vaddr;
-  ulong *in_R8;
+  ulong *resume_index_ptr;
   long lVar5;
   Elf64_Relr EVar6;
   ulong uVar7;
@@ -33,12 +33,12 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   pEVar2 = elf_info->elfbase;
   if ((elf_info->flags & 4) != 0) {
     uVar1 = elf_info->relr_relocs_num;
-    if ((CONCAT44(in_register_00000034,encoded_string_id) != 0) && (uVar1 != 0)) {
+    if ((CONCAT44(target_addr_high,encoded_string_id) != 0) && (uVar1 != 0)) {
       uVar4 = 0;
-      if (in_R8 != (ulong *)0x0) {
-        uVar4 = *in_R8;
+      if (resume_index_ptr != (ulong *)0x0) {
+        uVar4 = *resume_index_ptr;
       }
-      EVar6 = CONCAT44(in_register_00000034,encoded_string_id) - (long)pEVar2;
+      EVar6 = CONCAT44(target_addr_high,encoded_string_id) - (long)pEVar2;
       lVar5 = 0;
       for (; uVar4 < uVar1; uVar4 = uVar4 + 1) {
         vaddr = pEVar2->e_ident + lVar5;
@@ -50,10 +50,10 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
             return (Elf64_Relr *)0x0;
           }
           if ((*(Elf64_Relr *)vaddr == EVar6) &&
-             ((in_RDX == (Elf64_Relr *)0x0 || ((in_RDX <= vaddr && (vaddr <= in_RCX)))))) {
+             ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= vaddr && (vaddr <= result_high_bound)))))) {
 LAB_00101d98:
-            if (in_R8 != (ulong *)0x0) {
-              *in_R8 = uVar4 + 1;
+            if (resume_index_ptr != (ulong *)0x0) {
+              *resume_index_ptr = uVar4 + 1;
               return (Elf64_Relr *)vaddr;
             }
             return (Elf64_Relr *)vaddr;
@@ -68,7 +68,7 @@ LAB_00101d98:
                 return (Elf64_Relr *)0x0;
               }
               if ((*(Elf64_Relr *)vaddr == EVar6) &&
-                 ((in_RDX == (Elf64_Relr *)0x0 || ((in_RDX <= vaddr && (vaddr <= in_RCX))))))
+                 ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= vaddr && (vaddr <= result_high_bound))))))
               goto LAB_00101d98;
             }
             vaddr = vaddr + 8;
@@ -76,8 +76,8 @@ LAB_00101d98:
           lVar5 = lVar5 + 0x1f8;
         }
       }
-      if (in_R8 != (ulong *)0x0) {
-        *in_R8 = uVar4;
+      if (resume_index_ptr != (ulong *)0x0) {
+        *resume_index_ptr = uVar4;
       }
     }
   }
