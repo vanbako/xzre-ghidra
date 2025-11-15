@@ -52,7 +52,7 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
       return TRUE;
     }
     if ((0x12 < payload_size) && (ctx->payload_state < 2)) {
-      hdr.field0_0x0._0_8_ = *(undefined8 *)&payload->field0_0x0;
+      *(u64 *)&hdr.field0_0x0 = *(undefined8 *)&payload->field0_0x0;
       hdr.field0_0x0.field1.field_c = *(u64 *)((long)&payload->field0_0x0 + 8);
       BVar3 = secret_data_get_decrypted((u8 *)&data,ctx);
       if (BVar3 != FALSE) {

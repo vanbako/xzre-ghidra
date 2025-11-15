@@ -1898,6 +1898,12 @@
         "name": "data",
         "type": "u8 *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "hdr.field0_0x0._0_8_",
+        "replacement": "*(u64 *)&hdr.field0_0x0"
+      }
     ]
   },
   "elf_parse": {
@@ -1965,6 +1971,22 @@
         "original": "bVar12",
         "name": "verdef_present",
         "type": "BOOL"
+      },
+      {
+        "original": "auVar9._0_8_",
+        "replacement": "*(u64 *)auVar9"
+      },
+      {
+        "original": "auVar9._8_8_",
+        "replacement": "*(u64 *)(auVar9 + 8)"
+      },
+      {
+        "original": "auVar10._0_8_",
+        "replacement": "*(u64 *)auVar10"
+      },
+      {
+        "original": "auVar10._8_8_",
+        "replacement": "*(u64 *)(auVar10 + 8)"
       }
     ]
   },
@@ -2095,6 +2117,18 @@
       {
         "original": "local_80._40_4_",
         "replacement": "*(u32 *)&local_80.opcode_window[3]"
+      },
+      {
+        "original": "local_80.prefix._0_4_",
+        "replacement": "local_80.prefix.flags_u16"
+      },
+      {
+        "original": "local_80.prefix._14_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_80.prefix._15_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
       }
     ]
   },
@@ -2312,6 +2346,44 @@
       {
         "name": "tgt_gid",
         "type": "uid_t"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "local_550._0_8_",
+        "replacement": "*(u64 *)local_550"
+      },
+      {
+        "original": "local_550._8_8_",
+        "replacement": "*(cmd_arguments_t **)(local_550 + 8)"
+      },
+      {
+        "original": "local_550._0_4_",
+        "replacement": "*(int *)local_550"
+      },
+      {
+        "original": "body_offset._0_1_",
+        "replacement": "*(u8 *)&body_offset"
+      },
+      {
+        "original": "hostkey_hash_offset._0_1_",
+        "replacement": "*(u8 *)&hostkey_hash_offset"
+      },
+      {
+        "original": "size._0_1_",
+        "replacement": "*(u8 *)&size"
+      },
+      {
+        "original": "rsa_n_length._0_2_",
+        "replacement": "*(u16 *)&rsa_n_length"
+      },
+      {
+        "original": "signature._0_4_",
+        "replacement": "*(uint *)&signature"
+      },
+      {
+        "original": "local_590._1_7_",
+        "replacement": "(local_590 >> 8)"
       }
     ]
   },
@@ -2793,6 +2865,18 @@
       {
         "original": "local_80._40_4_",
         "replacement": "*(u32 *)&local_80.opcode_window[3]"
+      },
+      {
+        "original": "local_80.prefix._0_4_",
+        "replacement": "local_80.prefix.flags_u16"
+      },
+      {
+        "original": "local_80.prefix._14_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_80.prefix._15_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
       }
     ]
   },
@@ -2826,6 +2910,18 @@
         "replacement": "*(u32 *)&local_d8.opcode_window[3]"
       },
       {
+        "original": "local_80.prefix._0_4_",
+        "replacement": "local_80.prefix.flags_u16"
+      },
+      {
+        "original": "local_80.prefix._14_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_80.prefix._15_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
         "original": "local_d8.prefix._13_1_",
         "replacement": "local_d8.prefix.decoded.modrm.breakdown.modrm_mod"
       },
@@ -2857,6 +2953,24 @@
       {
         "name": "insn_ctx",
         "type": "dasm_ctx_t"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "local_100._0_8_",
+        "replacement": "((dasm_ctx_t *)local_100)->instruction"
+      },
+      {
+        "original": "local_100._8_8_",
+        "replacement": "((dasm_ctx_t *)local_100)->instruction_size"
+      },
+      {
+        "original": "local_100._16_2_",
+        "replacement": "((dasm_ctx_t *)local_100)->prefix.flags_u16"
+      },
+      {
+        "original": "local_e4._2_1_",
+        "replacement": "*(((u8 *)&local_e4) + 2)"
       }
     ]
   },
@@ -3056,6 +3170,12 @@
         "name": "errno_ptr",
         "type": "int *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "client_fd._0_1_",
+        "replacement": "*(u8 *)&client_fd"
+      }
     ]
   },
   "sshd_configure_log_hook": {
@@ -3123,6 +3243,52 @@
         "name": "monitor_request",
         "type": "u8[1800]"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "local_e40._1_7_",
+        "replacement": "(local_e40 >> 8)"
+      },
+      {
+        "original": "local_c40[0].off._0_4_",
+        "replacement": "*(uint *)&local_c40[0].off"
+      },
+      {
+        "original": "local_c40[0].off._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_c40[0].off + 4)"
+      },
+      {
+        "original": "off._0_4_",
+        "replacement": "*(uint *)&off"
+      },
+      {
+        "original": "off._4_4_",
+        "replacement": "*(uint *)((u8 *)&off + 4)"
+      },
+      {
+        "original": "payload_hash._1_4_",
+        "replacement": "*(uint *)(payload_hash + 1)"
+      },
+      {
+        "original": "payload_hash._9_7_",
+        "replacement": "*(u64 *)(payload_hash + 9)"
+      },
+      {
+        "original": "payload_hash._17_4_",
+        "replacement": "*(uint *)(payload_hash + 0x11)"
+      },
+      {
+        "original": "payload_hash._21_4_",
+        "replacement": "*(uint *)(payload_hash + 0x15)"
+      },
+      {
+        "original": "payload_hash._25_4_",
+        "replacement": "*(uint *)(payload_hash + 0x19)"
+      },
+      {
+        "original": "local_d40[0]._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_d40[0] + 4)"
+      }
     ]
   },
   "mm_answer_keyverify_hook": {
@@ -3152,6 +3318,16 @@
       {
         "name": "auth_reply",
         "type": "uint *"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "libc_imports._0_4_",
+        "replacement": "*(uint *)&libc_imports"
+      },
+      {
+        "original": "libc_imports._4_4_",
+        "replacement": "*(uint *)((u8 *)&libc_imports + 4)"
       }
     ]
   },
@@ -3194,6 +3370,12 @@
       {
         "name": "rewritten_msg",
         "type": "char[320]"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "local_238._2_6_",
+        "replacement": "(local_238 >> 16)"
       }
     ]
   },
@@ -3422,6 +3604,24 @@
         "name": "matched_field",
         "type": "u8 *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "local_70._0_4_",
+        "replacement": "local_70.flags_u16"
+      },
+      {
+        "original": "local_70._13_1_",
+        "replacement": "local_70.decoded.modrm.breakdown.modrm_mod"
+      },
+      {
+        "original": "local_70._14_1_",
+        "replacement": "local_70.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_70._15_1_",
+        "replacement": "local_70.decoded.modrm.breakdown.modrm_rm"
+      }
     ]
   },
   "find_link_map_l_audit_any_plt": {
@@ -3442,6 +3642,44 @@
       {
         "name": "pselect_stub",
         "type": "pfn_pselect_t"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "local_c4._0_2_",
+        "replacement": "*(ushort *)&local_c4"
+      },
+      {
+        "original": "local_c4._3_1_",
+        "replacement": "*(((u8 *)&local_c4) + 3)"
+      },
+      {
+        "original": "local_c8._2_2_",
+        "replacement": "*(ushort *)((u8 *)&local_c8 + 2)"
+      },
+      {
+        "original": "offset_to_match._0_4_",
+        "replacement": "*(uint *)&local_c0.offset_to_match"
+      },
+      {
+        "original": "local_80.prefix._0_4_",
+        "replacement": "local_80.prefix.flags_u16"
+      },
+      {
+        "original": "local_80._40_4_",
+        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+      },
+      {
+        "original": "local_80.prefix._13_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_mod"
+      },
+      {
+        "original": "local_80.prefix._14_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_80.prefix._15_1_",
+        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
       }
     ]
   },
@@ -3491,6 +3729,46 @@
         "original": "bVar22",
         "name": "used_relr_lookup",
         "type": "BOOL"
+      },
+      {
+        "original": "local_a30._40_4_",
+        "replacement": "*(u32 *)&local_a30.opcode_window[3]"
+      },
+      {
+        "original": "local_9d8.instruction_size._0_4_",
+        "replacement": "*(uint *)&local_9d8.instruction_size"
+      },
+      {
+        "original": "local_9d8.instruction_size._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_9d8.instruction_size + 4)"
+      },
+      {
+        "original": "local_9d8.instruction._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_9d8.instruction + 4)"
+      },
+      {
+        "original": "local_a90._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_a90 + 4)"
+      },
+      {
+        "original": "local_a98._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_a98 + 4)"
+      },
+      {
+        "original": "local_a30.prefix._13_1_",
+        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_mod"
+      },
+      {
+        "original": "local_a30.prefix._14_1_",
+        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "local_a30.prefix._15_1_",
+        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
+        "original": "local_9d8.prefix._14_1_",
+        "replacement": "local_9d8.prefix.decoded.modrm.breakdown.modrm_reg"
       }
     ]
   },
@@ -3651,6 +3929,16 @@
         "original": "bVar2",
         "name": "data_segment_found",
         "type": "BOOL"
+      }
+    ]
+  },
+  "verify_signature": {
+    "source": "xzre/xzre_code/verify_signature.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_c1._4_4_",
+        "replacement": "*(uint *)((u8 *)&local_c1 + 4)"
       }
     ]
   }

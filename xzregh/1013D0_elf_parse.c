@@ -202,8 +202,8 @@ switchD_0010157d_caseD_18:
             return FALSE;
           }
           elf_info->flags = elf_info->flags | 1;
-          auVar9._8_8_ = 0;
-          auVar9._0_8_ = EVar18;
+          *(u64 *)(auVar9 + 8) = 0;
+          *(u64 *)auVar9 = EVar18;
           elf_info->plt_relocs_num = SUB164(auVar9 / ZEXT816(0x18),0);
         }
         pEVar6 = elf_info->rela_relocs;
@@ -212,8 +212,8 @@ switchD_0010157d_caseD_18:
             return FALSE;
           }
           elf_info->flags = elf_info->flags | 2;
-          auVar10._8_8_ = 0;
-          auVar10._0_8_ = size_00;
+          *(u64 *)(auVar10 + 8) = 0;
+          *(u64 *)auVar10 = size_00;
           elf_info->rela_relocs_num = SUB164(auVar10 / ZEXT816(0x18),0);
         }
         pEVar7 = elf_info->relr_relocs;

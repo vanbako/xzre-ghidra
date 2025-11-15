@@ -364,15 +364,15 @@ LAB_0010845f:
     payload_hash[7] = '\0';
     payload_hash[8] = '\x1c';
     local_e70[0] = pBVar18;
-    local_e40 = CONCAT71(local_e40._1_7_,0x80);
+    local_e40 = CONCAT71((local_e40 >> 8),0x80);
     local_e70[1] = pBVar17;
-    payload_hash._9_7_ = (undefined7)*(undefined8 *)pcVar32;
+    *(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)pcVar32;
     payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)pcVar32 >> 0x38);
-    payload_hash._17_4_ = (undefined4)*(undefined8 *)(pcVar32 + 8);
+    *(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(pcVar32 + 8);
     local_d4a = 8;
     local_d41 = 1;
-    payload_hash._21_4_ = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
-    payload_hash._25_4_ = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
+    *(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
+    *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
     stack0xfffffffffffff50d = *(undefined8 *)(pcVar32 + 0x14);
     puVar22 = &local_e40;
     puVar27 = local_abb;
@@ -402,7 +402,7 @@ LAB_0010845f:
         local_98b = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                     uVar11 * 0x1000000;
         uVar11 = iVar12 + 0x2a7;
-        payload_hash._1_4_ =
+        *(uint *)(payload_hash + 1) =
              uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 | uVar11 * 0x1000000
         ;
         uVar11 = iVar12 + 700;
@@ -434,9 +434,9 @@ LAB_0010845f:
                                (0x2a0,local_e60,0x20,(uchar *)local_d40,&local_e7c,r);
             if ((iVar12 == 1) && (local_e7c == 0x100)) {
               local_c40[0].d = (u8 *)0xc00000014010000;
-              local_c40[0].off._4_4_ = 0x10000;
+              *(uint *)((u8 *)&local_c40[0].off + 4) = 0x10000;
               local_c40[0].cd = *(u8 **)ctx->STR_rsa_sha2_256;
-              local_c40[0].off._0_4_ = *(undefined4 *)(ctx->STR_rsa_sha2_256 + 8);
+              *(uint *)&local_c40[0].off = *(undefined4 *)(ctx->STR_rsa_sha2_256 + 8);
               sVar20 = uVar33 + 0x2c0;
               puVar24 = local_d40;
               psVar30 = &local_c40[0].size;
@@ -554,7 +554,7 @@ LAB_0010897e:
               }
               uVar11 = (uint)local_d40[0] >> 0x18 | ((uint)local_d40[0] & 0xff0000) >> 8 |
                        ((uint)local_d40[0] & 0xff00) << 8 | (uint)local_d40[0] << 0x18;
-              local_d40[0] = CONCAT44(local_d40[0]._4_4_,uVar11);
+              local_d40[0] = CONCAT44(*(uint *)((u8 *)&local_d40[0] + 4),uVar11);
               uVar33 = (ulong)uVar11;
               if (uVar33 != 0) {
                 if (plVar5->read == (pfn_read_t)0x0) {

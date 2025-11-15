@@ -64,39 +64,39 @@ LAB_001036eb:
     if ((code_end <= code_start) ||
        (BVar2 = find_call_instruction(code_start,code_end,call_target,(dasm_ctx_t *)local_100),
        BVar2 == FALSE)) goto LAB_00103802;
-    code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
+    code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
     BVar2 = find_instruction_with_mem_operand_ex
                       (code_start,code_start + 0x20,(dasm_ctx_t *)local_100,0x109,(void *)0x0);
   } while (BVar2 == FALSE);
-  if ((local_100._16_2_ & 0x1040) == 0) {
+  if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1040) == 0) {
 LAB_00103788:
     if (uVar11 != 0) {
-      code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
+      code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
       goto LAB_001036eb;
     }
   }
   else {
-    if ((local_100._16_2_ & 0x40) != 0) {
-      uVar11 = local_e4._2_1_;
-      if ((local_100._16_2_ & 0x20) != 0) {
+    if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x40) != 0) {
+      uVar11 = *(((u8 *)&local_e4) + 2);
+      if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
         bVar1 = hit_count * '\x02';
 LAB_00103782:
         uVar11 = uVar11 | bVar1 & 8;
       }
       goto LAB_00103788;
     }
-    if ((local_100._16_2_ & 0x1000) != 0) {
+    if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1000) != 0) {
       uVar11 = local_e0;
-      if ((local_100._16_2_ & 0x20) != 0) {
+      if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
         bVar1 = hit_count << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;
     }
   }
-  if (((local_100._16_2_ & 0x100) != 0) && (puVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)
+  if (((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x100) != 0) && (puVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)
      ) {
-    puVar8 = local_d0 + local_100._0_8_ + local_100._8_8_;
+    puVar8 = local_d0 + ((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size;
   }
   if ((data_start <= puVar8) && (puVar8 < data_end)) {
     uVar9 = (ulong)bVar10;
@@ -127,7 +127,7 @@ LAB_00103802:
     }
   }
   uVar11 = 0;
-  code_start = (u8 *)(local_100._0_8_ + local_100._8_8_);
+  code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
   goto LAB_001036eb;
 }
 

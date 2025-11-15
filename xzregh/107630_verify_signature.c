@@ -85,7 +85,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
       return FALSE;
     }
     uVar4 = (uint)sVar8;
-    local_c1 = CONCAT44(local_c1._4_4_,
+    local_c1 = CONCAT44(*(uint *)((u8 *)&local_c1 + 4),
                         uVar4 >> 0x18 | (uVar4 & 0xff0000) >> 8 | (uVar4 & 0xff00) << 8 |
                         uVar4 << 0x18);
     sVar6 = (*piVar1->EC_POINT_point2oct)

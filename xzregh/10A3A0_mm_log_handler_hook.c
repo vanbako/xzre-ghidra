@@ -113,7 +113,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
       }
       msg = msg + 1;
     }
-    local_238 = CONCAT62(local_238._2_6_,*(undefined2 *)log_ctx_00->STR_percent_s);
+    local_238 = CONCAT62((local_238 >> 16),*(undefined2 *)log_ctx_00->STR_percent_s);
     log_ctx_00->logging_disabled = TRUE;
     if (((log_ctx_00->syslog_disabled != FALSE) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
