@@ -32,9 +32,9 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   dasm_ctx_t *code_end;
   void **ppvVar14;
   dasm_ctx_t *pdVar15;
-  EncodedStringId local_94;
-  u64 local_90 [2];
-  dasm_ctx_t local_80;
+  EncodedStringId string_id_cursor;
+  u64 code_segment_info [2];
+  dasm_ctx_t scanner_ctx;
   
   EVar4 = STR_xcalloc_zero_size;
   psVar13 = refs->entries;
@@ -43,26 +43,26 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
     EVar4 = EVar4 + 8;
     psVar13 = psVar13 + 1;
   } while (EVar4 != 0xe8);
-  pdVar11 = &local_80;
+  pdVar11 = &scanner_ctx;
   for (lVar12 = 0x16; lVar12 != 0; lVar12 = lVar12 + -1) {
     *(undefined4 *)&pdVar11->instruction = 0;
     pdVar11 = (dasm_ctx_t *)((long)&pdVar11->instruction + 4);
   }
-  local_90[0] = 0;
-  local_90[1] = 0;
-  code_start = (dasm_ctx_t *)elf_get_code_segment(elf_info,local_90);
-  pdVar11 = &local_80;
-  if ((code_start != (dasm_ctx_t *)0x0) && (0x10 < local_90[0])) {
-    code_end = (dasm_ctx_t *)(code_start->opcode_window + (local_90[0] - 0x25));
+  code_segment_info[0] = 0;
+  code_segment_info[1] = 0;
+  code_start = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_info);
+  pdVar11 = &scanner_ctx;
+  if ((code_start != (dasm_ctx_t *)0x0) && (0x10 < code_segment_info[0])) {
+    code_end = (dasm_ctx_t *)(code_start->opcode_window + (code_segment_info[0] - 0x25));
     pcVar6 = (char *)0x0;
     while( TRUE ) {
-      local_94 = 0;
-      pcVar6 = elf_find_string(elf_info,&local_94,pcVar6);
+      string_id_cursor = 0;
+      pcVar6 = elf_find_string(elf_info,&string_id_cursor,pcVar6);
       if (pcVar6 == (char *)0x0) break;
       lVar12 = 0;
       do {
         if (((*(long *)(refs->entries[0].entry_bytes + lVar12 + 0x14) == 0) &&
-            (*(EncodedStringId *)(refs->entries[0].entry_bytes + lVar12 + -4) == local_94)) &&
+            (*(EncodedStringId *)(refs->entries[0].entry_bytes + lVar12 + -4) == string_id_cursor)) &&
            (puVar7 = find_string_reference((u8 *)code_start,(u8 *)code_end,pcVar6),
            puVar7 != (u8 *)0x0)) {
           *(u8 **)(refs->entries[0].entry_bytes + lVar12 + 0x14) = puVar7;
@@ -97,22 +97,22 @@ LAB_00102e64:
       pdVar15 = (dasm_ctx_t *)((long)&pdVar15->instruction + 1);
       if (BVar5 != FALSE) {
         pdVar15 = (dasm_ctx_t *)
-                  ((u8 *)((long)local_80.instruction + 0x25) + (local_80.instruction_size - 0x25));
-        if (*(u32 *)&local_80.opcode_window[3] == 0x168) {
-          if (local_80.operand == 0) goto LAB_00102e64;
+                  ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));
+        if (scanner_ctx._40_4_ == 0x168) {
+          if (scanner_ctx.operand == 0) goto LAB_00102e64;
           pdVar9 = (dasm_ctx_t *)
-                   ((u8 *)((long)local_80.instruction + 0x25) +
-                   local_80.operand + local_80.instruction_size + -0x25);
+                   ((u8 *)((long)scanner_ctx.instruction + 0x25) +
+                   scanner_ctx.operand + scanner_ctx.instruction_size + -0x25);
 LAB_00102ee5:
           if (pdVar9 == (dasm_ctx_t *)0x0) goto LAB_00102e64;
         }
         else {
-          pdVar9 = (dasm_ctx_t *)local_80.instruction;
-          if (*(u32 *)&local_80.opcode_window[3] == 0xa5fe) goto LAB_00102ee5;
-          if (((*(u32 *)&local_80.opcode_window[3] != 0x10d) || (((byte)local_80.prefix.decoded.rex & 0x48) != 0x48))
-             || (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
+          pdVar9 = (dasm_ctx_t *)scanner_ctx.instruction;
+          if (scanner_ctx._40_4_ == 0xa5fe) goto LAB_00102ee5;
+          if (((scanner_ctx._40_4_ != 0x10d) || (((byte)scanner_ctx.prefix.decoded.rex & 0x48) != 0x48))
+             || (((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
           goto LAB_00102e64;
-          pdVar9 = (dasm_ctx_t *)(pdVar15->opcode_window + (local_80.mem_disp - 0x25));
+          pdVar9 = (dasm_ctx_t *)(pdVar15->opcode_window + (scanner_ctx.mem_disp - 0x25));
         }
         if ((code_start <= pdVar9) && (ppvVar8 = ppvVar14, pdVar9 <= code_end)) {
           do {

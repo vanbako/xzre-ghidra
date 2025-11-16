@@ -39,9 +39,9 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   ulong uVar22;
   x86_prefix_state_t *pxVar23;
   BOOL bVar24;
-  BOOL has_bytes_remaining;
+  BOOL bVar25;
   byte bVar26;
-  ulong local_38 [4];
+  ulong opcode_class_masks [4];
   
   bVar26 = 0;
   BVar7 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
@@ -355,13 +355,13 @@ LAB_001003fa:
                 if (uVar11 < 0x3a) {
                   if (0x37 < uVar11) goto LAB_001005bf;
                   bVar24 = uVar11 - 0x20 < 2;
-                  has_bytes_remaining = uVar11 - 0x20 == 2;
+                  bVar25 = uVar11 - 0x20 == 2;
                 }
                 else {
                   bVar24 = uVar11 - 0x60 < 3;
-                  has_bytes_remaining = uVar11 - 0x60 == 3;
+                  bVar25 = uVar11 - 0x60 == 3;
                 }
-                if (!bVar24 && !has_bytes_remaining) goto LAB_001005d6;
+                if (!bVar24 && !bVar25) goto LAB_001005d6;
               }
               else if ((0x1000080001U >> (bVar16 + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
@@ -492,12 +492,12 @@ LAB_001001c5:
             return FALSE;
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)bVar16;
-          local_38[0] = 0x3030303030303030;
+          opcode_class_masks[0] = 0x3030303030303030;
           ctx->insn_offset = (u8)((long)pbVar14 - (long)code_start);
-          local_38[1] = 0xffff0fc000000000;
-          local_38[2] = 0xffff03000000000b;
-          local_38[3] = 0xc00bff000025c7;
-          uVar18 = local_38[bVar16 >> 6] >> (bVar16 & 0x3f);
+          opcode_class_masks[1] = 0xffff0fc000000000;
+          opcode_class_masks[2] = 0xffff03000000000b;
+          opcode_class_masks[3] = 0xc00bff000025c7;
+          uVar18 = opcode_class_masks[bVar16 >> 6] >> (bVar16 & 0x3f);
           uVar19 = (ulong)((uint)uVar18 & 1);
           if ((uVar18 & 1) == 0) {
             ctx->operand_size = 0;

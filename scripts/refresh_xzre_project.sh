@@ -163,6 +163,10 @@ python3 "$ROOT_DIR/scripts/postprocess_register_temps.py" \
   --metadata "$LOCALS_SOURCE" \
   --xzregh-dir "$XZREGH_EXPORT_DIR"
 
+RENAME_REPORT="$GENERATED_DIR/locals_rename_report.txt"
+python3 "$ROOT_DIR/scripts/check_locals_renames.py" --output "$RENAME_REPORT" || \
+  echo "warning: locals rename verification reported issues. See $RENAME_REPORT." >&2
+
 if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
   echo "warning: exported AutoDoc comments differ from metadata/functions_autodoc.json" >&2
   if [[ "$CHECK_ONLY" -eq 1 ]]; then

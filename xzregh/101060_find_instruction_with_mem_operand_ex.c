@@ -20,18 +20,18 @@ BOOL find_instruction_with_mem_operand_ex
   long lVar2;
   dasm_ctx_t *pdVar3;
   byte bVar4;
-  dasm_ctx_t local_80;
+  dasm_ctx_t scratch_ctx;
   
   bVar4 = 0;
   BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xd6,4,0xe,FALSE);
   if (BVar1 != FALSE) {
-    pdVar3 = &local_80;
+    pdVar3 = &scratch_ctx;
     for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
       *(undefined4 *)&pdVar3->instruction = 0;
       pdVar3 = (dasm_ctx_t *)((long)pdVar3 + ((ulong)bVar4 * -2 + 1) * 4);
     }
     if (dctx == (dasm_ctx_t *)0x0) {
-      dctx = &local_80;
+      dctx = &scratch_ctx;
     }
     for (; code_start < code_end; code_start = code_start + 1) {
       BVar1 = x86_dasm(dctx,code_start,code_end);

@@ -3,6 +3,18 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-15
+- Revisited the `opco_patt` helpers and added explicit register-temp metadata so
+  all of the remaining `local_*` decoder scratch variables have descriptive
+  names (`opcode_class_masks`, `scratch_ctx`, `scanner_ctx`, etc.). Updated
+  `metadata/xzre_locals.json` for the instruction scanners, string xref
+  builders, and pointer-finder helpers, then ran
+  `./scripts/refresh_xzre_project.sh` to regenerate the exported sources and
+  portable Ghidra project with the refreshed metadata.
+- Next: continue expanding the metadata coverage for the remaining pointer
+  utilities (e.g., `find_reg2reg_instruction`) if we discover additional
+  scratch locals that could benefit from stronger typing.
+
+## 2025-11-15
 - Tagged the remaining `sshd_recon` locals inside `metadata/xzre_locals.json`
   (extra disassembly contexts, store-slot scratch buffers, monitor vote table,
   sshd_main/code-scan bounds, etc.) so the headless run can replace the last

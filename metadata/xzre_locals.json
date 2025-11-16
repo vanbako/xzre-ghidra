@@ -2063,10 +2063,11 @@
   },
   "find_call_instruction": {
     "source": "xzre/xzre_code/find_call_instruction.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "ctx",
-        "type": "dasm_ctx_t"
+        "original": "local_80",
+        "replacement": "scratch_ctx"
       }
     ]
   },
@@ -2101,43 +2102,47 @@
     "register_temps": [
       {
         "original": "local_70._40_4_",
-        "replacement": "*(u32 *)&local_70.opcode_window[3]"
+        "replacement": "*(u32 *)&prologue_ctx.opcode_window[3]"
+      },
+      {
+        "original": "local_70",
+        "replacement": "prologue_ctx"
       }
     ]
   },
   "find_lea_instruction": {
     "source": "xzre/xzre_code/find_lea_instruction.c",
-    "locals": [
-      {
-        "name": "dctx",
-        "type": "dasm_ctx_t"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+        "replacement": "*(u32 *)&lea_ctx.opcode_window[3]"
       },
       {
         "original": "local_80.prefix._0_4_",
-        "replacement": "local_80.prefix.flags_u16"
+        "replacement": "lea_ctx.prefix.flags_u16"
       },
       {
         "original": "local_80.prefix._14_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+        "replacement": "lea_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
       },
       {
         "original": "local_80.prefix._15_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
+        "replacement": "lea_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
+        "original": "local_80",
+        "replacement": "lea_ctx"
       }
     ]
   },
   "find_string_reference": {
     "source": "xzre/xzre_code/find_string_reference.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "dctx",
-        "type": "dasm_ctx_t"
+        "original": "local_60",
+        "replacement": "scratch_ctx"
       }
     ]
   },
@@ -2146,8 +2151,20 @@
     "locals": [],
     "register_temps": [
       {
+        "original": "local_80",
+        "replacement": "scanner_ctx"
+      },
+      {
         "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+        "replacement": "*(u32 *)&scanner_ctx.opcode_window[3]"
+      },
+      {
+        "original": "local_90",
+        "replacement": "code_segment_info"
+      },
+      {
+        "original": "local_94",
+        "replacement": "string_id_cursor"
       }
     ]
   },
@@ -4183,14 +4200,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "bVar25",
-        "name": "has_bytes_remaining",
-        "type": "BOOL"
-      },
-      {
-        "original": "bVar26",
-        "name": "is_two_byte_opcode",
-        "type": "BOOL"
+        "original": "local_38",
+        "replacement": "opcode_class_masks"
       }
     ]
   },
@@ -4199,9 +4210,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "bVar5",
-        "name": "opcode_matches_direction",
-        "type": "BOOL"
+        "original": "local_80",
+        "replacement": "scratch_ctx"
       }
     ]
   },
@@ -4210,9 +4220,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "bVar5",
-        "name": "opcode_matches_direction",
-        "type": "BOOL"
+        "original": "local_80",
+        "replacement": "scratch_ctx"
       }
     ]
   },
@@ -4247,5 +4256,60 @@
         "replacement": "*(uint *)((u8 *)&local_c1 + 4)"
       }
     ]
+  },
+  "find_lea_instruction_with_mem_operand": {
+    "source": "xzre/xzre_code/find_lea_instruction_with_mem_operand.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_80",
+        "replacement": "scratch_ctx"
+      }
+    ]
+  },
+  "find_instruction_with_mem_operand_ex": {
+    "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_80",
+        "replacement": "scratch_ctx"
+      }
+    ]
+  },
+  "find_add_instruction_with_mem_operand": {
+    "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_80",
+        "replacement": "scratch_ctx"
+      }
+    ]
+  },
+  "find_addr_referenced_in_mov_instruction": {
+    "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_80",
+        "replacement": "scratch_ctx"
+      }
+    ]
+  },
+  "elf_find_string_reference": {
+    "source": "xzre/xzre_code/elf_find_string_reference.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_2c",
+        "replacement": "string_id_cursor"
+      }
+    ]
+  },
+  "find_lea_instruction_with_mem_operand_extras": {
+    "source": "",
+    "locals": [],
+    "register_temps": []
   }
 }

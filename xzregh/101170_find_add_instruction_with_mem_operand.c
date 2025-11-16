@@ -19,15 +19,15 @@ BOOL find_add_instruction_with_mem_operand
   BOOL BVar1;
   long lVar2;
   dasm_ctx_t *pdVar3;
-  dasm_ctx_t local_80;
+  dasm_ctx_t scratch_ctx;
   
-  pdVar3 = &local_80;
+  pdVar3 = &scratch_ctx;
   for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
     *(undefined4 *)&pdVar3->instruction = 0;
     pdVar3 = (dasm_ctx_t *)((long)&pdVar3->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
-    dctx = &local_80;
+    dctx = &scratch_ctx;
   }
   while( TRUE ) {
     if (code_end <= code_start) {

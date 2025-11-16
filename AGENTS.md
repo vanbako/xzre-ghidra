@@ -25,6 +25,7 @@
 ### Metadata Helpers & Notes
 - `scripts/edit_autodoc.py <function>` opens your `$EDITOR` (or accepts `--set/--file/--stdin`) with the current entry so you can update `metadata/functions_autodoc.json` one function at a time without juggling the full JSON blob.
 - `scripts/generate_function_stubs.py --batch <shortname>` writes `notes/<function>.md` scaffolds that capture the existing AutoDoc text, locals snapshot, and TODO checkboxes. Re-run with `--force` to refresh stubs or pass `--function <symbol>` for ad-hoc helpers.
+- `scripts/check_locals_renames.py --output <report>` validates that every `register_temps` rename in `metadata/xzre_locals.json` actually shows up in the exported `xzregh/*.c`. `refresh_xzre_project.sh` runs it automatically and writes the results to `ghidra_scripts/generated/locals_rename_report.txt`; inspect that file whenever the refresh complains about lingering `local_*` names.
 - Recommended loop: generate stubs for the batch you plan to tackle, jot raw observations in those Markdown files while reviewing `xzregh/`, then promote the distilled findings into the metadata JSON via the helper (and adjust `metadata/xzre_locals.json` for renamed locals/params). The stubs are scratchpads only—the JSON files remain the source of truth.
 
 ## Working With Ghidra

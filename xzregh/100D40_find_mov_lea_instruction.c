@@ -20,16 +20,16 @@ BOOL find_mov_lea_instruction
   BOOL BVar2;
   long lVar3;
   dasm_ctx_t *pdVar4;
-  BOOL opcode_matches_direction;
-  dasm_ctx_t local_80;
+  BOOL bVar5;
+  dasm_ctx_t scratch_ctx;
   
-  pdVar4 = &local_80;
+  pdVar4 = &scratch_ctx;
   for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
     *(undefined4 *)&pdVar4->instruction = 0;
     pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
-    dctx = &local_80;
+    dctx = &scratch_ctx;
   }
   do {
     while( TRUE ) {
@@ -48,12 +48,12 @@ BOOL find_mov_lea_instruction
         return TRUE;
       }
       if (load_flag == FALSE) {
-        opcode_matches_direction = iVar1 == 0x109;
+        bVar5 = iVar1 == 0x109;
       }
       else {
-        opcode_matches_direction = iVar1 == 0x10b;
+        bVar5 = iVar1 == 0x10b;
       }
-      if (opcode_matches_direction) {
+      if (bVar5) {
         return TRUE;
       }
     }
