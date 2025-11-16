@@ -2872,6 +2872,14 @@
       {
         "name": "sshd_main_candidate",
         "type": "u8 *"
+      },
+      {
+        "name": "code_segment_size",
+        "type": "u64"
+      },
+      {
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
       }
     ],
     "register_temps": [
@@ -2932,12 +2940,16 @@
         "type": "u8 *"
       },
       {
-        "name": "insn_ctx",
+        "name": "store_scan_ctx",
         "type": "dasm_ctx_t"
       },
       {
         "name": "data_cursor",
         "type": "u8 *"
+      },
+      {
+        "name": "string_scan_ctx",
+        "type": "dasm_ctx_t"
       }
     ],
     "register_temps": [
@@ -2993,6 +3005,26 @@
       {
         "name": "insn_ctx",
         "type": "dasm_ctx_t"
+      },
+      {
+        "name": "store_probe_ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "modrm_snapshot",
+        "type": "u32"
+      },
+      {
+        "name": "rex_rm_bits",
+        "type": "u8"
+      },
+      {
+        "name": "store_operand_ptr",
+        "type": "u8 *"
+      },
+      {
+        "name": "store_candidates",
+        "type": "u64[16]"
       }
     ],
     "register_temps": [
@@ -3088,6 +3120,14 @@
       {
         "name": "monitor_candidates",
         "type": "void *[10]"
+      },
+      {
+        "name": "data_segment_size",
+        "type": "u64"
+      },
+      {
+        "name": "monitor_vote_table",
+        "type": "uint[20]"
       }
     ]
   },
@@ -3121,6 +3161,30 @@
       {
         "name": "winning_candidate",
         "type": "sensitive_data *"
+      },
+      {
+        "name": "data_segment_size",
+        "type": "u64"
+      },
+      {
+        "name": "sshd_main_addr",
+        "type": "u8 *"
+      },
+      {
+        "name": "code_scan_limit",
+        "type": "u8 *"
+      },
+      {
+        "name": "xzcalloc_candidate_local",
+        "type": "sensitive_data *"
+      },
+      {
+        "name": "krb_candidate_local",
+        "type": "sensitive_data *"
+      },
+      {
+        "name": "secret_probe_items",
+        "type": "secret_data_item_t"
       }
     ]
   },

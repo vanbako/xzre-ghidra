@@ -30,7 +30,8 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   dasm_ctx_t *pdVar9;
   undefined1 uVar10;
   byte bVar11;
-  dasm_ctx_t insn_ctx;
+  dasm_ctx_t string_scan_ctx;
+  dasm_ctx_t store_scan_ctx;
   u8 *krb5_string_ref;
   u8 *candidate_store;
   u8 *data_cursor;

