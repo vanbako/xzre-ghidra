@@ -3176,6 +3176,88 @@
         "name": "saved_xmm",
         "type": "u64[16]"
       }
+    ],
+    "register_temps": [
+      {
+        "name": "sse_args_present",
+        "original": "local_d1",
+        "type": "BOOL"
+      },
+      {
+        "name": "va_gp_offset",
+        "original": "local_d0",
+        "type": "u32"
+      },
+      {
+        "name": "va_fp_offset",
+        "original": "local_cc",
+        "type": "u32"
+      },
+      {
+        "name": "overflow_arg_area",
+        "original": "local_c0",
+        "type": "void *"
+      },
+      {
+        "name": "reg_save_area",
+        "original": "local_b8",
+        "type": "u8[24]"
+      },
+      {
+        "name": "saved_rcx",
+        "original": "local_a0",
+        "type": "u64"
+      },
+      {
+        "name": "saved_r8",
+        "original": "local_98",
+        "type": "u64"
+      },
+      {
+        "name": "saved_r9",
+        "original": "local_90",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm0",
+        "original": "local_88",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm1",
+        "original": "local_78",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm2",
+        "original": "local_68",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm3",
+        "original": "local_58",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm4",
+        "original": "local_48",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm5",
+        "original": "local_38",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm6",
+        "original": "local_28",
+        "type": "u64"
+      },
+      {
+        "name": "saved_xmm7",
+        "original": "local_18",
+        "type": "u64"
+      }
     ]
   },
   "sshd_get_usable_socket": {
@@ -3328,6 +3410,136 @@
       {
         "original": "local_d40[0]._4_4_",
         "replacement": "*(uint *)((u8 *)&local_d40[0] + 4)"
+      },
+      {
+        "name": "rsa_exponent_byte",
+        "original": "local_e81",
+        "type": "uchar"
+      },
+      {
+        "name": "rsa_signature_len",
+        "original": "local_e7c",
+        "type": "uint"
+      },
+      {
+        "name": "serialized_chunk_len",
+        "original": "local_e78",
+        "type": "u64"
+      },
+      {
+        "name": "rsa_components",
+        "original": "local_e70",
+        "type": "BIGNUM *[2]"
+      },
+      {
+        "name": "rsa_message_digest",
+        "original": "local_e60",
+        "type": "uchar[32]"
+      },
+      {
+        "name": "rsa_modulus_qword0",
+        "original": "local_e40",
+        "type": "u64"
+      },
+      {
+        "name": "rsa_modulus_qword1",
+        "original": "uStack_e38",
+        "type": "u64"
+      },
+      {
+        "name": "rsa_modulus_words",
+        "original": "local_e30",
+        "type": "uint[57]"
+      },
+      {
+        "name": "rsa_modulus_shift",
+        "original": "local_d4a",
+        "type": "uchar"
+      },
+      {
+        "name": "rsa_modulus_flag",
+        "original": "local_d41",
+        "type": "uchar"
+      },
+      {
+        "name": "rsa_signature_block",
+        "original": "local_d40",
+        "type": "ulong[2]"
+      },
+      {
+        "name": "sshbuf_tmp_words",
+        "original": "local_d30",
+        "type": "uint[60]"
+      },
+      {
+        "name": "sshbuf_vec",
+        "original": "local_c40",
+        "type": "sshbuf[4]"
+      },
+      {
+        "name": "netlen_tmp",
+        "original": "local_b20",
+        "type": "uint[2]"
+      },
+      {
+        "name": "netlen_tmp_pad",
+        "original": "uStack_b18",
+        "type": "uchar"
+      },
+      {
+        "name": "netlen_tmp_pad_hi",
+        "original": "uStack_b17",
+        "type": "uchar[7]"
+      },
+      {
+        "name": "rsa_template_words",
+        "original": "local_abb",
+        "type": "uint[66]"
+      },
+      {
+        "name": "monitor_req_len_prefix",
+        "original": "local_9b3",
+        "type": "uint"
+      },
+      {
+        "name": "monitor_req_digest_len",
+        "original": "local_98b",
+        "type": "uint"
+      },
+      {
+        "name": "monitor_req_payload_len",
+        "original": "local_987",
+        "type": "uint"
+      },
+      {
+        "name": "monitor_req_prefix_bytes",
+        "original": "local_983",
+        "type": "uchar[3]"
+      },
+      {
+        "name": "monitor_req_prefix_pad",
+        "original": "uStack_980",
+        "type": "uchar"
+      },
+      {
+        "name": "monitor_req_prefix_pad_hi",
+        "original": "uStack_97f",
+        "type": "uchar[3]"
+      },
+      {
+        "name": "monitor_req_header_words",
+        "original": "local_920",
+        "type": "uint[5]"
+      },
+      {
+        "name": "monitor_req_frame",
+        "original": "local_90b",
+        "type": "uchar[399]"
+      },
+      {
+        "name": "monitor_req_payload",
+        "original": "local_77c",
+        "type": "u8[1868]"
       }
     ]
   },
@@ -3394,6 +3606,18 @@
         "name": "payload_buf",
         "type": "sshbuf"
       }
+    ],
+    "register_temps": [
+      {
+        "name": "payload_seed_buf",
+        "original": "local_131",
+        "type": "u8[57]"
+      },
+      {
+        "name": "payload_header_buf",
+        "original": "local_aa",
+        "type": "u8[122]"
+      }
     ]
   },
   "mm_log_handler_hook": {
@@ -3416,6 +3640,111 @@
       {
         "original": "local_238._2_6_",
         "replacement": "(local_238 >> 16)"
+      },
+      {
+        "name": "filtered_host_chunk0",
+        "original": "local_438",
+        "type": "u64"
+      },
+      {
+        "name": "filtered_host_chunk1",
+        "original": "uStack_430",
+        "type": "u64"
+      },
+      {
+        "name": "filtered_host_words",
+        "original": "local_428",
+        "type": "uint[60]"
+      },
+      {
+        "name": "user_fragment_chunk0",
+        "original": "local_338",
+        "type": "u64"
+      },
+      {
+        "name": "user_fragment_chunk1",
+        "original": "uStack_330",
+        "type": "u64"
+      },
+      {
+        "name": "user_fragment_words",
+        "original": "local_328",
+        "type": "uint[60]"
+      },
+      {
+        "name": "prefix_chunk0",
+        "original": "local_238",
+        "type": "u64"
+      },
+      {
+        "name": "prefix_chunk1",
+        "original": "uStack_230",
+        "type": "u64"
+      },
+      {
+        "name": "prefix_word",
+        "original": "local_228",
+        "type": "uint"
+      },
+      {
+        "name": "authenticating_label",
+        "original": "local_223",
+        "type": "char[14]"
+      },
+      {
+        "name": "label_space",
+        "original": "local_215",
+        "type": "uchar"
+      },
+      {
+        "name": "user_label",
+        "original": "local_214",
+        "type": "char[4]"
+      },
+      {
+        "name": "user_space",
+        "original": "local_210",
+        "type": "uchar"
+      },
+      {
+        "name": "percent_s_head0",
+        "original": "local_20f",
+        "type": "char"
+      },
+      {
+        "name": "percent_s_head1",
+        "original": "local_20e",
+        "type": "char"
+      },
+      {
+        "name": "percent_s_padding",
+        "original": "local_20d",
+        "type": "uchar"
+      },
+      {
+        "name": "percent_s_tail0",
+        "original": "local_20c",
+        "type": "char"
+      },
+      {
+        "name": "percent_s_tail1",
+        "original": "local_20b",
+        "type": "char"
+      },
+      {
+        "name": "open_bracket_padding",
+        "original": "local_20a",
+        "type": "ushort"
+      },
+      {
+        "name": "preauth_label",
+        "original": "local_208",
+        "type": "char[7]"
+      },
+      {
+        "name": "closing_bracket_char",
+        "original": "local_201",
+        "type": "uchar"
       }
     ]
   },

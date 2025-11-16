@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Uses the string-reference catalogue to find `do_child`, then counts how often it dereferences the candidate pointer at offsets 0
- * and +0x10. A hit on the base yields one point, and seeing multiple accesses to the +0x10 slot adds up to two more, producing a
- * score that reflects how tightly the child process manipulates the structure.
+ * AutoDoc: Uses the string catalogue to locate `do_child` and counts how many memory operands touch the supplied pointer at offsets
+ * 0 and +0x10. Touching the base is worth one point while seeing multiple hits on +0x10 yields up to two more, so routines
+ * that read both halves of the struct bubble to the top. The tiny score (0–3) feeds into the aggregate heuristic that
+ * selects the best candidate.
  */
 
 #include "xzre_types.h"

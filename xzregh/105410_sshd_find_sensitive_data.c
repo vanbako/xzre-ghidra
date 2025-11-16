@@ -5,10 +5,14 @@
 
 
 /*
- * AutoDoc: Bootstraps the entire sensitive-data discovery pipeline: emits bookkeeping entries for the secret-data mirroring code, allocates
- * libcrypto stubs (EVP_DigestVerify*, EVP_CIPHER_CTX_new, EVP_chacha20), finds `sshd_main`/`uses_endbr64`, gathers code/data
- * segment bounds, and runs both the xcalloc and KRB5CCNAME heuristics. It scores whichever pointers were found, keeps the higher-
- * confidence candidate, and writes it into `ctx->sshd_sensitive_data` before returning success.
+ * AutoDoc: Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers
+ * into the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`,
+ * `EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that
+ * the library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real
+ * `sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME`
+ * heuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and
+ * whichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved
+ * libcrypto stubs are freed before the helper reports that no recon data was found.
  */
 
 #include "xzre_types.h"

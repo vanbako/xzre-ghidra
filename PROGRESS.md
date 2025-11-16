@@ -3,6 +3,30 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-15
+- Added register-temp mappings for the sshd monitor/payload helpers (`sshd_log`,
+  `sshd_proxy_elevate`, `mm_answer_keyallowed_hook`, `mm_log_handler_hook`) so
+  the next refresh renames every lingering `local_*` scratch buffer and the
+  propagated `p?Var*` temporaries to descriptive names (e.g., RSA digest
+  buffers, monitor request payloads, log rewrite fragments). Ran
+  `./scripts/refresh_xzre_project.sh --check-only` to verify the metadata parses
+  cleanly; the full refresh can wait until we’re ready to push these names into
+  `xzregh/` and the portable project snapshot.
+- Next: execute the full refresh (no `--check-only`) once we’re done staging the
+  rest of the locals so the exported C picks up the new identifiers.
+
+## 2025-11-15
+- Reflowed every `sshd_recon` AutoDoc entry in `metadata/functions_autodoc.json` to multi-line form (120-char wraps) so
+  the generated comments in `xzregh/*.c` are readable again. No refresh yet—the check-only run still reflects the
+  same metadata contents.
+- Next: once the locals metadata is tidied, run the full refresh to push both the wording updates and the new wrapping
+  through Ghidra/xzregh.
+
+## 2025-11-15
+- Completed the `sshd_recon` RE batch: generated fresh stubs, reread the sshd discovery/sensitive-data helpers plus the monitor/MM hooks, and rewrote all 25 corresponding entries in `metadata/functions_autodoc.json` so their narratives now capture the real heuristics (monitor field voting, payload state gating, socket reuse, PAM/log toggles, etc.).
+- Ran `./scripts/refresh_xzre_project.sh --check-only` to validate the new metadata, confirm no derived artifacts drifted, and keep the portable project untouched until we’re ready for a full refresh.
+- Next: extend `metadata/xzre_locals.json` for any lingering sshd monitor/payload helpers that still export `local_*` temps before running the full refresh that updates `ghidra_projects/` and `xzregh/*.c`.
+
+## 2025-11-15
 - Captured the telemetry/cursor semantics from the `elf_mem` RE pass: updated `metadata/functions_autodoc.json` so `elf_get_reloc_symbol`, `elf_get_code_segment`, `elf_get_rodata_segment`, and `elf_find_string` now document the `secret_data_*` gates, and taught `metadata/xzre_locals.json` to rename the RELA/RELR resume pointers plus range bounds.
 - Skipped `./scripts/refresh_xzre_project.sh` this round; follow-up run needed once we’re ready to push the metadata back into Ghidra and the exported sources.
 - Next: kick off a refresh (at least `--check-only`) to confirm the renamed register temps stick inside `xzregh/101B90*.c` and `101C30*.c`, then decide if any additional `elf_mem` helpers need similar instrumentation notes.

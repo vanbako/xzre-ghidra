@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Wraps sshd's sshlogv() implementation by rebuilding a va_list on the stack, saving/restoring XMM registers when necessary, and
- * then tail-calling the resolved function pointer in the log context. Every monitor hook routes formatted log lines through here
- * so it matches OpenSSH's logging ABI without needing libc wrappers.
+ * AutoDoc: Builds a fresh `va_list` that mirrors sshd's sshlogv() calling convention, saving and restoring the XMM argument
+ * registers when the ABI says variadic SSE arguments are present. It then tail-calls the resolved sshlogv pointer stored
+ * in the logging context so higher-level hooks can format log lines exactly the way sshd expects without resolving libc
+ * wrappers first.
  */
 
 #include "xzre_types.h"

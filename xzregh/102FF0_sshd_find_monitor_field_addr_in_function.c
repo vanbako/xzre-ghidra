@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Sweeps a candidate sshd routine for MOV/LEA instructions that load a BSS slot into a register, confirms that the pointer flows
- * unmodified into a nearby call to `mm_request_send`, and returns the underlying data-section address. The helper lets
- * `sshd_find_monitor_struct` recover individual monitor fields (send/recv fds, sshbuf pointers, etc.) even when the surrounding
- * function is stripped.
+ * AutoDoc: Disassembles a monitor helper and repeatedly calls `find_mov_lea_instruction` until it sees a register loaded from the
+ * sshd .bss/.data window. It then limits itself to the next ~0x40 bytes of code, tracks that register through LEA/MOV
+ * mirroring, and confirms that it flows unmodified into a nearby call to `mm_request_send`. When those conditions hold it
+ * returns the referenced data address so the caller can treat it as the monitor struct slot (sendfd, recvfd, sshbuf
+ * pointer, etc.).
  */
 
 #include "xzre_types.h"

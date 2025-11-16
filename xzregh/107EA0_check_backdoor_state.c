@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Guards the payload assembly state machine. States 1–2 require a populated `sshd_payload_ctx` and a minimum payload length
- * (>=0xae) plus a sane body_length pulled from the decrypted header; state 3 tolerates either 3 or 4; and state 0 expects the
- * staging buffer to be empty. Any inconsistency zeros the state and sets it to 0xffffffff so the hooks know to discard buffered
- * data.
+ * AutoDoc: Enforces the payload assembly state machine kept in `global_context_t`: states 1 and 2 require a populated
+ * `sshd_payload_ctx`, at least 0xae bytes buffered, and a sane body_length lifted from the decrypted header (including
+ * room for the 0x60-byte trailer). State 0 insists that the staging buffer stays smaller than 0xae bytes, while state 3/4
+ * accept only those literal values. Any mismatch resets `payload_state` to 0xffffffff so the caller knows to discard
+ * partially buffered data.
  */
 
 #include "xzre_types.h"

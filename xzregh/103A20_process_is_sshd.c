@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Replays sshd's early argument parsing from the saved stack pointer: it verifies the argc/argv tuple is sane, checks argv[0]
- * hashes to '/usr/sbin/sshd', walks every argument through `check_argument`, and then ensures envp pointers either live on the
- * stack or inside the ELF .data segment. Any environment string that maps to a known identifier (get_string_id != 0) aborts the
- * run, which keeps the loader from running inside unexpected binaries or instrumentation harnesses.
+ * AutoDoc: Replays sshd's argc/argv/envp layout straight off the stack pointer: it checks that argc is sane, argv[0] points above
+ * the stack and hashes to `/usr/sbin/sshd`, and every subsequent argv entry lives within 0x4000 bytes of the saved SP.
+ * Each argument is passed through `check_argument`, and once it reaches envp it enforces that every pointer is either
+ * stack-resident or located inside sshd's .data segment. Any environment string that matches a known identifier (via
+ * `get_string_id`) or falls outside those regions terminates the probe so the loader only runs inside real sshd processes.
  */
 
 #include "xzre_types.h"

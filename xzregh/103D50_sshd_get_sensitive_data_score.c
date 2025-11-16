@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Combines the three per-function heuristics with weighting: `demote_sensitive_data` and `main` scores get doubled and added
- * together, then the `do_child` score is tacked on. Candidates must exceed the global threshold (>=8) before the pointer is
- * published to the rest of the implant.
+ * AutoDoc: Combines the per-function heuristics by doubling the `demote_sensitive_data` and `main()` scores, adding them together,
+ * and finally tacking on the `do_child` result. Only candidates that reach eight or more points are surfaced to the rest
+ * of the implant; weaker hits are ignored even if one heuristic thought they were promising.
  */
 
 #include "xzre_types.h"

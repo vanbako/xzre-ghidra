@@ -5,12 +5,13 @@
 
 
 /*
- * AutoDoc: Implements the privileged side of the monitor command channel. Depending on the cmd_type and flags it may disable PAM, short-
- * circuit non interactive requests, or exit when instructed. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped
- * blob on the stack, decrypts it with the recovered key, generates a signed MONITOR_REQ_KEYALLOWED packet using freshly built
- * RSA/BIGNUM objects and the attacker-provided modulus/exponent, and writes the forged request over the selected monitor or
- * fallback socket. It then pushes any extra sshbuf data when needed, drains the reply, and honours 'exit' or 'wait for response'
- * semantics encoded in the original command.
+ * AutoDoc: Implements the privileged side of the monitor command channel. It validates the supplied RSA components, command flags,
+ * and libc/import tables; rejects unsupported command types; and decides whether PAM should be disabled or sshd should
+ * exit outright based on the flag bits. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the
+ * stack, decrypts and hashes it, emits a forged `MONITOR_REQ_KEYALLOWED` packet (creating temporary BIGNUM/RSA objects
+ * populated with the attacker's modulus/exponent), and writes it over the selected monitor socket or the fd discovered via
+ * `sshd_get_client_socket`. After sending optional sshbuf payloads it drains replies, honours "wait" vs "fire-and-forget"
+ * semantics, and updates the monitor request IDs so sshd's dispatcher believes the forged exchange was legitimate.
  */
 
 #include "xzre_types.h"

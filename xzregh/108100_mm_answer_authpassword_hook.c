@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Responds to MONITOR_REQ_AUTHPASSWORD by either replaying the canned buffer stored in the global payload context or synthesising
- * a minimal success packet on the fly. The hook emits the reply through fd_write(), mirrors sshd's bookkeeping by updating the
- * monitor context at lVar1+0xa0, and returns 1 so the monitor thread believes password authentication succeeded without ever
- * consulting sshd.
+ * AutoDoc: Handles `MONITOR_REQ_AUTHPASSWORD` by replaying a prebuilt reply buffer whenever the payload provided one, or by
+ * synthesizing the four-field success packet when no payload data is pending. The hook emits the reply through
+ * `fd_write()`, mirrors sshd's bookkeeping by copying the saved dispatch target back into the table at lVar1+0xa0, and
+ * returns 1 so the monitor thread believes password authentication finished successfully without ever touching sshd's
+ * password logic. Any structural error falls back to libc's `exit()` to keep the daemon from running partially patched.
  */
 
 #include "xzre_types.h"

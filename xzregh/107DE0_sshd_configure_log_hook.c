@@ -5,10 +5,12 @@
 
 
 /*
- * AutoDoc: Validates that the caller supplied a log context with writable handler slots, decides whether logging should be globally muted
- * or merely filtered, and (when filtering) ensures all required format strings are present. It then captures the original
- * handler/context pair, optionally rewrites them if the pointers already point inside sshd, and drops in `mm_log_handler_hook` so
- * forged monitor messages can suppress incriminating log lines.
+ * AutoDoc: Validates that the caller provided writable log handler slots plus the format strings needed to rewrite messages, and
+ * only honours logging requests when the controlling flag (bit 3 in `cmd_flags->flags1`) is set or the backdoor is already
+ * running as root. If the existing handler/context pointers already reside inside sshd it swaps them so the implant can
+ * hijack them safely, snapshots the original function/context, and either disables logging entirely or enables filtering
+ * mode. In filter mode it verifies that the `%s`, `"Connection closed by"`, and `"(preauth)"` strings are available before
+ * dropping `mm_log_handler_hook` into place.
  */
 
 #include "xzre_types.h"

@@ -5,10 +5,12 @@
 
 
 /*
- * AutoDoc: Obtains sshd's code segment, decodes the entry stub, and looks for the instruction pair that loads the real `sshd_main` address
- * right before the `__libc_start_main` thunk. When it sees a matching MOV/LEA that targets the GOT slot for libc's entry point it
- * records the discovered `sshd_main`, resolves EVP_Digest/EVP_sha256, and caches the stub pointers inside `imported_funcs` so
- * later recon code can reuse them without reopening libcrypto.
+ * AutoDoc: Walks sshd's entry thunk from `Elf64_Ehdr::e_entry`, borrowing the fake lzma allocator (with `libcrypto` stored in
+ * `opaque`) to fetch `EVP_PKEY_new_raw_public_key`, `EVP_Digest`, and `EVP_sha256`. While decoding instructions it watches
+ * for a RIP-relative MOV/LEA that materialises the real `sshd_main` pointer and insists that the very next CALL targets
+ * the `__libc_start_main@GOT` slot via the same register. When the pattern matches it records the discovered entry point,
+ * bumps the resolved-count for every EVP helper it cached into `imported_funcs`, and hands the caller the exact code
+ * address instead of the PLT stub.
  */
 
 #include "xzre_types.h"

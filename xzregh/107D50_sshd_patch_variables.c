@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Requires the mm_answer_authpassword hook to be resolved, then optionally forces PermitRootLogin to 'yes', disables PAM when
- * requested, and swaps the monitor authpassword function pointer to the implant's hook. If no explicit monitor_reqtype override is
- * provided it derives the current request ID from the original function pointer so replies continue matching sshd's state machine.
+ * AutoDoc: Requires the mm_answer_authpassword hook and metadata to have been recovered, then applies three optional tweaks: force
+ * PermitRootLogin to the value `3` ("yes"), zero out `use_pam` when PAM should be disabled, and replace sshd's monitor
+ * dispatch table entry with the attacker's authpassword hook. When `monitor_reqtype` isn't explicitly supplied it is
+ * derived from the original dispatch table so the forged replies stay in lock-step with sshd's state machine.
  */
 
 #include "xzre_types.h"

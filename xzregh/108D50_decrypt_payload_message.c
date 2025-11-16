@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Decrypts a ChaCha-wrapped `key_payload_t` chunk, copies the plaintext body into the global staging buffer when the advertised
- * length fits, and bumps `ctx->current_data_size`. The body is decrypted twice—the second pass keeps the keystream in sync with
- * sshd's original consumer— so later packets can continue appending without tearing, and any failure forces the payload state back
- * to 0xffffffff.
+ * AutoDoc: Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by
+ * `secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_data`,
+ * it copies the plaintext body into the staging buffer, bumps `current_data_size`, and then replays the decryption a
+ * second time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short
+ * decrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.
  */
 
 #include "xzre_types.h"

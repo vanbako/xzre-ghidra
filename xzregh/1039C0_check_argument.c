@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Walks a dash-prefixed argv entry two bytes at a time, mirroring each character so it can flag both upper- and lower-case
- * variants of '-d', '-D', '-E', '-Q', or any option that includes '=' or '/'. It returns the offending pointer so
- * `process_is_sshd` can treat those switches as a hard stop and avoid touching sshd instances launched in debug or non-daemon
- * modes.
+ * AutoDoc: Sanity-checks a dash-prefixed argv entry by sliding a two-byte window across it and immediately returning the current
+ * pointer when either byte is the lowercase letter `d`. `process_is_sshd` treats that non-null result as grounds to abort,
+ * which keeps the implant out of sshd instances started with `-d`, `--debug`, or any argument that embeds a lowercase
+ * debug flag. Arguments containing control characters or `=` bail out of the loop without ever tripping the match, so only
+ * the specific `-d` style switches are rejected.
  */
 
 #include "xzre_types.h"

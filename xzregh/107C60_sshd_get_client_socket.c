@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Prefers using the recovered monitor struct: depending on DIR_READ/DIR_WRITE it fetches monitor->m_sendfd or m_recvfd, verifies
- * the fd by issuing a zero-length read that tolerates EINTR, and returns it on success. If the monitor pointer is missing or the
- * fd is bad/EBADF it falls back to `sshd_get_usable_socket`'s fd scanner.
+ * AutoDoc: Prefers the recovered monitor struct when one is available: it selects monitor->m_recvfd for DIR_WRITE and
+ * monitor->m_sendfd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and
+ * returns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to
+ * `sshd_get_usable_socket`, letting callers still obtain a socket handle by index.
  */
 
 #include "xzre_types.h"

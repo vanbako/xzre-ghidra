@@ -5,9 +5,11 @@
 
 
 /*
- * AutoDoc: Scans an sshbuf blob for either 'ssh-rsa-cert-v01@openssh.com' or 'rsa-sha2-256', walks the surrounding length fields (network
- * byte order), and ensures the modulus chunk fits within the caller-provided buffer. When it finds a match it rewrites sshbuf->d
- * to point at the modulus payload and returns its size so the command decoder knows how many bytes to decrypt.
+ * AutoDoc: Searches an sshbuf blob for either `"ssh-rsa-cert-v01@openssh.com"` or `"rsa-sha2-256"`, using the surrounding length
+ * fields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at
+ * 0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point
+ * directly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly
+ * how many bytes to peel off.
  */
 
 #include "xzre_types.h"
