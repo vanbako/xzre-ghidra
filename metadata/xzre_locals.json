@@ -5925,6 +5925,11 @@
         "original": "uVar5",
         "name": "edx_val",
         "type": "u32"
+      },
+      {
+        "original": "lVar8",
+        "name": "clear_idx",
+        "type": "long"
       }
     ]
   },

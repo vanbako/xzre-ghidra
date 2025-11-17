@@ -25,7 +25,7 @@ BOOL backdoor_init_stage2
   u32 edx_val;
   int status;
   BOOL setup_success;
-  long lVar8;
+  long clear_idx;
   backdoor_shared_globals_t *shared_globals_ptr;
   backdoor_hooks_ctx_t *extraout_RDX;
   backdoor_hooks_ctx_t *hooks_ctx_ptr;
@@ -39,7 +39,7 @@ BOOL backdoor_init_stage2
   backdoor_setup_params_t local_a0;
   
   hooks_ctx_ptr = &local_128;
-  for (lVar8 = 0x22; lVar8 != 0; lVar8 = lVar8 + -1) {
+  for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
     hooks_ctx_ptr->_unknown1621[0] = '\0';
     hooks_ctx_ptr->_unknown1621[1] = '\0';
     hooks_ctx_ptr->_unknown1621[2] = '\0';
@@ -47,7 +47,7 @@ BOOL backdoor_init_stage2
     hooks_ctx_ptr = (backdoor_hooks_ctx_t *)(hooks_ctx_ptr->_unknown1621 + 4);
   }
   setup_params_ptr = &local_a0;
-  for (lVar8 = 0x22; lVar8 != 0; lVar8 = lVar8 + -1) {
+  for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
     setup_params_ptr->_unknown1649[0] = '\0';
     setup_params_ptr->_unknown1649[1] = '\0';
     setup_params_ptr->_unknown1649[2] = '\0';
