@@ -5518,6 +5518,121 @@
         "type": "BOOL"
       },
       {
+        "original": "puVar1",
+        "name": "resolved_count_ptr",
+        "type": "u32 *"
+      },
+      {
+        "original": "paVar2",
+        "name": "audit_ifaces_ptr",
+        "type": "audit_ifaces *"
+      },
+      {
+        "original": "peVar3",
+        "name": "elf_handles",
+        "type": "elf_handles_t *"
+      },
+      {
+        "original": "puVar6",
+        "name": "cpuid_got_entry",
+        "type": "u64 *"
+      },
+      {
+        "original": "puVar7",
+        "name": "frame_address",
+        "type": "u64 *"
+      },
+      {
+        "original": "pbVar8",
+        "name": "hooks_ctx",
+        "type": "backdoor_hooks_ctx_t *"
+      },
+      {
+        "original": "ppbVar9",
+        "name": "hooks_data_addr_ptr",
+        "type": "backdoor_hooks_data_t **"
+      },
+      {
+        "original": "uVar10",
+        "name": "signed_data_size",
+        "type": "u64"
+      },
+      {
+        "original": "ppVar11",
+        "name": "hook_RSA_get0_key",
+        "type": "pfn_RSA_get0_key_t"
+      },
+      {
+        "original": "ppVar12",
+        "name": "hook_EVP_PKEY_set1_RSA",
+        "type": "pfn_EVP_PKEY_set1_RSA_t"
+      },
+      {
+        "original": "psVar13",
+        "name": "mm_answer_keyverify_fn",
+        "type": "sshd_monitor_func_t"
+      },
+      {
+        "original": "peVar14",
+        "name": "sym_get_addr",
+        "type": "elf_symbol_get_addr_fn"
+      },
+      {
+        "original": "EVar15",
+        "name": "libcrypto_sym_offset",
+        "type": "Elf64_Addr"
+      },
+      {
+        "original": "pEVar16",
+        "name": "libcrypto_ehdr",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "original": "psVar17",
+        "name": "sshd_ctx_ptr",
+        "type": "sshd_ctx_t *"
+      },
+      {
+        "original": "pbVar18",
+        "name": "hook_table_bytes",
+        "type": "byte *"
+      },
+      {
+        "original": "puVar19",
+        "name": "resolved_count_cursor",
+        "type": "u32 *"
+      },
+      {
+        "original": "uVar20",
+        "name": "resolved_mask0",
+        "type": "u32"
+      },
+      {
+        "original": "uVar21",
+        "name": "resolved_mask1",
+        "type": "u32"
+      },
+      {
+        "original": "uVar22",
+        "name": "resolved_mask2",
+        "type": "u32"
+      },
+      {
+        "original": "bVar23",
+        "name": "success_flag",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar42",
+        "name": "rsa_sign_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "psVar53",
+        "name": "sshd_log_ctx",
+        "type": "sshd_log_ctx_t *"
+      },
+      {
         "original": "local_a30._40_4_",
         "replacement": "*(u32 *)&local_a30.opcode_window[3]"
       },
@@ -5556,6 +5671,191 @@
       {
         "original": "local_9d8.prefix._14_1_",
         "replacement": "local_9d8.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "peVar31",
+        "name": "libcrypto_info",
+        "type": "elf_info_t *"
+      },
+      {
+        "original": "ppVar29",
+        "name": "malloc_usable_size_stub",
+        "type": "pfn_malloc_usable_size_t"
+      },
+      {
+        "original": "plVar28",
+        "name": "libc_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "original": "plVar30",
+        "name": "libcrypto_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "original": "ppVar35",
+        "name": "BN_free_stub",
+        "type": "pfn_BN_free_t"
+      },
+      {
+        "original": "ppVar38",
+        "name": "BN_bn2bin_stub",
+        "type": "pfn_BN_bn2bin_t"
+      },
+      {
+        "original": "pEVar39",
+        "name": "bn_dup_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "pEVar40",
+        "name": "rsa_free_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "ppVar41",
+        "name": "RSA_set0_key_stub",
+        "type": "pfn_RSA_set0_key_t"
+      },
+      {
+        "original": "pEVar36",
+        "name": "bn_bin2bn_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "pEVar42",
+        "name": "rsa_sign_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "pEVar39",
+        "name": "rsa_new_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "pbVar18",
+        "name": "hook_table_bytes",
+        "type": "byte *"
+      },
+      {
+        "original": "piVar43",
+        "name": "tls_slot",
+        "type": "int *"
+      },
+      {
+        "original": "puVar44",
+        "name": "offset_patch_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar46",
+        "name": "payload_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar47",
+        "name": "payload_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar55",
+        "name": "lzma_code_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "pdVar56",
+        "name": "insn_ctx_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "puVar60",
+        "name": "sshd_code_end_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "psVar52",
+        "name": "sshd_ctx_cursor",
+        "type": "sshd_ctx_t *"
+      },
+      {
+        "original": "psVar53",
+        "name": "sshd_log_ctx_cursor",
+        "type": "sshd_log_ctx_t *"
+      },
+      {
+        "original": "piVar54",
+        "name": "imported_funcs_cursor",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "puVar60",
+        "name": "sshd_code_end_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "pvVar27",
+        "name": "code_segment",
+        "type": "void *"
+      },
+      {
+        "original": "pvVar33",
+        "name": "data_segment",
+        "type": "void *"
+      },
+      {
+        "original": "puVar55",
+        "name": "lzma_code_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "plVar3",
+        "name": "shared_hooks",
+        "type": "backdoor_hooks_data_t *"
+      },
+      {
+        "original": "uVar4",
+        "name": "log_string_slot",
+        "type": "uint"
+      },
+      {
+        "original": "uVar5",
+        "name": "resolver_status",
+        "type": "u32"
+      },
+      {
+        "original": "bVar24",
+        "name": "reg_tmp",
+        "type": "u8"
+      },
+      {
+        "original": "iVar61",
+        "name": "search_hit_count",
+        "type": "int"
+      },
+      {
+        "original": "lVar45",
+        "name": "loop_idx",
+        "type": "long"
+      },
+      {
+        "original": "code_start",
+        "name": "mm_answer_keyverify_sym",
+        "type": "sshd_monitor_func_t *"
+      },
+      {
+        "original": "uVar58",
+        "name": "reg_lower",
+        "type": "u8"
+      },
+      {
+        "original": "uVar59",
+        "name": "reg_upper",
+        "type": "u8"
+      },
+      {
+        "original": "bVar62",
+        "name": "zero_seed",
+        "type": "u8"
       }
     ]
   },
