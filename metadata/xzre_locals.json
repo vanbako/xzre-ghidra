@@ -3195,6 +3195,11 @@
         "original": "local_78",
         "name": "monitor_candidates",
         "type": "void *[10]"
+      },
+      {
+        "original": "local_d0",
+        "name": "data_segment_size",
+        "type": "u64"
       }
     ]
   },
@@ -3221,11 +3226,6 @@
         "original": "puVar4",
         "name": "code_scan_limit",
         "type": "u8 *"
-      },
-      {
-        "original": "local_88",
-        "name": "secret_probe_items",
-        "type": "secret_data_item_t"
       },
       {
         "original": "local_a8",
@@ -3256,6 +3256,56 @@
         "original": "local_90",
         "name": "xzcalloc_candidate_local",
         "type": "sensitive_data *"
+      },
+      {
+        "original": "local_88",
+        "name": "secret_probe_items",
+        "type": "secret_data_item_t"
+      },
+      {
+        "original": "local_70",
+        "name": "run_backdoor_entry",
+        "type": "code *"
+      },
+      {
+        "original": "local_68",
+        "name": "run_backdoor_descriptor",
+        "type": "u64"
+      },
+      {
+        "original": "local_60",
+        "name": "usable_socket_descriptor",
+        "type": "u64"
+      },
+      {
+        "original": "local_58",
+        "name": "usable_socket_entry",
+        "type": "code *"
+      },
+      {
+        "original": "local_50",
+        "name": "usable_socket_opcode",
+        "type": "u64"
+      },
+      {
+        "original": "local_48",
+        "name": "client_socket_descriptor",
+        "type": "u64"
+      },
+      {
+        "original": "local_40",
+        "name": "client_socket_entry",
+        "type": "code *"
+      },
+      {
+        "original": "local_38",
+        "name": "client_socket_opcode",
+        "type": "u64"
+      },
+      {
+        "original": "local_30",
+        "name": "client_socket_flags",
+        "type": "u64"
       }
     ]
   },

