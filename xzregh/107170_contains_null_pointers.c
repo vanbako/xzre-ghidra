@@ -14,18 +14,17 @@
 BOOL contains_null_pointers(void **pointers,uint num_pointers)
 
 {
-  void **ppvVar1;
-  long lVar2;
   void **slot;
+  size_t index;
   
-  lVar2 = 0;
+  index = 0;
   do {
-    if (num_pointers <= (uint)lVar2) {
+    if (num_pointers <= (uint)index) {
       return FALSE;
     }
-    ppvVar1 = pointers + lVar2;
-    lVar2 = lVar2 + 1;
-  } while (*ppvVar1 != (void *)0x0);
+    slot = pointers + index;
+    index = index + 1;
+  } while (*slot != (void *)0x0);
   return TRUE;
 }
 

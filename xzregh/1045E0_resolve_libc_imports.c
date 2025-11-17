@@ -15,28 +15,28 @@
 BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *imports)
 
 {
-  BOOL BVar1;
+  BOOL success;
   lzma_allocator *allocator;
-  pfn_read_t ppVar2;
-  pfn___errno_location_t ppVar3;
+  pfn_read_t read_stub;
+  pfn___errno_location_t errno_stub;
   lzma_allocator *resolver;
   
   allocator = get_lzma_allocator();
-  BVar1 = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
-  if (BVar1 != FALSE) {
+  success = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
+  if (success != FALSE) {
     allocator->opaque = libc_info;
-    ppVar2 = (pfn_read_t)lzma_alloc(0x308,allocator);
-    imports->read = ppVar2;
-    if (ppVar2 != (pfn_read_t)0x0) {
+    read_stub = (pfn_read_t)lzma_alloc(0x308,allocator);
+    imports->read = read_stub;
+    if (read_stub != (pfn_read_t)0x0) {
       imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    ppVar3 = (pfn___errno_location_t)lzma_alloc(0x878,allocator);
-    imports->__errno_location = ppVar3;
-    if (ppVar3 != (pfn___errno_location_t)0x0) {
+    errno_stub = (pfn___errno_location_t)lzma_alloc(0x878,allocator);
+    imports->__errno_location = errno_stub;
+    if (errno_stub != (pfn___errno_location_t)0x0) {
       imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    BVar1 = (BOOL)(imports->resolved_imports_count == 2);
+    success = (BOOL)(imports->resolved_imports_count == 2);
   }
-  return BVar1;
+  return success;
 }
 

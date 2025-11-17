@@ -15,12 +15,11 @@
 ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx)
 
 {
-  ptrdiff_t pVar1;
   ptrdiff_t got_offset;
   
   (ctx->got_ctx).got_ptr = (void *)0x2600;
-  pVar1 = elf_functions_offset;
+  got_offset = elf_functions_offset;
   (ctx->got_ctx).got_offset = elf_functions_offset;
-  return pVar1;
+  return got_offset;
 }
 

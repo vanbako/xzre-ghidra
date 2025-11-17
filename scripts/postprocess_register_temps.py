@@ -29,11 +29,18 @@ def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
 
 
 def find_decomp_file(xzregh_dir: Path, func_name: str) -> Path:
-    matches = [
-        path
-        for path in xzregh_dir.glob(f"*_{func_name}.c")
-        if path.name.split("_", 1)[1] == f"{func_name}.c"
-    ]
+    suffixes = [func_name]
+    if func_name.startswith("_"):
+        suffixes.append(func_name.lstrip("_"))
+    matches: List[Path] = []
+    for suffix in suffixes:
+        matches = [
+            path
+            for path in xzregh_dir.glob(f"*_{suffix}.c")
+            if path.name.split("_", 1)[1] == f"{suffix}.c"
+        ]
+        if matches:
+            break
     if not matches:
         raise FileNotFoundError(f"no exported C file found for function '{func_name}'")
     if len(matches) > 1:

@@ -14,34 +14,31 @@
 ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)
 
 {
-  ssize_t sVar1;
-  int *piVar2;
-  size_t count_00;
-  size_t remaining;
-  int *errno_slot;
   ssize_t write_chunk;
+  int *errno_slot;
+  size_t remaining;
   
   if (count == 0) {
     return 0;
   }
   if ((((funcs == (libc_imports_t *)0x0 || fd < 0) || (buffer == (void *)0x0)) ||
       (funcs->write == (pfn_write_t)0x0)) ||
-     (count_00 = count, funcs->__errno_location == (pfn___errno_location_t)0x0)) {
+     (remaining = count, funcs->__errno_location == (pfn___errno_location_t)0x0)) {
 LAB_0010711f:
     count = 0xffffffffffffffff;
   }
   else {
     do {
       while( TRUE ) {
-        sVar1 = (*funcs->write)(fd,buffer,count_00);
-        if (-1 < sVar1) break;
-        piVar2 = (*funcs->__errno_location)();
-        if (*piVar2 != 4) goto LAB_0010711f;
+        write_chunk = (*funcs->write)(fd,buffer,remaining);
+        if (-1 < write_chunk) break;
+        errno_slot = (*funcs->__errno_location)();
+        if (*errno_slot != 4) goto LAB_0010711f;
       }
-      if (sVar1 == 0) goto LAB_0010711f;
-      buffer = (void *)((long)buffer + sVar1);
-      count_00 = count_00 - sVar1;
-    } while (count_00 != 0);
+      if (write_chunk == 0) goto LAB_0010711f;
+      buffer = (void *)((long)buffer + write_chunk);
+      remaining = remaining - write_chunk;
+    } while (remaining != 0);
   }
   return count;
 }

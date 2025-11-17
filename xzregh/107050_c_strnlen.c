@@ -14,19 +14,18 @@
 ssize_t c_strnlen(char *str,size_t max_len)
 
 {
-  size_t sVar1;
-  ssize_t len;
+  size_t len;
   
-  sVar1 = 0;
+  len = 0;
   if (max_len == 0) {
     return max_len;
   }
   do {
-    if (str[sVar1] == '\0') {
-      return sVar1;
+    if (str[len] == '\0') {
+      return len;
     }
-    sVar1 = sVar1 + 1;
-  } while (max_len != sVar1);
+    len = len + 1;
+  } while (max_len != len);
   return max_len;
 }
 

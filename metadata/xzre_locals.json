@@ -17,8 +17,11 @@
       {
         "name": "d",
         "type": "u32"
-      },
+      }
+    ],
+    "register_temps": [
       {
+        "original": "local_48",
         "name": "state",
         "type": "elf_entry_ctx_t"
       }
@@ -1816,8 +1819,10 @@
   },
   "c_strlen": {
     "source": "xzre/xzre_code/c_strlen.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "lVar1",
         "name": "len",
         "type": "ssize_t"
       }
@@ -1825,10 +1830,12 @@
   },
   "c_strnlen": {
     "source": "xzre/xzre_code/c_strnlen.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "sVar1",
         "name": "len",
-        "type": "ssize_t"
+        "type": "size_t"
       }
     ]
   },
@@ -1860,18 +1867,22 @@
   },
   "count_pointers": {
     "source": "xzre/xzre_code/count_pointers.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "blockSize",
+        "original": "sVar2",
+        "name": "block_size",
         "type": "size_t"
       },
       {
-        "name": "nWords",
-        "type": "size_t"
+        "original": "uVar3",
+        "name": "index",
+        "type": "ulong"
       },
       {
-        "name": "i",
-        "type": "size_t"
+        "original": "uVar4",
+        "name": "count",
+        "type": "ulong"
       }
     ]
   },
@@ -2267,6 +2278,23 @@
       {
         "name": "resolver",
         "type": "lzma_allocator *"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "ppVar2",
+        "name": "read_stub",
+        "type": "pfn_read_t"
+      },
+      {
+        "original": "ppVar3",
+        "name": "errno_stub",
+        "type": "pfn___errno_location_t"
       }
     ]
   },
@@ -3935,12 +3963,15 @@
   },
   "init_ldso_ctx": {
     "source": "xzre/xzre_code/init_ldso_ctx.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "puVar1",
         "name": "libcrypto_bindflags_ptr",
         "type": "u32 *"
       },
       {
+        "original": "pbVar2",
         "name": "audit_flag_byte",
         "type": "byte *"
       }
@@ -3948,8 +3979,10 @@
   },
   "init_hooks_ctx": {
     "source": "xzre/xzre_code/init_hooks_ctx.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "iVar1",
         "name": "status",
         "type": "int"
       }
@@ -3957,8 +3990,10 @@
   },
   "init_shared_globals": {
     "source": "xzre/xzre_code/init_shared_globals.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "iVar1",
         "name": "status",
         "type": "int"
       }
@@ -4015,12 +4050,36 @@
         "name": "branch_disp",
         "type": "u64"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "pointer_gap",
+        "type": "ptrdiff_t"
+      },
+      {
+        "original": "puVar3",
+        "name": "function_start",
+        "type": "u8 *"
+      },
+      {
+        "original": "ppuVar4",
+        "name": "function_end_ptr",
+        "type": "u8 **"
+      }
     ]
   },
   "get_tls_get_addr_random_symbol_got_offset": {
     "source": "xzre/xzre_code/get_tls_get_addr_random_symbol_got_offset.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "pVar1",
         "name": "got_offset",
         "type": "ptrdiff_t"
       }
@@ -4028,20 +4087,25 @@
   },
   "update_got_address": {
     "source": "xzre/xzre_code/update_got_address.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "pvVar1",
         "name": "plt_entry",
         "type": "void *"
       },
       {
+        "original": "uVar2",
         "name": "jump_flags",
         "type": "ulong"
       },
       {
+        "original": "lVar3",
         "name": "reloc_offset",
         "type": "long"
       },
       {
+        "original": "pvVar4",
         "name": "got_entry",
         "type": "void *"
       }
@@ -4082,18 +4146,160 @@
       {
         "original": "peVar2",
         "replacement": "ldso_elf"
+      },
+      {
+        "original": "BVar4",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar5",
+        "name": "snapshot_offset",
+        "type": "ptrdiff_t"
+      },
+      {
+        "original": "ppVar6",
+        "name": "exit_fn",
+        "type": "pfn_exit_t"
+      },
+      {
+        "original": "ppVar7",
+        "name": "setlogmask_fn",
+        "type": "pfn_setlogmask_t"
+      },
+      {
+        "original": "ppVar8",
+        "name": "setresgid_fn",
+        "type": "pfn_setresgid_t"
+      },
+      {
+        "original": "allocator_00",
+        "name": "libcrypto_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "original": "pEVar9",
+        "name": "audit_preinit_symbol",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "ppVar10",
+        "name": "bn_num_bits_fn",
+        "type": "pfn_BN_num_bits_t"
+      },
+      {
+        "original": "code_start_00",
+        "name": "audit_sym_start",
+        "type": "uchar *"
+      },
+      {
+        "original": "ppVar11",
+        "name": "setresuid_fn",
+        "type": "pfn_setresuid_t"
+      },
+      {
+        "original": "ppVar12",
+        "name": "system_fn",
+        "type": "pfn_system_t"
+      },
+      {
+        "original": "ppVar13",
+        "name": "shutdown_fn",
+        "type": "pfn_shutdown_t"
       }
     ]
   },
   "find_dl_naudit": {
     "source": "xzre/xzre_code/find_dl_naudit.c",
     "locals": [],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "BVar4",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar6",
+        "name": "dsa_get0_pqg_symbol",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "puVar7",
+        "name": "string_ref",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar8",
+        "name": "rtld_global_ro_ptr",
+        "type": "uchar *"
+      },
+      {
+        "original": "ppVar9",
+        "name": "evp_md_ctx_free_fn",
+        "type": "pfn_EVP_MD_CTX_free_t"
+      },
+      {
+        "original": "puVar10",
+        "name": "slot_ptr",
+        "type": "uint *"
+      },
+      {
+        "original": "ppVar11",
+        "name": "dsa_get0_pub_key_fn",
+        "type": "pfn_DSA_get0_pub_key_t"
+      },
+      {
+        "original": "pdVar13",
+        "name": "dasm_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "code_start_00",
+        "name": "scan_cursor",
+        "type": "u8 *"
+      }
+    ]
   },
   "process_shared_libraries_map": {
     "source": "xzre/xzre_code/process_shared_libraries_map.c",
     "locals": [],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "cVar1",
+        "name": "name_char",
+        "type": "char"
+      },
+      {
+        "original": "puVar2",
+        "name": "rsa_get0_key_slot",
+        "type": "void **"
+      },
+      {
+        "original": "puVar3",
+        "name": "evp_set1_rsa_slot",
+        "type": "void **"
+      },
+      {
+        "original": "puVar4",
+        "name": "rsa_public_decrypt_slot",
+        "type": "void **"
+      },
+      {
+        "original": "puVar12",
+        "name": "rtld_global_ptr",
+        "type": "uchar *"
+      },
+      {
+        "original": "puVar13",
+        "name": "plt_entry",
+        "type": "ulong *"
+      },
+      {
+        "original": "pvVar14",
+        "name": "hooks_blob",
+        "type": "void *"
+      }
+    ]
   },
   "process_shared_libraries": {
     "source": "xzre/xzre_code/process_shared_libraries.c",
@@ -4110,22 +4316,212 @@
         "name": "tmp_state",
         "type": "backdoor_shared_libraries_data_t"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar2",
+        "name": "r_debug_symbol",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "puVar3",
+        "name": "r_debug_addr",
+        "type": "uchar *"
+      }
     ]
   },
   "find_link_map_l_audit_any_plt_bitmask": {
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c",
     "locals": [],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "piVar1",
+        "name": "imports",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "plVar2",
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "original": "puVar3",
+        "name": "matched_register",
+        "type": "u32 *"
+      },
+      {
+        "original": "pbVar4",
+        "name": "hook_table",
+        "type": "backdoor_hooks_data_t *"
+      },
+      {
+        "original": "uVar5",
+        "name": "mask_register",
+        "type": "uchar"
+      },
+      {
+        "original": "BVar6",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar7",
+        "name": "mask_bits",
+        "type": "u32"
+      },
+      {
+        "original": "ppVar8",
+        "name": "evp_decryptinit_stub",
+        "type": "pfn_EVP_DecryptInit_ex_t"
+      },
+      {
+        "original": "allocator_00",
+        "name": "libc_allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "original": "ppVar9",
+        "name": "getuid_stub",
+        "type": "pfn_getuid_t"
+      },
+      {
+        "original": "plVar10",
+        "name": "audit_flag_slot",
+        "type": "link_map *"
+      },
+      {
+        "original": "uVar11",
+        "name": "lea_ptr_register",
+        "type": "uchar"
+      },
+      {
+        "original": "code_start",
+        "name": "audit_sym_cursor",
+        "type": "u8 *"
+      }
+    ]
   },
   "find_link_map_l_audit_any_plt": {
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c",
     "locals": [],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "plVar1",
+        "name": "libc_imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "original": "uVar2",
+        "name": "register_mask_snapshot",
+        "type": "u32"
+      },
+      {
+        "original": "BVar4",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "ppVar5",
+        "name": "write_stub",
+        "type": "pfn_write_t"
+      },
+      {
+        "original": "ppVar6",
+        "name": "pselect_stub",
+        "type": "pfn_pselect_t"
+      },
+      {
+        "original": "uVar8",
+        "name": "lea_target_reg",
+        "type": "uchar"
+      },
+      {
+        "original": "uVar13",
+        "name": "mask_register",
+        "type": "uchar"
+      },
+      {
+        "original": "puVar9",
+        "name": "lea_disp",
+        "type": "u8 *"
+      },
+      {
+        "original": "code_start",
+        "name": "audit_cursor",
+        "type": "dl_audit_symbind_alt_fn"
+      },
+      {
+        "original": "code_end",
+        "name": "audit_end",
+        "type": "dl_audit_symbind_alt_fn"
+      }
+    ]
   },
   "find_dl_audit_offsets": {
     "source": "xzre/xzre_code/find_dl_audit_offsets.c",
     "locals": [],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "uVar1",
+        "name": "libname_len",
+        "type": "uint"
+      },
+      {
+        "original": "peVar2",
+        "name": "libcrypto_info",
+        "type": "elf_info_t *"
+      },
+      {
+        "original": "EVar3",
+        "name": "symbol_offset",
+        "type": "Elf64_Addr"
+      },
+      {
+        "original": "pEVar4",
+        "name": "libcrypto_ehdr",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "original": "peVar5",
+        "name": "elf_handles",
+        "type": "elf_handles_t *"
+      },
+      {
+        "original": "BVar8",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "ppVar10",
+        "name": "evp_pkey_free_stub",
+        "type": "pfn_EVP_PKEY_free_t"
+      },
+      {
+        "original": "ppVar11",
+        "name": "ec_group_stub",
+        "type": "pfn_EC_KEY_get0_group_t"
+      },
+      {
+        "original": "ppVar12",
+        "name": "cipher_ctx_free_stub",
+        "type": "pfn_EVP_CIPHER_CTX_free_t"
+      },
+      {
+        "original": "vaddr",
+        "name": "audit_symbol_vaddr",
+        "type": "uchar *"
+      },
+      {
+        "original": "pbVar14",
+        "name": "hooks_cursor",
+        "type": "backdoor_hooks_data_t *"
+      }
+    ]
   },
   "backdoor_setup": {
     "source": "xzre/xzre_code/backdoor_setup.c",
@@ -4214,20 +4610,76 @@
         "name": "setup_params",
         "type": "backdoor_setup_params_t"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "iVar6",
+        "name": "status",
+        "type": "int"
+      },
+      {
+        "original": "BVar7",
+        "name": "setup_success",
+        "type": "BOOL"
+      },
+      {
+        "original": "pbVar9",
+        "name": "shared_globals_ptr",
+        "type": "backdoor_shared_globals_t *"
+      },
+      {
+        "original": "pbVar10",
+        "name": "hooks_ctx_ptr",
+        "type": "backdoor_hooks_ctx_t *"
+      },
+      {
+        "original": "pbVar11",
+        "name": "setup_params_ptr",
+        "type": "backdoor_setup_params_t *"
+      },
+      {
+        "original": "piVar1",
+        "name": "max_leaf_info",
+        "type": "int *"
+      },
+      {
+        "original": "puVar2",
+        "name": "cpuid_info",
+        "type": "undefined4 *"
+      },
+      {
+        "original": "uVar3",
+        "name": "ebx_val",
+        "type": "u32"
+      },
+      {
+        "original": "uVar4",
+        "name": "ecx_val",
+        "type": "u32"
+      },
+      {
+        "original": "uVar5",
+        "name": "edx_val",
+        "type": "u32"
+      }
     ]
   },
   "fd_read": {
     "source": "xzre/xzre_code/fd_read.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "sVar1",
         "name": "read_chunk",
         "type": "ssize_t"
       },
       {
+        "original": "piVar2",
         "name": "errno_slot",
         "type": "int *"
       },
       {
+        "original": "count_00",
         "name": "remaining",
         "type": "size_t"
       }
@@ -4235,16 +4687,20 @@
   },
   "fd_write": {
     "source": "xzre/xzre_code/fd_write.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "sVar1",
         "name": "write_chunk",
         "type": "ssize_t"
       },
       {
+        "original": "piVar2",
         "name": "errno_slot",
         "type": "int *"
       },
       {
+        "original": "count_00",
         "name": "remaining",
         "type": "size_t"
       }
@@ -4252,34 +4708,67 @@
   },
   "contains_null_pointers": {
     "source": "xzre/xzre_code/contains_null_pointers.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "ppvVar1",
         "name": "slot",
         "type": "void **"
+      },
+      {
+        "original": "lVar2",
+        "name": "index",
+        "type": "size_t"
       }
     ]
   },
   "_cpuid_gcc": {
     "source": "xzre/xzre_code/cpuid_gcc.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "puVar1",
         "name": "leaf_info",
         "type": "uint *"
+      },
+      {
+        "original": "uVar2",
+        "name": "ebx_val",
+        "type": "uint"
+      },
+      {
+        "original": "uVar3",
+        "name": "ecx_val",
+        "type": "uint"
+      },
+      {
+        "original": "uVar4",
+        "name": "edx_val",
+        "type": "uint"
       }
     ]
   },
   "backdoor_init": {
     "source": "xzre/xzre_code/backdoor_init.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "plt_entry",
-        "type": "void *"
-      },
-      {
-        "name": "jump_flags",
+        "original": "lVar1",
+        "name": "original_target",
         "type": "long"
       },
       {
+        "original": "puVar2",
+        "name": "reloc_consts",
+        "type": "undefined *"
+      },
+      {
+        "original": "pvVar3",
+        "name": "got_base",
+        "type": "void *"
+      },
+      {
+        "original": "plVar4",
         "name": "got_slot",
         "type": "long *"
       }
@@ -4287,8 +4776,10 @@
   },
   "_get_cpuid_modified": {
     "source": "xzre/xzre_code/get_cpuid_modified.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "uVar1",
         "name": "max_leaf",
         "type": "uint"
       }

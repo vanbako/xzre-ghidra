@@ -15,27 +15,24 @@ BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
 
 {
   BOOL BVar1;
-  size_t sVar2;
-  ulong uVar3;
-  ulong uVar4;
-  size_t i;
-  size_t nWords;
-  size_t blockSize;
+  size_t block_size;
+  ulong index;
+  ulong count;
   
   if (((ptrs == (void **)0x0) || (funcs == (libc_imports_t *)0x0)) ||
      (funcs->malloc_usable_size == (pfn_malloc_usable_size_t)0x0)) {
     return FALSE;
   }
-  sVar2 = (*funcs->malloc_usable_size)(ptrs);
-  if (sVar2 - 8 < 0x80) {
-    uVar3 = 0;
+  block_size = (*funcs->malloc_usable_size)(ptrs);
+  if (block_size - 8 < 0x80) {
+    index = 0;
     do {
-      uVar4 = uVar3;
-      if (ptrs[uVar3] == (void *)0x0) break;
-      uVar3 = (ulong)((int)uVar3 + 1);
-      uVar4 = sVar2 >> 3;
-    } while (uVar3 < sVar2 >> 3);
-    *count_out = uVar4;
+      count = index;
+      if (ptrs[index] == (void *)0x0) break;
+      index = (ulong)((int)index + 1);
+      count = block_size >> 3;
+    } while (index < block_size >> 3);
+    *count_out = count;
     BVar1 = TRUE;
   }
   else {

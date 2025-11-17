@@ -17,13 +17,12 @@
 int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
 
 {
-  int iVar1;
   int status;
   
-  iVar1 = 5;
+  status = 5;
   if (ctx != (backdoor_hooks_ctx_t *)0x0) {
     ctx->hooks_data_addr = (backdoor_hooks_data_t **)&hooks_data;
-    iVar1 = 0;
+    status = 0;
     if (ctx->shared == (backdoor_shared_globals_t *)0x0) {
       ctx->_unknown1632[0] = '\x04';
       ctx->_unknown1632[1] = '\0';
@@ -39,9 +38,9 @@ int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
       ctx->mm_log_handler = mm_log_handler_hook;
       ctx->mm_answer_keyallowed = mm_answer_keyallowed_hook;
       ctx->mm_answer_keyverify = mm_answer_keyverify_hook;
-      iVar1 = 0x65;
+      status = 0x65;
     }
   }
-  return iVar1;
+  return status;
 }
 

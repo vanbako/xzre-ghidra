@@ -2,6 +2,24 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-17
+- Revisited every `loader_rt` export and mapped the remaining `p?Var*`/`local_*`
+  temporaries in `metadata/xzre_locals.json`, covering the ld.so setup helpers,
+  libc import resolvers, GOT/AUDIT scanners, cpuid stubs, and the file-descriptor
+  shims. Added the missing metadata for the `_cpuid_gcc`/`_get_cpuid_modified`
+  pair and taught `scripts/postprocess_register_temps.py` how to locate files
+  whose short names drop a leading underscore so the cpuid sources pick up the
+  new names.
+- Ran `./scripts/refresh_xzre_project.sh` followed by a manual
+  `python scripts/postprocess_register_temps.py --metadata metadata/xzre_locals.json --xzregh-dir xzregh`
+  to push the refreshed metadata through headless Ghidra, regenerate `xzregh/*.c`,
+  and update the portable project archive. The locals rename report is clean,
+  and the refresher only emitted the usual register-temp warnings for the sshd
+  helpers.
+- Next: continue peeling local/register-temp coverage into `backdoor_setup` and
+  the remaining loader structures so their large scratch structs get the same
+  treatment on the next metadata pass.
+
 ## 2025-11-15
 - Revisited the `opco_patt` helpers and added explicit register-temp metadata so
   all of the remaining `local_*` decoder scratch variables have descriptive

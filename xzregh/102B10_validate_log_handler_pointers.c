@@ -20,10 +20,10 @@ BOOL validate_log_handler_pointers
 
 {
   void *mem_address;
-  BOOL BVar1;
-  long lVar2;
-  u8 *puVar3;
-  u8 **ppuVar4;
+  BOOL success;
+  ptrdiff_t pointer_gap;
+  u8 *function_start;
+  u8 **function_end_ptr;
   u64 branch_disp;
   int opcode;
   u64 insn_size;
@@ -36,38 +36,38 @@ BOOL validate_log_handler_pointers
   BOOL scan_success;
   u8 *dasm_ip;
   
-  ppuVar4 = &block_end;
-  for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *(undefined4 *)ppuVar4 = 0;
-    ppuVar4 = (u8 **)((long)ppuVar4 + 4);
+  function_end_ptr = &block_end;
+  for (pointer_gap = 0x16; pointer_gap != 0; pointer_gap = pointer_gap + -1) {
+    *(undefined4 *)function_end_ptr = 0;
+    function_end_ptr = (u8 **)((long)function_end_ptr + 4);
   }
   if ((addr1 != addr2 && addr1 != (void *)0x0) && (addr2 != (void *)0x0)) {
-    lVar2 = (long)addr2 - (long)addr1;
+    pointer_gap = (long)addr2 - (long)addr1;
     if (addr2 <= addr1) {
-      lVar2 = (long)addr1 - (long)addr2;
+      pointer_gap = (long)addr1 - (long)addr2;
     }
-    if (((lVar2 < 0x10) &&
+    if (((pointer_gap < 0x10) &&
         (mem_address = refs->entries[0x13].func_start, mem_address != (void *)0x0)) &&
-       (puVar3 = (u8 *)refs->entries[0x14].func_start, puVar3 != (u8 *)0x0)) {
-      ppuVar4 = (u8 **)refs->entries[0x14].func_end;
-      BVar1 = find_lea_instruction_with_mem_operand
-                        (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)&block_end,mem_address);
-      puVar3 = block_end;
-      if (BVar1 != FALSE) {
-        BVar1 = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)ppuVar4);
-        if ((BVar1 != FALSE) && (scan_success == 0x168)) {
+       (function_start = (u8 *)refs->entries[0x14].func_start, function_start != (u8 *)0x0)) {
+      function_end_ptr = (u8 **)refs->entries[0x14].func_end;
+      success = find_lea_instruction_with_mem_operand
+                        (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)&block_end,mem_address);
+      function_start = block_end;
+      if (success != FALSE) {
+        success = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)function_end_ptr);
+        if ((success != FALSE) && (scan_success == 0x168)) {
           scan_ctx = (u8 **)0x0;
-          puVar3 = function_end + (long)dasm_ip + (long)block_end;
-          find_function(puVar3,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
+          function_start = function_end + (long)dasm_ip + (long)block_end;
+          find_function(function_start,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
                         global->uses_endbr64);
-          ppuVar4 = scan_ctx;
+          function_end_ptr = scan_ctx;
         }
-        BVar1 = find_instruction_with_mem_operand_ex
-                          (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr1);
-        if (BVar1 != FALSE) {
-          BVar1 = find_instruction_with_mem_operand_ex
-                            (puVar3,(u8 *)ppuVar4,(dasm_ctx_t *)0x0,0x109,addr2);
-          return (uint)(BVar1 != FALSE);
+        success = find_instruction_with_mem_operand_ex
+                          (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)0x0,0x109,addr1);
+        if (success != FALSE) {
+          success = find_instruction_with_mem_operand_ex
+                            (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)0x0,0x109,addr2);
+          return (uint)(success != FALSE);
         }
       }
     }

