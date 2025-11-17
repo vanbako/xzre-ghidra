@@ -16,13 +16,13 @@
 fake_lzma_allocator_t * get_lzma_allocator_address(void)
 
 {
-  uint local_14;
-  fake_lzma_allocator_t *local_10;
+  uint slot_idx;
+  fake_lzma_allocator_t *allocator_cursor;
   
-  local_10 = (fake_lzma_allocator_t *)fake_lzma_allocator;
-  for (local_14 = 0; local_14 < 0xc; local_14 = local_14 + 1) {
-    local_10 = local_10 + 1;
+  allocator_cursor = (fake_lzma_allocator_t *)fake_lzma_allocator;
+  for (slot_idx = 0; slot_idx < 0xc; slot_idx = slot_idx + 1) {
+    allocator_cursor = allocator_cursor + 1;
   }
-  return local_10;
+  return allocator_cursor;
 }
 

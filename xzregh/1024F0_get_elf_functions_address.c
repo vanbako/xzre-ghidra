@@ -16,13 +16,13 @@
 elf_functions_t * get_elf_functions_address(void)
 
 {
-  uint local_14;
-  elf_functions_t *local_10;
+  uint slot_idx;
+  elf_functions_t *table_cursor;
   
-  local_10 = (elf_functions_t *)fake_lzma_allocator_offset;
-  for (local_14 = 0; local_14 < 0xc; local_14 = local_14 + 1) {
-    local_10 = local_10 + 1;
+  table_cursor = (elf_functions_t *)fake_lzma_allocator_offset;
+  for (slot_idx = 0; slot_idx < 0xc; slot_idx = slot_idx + 1) {
+    table_cursor = table_cursor + 1;
   }
-  return local_10;
+  return table_cursor;
 }
 

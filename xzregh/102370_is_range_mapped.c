@@ -17,45 +17,45 @@
 BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
 
 {
-  libc_imports_t *plVar1;
-  BOOL BVar2;
-  int iVar3;
-  int *piVar4;
-  sigset_t *sigmask;
-  undefined8 local_38;
-  undefined8 local_30;
+  libc_imports_t *imports;
+  BOOL range_is_mapped;
+  int pselect_result;
+  int *errno_ptr;
+  sigset_t *page_cursor;
+  long timeout_sec;
+  long timeout_nsec;
   
   if (length == 0) {
     return FALSE;
   }
   if (addr < (u8 *)0x1000000) {
 LAB_00102393:
-    BVar2 = FALSE;
+    range_is_mapped = FALSE;
   }
   else {
-    sigmask = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
-    if (sigmask < addr + length) {
+    page_cursor = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
+    if (page_cursor < addr + length) {
       if (ctx == (global_context_t *)0x0) goto LAB_00102393;
       do {
-        local_38 = 0;
-        plVar1 = ctx->libc_imports;
-        if (((plVar1 == (libc_imports_t *)0x0) ||
-            (plVar1->__errno_location == (pfn___errno_location_t)0x0)) ||
-           (plVar1->pselect == (pfn_pselect_t)0x0)) goto LAB_00102393;
-        local_30 = 1;
-        iVar3 = (*plVar1->pselect)(1,(fd_set *)0x0,(fd_set *)0x0,(fd_set *)0x0,(timespec *)&local_38
-                                   ,sigmask);
-        if ((iVar3 < 0) &&
-           ((piVar4 = (*ctx->libc_imports->__errno_location)(), *piVar4 == 0xe ||
-            (sigmask == (sigset_t *)0x0)))) {
-          *piVar4 = 0;
+        timeout_sec = 0;
+        imports = ctx->libc_imports;
+        if (((imports == (libc_imports_t *)0x0) ||
+            (imports->__errno_location == (pfn___errno_location_t)0x0)) ||
+           (imports->pselect == (pfn_pselect_t)0x0)) goto LAB_00102393;
+        timeout_nsec = 1;
+        pselect_result = (*imports->pselect)(1,(fd_set *)0x0,(fd_set *)0x0,(fd_set *)0x0,(timespec *)&timeout_sec
+                                   ,page_cursor);
+        if ((pselect_result < 0) &&
+           ((errno_ptr = (*ctx->libc_imports->__errno_location)(), *errno_ptr == 0xe ||
+            (page_cursor == (sigset_t *)0x0)))) {
+          *errno_ptr = 0;
           goto LAB_00102393;
         }
-        sigmask = sigmask + 0x200;
-      } while (sigmask < addr + length);
+        page_cursor = page_cursor + 0x200;
+      } while (page_cursor < addr + length);
     }
-    BVar2 = TRUE;
+    range_is_mapped = TRUE;
   }
-  return BVar2;
+  return range_is_mapped;
 }
 

@@ -26,10 +26,10 @@ BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_fla
   Elf64_Ehdr *pEVar5;
   Elf64_Ehdr *pEVar6;
   long lVar7;
-  int in_R8D;
+  int recursion_depth;
   
 LAB_00101254:
-  in_R8D = in_R8D + 1;
+  recursion_depth = recursion_depth + 1;
   pEVar1 = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);
   if (size == 0) {
 LAB_0010138e:
@@ -40,7 +40,7 @@ LAB_0010138e:
     if (vaddr <= pEVar1) {
       pEVar5 = (Elf64_Ehdr *)vaddr;
     }
-    if ((elf_info->elfbase <= pEVar5) && (in_R8D != 0x3ea)) {
+    if ((elf_info->elfbase <= pEVar5) && (recursion_depth != 0x3ea)) {
       lVar7 = 0;
       do {
         if ((uint)(ushort)elf_info->e_phnum <= (uint)lVar7) break;

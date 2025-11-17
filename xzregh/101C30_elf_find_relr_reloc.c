@@ -23,7 +23,7 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   Elf64_Relr *result_high_bound;
   Elf64_Relr *result_low_bound;
   ulong uVar4;
-  undefined4 target_addr_high;
+  u32 target_addr_high;
   uchar *vaddr;
   ulong *resume_index_ptr;
   long lVar5;

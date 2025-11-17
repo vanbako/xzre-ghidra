@@ -26,7 +26,7 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
   Elf64_Rela *pEVar2;
   Elf64_Rela *result_high_bound;
   ulong uVar3;
-  undefined4 target_addr_high;
+  u32 target_addr_high;
   ulong *resume_index_ptr;
   
   if (((elf_info->flags & 2) == 0) || (elf_info->rela_relocs_num == 0)) {

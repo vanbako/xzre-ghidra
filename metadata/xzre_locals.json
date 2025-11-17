@@ -2174,15 +2174,18 @@
     "register_temps": [
       {
         "original": "in_RCX",
-        "replacement": "result_high_bound"
+        "name": "result_high_bound",
+        "type": "Elf64_Rela *"
       },
       {
         "original": "in_R8",
-        "replacement": "resume_index_ptr"
+        "name": "resume_index_ptr",
+        "type": "ulong *"
       },
       {
         "original": "in_register_00000034",
-        "replacement": "target_addr_high"
+        "name": "target_addr_high",
+        "type": "u32"
       }
     ]
   },
@@ -2192,19 +2195,23 @@
     "register_temps": [
       {
         "original": "in_RDX",
-        "replacement": "result_low_bound"
+        "name": "result_low_bound",
+        "type": "Elf64_Relr *"
       },
       {
         "original": "in_RCX",
-        "replacement": "result_high_bound"
+        "name": "result_high_bound",
+        "type": "Elf64_Relr *"
       },
       {
         "original": "in_R8",
-        "replacement": "resume_index_ptr"
+        "name": "resume_index_ptr",
+        "type": "ulong *"
       },
       {
         "original": "in_register_00000034",
-        "replacement": "target_addr_high"
+        "name": "target_addr_high",
+        "type": "u32"
       }
     ]
   },
@@ -4233,6 +4240,11 @@
         "original": "bVar2",
         "name": "rodata_segment_found",
         "type": "BOOL"
+      },
+      {
+        "original": "local_20",
+        "name": "code_segment_size",
+        "type": "u64"
       }
     ]
   },
@@ -4311,5 +4323,181 @@
     "source": "",
     "locals": [],
     "register_temps": []
+  },
+  "elf_contains_vaddr_impl": {
+    "source": "xzre/xzre_code/elf_contains_vaddr_impl.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "in_R8D",
+        "name": "recursion_depth",
+        "type": "int"
+      }
+    ]
+  },
+  "elf_symbol_get": {
+    "source": "xzre/xzre_code/elf_symbol_get.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "uVar1",
+        "name": "version_index",
+        "type": "ushort"
+      },
+      {
+        "original": "uVar2",
+        "name": "name_offset",
+        "type": "uint"
+      },
+      {
+        "original": "puVar3",
+        "name": "gnu_hash_cursor",
+        "type": "u32 *"
+      },
+      {
+        "original": "pcVar4",
+        "name": "candidate_name",
+        "type": "char *"
+      },
+      {
+        "original": "uVar5",
+        "name": "chain_hash",
+        "type": "u32"
+      },
+      {
+        "original": "BVar6",
+        "name": "addr_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "EVar7",
+        "name": "candidate_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "original": "vaddr",
+        "name": "sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "uVar8",
+        "name": "symbol_index",
+        "type": "ulong"
+      },
+      {
+        "original": "vaddr_00",
+        "name": "versym_slot",
+        "type": "ushort *"
+      },
+      {
+        "original": "vaddr_01",
+        "name": "verdef_cursor",
+        "type": "Elf64_Verdef *"
+      },
+      {
+        "original": "uVar9",
+        "name": "bucket_index",
+        "type": "uint"
+      },
+      {
+        "original": "vaddr_02",
+        "name": "verdef_name_ptr",
+        "type": "uint *"
+      },
+      {
+        "original": "local_40",
+        "name": "chain_entry",
+        "type": "u32 *"
+      },
+      {
+        "original": "local_34",
+        "name": "verdef_idx",
+        "type": "uint"
+      }
+    ]
+  },
+  "elf_find_string": {
+    "source": "xzre/xzre_code/elf_find_string.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_30",
+        "name": "rodata_window",
+        "type": "u64[2]"
+      }
+    ]
+  },
+  "is_range_mapped": {
+    "source": "xzre/xzre_code/is_range_mapped.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "plVar1",
+        "name": "imports",
+        "type": "libc_imports_t *"
+      },
+      {
+        "original": "BVar2",
+        "name": "range_is_mapped",
+        "type": "BOOL"
+      },
+      {
+        "original": "iVar3",
+        "name": "pselect_result",
+        "type": "int"
+      },
+      {
+        "original": "piVar4",
+        "name": "errno_ptr",
+        "type": "int *"
+      },
+      {
+        "original": "sigmask",
+        "name": "page_cursor",
+        "type": "sigset_t *"
+      },
+      {
+        "original": "local_38",
+        "name": "timeout_sec",
+        "type": "long"
+      },
+      {
+        "original": "local_30",
+        "name": "timeout_nsec",
+        "type": "long"
+      }
+    ]
+  },
+  "get_lzma_allocator_address": {
+    "source": "xzre/xzre_code/get_lzma_allocator_address.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_14",
+        "name": "slot_idx",
+        "type": "uint"
+      },
+      {
+        "original": "local_10",
+        "name": "allocator_cursor",
+        "type": "fake_lzma_allocator_t *"
+      }
+    ]
+  },
+  "get_elf_functions_address": {
+    "source": "xzre/xzre_code/get_elf_functions_address.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "local_14",
+        "name": "slot_idx",
+        "type": "uint"
+      },
+      {
+        "original": "local_10",
+        "name": "table_cursor",
+        "type": "elf_functions_t *"
+      }
+    ]
   }
 }
