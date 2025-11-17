@@ -2628,6 +2628,13 @@
       "code": "extern const u8 dasm_onebyte_is_invalid[32];"
     },
     {
+      "kind": "struct",
+      "names": [
+        "key_buf"
+      ],
+      "code": "typedef struct __attribute__((packed))\n{\n  u32 words[28];\n} key_buf;"
+    },
+    {
       "kind": "declaration",
       "names": [
         "string_mask_data"

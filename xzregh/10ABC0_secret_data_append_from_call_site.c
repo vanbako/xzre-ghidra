@@ -16,11 +16,11 @@ BOOL secret_data_append_from_call_site
                BOOL bypass)
 
 {
-  BOOL BVar1;
-  u8 *unaff_retaddr;
+  BOOL success;
+  u8 *return_address;
   
-  BVar1 = secret_data_append_singleton
-                    ((u8 *)0x0,unaff_retaddr,shift_cursor,shift_count,operation_index);
-  return BVar1 | bypass;
+  success = secret_data_append_singleton
+                    ((u8 *)0x0,return_address,shift_cursor,shift_count,operation_index);
+  return success | bypass;
 }
 

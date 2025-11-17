@@ -17,11 +17,11 @@ BOOL secret_data_append_item
                int index,u8 *code)
 
 {
-  BOOL BVar1;
+  BOOL success;
   
   if (index != 0) {
-    BVar1 = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
-    return BVar1;
+    success = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
+    return success;
   }
   return FALSE;
 }

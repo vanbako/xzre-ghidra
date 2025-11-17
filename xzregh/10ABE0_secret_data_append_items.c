@@ -16,29 +16,29 @@ BOOL secret_data_append_items
                (secret_data_item_t *items,u64 items_count,secret_data_appender_fn appender)
 
 {
-  BOOL BVar1;
-  secret_data_item_t *psVar2;
-  u32 uVar3;
+  BOOL success;
+  secret_data_item_t *item;
+  u32 slot_index;
   uint index;
-  ulong uVar4;
+  ulong item_index;
   
-  uVar3 = 0;
-  uVar4 = 0;
+  slot_index = 0;
+  item_index = 0;
   while( TRUE ) {
     while( TRUE ) {
-      if (items_count <= uVar4) {
+      if (items_count <= item_index) {
         return TRUE;
       }
-      index = (int)uVar4 + 1;
-      psVar2 = items + uVar4;
-      uVar4 = (ulong)index;
-      if (psVar2->index != 0) break;
-      psVar2->index = uVar3;
+      index = (int)item_index + 1;
+      item = items + item_index;
+      item_index = (ulong)index;
+      if (item->index != 0) break;
+      item->index = slot_index;
     }
-    BVar1 = (*appender)((secret_data_shift_cursor_t)(psVar2->shift_cursor).index,
-                        psVar2->operation_index,psVar2->shift_count,index,psVar2->code);
-    if (BVar1 == FALSE) break;
-    uVar3 = uVar3 + 1;
+    success = (*appender)((secret_data_shift_cursor_t)(item->shift_cursor).index,
+                        item->operation_index,item->shift_count,index,item->code);
+    if (success == FALSE) break;
+    slot_index = slot_index + 1;
   }
   return FALSE;
 }

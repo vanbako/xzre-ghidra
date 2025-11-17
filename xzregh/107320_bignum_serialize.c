@@ -15,29 +15,29 @@
 BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,imported_funcs_t *funcs)
 
 {
-  uint uVar1;
-  int iVar2;
-  ulong cnt;
+  uint bit_length;
+  int written_bytes;
+  ulong value_len;
   
   if (((funcs != (imported_funcs_t *)0x0 && 5 < bufferSize) && (bn != (BIGNUM *)0x0)) &&
      (funcs->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)) {
     *pOutSize = 0;
     if (((funcs->BN_num_bits != (pfn_BN_num_bits_t)0x0) &&
-        (uVar1 = (*funcs->BN_num_bits)(bn), uVar1 < 0x4001)) &&
-       ((uVar1 = uVar1 + 7 >> 3, uVar1 != 0 && (cnt = (ulong)uVar1, cnt <= bufferSize - 6)))) {
+        (bit_length = (*funcs->BN_num_bits)(bn), bit_length < 0x4001)) &&
+       ((bit_length = bit_length + 7 >> 3, bit_length != 0 && (value_len = (ulong)bit_length, value_len <= bufferSize - 6)))) {
       buffer[4] = '\0';
-      iVar2 = (*funcs->BN_bn2bin)(bn,buffer + 5);
-      if ((long)iVar2 == cnt) {
+      written_bytes = (*funcs->BN_bn2bin)(bn,buffer + 5);
+      if ((long)written_bytes == value_len) {
         if ((char)buffer[5] < '\0') {
-          cnt = cnt + 1;
-          uVar1 = uVar1 + 1;
+          value_len = value_len + 1;
+          bit_length = bit_length + 1;
         }
         else {
-          c_memmove((char *)(buffer + 4),(char *)(buffer + 5),cnt);
+          c_memmove((char *)(buffer + 4),(char *)(buffer + 5),value_len);
         }
         *(uint *)buffer =
-             uVar1 >> 0x18 | (uVar1 & 0xff0000) >> 8 | (uVar1 & 0xff00) << 8 | uVar1 << 0x18;
-        *pOutSize = cnt + 4;
+             bit_length >> 0x18 | (bit_length & 0xff0000) >> 8 | (bit_length & 0xff00) << 8 | bit_length << 0x18;
+        *pOutSize = value_len + 4;
         return TRUE;
       }
     }

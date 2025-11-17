@@ -17,15 +17,15 @@ BOOL secret_data_append_from_address
                uint operation_index)
 
 {
-  BOOL BVar1;
-  u8 *code_00;
-  u8 *code;
+  BOOL success;
+  u8 *resolved_code;
+  u8 *return_address;
   
-  code_00 = (u8 *)addr;
+  resolved_code = (u8 *)addr;
   if (addr < (void *)0x2) {
-    code_00 = code;
+    resolved_code = return_address;
   }
-  BVar1 = secret_data_append_singleton((u8 *)addr,code_00,shift_cursor,shift_count,operation_index);
-  return (BOOL)(0 < (int)BVar1);
+  success = secret_data_append_singleton((u8 *)addr,resolved_code,shift_cursor,shift_count,operation_index);
+  return (BOOL)(0 < (int)success);
 }
 

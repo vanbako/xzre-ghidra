@@ -14,26 +14,26 @@
 BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {
-  pfn_EVP_Digest_t ppVar1;
+  pfn_EVP_Digest_t digest_fn;
   int iVar2;
-  BOOL BVar3;
-  EVP_MD *type;
+  BOOL success;
+  EVP_MD *sha256_md;
   EVP_MD *md;
   
   if ((((data == (void *)0x0) || (count == 0)) || (mdBufSize < 0x20)) ||
      (funcs == (imported_funcs_t *)0x0)) {
-    BVar3 = FALSE;
+    success = FALSE;
   }
   else {
-    ppVar1 = funcs->EVP_Digest;
-    BVar3 = FALSE;
-    if ((ppVar1 != (pfn_EVP_Digest_t)0x0) &&
-       (BVar3 = FALSE, funcs->EVP_sha256 != (pfn_EVP_sha256_t)0x0)) {
-      type = (*funcs->EVP_sha256)();
-      iVar2 = (*ppVar1)(data,count,mdBuf,(uint *)0x0,type,(ENGINE *)0x0);
-      BVar3 = (BOOL)(iVar2 == 1);
+    digest_fn = funcs->EVP_Digest;
+    success = FALSE;
+    if ((digest_fn != (pfn_EVP_Digest_t)0x0) &&
+       (success = FALSE, funcs->EVP_sha256 != (pfn_EVP_sha256_t)0x0)) {
+      sha256_md = (*funcs->EVP_sha256)();
+      iVar2 = (*digest_fn)(data,count,mdBuf,(uint *)0x0,sha256_md,(ENGINE *)0x0);
+      success = (BOOL)(iVar2 == 1);
     }
   }
-  return BVar3;
+  return success;
 }
 

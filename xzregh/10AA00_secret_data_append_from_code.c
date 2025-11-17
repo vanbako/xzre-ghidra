@@ -18,45 +18,45 @@ BOOL secret_data_append_from_code
                uint shift_count,BOOL start_from_call)
 
 {
-  BOOL BVar1;
-  long lVar2;
-  dasm_ctx_t *pdVar3;
-  ulong uVar4;
-  secret_data_shift_cursor_t local_9c [3];
-  dasm_ctx_t local_90;
+  BOOL success;
+  long i;
+  dasm_ctx_t *ctx_cursor;
+  ulong appended;
+  secret_data_shift_cursor_t cursor_copy[3];
+  dasm_ctx_t scan_ctx;
   
-  pdVar3 = &local_90;
-  for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *(undefined4 *)&pdVar3->instruction = 0;
-    pdVar3 = (dasm_ctx_t *)((long)&pdVar3->instruction + 4);
+  ctx_cursor = &scan_ctx;
+  for (i = 0x16; i != 0; i = i + -1) {
+    *(undefined4 *)&ctx_cursor->instruction = 0;
+    ctx_cursor = (dasm_ctx_t *)((long)&ctx_cursor->instruction + 4);
   }
-  local_9c[0] = shift_cursor;
+  cursor_copy[0] = shift_cursor;
   if (start_from_call != FALSE) {
-    BVar1 = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&local_90);
-    if (BVar1 == FALSE) {
+    success = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&scan_ctx);
+    if (success == FALSE) {
       return FALSE;
     }
-    code_start = local_90.instruction + local_90.instruction_size;
+    code_start = scan_ctx.instruction + scan_ctx.instruction_size;
   }
-  uVar4 = 0;
+  appended = 0;
   do {
-    BVar1 = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&local_90);
-    if (BVar1 == FALSE) {
+    success = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&scan_ctx);
+    if (success == FALSE) {
 LAB_0010aa80:
-      return (uint)(shift_count == (uint)uVar4);
+      return (uint)(shift_count == (uint)appended);
     }
-    if (uVar4 == shift_count) {
-      if (shift_count < (uint)uVar4) {
+    if (appended == shift_count) {
+      if (shift_count < (uint)appended) {
         return FALSE;
       }
       goto LAB_0010aa80;
     }
-    uVar4 = uVar4 + 1;
-    BVar1 = secret_data_append_from_instruction(&local_90,local_9c);
-    if (BVar1 == FALSE) {
+    appended = appended + 1;
+    success = secret_data_append_from_instruction(&scan_ctx,cursor_copy);
+    if (success == FALSE) {
       return FALSE;
     }
-    code_start = local_90.instruction + local_90.instruction_size;
+    code_start = scan_ctx.instruction + scan_ctx.instruction_size;
   } while( TRUE );
 }
 

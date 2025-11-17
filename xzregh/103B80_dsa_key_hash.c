@@ -15,21 +15,21 @@
 BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
 
 {
-  imported_funcs_t *piVar1;
-  BOOL BVar2;
-  long lVar3;
-  ulong count;
+  imported_funcs_t *imports;
+  BOOL success;
+  long component_index;
+  ulong serialized_len;
   undefined4 *puVar4;
-  BIGNUM *local_6a0;
-  BIGNUM *local_698;
-  BIGNUM *local_690;
-  u64 local_688;
-  BIGNUM *local_680 [4];
+  BIGNUM *param_p;
+  BIGNUM *param_q;
+  BIGNUM *param_g;
+  u64 component_len;
+  BIGNUM *components[4];
   u8 local_660 [16];
   undefined4 local_650 [392];
   
   puVar4 = local_650;
-  for (lVar3 = 0x186; lVar3 != 0; lVar3 = lVar3 + -1) {
+  for (component_index = 0x186; component_index != 0; component_index = component_index + -1) {
     *puVar4 = 0;
     puVar4 = puVar4 + 1;
   }
@@ -50,32 +50,32 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
   local_660[0xe] = '\0';
   local_660[0xf] = '\0';
   if ((((dsa != (DSA *)0x0) && (ctx != (global_context_t *)0x0)) &&
-      (piVar1 = ctx->imported_funcs, piVar1 != (imported_funcs_t *)0x0)) &&
-     ((piVar1->DSA_get0_pqg != (pfn_DSA_get0_pqg_t)0x0 &&
-      (piVar1->DSA_get0_pub_key != (pfn_DSA_get0_pub_key_t)0x0)))) {
-    local_6a0 = (BIGNUM *)0x0;
-    local_698 = (BIGNUM *)0x0;
-    local_690 = (BIGNUM *)0x0;
-    (*piVar1->DSA_get0_pqg)(dsa,&local_6a0,&local_698,&local_690);
-    local_680[3] = (*ctx->imported_funcs->DSA_get0_pub_key)(dsa);
-    if (((local_6a0 != (BIGNUM *)0x0) &&
-        ((local_698 != (BIGNUM *)0x0 && (local_690 != (BIGNUM *)0x0)))) &&
-       (local_680[3] != (BIGNUM *)0x0)) {
-      local_680[0] = local_6a0;
-      local_688 = 0;
-      local_680[1] = local_698;
-      local_680[2] = local_690;
+      (imports = ctx->imported_funcs, imports != (imported_funcs_t *)0x0)) &&
+     ((imports->DSA_get0_pqg != (pfn_DSA_get0_pqg_t)0x0 &&
+      (imports->DSA_get0_pub_key != (pfn_DSA_get0_pub_key_t)0x0)))) {
+    param_p = (BIGNUM *)0x0;
+    param_q = (BIGNUM *)0x0;
+    param_g = (BIGNUM *)0x0;
+    (*imports->DSA_get0_pqg)(dsa,&param_p,&param_q,&param_g);
+    components[3] = (*ctx->imported_funcs->DSA_get0_pub_key)(dsa);
+    if (((param_p != (BIGNUM *)0x0) &&
+        ((param_q != (BIGNUM *)0x0 && (param_g != (BIGNUM *)0x0)))) &&
+       (components[3] != (BIGNUM *)0x0)) {
+      components[0] = param_p;
+      component_len = 0;
+      components[1] = param_q;
+      components[2] = param_g;
       if (ctx->imported_funcs != (imported_funcs_t *)0x0) {
-        lVar3 = 0;
-        count = 0;
+        component_index = 0;
+        serialized_len = 0;
         while( TRUE ) {
-          BVar2 = bignum_serialize(local_660 + count,0x628 - count,&local_688,local_680[lVar3],
+          success = bignum_serialize(local_660 + serialized_len,0x628 - serialized_len,&component_len,components[component_index],
                                    ctx->imported_funcs);
-          if ((BVar2 == FALSE) || (count = count + local_688, 0x628 < count)) break;
-          lVar3 = lVar3 + 1;
-          if (lVar3 == 4) {
-            BVar2 = sha256(local_660,count,mdBuf,mdBufSize,ctx->imported_funcs);
-            return (uint)(BVar2 != FALSE);
+          if ((success == FALSE) || (serialized_len = serialized_len + component_len, 0x628 < serialized_len)) break;
+          component_index = component_index + 1;
+          if (component_index == 4) {
+            success = sha256(local_660,serialized_len,mdBuf,mdBufSize,ctx->imported_funcs);
+            return (uint)(success != FALSE);
           }
         }
       }

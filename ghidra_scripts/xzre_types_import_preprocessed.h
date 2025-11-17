@@ -2137,6 +2137,11 @@ extern const u8 dasm_onebyte_has_modrm[32];
 
 extern const u8 dasm_onebyte_is_invalid[32];
 
+typedef struct __attribute__((packed))
+{
+  u32 words[28];
+} key_buf;
+
 extern const u64 string_mask_data[238];
 
 extern const u32 string_action_data[1304];

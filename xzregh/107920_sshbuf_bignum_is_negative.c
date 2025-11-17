@@ -15,20 +15,20 @@
 BOOL sshbuf_bignum_is_negative(sshbuf *buf)
 
 {
-  BOOL BVar1;
-  size_t sVar2;
+  BOOL is_negative;
+  size_t index;
   
-  BVar1 = FALSE;
+  is_negative = FALSE;
   if (buf->size - 0x20 < 0x21) {
-    sVar2 = 0;
-    while (-1 < (char)buf->d[sVar2]) {
-      sVar2 = sVar2 + 1;
-      if (buf->size == sVar2) {
+    index = 0;
+    while (-1 < (char)buf->d[index]) {
+      index = index + 1;
+      if (buf->size == index) {
         return FALSE;
       }
     }
-    BVar1 = TRUE;
+    is_negative = TRUE;
   }
-  return BVar1;
+  return is_negative;
 }
 

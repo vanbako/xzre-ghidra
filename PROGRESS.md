@@ -3,6 +3,21 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-17
+- Reworked the `crypto_cmd` batch metadata: added missing entries for `dsa_key_hash`,
+  the sshbuf helpers, secret-data appender wrappers, and the RSA hook shims, then
+  mapped the high-traffic temporaries (imports, serialized lengths, cursor copies,
+  etc.) via `register_temps` so the exported C names reflect their purpose.
+- Focused on the crypto paths (`bignum_serialize`, `verify_signature`, ChaCha/SHA
+  helpers, `sshd_get_sshbuf`, the sshbuf extractors, and the secret-data sweepers)
+  to annotate the pointer temps and offsets, bringing the metadata in sync with the
+  reversing notes.
+- Ran `./scripts/refresh_xzre_project.sh` to push the JSON into the headless Ghidra
+  project and regenerate `xzregh/*.c`/`ghidra_projects/xzre_ghidra_portable.zip`; the
+  generated `ghidra_scripts/generated/locals_rename_report.txt` reports clean rewrites.
+- Next: continue tightening the rsa/dsa helper structs in `run_backdoor_commands`
+  once we’re ready to rename the nested `cmd_arguments_t` overlays.
+
+## 2025-11-17
 - Revisited every `loader_rt` export and mapped the remaining `p?Var*`/`local_*`
   temporaries in `metadata/xzre_locals.json`, covering the ld.so setup helpers,
   libc import resolvers, GOT/AUDIT scanners, cpuid stubs, and the file-descriptor

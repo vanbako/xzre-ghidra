@@ -18,31 +18,31 @@ BOOL secret_data_append_singleton
                uint operation_index)
 
 {
-  long lVar1;
-  BOOL BVar2;
+  long ctx_addr;
+  BOOL success;
   void *func_start;
   
-  lVar1 = global_ctx;
+  ctx_addr = global_ctx;
   func_start = (void *)0x0;
   if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\0')) {
 LAB_0010ab60:
-    BVar2 = TRUE;
+    success = TRUE;
   }
   else {
     *(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;
-    BVar2 = find_function(code,&func_start,(void **)0x0,*(u8 **)(lVar1 + 0x80),
-                          *(u8 **)(lVar1 + 0x88),FIND_NOP);
-    if (BVar2 != FALSE) {
-      BVar2 = secret_data_append_from_code
+    success = find_function(code,&func_start,(void **)0x0,*(u8 **)(ctx_addr + 0x80),
+                          *(u8 **)(ctx_addr + 0x88),FIND_NOP);
+    if (success != FALSE) {
+      success = secret_data_append_from_code
                         (func_start,*(void **)(global_ctx + 0x88),shift_cursor,shift_count,
                          (uint)(call_site == (u8 *)0x0));
-      if (BVar2 != FALSE) {
+      if (success != FALSE) {
         *(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;
         goto LAB_0010ab60;
       }
     }
-    BVar2 = FALSE;
+    success = FALSE;
   }
-  return BVar2;
+  return success;
 }
 

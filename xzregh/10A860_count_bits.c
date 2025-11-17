@@ -14,13 +14,13 @@
 u32 count_bits(u64 x)
 
 {
-  u32 uVar1;
+  u32 bit_count;
   u32 result;
   
-  uVar1 = 0;
+  bit_count = 0;
   for (; x != 0; x = x & x - 1) {
-    uVar1 = uVar1 + 1;
+    bit_count = bit_count + 1;
   }
-  return uVar1;
+  return bit_count;
 }
 

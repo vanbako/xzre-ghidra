@@ -1854,6 +1854,38 @@
         "name": "cipher",
         "type": "const EVP_CIPHER *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "ppVar1",
+        "name": "decrypt_init",
+        "type": "pfn_EVP_DecryptInit_ex_t"
+      },
+      {
+        "original": "BVar2",
+        "name": "has_missing_imports",
+        "type": "BOOL"
+      },
+      {
+        "original": "piVar4",
+        "name": "imports",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "ctx_00",
+        "name": "ctx",
+        "type": "EVP_CIPHER_CTX *"
+      },
+      {
+        "original": "type",
+        "name": "cipher",
+        "type": "EVP_CIPHER *"
+      },
+      {
+        "original": "iVar3",
+        "name": "status",
+        "type": "int"
+      }
     ]
   },
   "count_bits": {
@@ -1861,6 +1893,13 @@
     "locals": [
       {
         "name": "result",
+        "type": "u32"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "uVar1",
+        "name": "bit_count",
         "type": "u32"
       }
     ]
@@ -2245,6 +2284,23 @@
         "name": "result",
         "type": "int"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "UNRECOVERED_JUMPTABLE",
+        "name": "orig_RSA_public_decrypt",
+        "type": "pfn_RSA_public_decrypt_t"
+      },
+      {
+        "original": "BVar1",
+        "name": "dispatcher_result",
+        "type": "BOOL"
+      },
+      {
+        "original": "iVar2",
+        "name": "orig_status",
+        "type": "int"
+      }
     ]
   },
   "init_elf_entry_ctx": {
@@ -2326,7 +2382,8 @@
         "type": "BOOL",
         "line": 15
       }
-    ]
+    ],
+    "register_temps": []
   },
   "run_backdoor_commands": {
     "source": "xzre/xzre_code/run_backdoor_commands.c",
@@ -2486,15 +2543,56 @@
         "name": "code",
         "type": "u8 *"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "code_00",
+        "name": "resolved_code",
+        "type": "u8 *"
+      },
+      {
+        "original": "code",
+        "name": "return_address",
+        "type": "u8 *"
+      }
     ]
   },
   "secret_data_append_from_instruction": {
     "source": "xzre/xzre_code/secret_data_append_from_instruction.c",
-    "locals": []
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "pbVar1",
+        "name": "secret_byte",
+        "type": "byte *"
+      },
+      {
+        "original": "uVar2",
+        "name": "cursor_index",
+        "type": "uint"
+      },
+      {
+        "original": "iVar3",
+        "name": "opcode",
+        "type": "int"
+      }
+    ]
   },
   "secret_data_append_item": {
     "source": "xzre/xzre_code/secret_data_append_item.c",
-    "locals": []
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      }
+    ]
   },
   "secret_data_append_singleton": {
     "source": "xzre/xzre_code/secret_data_append_singleton.c",
@@ -2502,6 +2600,18 @@
       {
         "name": "func_start",
         "type": "void *"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "lVar1",
+        "name": "ctx_addr",
+        "type": "long"
+      },
+      {
+        "original": "BVar2",
+        "name": "success",
+        "type": "BOOL"
       }
     ]
   },
@@ -2516,6 +2626,23 @@
         "name": "buf2",
         "type": "struct key_buf"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "puVar3",
+        "name": "seed_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "pkVar4",
+        "name": "key_cursor",
+        "type": "key_buf *"
+      }
     ]
   },
   "sha256": {
@@ -2524,6 +2651,23 @@
       {
         "name": "md",
         "type": "const EVP_MD *"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "ppVar1",
+        "name": "digest_fn",
+        "type": "pfn_EVP_Digest_t"
+      },
+      {
+        "original": "BVar3",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "type",
+        "name": "sha256_md",
+        "type": "EVP_MD *"
       }
     ]
   },
@@ -4854,6 +4998,51 @@
       {
         "original": "local_c1._4_4_",
         "replacement": "*(uint *)((u8 *)&local_c1 + 4)"
+      },
+      {
+        "original": "piVar1",
+        "name": "imports",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "puVar2",
+        "name": "ed25519_pub",
+        "type": "u8 *"
+      },
+      {
+        "original": "BVar3",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar4",
+        "name": "ec_point_len",
+        "type": "uint"
+      },
+      {
+        "original": "iVar5",
+        "name": "status",
+        "type": "int"
+      },
+      {
+        "original": "sVar6",
+        "name": "written_len",
+        "type": "size_t"
+      },
+      {
+        "original": "sVar8",
+        "name": "serialized_len",
+        "type": "size_t"
+      },
+      {
+        "original": "lVar7",
+        "name": "i",
+        "type": "long"
+      },
+      {
+        "original": "puVar9",
+        "name": "scratch_cursor",
+        "type": "u32 *"
       }
     ]
   },
@@ -5085,6 +5274,382 @@
         "original": "local_10",
         "name": "table_cursor",
         "type": "elf_functions_t *"
+      }
+    ]
+  },
+  "dsa_key_hash": {
+    "source": "xzre/xzre_code/dsa_key_hash.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "piVar1",
+        "name": "imports",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "BVar2",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar3",
+        "name": "component_index",
+        "type": "long"
+      },
+      {
+        "original": "count",
+        "name": "serialized_len",
+        "type": "ulong"
+      },
+      {
+        "original": "local_688",
+        "name": "component_len",
+        "type": "u64"
+      },
+      {
+        "original": "local_6a0",
+        "name": "param_p",
+        "type": "BIGNUM *"
+      },
+      {
+        "original": "local_698",
+        "name": "param_q",
+        "type": "BIGNUM *"
+      },
+      {
+        "original": "local_690",
+        "name": "param_g",
+        "type": "BIGNUM *"
+      },
+      {
+        "original": "local_680",
+        "name": "components",
+        "type": "BIGNUM *[4]"
+      }
+    ]
+  },
+  "bignum_serialize": {
+    "source": "xzre/xzre_code/bignum_serialize.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "uVar1",
+        "name": "bit_length",
+        "type": "uint"
+      },
+      {
+        "original": "iVar2",
+        "name": "written_bytes",
+        "type": "int"
+      },
+      {
+        "original": "cnt",
+        "name": "value_len",
+        "type": "ulong"
+      }
+    ]
+  },
+  "sshd_get_sshbuf": {
+    "source": "xzre/xzre_code/sshd_get_sshbuf.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "pkVar1",
+        "name": "pkex_end",
+        "type": "kex *"
+      },
+      {
+        "original": "cVar2",
+        "name": "pkex_index",
+        "type": "char"
+      },
+      {
+        "original": "bVar3",
+        "name": "size_index",
+        "type": "byte"
+      },
+      {
+        "original": "bVar4",
+        "name": "data_index",
+        "type": "byte"
+      },
+      {
+        "original": "addr",
+        "name": "monitor_ptr",
+        "type": "monitor *"
+      },
+      {
+        "original": "BVar5",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "EVar6",
+        "name": "banner_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "original": "uVar7",
+        "name": "data_field_offset",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar8",
+        "name": "size_field_offset",
+        "type": "ulong"
+      },
+      {
+        "original": "addr_00",
+        "name": "pkex_table",
+        "type": "kex **"
+      },
+      {
+        "original": "addr_01",
+        "name": "pkex_cursor",
+        "type": "kex *"
+      },
+      {
+        "original": "length",
+        "name": "entry_span",
+        "type": "u64"
+      },
+      {
+        "original": "uVar9",
+        "name": "banner_matches",
+        "type": "uint"
+      }
+    ]
+  },
+  "sshbuf_bignum_is_negative": {
+    "source": "xzre/xzre_code/sshbuf_bignum_is_negative.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "is_negative",
+        "type": "BOOL"
+      },
+      {
+        "original": "sVar2",
+        "name": "index",
+        "type": "size_t"
+      }
+    ]
+  },
+  "sshbuf_extract": {
+    "source": "xzre/xzre_code/sshbuf_extract.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "bVar1",
+        "name": "size_index",
+        "type": "byte"
+      },
+      {
+        "original": "bVar2",
+        "name": "data_index",
+        "type": "byte"
+      },
+      {
+        "original": "BVar3",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar4",
+        "name": "size_offset",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar5",
+        "name": "data_offset",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar6",
+        "name": "span",
+        "type": "u64"
+      },
+      {
+        "original": "addr",
+        "name": "data_ptr",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "hook_EVP_PKEY_set1_RSA": {
+    "source": "xzre/xzre_code/hook_EVP_PKEY_set1_RSA.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "UNRECOVERED_JUMPTABLE",
+        "name": "orig_EVP_PKEY_set1_RSA",
+        "type": "pfn_EVP_PKEY_set1_RSA_t"
+      },
+      {
+        "original": "local_1c",
+        "name": "call_orig",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "hook_RSA_get0_key": {
+    "source": "xzre/xzre_code/hook_RSA_get0_key.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "UNRECOVERED_JUMPTABLE",
+        "name": "orig_RSA_get0_key",
+        "type": "pfn_RSA_get0_key_t"
+      },
+      {
+        "original": "local_1c",
+        "name": "call_orig",
+        "type": "BOOL"
+      }
+    ]
+  },
+  "get_string_id": {
+    "source": "xzre/xzre_code/get_string_id.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "puVar1",
+        "name": "node_entry",
+        "type": "ushort *"
+      },
+      {
+        "original": "lVar2",
+        "name": "bit_index",
+        "type": "long"
+      },
+      {
+        "original": "uVar3",
+        "name": "child_flags",
+        "type": "ushort"
+      },
+      {
+        "original": "uVar4",
+        "name": "child_offset",
+        "type": "ushort"
+      },
+      {
+        "original": "BVar5",
+        "name": "logged",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar6",
+        "name": "bitmap_rank",
+        "type": "uint"
+      },
+      {
+        "original": "bVar7",
+        "name": "ch",
+        "type": "byte"
+      },
+      {
+        "original": "uVar8",
+        "name": "node_flags",
+        "type": "ushort"
+      },
+      {
+        "original": "puVar9",
+        "name": "bitmap_row",
+        "type": "ulong *"
+      },
+      {
+        "original": "pbVar10",
+        "name": "scan_limit",
+        "type": "byte *"
+      },
+      {
+        "original": "lVar11",
+        "name": "trie_cursor",
+        "type": "long"
+      },
+      {
+        "original": "uVar12",
+        "name": "bitmap_word",
+        "type": "ulong"
+      }
+    ]
+  },
+  "secret_data_append_from_code": {
+    "source": "xzre/xzre_code/secret_data_append_from_code.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "i",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "ctx_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "uVar4",
+        "name": "appended",
+        "type": "ulong"
+      },
+      {
+        "original": "local_9c",
+        "name": "cursor_copy",
+        "type": "secret_data_shift_cursor_t[3]"
+      },
+      {
+        "original": "local_90",
+        "name": "scan_ctx",
+        "type": "dasm_ctx_t"
+      }
+    ]
+  },
+  "secret_data_append_from_call_site": {
+    "source": "xzre/xzre_code/secret_data_append_from_call_site.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "unaff_retaddr",
+        "name": "return_address",
+        "type": "u8 *"
+      }
+    ]
+  },
+  "secret_data_append_items": {
+    "source": "xzre/xzre_code/secret_data_append_items.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "psVar2",
+        "name": "item",
+        "type": "secret_data_item_t *"
+      },
+      {
+        "original": "uVar3",
+        "name": "slot_index",
+        "type": "u32"
+      },
+      {
+        "original": "uVar4",
+        "name": "item_index",
+        "type": "ulong"
       }
     ]
   }
