@@ -16,39 +16,39 @@ BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_b
                   FuncFindType find_mode)
 
 {
-  BOOL BVar1;
-  u8 *puVar2;
+  BOOL prologue_found;
+  u8 *scan_cursor;
   BOOL found;
   u8 *search_to;
   u8 *search_from;
   u8 *p;
   
   p = (u8 *)0x0;
-  puVar2 = code_start;
+  scan_cursor = code_start;
   if (func_start != (void **)0x0) {
-    while ((search_base < puVar2 &&
-           (BVar1 = find_function_prologue(puVar2,code_end,&p,find_mode), BVar1 == FALSE))) {
-      puVar2 = puVar2 + -1;
+    while ((search_base < scan_cursor &&
+           (prologue_found = find_function_prologue(scan_cursor,code_end,&p,find_mode), prologue_found == FALSE))) {
+      scan_cursor = scan_cursor + -1;
     }
-    puVar2 = p;
+    scan_cursor = p;
     if ((p == (u8 *)0x0) ||
        ((p == search_base &&
-        (BVar1 = find_function_prologue(search_base,code_end,(u8 **)0x0,find_mode), BVar1 == FALSE))
+        (prologue_found = find_function_prologue(search_base,code_end,(u8 **)0x0,find_mode), prologue_found == FALSE))
        )) {
       return FALSE;
     }
-    *func_start = puVar2;
+    *func_start = scan_cursor;
   }
-  puVar2 = code_start + 1;
+  scan_cursor = code_start + 1;
   if (func_end != (void **)0x0) {
-    for (; puVar2 < code_end + -4; puVar2 = puVar2 + 1) {
-      BVar1 = find_function_prologue(puVar2,code_end,(u8 **)0x0,find_mode);
-      if (BVar1 != FALSE) goto LAB_00100c78;
+    for (; scan_cursor < code_end + -4; scan_cursor = scan_cursor + 1) {
+      prologue_found = find_function_prologue(scan_cursor,code_end,(u8 **)0x0,find_mode);
+      if (prologue_found != FALSE) goto LAB_00100c78;
     }
-    if ((code_end + -4 != puVar2) ||
-       (BVar1 = find_function_prologue(puVar2,code_end,(u8 **)0x0,find_mode), BVar1 != FALSE)) {
+    if ((code_end + -4 != scan_cursor) ||
+       (prologue_found = find_function_prologue(scan_cursor,code_end,(u8 **)0x0,find_mode), prologue_found != FALSE)) {
 LAB_00100c78:
-      code_end = puVar2;
+      code_end = scan_cursor;
     }
     *func_end = code_end;
   }

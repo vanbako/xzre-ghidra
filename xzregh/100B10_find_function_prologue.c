@@ -15,37 +15,37 @@
 BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType find_mode)
 
 {
-  BOOL BVar1;
-  BOOL BVar2;
-  long lVar3;
-  dasm_ctx_t *pdVar4;
+  BOOL prologue_found;
+  BOOL decoded;
+  long clear_idx;
+  dasm_ctx_t *ctx_cursor;
   dasm_ctx_t prologue_ctx;
   
   if (find_mode == FIND_ENDBR64) {
-    pdVar4 = &prologue_ctx;
-    for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-      *(undefined4 *)&pdVar4->instruction = 0;
-      pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
+    ctx_cursor = &prologue_ctx;
+    for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+      *(undefined4 *)&ctx_cursor->instruction = 0;
+      ctx_cursor = (dasm_ctx_t *)((long)&ctx_cursor->instruction + 4);
     }
-    BVar2 = x86_dasm(&prologue_ctx,code_start,code_end);
-    BVar1 = FALSE;
-    if (((BVar2 != FALSE) && (*(u32 *)&prologue_ctx.opcode_window[3] == 3999)) &&
+    decoded = x86_dasm(&prologue_ctx,code_start,code_end);
+    prologue_found = FALSE;
+    if (((decoded != FALSE) && (*(u32 *)&prologue_ctx.opcode_window[3] == 3999)) &&
        (((ulong)(prologue_ctx.instruction + prologue_ctx.instruction_size) & 0xf) == 0)) {
       if (output != (u8 **)0x0) {
         *output = prologue_ctx.instruction + prologue_ctx.instruction_size;
       }
-      BVar1 = TRUE;
+      prologue_found = TRUE;
     }
   }
   else {
-    BVar1 = is_endbr64_instruction(code_start,code_end,0xe230);
-    if (BVar1 != FALSE) {
+    prologue_found = is_endbr64_instruction(code_start,code_end,0xe230);
+    if (prologue_found != FALSE) {
       if (output != (u8 **)0x0) {
         *output = code_start;
       }
-      BVar1 = TRUE;
+      prologue_found = TRUE;
     }
   }
-  return BVar1;
+  return prologue_found;
 }
 

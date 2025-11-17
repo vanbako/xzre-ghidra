@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-17
+- Tightened the `opco_patt` locals by mapping the decoder/pattern-scan register temps (`x86_dasm`, the `find_*` MOV/LEA/CALL helpers, string xref builders) to accurate pointer/BOOL types; added fresh metadata entries for `elf_find_function_pointer`, `find_instruction_with_mem_operand`, and `find_reg2reg_instruction`.
+- Ran `./scripts/refresh_xzre_project.sh`; the headless pass and locals rename report came back clean, and `xzregh/` now reflects the renamed cursors/targets/contexts across the opcode scanners and string walkers.
+- Next: revisit the `elf_find_string_references` pointer math to see if we can drop the residual casts once the code/size bookkeeping is clearer.
+
+## 2025-11-17
 - Reworked the `crypto_cmd` batch metadata: added missing entries for `dsa_key_hash`,
   the sshbuf helpers, secret-data appender wrappers, and the RSA hook shims, then
   mapped the high-traffic temporaries (imports, serialized lengths, cursor copies,

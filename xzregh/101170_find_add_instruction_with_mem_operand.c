@@ -16,15 +16,15 @@ BOOL find_add_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
 
 {
-  BOOL BVar1;
-  long lVar2;
-  dasm_ctx_t *pdVar3;
+  BOOL decode_ok;
+  long clear_idx;
+  dasm_ctx_t *zero_ctx;
   dasm_ctx_t scratch_ctx;
   
-  pdVar3 = &scratch_ctx;
-  for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-    *(undefined4 *)&pdVar3->instruction = 0;
-    pdVar3 = (dasm_ctx_t *)((long)&pdVar3->instruction + 4);
+  zero_ctx = &scratch_ctx;
+  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+    *(undefined4 *)&zero_ctx->instruction = 0;
+    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &scratch_ctx;
@@ -33,8 +33,8 @@ BOOL find_add_instruction_with_mem_operand
     if (code_end <= code_start) {
       return FALSE;
     }
-    BVar1 = x86_dasm(dctx,code_start,code_end);
-    if ((((BVar1 != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&
+    decode_ok = x86_dasm(dctx,code_start,code_end);
+    if ((((decode_ok != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&
         (((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000)) &&
        ((mem_address == (void *)0x0 ||
         ((((dctx->prefix).decoded.flags2 & 1) != 0 &&

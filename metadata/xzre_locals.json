@@ -2118,6 +2118,26 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar4",
+        "name": "clear_stride_marker",
+        "type": "byte"
       }
     ]
   },
@@ -2144,6 +2164,18 @@
         "name": "found",
         "type": "BOOL"
       }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "prologue_found",
+        "type": "BOOL"
+      },
+      {
+        "original": "puVar2",
+        "name": "scan_cursor",
+        "type": "u8 *"
+      }
     ]
   },
   "find_function_prologue": {
@@ -2157,6 +2189,26 @@
       {
         "original": "local_70",
         "replacement": "prologue_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "prologue_found",
+        "type": "BOOL"
+      },
+      {
+        "original": "BVar2",
+        "name": "decoded",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar3",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar4",
+        "name": "ctx_cursor",
+        "type": "dasm_ctx_t *"
       }
     ]
   },
@@ -2183,6 +2235,26 @@
       {
         "original": "local_80",
         "replacement": "lea_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar4",
+        "name": "clear_stride_marker",
+        "type": "byte"
       }
     ]
   },
@@ -2193,6 +2265,26 @@
       {
         "original": "local_60",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "puVar2",
+        "name": "xref",
+        "type": "u8 *"
+      },
+      {
+        "original": "lVar3",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar4",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
       }
     ]
   },
@@ -2215,6 +2307,91 @@
       {
         "original": "local_94",
         "replacement": "string_id_cursor"
+      },
+      {
+        "original": "ppvVar1",
+        "name": "func_range_end_ptr",
+        "type": "void **"
+      },
+      {
+        "original": "pdVar2",
+        "name": "entry_xref",
+        "type": "u8 *"
+      },
+      {
+        "original": "pEVar3",
+        "name": "xref_bound",
+        "type": "u8 *"
+      },
+      {
+        "original": "EVar4",
+        "name": "string_id_seed",
+        "type": "EncodedStringId"
+      },
+      {
+        "original": "BVar5",
+        "name": "decoded",
+        "type": "BOOL"
+      },
+      {
+        "original": "code_start",
+        "name": "code_start",
+        "type": "u8 *"
+      },
+      {
+        "original": "pcVar6",
+        "name": "string_ptr",
+        "type": "char *"
+      },
+      {
+        "original": "puVar7",
+        "name": "xref_addr",
+        "type": "u8 *"
+      },
+      {
+        "original": "ppvVar8",
+        "name": "func_range_iter",
+        "type": "void **"
+      },
+      {
+        "original": "pdVar9",
+        "name": "target_addr",
+        "type": "u8 *"
+      },
+      {
+        "original": "pEVar10",
+        "name": "rela_cursor",
+        "type": "Elf64_Rela *"
+      },
+      {
+        "original": "pdVar11",
+        "name": "decoder_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "lVar12",
+        "name": "entry_offset",
+        "type": "long"
+      },
+      {
+        "original": "psVar13",
+        "name": "entry_cursor",
+        "type": "string_item_t *"
+      },
+      {
+        "original": "code_end",
+        "name": "code_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "ppvVar14",
+        "name": "func_range_cursor",
+        "type": "void **"
+      },
+      {
+        "original": "pdVar15",
+        "name": "insn_cursor",
+        "type": "u8 *"
       }
     ]
   },
@@ -2309,7 +2486,14 @@
   },
   "is_endbr64_instruction": {
     "source": "xzre/xzre_code/is_endbr64_instruction.c",
-    "locals": []
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "is_endbr",
+        "type": "BOOL"
+      }
+    ]
   },
   "main_elf_parse": {
     "source": "xzre/xzre_code/main_elf_parse.c",
@@ -4941,6 +5125,91 @@
       {
         "original": "local_38",
         "replacement": "opcode_class_masks"
+      },
+      {
+        "original": "pxVar1",
+        "name": "rex_prefix",
+        "type": "x86_rex_prefix_t *"
+      },
+      {
+        "original": "puVar2",
+        "name": "flags2_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "BVar7",
+        "name": "telemetry_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "iVar8",
+        "name": "derived_opcode",
+        "type": "int"
+      },
+      {
+        "original": "uVar9",
+        "name": "operand_width",
+        "type": "u64"
+      },
+      {
+        "original": "sVar10",
+        "name": "opcode_index",
+        "type": "sbyte"
+      },
+      {
+        "original": "uVar11",
+        "name": "opcode",
+        "type": "uint"
+      },
+      {
+        "original": "uVar12",
+        "name": "opcode_high_bits",
+        "type": "uint"
+      },
+      {
+        "original": "pbVar14",
+        "name": "cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "pbVar15",
+        "name": "opcode_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "bVar16",
+        "name": "current_byte",
+        "type": "byte"
+      },
+      {
+        "original": "uVar17",
+        "name": "normalized_opcode",
+        "type": "uint"
+      },
+      {
+        "original": "uVar18",
+        "name": "opcode_class_mask",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar19",
+        "name": "opcode_class_flag",
+        "type": "ulong"
+      },
+      {
+        "original": "pbVar20",
+        "name": "operand_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "pdVar21",
+        "name": "ctx_clear",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "pxVar23",
+        "name": "prefix_clear",
+        "type": "x86_prefix_state_t *"
       }
     ]
   },
@@ -4951,6 +5220,31 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "iVar1",
+        "name": "opcode",
+        "type": "int"
+      },
+      {
+        "original": "BVar2",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar3",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar4",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar5",
+        "name": "opcode_match",
+        "type": "BOOL"
       }
     ]
   },
@@ -4961,6 +5255,26 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar4",
+        "name": "opcode_match",
+        "type": "BOOL"
       }
     ]
   },
@@ -5053,6 +5367,26 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar4",
+        "name": "clear_stride_marker",
+        "type": "byte"
       }
     ]
   },
@@ -5063,6 +5397,37 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "bVar4",
+        "name": "clear_stride_marker",
+        "type": "byte"
+      }
+    ]
+  },
+  "find_instruction_with_mem_operand": {
+    "source": "xzre/xzre_code/find_instruction_with_mem_operand.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
       }
     ]
   },
@@ -5073,6 +5438,21 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar3",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
       }
     ]
   },
@@ -5083,6 +5463,52 @@
       {
         "original": "local_80",
         "replacement": "scratch_ctx"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "puVar2",
+        "name": "referenced_addr",
+        "type": "u8 *"
+      },
+      {
+        "original": "lVar3",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar4",
+        "name": "zero_ctx",
+        "type": "dasm_ctx_t *"
+      }
+    ]
+  },
+  "elf_find_function_pointer": {
+    "source": "xzre/xzre_code/elf_find_function_pointer.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "pvVar1",
+        "name": "func_start",
+        "type": "void *"
+      },
+      {
+        "original": "BVar2",
+        "name": "ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar3",
+        "name": "rela_slot",
+        "type": "Elf64_Rela *"
+      },
+      {
+        "original": "pEVar4",
+        "name": "relr_slot",
+        "type": "Elf64_Relr *"
       }
     ]
   },
@@ -5093,6 +5519,21 @@
       {
         "original": "local_2c",
         "replacement": "string_id_cursor"
+      },
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "pcVar2",
+        "name": "string_ptr",
+        "type": "char *"
+      },
+      {
+        "original": "puVar3",
+        "name": "xref",
+        "type": "u8 *"
       }
     ]
   },
@@ -5100,6 +5541,22 @@
     "source": "",
     "locals": [],
     "register_temps": []
+  },
+  "find_reg2reg_instruction": {
+    "source": "xzre/xzre_code/find_reg2reg_instruction.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar2",
+        "name": "opcode_index",
+        "type": "uint"
+      }
+    ]
   },
   "elf_contains_vaddr_impl": {
     "source": "xzre/xzre_code/elf_contains_vaddr_impl.c",

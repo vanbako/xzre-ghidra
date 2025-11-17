@@ -16,17 +16,17 @@ BOOL find_mov_lea_instruction
                (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)
 
 {
-  int iVar1;
-  BOOL BVar2;
-  long lVar3;
-  dasm_ctx_t *pdVar4;
-  BOOL bVar5;
+  int opcode;
+  BOOL decode_ok;
+  long clear_idx;
+  dasm_ctx_t *zero_ctx;
+  BOOL opcode_match;
   dasm_ctx_t scratch_ctx;
   
-  pdVar4 = &scratch_ctx;
-  for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined4 *)&pdVar4->instruction = 0;
-    pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
+  zero_ctx = &scratch_ctx;
+  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+    *(undefined4 *)&zero_ctx->instruction = 0;
+    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &scratch_ctx;
@@ -36,24 +36,24 @@ BOOL find_mov_lea_instruction
       if (code_end <= code_start) {
         return FALSE;
       }
-      BVar2 = x86_dasm(dctx,code_start,code_end);
-      if (BVar2 != FALSE) break;
+      decode_ok = x86_dasm(dctx,code_start,code_end);
+      if (decode_ok != FALSE) break;
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
        (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
-      iVar1 = *(int *)(dctx->opcode_window + 3);
-      if (iVar1 == 0x10d) {
+      opcode = *(int *)(dctx->opcode_window + 3);
+      if (opcode == 0x10d) {
         return TRUE;
       }
       if (load_flag == FALSE) {
-        bVar5 = iVar1 == 0x109;
+        opcode_match = opcode == 0x109;
       }
       else {
-        bVar5 = iVar1 == 0x10b;
+        opcode_match = opcode == 0x10b;
       }
-      if (bVar5) {
+      if (opcode_match) {
         return TRUE;
       }
     }

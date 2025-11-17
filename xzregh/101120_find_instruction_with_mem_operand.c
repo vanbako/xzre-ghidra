@@ -16,12 +16,12 @@ BOOL find_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
 
 {
-  BOOL BVar1;
+  BOOL decode_ok;
   
-  BVar1 = find_lea_instruction_with_mem_operand(code_start,code_end,dctx,mem_address);
-  if (BVar1 == FALSE) {
-    BVar1 = find_instruction_with_mem_operand_ex(code_start,code_end,dctx,0x10b,mem_address);
-    return BVar1;
+  decode_ok = find_lea_instruction_with_mem_operand(code_start,code_end,dctx,mem_address);
+  if (decode_ok == FALSE) {
+    decode_ok = find_instruction_with_mem_operand_ex(code_start,code_end,dctx,0x10b,mem_address);
+    return decode_ok;
   }
   return TRUE;
 }

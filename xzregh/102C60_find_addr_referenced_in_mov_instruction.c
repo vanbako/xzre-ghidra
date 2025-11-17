@@ -18,24 +18,24 @@ void * find_addr_referenced_in_mov_instruction
 
 {
   u8 *code_end;
-  BOOL BVar1;
-  u8 *puVar2;
-  long lVar3;
-  dasm_ctx_t *pdVar4;
+  BOOL decode_ok;
+  u8 *referenced_addr;
+  long clear_idx;
+  dasm_ctx_t *zero_ctx;
   u8 *code_start;
   dasm_ctx_t scratch_ctx;
   
-  pdVar4 = &scratch_ctx;
-  for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined4 *)&pdVar4->instruction = 0;
-    pdVar4 = (dasm_ctx_t *)((long)&pdVar4->instruction + 4);
+  zero_ctx = &scratch_ctx;
+  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+    *(undefined4 *)&zero_ctx->instruction = 0;
+    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
   }
   code_start = (u8 *)refs->entries[id].func_start;
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)refs->entries[id].func_end;
     while (code_start < code_end) {
-      BVar1 = find_instruction_with_mem_operand_ex(code_start,code_end,&scratch_ctx,0x10b,(void *)0x0);
-      if (BVar1 == FALSE) {
+      decode_ok = find_instruction_with_mem_operand_ex(code_start,code_end,&scratch_ctx,0x10b,(void *)0x0);
+      if (decode_ok == FALSE) {
         code_start = code_start + 1;
       }
       else {
@@ -46,13 +46,13 @@ void * find_addr_referenced_in_mov_instruction
             }
           }
           else {
-            puVar2 = (u8 *)scratch_ctx.mem_disp;
+            referenced_addr = (u8 *)scratch_ctx.mem_disp;
             if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-              puVar2 = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
+              referenced_addr = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
                        scratch_ctx.instruction_size;
             }
-            if ((mem_range_start <= puVar2) && (puVar2 <= (u8 *)((long)mem_range_end + -4))) {
-              return puVar2;
+            if ((mem_range_start <= referenced_addr) && (referenced_addr <= (u8 *)((long)mem_range_end + -4))) {
+              return referenced_addr;
             }
           }
         }

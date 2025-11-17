@@ -15,19 +15,19 @@
 BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
 
 {
-  BOOL BVar1;
-  uint uVar2;
+  BOOL decode_ok;
+  uint opcode_index;
   
   if (dctx == (dasm_ctx_t *)0x0) {
     return FALSE;
   }
   while( TRUE ) {
-    if ((code_end <= code_start) || (BVar1 = x86_dasm(dctx,code_start,code_end), BVar1 == FALSE)) {
+    if ((code_end <= code_start) || (decode_ok = x86_dasm(dctx,code_start,code_end), decode_ok == FALSE)) {
       return FALSE;
     }
     if (((((*(uint *)(dctx->opcode_window + 3) & 0xfffffffd) == 0x109) ||
-         ((uVar2 = *(uint *)(dctx->opcode_window + 3) - 0x81, uVar2 < 0x3b &&
-          ((0x505050500000505U >> ((byte)uVar2 & 0x3f) & 1) != 0)))) &&
+         ((opcode_index = *(uint *)(dctx->opcode_window + 3) - 0x81, opcode_index < 0x3b &&
+          ((0x505050500000505U >> ((byte)opcode_index & 0x3f) & 1) != 0)))) &&
         (((dctx->prefix).flags_u16 & 0xf80) == 0)) &&
        ((((dctx->prefix).decoded.rex.rex_byte & 5) == 0 &&
         (*(char *)((long)&dctx->prefix + 0xd) == '\x03')))) break;

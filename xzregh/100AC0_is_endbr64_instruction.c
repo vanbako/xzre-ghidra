@@ -14,12 +14,12 @@
 BOOL is_endbr64_instruction(u8 *code_start,u8 *code_end,u32 low_mask_part)
 
 {
-  BOOL BVar1;
+  BOOL is_endbr;
   
-  BVar1 = FALSE;
+  is_endbr = FALSE;
   if (3 < (long)code_end - (long)code_start) {
-    BVar1 = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
+    is_endbr = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
   }
-  return BVar1;
+  return is_endbr;
 }
 

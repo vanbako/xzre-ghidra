@@ -15,163 +15,163 @@
 BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
 
 {
-  void **ppvVar1;
-  dasm_ctx_t *pdVar2;
-  Elf64_Rela *pEVar3;
-  EncodedStringId EVar4;
-  BOOL BVar5;
-  dasm_ctx_t *code_start;
-  char *pcVar6;
-  u8 *puVar7;
-  void **ppvVar8;
-  dasm_ctx_t *pdVar9;
-  Elf64_Rela *pEVar10;
-  dasm_ctx_t *pdVar11;
-  long lVar12;
-  string_item_t *psVar13;
-  dasm_ctx_t *code_end;
-  void **ppvVar14;
-  dasm_ctx_t *pdVar15;
+  void **func_range_end_ptr;
+  u8 *entry_xref;
+  u8 *xref_bound;
+  EncodedStringId string_id_seed;
+  BOOL decoded;
+  u8 *code_start;
+  char *string_ptr;
+  u8 *xref_addr;
+  void **func_range_iter;
+  u8 *target_addr;
+  Elf64_Rela *rela_cursor;
+  dasm_ctx_t *decoder_ctx;
+  long entry_offset;
+  string_item_t *entry_cursor;
+  u8 *code_end;
+  void **func_range_cursor;
+  u8 *insn_cursor;
   EncodedStringId string_id_cursor;
   u64 code_segment_info [2];
   dasm_ctx_t scanner_ctx;
   
-  EVar4 = STR_xcalloc_zero_size;
-  psVar13 = refs->entries;
+  string_id_seed = STR_xcalloc_zero_size;
+  entry_cursor = refs->entries;
   do {
-    ((string_item_t *)&psVar13->string_id)->string_id = EVar4;
-    EVar4 = EVar4 + 8;
-    psVar13 = psVar13 + 1;
-  } while (EVar4 != 0xe8);
-  pdVar11 = &scanner_ctx;
-  for (lVar12 = 0x16; lVar12 != 0; lVar12 = lVar12 + -1) {
-    *(undefined4 *)&pdVar11->instruction = 0;
-    pdVar11 = (dasm_ctx_t *)((long)&pdVar11->instruction + 4);
+    ((string_item_t *)&entry_cursor->string_id)->string_id = string_id_seed;
+    string_id_seed = string_id_seed + 8;
+    entry_cursor = entry_cursor + 1;
+  } while (string_id_seed != 0xe8);
+  decoder_ctx = &scanner_ctx;
+  for (entry_offset = 0x16; entry_offset != 0; entry_offset = entry_offset + -1) {
+    *(undefined4 *)&decoder_ctx->instruction = 0;
+    decoder_ctx = (dasm_ctx_t *)((long)&decoder_ctx->instruction + 4);
   }
   code_segment_info[0] = 0;
   code_segment_info[1] = 0;
   code_start = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_info);
-  pdVar11 = &scanner_ctx;
+  decoder_ctx = &scanner_ctx;
   if ((code_start != (dasm_ctx_t *)0x0) && (0x10 < code_segment_info[0])) {
     code_end = (dasm_ctx_t *)(code_start->opcode_window + (code_segment_info[0] - 0x25));
-    pcVar6 = (char *)0x0;
+    string_ptr = (char *)0x0;
     while( TRUE ) {
       string_id_cursor = 0;
-      pcVar6 = elf_find_string(elf_info,&string_id_cursor,pcVar6);
-      if (pcVar6 == (char *)0x0) break;
-      lVar12 = 0;
+      string_ptr = elf_find_string(elf_info,&string_id_cursor,string_ptr);
+      if (string_ptr == (char *)0x0) break;
+      entry_offset = 0;
       do {
-        if (((*(long *)(refs->entries[0].entry_bytes + lVar12 + 0x14) == 0) &&
-            (*(EncodedStringId *)(refs->entries[0].entry_bytes + lVar12 + -4) == string_id_cursor)) &&
-           (puVar7 = find_string_reference((u8 *)code_start,(u8 *)code_end,pcVar6),
-           puVar7 != (u8 *)0x0)) {
-          *(u8 **)(refs->entries[0].entry_bytes + lVar12 + 0x14) = puVar7;
+        if (((*(long *)(refs->entries[0].entry_bytes + entry_offset + 0x14) == 0) &&
+            (*(EncodedStringId *)(refs->entries[0].entry_bytes + entry_offset + -4) == string_id_cursor)) &&
+           (xref_addr = find_string_reference((u8 *)code_start,(u8 *)code_end,string_ptr),
+           xref_addr != (u8 *)0x0)) {
+          *(u8 **)(refs->entries[0].entry_bytes + entry_offset + 0x14) = xref_addr;
         }
-        lVar12 = lVar12 + 0x20;
-      } while (lVar12 != 0x360);
-      pcVar6 = pcVar6 + 1;
+        entry_offset = entry_offset + 0x20;
+      } while (entry_offset != 0x360);
+      string_ptr = string_ptr + 1;
     }
-    ppvVar14 = &refs->entries[0].func_start;
-    ppvVar1 = &refs[1].entries[0].func_start;
-    ppvVar8 = ppvVar14;
+    func_range_cursor = &refs->entries[0].func_start;
+    func_range_end_ptr = &refs[1].entries[0].func_start;
+    func_range_iter = func_range_cursor;
     do {
-      pdVar15 = (dasm_ctx_t *)ppvVar8[2];
-      if (pdVar15 != (dasm_ctx_t *)0x0) {
-        if (code_start <= pdVar15) {
-          if ((dasm_ctx_t *)*ppvVar8 < code_start) {
-            *ppvVar8 = code_start;
+      insn_cursor = (dasm_ctx_t *)func_range_iter[2];
+      if (insn_cursor != (dasm_ctx_t *)0x0) {
+        if (code_start <= insn_cursor) {
+          if ((dasm_ctx_t *)*func_range_iter < code_start) {
+            *func_range_iter = code_start;
           }
-          if (code_start != pdVar15) goto LAB_00102e58;
+          if (code_start != insn_cursor) goto LAB_00102e58;
         }
-        if (code_start <= (dasm_ctx_t *)((long)ppvVar8[1] - 1U)) {
-          ppvVar8[1] = code_start;
+        if (code_start <= (dasm_ctx_t *)((long)func_range_iter[1] - 1U)) {
+          func_range_iter[1] = code_start;
         }
       }
 LAB_00102e58:
-      ppvVar8 = ppvVar8 + 4;
-      pdVar15 = code_start;
-    } while (ppvVar8 != ppvVar1);
+      func_range_iter = func_range_iter + 4;
+      insn_cursor = code_start;
+    } while (func_range_iter != func_range_end_ptr);
 LAB_00102e64:
-    if (pdVar15 < code_end) {
-      BVar5 = x86_dasm(pdVar11,(u8 *)pdVar15,(u8 *)code_end);
-      pdVar15 = (dasm_ctx_t *)((long)&pdVar15->instruction + 1);
-      if (BVar5 != FALSE) {
-        pdVar15 = (dasm_ctx_t *)
+    if (insn_cursor < code_end) {
+      decoded = x86_dasm(decoder_ctx,(u8 *)insn_cursor,(u8 *)code_end);
+      insn_cursor = (dasm_ctx_t *)((long)&insn_cursor->instruction + 1);
+      if (decoded != FALSE) {
+        insn_cursor = (dasm_ctx_t *)
                   ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));
         if (scanner_ctx._40_4_ == 0x168) {
           if (scanner_ctx.operand == 0) goto LAB_00102e64;
-          pdVar9 = (dasm_ctx_t *)
+          target_addr = (dasm_ctx_t *)
                    ((u8 *)((long)scanner_ctx.instruction + 0x25) +
                    scanner_ctx.operand + scanner_ctx.instruction_size + -0x25);
 LAB_00102ee5:
-          if (pdVar9 == (dasm_ctx_t *)0x0) goto LAB_00102e64;
+          if (target_addr == (dasm_ctx_t *)0x0) goto LAB_00102e64;
         }
         else {
-          pdVar9 = (dasm_ctx_t *)scanner_ctx.instruction;
+          target_addr = (dasm_ctx_t *)scanner_ctx.instruction;
           if (scanner_ctx._40_4_ == 0xa5fe) goto LAB_00102ee5;
           if (((scanner_ctx._40_4_ != 0x10d) || (((byte)scanner_ctx.prefix.decoded.rex & 0x48) != 0x48))
              || (((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
           goto LAB_00102e64;
-          pdVar9 = (dasm_ctx_t *)(pdVar15->opcode_window + (scanner_ctx.mem_disp - 0x25));
+          target_addr = (dasm_ctx_t *)(insn_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));
         }
-        if ((code_start <= pdVar9) && (ppvVar8 = ppvVar14, pdVar9 <= code_end)) {
+        if ((code_start <= target_addr) && (func_range_iter = func_range_cursor, target_addr <= code_end)) {
           do {
-            pdVar2 = (dasm_ctx_t *)ppvVar8[2];
-            if (pdVar2 != (dasm_ctx_t *)0x0) {
-              if (pdVar9 <= pdVar2) {
-                if ((dasm_ctx_t *)*ppvVar8 < pdVar9) {
-                  *ppvVar8 = pdVar9;
+            entry_xref = (dasm_ctx_t *)func_range_iter[2];
+            if (entry_xref != (dasm_ctx_t *)0x0) {
+              if (target_addr <= entry_xref) {
+                if ((dasm_ctx_t *)*func_range_iter < target_addr) {
+                  *func_range_iter = target_addr;
                 }
-                if (pdVar2 != pdVar9) goto LAB_00102f31;
+                if (entry_xref != target_addr) goto LAB_00102f31;
               }
-              if (pdVar9 <= (dasm_ctx_t *)((long)ppvVar8[1] - 1U)) {
-                ppvVar8[1] = pdVar9;
+              if (target_addr <= (dasm_ctx_t *)((long)func_range_iter[1] - 1U)) {
+                func_range_iter[1] = target_addr;
               }
             }
 LAB_00102f31:
-            ppvVar8 = ppvVar8 + 4;
-          } while (ppvVar8 != ppvVar1);
+            func_range_iter = func_range_iter + 4;
+          } while (func_range_iter != func_range_end_ptr);
         }
       }
       goto LAB_00102e64;
     }
-    while (pEVar10 = elf_find_rela_reloc(elf_info,0,(u64)code_start), ppvVar8 = ppvVar14,
-          pEVar10 != (Elf64_Rela *)0x0) {
+    while (rela_cursor = elf_find_rela_reloc(elf_info,0,(u64)code_start), func_range_iter = func_range_cursor,
+          rela_cursor != (Elf64_Rela *)0x0) {
       do {
-        pEVar3 = (Elf64_Rela *)ppvVar8[2];
-        if (pEVar3 != (Elf64_Rela *)0x0) {
-          if (pEVar10 <= pEVar3) {
-            if ((Elf64_Rela *)*ppvVar8 < pEVar10) {
-              *ppvVar8 = pEVar10;
+        xref_bound = (Elf64_Rela *)func_range_iter[2];
+        if (xref_bound != (Elf64_Rela *)0x0) {
+          if (rela_cursor <= xref_bound) {
+            if ((Elf64_Rela *)*func_range_iter < rela_cursor) {
+              *func_range_iter = rela_cursor;
             }
-            if (pEVar10 != pEVar3) goto LAB_00102f8e;
+            if (rela_cursor != xref_bound) goto LAB_00102f8e;
           }
-          if (pEVar10 <= (Elf64_Rela *)((long)ppvVar8[1] - 1U)) {
-            ppvVar8[1] = pEVar10;
+          if (rela_cursor <= (Elf64_Rela *)((long)func_range_iter[1] - 1U)) {
+            func_range_iter[1] = rela_cursor;
           }
         }
 LAB_00102f8e:
-        ppvVar8 = ppvVar8 + 4;
-      } while (ppvVar8 != ppvVar1);
+        func_range_iter = func_range_iter + 4;
+      } while (func_range_iter != func_range_end_ptr);
     }
     do {
-      pdVar11 = (dasm_ctx_t *)ppvVar14[2];
-      if (pdVar11 != (dasm_ctx_t *)0x0) {
-        if (code_end <= pdVar11) {
-          if ((dasm_ctx_t *)*ppvVar14 < code_end) {
-            *ppvVar14 = code_end;
+      decoder_ctx = (dasm_ctx_t *)func_range_cursor[2];
+      if (decoder_ctx != (dasm_ctx_t *)0x0) {
+        if (code_end <= decoder_ctx) {
+          if ((dasm_ctx_t *)*func_range_cursor < code_end) {
+            *func_range_cursor = code_end;
           }
-          if (pdVar11 != code_end) goto LAB_00102fad;
+          if (decoder_ctx != code_end) goto LAB_00102fad;
         }
-        pdVar11 = (dasm_ctx_t *)((long)ppvVar14[1] + -1);
-        if (code_end <= pdVar11) {
-          ppvVar14[1] = code_end;
+        decoder_ctx = (dasm_ctx_t *)((long)func_range_cursor[1] + -1);
+        if (code_end <= decoder_ctx) {
+          func_range_cursor[1] = code_end;
         }
       }
 LAB_00102fad:
-      ppvVar14 = ppvVar14 + 4;
-    } while (ppvVar14 != ppvVar1);
+      func_range_cursor = func_range_cursor + 4;
+    } while (func_range_cursor != func_range_end_ptr);
   }
-  return (BOOL)pdVar11;
+  return (BOOL)decoder_ctx;
 }
 

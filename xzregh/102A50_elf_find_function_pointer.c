@@ -17,33 +17,33 @@ BOOL elf_find_function_pointer
                elf_info_t *elf_info,string_references_t *xrefs,global_context_t *ctx)
 
 {
-  void *pvVar1;
-  BOOL BVar2;
-  Elf64_Rela *pEVar3;
-  Elf64_Relr *pEVar4;
+  void *func_start;
+  BOOL ok;
+  Elf64_Rela *rela_slot;
+  Elf64_Relr *relr_slot;
   
-  pvVar1 = xrefs->entries[xref_id].func_start;
-  if (pvVar1 == (void *)0x0) {
+  func_start = xrefs->entries[xref_id].func_start;
+  if (func_start == (void *)0x0) {
     return FALSE;
   }
-  *pOutCodeStart = pvVar1;
+  *pOutCodeStart = func_start;
   *pOutCodeEnd = xrefs->entries[xref_id].func_end;
-  pEVar3 = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
-  *pOutFptrAddr = pEVar3;
-  if (pEVar3 == (Elf64_Rela *)0x0) {
-    pEVar4 = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
-    *pOutFptrAddr = pEVar4;
-    if (pEVar4 == (Elf64_Relr *)0x0) {
+  rela_slot = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
+  *pOutFptrAddr = rela_slot;
+  if (rela_slot == (Elf64_Rela *)0x0) {
+    relr_slot = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
+    *pOutFptrAddr = relr_slot;
+    if (relr_slot == (Elf64_Relr *)0x0) {
       return FALSE;
     }
   }
-  BVar2 = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
-  if (BVar2 == FALSE) {
+  ok = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
+  if (ok == FALSE) {
     return FALSE;
   }
   if (ctx->uses_endbr64 != FALSE) {
-    BVar2 = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
-    return (uint)(BVar2 != FALSE);
+    ok = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
+    return (uint)(ok != FALSE);
   }
   return TRUE;
 }
