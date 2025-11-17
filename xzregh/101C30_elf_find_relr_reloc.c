@@ -17,67 +17,67 @@
 Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 
 {
-  uint uVar1;
-  Elf64_Ehdr *pEVar2;
-  BOOL BVar3;
+  uint relr_count;
+  Elf64_Ehdr *elfbase;
+  BOOL addr_ok;
   Elf64_Relr *result_high_bound;
   Elf64_Relr *result_low_bound;
-  ulong uVar4;
+  ulong relr_index;
   u32 target_addr_high;
-  uchar *vaddr;
+  uchar *candidate_ptr;
   ulong *resume_index_ptr;
-  long lVar5;
-  Elf64_Relr EVar6;
-  ulong uVar7;
+  long relr_offset;
+  Elf64_Relr target_offset;
+  ulong encoded_entry;
   
-  pEVar2 = elf_info->elfbase;
+  elfbase = elf_info->elfbase;
   if ((elf_info->flags & 4) != 0) {
-    uVar1 = elf_info->relr_relocs_num;
-    if ((CONCAT44(target_addr_high,encoded_string_id) != 0) && (uVar1 != 0)) {
-      uVar4 = 0;
+    relr_count = elf_info->relr_relocs_num;
+    if ((CONCAT44(target_addr_high,encoded_string_id) != 0) && (relr_count != 0)) {
+      relr_index = 0;
       if (resume_index_ptr != (ulong *)0x0) {
-        uVar4 = *resume_index_ptr;
+        relr_index = *resume_index_ptr;
       }
-      EVar6 = CONCAT44(target_addr_high,encoded_string_id) - (long)pEVar2;
-      lVar5 = 0;
-      for (; uVar4 < uVar1; uVar4 = uVar4 + 1) {
-        vaddr = pEVar2->e_ident + lVar5;
-        uVar7 = elf_info->relr_relocs[uVar4];
-        if ((uVar7 & 1) == 0) {
-          vaddr = pEVar2->e_ident + uVar7;
-          BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-          if (BVar3 == FALSE) {
+      target_offset = CONCAT44(target_addr_high,encoded_string_id) - (long)elfbase;
+      relr_offset = 0;
+      for (; relr_index < relr_count; relr_index = relr_index + 1) {
+        candidate_ptr = elfbase->e_ident + relr_offset;
+        encoded_entry = elf_info->relr_relocs[relr_index];
+        if ((encoded_entry & 1) == 0) {
+          candidate_ptr = elfbase->e_ident + encoded_entry;
+          addr_ok = elf_contains_vaddr(elf_info,candidate_ptr,8,4);
+          if (addr_ok == FALSE) {
             return (Elf64_Relr *)0x0;
           }
-          if ((*(Elf64_Relr *)vaddr == EVar6) &&
-             ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= vaddr && (vaddr <= result_high_bound)))))) {
+          if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
+             ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= candidate_ptr && (candidate_ptr <= result_high_bound)))))) {
 LAB_00101d98:
             if (resume_index_ptr != (ulong *)0x0) {
-              *resume_index_ptr = uVar4 + 1;
-              return (Elf64_Relr *)vaddr;
+              *resume_index_ptr = relr_index + 1;
+              return (Elf64_Relr *)candidate_ptr;
             }
-            return (Elf64_Relr *)vaddr;
+            return (Elf64_Relr *)candidate_ptr;
           }
-          lVar5 = uVar7 + 8;
+          relr_offset = encoded_entry + 8;
         }
         else {
-          while (uVar7 = uVar7 >> 1, uVar7 != 0) {
-            if ((uVar7 & 1) != 0) {
-              BVar3 = elf_contains_vaddr(elf_info,vaddr,8,4);
-              if (BVar3 == FALSE) {
+          while (encoded_entry = encoded_entry >> 1, encoded_entry != 0) {
+            if ((encoded_entry & 1) != 0) {
+              addr_ok = elf_contains_vaddr(elf_info,candidate_ptr,8,4);
+              if (addr_ok == FALSE) {
                 return (Elf64_Relr *)0x0;
               }
-              if ((*(Elf64_Relr *)vaddr == EVar6) &&
-                 ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= vaddr && (vaddr <= result_high_bound))))))
+              if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
+                 ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= candidate_ptr && (candidate_ptr <= result_high_bound))))))
               goto LAB_00101d98;
             }
-            vaddr = vaddr + 8;
+            candidate_ptr = candidate_ptr + 8;
           }
-          lVar5 = lVar5 + 0x1f8;
+          relr_offset = relr_offset + 0x1f8;
         }
       }
       if (resume_index_ptr != (ulong *)0x0) {
-        *resume_index_ptr = uVar4;
+        *resume_index_ptr = relr_index;
       }
     }
   }

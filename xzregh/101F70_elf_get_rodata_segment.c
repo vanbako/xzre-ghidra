@@ -15,62 +15,62 @@
 void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
 
 {
-  Elf64_Ehdr *pEVar1;
+  Elf64_Ehdr *ehdr;
   BOOL rodata_segment_found;
-  BOOL BVar3;
-  void *pvVar4;
-  void *pvVar5;
-  Elf64_Phdr *pEVar6;
-  ulong uVar7;
-  void *pvVar8;
-  u64 uVar9;
+  BOOL telemetry_ok;
+  void *cached_rodata;
+  void *selected_rodata_start;
+  Elf64_Phdr *phdr;
+  ulong segment_runtime_start;
+  void *segment_page_start;
+  u64 selected_size;
   long lVar10;
-  ulong uVar11;
+  ulong segment_runtime_end;
   u64 code_segment_size;
   
-  BVar3 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xbd,0xe,0xb,FALSE);
-  if (BVar3 != FALSE) {
-    pvVar4 = (void *)elf_info->rodata_segment_start;
-    pEVar1 = elf_info->elfbase;
+  telemetry_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xbd,0xe,0xb,FALSE);
+  if (telemetry_ok != FALSE) {
+    cached_rodata = (void *)elf_info->rodata_segment_start;
+    ehdr = elf_info->elfbase;
     code_segment_size = 0;
-    if (pvVar4 != (void *)0x0) {
+    if (cached_rodata != (void *)0x0) {
       *pSize = elf_info->rodata_segment_size;
-      return pvVar4;
+      return cached_rodata;
     }
-    pvVar4 = elf_get_code_segment(elf_info,&code_segment_size);
-    if (pvVar4 != (void *)0x0) {
+    cached_rodata = elf_get_code_segment(elf_info,&code_segment_size);
+    if (cached_rodata != (void *)0x0) {
       rodata_segment_found = FALSE;
-      uVar9 = 0;
-      pvVar5 = (void *)0x0;
+      selected_size = 0;
+      selected_rodata_start = (void *)0x0;
       for (lVar10 = 0; (uint)lVar10 < (uint)(ushort)elf_info->e_phnum; lVar10 = lVar10 + 1) {
-        pEVar6 = elf_info->phdrs + lVar10;
-        if ((pEVar6->p_type == 1) && ((pEVar6->p_flags & 7) == 4)) {
-          uVar7 = (long)pEVar1 + (pEVar6->p_vaddr - elf_info->first_vaddr);
-          uVar11 = pEVar6->p_memsz + uVar7;
-          pvVar8 = (void *)(uVar7 & 0xfffffffffffff000);
-          if ((uVar11 & 0xfff) != 0) {
-            uVar11 = (uVar11 & 0xfffffffffffff000) + 0x1000;
+        phdr = elf_info->phdrs + lVar10;
+        if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {
+          segment_runtime_start = (long)ehdr + (phdr->p_vaddr - elf_info->first_vaddr);
+          segment_runtime_end = phdr->p_memsz + segment_runtime_start;
+          segment_page_start = (void *)(segment_runtime_start & 0xfffffffffffff000);
+          if ((segment_runtime_end & 0xfff) != 0) {
+            segment_runtime_end = (segment_runtime_end & 0xfffffffffffff000) + 0x1000;
           }
-          if ((void *)((long)pvVar4 + code_segment_size) <= pvVar8) {
+          if ((void *)((long)cached_rodata + code_segment_size) <= segment_page_start) {
             if (rodata_segment_found) {
-              if (pvVar8 < pvVar5) {
-                uVar9 = uVar11 - (long)pvVar8;
-                pvVar5 = pvVar8;
+              if (segment_page_start < selected_rodata_start) {
+                selected_size = segment_runtime_end - (long)segment_page_start;
+                selected_rodata_start = segment_page_start;
               }
             }
             else {
               rodata_segment_found = TRUE;
-              uVar9 = uVar11 - (long)pvVar8;
-              pvVar5 = pvVar8;
+              selected_size = segment_runtime_end - (long)segment_page_start;
+              selected_rodata_start = segment_page_start;
             }
           }
         }
       }
       if (rodata_segment_found) {
-        elf_info->rodata_segment_start = (u64)pvVar5;
-        elf_info->rodata_segment_size = uVar9;
-        *pSize = uVar9;
-        return pvVar5;
+        elf_info->rodata_segment_start = (u64)selected_rodata_start;
+        elf_info->rodata_segment_size = selected_size;
+        *pSize = selected_size;
+        return selected_rodata_start;
       }
     }
   }

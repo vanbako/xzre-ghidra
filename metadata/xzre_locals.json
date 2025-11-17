@@ -1806,13 +1806,16 @@
   },
   "c_memmove": {
     "source": "xzre/xzre_code/c_memmove.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "curr",
-        "type": "size_t"
+        "original": "lVar1",
+        "name": "backward_idx",
+        "type": "ssize_t"
       },
       {
-        "name": "curr",
+        "original": "sVar2",
+        "name": "forward_idx",
         "type": "size_t"
       }
     ]
@@ -2017,6 +2020,106 @@
       }
     ],
     "register_temps": [
+      {
+        "original": "uVar21",
+        "name": "min_load_vaddr",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar23",
+        "name": "phnum",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar24",
+        "name": "phdr_idx",
+        "type": "uint"
+      },
+      {
+        "original": "pEVar20",
+        "name": "phdrs",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "pEVar22",
+        "name": "phdr_cursor",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "lVar17",
+        "name": "dynamic_phdr_index",
+        "type": "long"
+      },
+      {
+        "original": "iVar14",
+        "name": "dyn_entry_capacity",
+        "type": "int"
+      },
+      {
+        "original": "iVar16",
+        "name": "dyn_index",
+        "type": "int"
+      },
+      {
+        "original": "pEVar15",
+        "name": "dyn_cursor",
+        "type": "Elf64_DynValue *"
+      },
+      {
+        "original": "EVar18",
+        "name": "pltrel_table_size",
+        "type": "Elf64_Xword"
+      },
+      {
+        "original": "size_00",
+        "name": "rela_table_size",
+        "type": "Elf64_Xword"
+      },
+      {
+        "original": "size",
+        "name": "relr_table_size",
+        "type": "Elf64_Xword"
+      },
+      {
+        "original": "pEVar5",
+        "name": "plt_relocs_ptr",
+        "type": "Elf64_Rela *"
+      },
+      {
+        "original": "pEVar6",
+        "name": "rela_relocs_ptr",
+        "type": "Elf64_Rela *"
+      },
+      {
+        "original": "pEVar7",
+        "name": "relr_relocs_ptr",
+        "type": "Elf64_Relr *"
+      },
+      {
+        "original": "pEVar8",
+        "name": "strtab_base",
+        "type": "char *"
+      },
+      {
+        "original": "uVar1",
+        "name": "gnu_hash_bloom_size",
+        "type": "uint"
+      },
+      {
+        "original": "uVar2",
+        "name": "gnu_hash_symbias",
+        "type": "uint"
+      },
+      {
+        "original": "uVar3",
+        "name": "gnu_hash_bloom_shift",
+        "type": "uint"
+      },
+      {
+        "original": "puVar25",
+        "name": "gnu_hash_header",
+        "type": "uint *"
+      },
       {
         "original": "bVar12",
         "name": "verdef_present",
@@ -2413,6 +2516,21 @@
         "original": "in_register_00000034",
         "name": "target_addr_high",
         "type": "u32"
+      },
+      {
+        "original": "pEVar1",
+        "name": "elfbase",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "original": "pEVar2",
+        "name": "rela",
+        "type": "Elf64_Rela *"
+      },
+      {
+        "original": "uVar3",
+        "name": "rela_index",
+        "type": "ulong"
       }
     ]
   },
@@ -2439,6 +2557,67 @@
         "original": "in_register_00000034",
         "name": "target_addr_high",
         "type": "u32"
+      },
+      {
+        "original": "uVar1",
+        "name": "relr_count",
+        "type": "uint"
+      },
+      {
+        "original": "pEVar2",
+        "name": "elfbase",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "original": "BVar3",
+        "name": "addr_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar4",
+        "name": "relr_index",
+        "type": "ulong"
+      },
+      {
+        "original": "vaddr",
+        "name": "candidate_ptr",
+        "type": "uchar *"
+      },
+      {
+        "original": "lVar5",
+        "name": "relr_offset",
+        "type": "long"
+      },
+      {
+        "original": "EVar6",
+        "name": "target_offset",
+        "type": "Elf64_Relr"
+      },
+      {
+        "original": "uVar7",
+        "name": "encoded_entry",
+        "type": "ulong"
+      }
+    ]
+  },
+  "elf_get_reloc_symbol": {
+    "source": "xzre/xzre_code/elf_get_reloc_symbol.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "telemetry_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "EVar2",
+        "name": "sym_name_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "original": "uVar3",
+        "name": "reloc_index",
+        "type": "ulong"
       }
     ]
   },
@@ -5278,14 +5457,100 @@
       }
     ]
   },
+  "elf_get_code_segment": {
+    "source": "xzre/xzre_code/elf_get_code_segment.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "telemetry_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar2",
+        "name": "segment_start",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar5",
+        "name": "segment_end",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar6",
+        "name": "segment_size",
+        "type": "u64"
+      },
+      {
+        "original": "pEVar4",
+        "name": "phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "lVar7",
+        "name": "phdr_index",
+        "type": "long"
+      },
+      {
+        "original": "pvVar3",
+        "name": "code_segment",
+        "type": "void *"
+      }
+    ]
+  },
   "elf_get_rodata_segment": {
     "source": "xzre/xzre_code/elf_get_rodata_segment.c",
     "locals": [],
     "register_temps": [
       {
+        "original": "BVar3",
+        "name": "telemetry_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar1",
+        "name": "ehdr",
+        "type": "Elf64_Ehdr *"
+      },
+      {
         "original": "bVar2",
         "name": "rodata_segment_found",
         "type": "BOOL"
+      },
+      {
+        "original": "pvVar4",
+        "name": "cached_rodata",
+        "type": "void *"
+      },
+      {
+        "original": "pEVar6",
+        "name": "phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "uVar7",
+        "name": "segment_runtime_start",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar11",
+        "name": "segment_runtime_end",
+        "type": "ulong"
+      },
+      {
+        "original": "pvVar8",
+        "name": "segment_page_start",
+        "type": "void *"
+      },
+      {
+        "original": "uVar9",
+        "name": "selected_size",
+        "type": "u64"
+      },
+      {
+        "original": "pvVar5",
+        "name": "selected_rodata_start",
+        "type": "void *"
       },
       {
         "original": "local_20",
@@ -5299,9 +5564,69 @@
     "locals": [],
     "register_temps": [
       {
+        "original": "pEVar1",
+        "name": "elfbase",
+        "type": "Elf64_Ehdr *"
+      },
+      {
         "original": "bVar2",
         "name": "data_segment_found",
         "type": "BOOL"
+      },
+      {
+        "original": "pEVar4",
+        "name": "phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "uVar3",
+        "name": "best_segment_index",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar11",
+        "name": "phdr_index",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar8",
+        "name": "best_segment_start",
+        "type": "ulong"
+      },
+      {
+        "original": "lVar13",
+        "name": "best_segment_size",
+        "type": "long"
+      },
+      {
+        "original": "uVar9",
+        "name": "seg_start",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar12",
+        "name": "seg_end",
+        "type": "ulong"
+      },
+      {
+        "original": "pvVar5",
+        "name": "segment_file_end",
+        "type": "void *"
+      },
+      {
+        "original": "pvVar10",
+        "name": "segment_mem_end",
+        "type": "void *"
+      },
+      {
+        "original": "pvVar6",
+        "name": "cached_data_start",
+        "type": "void *"
+      },
+      {
+        "original": "uVar7",
+        "name": "alignment_size",
+        "type": "u64"
       }
     ]
   },
@@ -5563,9 +5888,60 @@
     "locals": [],
     "register_temps": [
       {
+        "original": "pEVar1",
+        "name": "range_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "pEVar3",
+        "name": "phdr",
+        "type": "Elf64_Phdr *"
+      },
+      {
+        "original": "uVar4",
+        "name": "segment_start",
+        "type": "ulong"
+      },
+      {
+        "original": "pEVar5",
+        "name": "segment_page_start",
+        "type": "u8 *"
+      },
+      {
+        "original": "pEVar6",
+        "name": "segment_page_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "lVar7",
+        "name": "phdr_index",
+        "type": "long"
+      },
+      {
         "original": "in_R8D",
         "name": "recursion_depth",
         "type": "int"
+      }
+    ]
+  },
+  "elf_contains_vaddr_relro": {
+    "source": "xzre/xzre_code/elf_contains_vaddr_relro.c",
+    "locals": [],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "range_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar3",
+        "name": "relro_start",
+        "type": "ulong"
+      },
+      {
+        "original": "uVar2",
+        "name": "relro_end",
+        "type": "ulong"
       }
     ]
   },

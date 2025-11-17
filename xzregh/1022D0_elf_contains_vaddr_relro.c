@@ -16,22 +16,22 @@
 BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)
 
 {
-  BOOL BVar1;
-  ulong uVar2;
-  ulong uVar3;
+  BOOL range_ok;
+  ulong relro_end;
+  ulong relro_start;
   
-  BVar1 = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);
-  if (((BVar1 != FALSE) && (BVar1 = TRUE, p_flags != 0)) && (elf_info->gnurelro_found != FALSE)) {
-    uVar3 = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->first_vaddr);
-    uVar2 = elf_info->gnurelro_memsize + uVar3;
-    uVar3 = uVar3 & 0xfffffffffffff000;
-    if ((uVar2 & 0xfff) != 0) {
-      uVar2 = (uVar2 & 0xfffffffffffff000) + 0x1000;
+  range_ok = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);
+  if (((range_ok != FALSE) && (range_ok = TRUE, p_flags != 0)) && (elf_info->gnurelro_found != FALSE)) {
+    relro_start = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->first_vaddr);
+    relro_end = elf_info->gnurelro_memsize + relro_start;
+    relro_start = relro_start & 0xfffffffffffff000;
+    if ((relro_end & 0xfff) != 0) {
+      relro_end = (relro_end & 0xfffffffffffff000) + 0x1000;
     }
-    if ((uVar2 <= vaddr) || (BVar1 = FALSE, vaddr < uVar3)) {
-      BVar1 = (BOOL)(vaddr + size <= uVar3 && vaddr < uVar3 || uVar2 < vaddr + size);
+    if ((relro_end <= vaddr) || (range_ok = FALSE, vaddr < relro_start)) {
+      range_ok = (BOOL)(vaddr + size <= relro_start && vaddr < relro_start || relro_end < vaddr + size);
     }
   }
-  return BVar1;
+  return range_ok;
 }
 

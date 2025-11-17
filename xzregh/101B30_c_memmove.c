@@ -16,29 +16,28 @@
 void * c_memmove(char *dest,char *src,size_t cnt)
 
 {
-  long lVar1;
-  size_t sVar2;
-  size_t curr;
+  ssize_t backward_idx;
+  size_t forward_idx;
   
   if ((src < dest) && (dest < src + cnt)) {
-    lVar1 = cnt - 1;
+    backward_idx = cnt - 1;
     if (cnt != 0) {
       do {
-        dest[lVar1] = src[lVar1];
-        lVar1 = lVar1 + -1;
-      } while (lVar1 != -1);
+        dest[backward_idx] = src[backward_idx];
+        backward_idx = backward_idx + -1;
+      } while (backward_idx != -1);
       return dest;
     }
   }
   else {
-    sVar2 = 0;
+    forward_idx = 0;
     if (cnt == 0) {
       return dest;
     }
     do {
-      dest[sVar2] = src[sVar2];
-      sVar2 = sVar2 + 1;
-    } while (cnt != sVar2);
+      dest[forward_idx] = src[forward_idx];
+      forward_idx = forward_idx + 1;
+    } while (cnt != forward_idx);
   }
   return dest;
 }

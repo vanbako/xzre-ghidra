@@ -17,86 +17,86 @@
 void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
 
 {
-  Elf64_Ehdr *pEVar1;
+  Elf64_Ehdr *elfbase;
   BOOL data_segment_found;
-  ulong uVar3;
-  Elf64_Phdr *pEVar4;
-  void *pvVar5;
-  void *pvVar6;
-  u64 uVar7;
-  ulong uVar8;
-  ulong uVar9;
-  void *pvVar10;
-  ulong uVar11;
-  ulong uVar12;
-  long lVar13;
+  ulong best_segment_index;
+  Elf64_Phdr *phdr;
+  void *segment_file_end;
+  void *cached_data_start;
+  u64 alignment_size;
+  ulong best_segment_start;
+  ulong seg_start;
+  void *segment_mem_end;
+  ulong phdr_index;
+  ulong seg_end;
+  long best_segment_size;
   
-  pvVar6 = (void *)elf_info->data_segment_start;
-  pEVar1 = elf_info->elfbase;
-  if (pvVar6 != (void *)0x0) {
+  cached_data_start = (void *)elf_info->data_segment_start;
+  elfbase = elf_info->elfbase;
+  if (cached_data_start != (void *)0x0) {
     if (get_alignment != FALSE) {
-      uVar7 = elf_info->data_segment_alignment;
-      *pSize = uVar7;
-      pvVar6 = (void *)((long)pvVar6 - uVar7);
-      if (uVar7 == 0) {
-        pvVar6 = (void *)0x0;
+      alignment_size = elf_info->data_segment_alignment;
+      *pSize = alignment_size;
+      cached_data_start = (void *)((long)cached_data_start - alignment_size);
+      if (alignment_size == 0) {
+        cached_data_start = (void *)0x0;
       }
-      return pvVar6;
+      return cached_data_start;
     }
     *pSize = elf_info->data_segment_size;
-    return pvVar6;
+    return cached_data_start;
   }
   data_segment_found = FALSE;
-  lVar13 = 0;
-  uVar8 = 0;
-  uVar3 = 0;
-  for (uVar11 = 0; (uint)uVar11 < (uint)(ushort)elf_info->e_phnum; uVar11 = uVar11 + 1) {
-    pEVar4 = elf_info->phdrs + uVar11;
-    if ((pEVar4->p_type == 1) && ((pEVar4->p_flags & 7) == 6)) {
-      if (pEVar4->p_memsz < pEVar4->p_filesz) {
+  best_segment_size = 0;
+  best_segment_start = 0;
+  best_segment_index = 0;
+  for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
+    phdr = elf_info->phdrs + phdr_index;
+    if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 6)) {
+      if (phdr->p_memsz < phdr->p_filesz) {
         return (void *)0x0;
       }
-      uVar9 = (long)pEVar1 + (pEVar4->p_vaddr - elf_info->first_vaddr);
-      uVar12 = pEVar4->p_memsz + uVar9;
-      uVar9 = uVar9 & 0xfffffffffffff000;
-      if ((uVar12 & 0xfff) != 0) {
-        uVar12 = (uVar12 & 0xfffffffffffff000) + 0x1000;
+      seg_start = (long)elfbase + (phdr->p_vaddr - elf_info->first_vaddr);
+      seg_end = phdr->p_memsz + seg_start;
+      seg_start = seg_start & 0xfffffffffffff000;
+      if ((seg_end & 0xfff) != 0) {
+        seg_end = (seg_end & 0xfffffffffffff000) + 0x1000;
       }
       if (data_segment_found) {
-        if (uVar8 + lVar13 < uVar12) {
-          lVar13 = uVar12 - uVar9;
-          uVar3 = uVar11 & 0xffffffff;
-          uVar8 = uVar9;
+        if (best_segment_start + best_segment_size < seg_end) {
+          best_segment_size = seg_end - seg_start;
+          best_segment_index = phdr_index & 0xffffffff;
+          best_segment_start = seg_start;
         }
       }
       else {
-        lVar13 = uVar12 - uVar9;
+        best_segment_size = seg_end - seg_start;
         data_segment_found = TRUE;
-        uVar3 = uVar11 & 0xffffffff;
-        uVar8 = uVar9;
+        best_segment_index = phdr_index & 0xffffffff;
+        best_segment_start = seg_start;
       }
     }
   }
   if (data_segment_found) {
-    pEVar4 = elf_info->phdrs;
-    lVar13 = pEVar4[uVar3].p_vaddr - elf_info->first_vaddr;
-    pvVar10 = (void *)((long)pEVar1 + pEVar4[uVar3].p_memsz + lVar13);
-    pvVar5 = (void *)((long)pEVar1 + pEVar4[uVar3].p_filesz + lVar13);
-    pvVar6 = pvVar10;
-    if (((ulong)pvVar10 & 0xfff) != 0) {
-      pvVar6 = (void *)(((ulong)pvVar10 & 0xfffffffffffff000) + 0x1000);
+    phdr = elf_info->phdrs;
+    best_segment_size = phdr[best_segment_index].p_vaddr - elf_info->first_vaddr;
+    segment_mem_end = (void *)((long)elfbase + phdr[best_segment_index].p_memsz + best_segment_size);
+    segment_file_end = (void *)((long)elfbase + phdr[best_segment_index].p_filesz + best_segment_size);
+    cached_data_start = segment_mem_end;
+    if (((ulong)segment_mem_end & 0xfff) != 0) {
+      cached_data_start = (void *)(((ulong)segment_mem_end & 0xfffffffffffff000) + 0x1000);
     }
-    uVar7 = (long)pvVar6 - (long)pvVar10;
-    elf_info->data_segment_start = (u64)pvVar5;
-    elf_info->data_segment_alignment = uVar7;
-    elf_info->data_segment_size = (long)pvVar6 - (long)pvVar5;
+    alignment_size = (long)cached_data_start - (long)segment_mem_end;
+    elf_info->data_segment_start = (u64)segment_file_end;
+    elf_info->data_segment_alignment = alignment_size;
+    elf_info->data_segment_size = (long)cached_data_start - (long)segment_file_end;
     if (get_alignment == FALSE) {
-      *pSize = (long)pvVar6 - (long)pvVar5;
-      return pvVar5;
+      *pSize = (long)cached_data_start - (long)segment_file_end;
+      return segment_file_end;
     }
-    *pSize = uVar7;
-    if (uVar7 != 0) {
-      return pvVar10;
+    *pSize = alignment_size;
+    if (alignment_size != 0) {
+      return segment_mem_end;
     }
   }
   return (void *)0x0;

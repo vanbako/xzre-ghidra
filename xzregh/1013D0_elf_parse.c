@@ -21,34 +21,34 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
 
 {
   Elf64_Word p_type;
-  uint uVar1;
-  uint uVar2;
-  uint uVar3;
+  uint gnu_hash_bloom_size;
+  uint gnu_hash_symbias;
+  uint gnu_hash_bloom_shift;
   Elf64_DynValue EVar4;
-  Elf64_Rela *pEVar5;
-  Elf64_Rela *pEVar6;
-  Elf64_Relr *pEVar7;
-  Elf64_Ehdr *pEVar8;
+  Elf64_Rela *plt_relocs_ptr;
+  Elf64_Rela *rela_relocs_ptr;
+  Elf64_Relr *relr_relocs_ptr;
+  char *strtab_base;
   undefined1 auVar9 [16];
   undefined1 auVar10 [16];
   byte bVar11;
   BOOL verdef_present;
   BOOL BVar13;
-  int iVar14;
+  int dyn_entry_capacity;
   Elf64_Dyn *vaddr;
-  Elf64_DynValue *pEVar15;
-  int iVar16;
-  long lVar17;
-  Elf64_Xword EVar18;
+  Elf64_DynValue *dyn_cursor;
+  int dyn_index;
+  long dynamic_phdr_index;
+  Elf64_Xword pltrel_table_size;
   u64 *puVar19;
-  Elf64_Phdr *pEVar20;
-  ulong uVar21;
-  Elf64_Phdr *pEVar22;
-  ulong uVar23;
-  uint uVar24;
-  Elf64_Xword size;
-  Elf64_Xword size_00;
-  uint *puVar25;
+  Elf64_Phdr *phdrs;
+  ulong min_load_vaddr;
+  Elf64_Phdr *phdr_cursor;
+  ulong phnum;
+  uint phdr_idx;
+  Elf64_Xword relr_table_size;
+  Elf64_Xword rela_table_size;
+  uint *gnu_hash_header;
   u32 *hash_chain;
   gnu_hash_table_t *hash_buckets;
   u64 *hash_bloom;
@@ -68,29 +68,29 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
     return FALSE;
   }
   if (elf_info != (elf_info_t *)0x0) {
-    uVar21 = 0xffffffffffffffff;
-    uVar24 = 0;
+    min_load_vaddr = 0xffffffffffffffff;
+    phdr_idx = 0;
     puVar19 = &elf_info->first_vaddr;
-    for (lVar17 = 0x3e; lVar17 != 0; lVar17 = lVar17 + -1) {
+    for (dynamic_phdr_index = 0x3e; dynamic_phdr_index != 0; dynamic_phdr_index = dynamic_phdr_index + -1) {
       *(undefined4 *)puVar19 = 0;
       puVar19 = (u64 *)((long)puVar19 + 4);
     }
     elf_info->elfbase = ehdr;
-    lVar17 = -1;
-    uVar23 = (ulong)ehdr->e_phnum;
-    pEVar20 = (Elf64_Phdr *)(ehdr->e_ident + ehdr->e_phoff);
+    dynamic_phdr_index = -1;
+    phnum = (ulong)ehdr->e_phnum;
+    phdrs = (Elf64_Phdr *)(ehdr->e_ident + ehdr->e_phoff);
     *(Elf64_Half *)&elf_info->e_phnum = ehdr->e_phnum;
-    elf_info->phdrs = pEVar20;
-    pEVar22 = pEVar20;
-    for (; uVar24 < (uint)uVar23; uVar24 = uVar24 + 1) {
-      p_type = pEVar22->p_type;
+    elf_info->phdrs = phdrs;
+    phdr_cursor = phdrs;
+    for (; phdr_idx < (uint)phnum; phdr_idx = phdr_idx + 1) {
+      p_type = phdr_cursor->p_type;
       if (p_type == 1) {
-        if (pEVar22->p_vaddr < uVar21) {
-          uVar21 = pEVar22->p_vaddr;
+        if (phdr_cursor->p_vaddr < min_load_vaddr) {
+          min_load_vaddr = phdr_cursor->p_vaddr;
         }
       }
       else if (p_type == 2) {
-        lVar17 = (long)(int)uVar24;
+        dynamic_phdr_index = (long)(int)phdr_idx;
       }
       else {
         BVar13 = is_gnu_relro(p_type,0xa0000000);
@@ -98,136 +98,136 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
           if (elf_info->gnurelro_found != FALSE) {
             return FALSE;
           }
-          elf_info->gnurelro_vaddr = pEVar22->p_vaddr;
-          EVar18 = pEVar22->p_memsz;
+          elf_info->gnurelro_vaddr = phdr_cursor->p_vaddr;
+          pltrel_table_size = phdr_cursor->p_memsz;
           elf_info->gnurelro_found = TRUE;
-          elf_info->gnurelro_memsize = EVar18;
+          elf_info->gnurelro_memsize = pltrel_table_size;
         }
       }
-      pEVar22 = pEVar22 + 1;
+      phdr_cursor = phdr_cursor + 1;
     }
-    if ((uVar21 != 0xffffffffffffffff) && ((int)lVar17 != -1)) {
-      elf_info->first_vaddr = uVar21;
-      uVar23 = pEVar20[lVar17].p_memsz;
-      vaddr = (Elf64_Dyn *)((long)ehdr + (pEVar20[lVar17].p_vaddr - uVar21));
+    if ((min_load_vaddr != 0xffffffffffffffff) && ((int)dynamic_phdr_index != -1)) {
+      elf_info->first_vaddr = min_load_vaddr;
+      phnum = phdrs[dynamic_phdr_index].p_memsz;
+      vaddr = (Elf64_Dyn *)((long)ehdr + (phdrs[dynamic_phdr_index].p_vaddr - min_load_vaddr));
       elf_info->dyn = vaddr;
-      iVar14 = (int)(uVar23 >> 4);
-      *(int *)&elf_info->dyn_num_entries = iVar14;
-      BVar13 = elf_contains_vaddr(elf_info,vaddr,uVar23,4);
+      dyn_entry_capacity = (int)(phnum >> 4);
+      *(int *)&elf_info->dyn_num_entries = dyn_entry_capacity;
+      BVar13 = elf_contains_vaddr(elf_info,vaddr,phnum,4);
       if (BVar13 != FALSE) {
-        pEVar15 = &vaddr->d_un;
+        dyn_cursor = &vaddr->d_un;
         verdef_present = FALSE;
-        size = 0xffffffffffffffff;
-        size_00 = 0xffffffffffffffff;
-        EVar18 = 0xffffffffffffffff;
-        puVar25 = (uint *)0x0;
-        for (iVar16 = 0; iVar14 != iVar16; iVar16 = iVar16 + 1) {
-          lVar17 = ((Elf64_Dyn *)(pEVar15 + -1))->d_tag;
-          if (lVar17 == 0) {
-            *(int *)&elf_info->dyn_num_entries = iVar16;
+        relr_table_size = 0xffffffffffffffff;
+        rela_table_size = 0xffffffffffffffff;
+        pltrel_table_size = 0xffffffffffffffff;
+        gnu_hash_header = (uint *)0x0;
+        for (dyn_index = 0; dyn_entry_capacity != dyn_index; dyn_index = dyn_index + 1) {
+          dynamic_phdr_index = ((Elf64_Dyn *)(dyn_cursor + -1))->d_tag;
+          if (dynamic_phdr_index == 0) {
+            *(int *)&elf_info->dyn_num_entries = dyn_index;
             break;
           }
-          if (lVar17 < 0x25) {
-            if (lVar17 < 0x17) {
-              switch(lVar17) {
+          if (dynamic_phdr_index < 0x25) {
+            if (dynamic_phdr_index < 0x17) {
+              switch(dynamic_phdr_index) {
               case 2:
-                EVar18 = pEVar15->d_val;
+                pltrel_table_size = dyn_cursor->d_val;
                 break;
               case 5:
-                elf_info->strtab = (char *)*(Elf64_Xword *)pEVar15;
+                elf_info->strtab = (char *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 6:
-                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)pEVar15;
+                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 7:
-                elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)pEVar15;
+                elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 8:
-                size_00 = pEVar15->d_val;
+                rela_table_size = dyn_cursor->d_val;
               }
             }
             else {
-              switch(lVar17) {
+              switch(dynamic_phdr_index) {
               case 0x17:
-                elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)pEVar15;
+                elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 0x18:
                 goto switchD_0010157d_caseD_18;
               case 0x1e:
-                bVar11 = *(byte *)pEVar15 & 8;
+                bVar11 = *(byte *)dyn_cursor & 8;
                 goto LAB_00101650;
               case 0x23:
-                size = pEVar15->d_val;
+                relr_table_size = dyn_cursor->d_val;
                 break;
               case 0x24:
-                elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)pEVar15;
+                elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)dyn_cursor;
               }
             }
           }
-          else if (lVar17 == 0x6ffffffb) {
-            bVar11 = *(byte *)pEVar15 & 1;
+          else if (dynamic_phdr_index == 0x6ffffffb) {
+            bVar11 = *(byte *)dyn_cursor & 1;
 LAB_00101650:
             if (bVar11 != 0) {
 switchD_0010157d_caseD_18:
               elf_info->flags = elf_info->flags | 0x20;
             }
           }
-          else if (lVar17 < 0x6ffffffc) {
-            if (lVar17 < 0x6ffffefd) {
-              if (0x6ffffefa < lVar17) {
+          else if (dynamic_phdr_index < 0x6ffffffc) {
+            if (dynamic_phdr_index < 0x6ffffefd) {
+              if (0x6ffffefa < dynamic_phdr_index) {
                 return FALSE;
               }
-              if (lVar17 == 0x6ffffef5) {
-                puVar25 = (uint *)pEVar15->d_val;
+              if (dynamic_phdr_index == 0x6ffffef5) {
+                gnu_hash_header = (uint *)dyn_cursor->d_val;
               }
             }
-            else if (lVar17 == 0x6ffffff0) {
-              EVar4.d_val = *(Elf64_Xword *)pEVar15;
+            else if (dynamic_phdr_index == 0x6ffffff0) {
+              EVar4.d_val = *(Elf64_Xword *)dyn_cursor;
               elf_info->flags = elf_info->flags | 0x10;
               elf_info->versym = (Elf64_Versym *)EVar4;
             }
           }
-          else if (lVar17 == 0x6ffffffd) {
+          else if (dynamic_phdr_index == 0x6ffffffd) {
             verdef_present = TRUE;
-            elf_info->verdef_num = *(Elf64_Xword *)pEVar15;
+            elf_info->verdef_num = *(Elf64_Xword *)dyn_cursor;
           }
           else {
-            if (lVar17 == 0x7fffffff) {
+            if (dynamic_phdr_index == 0x7fffffff) {
               return FALSE;
             }
-            if (lVar17 == 0x6ffffffc) {
-              elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)pEVar15;
+            if (dynamic_phdr_index == 0x6ffffffc) {
+              elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)dyn_cursor;
             }
           }
-          pEVar15 = pEVar15 + 2;
+          dyn_cursor = dyn_cursor + 2;
         }
-        pEVar5 = elf_info->plt_relocs;
-        if (pEVar5 != (Elf64_Rela *)0x0) {
-          if (EVar18 == 0xffffffffffffffff) {
+        plt_relocs_ptr = elf_info->plt_relocs;
+        if (plt_relocs_ptr != (Elf64_Rela *)0x0) {
+          if (pltrel_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
           elf_info->flags = elf_info->flags | 1;
           *(u64 *)(auVar9 + 8) = 0;
-          *(u64 *)auVar9 = EVar18;
+          *(u64 *)auVar9 = pltrel_table_size;
           elf_info->plt_relocs_num = SUB164(auVar9 / ZEXT816(0x18),0);
         }
-        pEVar6 = elf_info->rela_relocs;
-        if (pEVar6 != (Elf64_Rela *)0x0) {
-          if (size_00 == 0xffffffffffffffff) {
+        rela_relocs_ptr = elf_info->rela_relocs;
+        if (rela_relocs_ptr != (Elf64_Rela *)0x0) {
+          if (rela_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
           elf_info->flags = elf_info->flags | 2;
           *(u64 *)(auVar10 + 8) = 0;
-          *(u64 *)auVar10 = size_00;
+          *(u64 *)auVar10 = rela_table_size;
           elf_info->rela_relocs_num = SUB164(auVar10 / ZEXT816(0x18),0);
         }
-        pEVar7 = elf_info->relr_relocs;
-        if (pEVar7 != (Elf64_Relr *)0x0) {
-          if (size == 0xffffffffffffffff) {
+        relr_relocs_ptr = elf_info->relr_relocs;
+        if (relr_relocs_ptr != (Elf64_Relr *)0x0) {
+          if (relr_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
           elf_info->flags = elf_info->flags | 4;
-          elf_info->relr_relocs_num = (u32)(size >> 3);
+          elf_info->relr_relocs_num = (u32)(relr_table_size >> 3);
         }
         if (elf_info->verdef != (Elf64_Verdef *)0x0) {
           if (verdef_present) {
@@ -237,53 +237,53 @@ switchD_0010157d_caseD_18:
             elf_info->verdef = (Elf64_Verdef *)0x0;
           }
         }
-        pEVar8 = (Elf64_Ehdr *)elf_info->strtab;
-        if (((pEVar8 != (Elf64_Ehdr *)0x0) && (puVar25 != (uint *)0x0)) &&
+        strtab_base = (Elf64_Ehdr *)elf_info->strtab;
+        if (((strtab_base != (Elf64_Ehdr *)0x0) && (gnu_hash_header != (uint *)0x0)) &&
            (elf_info->symtab != (Elf64_Sym *)0x0)) {
-          if (pEVar8 <= ehdr) {
-            elf_info->strtab = (char *)(ehdr->e_ident + (long)pEVar8->e_ident);
+          if (strtab_base <= ehdr) {
+            elf_info->strtab = (char *)(ehdr->e_ident + (long)strtab_base->e_ident);
             elf_info->symtab = (Elf64_Sym *)(ehdr->e_ident + (long)&elf_info->symtab->st_name);
-            if (pEVar5 != (Elf64_Rela *)0x0) {
-              elf_info->plt_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&pEVar5->r_offset);
+            if (plt_relocs_ptr != (Elf64_Rela *)0x0) {
+              elf_info->plt_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&plt_relocs_ptr->r_offset);
             }
-            if (pEVar6 != (Elf64_Rela *)0x0) {
-              elf_info->rela_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&pEVar6->r_offset);
+            if (rela_relocs_ptr != (Elf64_Rela *)0x0) {
+              elf_info->rela_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&rela_relocs_ptr->r_offset);
             }
-            if (pEVar7 != (Elf64_Relr *)0x0) {
-              elf_info->relr_relocs = (Elf64_Relr *)((long)pEVar7 + (long)ehdr);
+            if (relr_relocs_ptr != (Elf64_Relr *)0x0) {
+              elf_info->relr_relocs = (Elf64_Relr *)((long)relr_relocs_ptr + (long)ehdr);
             }
             if (elf_info->versym != (Elf64_Versym *)0x0) {
               elf_info->versym = (Elf64_Versym *)((long)elf_info->versym + (long)ehdr);
             }
-            puVar25 = (uint *)((long)puVar25 + (long)ehdr);
+            gnu_hash_header = (uint *)((long)gnu_hash_header + (long)ehdr);
           }
-          pEVar8 = (Elf64_Ehdr *)elf_info->verdef;
-          if ((pEVar8 != (Elf64_Ehdr *)0x0) && (pEVar8 < ehdr)) {
-            elf_info->verdef = (Elf64_Verdef *)(pEVar8->e_ident + (long)ehdr->e_ident);
+          strtab_base = (Elf64_Ehdr *)elf_info->verdef;
+          if ((strtab_base != (Elf64_Ehdr *)0x0) && (strtab_base < ehdr)) {
+            elf_info->verdef = (Elf64_Verdef *)(strtab_base->e_ident + (long)ehdr->e_ident);
           }
           if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,EVar18,4),
+                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,pltrel_table_size,4),
                 BVar13 != FALSE)) &&
                ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,size_00,4),
+                (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,rela_table_size,4),
                 BVar13 != FALSE)))) &&
               ((elf_info->relr_relocs == (Elf64_Relr *)0x0 ||
-               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,size,4), BVar13 != FALSE)
+               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,relr_table_size,4), BVar13 != FALSE)
                ))) && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
                        (BVar13 = elf_contains_vaddr(elf_info,elf_info->verdef,
                                                     elf_info->verdef_num * 0x14,4), BVar13 != FALSE)
                        ))) {
-            uVar24 = *puVar25;
-            elf_info->gnu_hash_nbuckets = uVar24;
-            uVar1 = puVar25[2];
-            uVar2 = puVar25[1];
-            elf_info->gnu_hash_last_bloom = uVar1 - 1;
-            uVar3 = puVar25[3];
-            elf_info->gnu_hash_bloom = (u64 *)(puVar25 + 4);
-            puVar25 = (uint *)((long)(puVar25 + 4) + (ulong)(uVar1 * 2) * 4);
-            elf_info->gnu_hash_bloom_shift = uVar3;
-            elf_info->gnu_hash_buckets = puVar25;
-            elf_info->gnu_hash_chain = puVar25 + ((ulong)uVar24 - (ulong)uVar2);
+            phdr_idx = *gnu_hash_header;
+            elf_info->gnu_hash_nbuckets = phdr_idx;
+            gnu_hash_bloom_size = gnu_hash_header[2];
+            gnu_hash_symbias = gnu_hash_header[1];
+            elf_info->gnu_hash_last_bloom = gnu_hash_bloom_size - 1;
+            gnu_hash_bloom_shift = gnu_hash_header[3];
+            elf_info->gnu_hash_bloom = (u64 *)(gnu_hash_header + 4);
+            gnu_hash_header = (uint *)((long)(gnu_hash_header + 4) + (ulong)(gnu_hash_bloom_size * 2) * 4);
+            elf_info->gnu_hash_bloom_shift = gnu_hash_bloom_shift;
+            elf_info->gnu_hash_buckets = gnu_hash_header;
+            elf_info->gnu_hash_chain = gnu_hash_header + ((ulong)phdr_idx - (ulong)gnu_hash_symbias);
             return TRUE;
           }
         }
