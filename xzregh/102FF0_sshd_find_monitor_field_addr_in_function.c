@@ -21,132 +21,128 @@ BOOL sshd_find_monitor_field_addr_in_function
 {
   byte bVar1;
   BOOL BVar2;
-  u8 *puVar3;
-  undefined1 uVar4;
-  undefined1 uVar5;
-  long lVar6;
-  undefined1 uVar7;
-  u8 *code_start_00;
-  dasm_ctx_t *pdVar8;
-  u8 *code_end_00;
-  dasm_ctx_t insn_ctx;
   u8 *monitor_field_addr;
+  u8 tracked_reg;
+  u8 candidate_reg;
+  long lVar6;
+  u8 mirrored_reg;
   u8 *mov_search_cursor;
+  dasm_ctx_t *pdVar8;
   u8 *call_window_end;
-  dasm_ctx_t local_80;
+  dasm_ctx_t insn_ctx;
   
   *monitor_field_ptr_out = (void *)0x0;
-  puVar3 = (u8 *)0x0;
+  monitor_field_addr = (u8 *)0x0;
   if (code_start < code_end) {
-    pdVar8 = &local_80;
+    pdVar8 = &insn_ctx;
     for (lVar6 = 0x16; lVar6 != 0; lVar6 = lVar6 + -1) {
       *(undefined4 *)&pdVar8->instruction = 0;
       pdVar8 = (dasm_ctx_t *)((long)&pdVar8->instruction + 4);
     }
     while( TRUE ) {
-      BVar2 = find_mov_lea_instruction(code_start,code_end,TRUE,TRUE,&local_80);
-      puVar3 = (u8 *)(ulong)BVar2;
+      BVar2 = find_mov_lea_instruction(code_start,code_end,TRUE,TRUE,&insn_ctx);
+      monitor_field_addr = (u8 *)(ulong)BVar2;
       if (BVar2 == FALSE) break;
-      puVar3 = (u8 *)0x0;
-      if (((local_80.prefix.flags_u16 & 0x100) != 0) &&
-         (puVar3 = (u8 *)local_80.mem_disp,
-         ((uint)local_80.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
-        puVar3 = local_80.instruction + local_80.mem_disp + local_80.instruction_size;
+      monitor_field_addr = (u8 *)0x0;
+      if (((insn_ctx.prefix.flags_u16 & 0x100) != 0) &&
+         (monitor_field_addr = (u8 *)insn_ctx.mem_disp,
+         ((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+        monitor_field_addr = insn_ctx.instruction + insn_ctx.mem_disp + insn_ctx.instruction_size;
       }
-      uVar4 = 0;
-      if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
-        if ((local_80.prefix.flags_u16 & 0x40) == 0) {
-          uVar4 = local_80.prefix.decoded.flags2 & 0x10;
-          if (((local_80.prefix.flags_u16 & 0x1000) != 0) &&
-             (uVar4 = local_80.imm64_reg, (local_80.prefix.flags_u16 & 0x20) != 0)) {
-            bVar1 = (char)local_80.prefix.decoded.rex << 3;
+      tracked_reg = 0;
+      if ((insn_ctx.prefix.flags_u16 & 0x1040) != 0) {
+        if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
+          tracked_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
+          if (((insn_ctx.prefix.flags_u16 & 0x1000) != 0) &&
+             (tracked_reg = insn_ctx.imm64_reg, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
+            bVar1 = (char)insn_ctx.prefix.decoded.rex << 3;
             goto LAB_001030d4;
           }
         }
         else {
-          uVar4 = local_80.prefix.decoded.modrm.breakdown.modrm_reg;
-          if ((local_80.prefix.flags_u16 & 0x20) != 0) {
-            bVar1 = (char)local_80.prefix.decoded.rex * '\x02';
+          tracked_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+          if ((insn_ctx.prefix.flags_u16 & 0x20) != 0) {
+            bVar1 = (char)insn_ctx.prefix.decoded.rex * '\x02';
 LAB_001030d4:
-            uVar4 = uVar4 | bVar1 & 8;
+            tracked_reg = tracked_reg | bVar1 & 8;
           }
         }
       }
-      code_start = local_80.instruction + local_80.instruction_size;
-      if ((data_start <= puVar3) && (puVar3 < data_end)) {
-        code_end_00 = code_start + 0x40;
+      code_start = insn_ctx.instruction + insn_ctx.instruction_size;
+      if ((data_start <= monitor_field_addr) && (monitor_field_addr < data_end)) {
+        call_window_end = code_start + 0x40;
         if (ctx->sshd_code_end < code_start + 0x40) {
-          code_end_00 = (u8 *)ctx->sshd_code_end;
+          call_window_end = (u8 *)ctx->sshd_code_end;
         }
-        uVar7 = 0;
-        uVar5 = 0;
-        code_start_00 = code_start;
+        mirrored_reg = 0;
+        candidate_reg = 0;
+        mov_search_cursor = code_start;
 LAB_00103110:
         do {
-          BVar2 = x86_dasm(&local_80,code_start_00,code_end_00);
+          BVar2 = x86_dasm(&insn_ctx,mov_search_cursor,call_window_end);
           if (BVar2 == FALSE) {
-            code_start_00 = code_start_00 + 1;
+            mov_search_cursor = mov_search_cursor + 1;
           }
           else {
-            code_start_00 = local_80.instruction + local_80.instruction_size;
-            if (*(u32 *)&local_80.opcode_window[3] == 0x109) {
-              bVar1 = local_80.prefix.decoded.modrm.breakdown.modrm_rm;
-              if ((local_80.prefix.flags_u16 & 0x1040) == 0) {
-                if ((local_80.prefix.flags_u16 & 0x40) != 0) goto LAB_00103237;
+            mov_search_cursor = insn_ctx.instruction + insn_ctx.instruction_size;
+            if (*(u32 *)&insn_ctx.opcode_window[3] == 0x109) {
+              bVar1 = insn_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+              if ((insn_ctx.prefix.flags_u16 & 0x1040) == 0) {
+                if ((insn_ctx.prefix.flags_u16 & 0x40) != 0) goto LAB_00103237;
               }
-              else if ((local_80.prefix.flags_u16 & 0x40) == 0) {
-                uVar5 = local_80.prefix.decoded.flags2 & 0x10;
-                if (((local_80.prefix.flags_u16 & 0x1000) != 0) &&
-                   (uVar5 = local_80.imm64_reg, (local_80.prefix.flags_u16 & 0x20) != 0)) {
-                  uVar5 = local_80.imm64_reg | ((byte)local_80.prefix.decoded.rex & 1) << 3;
+              else if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
+                candidate_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
+                if (((insn_ctx.prefix.flags_u16 & 0x1000) != 0) &&
+                   (candidate_reg = insn_ctx.imm64_reg, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
+                  candidate_reg = insn_ctx.imm64_reg | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
                 }
               }
               else {
-                uVar5 = local_80.prefix.decoded.modrm.breakdown.modrm_reg;
-                if ((local_80.prefix.flags_u16 & 0x20) != 0) {
-                  uVar5 = local_80.prefix.decoded.modrm.breakdown.modrm_reg | (char)local_80.prefix.decoded.rex * '\x02' & 8U;
+                candidate_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+                if ((insn_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  candidate_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg | (char)insn_ctx.prefix.decoded.rex * '\x02' & 8U;
                 }
 LAB_00103237:
-                uVar7 = bVar1;
-                if ((local_80.prefix.flags_u16 & 0x20) != 0) {
-                  uVar7 = bVar1 | ((byte)local_80.prefix.decoded.rex & 1) << 3;
+                mirrored_reg = bVar1;
+                if ((insn_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  mirrored_reg = bVar1 | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
                 }
               }
             }
-            else if (*(u32 *)&local_80.opcode_window[3] == 0x10b) {
-              if ((local_80.prefix.flags_u16 & 0x40) == 0) {
-                if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
-                  bVar1 = local_80.imm64_reg;
-                  if ((local_80.prefix.flags_u16 & 0x1000) != 0) goto LAB_00103237;
-                  uVar7 = local_80.prefix.decoded.flags2 & 0x10;
-                  if (uVar4 != uVar5) goto LAB_0010325f;
-                  uVar7 = 0;
-                  uVar4 = local_80.prefix.decoded.flags2 & 0x10;
+            else if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10b) {
+              if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
+                if ((insn_ctx.prefix.flags_u16 & 0x1040) != 0) {
+                  bVar1 = insn_ctx.imm64_reg;
+                  if ((insn_ctx.prefix.flags_u16 & 0x1000) != 0) goto LAB_00103237;
+                  mirrored_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
+                  if (tracked_reg != candidate_reg) goto LAB_0010325f;
+                  mirrored_reg = 0;
+                  tracked_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
                   goto LAB_00103110;
                 }
               }
-              else if ((local_80.prefix.flags_u16 & 0x20) == 0) {
-                uVar5 = local_80.prefix.decoded.modrm.breakdown.modrm_rm;
-                if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
-                  uVar7 = local_80.prefix.decoded.modrm.breakdown.modrm_reg;
+              else if ((insn_ctx.prefix.flags_u16 & 0x20) == 0) {
+                candidate_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+                if ((insn_ctx.prefix.flags_u16 & 0x1040) != 0) {
+                  mirrored_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
                 }
               }
               else {
-                uVar5 = local_80.prefix.decoded.modrm.breakdown.modrm_rm | (char)local_80.prefix.decoded.rex * '\b' & 8U;
-                if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
-                  uVar7 = (char)local_80.prefix.decoded.rex * '\x02' & 8U | local_80.prefix.decoded.modrm.breakdown.modrm_reg;
+                candidate_reg = insn_ctx.prefix.decoded.modrm.breakdown.modrm_rm | (char)insn_ctx.prefix.decoded.rex * '\b' & 8U;
+                if ((insn_ctx.prefix.flags_u16 & 0x1040) != 0) {
+                  mirrored_reg = (char)insn_ctx.prefix.decoded.rex * '\x02' & 8U | insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
                 }
               }
             }
-            if (uVar4 == uVar5) {
-              uVar4 = uVar7;
-              if (uVar7 == 7) {
+            if (tracked_reg == candidate_reg) {
+              tracked_reg = mirrored_reg;
+              if (mirrored_reg == 7) {
                 BVar2 = find_call_instruction
-                                  (local_80.instruction + local_80.instruction_size,code_end_00,
-                                   (u8 *)ctx->sshd_ctx->mm_request_send_start,&local_80);
+                                  (insn_ctx.instruction + insn_ctx.instruction_size,call_window_end,
+                                   (u8 *)ctx->sshd_ctx->mm_request_send_start,&insn_ctx);
                 if (BVar2 != FALSE) {
-                  *monitor_field_ptr_out = puVar3;
-                  puVar3 = (u8 *)(ulong)BVar2;
+                  *monitor_field_ptr_out = monitor_field_addr;
+                  monitor_field_addr = (u8 *)(ulong)BVar2;
                   goto LAB_001032a5;
                 }
                 break;
@@ -155,13 +151,13 @@ LAB_00103237:
             }
           }
 LAB_0010325f:
-        } while (code_start_00 < code_end_00);
+        } while (mov_search_cursor < call_window_end);
       }
-      puVar3 = code_end;
+      monitor_field_addr = code_end;
       if (code_end <= code_start) break;
     }
   }
 LAB_001032a5:
-  return (BOOL)puVar3;
+  return (BOOL)monitor_field_addr;
 }
 

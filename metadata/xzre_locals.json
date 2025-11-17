@@ -2876,63 +2876,52 @@
   },
   "sshd_find_main": {
     "source": "xzre/xzre_code/sshd_find_main.c",
-    "locals": [
-      {
-        "name": "allocator",
-        "type": "lzma_allocator *"
-      },
-      {
-        "name": "code_segment_start",
-        "type": "u8 *"
-      },
-      {
-        "name": "code_segment_end",
-        "type": "u8 *"
-      },
-      {
-        "name": "libc_start_main_got",
-        "type": "u8 *"
-      },
-      {
-        "name": "sshd_main_candidate",
-        "type": "u8 *"
-      },
-      {
-        "name": "code_segment_size",
-        "type": "u64"
-      },
-      {
-        "name": "insn_ctx",
-        "type": "dasm_ctx_t"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "original": "local_80._40_4_",
         "replacement": "*(u32 *)&local_80.opcode_window[3]"
+      },
+      {
+        "original": "allocator_00",
+        "name": "allocator",
+        "type": "lzma_allocator *"
+      },
+      {
+        "original": "puVar4",
+        "name": "code_segment_start",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar12",
+        "name": "code_segment_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar6",
+        "name": "libc_start_main_got",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar11",
+        "name": "sshd_main_candidate",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_88",
+        "name": "code_segment_size",
+        "type": "u64"
+      },
+      {
+        "original": "local_80",
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
       }
     ]
   },
   "sshd_find_monitor_field_addr_in_function": {
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c",
-    "locals": [
-      {
-        "name": "monitor_field_addr",
-        "type": "u8 *"
-      },
-      {
-        "name": "mov_search_cursor",
-        "type": "u8 *"
-      },
-      {
-        "name": "call_window_end",
-        "type": "u8 *"
-      },
-      {
-        "name": "insn_ctx",
-        "type": "dasm_ctx_t"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "original": "local_80._40_4_",
@@ -2949,33 +2938,47 @@
       {
         "original": "local_80.prefix._15_1_",
         "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
+        "original": "puVar3",
+        "name": "monitor_field_addr",
+        "type": "u8 *"
+      },
+      {
+        "original": "code_start_00",
+        "name": "mov_search_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "code_end_00",
+        "name": "call_window_end",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_80",
+        "name": "insn_ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "original": "uVar4",
+        "name": "tracked_reg",
+        "type": "u8"
+      },
+      {
+        "original": "uVar5",
+        "name": "candidate_reg",
+        "type": "u8"
+      },
+      {
+        "original": "uVar7",
+        "name": "mirrored_reg",
+        "type": "u8"
       }
     ]
   },
   "sshd_get_sensitive_data_address_via_krb5ccname": {
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c",
-    "locals": [
-      {
-        "name": "krb5_string_ref",
-        "type": "u8 *"
-      },
-      {
-        "name": "candidate_store",
-        "type": "u8 *"
-      },
-      {
-        "name": "store_scan_ctx",
-        "type": "dasm_ctx_t"
-      },
-      {
-        "name": "data_cursor",
-        "type": "u8 *"
-      },
-      {
-        "name": "string_scan_ctx",
-        "type": "dasm_ctx_t"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "original": "local_80._40_4_",
@@ -3008,49 +3011,62 @@
       {
         "original": "local_d8.prefix._15_1_",
         "replacement": "local_d8.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
+        "original": "code_start_00",
+        "name": "krb5_string_ref",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar3",
+        "name": "candidate_store",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar7",
+        "name": "data_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "puVar8",
+        "name": "store_scan_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_d8",
+        "name": "string_scan_ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "original": "local_80",
+        "name": "store_scan_ctx",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "original": "uVar1",
+        "name": "dest_reg",
+        "type": "u8"
+      },
+      {
+        "original": "uVar10",
+        "name": "tracked_reg",
+        "type": "u8"
+      },
+      {
+        "original": "uVar4",
+        "name": "probe_depth",
+        "type": "uint"
+      },
+      {
+        "original": "bVar6",
+        "name": "rex_extension",
+        "type": "u8"
       }
     ]
   },
   "sshd_get_sensitive_data_address_via_xcalloc": {
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c",
-    "locals": [
-      {
-        "name": "xcalloc_call_target",
-        "type": "u8 *"
-      },
-      {
-        "name": "store_hits",
-        "type": "long[16]"
-      },
-      {
-        "name": "hit_count",
-        "type": "u8"
-      },
-      {
-        "name": "insn_ctx",
-        "type": "dasm_ctx_t"
-      },
-      {
-        "name": "store_probe_ctx",
-        "type": "dasm_ctx_t"
-      },
-      {
-        "name": "modrm_snapshot",
-        "type": "u32"
-      },
-      {
-        "name": "rex_rm_bits",
-        "type": "u8"
-      },
-      {
-        "name": "store_operand_ptr",
-        "type": "u8 *"
-      },
-      {
-        "name": "store_candidates",
-        "type": "u64[16]"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "original": "local_100._0_8_",
@@ -3067,6 +3083,36 @@
       {
         "original": "local_e4._2_1_",
         "replacement": "*(((u8 *)&local_e4) + 2)"
+      },
+      {
+        "original": "call_target",
+        "name": "xcalloc_call_target",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_a8",
+        "name": "store_hits",
+        "type": "long[16]"
+      },
+      {
+        "original": "bVar10",
+        "name": "hit_count",
+        "type": "u8"
+      },
+      {
+        "original": "uVar11",
+        "name": "tracked_reg",
+        "type": "u8"
+      },
+      {
+        "original": "puVar8",
+        "name": "store_operand_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_100",
+        "name": "store_probe_ctx",
+        "type": "dasm_ctx_t"
       }
     ]
   },
@@ -3128,87 +3174,88 @@
   },
   "sshd_find_monitor_struct": {
     "source": "xzre/xzre_code/sshd_find_monitor_struct.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "data_start_00",
         "name": "data_start",
         "type": "u8 *"
       },
       {
+        "original": "data_end_00",
         "name": "data_end",
         "type": "u8 *"
       },
       {
-        "name": "monitor_field_hits",
-        "type": "uint[10]"
-      },
-      {
-        "name": "monitor_candidates",
-        "type": "void *[10]"
-      },
-      {
-        "name": "data_segment_size",
-        "type": "u64"
-      },
-      {
+        "original": "local_c8",
         "name": "monitor_vote_table",
         "type": "uint[20]"
+      },
+      {
+        "original": "local_78",
+        "name": "monitor_candidates",
+        "type": "void *[10]"
       }
     ]
   },
   "sshd_find_sensitive_data": {
     "source": "xzre/xzre_code/sshd_find_sensitive_data.c",
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
+        "original": "allocator_00",
         "name": "allocator",
         "type": "lzma_allocator *"
       },
       {
+        "original": "code_start_00",
         "name": "code_start",
         "type": "u8 *"
       },
       {
-        "name": "code_end",
-        "type": "u8 *"
-      },
-      {
+        "original": "data_start_00",
         "name": "data_start",
         "type": "u8 *"
       },
       {
-        "name": "xzcalloc_candidate",
-        "type": "sensitive_data *"
-      },
-      {
-        "name": "krb_candidate",
-        "type": "sensitive_data *"
-      },
-      {
-        "name": "winning_candidate",
-        "type": "sensitive_data *"
-      },
-      {
-        "name": "data_segment_size",
-        "type": "u64"
-      },
-      {
-        "name": "sshd_main_addr",
-        "type": "u8 *"
-      },
-      {
+        "original": "puVar4",
         "name": "code_scan_limit",
         "type": "u8 *"
       },
       {
-        "name": "xzcalloc_candidate_local",
-        "type": "sensitive_data *"
+        "original": "local_88",
+        "name": "secret_probe_items",
+        "type": "secret_data_item_t"
       },
       {
+        "original": "local_a8",
+        "name": "sshd_main_addr",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_a0",
+        "name": "code_scan_limit",
+        "type": "u8 *"
+      },
+      {
+        "original": "local_b8",
+        "name": "code_segment_size",
+        "type": "u64"
+      },
+      {
+        "original": "local_b0",
+        "name": "data_segment_size",
+        "type": "u64"
+      },
+      {
+        "original": "local_98",
         "name": "krb_candidate_local",
         "type": "sensitive_data *"
       },
       {
-        "name": "secret_probe_items",
-        "type": "secret_data_item_t"
+        "original": "local_90",
+        "name": "xzcalloc_candidate_local",
+        "type": "sensitive_data *"
       }
     ]
   },

