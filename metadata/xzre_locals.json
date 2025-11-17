@@ -4881,6 +4881,41 @@
         "original": "code_start_00",
         "name": "scan_cursor",
         "type": "u8 *"
+      },
+      {
+        "original": "bVar14",
+        "name": "zero_seed",
+        "type": "u8"
+      },
+      {
+        "original": "lVar12",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pEVar2",
+        "name": "libcrypto_ehdr",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "original": "EVar1",
+        "name": "dsa_get0_pqg_value",
+        "type": "Elf64_Addr"
+      },
+      {
+        "original": "EVar3",
+        "name": "rtld_global_ro_size",
+        "type": "Elf64_Xword"
+      },
+      {
+        "original": "mem_address",
+        "name": "glro_slot_ptr",
+        "type": "uint *"
+      },
+      {
+        "original": "code_start",
+        "name": "audit_symbind_alt",
+        "type": "dl_audit_symbind_alt_fn"
       }
     ]
   },
@@ -4922,6 +4957,56 @@
         "original": "pvVar14",
         "name": "hooks_blob",
         "type": "void *"
+      },
+      {
+        "original": "peVar5",
+        "name": "elf_info",
+        "type": "elf_info_t *"
+      },
+      {
+        "original": "plVar6",
+        "name": "map_cursor",
+        "type": "link_map *"
+      },
+      {
+        "original": "pbVar7",
+        "name": "shared_maps",
+        "type": "backdoor_data_t *"
+      },
+      {
+        "original": "ppbVar8",
+        "name": "hooks_data_addr_ptr",
+        "type": "backdoor_hooks_data_t **"
+      },
+      {
+        "original": "EVar9",
+        "name": "basename_id",
+        "type": "EncodedStringId"
+      },
+      {
+        "original": "BVar10",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "pEVar11",
+        "name": "rtld_global_sym",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "local_30",
+        "name": "liblzma_data_segment_size",
+        "type": "u64"
+      },
+      {
+        "original": "string_begin",
+        "name": "basename_ptr",
+        "type": "char *"
+      },
+      {
+        "original": "string_end",
+        "name": "soname_cursor",
+        "type": "char *"
       }
     ]
   },
@@ -4956,6 +5041,31 @@
         "original": "puVar3",
         "name": "r_debug_addr",
         "type": "uchar *"
+      },
+      {
+        "original": "local_30",
+        "name": "saved_RSA_public_decrypt_plt",
+        "type": "void *"
+      },
+      {
+        "original": "local_28",
+        "name": "saved_EVP_PKEY_set1_RSA_plt",
+        "type": "void *"
+      },
+      {
+        "original": "local_20",
+        "name": "saved_RSA_get0_key_plt",
+        "type": "void *"
+      },
+      {
+        "original": "local_18",
+        "name": "saved_hooks_data_addr",
+        "type": "backdoor_hooks_data_t **"
+      },
+      {
+        "original": "local_10",
+        "name": "saved_libc_imports",
+        "type": "libc_imports_t *"
       }
     ]
   },
@@ -5027,6 +5137,36 @@
         "original": "code_start",
         "name": "audit_sym_cursor",
         "type": "u8 *"
+      },
+      {
+        "original": "bVar12",
+        "name": "rex_extension",
+        "type": "u8"
+      },
+      {
+        "original": "lVar13",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "puVar14",
+        "name": "lea_target_ptr",
+        "type": "u8 *"
+      },
+      {
+        "original": "pdVar15",
+        "name": "zero_ctx_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "iVar16",
+        "name": "scan_state",
+        "type": "int"
+      },
+      {
+        "original": "bVar17",
+        "name": "zero_seed",
+        "type": "u8"
       }
     ]
   },
@@ -5073,6 +5213,36 @@
         "original": "puVar9",
         "name": "lea_disp",
         "type": "u8 *"
+      },
+      {
+        "original": "uVar3",
+        "name": "insn_size",
+        "type": "u64"
+      },
+      {
+        "original": "pdVar10",
+        "name": "zero_ctx_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "piVar11",
+        "name": "search_ctx_cursor",
+        "type": "instruction_search_ctx_t *"
+      },
+      {
+        "original": "puVar12",
+        "name": "offset_clear_cursor",
+        "type": "undefined4 *"
+      },
+      {
+        "original": "bVar14",
+        "name": "zero_seed",
+        "type": "u8"
+      },
+      {
+        "original": "lVar7",
+        "name": "clear_idx",
+        "type": "long"
       },
       {
         "original": "code_start",
@@ -5144,6 +5314,176 @@
         "original": "pbVar14",
         "name": "hooks_cursor",
         "type": "backdoor_hooks_data_t *"
+      },
+      {
+        "original": "plVar6",
+        "name": "libc_handle",
+        "type": "link_map *"
+      },
+      {
+        "original": "pEVar7",
+        "name": "audit_symbol",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "original": "uVar9",
+        "name": "audit_symbol_size",
+        "type": "ulong"
+      },
+      {
+        "original": "ppVar13",
+        "name": "evp_md_ctx_free_stub",
+        "type": "pfn_EVP_MD_CTX_free_t"
+      },
+      {
+        "original": "ppVar14",
+        "name": "dh_new_stub",
+        "type": "pfn_DH_new_t"
+      },
+      {
+        "original": "ppVar15",
+        "name": "bn_new_stub",
+        "type": "pfn_BN_new_t"
+      },
+      {
+        "original": "ppVar16",
+        "name": "bn_free_stub",
+        "type": "pfn_BN_free_t"
+      },
+      {
+        "original": "ppVar17",
+        "name": "asn1_get_object_stub",
+        "type": "pfn_ASN1_get_object_t"
+      },
+      {
+        "original": "ppVar18",
+        "name": "bn_bn2bin_stub",
+        "type": "pfn_BN_bn2bin_t"
+      },
+      {
+        "original": "ppVar19",
+        "name": "evp_sha256_stub",
+        "type": "pfn_EVP_sha256_t"
+      },
+      {
+        "original": "ppVar20",
+        "name": "evp_x25519_stub",
+        "type": "pfn_EVP_PKEY_CTX_set1_id_t"
+      },
+      {
+        "original": "ppVar21",
+        "name": "sha256_digest_stub",
+        "type": "pfn_SHA256_Init_t"
+      },
+      {
+        "original": "ppVar22",
+        "name": "err_reason_error_stub",
+        "type": "pfn_ERR_reason_error_string_t"
+      },
+      {
+        "original": "ppVar23",
+        "name": "asn1_integer_set_stub",
+        "type": "pfn_ASN1_INTEGER_set_t"
+      },
+      {
+        "original": "ppVar24",
+        "name": "asn1_integer_new_stub",
+        "type": "pfn_ASN1_INTEGER_new_t"
+      },
+      {
+        "original": "ppVar25",
+        "name": "bn_num_bits_stub",
+        "type": "pfn_BN_num_bits_t"
+      },
+      {
+        "original": "ppVar26",
+        "name": "bn_new_stub2",
+        "type": "pfn_BN_new_t"
+      },
+      {
+        "original": "ppVar27",
+        "name": "asn1_put_object_stub",
+        "type": "pfn_ASN1_put_object_t"
+      },
+      {
+        "original": "ppVar28",
+        "name": "bn_bn2bin_stub2",
+        "type": "pfn_BN_bn2bin_t"
+      },
+      {
+        "original": "ppVar29",
+        "name": "bn_copy_stub",
+        "type": "pfn_BN_copy_t"
+      },
+      {
+        "original": "ppVar30",
+        "name": "dh_free_stub",
+        "type": "pfn_DH_free_t"
+      },
+      {
+        "original": "ppVar31",
+        "name": "dh_generate_key_stub",
+        "type": "pfn_DH_generate_key_t"
+      },
+      {
+        "original": "ppVar32",
+        "name": "bn_bn2binpad_stub",
+        "type": "pfn_BN_bn2binpad_t"
+      },
+      {
+        "original": "ppVar33",
+        "name": "asn1_integer_get_uint64_stub",
+        "type": "pfn_ASN1_INTEGER_get_uint64_t"
+      },
+      {
+        "original": "ppVar34",
+        "name": "asn1_integer_set_uint64_stub",
+        "type": "pfn_ASN1_INTEGER_set_uint64_t"
+      },
+      {
+        "original": "ppVar35",
+        "name": "bn_value_one_stub",
+        "type": "BIGNUM *"
+      },
+      {
+        "original": "ppVar36",
+        "name": "asn1_object_new_stub",
+        "type": "pfn_ASN1_OBJECT_new_t"
+      },
+      {
+        "original": "ppVar37",
+        "name": "asn1_object_free_stub",
+        "type": "pfn_ASN1_OBJECT_free_t"
+      },
+      {
+        "original": "ppVar38",
+        "name": "asn1_object_create_stub",
+        "type": "pfn_ASN1_OBJECT_create_t"
+      },
+      {
+        "original": "ppVar39",
+        "name": "asn1_object_free_stub2",
+        "type": "pfn_ASN1_OBJECT_free_t"
+      },
+      {
+        "original": "ppVar40",
+        "name": "evp_md_ctx_new_stub",
+        "type": "pfn_EVP_MD_CTX_new_t"
+      },
+      {
+        "original": "ppVar41",
+        "name": "evp_md_ctx_free_stub2",
+        "type": "pfn_EVP_MD_CTX_free_t"
+      },
+      {
+        "original": "ppVar42",
+        "name": "evp_ptype_set1_id_stub",
+        "type": "pfn_EVP_PKEY_CTX_set1_id_t"
+      },
+      {
+        "original": "ppVar43",
+        "name": "sslsk_new_stub",
+        "type": "pfn_SSL_CTX_new_t"
       }
     ]
   },

