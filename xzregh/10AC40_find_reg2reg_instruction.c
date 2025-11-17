@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Requires a valid decoder context and walks instructions until it finds a pure register-to-register transfer.
- * The opcode filter accepts MOV reg↔reg plus a small mask of arithmetic immediates, but the helper rejects any instruction with lock/rep prefixes, REX.W/B bits, or a ModRM mode other than 3 (register operands).
- * When it returns TRUE the caller’s `dctx` still describes that register shuffle so pointer-propagation routines can continue without worrying about hidden memory accesses.
+ * AutoDoc: Requires a caller-supplied decoder context and walks instructions until it finds a pure register-to-register transfer.
+ * Accepts MOV reg↔reg plus a masked set of arithmetic-immediate opcodes, but rejects any lock/rep prefixes, REX.W/B bits, or ModRM modes other than 3.
+ * Returns TRUE with `dctx` still on the shuffle; decode failures or reaching `code_end` return FALSE so pointer propagation routines know no memory was touched.
  */
 
 #include "xzre_types.h"

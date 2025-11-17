@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Initialises a scratch decoder (or reuses the caller’s `dctx`) and decodes forward from `code_start` to `code_end`, skipping undecodable bytes along the way.
- * It looks for the normalised CALL opcode (`0x168`) and, when `call_target` is non-null, requires that the rel32 destination computed from `instruction + instruction_size + operand` matches that target.
- * The function returns TRUE with the context still describing the CALL so that higher-level code can splice hooks immediately after the call site.
+ * AutoDoc: Emits a secret-data telemetry record, then decodes forward using a scratch or caller-supplied context.
+ * Decode failures advance a single byte; successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen, and when `call_target` is provided the rel32 destination (`instruction + instruction_size + operand`) must match it.
+ * Returns TRUE with `dctx` still describing the CALL so hook installers can patch immediately after it.
  */
 
 #include "xzre_types.h"

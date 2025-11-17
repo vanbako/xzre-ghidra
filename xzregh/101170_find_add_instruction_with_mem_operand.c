@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Specialised search for ADDs that modify a memory location.
- * The helper runs the decoder until opcode `0x103` (the loader’s normalised add [mem],reg form) shows up, ensures the ModRM bits encode a memory destination, and, when `mem_address` is provided, recomputes the effective address via `mem_disp` to make sure it matches.
- * It returns TRUE with `dctx` still referencing the ADD so callers can read back the increment constant.
+ * AutoDoc: Specialised scanner for `add [mem],reg`: decodes forward byte-by-byte until opcode `0x103` appears with a memory ModRM form.
+ * When `mem_address` is supplied it also requires DF2 to show a displacement and the recomputed RIP-relative address to match.
+ * Returns TRUE with `dctx` still on the ADD so callers can read the increment immediate.
  */
 
 #include "xzre_types.h"

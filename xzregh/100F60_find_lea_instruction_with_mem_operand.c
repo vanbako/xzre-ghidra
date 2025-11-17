@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: General-purpose LEA finder that optionally reuses a caller-supplied decoder context.
- * It scans until `x86_dasm` reports opcode `0x10d`, requires a 64-bit operand (`REX.W`), and checks the ModRM bits to make sure the instruction actually reads memory rather than a register-form.
- * If `mem_address` is supplied it replays the RIP-relative calculation (`instruction + instruction_size + mem_disp`) and only returns TRUE when that absolute address matches, letting callers home in on a specific global.
+ * AutoDoc: LEA finder that insists the instruction truly references memory: waits for opcode `0x10d` with REX.W set and a memory ModRM form, using a scratch decoder when the caller passes NULL.
+ * If `mem_address` is supplied it replays the RIP-relative calculation (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match, returning with `dctx` still on the LEA.
  */
 
 #include "xzre_types.h"

@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-17
+- Revisited the opco_patt AutoDocs with the improved sources and dependencies in mind: clarified decoder behavior, ModRM/REX/DF2 requirements, address recomputation paths, and how the string/reloc walkers tighten function bounds. Updated the relevant entries in `metadata/functions_autodoc.json` and pushed them through the headless refresh.
+- Ran `./scripts/refresh_xzre_project.sh`; exported comments now mirror the richer descriptions and the locals rename report remains clean.
+- Next: consider a second pass over the CET prologue scans once more binaries are imported to ensure the ENDBR alignment rules still hold.
+
+## 2025-11-17
+- Reworked the opco_patt AutoDoc copy in `metadata/functions_autodoc.json` to spell out the decoder behavior, opcode/ModRM requirements, and address calculations across `x86_dasm`, the MOV/LEA/MOV+ADD scanners, string-xref helpers, reloc-backed pointer finder, and reg2reg matcher.
+- Ran `./scripts/refresh_xzre_project.sh`; the exported `xzregh/` comments now match the refreshed wording and the locals rename report remains clean.
+- Next: revisit whether `find_function`/`find_function_prologue` need more nuance around CET vs legacy ranges once we analyse additional binaries.
+
+## 2025-11-17
 - Tightened the `opco_patt` locals by mapping the decoder/pattern-scan register temps (`x86_dasm`, the `find_*` MOV/LEA/CALL helpers, string xref builders) to accurate pointer/BOOL types; added fresh metadata entries for `elf_find_function_pointer`, `find_instruction_with_mem_operand`, and `find_reg2reg_instruction`.
 - Ran `./scripts/refresh_xzre_project.sh`; the headless pass and locals rename report came back clean, and `xzregh/` now reflects the renamed cursors/targets/contexts across the opcode scanners and string walkers.
 - Next: revisit the `elf_find_string_references` pointer math to see if we can drop the residual casts once the code/size bookkeeping is clearer.

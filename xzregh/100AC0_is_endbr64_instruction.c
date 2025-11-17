@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Sanity-checks that at least four bytes remain at `code_start` and then tests the dword against the ENDBR64 opcode, folding in the caller supplied `low_mask_part` so both CET prefix variants collapse to the same comparison.
- * The loader’s pattern scanners use it to cheaply confirm CET landing pads before treating the site as a safe function prologue.
+ * AutoDoc: Guards that at least four bytes remain and then compares the dword at `code_start` against ENDBR64, or'd with the caller-supplied `low_mask_part` so both CET prefix variants collapse to a single equality test.
+ * Used by the prologue finders to cheaply vet potential landing pads before accepting them as function entries.
  */
 
 #include "xzre_types.h"

@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Given a populated string-reference entry, finds the function-pointer slot associated with that reference.
- * It copies the recorded `func_start`/`func_end` to the outputs, scans the RELA table (and then RELR as a fallback) for a relocation targeting that function, and treats the relocation address as the writable slot to return.
- * The slot must reside inside RELRO, and when `ctx->uses_endbr64` is set the helper confirms the referenced code starts with ENDBR64 before handing the pointer back so callers can safely overwrite sshd callback vectors.
+ * AutoDoc: Given a populated string-reference entry, copies its `func_start`/`func_end` and searches RELA (then RELR) for a relocation that targets the function, treating the relocation address as the writable function-pointer slot.
+ * The slot must live in RELRO (`elf_contains_vaddr_relro` enforces this); if the runtime flagged ENDBR usage, the referenced code is revalidated with `is_endbr64_instruction` before returning TRUE.
+ * Returns FALSE when the xref is missing, no relocation is found, or the slot is outside RELRO.
  */
 
 #include "xzre_types.h"

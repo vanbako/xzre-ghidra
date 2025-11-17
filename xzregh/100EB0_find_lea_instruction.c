@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Looks for LEA instructions that generate a specific displacement.
- * For every byte offset it runs the decoder, insists on opcode `0x10d`, checks that DF2 reports a plain displacement operand, and compares `mem_disp` against the requested `displacement`, treating `-displacement` as equivalent so mirrored scans still match.
- * Once found the helper returns TRUE with the stack-resident decoder context capturing the instruction.
+ * AutoDoc: Telemetry-backed search for LEA instructions that materialise a specific displacement.
+ * Slides one byte at a time, requires opcode `0x10d`, demands DF2 report a plain displacement operand, and treats `displacement` and `-displacement` as equivalent so mirrored scans still qualify.
+ * Returns TRUE with the stack-resident decoder context describing the LEA when found.
  */
 
 #include "xzre_types.h"

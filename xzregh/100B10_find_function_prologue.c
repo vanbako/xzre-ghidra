@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Validates that a cursor points at the requested prologue style.
- * When `find_mode` asks for CET entries it runs `x86_dasm`, insists the opcode matches the ENDBR64 sequence, and only succeeds if the landing pad ends on a 16-byte boundary (returning the first post-pad instruction through `output`).
- * In the legacy/NOP mode it falls back to `is_endbr64_instruction` with the simpler mask and returns the address itself, allowing callers to keep sweeping until one of the checks passes.
+ * AutoDoc: Validates that an address matches the requested prologue form.
+ * For `FIND_ENDBR64` it zeros a decoder, runs `x86_dasm`, requires the ENDBR64 opcode, and only succeeds if the pad ends on a 16-byte boundary (returning the first post-pad instruction through `output`).
+ * In legacy mode it calls `is_endbr64_instruction` with the simple mask and, on success, returns the prologue address itself so callers can sweep until a match is found.
  */
 
 #include "xzre_types.h"

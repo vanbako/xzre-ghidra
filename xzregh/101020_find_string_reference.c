@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Convenience wrapper that returns the instruction which first references a given string literal.
- * It simply calls `find_lea_instruction_with_mem_operand` across `[code_start, code_end)` with `str` as the desired absolute address and, when successful, yields the LEA’s address so later heuristics can treat it as the anchor for the surrounding function.
+ * AutoDoc: Zeroes a scratch decoder and asks `find_lea_instruction_with_mem_operand` to locate the first LEA in `[code_start, code_end)` that materialises the absolute address `str`.
+ * Returns the LEA's address as the xref anchor or NULL when no such reference exists.
  */
 
 #include "xzre_types.h"

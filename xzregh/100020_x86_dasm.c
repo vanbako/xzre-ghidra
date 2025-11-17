@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Hand-rolled x86-64 decoder that rewinds the supplied `dasm_ctx_t`, walks forward from `code_start`, and normalises every prefix/modRM/SIB combination the implant cares about.
- * It understands legacy lock/rep/segment overrides, operand/address-size prefixes, REX and both two- and three-byte VEX sequences, and fills out `opcode_window`, ModRM/SIB, displacement and immediate widths, and the derived `operand`/`mem_disp` fields.
- * Bad encodings or truncated buffers clear the context and return FALSE so the caller can advance by a byte; a clean decode leaves `instruction`, `instruction_size`, and all prefix/flag bits populated so higher-level pattern searches can reason about the instruction without linking a full disassembler.
+ * AutoDoc: Resets the supplied `dasm_ctx_t` and incrementally decodes from `code_start`, honoring legacy prefixes, REX, 2- and 3-byte VEX, and ModRM/SIB so `opcode_window`, prefix bits, displacement/immediates, and the derived `operand`/`mem_disp` fields are normalised.
+ * Invalid encodings or truncated buffers zero the context and return FALSE so callers can slide one byte and reattempt; a clean decode leaves `instruction`/`instruction_size` populated for upstream scanners like the MOV/LEA and prologue finders.
  */
 
 #include "xzre_types.h"

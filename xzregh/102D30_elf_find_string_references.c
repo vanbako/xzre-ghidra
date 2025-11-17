@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Builds the 27-entry `string_references_t` catalogue for sshd’s interesting status strings.
- * It seeds each slot with its `EncodedStringId`, walks .rodata via `elf_find_string`, and for every match calls `find_string_reference` to capture the referencing instruction plus provisional function bounds.
- * The routine then sweeps `.text`, following direct CALLs, PLT trampolines, and RIP-relative LEAs so each entry’s `func_start`/`func_end` brackets the owning routine, finally reconciling the recorded ranges with RELA/RELR relocations and the code-segment limits so later analyses can trust the table.
+ * AutoDoc: Builds the 27-entry `string_references_t` catalogue used by the loader heuristics.
+ * Seeds each entry with its `EncodedStringId`, walks .rodata via `elf_find_string`, and records the first LEA that materialises each literal with `find_string_reference`.
+ * Then sweeps `.text` with `x86_dasm`, tightening each entry's `func_start`/`func_end` around calls, PLT/JMP stubs, and RIP-relative LEAs that target the recorded xrefs, and finally reconciles the ranges against RELA/RELR relocations and the code-segment bounds so later scans can trust the table.
  */
 
 #include "xzre_types.h"

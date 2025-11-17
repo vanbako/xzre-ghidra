@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Generic memory-operand predicate used by higher-level pattern matchers.
- * It decodes forward, watches for the requested opcode, demands that the ModRM describe a memory operand, and optionally replays the RIP-relative calculation so `mem_address` can filter the effective address.
- * When the DF2 displacement bit is set the helper writes the full context back to `dctx` and returns TRUE, allowing downstream code to introspect registers or immediates without re-decoding.
+ * AutoDoc: Generic predicate for locating a specific `opcode` that reads/writes memory.
+ * Decodes forward (scratch context if needed), requires a memory ModRM form, and when `mem_address` is non-null also requires DF2 to indicate a displacement operand and the RIP-relative address (`instruction + instruction_size + mem_disp`) to equal that address.
+ * On success it leaves `dctx` populated so callers like the add/mov/addr scanners can inspect operands without re-decoding.
  */
 
 #include "xzre_types.h"

@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Walks both directions from an instruction to recover a function’s bounds.
- * If `func_start` is requested it steps backward toward `search_base`, invoking `find_function_prologue` at each byte until it finds a matching entry pad and records it.
- * If `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that address as the end marker, giving the loader dependable start/end pointers for whatever instruction kicked off the search.
+ * AutoDoc: Recovers function bounds around an instruction.
+ * With `func_start` non-null it scans backward toward `search_base`, checking every byte with `find_function_prologue`; failing to find a match or hitting `search_base` without one aborts.
+ * With `func_end` it scans forward to the next prologue (or `code_end`) and uses that address as the end marker, yielding dependable start/end pointers for later string/reloc walkers.
  */
 
 #include "xzre_types.h"

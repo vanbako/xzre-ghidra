@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Takes a string-reference entry and hunts through the owning function for MOV loads that reference a caller-supplied data range.
- * It repeatedly invokes `find_instruction_with_mem_operand_ex` for opcode `0x10b`, skips instructions that use the 64-bit register-only form, and recomputes RIP-relative addresses by adding `mem_disp` to the current instruction pointer when the ModRM demands it.
- * The first computed address that falls within `[mem_range_start, mem_range_end)` is returned, giving the loader the exact struct field a particular status string touches.
+ * AutoDoc: Walks the function owning a string reference, repeatedly calling `find_instruction_with_mem_operand_ex` for opcode `0x10b` to find MOV loads that touch data.
+ * Skips register-only forms and 64-bit REX.W MOVs, recomputes the absolute address for displacement-based operands (RIP-relative when ModRM encodes it), and returns the first address that falls inside `[mem_range_start, mem_range_end)`.
+ * Returns NULL when no qualifying reference is found or when register-only forms surface and no range was requested.
  */
 
 #include "xzre_types.h"

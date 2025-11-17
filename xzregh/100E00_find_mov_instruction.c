@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: MOV-only variant of the pointer scan.
- * It linearly decodes instructions, requires the ModRM bits to encode the loader’s expected register↔memory form, enforces the 64-bit width test when `is_64bit_operand` is TRUE (again waived for stores), and then matches the opcode against either the load (`0x10b`) or store (`0x109`) flavor depending on `load_flag`.
- * Successful matches stop the sweep immediately with `dctx` describing the MOV; failures either advance by the instruction size or peg forward one byte when decoding fails.
+ * AutoDoc: MOV-only variant of the pointer scan: decodes sequentially, requires the memory↔register ModRM form, enforces the REX.W width test when `is_64bit_operand` is TRUE (waived for stores), and accepts only opcode `0x10b` (load) or `0x109` (store) per `load_flag`.
+ * Decode failures advance one byte; otherwise the loop walks by `instruction_size`, returning TRUE with `dctx` on the matching MOV.
  */
 
 #include "xzre_types.h"

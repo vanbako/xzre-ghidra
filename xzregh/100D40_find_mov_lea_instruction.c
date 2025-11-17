@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Scans a code range for MOV/LEA instructions that move pointer values between registers and memory.
- * Each decoded instruction must expose the expected RIP/base-plus-displacement addressing form, satisfy the caller’s `is_64bit_operand` requirement via the REX bits (unless the caller is hunting for stores), and then match either the shared LEA opcode (`0x10d`) or the directional MOV opcode selected by `load_flag` (`mov reg,[mem]` vs `mov [mem],reg`).
- * When those checks pass the populated `dctx` is left pointing at the instruction so later pointer-chasing code can read back the operands.
+ * AutoDoc: Scans for pointer-producing MOV/LEA instructions that use the expected memory ModRM shape.
+ * Each decode must either be LEA (`0x10d`) or the MOV opcode selected by `load_flag` (`mov reg,[mem]` vs `mov [mem],reg`), and the REX.W bit must agree with `is_64bit_operand` unless the caller is searching for stores.
+ * On success `dctx` remains on the instruction so pointer-chasing helpers can read back operands and addressing.
  */
 
 #include "xzre_types.h"
