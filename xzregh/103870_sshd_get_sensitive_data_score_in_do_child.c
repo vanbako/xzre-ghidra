@@ -19,35 +19,35 @@ int sshd_get_sensitive_data_score_in_do_child
 {
   u8 *code_start;
   u8 *code_end;
-  BOOL BVar1;
-  long lVar2;
-  u8 **ppuVar3;
+  BOOL hit_found;
+  long clear_idx;
+  u8 **ctx_cursor;
   uint uVar4;
-  byte bVar5;
+  u8 zero_seed;
   dasm_ctx_t insn_ctx;
   u8 *do_child_start;
   u8 *do_child_end;
   
-  bVar5 = 0;
+  zero_seed = 0;
   uVar4 = 0;
   code_start = (u8 *)refs->entries[1].func_start;
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)refs->entries[1].func_end;
-    BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
-    uVar4 = (uint)(BVar1 != FALSE);
-    ppuVar3 = &do_child_start;
-    for (lVar2 = 0x16; lVar2 != 0; lVar2 = lVar2 + -1) {
-      *(undefined4 *)ppuVar3 = 0;
-      ppuVar3 = (u8 **)((long)ppuVar3 + (ulong)bVar5 * -8 + 4);
+    hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
+    uVar4 = (uint)(hit_found != FALSE);
+    ctx_cursor = &do_child_start;
+    for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
+      *(undefined4 *)ctx_cursor = 0;
+      ctx_cursor = (u8 **)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
-    BVar1 = find_instruction_with_mem_operand
+    hit_found = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)&do_child_start,
                        (void *)((long)sensitive_data + 0x10));
-    if (BVar1 != FALSE) {
-      BVar1 = find_instruction_with_mem_operand
+    if (hit_found != FALSE) {
+      hit_found = find_instruction_with_mem_operand
                         (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
                          (void *)((long)sensitive_data + 0x10));
-      if (BVar1 == FALSE) {
+      if (hit_found == FALSE) {
         uVar4 = uVar4 + 1;
       }
       else {

@@ -21,24 +21,24 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
 {
   Elf64_Addr EVar1;
   Elf64_Ehdr *pEVar2;
-  BOOL BVar3;
+  BOOL decode_ok;
   lzma_allocator *allocator;
   u8 *code_segment_start;
   pfn_EVP_PKEY_new_raw_public_key_t ppVar5;
   u8 *libc_start_main_got;
   Elf64_Sym *pEVar7;
   u8 *puVar8;
-  long lVar9;
+  long clear_idx;
   dasm_ctx_t *pdVar10;
   uchar *code_start;
   u8 *code_end;
   u8 *sshd_main_candidate;
   u8 *code_segment_end;
-  byte bVar13;
+  u8 zero_seed;
   u64 code_segment_size;
   dasm_ctx_t insn_ctx;
   
-  bVar13 = 0;
+  zero_seed = 0;
   code_segment_size = 0;
   allocator = get_lzma_allocator();
   allocator->opaque = libcrypto;
@@ -55,14 +55,14 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
         (code_start = sshd->elfbase->e_ident + sshd->elfbase->e_entry, code_start < code_segment_end)) &&
        (code_segment_start <= code_start)) {
       pdVar10 = &insn_ctx;
-      lVar9 = 0x16;
+      clear_idx = 0x16;
       code_end = code_start + 0x200;
       if (code_segment_end <= code_start + 0x200) {
         code_end = code_segment_end;
       }
-      for (; lVar9 != 0; lVar9 = lVar9 + -1) {
+      for (; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(undefined4 *)&pdVar10->instruction = 0;
-        pdVar10 = (dasm_ctx_t *)((long)pdVar10 + (ulong)bVar13 * -8 + 4);
+        pdVar10 = (dasm_ctx_t *)((long)pdVar10 + (ulong)zero_seed * -8 + 4);
       }
       pEVar7 = elf_symbol_get(libcrypto,STR_EVP_Digest,0);
       if (pEVar7 != (Elf64_Sym *)0x0) {
@@ -73,8 +73,8 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
       }
       sshd_main_candidate = (u8 *)0x0;
       while (code_start < code_end) {
-        BVar3 = x86_dasm(&insn_ctx,code_start,code_end);
-        if (BVar3 == FALSE) {
+        decode_ok = x86_dasm(&insn_ctx,code_start,code_end);
+        if (decode_ok == FALSE) {
           code_start = code_start + 1;
         }
         else {

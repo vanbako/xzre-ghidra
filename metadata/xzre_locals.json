@@ -3443,6 +3443,21 @@
         "type": "u8 *"
       },
       {
+        "original": "BVar3",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "lVar9",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "bVar13",
+        "name": "zero_seed",
+        "type": "u8"
+      },
+      {
         "original": "local_88",
         "name": "code_segment_size",
         "type": "u64"
@@ -3508,6 +3523,26 @@
         "original": "uVar7",
         "name": "mirrored_reg",
         "type": "u8"
+      },
+      {
+        "original": "BVar2",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar1",
+        "name": "rex_extension",
+        "type": "u8"
+      },
+      {
+        "original": "lVar6",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar8",
+        "name": "zero_ctx_cursor",
+        "type": "dasm_ctx_t *"
       }
     ]
   },
@@ -3596,6 +3631,26 @@
         "original": "bVar6",
         "name": "rex_extension",
         "type": "u8"
+      },
+      {
+        "original": "BVar2",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar11",
+        "name": "zero_seed",
+        "type": "u8"
+      },
+      {
+        "original": "lVar5",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "pdVar9",
+        "name": "zero_ctx_cursor",
+        "type": "dasm_ctx_t *"
       }
     ]
   },
@@ -3635,6 +3690,46 @@
         "type": "u8"
       },
       {
+        "original": "BVar2",
+        "name": "decode_ok",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar1",
+        "name": "rex_extension",
+        "type": "u8"
+      },
+      {
+        "original": "lVar3",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "lVar4",
+        "name": "hit_scan_idx",
+        "type": "long"
+      },
+      {
+        "original": "lVar5",
+        "name": "hit_compare_idx",
+        "type": "long"
+      },
+      {
+        "original": "plVar6",
+        "name": "hit_cursor",
+        "type": "long *"
+      },
+      {
+        "original": "pdVar7",
+        "name": "zero_ctx_cursor",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "uVar9",
+        "name": "hit_index",
+        "type": "ulong"
+      },
+      {
         "original": "uVar11",
         "name": "tracked_reg",
         "type": "u8"
@@ -3665,6 +3760,28 @@
       {
         "name": "insn_ctx",
         "type": "dasm_ctx_t"
+      }
+    ],
+    "register_temps": [
+      {
+        "original": "BVar1",
+        "name": "hit_found",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar5",
+        "name": "zero_seed",
+        "type": "u8"
+      },
+      {
+        "original": "lVar2",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "ppuVar3",
+        "name": "ctx_cursor",
+        "type": "u8 **"
       }
     ]
   },
