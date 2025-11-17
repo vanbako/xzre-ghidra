@@ -98,7 +98,7 @@ LAB_00102e64:
       if (decoded != FALSE) {
         insn_cursor = (dasm_ctx_t *)
                   ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));
-        if (scanner_ctx._40_4_ == 0x168) {
+        if (*(u32 *)&scanner_ctx.opcode_window[3] == 0x168) {
           if (scanner_ctx.operand == 0) goto LAB_00102e64;
           target_addr = (dasm_ctx_t *)
                    ((u8 *)((long)scanner_ctx.instruction + 0x25) +
@@ -108,8 +108,8 @@ LAB_00102ee5:
         }
         else {
           target_addr = (dasm_ctx_t *)scanner_ctx.instruction;
-          if (scanner_ctx._40_4_ == 0xa5fe) goto LAB_00102ee5;
-          if (((scanner_ctx._40_4_ != 0x10d) || (((byte)scanner_ctx.prefix.decoded.rex & 0x48) != 0x48))
+          if (*(u32 *)&scanner_ctx.opcode_window[3] == 0xa5fe) goto LAB_00102ee5;
+          if (((*(u32 *)&scanner_ctx.opcode_window[3] != 0x10d) || (((byte)scanner_ctx.prefix.decoded.rex & 0x48) != 0x48))
              || (((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
           goto LAB_00102e64;
           target_addr = (dasm_ctx_t *)(insn_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));

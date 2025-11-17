@@ -16,9 +16,9 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 {
   x86_rex_prefix_t *rex_prefix;
   u8 *flags2_ptr;
-  byte bVar3;
-  byte bVar4;
-  ushort uVar5;
+  byte modrm_byte;
+  byte modrm_rm_bits;
+  ushort imm16_word;
   byte bVar6;
   BOOL telemetry_ok;
   int derived_opcode;
@@ -26,7 +26,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   sbyte opcode_index;
   uint opcode;
   uint opcode_high_bits;
-  long lVar13;
+  long clear_idx;
   u8 *cursor;
   u8 *opcode_ptr;
   byte current_byte;
@@ -35,31 +35,31 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   ulong opcode_class_flag;
   u8 *operand_cursor;
   dasm_ctx_t *ctx_clear;
-  ulong uVar22;
+  ulong opcode_class_shift;
   x86_prefix_state_t *prefix_clear;
-  BOOL bVar24;
-  BOOL bVar25;
-  byte bVar26;
+  BOOL condition_match;
+  BOOL range_eq_boundary;
+  byte clear_stride_marker;
   ulong opcode_class_masks [4];
   
-  bVar26 = 0;
+  clear_stride_marker = 0;
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
   if (telemetry_ok == FALSE) {
     return FALSE;
   }
   ctx_clear = ctx;
-  for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
+  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(undefined4 *)&ctx_clear->instruction = 0;
-    ctx_clear = (dasm_ctx_t *)((long)ctx_clear + (ulong)bVar26 * -8 + 4);
+    ctx_clear = (dasm_ctx_t *)((long)ctx_clear + (ulong)clear_stride_marker * -8 + 4);
   }
-  bVar24 = code_start < code_end;
+  condition_match = code_start < code_end;
   cursor = code_start;
   do {
-    if (!bVar24) {
+    if (!condition_match) {
 LAB_00100aa5:
-      for (lVar13 = 0x16; lVar13 != 0; lVar13 = lVar13 + -1) {
+      for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(undefined4 *)&ctx->instruction = 0;
-        ctx = (dasm_ctx_t *)((long)ctx + (ulong)bVar26 * -8 + 4);
+        ctx = (dasm_ctx_t *)((long)ctx + (ulong)clear_stride_marker * -8 + 4);
       }
       return FALSE;
     }
@@ -90,9 +90,9 @@ LAB_001001c9:
           if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (bVar6 == 0x1e)) {
             if (cursor + 1 < code_end) {
               prefix_clear = &ctx->prefix;
-              for (lVar13 = 0x12; lVar13 != 0; lVar13 = lVar13 + -1) {
+              for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
                 *(undefined4 *)prefix_clear = 0;
-                prefix_clear = (x86_prefix_state_t *)((long)prefix_clear + (ulong)bVar26 * -8 + 4);
+                prefix_clear = (x86_prefix_state_t *)((long)prefix_clear + (ulong)clear_stride_marker * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
@@ -146,10 +146,10 @@ LAB_001008c5:
             *(byte *)((long)&ctx->prefix + 0xc) = bVar6;
             bVar6 = bVar6 >> 6;
             *(byte *)((long)&ctx->prefix + 0xd) = bVar6;
-            bVar3 = *cursor;
-            *(byte *)((long)&ctx->prefix + 0xe) = (byte)((int)(uint)bVar3 >> 3) & 7;
-            bVar4 = *cursor;
-            *(byte *)((long)&ctx->prefix + 0xf) = bVar4 & 7;
+            modrm_byte = *cursor;
+            *(byte *)((long)&ctx->prefix + 0xe) = (byte)((int)(uint)modrm_byte >> 3) & 7;
+            modrm_rm_bits = *cursor;
+            *(byte *)((long)&ctx->prefix + 0xf) = modrm_rm_bits & 7;
             if (bVar6 == 3) {
 LAB_00100902:
               if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {
@@ -159,7 +159,7 @@ LAB_0010092e:
               }
             }
             else {
-              if ((bVar4 & 7) == 4) {
+              if ((modrm_rm_bits & 7) == 4) {
                 (ctx->prefix).decoded.flags = current_byte | 0xc0;
               }
               if (bVar6 != 1) {
@@ -170,7 +170,7 @@ LAB_0010092e:
               *flags2_ptr = *flags2_ptr | 3;
             }
             opcode = *(uint *)(ctx->opcode_window + 3);
-            if ((opcode - 0xf6 < 2) && (((int)(uint)bVar3 >> 3 & 7U) != 0)) {
+            if ((opcode - 0xf6 < 2) && (((int)(uint)modrm_byte >> 3 & 7U) != 0)) {
               flags2_ptr = &(ctx->prefix).decoded.flags2;
               *flags2_ptr = *flags2_ptr & 0xf7;
               ctx->operand_size = 0;
@@ -281,10 +281,10 @@ LAB_001004e1:
             return FALSE;
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)current_byte;
-          bVar3 = *cursor;
+          modrm_byte = *cursor;
           opcode_ptr = cursor + 1;
           (ctx->prefix).decoded.flags = bVar6 | 0x10;
-          (ctx->prefix).decoded.vex_byte = bVar3;
+          (ctx->prefix).decoded.vex_byte = modrm_byte;
           if (code_end <= opcode_ptr) goto LAB_00100aa5;
           bVar6 = cursor[1];
           (ctx->prefix).decoded.rex.rex_byte = '@';
@@ -293,19 +293,19 @@ LAB_001004e1:
           *(uint *)(ctx->opcode_window + 3) = opcode;
           current_byte = ((char)cursor[1] >> 7 & 0xfcU) + 0x44;
           *(byte *)((long)&ctx->prefix + 0xb) = current_byte;
-          if (bVar3 == 0xc5) goto LAB_001001c5;
-          if (bVar3 != 0xc4) {
+          if (modrm_byte == 0xc5) goto LAB_001001c5;
+          if (modrm_byte != 0xc4) {
             return FALSE;
           }
-          bVar3 = cursor[1];
-          if ((bVar3 & 0x40) == 0) {
+          modrm_byte = cursor[1];
+          if ((modrm_byte & 0x40) == 0) {
             (ctx->prefix).decoded.rex.rex_byte = current_byte | 2;
           }
           if ((cursor[1] & 0x20) == 0) {
             rex_prefix = &(ctx->prefix).decoded.rex;
             rex_prefix->rex_byte = rex_prefix->rex_byte | 1;
           }
-          if (2 < (byte)((bVar3 & 0x1f) - 1)) {
+          if (2 < (byte)((modrm_byte & 0x1f) - 1)) {
             return FALSE;
           }
           if (code_end <= cursor + 2) goto LAB_00100aa5;
@@ -353,14 +353,14 @@ LAB_001003fa:
               if (opcode < 0xcc) {
                 if (opcode < 0x3a) {
                   if (0x37 < opcode) goto LAB_001005bf;
-                  bVar24 = opcode - 0x20 < 2;
-                  bVar25 = opcode - 0x20 == 2;
+                  condition_match = opcode - 0x20 < 2;
+                  range_eq_boundary = opcode - 0x20 == 2;
                 }
                 else {
-                  bVar24 = opcode - 0x60 < 3;
-                  bVar25 = opcode - 0x60 == 3;
+                  condition_match = opcode - 0x60 < 3;
+                  range_eq_boundary = opcode - 0x60 == 3;
                 }
-                if (!bVar24 && !bVar25) goto LAB_001005d6;
+                if (!condition_match && !range_eq_boundary) goto LAB_001005d6;
               }
               else if ((0x1000080001U >> (current_byte + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
@@ -378,7 +378,7 @@ LAB_001005d6:
               bVar6 = current_byte & 0xf;
               if (current_byte >> 4 == 1) {
                 if (bVar6 < 10) {
-                  bVar24 = (normalized_opcode & 0xc) == 0;
+                  condition_match = (normalized_opcode & 0xc) == 0;
                   goto LAB_00100604;
                 }
                 if (bVar6 != 0xd) {
@@ -387,16 +387,16 @@ LAB_001005d6:
               }
               else {
                 if (current_byte >> 4 == 4) {
-                  bVar24 = (0x1c57UL >> bVar6 & 1) == 0;
+                  condition_match = (0x1c57UL >> bVar6 & 1) == 0;
                 }
                 else {
                   if (current_byte >> 4 != 0) {
                     return FALSE;
                   }
-                  bVar24 = (current_byte & 0xb) == 3;
+                  condition_match = (current_byte & 0xb) == 3;
                 }
 LAB_00100604:
-                if (bVar24) {
+                if (condition_match) {
                   return FALSE;
                 }
               }
@@ -437,10 +437,10 @@ LAB_00100680:
               }
             }
             if (code_end <= opcode_ptr) goto LAB_00100aa5;
-            uVar5 = CONCAT11(*opcode_ptr,current_byte);
+            imm16_word = CONCAT11(*opcode_ptr,current_byte);
             if (ctx->operand_size == 2) {
-              ctx->operand_zeroextended = (ulong)uVar5;
-              ctx->operand = (long)(short)uVar5;
+              ctx->operand_zeroextended = (ulong)imm16_word;
+              ctx->operand = (long)(short)imm16_word;
               cursor = opcode_ptr + (1 - (long)code_start);
               ctx->instruction = code_start;
               goto LAB_001007e4;
@@ -448,7 +448,7 @@ LAB_00100680:
             if (code_end <= cursor + 2) goto LAB_00100aa5;
             operand_cursor = cursor + 3;
             if (code_end <= operand_cursor) goto LAB_00100aa5;
-            opcode = CONCAT13(cursor[3],CONCAT12(cursor[2],uVar5));
+            opcode = CONCAT13(cursor[3],CONCAT12(cursor[2],imm16_word));
             if (ctx->operand_size == 4) {
               ctx->operand_zeroextended = (ulong)opcode;
               operand_width = (u64)(int)opcode;
@@ -477,7 +477,7 @@ LAB_00100680:
 LAB_00100191:
           if (code_end <= cursor) goto LAB_00100aa5;
           current_byte = *cursor;
-          uVar22 = (ulong)current_byte;
+          opcode_class_shift = (ulong)current_byte;
           if (current_byte == 0xf) {
             *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
             opcode_ptr = cursor;
@@ -511,22 +511,22 @@ LAB_001001c5:
                   }
                   else {
                     opcode_class_mask = 0x1800000000010101;
-                    uVar22 = (ulong)(current_byte - 0x2d);
+                    opcode_class_shift = (ulong)(current_byte - 0x2d);
                   }
                 }
                 else {
                   opcode_class_mask = 0x7f80010000000001;
-                  uVar22 = (ulong)(current_byte + 0x7f);
+                  opcode_class_shift = (ulong)(current_byte + 0x7f);
                   if (0x3e < (byte)(current_byte + 0x7f)) goto LAB_00100344;
                 }
-                if ((opcode_class_mask >> (uVar22 & 0x3f) & 1) != 0) {
+                if ((opcode_class_mask >> (opcode_class_shift & 0x3f) & 1) != 0) {
                   opcode_class_flag = 4;
                 }
               }
               else {
-                uVar22 = 1L << (current_byte + 0x3e & 0x3f);
-                if ((uVar22 & 0x2000c800000020) == 0) {
-                  if ((uVar22 & 0x101) != 0) {
+                opcode_class_shift = 1L << (current_byte + 0x3e & 0x3f);
+                if ((opcode_class_shift & 0x2000c800000020) == 0) {
+                  if ((opcode_class_shift & 0x101) != 0) {
                     opcode_class_flag = 2;
                   }
                 }
@@ -612,7 +612,7 @@ LAB_001000cf:
     }
 LAB_00100675:
     cursor = cursor + 1;
-    bVar24 = cursor < code_end;
+    condition_match = cursor < code_end;
   } while( TRUE );
 }
 

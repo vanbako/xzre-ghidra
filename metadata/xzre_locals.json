@@ -2487,6 +2487,10 @@
         "original": "pdVar15",
         "name": "insn_cursor",
         "type": "u8 *"
+      },
+      {
+        "original": "scanner_ctx._40_4_",
+        "replacement": "*(u32 *)&scanner_ctx.opcode_window[3]"
       }
     ]
   },
@@ -6235,6 +6239,46 @@
         "original": "pxVar23",
         "name": "prefix_clear",
         "type": "x86_prefix_state_t *"
+      },
+      {
+        "original": "bVar3",
+        "name": "modrm_byte",
+        "type": "byte"
+      },
+      {
+        "original": "bVar4",
+        "name": "modrm_rm_bits",
+        "type": "byte"
+      },
+      {
+        "original": "uVar5",
+        "name": "imm16_word",
+        "type": "ushort"
+      },
+      {
+        "original": "lVar13",
+        "name": "clear_idx",
+        "type": "long"
+      },
+      {
+        "original": "uVar22",
+        "name": "opcode_class_shift",
+        "type": "ulong"
+      },
+      {
+        "original": "bVar24",
+        "name": "condition_match",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar25",
+        "name": "range_eq_boundary",
+        "type": "BOOL"
+      },
+      {
+        "original": "bVar26",
+        "name": "clear_stride_marker",
+        "type": "byte"
       }
     ]
   },
