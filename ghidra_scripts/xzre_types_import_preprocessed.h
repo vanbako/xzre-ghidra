@@ -24,6 +24,8 @@ typedef unsigned int uint32_t;
 
 typedef unsigned char uchar;
 
+typedef void code(void);
+
 typedef unsigned short ushort;
 
 typedef unsigned int uint;

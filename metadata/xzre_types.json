@@ -98,6 +98,13 @@
     {
       "kind": "typedef",
       "names": [
+        "code"
+      ],
+      "code": "typedef void code(void);"
+    },
+    {
+      "kind": "typedef",
+      "names": [
         "ushort"
       ],
       "code": "typedef unsigned short ushort;"
