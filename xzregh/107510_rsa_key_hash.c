@@ -15,21 +15,21 @@
 BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
 
 {
-  u64 uVar1;
-  BOOL BVar2;
-  long lVar3;
-  BOOL *pBVar4;
+  u64 exp_serialized_len;
+  BOOL success;
+  long wipe_length;
+  u8 *wipe_cursor;
   u8 buf [4106];
   u64 written;
-  u64 expSize;
-  BIGNUM *n;
+  BIGNUM *rsa_exponent;
+  BIGNUM *rsa_modulus;
   u8 local_1042 [16];
   BOOL result;
   
-  pBVar4 = &result;
-  for (lVar3 = 0xffa; lVar3 != 0; lVar3 = lVar3 + -1) {
-    *(undefined1 *)pBVar4 = FALSE;
-    pBVar4 = (BOOL *)((long)pBVar4 + 1);
+  wipe_cursor = &result;
+  for (wipe_length = 0xffa; wipe_length != 0; wipe_length = wipe_length + -1) {
+    *(undefined1 *)wipe_cursor = FALSE;
+    wipe_cursor = (BOOL *)((long)wipe_cursor + 1);
   }
   local_1042[0] = '\0';
   local_1042[1] = '\0';
@@ -50,18 +50,18 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   written = 0;
   if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&
      (funcs->RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
-    expSize = 0;
-    n = (BIGNUM *)0x0;
-    (*funcs->RSA_get0_key)(rsa,&n,(BIGNUM **)&expSize,(BIGNUM **)0x0);
-    if ((expSize != 0) && (n != (BIGNUM *)0x0)) {
-      BVar2 = bignum_serialize(local_1042,0x100a,&written,(BIGNUM *)expSize,funcs);
-      uVar1 = written;
-      if (((BVar2 != FALSE) &&
+    rsa_exponent = (BIGNUM *)0x0;
+    rsa_modulus = (BIGNUM *)0x0;
+    (*funcs->RSA_get0_key)(rsa,&rsa_modulus,&rsa_exponent,(BIGNUM **)0x0);
+    if ((rsa_exponent != (BIGNUM *)0x0) && (rsa_modulus != (BIGNUM *)0x0)) {
+      success = bignum_serialize(local_1042,0x100a,&written,rsa_exponent,funcs);
+      exp_serialized_len = written;
+      if (((success != FALSE) &&
           ((written < 0x100a &&
-           (BVar2 = bignum_serialize(local_1042 + written,0x100a - written,&written,n,funcs),
-           BVar2 != FALSE)))) && (uVar1 + written < 0x100b)) {
-        BVar2 = sha256(local_1042,uVar1 + written,mdBuf,mdBufSize,funcs);
-        return BVar2;
+           (success = bignum_serialize(local_1042 + written,0x100a - written,&written,rsa_modulus,
+                                     funcs), success != FALSE)))) && (exp_serialized_len + written < 0x100b)) {
+        success = sha256(local_1042,exp_serialized_len + written,mdBuf,mdBufSize,funcs);
+        return success;
       }
     }
   }

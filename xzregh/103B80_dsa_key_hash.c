@@ -17,9 +17,9 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
 {
   imported_funcs_t *imports;
   BOOL success;
-  long component_index;
-  ulong serialized_len;
-  undefined4 *puVar4;
+  size_t component_idx;
+  size_t serialized_len;
+  u32 *scratch_cursor;
   BIGNUM *param_p;
   BIGNUM *param_q;
   BIGNUM *param_g;
@@ -28,10 +28,10 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
   u8 local_660 [16];
   undefined4 local_650 [392];
   
-  puVar4 = local_650;
-  for (component_index = 0x186; component_index != 0; component_index = component_index + -1) {
-    *puVar4 = 0;
-    puVar4 = puVar4 + 1;
+  scratch_cursor = local_650;
+  for (component_idx = 0x186; component_idx != 0; component_idx = component_idx + -1) {
+    *scratch_cursor = 0;
+    scratch_cursor = scratch_cursor + 1;
   }
   local_660[0] = '\0';
   local_660[1] = '\0';
@@ -66,14 +66,14 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
       components[1] = param_q;
       components[2] = param_g;
       if (ctx->imported_funcs != (imported_funcs_t *)0x0) {
-        component_index = 0;
+        component_idx = 0;
         serialized_len = 0;
         while( TRUE ) {
-          success = bignum_serialize(local_660 + serialized_len,0x628 - serialized_len,&component_len,components[component_index],
+          success = bignum_serialize(local_660 + serialized_len,0x628 - serialized_len,&component_len,components[component_idx],
                                    ctx->imported_funcs);
           if ((success == FALSE) || (serialized_len = serialized_len + component_len, 0x628 < serialized_len)) break;
-          component_index = component_index + 1;
-          if (component_index == 4) {
+          component_idx = component_idx + 1;
+          if (component_idx == 4) {
             success = sha256(local_660,serialized_len,mdBuf,mdBufSize,ctx->imported_funcs);
             return (uint)(success != FALSE);
           }

@@ -19,7 +19,7 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   BOOL success;
   long lVar2;
   u8 *seed_cursor;
-  u8 *puVar4;
+  u8 *buf_zero_cursor;
   key_buf buf2;
   key_buf buf1;
   u8 local_98 [16];
@@ -36,13 +36,13 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
       *seed_cursor = 0;
       seed_cursor = seed_cursor + 1;
     }
-    puVar4 = local_88;
+    buf_zero_cursor = local_88;
     for (lVar2 = 0x1c; lVar2 != 0; lVar2 = lVar2 + -1) {
-      puVar4[0] = '\0';
-      puVar4[1] = '\0';
-      puVar4[2] = '\0';
-      puVar4[3] = '\0';
-      puVar4 = puVar4 + 4;
+      buf_zero_cursor[0] = '\0';
+      buf_zero_cursor[1] = '\0';
+      buf_zero_cursor[2] = '\0';
+      buf_zero_cursor[3] = '\0';
+      buf_zero_cursor = buf_zero_cursor + 4;
     }
     buf1.words[0x12] = 0x108233;
     buf1.words[0x13] = 0;

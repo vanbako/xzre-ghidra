@@ -1848,14 +1848,6 @@
       {
         "name": "outl",
         "type": "int"
-      },
-      {
-        "name": "ctx",
-        "type": "EVP_CIPHER_CTX *"
-      },
-      {
-        "name": "cipher",
-        "type": "const EVP_CIPHER *"
       }
     ],
     "register_temps": [
@@ -1876,17 +1868,17 @@
       },
       {
         "original": "ctx_00",
-        "name": "ctx",
+        "name": "cipher_ctx",
         "type": "EVP_CIPHER_CTX *"
       },
       {
         "original": "type",
-        "name": "cipher",
-        "type": "EVP_CIPHER *"
+        "name": "chacha_cipher",
+        "type": "const EVP_CIPHER *"
       },
       {
         "original": "iVar3",
-        "name": "status",
+        "name": "decrypt_status",
         "type": "int"
       }
     ]
@@ -2729,15 +2721,11 @@
         "type": "u64"
       },
       {
-        "name": "expSize",
-        "type": "u64"
-      },
-      {
-        "name": "n",
+        "name": "rsa_exponent",
         "type": "const BIGNUM *"
       },
       {
-        "name": "e",
+        "name": "rsa_modulus",
         "type": "const BIGNUM *"
       },
       {
@@ -2746,7 +2734,38 @@
         "line": 15
       }
     ],
-    "register_temps": []
+    "register_temps": [
+      {
+        "original": "pBVar4",
+        "name": "wipe_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "lVar3",
+        "name": "wipe_length",
+        "type": "long"
+      },
+      {
+        "original": "BVar2",
+        "name": "success",
+        "type": "BOOL"
+      },
+      {
+        "original": "uVar1",
+        "name": "exp_serialized_len",
+        "type": "u64"
+      },
+      {
+        "original": "expSize",
+        "name": "rsa_exponent",
+        "type": "const BIGNUM *"
+      },
+      {
+        "original": "n",
+        "name": "rsa_modulus",
+        "type": "const BIGNUM *"
+      }
+    ]
   },
   "run_backdoor_commands": {
     "source": "xzre/xzre_code/run_backdoor_commands.c",
@@ -2896,6 +2915,66 @@
       {
         "original": "local_590._1_7_",
         "replacement": "(local_590 >> 8)"
+      },
+      {
+        "original": "piVar1",
+        "name": "imports",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "original": "ppVar2",
+        "name": "get_rsa_components",
+        "type": "pfn_RSA_get0_key_t"
+      },
+      {
+        "original": "ppVar3",
+        "name": "bn_num_bits",
+        "type": "pfn_BN_num_bits_t"
+      },
+      {
+        "original": "plVar4",
+        "name": "libc",
+        "type": "libc_imports_t *"
+      },
+      {
+        "original": "psVar5",
+        "name": "secrets",
+        "type": "sensitive_data *"
+      },
+      {
+        "original": "ppsVar6",
+        "name": "host_keys",
+        "type": "sshkey **"
+      },
+      {
+        "original": "puVar7",
+        "name": "payload_cursor",
+        "type": "u8 *"
+      },
+      {
+        "original": "ppVar8",
+        "name": "setlogmask_fn",
+        "type": "pfn_setlogmask_t"
+      },
+      {
+        "original": "psVar9",
+        "name": "sshd_ctx",
+        "type": "sshd_ctx_t *"
+      },
+      {
+        "original": "puVar10",
+        "name": "use_pam_ptr",
+        "type": "uint *"
+      },
+      {
+        "original": "plVar11",
+        "name": "mm_answer_slot",
+        "type": "long *"
+      },
+      {
+        "original": "ppVar12",
+        "name": "exit_fn",
+        "type": "pfn_exit_t"
       }
     ]
   },
@@ -3002,9 +3081,9 @@
         "type": "u8 *"
       },
       {
-        "original": "pkVar4",
-        "name": "key_cursor",
-        "type": "key_buf *"
+        "original": "puVar4",
+        "name": "buf_zero_cursor",
+        "type": "u8 *"
       }
     ]
   },
@@ -3030,7 +3109,12 @@
       {
         "original": "type",
         "name": "sha256_md",
-        "type": "EVP_MD *"
+        "type": "const EVP_MD *"
+      },
+      {
+        "original": "iVar2",
+        "name": "digest_status",
+        "type": "int"
       }
     ]
   },
@@ -6444,6 +6528,41 @@
         "original": "puVar9",
         "name": "scratch_cursor",
         "type": "u32 *"
+      },
+      {
+        "original": "key",
+        "name": "ecdsa_key",
+        "type": "EC_KEY *"
+      },
+      {
+        "original": "p",
+        "name": "ecdsa_pubkey",
+        "type": "EC_POINT *"
+      },
+      {
+        "original": "group",
+        "name": "ecdsa_group",
+        "type": "EC_GROUP *"
+      },
+      {
+        "original": "ctx",
+        "name": "mdctx",
+        "type": "EVP_MD_CTX *"
+      },
+      {
+        "original": "pkey",
+        "name": "ed448_pkey",
+        "type": "EVP_PKEY *"
+      },
+      {
+        "original": "local_b1",
+        "name": "digest_scratch",
+        "type": "u8[128]"
+      },
+      {
+        "original": "tbslen",
+        "name": "tbs_len",
+        "type": "size_t"
       }
     ]
   },
@@ -6888,13 +7007,13 @@
       },
       {
         "original": "lVar3",
-        "name": "component_index",
-        "type": "long"
+        "name": "component_idx",
+        "type": "size_t"
       },
       {
         "original": "count",
         "name": "serialized_len",
-        "type": "ulong"
+        "type": "size_t"
       },
       {
         "original": "local_688",
@@ -6920,6 +7039,11 @@
         "original": "local_680",
         "name": "components",
         "type": "BIGNUM *[4]"
+      },
+      {
+        "original": "puVar4",
+        "name": "scratch_cursor",
+        "type": "u32 *"
       }
     ]
   },
@@ -6929,8 +7053,8 @@
     "register_temps": [
       {
         "original": "uVar1",
-        "name": "bit_length",
-        "type": "uint"
+        "name": "bit_length_bits",
+        "type": "u32"
       },
       {
         "original": "iVar2",
@@ -6939,8 +7063,8 @@
       },
       {
         "original": "cnt",
-        "name": "value_len",
-        "type": "ulong"
+        "name": "value_len_bytes",
+        "type": "size_t"
       }
     ]
   },
