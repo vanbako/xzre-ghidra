@@ -57,6 +57,13 @@
 - Review the imported program under `ghidra_projects/xzre_ghidra` and determine additional binaries or archives that should be brought into the workspace.
 - Correlate findings with the sources in `xzre/` and document insights or triage queues in `PROGRESS.md`.
 
+## Dynamic RE Tips
+- Keys/payloads: the RSA hooks expect ChaCha-encrypted payloads signed with the attacker’s Ed448 private key. Only the public key is embedded (wrapped in `secret_data` and unwrapped by `secret_data_get_decrypted`), so unsigned/invalid payloads fall back to the real OpenSSL path.
+- Imports/globals: ensure libcrypto/libc imports resolve and `xzre_globals` is initialised before driving hooks. In sandboxes, patch import pointers to real functions or preload stubs so the dispatcher doesn’t bail out.
+- Payload state machine: `mm_answer_keyallowed_hook` enforces `check_backdoor_state` and length checks. Feed well-formed chunks in order or temporarily NOP the state/exit paths if you need to observe deeper behavior without the hooks exiting early.
+- Safety exits: monitor hooks call `exit()` and the dispatcher flips `disable_backdoor` on malformed inputs. For tracing, stub those exits or keep `do_orig` non-NULL in RSA hooks to prevent early bailouts.
+- Priv-esc path: `sshd_proxy_elevate` rewrites in-memory sshd flags (PermitRootLogin, PAM on/off, monitor IDs/sockets) and may call `setresuid/setresgid`/`system`. Test only against nonproduction sshd or stub those imports to avoid real privilege changes.
+
 ## Quick Batch Handles
 When you are ready for more reversing you can simply ask, e.g., “Can you do an RE session of batch `opco_patt`?” and Codex will fan out the right stubs/scripts. The short names are:
 - `opco_patt` – Opcode scanners & pattern utilities.

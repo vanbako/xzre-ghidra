@@ -156,3 +156,10 @@ flowchart TD
     run_cmds --> authhooks
     run_cmds --> loghook
 ```
+
+## Dynamic RE Prereqs & Tips
+- Keys and payloads: you need a valid Ed448 signing key and a payload encrypted with the baked-in ChaCha key/IV pairs (`secret_data_get_decrypted` unwraps the public key and keying material). Without a valid signature on the modulus-encoded payload, `run_backdoor_commands` will fall back to the host OpenSSL routines.
+- Imports and globals: the loader and hooks expect resolved libcrypto/libc imports and a non-null `xzre_globals` with payload buffers. If you instrument dynamically, ensure the headless refresh has applied metadata so imports resolve, or patch the import table in-memory to point at real OpenSSL/libc functions before invoking the hooks.
+- Payload assembly: the monitor path (`mm_answer_keyallowed_hook`) steps a state machine (`check_backdoor_state`) and requires sane lengths before decrypting or acting. When replaying traffic, feed well-formed chunks in order and keep `payload_state`/sizes consistent, or temporarily patch out the state checks to observe deeper behavior.
+- Safety exits: monitor hooks and the dispatcher call libc `exit()` or disable the backdoor on malformed inputs (e.g., null pointers, unexpected sizes). For exploratory tracing, you can NOP those exits or force `do_orig` non-null to keep the process alive while you observe.
+- Elevation paths: `sshd_proxy_elevate` rewrites in-memory sshd globals (PermitRootLogin, PAM flag, monitor IDs) and may call `system`. When testing, run under a nonproduction sshd and confirm `setresuid/setresgid`/PAM calls are safe, or stub those imports to avoid actual privilege changes.
