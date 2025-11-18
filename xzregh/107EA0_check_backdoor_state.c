@@ -17,8 +17,8 @@
 BOOL check_backdoor_state(global_context_t *ctx)
 
 {
-  u32 uVar1;
-  ulong uVar2;
+  u32 payload_state;
+  ulong payload_length_candidate;
   BOOL state_in_expected_range;
   BOOL state_matches_exact;
   sshd_payload_ctx_t *payload_ctx;
@@ -27,27 +27,27 @@ BOOL check_backdoor_state(global_context_t *ctx)
   if (ctx == (global_context_t *)0x0) {
     return FALSE;
   }
-  uVar1 = ctx->payload_state;
-  if ((int)uVar1 < 3) {
-    if (0 < (int)uVar1) {
+  payload_state = ctx->payload_state;
+  if ((int)payload_state < 3) {
+    if (0 < (int)payload_state) {
       if ((((ushort *)ctx->sshd_payload_ctx != (ushort *)0x0) && (0xad < ctx->current_data_size)) &&
-         (uVar2 = (ulong)*(ushort *)ctx->sshd_payload_ctx, ctx->current_data_size <= uVar2)) {
-        if (uVar2 <= uVar2 + 0x60) {
-          uVar2 = uVar2 + 0x60;
+         (payload_length_candidate = (ulong)*(ushort *)ctx->sshd_payload_ctx, ctx->current_data_size <= payload_length_candidate)) {
+        if (payload_length_candidate <= payload_length_candidate + 0x60) {
+          payload_length_candidate = payload_length_candidate + 0x60;
         }
-        if (uVar2 <= ctx->payload_data_size) {
+        if (payload_length_candidate <= ctx->payload_data_size) {
           return TRUE;
         }
       }
       goto LAB_00107f11;
     }
-    if (uVar1 != 0) goto LAB_00107f11;
+    if (payload_state != 0) goto LAB_00107f11;
     state_in_expected_range = ctx->current_data_size < 0xae;
     state_matches_exact = ctx->current_data_size == 0xae;
   }
   else {
-    state_in_expected_range = uVar1 == 3;
-    state_matches_exact = uVar1 == 4;
+    state_in_expected_range = payload_state == 3;
+    state_matches_exact = payload_state == 4;
   }
   if (state_in_expected_range || state_matches_exact) {
     return TRUE;

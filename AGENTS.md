@@ -38,7 +38,7 @@
   - OpenSSL 3.0.13 (`third_party/include/openssl`)
   - XZ Utils 5.4.6 (`third_party/include/xz`)
 - Adjust versions/URLs inside the script if you need a different snapshot, then rerun; it refreshes the header trees in place.
-- The refresh pipeline already passes `third_party/include` into `ImportXzreTypes.py`; point any ad-hoc Ghidra signature passes or local analyses at that include root when applying prototypes/structs.
+- The refresh pipeline already passes `third_party/include` into `ImportXzreTypes.py`; point any ad-hoc Ghidra signature passes or local analyses at that include root when applying prototypes/structs. Keep `xzre_types.json` as the curated source of truth—use the third-party headers as reference during RE, then copy only the needed defs/prototypes into the JSON once you confirm they match the binary, rather than wholesale replacing our pinned layouts.
 
 ## Working With Ghidra
 - Refresh the project with the bundled helper (runs the import, replays header types/signatures, and exports the portable snapshot so the System V calling convention fix is always applied):

@@ -16,43 +16,41 @@
 BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)
 
 {
-  int iVar1;
-  int *piVar2;
-  int sockfd_00;
-  int iVar3;
   int shutdown_result;
   int *errno_ptr;
+  int candidate_fd;
+  int usable_index;
   int sockfd;
   
   if (pSock == (int *)0x0) {
     return FALSE;
   }
   if (imports != (libc_imports_t *)0x0) {
-    iVar3 = -1;
-    sockfd_00 = 0;
+    usable_index = -1;
+    candidate_fd = 0;
     do {
       sockfd = 0;
       if ((imports->shutdown != (pfn_shutdown_t)0x0) &&
          (imports->__errno_location != (pfn___errno_location_t)0x0)) {
-        iVar1 = (*imports->shutdown)(sockfd_00,0x7fffffff);
-        if (iVar1 < 0) {
-          piVar2 = (*imports->__errno_location)();
+        shutdown_result = (*imports->shutdown)(candidate_fd,0x7fffffff);
+        if (shutdown_result < 0) {
+          errno_ptr = (*imports->__errno_location)();
 LAB_00107c21:
-          if ((*piVar2 != 0x16) && (*piVar2 != 0x6b)) goto LAB_00107c40;
+          if ((*errno_ptr != 0x16) && (*errno_ptr != 0x6b)) goto LAB_00107c40;
         }
         else {
-          piVar2 = &sockfd;
-          if (iVar1 != 0) goto LAB_00107c21;
+          errno_ptr = &sockfd;
+          if (shutdown_result != 0) goto LAB_00107c21;
         }
-        iVar3 = iVar3 + 1;
-        if (iVar3 == socket_index) {
-          *pSock = sockfd_00;
+        usable_index = usable_index + 1;
+        if (usable_index == socket_index) {
+          *pSock = candidate_fd;
           return TRUE;
         }
       }
 LAB_00107c40:
-      sockfd_00 = sockfd_00 + 1;
-    } while (sockfd_00 != 0x40);
+      candidate_fd = candidate_fd + 1;
+    } while (candidate_fd != 0x40);
   }
   return FALSE;
 }

