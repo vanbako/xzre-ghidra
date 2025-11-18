@@ -19,7 +19,6 @@ BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *i
   lzma_allocator *allocator;
   pfn_read_t read_stub;
   pfn___errno_location_t errno_stub;
-  lzma_allocator *resolver;
   
   allocator = get_lzma_allocator();
   success = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
