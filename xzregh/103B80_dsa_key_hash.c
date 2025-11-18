@@ -25,30 +25,30 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
   BIGNUM *param_g;
   u64 component_len;
   BIGNUM *components[4];
-  u8 local_660 [16];
-  undefined4 local_650 [392];
+  u8 serialized_components[0x628];
+  u32 serialized_words[392];
   
-  scratch_cursor = local_650;
+  scratch_cursor = serialized_words;
   for (component_idx = 0x186; component_idx != 0; component_idx = component_idx + -1) {
     *scratch_cursor = 0;
     scratch_cursor = scratch_cursor + 1;
   }
-  local_660[0] = '\0';
-  local_660[1] = '\0';
-  local_660[2] = '\0';
-  local_660[3] = '\0';
-  local_660[4] = '\0';
-  local_660[5] = '\0';
-  local_660[6] = '\0';
-  local_660[7] = '\0';
-  local_660[8] = '\0';
-  local_660[9] = '\0';
-  local_660[10] = '\0';
-  local_660[0xb] = '\0';
-  local_660[0xc] = '\0';
-  local_660[0xd] = '\0';
-  local_660[0xe] = '\0';
-  local_660[0xf] = '\0';
+  serialized_components[0] = '\0';
+  serialized_components[1] = '\0';
+  serialized_components[2] = '\0';
+  serialized_components[3] = '\0';
+  serialized_components[4] = '\0';
+  serialized_components[5] = '\0';
+  serialized_components[6] = '\0';
+  serialized_components[7] = '\0';
+  serialized_components[8] = '\0';
+  serialized_components[9] = '\0';
+  serialized_components[10] = '\0';
+  serialized_components[0xb] = '\0';
+  serialized_components[0xc] = '\0';
+  serialized_components[0xd] = '\0';
+  serialized_components[0xe] = '\0';
+  serialized_components[0xf] = '\0';
   if ((((dsa != (DSA *)0x0) && (ctx != (global_context_t *)0x0)) &&
       (imports = ctx->imported_funcs, imports != (imported_funcs_t *)0x0)) &&
      ((imports->DSA_get0_pqg != (pfn_DSA_get0_pqg_t)0x0 &&
@@ -69,12 +69,12 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
         component_idx = 0;
         serialized_len = 0;
         while( TRUE ) {
-          success = bignum_serialize(local_660 + serialized_len,0x628 - serialized_len,&component_len,components[component_idx],
+          success = bignum_serialize(serialized_components + serialized_len,0x628 - serialized_len,&component_len,components[component_idx],
                                    ctx->imported_funcs);
           if ((success == FALSE) || (serialized_len = serialized_len + component_len, 0x628 < serialized_len)) break;
           component_idx = component_idx + 1;
           if (component_idx == 4) {
-            success = sha256(local_660,serialized_len,mdBuf,mdBufSize,ctx->imported_funcs);
+            success = sha256(serialized_components,serialized_len,mdBuf,mdBufSize,ctx->imported_funcs);
             return (uint)(success != FALSE);
           }
         }

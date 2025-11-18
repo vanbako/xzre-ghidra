@@ -2227,6 +2227,16 @@
         "name": "scratch_cursor",
         "original": "puVar4",
         "type": "u32 *"
+      },
+      {
+        "name": "serialized_components",
+        "original": "local_660",
+        "type": "u8[0x628]"
+      },
+      {
+        "name": "serialized_words",
+        "original": "local_650",
+        "type": "u32[392]"
       }
     ],
     "source": "xzre/xzre_code/dsa_key_hash.c"
@@ -5712,10 +5722,6 @@
   "rsa_key_hash": {
     "locals": [
       {
-        "name": "buf",
-        "type": "u8[4106]"
-      },
-      {
         "name": "written",
         "type": "u64"
       },
@@ -5763,6 +5769,11 @@
         "name": "rsa_modulus",
         "original": "n",
         "type": "const BIGNUM *"
+      },
+      {
+        "name": "fingerprint_buf",
+        "original": "local_1042",
+        "type": "u8[0x100a]"
       }
     ],
     "source": "xzre/xzre_code/rsa_key_hash.c"
@@ -6161,6 +6172,21 @@
         "name": "buf_zero_cursor",
         "original": "puVar4",
         "type": "u8 *"
+      },
+      {
+        "name": "seed_iv",
+        "original": "local_98",
+        "type": "u8[0x10]"
+      },
+      {
+        "name": "seed_block",
+        "original": "local_88",
+        "type": "u8[0x70]"
+      },
+      {
+        "name": "payload_iv",
+        "original": "local_68",
+        "type": "u8[0x10]"
       }
     ],
     "source": "xzre/xzre_code/secret_data_get_decrypted.c"
@@ -7445,6 +7471,40 @@
       {
         "original": "local_c1._4_4_",
         "replacement": "*(uint *)((u8 *)&local_c1 + 4)"
+      },
+      {
+        "name": "serialized_key",
+        "original": "local_c1",
+        "type": "u8[0x89]"
+      },
+      {
+        "name": "serialized_key_pad",
+        "original": "uStack_b9",
+        "type": "u64"
+      },
+      {
+        "original": "serialized_key = CONCAT44(*(uint *)((u8 *)&serialized_key + 4),",
+        "replacement": "*(uint *)serialized_key ="
+      },
+      {
+        "original": "ec_point_len << 0x18);",
+        "replacement": "ec_point_len << 0x18;"
+      },
+      {
+        "original": "<< 0x18);",
+        "replacement": "<< 0x18;"
+      },
+      {
+        "original": "serialized_key = 0;",
+        "replacement": "*(u64 *)serialized_key = 0;"
+      },
+      {
+        "original": "serialized_key = 0x20000000;",
+        "replacement": "*(u32 *)serialized_key = 0x20000000;"
+      },
+      {
+        "original": "&serialized_key",
+        "replacement": "serialized_key"
       },
       {
         "name": "imports",

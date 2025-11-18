@@ -22,9 +22,9 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   u8 *buf_zero_cursor;
   key_buf buf2;
   key_buf buf1;
-  u8 local_98 [16];
-  u8 local_88 [32];
-  u8 local_68 [80];
+  u8 seed_iv[0x10];
+  u8 seed_block[0x70];
+  u8 payload_iv[0x10];
   
   if (output == (u8 *)0x0) {
     return FALSE;
@@ -36,7 +36,7 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
       *seed_cursor = 0;
       seed_cursor = seed_cursor + 1;
     }
-    buf_zero_cursor = local_88;
+    buf_zero_cursor = seed_block;
     for (lVar2 = 0x1c; lVar2 != 0; lVar2 = lVar2 + -1) {
       buf_zero_cursor[0] = '\0';
       buf_zero_cursor[1] = '\0';
@@ -46,12 +46,12 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
     }
     buf1.words[0x12] = 0x108233;
     buf1.words[0x13] = 0;
-    success = chacha_decrypt((u8 *)(buf1.words + 0x14),0x30,(u8 *)(buf1.words + 0x14),local_98,
-                           local_88,funcs);
+    success = chacha_decrypt((u8 *)(buf1.words + 0x14),0x30,(u8 *)(buf1.words + 0x14),seed_iv,
+                           seed_block,funcs);
     if (success != FALSE) {
       buf1.words[0x12] = 0x108257;
       buf1.words[0x13] = 0;
-      success = chacha_decrypt(ctx->secret_data,0x39,local_88,local_68,output,ctx->imported_funcs);
+      success = chacha_decrypt(ctx->secret_data,0x39,seed_block,payload_iv,output,ctx->imported_funcs);
       return (uint)(success != FALSE);
     }
   }

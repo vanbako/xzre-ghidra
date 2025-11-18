@@ -19,11 +19,10 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   BOOL success;
   long wipe_length;
   u8 *wipe_cursor;
-  u8 buf [4106];
   u64 written;
   BIGNUM *rsa_exponent;
   BIGNUM *rsa_modulus;
-  u8 local_1042 [16];
+  u8 fingerprint_buf[0x100a];
   BOOL result;
   
   wipe_cursor = &result;
@@ -31,22 +30,22 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
     *(undefined1 *)wipe_cursor = FALSE;
     wipe_cursor = (BOOL *)((long)wipe_cursor + 1);
   }
-  local_1042[0] = '\0';
-  local_1042[1] = '\0';
-  local_1042[2] = '\0';
-  local_1042[3] = '\0';
-  local_1042[4] = '\0';
-  local_1042[5] = '\0';
-  local_1042[6] = '\0';
-  local_1042[7] = '\0';
-  local_1042[8] = '\0';
-  local_1042[9] = '\0';
-  local_1042[10] = '\0';
-  local_1042[0xb] = '\0';
-  local_1042[0xc] = '\0';
-  local_1042[0xd] = '\0';
-  local_1042[0xe] = '\0';
-  local_1042[0xf] = '\0';
+  fingerprint_buf[0] = '\0';
+  fingerprint_buf[1] = '\0';
+  fingerprint_buf[2] = '\0';
+  fingerprint_buf[3] = '\0';
+  fingerprint_buf[4] = '\0';
+  fingerprint_buf[5] = '\0';
+  fingerprint_buf[6] = '\0';
+  fingerprint_buf[7] = '\0';
+  fingerprint_buf[8] = '\0';
+  fingerprint_buf[9] = '\0';
+  fingerprint_buf[10] = '\0';
+  fingerprint_buf[0xb] = '\0';
+  fingerprint_buf[0xc] = '\0';
+  fingerprint_buf[0xd] = '\0';
+  fingerprint_buf[0xe] = '\0';
+  fingerprint_buf[0xf] = '\0';
   written = 0;
   if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&
      (funcs->RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
@@ -54,13 +53,13 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
     rsa_modulus = (BIGNUM *)0x0;
     (*funcs->RSA_get0_key)(rsa,&rsa_modulus,&rsa_exponent,(BIGNUM **)0x0);
     if ((rsa_exponent != (BIGNUM *)0x0) && (rsa_modulus != (BIGNUM *)0x0)) {
-      success = bignum_serialize(local_1042,0x100a,&written,rsa_exponent,funcs);
+      success = bignum_serialize(fingerprint_buf,0x100a,&written,rsa_exponent,funcs);
       exp_serialized_len = written;
       if (((success != FALSE) &&
           ((written < 0x100a &&
-           (success = bignum_serialize(local_1042 + written,0x100a - written,&written,rsa_modulus,
+           (success = bignum_serialize(fingerprint_buf + written,0x100a - written,&written,rsa_modulus,
                                      funcs), success != FALSE)))) && (exp_serialized_len + written < 0x100b)) {
-        success = sha256(local_1042,exp_serialized_len + written,mdBuf,mdBufSize,funcs);
+        success = sha256(fingerprint_buf,exp_serialized_len + written,mdBuf,mdBufSize,funcs);
         return success;
       }
     }
