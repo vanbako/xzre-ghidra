@@ -24,7 +24,7 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
 {
   Elf64_Ehdr *elfbase;
   Elf64_Rela *rela;
-  Elf64_Rela *result_high_bound;
+  u8 *result_upper_bound;
   ulong rela_index;
   u32 target_addr_high;
   ulong *resume_index_ptr;
@@ -55,7 +55,7 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
         rela = (Elf64_Rela *)(elfbase->e_ident + rela->r_offset);
         if (reloc_type == 0) goto LAB_00101c18;
       }
-      if ((reloc_type <= rela) && (rela <= result_high_bound)) {
+      if ((reloc_type <= rela) && (rela <= result_upper_bound)) {
 LAB_00101c18:
         if (resume_index_ptr == (ulong *)0x0) {
           return rela;

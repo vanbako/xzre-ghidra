@@ -25,7 +25,7 @@ BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_fla
   ulong segment_start;
   u8 *segment_page_start;
   u8 *segment_page_end;
-  long phdr_index;
+  ulong phdr_index;
   int recursion_depth;
   
 LAB_00101254:

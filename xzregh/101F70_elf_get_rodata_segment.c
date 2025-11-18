@@ -24,7 +24,7 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
   ulong segment_runtime_start;
   void *segment_page_start;
   u64 selected_size;
-  long lVar10;
+  ulong phdr_index;
   ulong segment_runtime_end;
   u64 code_segment_size;
   
@@ -42,8 +42,8 @@ void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)
       rodata_segment_found = FALSE;
       selected_size = 0;
       selected_rodata_start = (void *)0x0;
-      for (lVar10 = 0; (uint)lVar10 < (uint)(ushort)elf_info->e_phnum; lVar10 = lVar10 + 1) {
-        phdr = elf_info->phdrs + lVar10;
+      for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
+        phdr = elf_info->phdrs + phdr_index;
         if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {
           segment_runtime_start = (long)ehdr + (phdr->p_vaddr - elf_info->first_vaddr);
           segment_runtime_end = phdr->p_memsz + segment_runtime_start;

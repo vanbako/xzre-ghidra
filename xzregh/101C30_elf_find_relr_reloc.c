@@ -20,14 +20,14 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   uint relr_count;
   Elf64_Ehdr *elfbase;
   BOOL addr_ok;
-  Elf64_Relr *result_high_bound;
-  Elf64_Relr *result_low_bound;
+  u8 *result_upper_bound;
+  u8 *result_lower_bound;
   ulong relr_index;
   u32 target_addr_high;
-  uchar *candidate_ptr;
+  u8 *candidate_ptr;
   ulong *resume_index_ptr;
   long relr_offset;
-  Elf64_Relr target_offset;
+  u64 target_offset;
   ulong encoded_entry;
   
   elfbase = elf_info->elfbase;
@@ -50,7 +50,7 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
             return (Elf64_Relr *)0x0;
           }
           if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
-             ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= candidate_ptr && (candidate_ptr <= result_high_bound)))))) {
+             ((result_lower_bound == (Elf64_Relr *)0x0 || ((result_lower_bound <= candidate_ptr && (candidate_ptr <= result_upper_bound)))))) {
 LAB_00101d98:
             if (resume_index_ptr != (ulong *)0x0) {
               *resume_index_ptr = relr_index + 1;
@@ -68,7 +68,7 @@ LAB_00101d98:
                 return (Elf64_Relr *)0x0;
               }
               if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
-                 ((result_low_bound == (Elf64_Relr *)0x0 || ((result_low_bound <= candidate_ptr && (candidate_ptr <= result_high_bound))))))
+                 ((result_lower_bound == (Elf64_Relr *)0x0 || ((result_lower_bound <= candidate_ptr && (candidate_ptr <= result_upper_bound))))))
               goto LAB_00101d98;
             }
             candidate_ptr = candidate_ptr + 8;

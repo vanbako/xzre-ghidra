@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-18
+- elf_mem sweep: retyped the RELA/RELR range limits to `u8 *`, renamed the probe page for `is_range_mapped`, and made the code/data/rodata segment cursors explicitly `u64`/`u8 *` (added the missing rodata `phdr_index` and swapped the data-segment span to an unsigned size).
+- Ran `./scripts/refresh_xzre_project.sh`; `ghidra_scripts/generated/locals_rename_report.txt` is clean and the exported `xzregh` shows the clarified bounds/page/segment names.
+- Next: consider exposing the recursion-depth arg in `elf_contains_vaddr_impl` or adding metadata for the trap stubs if we need to annotate their placeholders later.
+
+## 2025-11-18
 - Loader_rt sweep: named the ld.so string/size/ctx temps in `find_dl_naudit` and expanded the disassembler field rewrites in `find_link_map_l_audit_any_plt_bitmask` so the decomp drops the raw `_0_4_`/`_40_4_` accesses. Ran `./scripts/refresh_xzre_project.sh`; locals rename report is clean and the exported `xzregh` now shows the clarified names.
 - Next: consider tackling the remaining large scratch structs in `backdoor_setup` if more anonymous `local_*` temps surface in future imports.
 

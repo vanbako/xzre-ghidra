@@ -29,7 +29,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   void *segment_mem_end;
   ulong phdr_index;
   ulong seg_end;
-  long best_segment_size;
+  u64 best_segment_span;
   
   cached_data_start = (void *)elf_info->data_segment_start;
   elfbase = elf_info->elfbase;
@@ -47,7 +47,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
     return cached_data_start;
   }
   data_segment_found = FALSE;
-  best_segment_size = 0;
+  best_segment_span = 0;
   best_segment_start = 0;
   best_segment_index = 0;
   for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
@@ -63,14 +63,14 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
         seg_end = (seg_end & 0xfffffffffffff000) + 0x1000;
       }
       if (data_segment_found) {
-        if (best_segment_start + best_segment_size < seg_end) {
-          best_segment_size = seg_end - seg_start;
+        if (best_segment_start + best_segment_span < seg_end) {
+          best_segment_span = seg_end - seg_start;
           best_segment_index = phdr_index & 0xffffffff;
           best_segment_start = seg_start;
         }
       }
       else {
-        best_segment_size = seg_end - seg_start;
+        best_segment_span = seg_end - seg_start;
         data_segment_found = TRUE;
         best_segment_index = phdr_index & 0xffffffff;
         best_segment_start = seg_start;
@@ -79,9 +79,9 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   }
   if (data_segment_found) {
     phdr = elf_info->phdrs;
-    best_segment_size = phdr[best_segment_index].p_vaddr - elf_info->first_vaddr;
-    segment_mem_end = (void *)((long)elfbase + phdr[best_segment_index].p_memsz + best_segment_size);
-    segment_file_end = (void *)((long)elfbase + phdr[best_segment_index].p_filesz + best_segment_size);
+    best_segment_span = phdr[best_segment_index].p_vaddr - elf_info->first_vaddr;
+    segment_mem_end = (void *)((long)elfbase + phdr[best_segment_index].p_memsz + best_segment_span);
+    segment_file_end = (void *)((long)elfbase + phdr[best_segment_index].p_filesz + best_segment_span);
     cached_data_start = segment_mem_end;
     if (((ulong)segment_mem_end & 0xfff) != 0) {
       cached_data_start = (void *)(((ulong)segment_mem_end & 0xfffffffffffff000) + 0x1000);

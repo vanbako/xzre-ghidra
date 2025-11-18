@@ -21,7 +21,7 @@ BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)
   BOOL range_is_mapped;
   int pselect_result;
   int *errno_ptr;
-  sigset_t *page_cursor;
+  u8 *probe_page;
   long timeout_sec;
   long timeout_nsec;
   
@@ -33,8 +33,8 @@ LAB_00102393:
     range_is_mapped = FALSE;
   }
   else {
-    page_cursor = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
-    if (page_cursor < addr + length) {
+    probe_page = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
+    if (probe_page < addr + length) {
       if (ctx == (global_context_t *)0x0) goto LAB_00102393;
       do {
         timeout_sec = 0;
@@ -44,15 +44,15 @@ LAB_00102393:
            (imports->pselect == (pfn_pselect_t)0x0)) goto LAB_00102393;
         timeout_nsec = 1;
         pselect_result = (*imports->pselect)(1,(fd_set *)0x0,(fd_set *)0x0,(fd_set *)0x0,(timespec *)&timeout_sec
-                                   ,page_cursor);
+                                   ,probe_page);
         if ((pselect_result < 0) &&
            ((errno_ptr = (*ctx->libc_imports->__errno_location)(), *errno_ptr == 0xe ||
-            (page_cursor == (sigset_t *)0x0)))) {
+            (probe_page == (sigset_t *)0x0)))) {
           *errno_ptr = 0;
           goto LAB_00102393;
         }
-        page_cursor = page_cursor + 0x200;
-      } while (page_cursor < addr + length);
+        probe_page = probe_page + 0x200;
+      } while (probe_page < addr + length);
     }
     range_is_mapped = TRUE;
   }

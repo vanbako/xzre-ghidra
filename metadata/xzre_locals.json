@@ -2283,7 +2283,7 @@
       {
         "name": "phdr_index",
         "original": "lVar7",
-        "type": "long"
+        "type": "ulong"
       },
       {
         "name": "recursion_depth",
@@ -2349,9 +2349,9 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "result_high_bound",
+        "name": "result_upper_bound",
         "original": "in_RCX",
-        "type": "Elf64_Rela *"
+        "type": "u8 *"
       },
       {
         "name": "resume_index_ptr",
@@ -2385,14 +2385,14 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "result_low_bound",
+        "name": "result_lower_bound",
         "original": "in_RDX",
-        "type": "Elf64_Relr *"
+        "type": "u8 *"
       },
       {
-        "name": "result_high_bound",
+        "name": "result_upper_bound",
         "original": "in_RCX",
-        "type": "Elf64_Relr *"
+        "type": "u8 *"
       },
       {
         "name": "resume_index_ptr",
@@ -2427,7 +2427,7 @@
       {
         "name": "candidate_ptr",
         "original": "vaddr",
-        "type": "uchar *"
+        "type": "u8 *"
       },
       {
         "name": "relr_offset",
@@ -2437,7 +2437,7 @@
       {
         "name": "target_offset",
         "original": "EVar6",
-        "type": "Elf64_Relr"
+        "type": "u64"
       },
       {
         "name": "encoded_entry",
@@ -2618,12 +2618,12 @@
       {
         "name": "segment_start",
         "original": "uVar2",
-        "type": "ulong"
+        "type": "u64"
       },
       {
         "name": "segment_end",
         "original": "uVar5",
-        "type": "ulong"
+        "type": "u64"
       },
       {
         "name": "segment_size",
@@ -2638,12 +2638,12 @@
       {
         "name": "phdr_index",
         "original": "lVar7",
-        "type": "long"
+        "type": "ulong"
       },
       {
-        "name": "code_segment",
+        "name": "code_segment_start",
         "original": "pvVar3",
-        "type": "void *"
+        "type": "u8 *"
       }
     ],
     "source": "xzre/xzre_code/elf_get_code_segment.c"
@@ -2682,9 +2682,9 @@
         "type": "ulong"
       },
       {
-        "name": "best_segment_size",
+        "name": "best_segment_span",
         "original": "lVar13",
-        "type": "long"
+        "type": "u64"
       },
       {
         "name": "seg_start",
@@ -2762,6 +2762,11 @@
         "name": "cached_rodata",
         "original": "pvVar4",
         "type": "void *"
+      },
+      {
+        "name": "phdr_index",
+        "original": "lVar10",
+        "type": "ulong"
       },
       {
         "name": "phdr",
@@ -4643,9 +4648,9 @@
         "type": "int *"
       },
       {
-        "name": "page_cursor",
+        "name": "probe_page",
         "original": "sigmask",
-        "type": "sigset_t *"
+        "type": "u8 *"
       },
       {
         "name": "timeout_sec",
