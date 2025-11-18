@@ -4915,6 +4915,26 @@
         "name": "reply_buf",
         "original": "buffer",
         "type": "void *"
+      },
+      {
+        "name": "synth_reply_word0",
+        "original": "local_15",
+        "type": "uint"
+      },
+      {
+        "name": "synth_reply_word1",
+        "original": "uStack_11",
+        "type": "uint"
+      },
+      {
+        "name": "synth_reply_flag",
+        "original": "uStack_d",
+        "type": "u8"
+      },
+      {
+        "name": "synth_reply_pad",
+        "original": "uStack_c",
+        "type": "u32"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_authpassword_hook.c"
