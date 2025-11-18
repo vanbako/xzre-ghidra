@@ -2544,7 +2544,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scanner_ctx"
+        "replacement": "scanner_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "original": "local_80._40_4_",
@@ -2552,8 +2553,8 @@
       },
       {
         "original": "local_90",
-        "replacement": "code_segment_info",
-        "type": "u64[2]"
+        "replacement": "code_segment_size",
+        "type": "u64"
       },
       {
         "original": "local_94",
@@ -2561,7 +2562,7 @@
         "type": "EncodedStringId"
       },
       {
-        "name": "func_range_end_ptr",
+        "name": "range_end",
         "original": "ppvVar1",
         "type": "void **"
       },
@@ -2571,9 +2572,9 @@
         "type": "u8 *"
       },
       {
-        "name": "xref_bound",
+        "name": "range_xref",
         "original": "pEVar3",
-        "type": "u8 *"
+        "type": "void *"
       },
       {
         "name": "string_id_seed",
@@ -2586,7 +2587,7 @@
         "type": "BOOL"
       },
       {
-        "name": "code_start",
+        "name": "code_segment_start",
         "original": "code_start",
         "type": "u8 *"
       },
@@ -2601,7 +2602,7 @@
         "type": "u8 *"
       },
       {
-        "name": "func_range_iter",
+        "name": "range_iter",
         "original": "ppvVar8",
         "type": "void **"
       },
@@ -2616,14 +2617,14 @@
         "type": "Elf64_Rela *"
       },
       {
-        "name": "decoder_ctx",
+        "name": "scan_ctx",
         "original": "pdVar11",
         "type": "dasm_ctx_t *"
       },
       {
         "name": "entry_offset",
         "original": "lVar12",
-        "type": "long"
+        "type": "u64"
       },
       {
         "name": "entry_cursor",
@@ -2631,12 +2632,12 @@
         "type": "string_item_t *"
       },
       {
-        "name": "code_end",
+        "name": "code_segment_end",
         "original": "code_end",
         "type": "u8 *"
       },
       {
-        "name": "func_range_cursor",
+        "name": "range_cursor",
         "original": "ppvVar14",
         "type": "void **"
       },
@@ -3296,7 +3297,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -3321,7 +3323,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -3351,7 +3354,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -3639,7 +3643,8 @@
       },
       {
         "original": "local_70",
-        "replacement": "prologue_ctx"
+        "replacement": "prologue_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "prologue_found",
@@ -3680,7 +3685,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -3726,7 +3732,8 @@
       },
       {
         "original": "local_80",
-        "replacement": "lea_ctx"
+        "replacement": "lea_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -3756,7 +3763,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -4139,7 +4147,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -4169,7 +4178,8 @@
     "register_temps": [
       {
         "original": "local_80",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "opcode",

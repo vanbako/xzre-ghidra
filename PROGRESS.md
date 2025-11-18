@@ -3,6 +3,12 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-18
+- opco_patt locals sweep: typed the scratch decoder contexts in the MOV/LEA/CALL/string finders as `dasm_ctx_t`, renamed the range/xref iterators inside `elf_find_string_references`, and made the string-entry offsets unsigned so the decomp reflects the underlying tables.
+- Ran `./scripts/refresh_xzre_project.sh`; locals rename report is clean and `xzregh/102D30_elf_find_string_references.c` picked up the new naming.
+- Continued unwinding `elf_find_string_references`: forced the code segment bounds and target calculations to use plain `u8 *` math instead of the decoder-struct offsets and normalized the return path to a simple TRUE.
+- Next: carry the `u8 *`-based code/target math into metadata so future refreshes keep the simplified pointers without reintroducing the decoder offsets.
+
+## 2025-11-18
 - Added `scripts/fetch_third_party_headers.py` to pull Feb 2024-era headers (OpenSSH 9.7p1, OpenSSL 3.0.13, XZ Utils 5.4.6) into `third_party/include/` while discarding the tarballs; refreshed `AGENTS.md` with usage notes so analysts can re-run or bump versions as needed.
 - Ran the helper to stage headers under `third_party/include/{openssh,openssl,xz}` and trimmed them to the relevant roots plus transitive includes.
 - Wired the refresh pipeline to pass `third_party/include` into `ImportXzreTypes.py` so signature application sees upstream structs/prototypes.
