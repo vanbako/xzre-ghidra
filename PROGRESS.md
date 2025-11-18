@@ -4,8 +4,9 @@ Document notable steps taken while building out the Ghidra analysis environment 
 
 ## 2025-11-18
 - Added `scripts/fetch_third_party_headers.py` to pull Feb 2024-era headers (OpenSSH 9.7p1, OpenSSL 3.0.13, XZ Utils 5.4.6) into `third_party/include/` while discarding the tarballs; refreshed `AGENTS.md` with usage notes so analysts can re-run or bump versions as needed.
-- Ran the helper to stage headers under `third_party/include/{openssh,openssl,xz}`.
-- Next: point Ghidra signature passes at `third_party/include` when richer prototypes/structs are needed for loader/crypto/ssh hooks.
+- Ran the helper to stage headers under `third_party/include/{openssh,openssl,xz}` and trimmed them to the relevant roots plus transitive includes.
+- Wired the refresh pipeline to pass `third_party/include` into `ImportXzreTypes.py` so signature application sees upstream structs/prototypes.
+- Next: if new upstream snapshots are needed, tweak the script versions/urls and rerun before the next refresh.
 
 ## 2025-11-18
 - elf_mem follow-up: exposed the recursion-depth arg in `elf_contains_vaddr_impl` (now named `depth_param`) and added locals metadata for the trap stubs (`lzma_check_init`, `tls_get_addr`, `lzma_free`, `lzma_alloc`) so their placeholders stay tracked in metadata.

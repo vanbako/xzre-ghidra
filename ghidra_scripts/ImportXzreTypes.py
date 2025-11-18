@@ -21,8 +21,19 @@ def main():
         printerr("Header file not found: {}".format(header_path))
         return
 
+    include_paths = []
+    for arg in script_args[1:]:
+        if arg.startswith("include_paths="):
+            include_paths.extend(
+                [
+                    p
+                    for p in arg.split("=", 1)[1].split(os.pathsep)
+                    if p and os.path.isdir(p)
+                ]
+            )
+
     filenames = array([header_path], String)
-    include_paths = array([], String)
+    include_paths_arr = array(include_paths, String)
     cpp_args = array([], String)
     open_dtms = array([], DataTypeManager)
 
@@ -31,10 +42,17 @@ def main():
     success = False
     try:
         CParserUtils.parseHeaderFiles(
-            open_dtms, filenames, include_paths, cpp_args, dtm, monitor
+            open_dtms, filenames, include_paths_arr, cpp_args, dtm, monitor
         )
         success = True
-        print("Imported xzre data types from {}".format(header_path))
+        if include_paths:
+            print(
+                "Imported xzre data types from {} (include paths: {})".format(
+                    header_path, ", ".join(include_paths)
+                )
+            )
+        else:
+            print("Imported xzre data types from {}".format(header_path))
     except Exception as exc:
         printerr("Failed to import xzre data types: {}".format(exc))
     finally:

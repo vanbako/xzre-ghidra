@@ -67,6 +67,7 @@ TYPES_SOURCE="$META_DIR/xzre_types.json"
 TYPE_DOCS_SOURCE="$META_DIR/type_docs.json"
 TYPES_HELPER="$ROOT_DIR/scripts/manage_types_metadata.py"
 LINKER_MAP_JSON="$META_DIR/linker_map.json"
+THIRD_PARTY_INCLUDE="$ROOT_DIR/third_party/include"
 
 mkdir -p "$PROJECT_DIR"
 mkdir -p "$(dirname "$HEADER_PATH")"
@@ -134,7 +135,7 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -import "$OBJECT_PATH" \
   -overwrite \
   -scriptPath "$SCRIPT_PATH" \
-  -postScript ImportXzreTypes.py "$HEADER_PATH" \
+  -postScript ImportXzreTypes.py "$HEADER_PATH" "include_paths=$THIRD_PARTY_INCLUDE" \
   -postScript RenameFromLinkerMap.py "$LINKER_MAP_JSON" \
   -postScript ApplySignaturesFromHeader.py \
   -postScript InstallEnumEquates.py "$HEADER_PATH" \
