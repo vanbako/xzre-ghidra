@@ -26,10 +26,10 @@ BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_fla
   u8 *segment_page_start;
   u8 *segment_page_end;
   ulong phdr_index;
-  int recursion_depth;
+  int depth_param;
   
 LAB_00101254:
-  recursion_depth = recursion_depth + 1;
+  depth_param = depth_param + 1;
   range_end = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);
   if (size == 0) {
 LAB_0010138e:
@@ -40,7 +40,7 @@ LAB_0010138e:
     if (vaddr <= range_end) {
       segment_page_start = (Elf64_Ehdr *)vaddr;
     }
-    if ((elf_info->elfbase <= segment_page_start) && (recursion_depth != 0x3ea)) {
+    if ((elf_info->elfbase <= segment_page_start) && (depth_param != 0x3ea)) {
       phdr_index = 0;
       do {
         if ((uint)(ushort)elf_info->e_phnum <= (uint)phdr_index) break;

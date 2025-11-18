@@ -3,6 +3,16 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-18
+- Added `scripts/fetch_third_party_headers.py` to pull Feb 2024-era headers (OpenSSH 9.7p1, OpenSSL 3.0.13, XZ Utils 5.4.6) into `third_party/include/` while discarding the tarballs; refreshed `AGENTS.md` with usage notes so analysts can re-run or bump versions as needed.
+- Ran the helper to stage headers under `third_party/include/{openssh,openssl,xz}`.
+- Next: point Ghidra signature passes at `third_party/include` when richer prototypes/structs are needed for loader/crypto/ssh hooks.
+
+## 2025-11-18
+- elf_mem follow-up: exposed the recursion-depth arg in `elf_contains_vaddr_impl` (now named `depth_param`) and added locals metadata for the trap stubs (`lzma_check_init`, `tls_get_addr`, `lzma_free`, `lzma_alloc`) so their placeholders stay tracked in metadata.
+- Ran `./scripts/refresh_xzre_project.sh`; rename report is clean and the exported `xzregh` picks up the depth rename.
+- Next: if we pull in more ELF sources, consider wiring a seed value for `depth_param` to avoid the implicit zeroing Ghidra assumes here.
+
+## 2025-11-18
 - elf_mem sweep: retyped the RELA/RELR range limits to `u8 *`, renamed the probe page for `is_range_mapped`, and made the code/data/rodata segment cursors explicitly `u64`/`u8 *` (added the missing rodata `phdr_index` and swapped the data-segment span to an unsigned size).
 - Ran `./scripts/refresh_xzre_project.sh`; `ghidra_scripts/generated/locals_rename_report.txt` is clean and the exported `xzregh` shows the clarified bounds/page/segment names.
 - Next: consider exposing the recursion-depth arg in `elf_contains_vaddr_impl` or adding metadata for the trap stubs if we need to annotate their placeholders later.

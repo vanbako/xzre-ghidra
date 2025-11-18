@@ -28,6 +28,18 @@
 - `scripts/check_locals_renames.py --output <report>` validates that every `register_temps` rename in `metadata/xzre_locals.json` actually shows up in the exported `xzregh/*.c`. `refresh_xzre_project.sh` runs it automatically and writes the results to `ghidra_scripts/generated/locals_rename_report.txt`; inspect that file whenever the refresh complains about lingering `local_*` names.
 - Recommended loop: generate stubs for the batch you plan to tackle, jot raw observations in those Markdown files while reviewing `xzregh/`, then promote the distilled findings into the metadata JSON via the helper (and adjust `metadata/xzre_locals.json` for renamed locals/params). The stubs are scratchpads only—the JSON files remain the source of truth.
 
+### Third-Party Headers (OpenSSH/OpenSSL/XZ)
+- We keep upstream headers under `third_party/include/` (separate from `xzregh/`) to improve type/signature fidelity without polluting the exported C.
+- Use the helper to fetch a curated set of `.h` files for Feb 2024-era releases and discard the tarballs; it keeps only the relevant roots and their intra-package include dependencies:
+  ```bash
+  ./scripts/fetch_third_party_headers.py --dest third_party/include
+  ```
+  - OpenSSH portable 9.7p1 (`third_party/include/openssh`)
+  - OpenSSL 3.0.13 (`third_party/include/openssl`)
+  - XZ Utils 5.4.6 (`third_party/include/xz`)
+- Adjust versions/URLs inside the script if you need a different snapshot, then rerun; it refreshes the header trees in place.
+- Point Ghidra signature passes (or local analysis) at `third_party/include` when applying prototypes/structs during reverse-engineering sessions.
+
 ## Working With Ghidra
 - Refresh the project with the bundled helper (runs the import, replays header types/signatures, and exports the portable snapshot so the System V calling convention fix is always applied):
   ```bash
