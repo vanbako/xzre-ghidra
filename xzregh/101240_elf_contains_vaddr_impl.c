@@ -20,7 +20,7 @@ BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_fla
 
 {
   u8 *range_end;
-  BOOL BVar2;
+  BOOL range_ok;
   Elf64_Phdr *phdr;
   ulong segment_start;
   u8 *segment_page_start;
@@ -33,7 +33,7 @@ LAB_00101254:
   range_end = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);
   if (size == 0) {
 LAB_0010138e:
-    BVar2 = TRUE;
+    range_ok = TRUE;
   }
   else {
     segment_page_start = range_end;
@@ -56,14 +56,14 @@ LAB_0010138e:
           if ((range_end > segment_page_end) || (segment_page_start <= vaddr)) {
             if ((segment_page_end <= vaddr) || (vaddr < segment_page_start)) {
               if ((segment_page_end < range_end) && (segment_page_start > vaddr)) {
-                BVar2 = elf_contains_vaddr_impl(elf_info,vaddr,(long)segment_page_start - (long)vaddr,p_flags);
-                if (BVar2 == FALSE) {
+                range_ok = elf_contains_vaddr_impl(elf_info,vaddr,(long)segment_page_start - (long)vaddr,p_flags);
+                if (range_ok == FALSE) {
                   return FALSE;
                 }
-                BVar2 = elf_contains_vaddr_impl
+                range_ok = elf_contains_vaddr_impl
                                   (elf_info,segment_page_end->e_ident + 1,(long)range_end + (-1 - (long)segment_page_end),
                                    p_flags);
-                return (uint)(BVar2 != FALSE);
+                return (uint)(range_ok != FALSE);
               }
             }
             else if (segment_page_end < range_end) {
@@ -77,9 +77,9 @@ LAB_0010138e:
         phdr_index = phdr_index + 1;
       } while( TRUE );
     }
-    BVar2 = FALSE;
+    range_ok = FALSE;
   }
-  return BVar2;
+  return range_ok;
 code_r0x00101313:
   size = (long)segment_page_start + (-1 - (long)vaddr);
   goto LAB_00101254;

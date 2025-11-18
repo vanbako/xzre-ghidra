@@ -15,9 +15,9 @@
 BOOL elf_contains_vaddr(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_flags)
 
 {
-  BOOL BVar1;
+  BOOL range_ok;
   
-  BVar1 = elf_contains_vaddr_impl(elf_info,vaddr,size,p_flags);
-  return BVar1;
+  range_ok = elf_contains_vaddr_impl(elf_info,vaddr,size,p_flags);
+  return range_ok;
 }
 

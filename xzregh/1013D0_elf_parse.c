@@ -24,16 +24,16 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   uint gnu_hash_bloom_size;
   uint gnu_hash_symbias;
   uint gnu_hash_bloom_shift;
-  Elf64_DynValue EVar4;
+  Elf64_DynValue versym_value;
   Elf64_Rela *plt_relocs_ptr;
   Elf64_Rela *rela_relocs_ptr;
   Elf64_Relr *relr_relocs_ptr;
   char *strtab_base;
   undefined1 auVar9 [16];
   undefined1 auVar10 [16];
-  byte bVar11;
+  byte bind_now_flag;
   BOOL verdef_present;
-  BOOL BVar13;
+  BOOL range_ok;
   int dyn_entry_capacity;
   Elf64_Dyn *vaddr;
   Elf64_DynValue *dyn_cursor;
@@ -93,8 +93,8 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
         dynamic_phdr_index = (long)(int)phdr_idx;
       }
       else {
-        BVar13 = is_gnu_relro(p_type,0xa0000000);
-        if (BVar13 != FALSE) {
+        range_ok = is_gnu_relro(p_type,0xa0000000);
+        if (range_ok != FALSE) {
           if (elf_info->gnurelro_found != FALSE) {
             return FALSE;
           }
@@ -113,8 +113,8 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       elf_info->dyn = vaddr;
       dyn_entry_capacity = (int)(phnum >> 4);
       *(int *)&elf_info->dyn_num_entries = dyn_entry_capacity;
-      BVar13 = elf_contains_vaddr(elf_info,vaddr,phnum,4);
-      if (BVar13 != FALSE) {
+      range_ok = elf_contains_vaddr(elf_info,vaddr,phnum,4);
+      if (range_ok != FALSE) {
         dyn_cursor = &vaddr->d_un;
         verdef_present = FALSE;
         relr_table_size = 0xffffffffffffffff;
@@ -154,7 +154,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
               case 0x18:
                 goto switchD_0010157d_caseD_18;
               case 0x1e:
-                bVar11 = *(byte *)dyn_cursor & 8;
+                bind_now_flag = *(byte *)dyn_cursor & 8;
                 goto LAB_00101650;
               case 0x23:
                 relr_table_size = dyn_cursor->d_val;
@@ -165,9 +165,9 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
             }
           }
           else if (dynamic_phdr_index == 0x6ffffffb) {
-            bVar11 = *(byte *)dyn_cursor & 1;
+            bind_now_flag = *(byte *)dyn_cursor & 1;
 LAB_00101650:
-            if (bVar11 != 0) {
+            if (bind_now_flag != 0) {
 switchD_0010157d_caseD_18:
               elf_info->flags = elf_info->flags | 0x20;
             }
@@ -182,9 +182,9 @@ switchD_0010157d_caseD_18:
               }
             }
             else if (dynamic_phdr_index == 0x6ffffff0) {
-              EVar4.d_val = *(Elf64_Xword *)dyn_cursor;
+              versym_value.d_val = *(Elf64_Xword *)dyn_cursor;
               elf_info->flags = elf_info->flags | 0x10;
-              elf_info->versym = (Elf64_Versym *)EVar4;
+              elf_info->versym = (Elf64_Versym *)versym_value;
             }
           }
           else if (dynamic_phdr_index == 0x6ffffffd) {
@@ -262,16 +262,16 @@ switchD_0010157d_caseD_18:
             elf_info->verdef = (Elf64_Verdef *)(strtab_base->e_ident + (long)ehdr->e_ident);
           }
           if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->plt_relocs,pltrel_table_size,4),
-                BVar13 != FALSE)) &&
+                (range_ok = elf_contains_vaddr(elf_info,elf_info->plt_relocs,pltrel_table_size,4),
+                range_ok != FALSE)) &&
                ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
-                (BVar13 = elf_contains_vaddr(elf_info,elf_info->rela_relocs,rela_table_size,4),
-                BVar13 != FALSE)))) &&
+                (range_ok = elf_contains_vaddr(elf_info,elf_info->rela_relocs,rela_table_size,4),
+                range_ok != FALSE)))) &&
               ((elf_info->relr_relocs == (Elf64_Relr *)0x0 ||
-               (BVar13 = elf_contains_vaddr(elf_info,elf_info->relr_relocs,relr_table_size,4), BVar13 != FALSE)
+               (range_ok = elf_contains_vaddr(elf_info,elf_info->relr_relocs,relr_table_size,4), range_ok != FALSE)
                ))) && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
-                       (BVar13 = elf_contains_vaddr(elf_info,elf_info->verdef,
-                                                    elf_info->verdef_num * 0x14,4), BVar13 != FALSE)
+                       (range_ok = elf_contains_vaddr(elf_info,elf_info->verdef,
+                                                    elf_info->verdef_num * 0x14,4), range_ok != FALSE)
                        ))) {
             phdr_idx = *gnu_hash_header;
             elf_info->gnu_hash_nbuckets = phdr_idx;

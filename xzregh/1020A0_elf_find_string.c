@@ -15,14 +15,14 @@
 char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void *rodata_start_ptr)
 
 {
-  BOOL BVar1;
-  EncodedStringId EVar2;
+  BOOL telemetry_ok;
+  EncodedStringId candidate_id;
   char *string_begin;
   char *string_end;
   u64 rodata_window[2];
   
-  BVar1 = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xb6,7,10,FALSE);
-  if (BVar1 != FALSE) {
+  telemetry_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xb6,7,10,FALSE);
+  if (telemetry_ok != FALSE) {
     rodata_window[0] = 0;
     string_begin = (char *)elf_get_rodata_segment(elf_info,rodata_window);
     if ((string_begin != (char *)0x0) && (0x2b < rodata_window[0])) {
@@ -36,13 +36,13 @@ char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void
         }
       }
       for (; string_begin < string_end; string_begin = string_begin + 1) {
-        EVar2 = get_string_id(string_begin,string_end);
-        if (EVar2 != 0) {
+        candidate_id = get_string_id(string_begin,string_end);
+        if (candidate_id != 0) {
           if (*stringId_inOut == 0) {
-            *stringId_inOut = EVar2;
+            *stringId_inOut = candidate_id;
             return string_begin;
           }
-          if (*stringId_inOut == EVar2) {
+          if (*stringId_inOut == candidate_id) {
             return string_begin;
           }
         }

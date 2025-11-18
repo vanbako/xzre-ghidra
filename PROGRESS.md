@@ -2,6 +2,16 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-18
+- Extended the `sshd_recon` locals sweep to `mm_answer_keyallowed_hook`: mapped command type/state, libc/sshd ctx handles, payload lengths/offsets, keyverify/authpayload cursors, and the sock-read merge scratch so the exported C reads cleanly.
+- Revisited the monitor struct finder and named its vote counters/cursors and the secret-data append flag; refreshed the headless project and the locals rename report stayed clean.
+- Next: keep walking the monitor/payload hooks for any remaining anonymous temps as we import additional sshd binaries.
+
+## 2025-11-18
+- Passed over the `sshd_recon` helpers again to tighten locals/register temps: the scoring helpers now expose `score`/`base_hit`/`offset*`/`demote_hit` cursors, `extract_payload_message` names the search offset, match window, big-endian length cursors, and modulus field pointers, and the authpassword hook labels the reply buffer/length scratch space. Updated `metadata/xzre_locals.json` accordingly.
+- Ran `./scripts/refresh_xzre_project.sh`; the regenerated `xzregh` sources picked up the new names and `ghidra_scripts/generated/locals_rename_report.txt` reports a clean pass.
+- Next: extend the same treatment to `mm_answer_keyallowed_hook` and revisit the monitor struct finders if any residual `local_*` temps show up in the next decomp export.
+
 ## 2025-11-17
 - Revisited the opco_patt AutoDocs with the improved sources and dependencies in mind: clarified decoder behavior, ModRM/REX/DF2 requirements, address recomputation paths, and how the string/reloc walkers tighten function bounds. Updated the relevant entries in `metadata/functions_autodoc.json` and pushed them through the headless refresh.
 - Ran `./scripts/refresh_xzre_project.sh`; exported comments now mirror the richer descriptions and the locals rename report remains clean.

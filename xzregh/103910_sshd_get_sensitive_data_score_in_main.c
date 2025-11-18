@@ -19,24 +19,24 @@ int sshd_get_sensitive_data_score_in_main
 {
   u8 *code_start;
   u8 *code_end;
-  BOOL BVar1;
-  BOOL BVar2;
-  BOOL BVar3;
-  int iVar4;
+  BOOL base_hit;
+  BOOL offset10_hit;
+  BOOL offset8_hit;
+  int score;
   u8 *main_end;
   u8 *main_start;
   
-  iVar4 = 0;
+  score = 0;
   code_start = (u8 *)refs->entries[2].func_start;
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)refs->entries[2].func_end;
-    BVar1 = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
-    BVar2 = find_instruction_with_mem_operand
+    base_hit = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
+    offset10_hit = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 0x10));
-    BVar3 = find_instruction_with_mem_operand
+    offset8_hit = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 8));
-    iVar4 = (((uint)(BVar1 != FALSE) - (uint)(BVar2 == FALSE)) + 2) - (uint)(BVar3 == FALSE);
+    score = (((uint)(base_hit != FALSE) - (uint)(offset10_hit == FALSE)) + 2) - (uint)(offset8_hit == FALSE);
   }
-  return iVar4;
+  return score;
 }
 
