@@ -2473,7 +2473,8 @@
     "register_temps": [
       {
         "original": "local_2c",
-        "replacement": "string_id_cursor"
+        "replacement": "string_id_cursor",
+        "type": "EncodedStringId"
       },
       {
         "name": "decode_ok",
@@ -2506,11 +2507,13 @@
       },
       {
         "original": "local_90",
-        "replacement": "code_segment_info"
+        "replacement": "code_segment_info",
+        "type": "u64[2]"
       },
       {
         "original": "local_94",
-        "replacement": "string_id_cursor"
+        "replacement": "string_id_cursor",
+        "type": "EncodedStringId"
       },
       {
         "name": "func_range_end_ptr",
@@ -4239,7 +4242,8 @@
     "register_temps": [
       {
         "original": "local_60",
-        "replacement": "scratch_ctx"
+        "replacement": "scratch_ctx",
+        "type": "dasm_ctx_t"
       },
       {
         "name": "decode_ok",
@@ -7590,11 +7594,11 @@
     "source": "xzre/xzre_code/verify_signature.c"
   },
   "x86_dasm": {
-    "locals": [],
     "register_temps": [
       {
         "original": "local_38",
-        "replacement": "opcode_class_masks"
+        "replacement": "opcode_class_masks",
+        "type": "ulong[4]"
       },
       {
         "name": "rex_prefix",
@@ -7670,6 +7674,11 @@
         "name": "operand_cursor",
         "original": "pbVar20",
         "type": "u8 *"
+      },
+      {
+        "name": "tmp_byte",
+        "original": "bVar6",
+        "type": "byte"
       },
       {
         "name": "ctx_clear",

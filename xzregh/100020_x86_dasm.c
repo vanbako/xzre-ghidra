@@ -19,7 +19,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   byte modrm_byte;
   byte modrm_rm_bits;
   ushort imm16_word;
-  byte bVar6;
+  byte tmp_byte;
   BOOL telemetry_ok;
   int derived_opcode;
   u64 operand_width;
@@ -76,18 +76,18 @@ LAB_001001c9:
           current_byte = *cursor;
           opcode = current_byte | opcode;
           *(uint *)(ctx->opcode_window + 3) = opcode;
-          bVar6 = *cursor;
-          if ((bVar6 & 0xfd) == 0x38) {
+          tmp_byte = *cursor;
+          if ((tmp_byte & 0xfd) == 0x38) {
             if (((ctx->prefix).decoded.flags & 0x10) != 0) {
               return FALSE;
             }
             cursor = cursor + 1;
             goto LAB_001003fa;
           }
-          if (((int)(uint)(byte)(&dasm_twobyte_is_valid)[bVar6 >> 3] >> (bVar6 & 7) & 1U) == 0) {
+          if (((int)(uint)(byte)(&dasm_twobyte_is_valid)[tmp_byte >> 3] >> (tmp_byte & 7) & 1U) == 0) {
             return FALSE;
           }
-          if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (bVar6 == 0x1e)) {
+          if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {
             if (cursor + 1 < code_end) {
               prefix_clear = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
@@ -142,15 +142,15 @@ LAB_001008c5:
             if (code_end <= cursor) goto LAB_00100aa5;
             current_byte = (ctx->prefix).decoded.flags;
             (ctx->prefix).decoded.flags = current_byte | 0x40;
-            bVar6 = *cursor;
-            *(byte *)((long)&ctx->prefix + 0xc) = bVar6;
-            bVar6 = bVar6 >> 6;
-            *(byte *)((long)&ctx->prefix + 0xd) = bVar6;
+            tmp_byte = *cursor;
+            *(byte *)((long)&ctx->prefix + 0xc) = tmp_byte;
+            tmp_byte = tmp_byte >> 6;
+            *(byte *)((long)&ctx->prefix + 0xd) = tmp_byte;
             modrm_byte = *cursor;
             *(byte *)((long)&ctx->prefix + 0xe) = (byte)((int)(uint)modrm_byte >> 3) & 7;
             modrm_rm_bits = *cursor;
             *(byte *)((long)&ctx->prefix + 0xf) = modrm_rm_bits & 7;
-            if (bVar6 == 3) {
+            if (tmp_byte == 3) {
 LAB_00100902:
               if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {
 LAB_0010092e:
@@ -162,8 +162,8 @@ LAB_0010092e:
               if ((modrm_rm_bits & 7) == 4) {
                 (ctx->prefix).decoded.flags = current_byte | 0xc0;
               }
-              if (bVar6 != 1) {
-                if (bVar6 != 2) goto LAB_00100902;
+              if (tmp_byte != 1) {
+                if (tmp_byte != 2) goto LAB_00100902;
                 goto LAB_0010092e;
               }
               flags2_ptr = &(ctx->prefix).decoded.flags2;
@@ -276,20 +276,20 @@ LAB_001004e1:
       if (current_byte != 0xf0) {
         if (current_byte < 0xf1) {
           if (1 < (byte)(current_byte + 0x3c)) goto LAB_00100191;
-          bVar6 = (ctx->prefix).decoded.flags;
-          if ((bVar6 & 0x20) != 0) {
+          tmp_byte = (ctx->prefix).decoded.flags;
+          if ((tmp_byte & 0x20) != 0) {
             return FALSE;
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)current_byte;
           modrm_byte = *cursor;
           opcode_ptr = cursor + 1;
-          (ctx->prefix).decoded.flags = bVar6 | 0x10;
+          (ctx->prefix).decoded.flags = tmp_byte | 0x10;
           (ctx->prefix).decoded.vex_byte = modrm_byte;
           if (code_end <= opcode_ptr) goto LAB_00100aa5;
-          bVar6 = cursor[1];
+          tmp_byte = cursor[1];
           (ctx->prefix).decoded.rex.rex_byte = '@';
           opcode = (uint)current_byte << 8 | 0xf;
-          (ctx->prefix).decoded.vex_byte2 = bVar6;
+          (ctx->prefix).decoded.vex_byte2 = tmp_byte;
           *(uint *)(ctx->opcode_window + 3) = opcode;
           current_byte = ((char)cursor[1] >> 7 & 0xfcU) + 0x44;
           *(byte *)((long)&ctx->prefix + 0xb) = current_byte;
@@ -310,7 +310,7 @@ LAB_001004e1:
           }
           if (code_end <= cursor + 2) goto LAB_00100aa5;
           current_byte = cursor[2];
-          bVar6 = bVar6 & 0x1f;
+          tmp_byte = tmp_byte & 0x1f;
           (ctx->prefix).decoded.vex_byte3 = current_byte;
           if (-1 < (char)current_byte) {
             rex_prefix = &(ctx->prefix).decoded.rex;
@@ -318,12 +318,12 @@ LAB_001004e1:
           }
           opcode = opcode << 8;
           *(uint *)(ctx->opcode_window + 3) = opcode;
-          if (bVar6 == 2) {
+          if (tmp_byte == 2) {
             opcode = opcode | 0x38;
           }
           else {
-            if (bVar6 != 3) {
-              if (bVar6 != 1) {
+            if (tmp_byte != 3) {
+              if (tmp_byte != 1) {
                 return FALSE;
               }
               cursor = cursor + 3;
@@ -375,19 +375,19 @@ LAB_0010063c:
             }
             else {
 LAB_001005d6:
-              bVar6 = current_byte & 0xf;
+              tmp_byte = current_byte & 0xf;
               if (current_byte >> 4 == 1) {
-                if (bVar6 < 10) {
+                if (tmp_byte < 10) {
                   condition_match = (normalized_opcode & 0xc) == 0;
                   goto LAB_00100604;
                 }
-                if (bVar6 != 0xd) {
+                if (tmp_byte != 0xd) {
                   return FALSE;
                 }
               }
               else {
                 if (current_byte >> 4 == 4) {
-                  condition_match = (0x1c57UL >> bVar6 & 1) == 0;
+                  condition_match = (0x1c57UL >> tmp_byte & 1) == 0;
                 }
                 else {
                   if (current_byte >> 4 != 0) {
@@ -545,12 +545,12 @@ LAB_00100344:
           if (((int)(uint)(byte)(&dasm_onebyte_has_modrm)[current_byte >> 3] >> opcode_index & 1U) != 0)
           goto LAB_001008c5;
           if (3 < current_byte - 0xa0) {
-            bVar6 = (ctx->prefix).decoded.flags2;
-            if ((bVar6 & 8) != 0) {
+            tmp_byte = (ctx->prefix).decoded.flags2;
+            if ((tmp_byte & 8) != 0) {
               if (((((ctx->prefix).decoded.flags & 0x20) != 0) &&
                   (((ctx->prefix).decoded.rex.rex_byte & 8) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
                 ctx->operand_size = 8;
-                (ctx->prefix).decoded.flags2 = bVar6 | 0x10;
+                (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
                 ctx->imm64_reg = opcode_index;
                 *(undefined4 *)(ctx->opcode_window + 3) = 0xb8;
               }

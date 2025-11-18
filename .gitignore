@@ -1,6 +1,8 @@
 # Ghidra headless project outputs
 ghidra_projects/*
 !ghidra_projects/*.zip
+# Do not track the exported portable snapshot
+ghidra_projects/xzre_ghidra_portable.zip
 
 # Dependency vendors and build caches
 vendor/
