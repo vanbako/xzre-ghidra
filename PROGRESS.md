@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-18
+- Loader_rt sweep: named the ld.so string/size/ctx temps in `find_dl_naudit` and expanded the disassembler field rewrites in `find_link_map_l_audit_any_plt_bitmask` so the decomp drops the raw `_0_4_`/`_40_4_` accesses. Ran `./scripts/refresh_xzre_project.sh`; locals rename report is clean and the exported `xzregh` now shows the clarified names.
+- Next: consider tackling the remaining large scratch structs in `backdoor_setup` if more anonymous `local_*` temps surface in future imports.
+
+## 2025-11-18
 - Extended the `sshd_recon` locals sweep to `mm_answer_keyallowed_hook`: mapped command type/state, libc/sshd ctx handles, payload lengths/offsets, keyverify/authpayload cursors, and the sock-read merge scratch so the exported C reads cleanly.
 - Revisited the monitor struct finder and named its vote counters/cursors and the secret-data append flag; refreshed the headless project and the locals rename report stayed clean.
 - Next: keep walking the monitor/payload hooks for any remaining anonymous temps as we import additional sshd binaries.
