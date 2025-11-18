@@ -17,7 +17,7 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
 {
   imported_funcs_t *funcs;
   BOOL success;
-  long lVar2;
+  long clear_idx;
   u8 *seed_cursor;
   u8 *buf_zero_cursor;
   key_buf buf2;
@@ -32,12 +32,12 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   if ((ctx != (global_context_t *)0x0) &&
      (funcs = ctx->imported_funcs, funcs != (imported_funcs_t *)0x0)) {
     seed_cursor = buf1.words + 0x14;
-    for (lVar2 = 0xc; lVar2 != 0; lVar2 = lVar2 + -1) {
+    for (clear_idx = 0xc; clear_idx != 0; clear_idx = clear_idx + -1) {
       *seed_cursor = 0;
       seed_cursor = seed_cursor + 1;
     }
     buf_zero_cursor = seed_block;
-    for (lVar2 = 0x1c; lVar2 != 0; lVar2 = lVar2 + -1) {
+    for (clear_idx = 0x1c; clear_idx != 0; clear_idx = clear_idx + -1) {
       buf_zero_cursor[0] = '\0';
       buf_zero_cursor[1] = '\0';
       buf_zero_cursor[2] = '\0';

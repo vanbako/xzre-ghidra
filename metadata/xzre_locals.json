@@ -6196,9 +6196,19 @@
     ],
     "register_temps": [
       {
+        "name": "funcs",
+        "original": "piVar2",
+        "type": "imported_funcs_t *"
+      },
+      {
         "name": "success",
         "original": "BVar1",
         "type": "BOOL"
+      },
+      {
+        "name": "clear_idx",
+        "original": "lVar2",
+        "type": "long"
       },
       {
         "name": "seed_cursor",
@@ -7663,9 +7673,9 @@
         "type": "long"
       },
       {
-        "name": "scratch_cursor",
+        "name": "digest_cursor",
         "original": "puVar9",
-        "type": "u32 *"
+        "type": "u8 *"
       },
       {
         "name": "ecdsa_key",

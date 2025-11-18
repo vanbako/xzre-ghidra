@@ -32,7 +32,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
   EVP_MD_CTX *mdctx;
   long i;
   size_t serialized_len;
-  u32 *scratch_cursor;
+  u8 *digest_cursor;
   u8 serialized_key[0x89];
   u64 serialized_key_pad;
   u8 digest_scratch[128];
@@ -65,10 +65,10 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     ecdsa_key = sshkey->ecdsa;
     *(u64 *)serialized_key = 0;
     serialized_key_pad = 0;
-    scratch_cursor = digest_scratch;
+    digest_cursor = digest_scratch;
     for (i = 0x79; i != 0; i = i + -1) {
-      *(BOOL *)scratch_cursor = signed_data_size < tbs_len;
-      scratch_cursor = (undefined4 *)((long)scratch_cursor + 1);
+      *(BOOL *)digest_cursor = signed_data_size < tbs_len;
+      digest_cursor = (undefined4 *)((long)digest_cursor + 1);
     }
     if (ecdsa_key == (EC_KEY *)0x0) {
       return FALSE;
@@ -119,10 +119,10 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     }
     ed25519_pub = sshkey->ed25519_pk;
     serialized_key_pad = 0;
-    scratch_cursor = digest_scratch;
+    digest_cursor = digest_scratch;
     for (i = 5; i != 0; i = i + -1) {
-      *scratch_cursor = 0;
-      scratch_cursor = scratch_cursor + 1;
+      *digest_cursor = 0;
+      digest_cursor = digest_cursor + 1;
     }
     if (ed25519_pub == (u8 *)0x0) {
       return FALSE;
