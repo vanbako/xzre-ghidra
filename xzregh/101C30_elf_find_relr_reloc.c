@@ -31,8 +31,8 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   ulong encoded_entry;
   
   elfbase = elf_info->elfbase;
-  if ((elf_info->flags & 4) != 0) {
-    relr_count = elf_info->relr_relocs_num;
+  if ((elf_info->feature_flags & 4) != 0) {
+    relr_count = elf_info->relr_reloc_count;
     if ((CONCAT44(target_addr_high,encoded_string_id) != 0) && (relr_count != 0)) {
       relr_index = 0;
       if (resume_index_ptr != (ulong *)0x0) {

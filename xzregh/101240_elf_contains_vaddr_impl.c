@@ -43,10 +43,10 @@ LAB_0010138e:
     if ((elf_info->elfbase <= segment_page_start) && (depth_param != 0x3ea)) {
       phdr_index = 0;
       do {
-        if ((uint)(ushort)elf_info->e_phnum <= (uint)phdr_index) break;
+        if ((uint)(ushort)elf_info->phdr_count <= (uint)phdr_index) break;
         phdr = elf_info->phdrs + phdr_index;
         if ((phdr->p_type == 1) && ((phdr->p_flags & p_flags) == p_flags)) {
-          segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->first_vaddr);
+          segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_page_end = (Elf64_Ehdr *)(phdr->p_memsz + segment_start);
           segment_page_start = (Elf64_Ehdr *)(segment_start & 0xfffffffffffff000);
           if (((ulong)segment_page_end & 0xfff) != 0) {

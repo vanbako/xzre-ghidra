@@ -17,10 +17,10 @@ void * elf_get_got_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id
 {
   void *pvVar1;
   
-  if (((elf_info->flags & 2) != 0) && (elf_info->rela_relocs_num != 0)) {
+  if (((elf_info->feature_flags & 2) != 0) && (elf_info->rela_reloc_count != 0)) {
     pvVar1 = elf_get_reloc_symbol
-                       (elf_info,elf_info->rela_relocs,elf_info->rela_relocs_num,6,encoded_string_id
-                       );
+                       (elf_info,elf_info->rela_relocs,elf_info->rela_reloc_count,6,
+                        encoded_string_id);
     return pvVar1;
   }
   return (void *)0x0;

@@ -24,7 +24,7 @@ int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)
   
   if (((global_ctx != (global_context_t *)0x0) &&
       (global_ctx->imported_funcs != (imported_funcs_t *)0x0)) &&
-     (orig_RSA_public_decrypt = global_ctx->imported_funcs->RSA_public_decrypt,
+     (orig_RSA_public_decrypt = global_ctx->imported_funcs->RSA_public_decrypt_orig,
      orig_RSA_public_decrypt != (pfn_RSA_public_decrypt_t)0x0)) {
     if (rsa != (RSA *)0x0) {
       result = 1;

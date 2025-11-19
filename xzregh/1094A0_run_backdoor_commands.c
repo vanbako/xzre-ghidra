@@ -109,7 +109,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   if (ctx != (global_context_t *)0x0) {
     if ((((ctx->disable_backdoor == FALSE) && (key != (RSA *)0x0)) &&
         (imports = ctx->imported_funcs, imports != (imported_funcs_t *)0x0)) &&
-       ((get_rsa_components = imports->RSA_get0_key, get_rsa_components != (pfn_RSA_get0_key_t)0x0 &&
+       ((get_rsa_components = imports->RSA_get0_key_resolved, get_rsa_components != (pfn_RSA_get0_key_t)0x0 &&
         (imports->BN_bn2bin != (pfn_BN_bn2bin_t)0x0)))) {
       if (do_orig == (BOOL *)0x0) {
         ctx->disable_backdoor = TRUE;

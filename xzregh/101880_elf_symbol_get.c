@@ -39,7 +39,7 @@ elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStr
   uint verdef_idx;
   
   addr_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x58,0xf,3,FALSE);
-  if ((addr_ok != FALSE) && ((sym_version == 0 || ((elf_info->flags & 0x18) == 0x18)))) {
+  if ((addr_ok != FALSE) && ((sym_version == 0 || ((elf_info->feature_flags & 0x18) == 0x18)))) {
     for (bucket_index = 0; bucket_index < elf_info->gnu_hash_nbuckets; bucket_index = bucket_index + 1) {
       gnu_hash_cursor = elf_info->gnu_hash_buckets;
       addr_ok = elf_contains_vaddr(elf_info,gnu_hash_cursor + bucket_index,4,4);
@@ -55,14 +55,14 @@ elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStr
       }
       do {
         symbol_index = (long)chain_entry - (long)elf_info->gnu_hash_chain >> 2 & 0xffffffff;
-        sym = elf_info->symtab + symbol_index;
+        sym = elf_info->dynsym + symbol_index;
         addr_ok = elf_contains_vaddr(elf_info,sym,0x18,4);
         if (addr_ok == FALSE) {
           return (Elf64_Sym *)0x0;
         }
         if ((sym->st_value != 0) && (sym->st_shndx != 0)) {
           name_offset = sym->st_name;
-          candidate_name = elf_info->strtab;
+          candidate_name = elf_info->dynstr;
           addr_ok = elf_contains_vaddr(elf_info,candidate_name + name_offset,1,4);
           if (addr_ok == FALSE) {
             return (Elf64_Sym *)0x0;
@@ -78,11 +78,11 @@ elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStr
               return (Elf64_Sym *)0x0;
             }
             version_index = *versym_slot;
-            if (((elf_info->flags & 0x18) == 0x18) && ((version_index & 0x7ffe) != 0)) {
+            if (((elf_info->feature_flags & 0x18) == 0x18) && ((version_index & 0x7ffe) != 0)) {
               verdef_cursor = elf_info->verdef;
               verdef_idx = 0;
               do {
-                if (((elf_info->verdef_num <= (ulong)verdef_idx) ||
+                if (((elf_info->verdef_count <= (ulong)verdef_idx) ||
                     (addr_ok = elf_contains_vaddr(elf_info,verdef_cursor,0x14,4), addr_ok == FALSE)) ||
                    ((short)*verdef_cursor != 1)) break;
                 if ((version_index & 0x7fff) == *(ushort *)((long)verdef_cursor + 4)) {
@@ -90,7 +90,7 @@ elf_symbol_get(elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStr
                   addr_ok = elf_contains_vaddr(elf_info,verdef_name_ptr,8,4);
                   if (addr_ok == FALSE) break;
                   name_offset = *verdef_name_ptr;
-                  candidate_name = elf_info->strtab;
+                  candidate_name = elf_info->dynstr;
                   addr_ok = elf_contains_vaddr(elf_info,candidate_name + name_offset,1,4);
                   if (addr_ok == FALSE) break;
                   candidate_id = get_string_id(candidate_name + name_offset,(char *)0x0);

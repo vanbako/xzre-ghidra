@@ -18,9 +18,10 @@ void * elf_get_plt_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id
 {
   void *pvVar1;
   
-  if (((elf_info->flags & 1) != 0) && (elf_info->plt_relocs_num != 0)) {
+  if (((elf_info->feature_flags & 1) != 0) && (elf_info->plt_reloc_count != 0)) {
     pvVar1 = elf_get_reloc_symbol
-                       (elf_info,elf_info->plt_relocs,elf_info->plt_relocs_num,7,encoded_string_id);
+                       (elf_info,elf_info->plt_relocs,elf_info->plt_reloc_count,7,encoded_string_id)
+    ;
     return pvVar1;
   }
   return (void *)0x0;

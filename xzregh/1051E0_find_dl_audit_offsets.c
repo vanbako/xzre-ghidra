@@ -46,7 +46,7 @@ BOOL find_dl_audit_offsets
     libcrypto_info = data->elf_handles->libcrypto;
     allocator->opaque = libcrypto_info;
     pEVar9 = elf_symbol_get(libcrypto_info,STR_EC_POINT_point2oct,0);
-    if (data->elf_handles->liblzma->gnurelro_found != FALSE) {
+    if (data->elf_handles->liblzma->gnurelro_present != FALSE) {
       if (pEVar9 != (Elf64_Sym *)0x0) {
         symbol_offset = pEVar9->st_value;
         libcrypto_ehdr = data->elf_handles->libcrypto->elfbase;

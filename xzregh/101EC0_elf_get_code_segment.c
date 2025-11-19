@@ -26,26 +26,26 @@ void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xcb,7,0xc);
   code_segment_start = (void *)0x0;
   if (telemetry_ok != FALSE) {
-    code_segment_start = (void *)elf_info->code_segment_start;
+    code_segment_start = (void *)elf_info->text_segment_start;
     if (code_segment_start == (void *)0x0) {
-      for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
+      for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
         phdr = elf_info->phdrs + phdr_index;
         if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {
-          segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->first_vaddr);
+          segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_end = phdr->p_memsz + segment_start;
           code_segment_start = (void *)(segment_start & 0xfffffffffffff000);
           if ((segment_end & 0xfff) != 0) {
             segment_end = (segment_end & 0xfffffffffffff000) + 0x1000;
           }
           segment_size = segment_end - (long)code_segment_start;
-          elf_info->code_segment_start = (u64)code_segment_start;
-          elf_info->code_segment_size = segment_size;
+          elf_info->text_segment_start = (u64)code_segment_start;
+          elf_info->text_segment_size = segment_size;
           goto LAB_00101f65;
         }
       }
     }
     else {
-      segment_size = elf_info->code_segment_size;
+      segment_size = elf_info->text_segment_size;
 LAB_00101f65:
       *pSize = segment_size;
     }

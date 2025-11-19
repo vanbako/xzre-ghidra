@@ -35,7 +35,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   elfbase = elf_info->elfbase;
   if (cached_data_start != (void *)0x0) {
     if (get_alignment != FALSE) {
-      alignment_size = elf_info->data_segment_alignment;
+      alignment_size = elf_info->data_segment_padding;
       *pSize = alignment_size;
       cached_data_start = (void *)((long)cached_data_start - alignment_size);
       if (alignment_size == 0) {
@@ -50,13 +50,13 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   best_segment_span = 0;
   best_segment_start = 0;
   best_segment_index = 0;
-  for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->e_phnum; phdr_index = phdr_index + 1) {
+  for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
     phdr = elf_info->phdrs + phdr_index;
     if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 6)) {
       if (phdr->p_memsz < phdr->p_filesz) {
         return (void *)0x0;
       }
-      seg_start = (long)elfbase + (phdr->p_vaddr - elf_info->first_vaddr);
+      seg_start = (long)elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
       seg_end = phdr->p_memsz + seg_start;
       seg_start = seg_start & 0xfffffffffffff000;
       if ((seg_end & 0xfff) != 0) {
@@ -79,7 +79,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
   }
   if (data_segment_found) {
     phdr = elf_info->phdrs;
-    best_segment_span = phdr[best_segment_index].p_vaddr - elf_info->first_vaddr;
+    best_segment_span = phdr[best_segment_index].p_vaddr - elf_info->load_base_vaddr;
     segment_mem_end = (void *)((long)elfbase + phdr[best_segment_index].p_memsz + best_segment_span);
     segment_file_end = (void *)((long)elfbase + phdr[best_segment_index].p_filesz + best_segment_span);
     cached_data_start = segment_mem_end;
@@ -88,7 +88,7 @@ void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)
     }
     alignment_size = (long)cached_data_start - (long)segment_mem_end;
     elf_info->data_segment_start = (u64)segment_file_end;
-    elf_info->data_segment_alignment = alignment_size;
+    elf_info->data_segment_padding = alignment_size;
     elf_info->data_segment_size = (long)cached_data_start - (long)segment_file_end;
     if (get_alignment == FALSE) {
       *pSize = (long)cached_data_start - (long)segment_file_end;

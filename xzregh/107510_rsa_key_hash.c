@@ -48,10 +48,10 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   fingerprint_buf[0xf] = '\0';
   written = 0;
   if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&
-     (funcs->RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
+     (funcs->RSA_get0_key_resolved != (pfn_RSA_get0_key_t)0x0)) {
     rsa_exponent = (BIGNUM *)0x0;
     rsa_modulus = (BIGNUM *)0x0;
-    (*funcs->RSA_get0_key)(rsa,&rsa_modulus,&rsa_exponent,(BIGNUM **)0x0);
+    (*funcs->RSA_get0_key_resolved)(rsa,&rsa_modulus,&rsa_exponent,(BIGNUM **)0x0);
     if ((rsa_exponent != (BIGNUM *)0x0) && (rsa_modulus != (BIGNUM *)0x0)) {
       success = bignum_serialize(fingerprint_buf,0x100a,&written,rsa_exponent,funcs);
       exp_serialized_len = written;

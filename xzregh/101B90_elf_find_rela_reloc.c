@@ -29,7 +29,7 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
   u32 target_addr_high;
   ulong *resume_index_ptr;
   
-  if (((elf_info->flags & 2) == 0) || (elf_info->rela_relocs_num == 0)) {
+  if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {
     return (Elf64_Rela *)0x0;
   }
   rela_index = 0;
@@ -38,7 +38,7 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
   }
   elfbase = elf_info->elfbase;
   do {
-    if (elf_info->rela_relocs_num <= rela_index) {
+    if (elf_info->rela_reloc_count <= rela_index) {
       if (resume_index_ptr != (ulong *)0x0) {
         *resume_index_ptr = rela_index;
       }

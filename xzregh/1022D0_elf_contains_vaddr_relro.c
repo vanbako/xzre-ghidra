@@ -21,8 +21,8 @@ BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flag
   ulong relro_start;
   
   range_ok = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);
-  if (((range_ok != FALSE) && (range_ok = TRUE, p_flags != 0)) && (elf_info->gnurelro_found != FALSE)) {
-    relro_start = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->first_vaddr);
+  if (((range_ok != FALSE) && (range_ok = TRUE, p_flags != 0)) && (elf_info->gnurelro_present != FALSE)) {
+    relro_start = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->load_base_vaddr);
     relro_end = elf_info->gnurelro_memsize + relro_start;
     relro_start = relro_start & 0xfffffffffffff000;
     if ((relro_end & 0xfff) != 0) {

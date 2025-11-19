@@ -26,8 +26,8 @@ void * elf_get_reloc_symbol
   if (telemetry_ok != FALSE) {
     for (; reloc_index < num_relocs; reloc_index = reloc_index + 1) {
       if ((((relocs->r_info & 0xffffffff) == reloc_type) &&
-          (elf_info->symtab[relocs->r_info >> 0x20].st_shndx == 0)) &&
-         (sym_name_id = get_string_id(elf_info->strtab + elf_info->symtab[relocs->r_info >> 0x20].st_name,
+          (elf_info->dynsym[relocs->r_info >> 0x20].st_shndx == 0)) &&
+         (sym_name_id = get_string_id(elf_info->dynstr + elf_info->dynsym[relocs->r_info >> 0x20].st_name,
                                 (char *)0x0), sym_name_id == encoded_string_id)) {
         return elf_info->elfbase->e_ident + relocs->r_offset;
       }

@@ -227,7 +227,7 @@ LAB_00105951:
           *params->shared->globals = ctx;
           imported_funcs_cursor = imported_funcs;
           for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {
-            *(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt = 0;
+            *(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
             imported_funcs_cursor = (imported_funcs_t *)((long)imported_funcs_cursor + (ulong)zero_seed * -8 + 4);
           }
           (local_b10->imported_funcs).RSA_public_decrypt_plt = local_ac0;
@@ -235,8 +235,8 @@ LAB_00105951:
           (local_b10->imported_funcs).RSA_get0_key_plt = local_ab0;
           loop_idx = 0;
           do {
-            (local_b10->libc_imports)._unknown993[loop_idx + -4] =
-                 local_980.libc_imports._unknown993[loop_idx + -4];
+            (local_b10->sshd_log_ctx).log_padding[loop_idx + -0x7c] =
+                 *(u8 *)((long)&local_980.libc_imports.resolved_imports_count + loop_idx);
             loop_idx = loop_idx + 1;
           } while (loop_idx != 0x70);
           (local_b10->imported_funcs).libc = &local_b10->libc_imports;
@@ -322,11 +322,11 @@ LAB_00105951:
             *resolved_count_ptr = *resolved_count_ptr + 1;
             rsa_sign_sym = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_sign,0);
             if (libcrypto_info != (elf_info_t *)0x0) {
-              libcrypto_sym_offset = libcrypto_info->first_vaddr;
+              libcrypto_sym_offset = libcrypto_info->load_base_vaddr;
               libcrypto_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
               resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
               *resolved_count_ptr = *resolved_count_ptr + 1;
-              (local_b10->imported_funcs).RSA_get0_key =
+              (local_b10->imported_funcs).RSA_get0_key_resolved =
                    (pfn_RSA_get0_key_t)(libcrypto_ehdr->e_ident + libcrypto_sym_offset);
             }
           }

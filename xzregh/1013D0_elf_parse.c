@@ -70,7 +70,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   if (elf_info != (elf_info_t *)0x0) {
     min_load_vaddr = 0xffffffffffffffff;
     phdr_idx = 0;
-    puVar19 = &elf_info->first_vaddr;
+    puVar19 = &elf_info->load_base_vaddr;
     for (dynamic_phdr_index = 0x3e; dynamic_phdr_index != 0; dynamic_phdr_index = dynamic_phdr_index + -1) {
       *(undefined4 *)puVar19 = 0;
       puVar19 = (u64 *)((long)puVar19 + 4);
@@ -79,7 +79,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
     dynamic_phdr_index = -1;
     phnum = (ulong)ehdr->e_phnum;
     phdrs = (Elf64_Phdr *)(ehdr->e_ident + ehdr->e_phoff);
-    *(Elf64_Half *)&elf_info->e_phnum = ehdr->e_phnum;
+    *(Elf64_Half *)&elf_info->phdr_count = ehdr->e_phnum;
     elf_info->phdrs = phdrs;
     phdr_cursor = phdrs;
     for (; phdr_idx < (uint)phnum; phdr_idx = phdr_idx + 1) {
@@ -95,24 +95,24 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       else {
         range_ok = is_gnu_relro(p_type,0xa0000000);
         if (range_ok != FALSE) {
-          if (elf_info->gnurelro_found != FALSE) {
+          if (elf_info->gnurelro_present != FALSE) {
             return FALSE;
           }
           elf_info->gnurelro_vaddr = phdr_cursor->p_vaddr;
           pltrel_table_size = phdr_cursor->p_memsz;
-          elf_info->gnurelro_found = TRUE;
+          elf_info->gnurelro_present = TRUE;
           elf_info->gnurelro_memsize = pltrel_table_size;
         }
       }
       phdr_cursor = phdr_cursor + 1;
     }
     if ((min_load_vaddr != 0xffffffffffffffff) && ((int)dynamic_phdr_index != -1)) {
-      elf_info->first_vaddr = min_load_vaddr;
+      elf_info->load_base_vaddr = min_load_vaddr;
       phnum = phdrs[dynamic_phdr_index].p_memsz;
       vaddr = (Elf64_Dyn *)((long)ehdr + (phdrs[dynamic_phdr_index].p_vaddr - min_load_vaddr));
-      elf_info->dyn = vaddr;
+      elf_info->dynamic_segment = vaddr;
       dyn_entry_capacity = (int)(phnum >> 4);
-      *(int *)&elf_info->dyn_num_entries = dyn_entry_capacity;
+      *(int *)&elf_info->dyn_entry_count = dyn_entry_capacity;
       range_ok = elf_contains_vaddr(elf_info,vaddr,phnum,4);
       if (range_ok != FALSE) {
         dyn_cursor = &vaddr->d_un;
@@ -124,7 +124,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
         for (dyn_index = 0; dyn_entry_capacity != dyn_index; dyn_index = dyn_index + 1) {
           dynamic_phdr_index = ((Elf64_Dyn *)(dyn_cursor + -1))->d_tag;
           if (dynamic_phdr_index == 0) {
-            *(int *)&elf_info->dyn_num_entries = dyn_index;
+            *(int *)&elf_info->dyn_entry_count = dyn_index;
             break;
           }
           if (dynamic_phdr_index < 0x25) {
@@ -134,10 +134,10 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
                 pltrel_table_size = dyn_cursor->d_val;
                 break;
               case 5:
-                elf_info->strtab = (char *)*(Elf64_Xword *)dyn_cursor;
+                elf_info->dynstr = (char *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 6:
-                elf_info->symtab = (Elf64_Sym *)*(Elf64_Xword *)dyn_cursor;
+                elf_info->dynsym = (Elf64_Sym *)*(Elf64_Xword *)dyn_cursor;
                 break;
               case 7:
                 elf_info->rela_relocs = (Elf64_Rela *)*(Elf64_Xword *)dyn_cursor;
@@ -169,7 +169,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
 LAB_00101650:
             if (bind_now_flag != 0) {
 switchD_0010157d_caseD_18:
-              elf_info->flags = elf_info->flags | 0x20;
+              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;
             }
           }
           else if (dynamic_phdr_index < 0x6ffffffc) {
@@ -183,13 +183,13 @@ switchD_0010157d_caseD_18:
             }
             else if (dynamic_phdr_index == 0x6ffffff0) {
               versym_value.d_val = *(Elf64_Xword *)dyn_cursor;
-              elf_info->flags = elf_info->flags | 0x10;
+              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x10;
               elf_info->versym = (Elf64_Versym *)versym_value;
             }
           }
           else if (dynamic_phdr_index == 0x6ffffffd) {
             verdef_present = TRUE;
-            elf_info->verdef_num = *(Elf64_Xword *)dyn_cursor;
+            elf_info->verdef_count = *(Elf64_Xword *)dyn_cursor;
           }
           else {
             if (dynamic_phdr_index == 0x7fffffff) {
@@ -206,43 +206,43 @@ switchD_0010157d_caseD_18:
           if (pltrel_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          elf_info->flags = elf_info->flags | 1;
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 1;
           *(u64 *)(auVar9 + 8) = 0;
           *(u64 *)auVar9 = pltrel_table_size;
-          elf_info->plt_relocs_num = SUB164(auVar9 / ZEXT816(0x18),0);
+          elf_info->plt_reloc_count = SUB164(auVar9 / ZEXT816(0x18),0);
         }
         rela_relocs_ptr = elf_info->rela_relocs;
         if (rela_relocs_ptr != (Elf64_Rela *)0x0) {
           if (rela_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          elf_info->flags = elf_info->flags | 2;
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 2;
           *(u64 *)(auVar10 + 8) = 0;
           *(u64 *)auVar10 = rela_table_size;
-          elf_info->rela_relocs_num = SUB164(auVar10 / ZEXT816(0x18),0);
+          elf_info->rela_reloc_count = SUB164(auVar10 / ZEXT816(0x18),0);
         }
         relr_relocs_ptr = elf_info->relr_relocs;
         if (relr_relocs_ptr != (Elf64_Relr *)0x0) {
           if (relr_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          elf_info->flags = elf_info->flags | 4;
-          elf_info->relr_relocs_num = (u32)(relr_table_size >> 3);
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 4;
+          elf_info->relr_reloc_count = (u32)(relr_table_size >> 3);
         }
         if (elf_info->verdef != (Elf64_Verdef *)0x0) {
           if (verdef_present) {
-            elf_info->flags = elf_info->flags | 8;
+            *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 8;
           }
           else {
             elf_info->verdef = (Elf64_Verdef *)0x0;
           }
         }
-        strtab_base = (Elf64_Ehdr *)elf_info->strtab;
+        strtab_base = (Elf64_Ehdr *)elf_info->dynstr;
         if (((strtab_base != (Elf64_Ehdr *)0x0) && (gnu_hash_header != (uint *)0x0)) &&
-           (elf_info->symtab != (Elf64_Sym *)0x0)) {
+           (elf_info->dynsym != (Elf64_Sym *)0x0)) {
           if (strtab_base <= ehdr) {
-            elf_info->strtab = (char *)(ehdr->e_ident + (long)strtab_base->e_ident);
-            elf_info->symtab = (Elf64_Sym *)(ehdr->e_ident + (long)&elf_info->symtab->st_name);
+            elf_info->dynstr = (char *)(ehdr->e_ident + (long)strtab_base->e_ident);
+            elf_info->dynsym = (Elf64_Sym *)(ehdr->e_ident + (long)&elf_info->dynsym->st_name);
             if (plt_relocs_ptr != (Elf64_Rela *)0x0) {
               elf_info->plt_relocs = (Elf64_Rela *)(ehdr->e_ident + (long)&plt_relocs_ptr->r_offset);
             }
@@ -271,8 +271,8 @@ switchD_0010157d_caseD_18:
                (range_ok = elf_contains_vaddr(elf_info,elf_info->relr_relocs,relr_table_size,4), range_ok != FALSE)
                ))) && ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
                        (range_ok = elf_contains_vaddr(elf_info,elf_info->verdef,
-                                                    elf_info->verdef_num * 0x14,4), range_ok != FALSE)
-                       ))) {
+                                                    elf_info->verdef_count * 0x14,4),
+                       range_ok != FALSE)))) {
             phdr_idx = *gnu_hash_header;
             elf_info->gnu_hash_nbuckets = phdr_idx;
             gnu_hash_bloom_size = gnu_hash_header[2];
