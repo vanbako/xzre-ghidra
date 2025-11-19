@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `backdoor_payload_hdr_t`: replaced the anonymous field_a/b/c triplet with the stride/index/bias naming, documented how run_backdoor_commands collapses them into `cmd_type` and how decrypt_payload_message reuses the 16 bytes as the ChaCha IV, and refreshed the project so the updated comments propagate into `xzregh`/Ghidra. Struct tracker bumped to reflect the pass.
+- Next: continue down the payload record chain by documenting `backdoor_payload_body_t` so the decrypted args/signature/body layout is just as clear.
+
+## 2025-11-19
 - Documented `backdoor_hooks_data_t`: annotated each sub-structure (`ldso_ctx`, `global_ctx`, import/sshd/log blocks) and described the signed payload tail so the liblzma blob is self-explanatory in both metadata and the exported headers; refreshed the project so every hook consumer sees the new comments.
 - Next: continue down the review order with `backdoor_hooks_ctx_t` to untangle the per-hook callback pointers.
 

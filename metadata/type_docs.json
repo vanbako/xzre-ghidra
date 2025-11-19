@@ -45,7 +45,7 @@
   "backdoor_shared_libraries_data_t": "Scratch arguments passed around while iterating dependent libraries; stitches together the master data blob, elf handles, resolved PLT stubs, and pointers back to the hook data so each pass can install the necessary trampolines.",
   "secret_data_shift_cursor_t": "Bit-packed cursor (3-bit bit index + 29-bit byte index) used when reconstructing the obfuscated secret data stream stored inside the RSA payload.",
   "secret_data_item_t": "One decoded chunk of the secret data stream including the original code reference, the shift cursor, the operation index, and bookkeeping counters.",
-  "backdoor_payload_hdr_t": "Header laid over the RSA modulus bytes; fields A/B/C encode the command family and payload lengths before we decrypt the body.",
+  "backdoor_payload_hdr_t": "First 16 bytes of every encrypted payload chunk. The stride/index/bias triple stays in plaintext so decrypt_payload_message can reuse it as the ChaCha nonce, and run_backdoor_commands collapses it into monitor_data.cmd_type via (stride * index + bias) before committing to the payload.",
   "u_cmd_arguments_t": "Two-byte overlay that lets us treat the final argument byte pair as either raw data or as a little-endian size value when computing payload lengths.",
   "cmd_arguments_t": "Command flags (three flag bytes plus the variable-size union) that describe how the monitor thread should interpret the decrypted payload.",
   "backdoor_payload_body_t": "Decrypted payload layout containing the Ed448 signature, parsed command arguments, and the opaque body that holds monitor instructions.",

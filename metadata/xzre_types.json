@@ -1449,7 +1449,7 @@
       "names": [
         "backdoor_payload_hdr_t"
       ],
-      "code": "typedef struct __attribute__((packed)) key_payload_hdr {\n union {\n  u8 bytes[16];\n  struct __attribute__((packed)) {\n   u32 field_a;\n   u32 field_b;\n   u64 field_c;\n  };\n };\n} backdoor_payload_hdr_t;"
+      "code": "typedef struct __attribute__((packed)) key_payload_hdr {\n union {\n  u8 bytes[16];\n  struct __attribute__((packed)) {\n   u32 cmd_type_stride; /* Low 32 bits of the ChaCha nonce; multiplied with cmd_type_index before cmd_type_bias is applied. */\n   u32 cmd_type_index; /* High 32 bits of the ChaCha nonce; second multiplicand in the cmd_type calculation. */\n   int64_t cmd_type_bias; /* Signed bias added to the product; also forms the top half of the 16-byte nonce. */\n  };\n };\n} backdoor_payload_hdr_t;"
     },
     {
       "kind": "union",
