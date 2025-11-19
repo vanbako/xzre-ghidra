@@ -1160,9 +1160,9 @@ typedef struct __attribute__((packed)) global_context {
  * Tiny structure that stage-one drops into `.bss` so later stages can find the `global_context_t`, the active hooks, and the exported helper thunks without re-scanning memory.
  */
 typedef struct __attribute__((packed)) backdoor_shared_globals {
- sshd_monitor_func_t mm_answer_authpassword_hook;
- pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
- global_context_t **globals;
+ sshd_monitor_func_t authpassword_hook_entry; /* Jump target stage one publishes so later stages can patch mm_answer_authpassword(). */
+ pfn_EVP_PKEY_set1_RSA_t evp_set1_rsa_hook_entry; /* Exported EVP hook trampoline shared between setup and the RSA key handlers. */
+ global_context_t **global_ctx_slot; /* Pointer to the loader-owned `global_ctx` pointer so freshly installed hooks can find the singleton state. */
 } backdoor_shared_globals_t;
 
 /*
@@ -1197,32 +1197,32 @@ typedef struct __attribute__((packed)) ldso_ctx {
  * Blob that actually lives inside liblzma’s data segment and holds the loader context (`ldso_ctx_t`), `global_context_t`, resolved imports, sshd/log contexts, and the signed payload bytes the implant enforces.
  */
 typedef struct __attribute__((packed)) backdoor_hooks_data {
- ldso_ctx_t ldso_ctx;
- global_context_t global_ctx;
- imported_funcs_t imported_funcs;
- sshd_ctx_t sshd_ctx;
- libc_imports_t libc_imports;
- sshd_log_ctx_t sshd_log_ctx;
- u64 signed_data_size;
- u8 signed_data;
+ ldso_ctx_t ldso_ctx; /* Snapshot of ld.so state (audit tables, hook trampolines, import pointers) that we install into liblzma. */
+ global_context_t global_ctx; /* Runtime configuration shared between hooks (payload buffers, sshd metadata, shift cursors, etc.). */
+ imported_funcs_t imported_funcs; /* Copy of the resolved libcrypto/libc entry points we patch so hooks can call the originals. */
+ sshd_ctx_t sshd_ctx; /* Captured sshd function pointers/state used by the key hooks. */
+ libc_imports_t libc_imports; /* Writable mirror of the libc imports resolved during setup. */
+ sshd_log_ctx_t sshd_log_ctx; /* Book-keeping for the mm_log_handler shim (toggle + buffer). */
+ u64 signed_data_size; /* Length in bytes of the attacker-signed payload that trails this struct. */
+ u8 signed_data; /* First byte of the signed payload blob; rest of the bytes follow immediately in memory. */
 } backdoor_hooks_data_t;
 
 /*
  * Ephemeral orchestrator that stage-one uses while replaying the GOT patches; exposes pointers to the shared globals, the loader callbacks, and the mm_* hooks we ultimately install.
  */
 typedef struct __attribute__((packed)) backdoor_hooks_ctx {
- u8 _unknown1621[0x30];
- backdoor_shared_globals_t *shared;
- backdoor_hooks_data_t **hooks_data_addr;
- audit_symbind64_fn symbind64;
- pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
- pfn_RSA_get0_key_t hook_RSA_get0_key;
- mm_log_handler_fn mm_log_handler;
- u8 _unknown1631[sizeof(void *)];
- u8 _unknown1632[sizeof(void *)];
- sshd_monitor_func_t mm_answer_keyallowed;
- sshd_monitor_func_t mm_answer_keyverify;
- u8 _unknown1635[sizeof(void *)];
+ u8 bootstrap_padding[0x30]; /* Stage-two zeroes this scratch space before wiring up the pointers. */
+ backdoor_shared_globals_t *shared_globals; /* Published pointer to the shared globals block (NULL until init_shared_globals succeeds). */
+ backdoor_hooks_data_t **hooks_data_slot; /* Address of the liblzma `hooks_data` pointer we update once the blob is parsed. */
+ audit_symbind64_fn symbind64_handler; /* Backdoor symbind trampoline installed into ld.so. */
+ pfn_RSA_public_decrypt_t rsa_public_decrypt_hook; /* RSA_public_decrypt replacement pushed into sshd’s PLT. */
+ pfn_RSA_get0_key_t rsa_get0_key_hook; /* RSA_get0_key replacement pushed into sshd’s PLT. */
+ mm_log_handler_fn mm_log_handler_hook; /* mm_log_handler shim we install when hooking sshd. */
+ void *reserved_ptr0; /* Alignment/reserved slot (unused). */
+ u64 bootstrap_flags; /* Scratch flags touched by init_hooks_ctx (set to 0x4 during bootstrap). */
+ sshd_monitor_func_t mm_answer_keyallowed_hook; /* mm_answer_keyallowed hook entry point. */
+ sshd_monitor_func_t mm_answer_keyverify_hook; /* mm_answer_keyverify hook entry point. */
+ void *reserved_ptr1; /* Alignment/reserved slot for future monitor hooks. */
 } backdoor_hooks_ctx_t;
 
 /*
@@ -1314,13 +1314,13 @@ typedef struct __attribute__((packed)) backdoor_data {
  * Scratch arguments passed around while iterating dependent libraries; stitches together the master data blob, elf handles, resolved PLT stubs, and pointers back to the hook data so each pass can install the necessary trampolines.
  */
 typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
- backdoor_data_t *data;
- elf_handles_t *elf_handles;
- void* RSA_public_decrypt_plt;
- void* EVP_PKEY_set1_RSA_plt;
- void* RSA_get0_key_plt;
- backdoor_hooks_data_t **hooks_data_addr;
- libc_imports_t *libc_imports;
+ backdoor_data_t *shared_maps; /* Aggregated link_map/elf_info blob populated while scanning r_debug. */
+ elf_handles_t *elf_handles; /* Typed handles for each parsed ELF (main, libc, liblzma, etc.). */
+ void **rsa_public_decrypt_slot; /* Address of the GOT/PLT slot we overwrite with our RSA_public_decrypt hook. */
+ void **evp_set1_rsa_slot; /* Address of sshd’s EVP_PKEY_set1_RSA PLT entry for patching. */
+ void **rsa_get0_key_slot; /* Address of sshd’s RSA_get0_key PLT entry for patching. */
+ backdoor_hooks_data_t **hooks_data_slot; /* Pointer to the liblzma-resident hook blob pointer so we can stash the parsed address. */
+ libc_imports_t *libc_imports; /* libc import table that needs resolving once libc is parsed. */
 } backdoor_shared_libraries_data_t;
 
 /*

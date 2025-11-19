@@ -5654,17 +5654,17 @@
       },
       {
         "name": "rsa_get0_key_slot",
-        "original": "puVar2",
+        "original": "ppvVar2",
         "type": "void **"
       },
       {
         "name": "evp_set1_rsa_slot",
-        "original": "puVar3",
+        "original": "ppvVar3",
         "type": "void **"
       },
       {
         "name": "rsa_public_decrypt_slot",
-        "original": "puVar4",
+        "original": "ppvVar4",
         "type": "void **"
       },
       {

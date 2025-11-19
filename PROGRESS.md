@@ -3,6 +3,18 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- Documented `backdoor_hooks_data_t`: annotated each sub-structure (`ldso_ctx`, `global_ctx`, import/sshd/log blocks) and described the signed payload tail so the liblzma blob is self-explanatory in both metadata and the exported headers; refreshed the project so every hook consumer sees the new comments.
+- Next: continue down the review order with `backdoor_hooks_ctx_t` to untangle the per-hook callback pointers.
+
+## 2025-11-19
+- Clarified `backdoor_shared_libraries_data_t`: renamed the PLT slot pointers (`rsa_public_decrypt_slot`, `evp_set1_rsa_slot`, `rsa_get0_key_slot`), the hook blob pointer (`hooks_data_slot`), and the aggregate map pointer (`shared_maps`), added inline comments, and refreshed the project so `process_shared_libraries[_map]` and `backdoor_setup` now show the tighter naming.
+- Next: dig into `backdoor_hooks_data_t` (review order #3) so the liblzma-resident blob is equally well documented.
+
+## 2025-11-19
+- Renamed `backdoor_shared_globals_t` members to spell out their roles (mm hook jump, EVP trampoline, global ctx slot), annotated each field in `metadata/xzre_types.json`, and refreshed the project so the decomp (`backdoor_setup`, `init_shared_globals`, `backdoor_init_stage2`) now references the clearer names.
+- Next: move to `backdoor_shared_libraries_data_t` (review order #2) so the loader snapshot gets the same treatment.
+
+## 2025-11-19
 - Renamed the opaque `dasm_ctx_t` slots (`imm64_reg`, `operand*`, `insn_offset`, etc.) to descriptive names, annotated every field in `metadata/xzre_types.json`, and ran `./scripts/refresh_xzre_project.sh` so the header plus all MOV/LEA/CALL scanners now describe and use the updated members.
 - Next: continue documenting decoder-adjacent structs (e.g., the `string_references_t` scaffolding) so cross-referencing helpers rely on typed fields instead of ad-hoc offsets.
 

