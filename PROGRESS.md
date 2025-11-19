@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `backdoor_payload_t`: clarified the union that wraps the decrypted payload by renaming the flat buffer to `raw`, annotating the embedded header/body view, and explaining how the RSA hooks use the raw bytes for hashing versus the structured fields for parsing. Ran `./scripts/refresh_xzre_project.sh` so the regenerated headers and Ghidra project expose the new comments, then bumped STRUCT_PROGRESS for review #1.
+- Next: finish the payload chain by documenting `key_payload_t` (streaming frame with length prefix) before tackling the remaining backdoor structs.
+
+## 2025-11-19
 - `backdoor_payload_body_t`: renamed the Ed448/signature/args/body fields to `ed448_signature`, `cmd_flags`, and `monitor_payload`, added inline comments that capture the signature coverage plus the 0x87 payload offset, and ran `./scripts/refresh_xzre_project.sh` so `xzregh/xzre_types.h` and the Ghidra project now show the annotated layout. Updated STRUCT_PROGRESS for review #1.
 - Next: continue documenting the rest of the payload chain (`backdoor_payload_t` → `key_payload_t`) so every layer of the RSA transport is described before moving on to the remaining backdoor structs.
 

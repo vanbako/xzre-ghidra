@@ -1477,7 +1477,7 @@
       "names": [
         "backdoor_payload_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_payload {\n union {\n  u8 data[0x228];\n  struct __attribute__((packed)) {\n   backdoor_payload_hdr_t header;\n   backdoor_payload_body_t body;\n  };\n };\n} backdoor_payload_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_payload {\n union {\n  u8 raw[0x228]; /* Entire decrypted payload blob (header + body) as a flat buffer for signature checks and monitor copies. */\n  struct __attribute__((packed)) {\n   backdoor_payload_hdr_t header; /* 16-byte nonce/cmd-type seeds pulled straight from the RSA modulus chunk. */\n   backdoor_payload_body_t body; /* Ed448 signature block plus the parsed command flags and monitor payload stream. */\n  };\n };\n} backdoor_payload_t;"
     },
     {
       "kind": "struct",

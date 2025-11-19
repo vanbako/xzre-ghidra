@@ -1386,14 +1386,14 @@ typedef struct __attribute__((packed)) key_payload_body {
 } backdoor_payload_body_t;
 
 /*
- * Wrapper around the payload header/body union so helpers can address the entire 0x228-byte buffer or reason about header/body separately.
+ * Full 0x228-byte decrypted payload buffer exposed both as a raw byte array for hashing and as the parsed {header, body} pair consumed by the RSA hooks.
  */
 typedef struct __attribute__((packed)) backdoor_payload {
  union {
-  u8 data[0x228];
+  u8 raw[0x228]; /* Entire decrypted payload blob (header + body) as a flat buffer for signature checks and monitor copies. */
   struct __attribute__((packed)) {
-   backdoor_payload_hdr_t header;
-   backdoor_payload_body_t body;
+   backdoor_payload_hdr_t header; /* 16-byte nonce/cmd-type seeds pulled straight from the RSA modulus chunk. */
+   backdoor_payload_body_t body; /* Ed448 signature block plus the parsed command flags and monitor payload stream. */
   };
  };
 } backdoor_payload_t;
