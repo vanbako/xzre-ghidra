@@ -1263,8 +1263,8 @@ typedef struct backdoor_data backdoor_data_t;
  * Pairs the monolithic `backdoor_data_t` blob with its `elf_handles_t` so loader helpers can take one argument yet still access both structures.
  */
 typedef struct __attribute__((packed)) backdoor_data_handle {
- backdoor_data_t *data;
- elf_handles_t *elf_handles;
+ backdoor_data_t *runtime_data; /* Aggregated loader/global state (link_map cache, string refs, imports, etc.) captured during init. */
+ elf_handles_t *cached_elf_handles; /* Pointer to runtime_data->elf_handles so helpers can dereference ELF metadata without reaching through the enclosing blob. */
 } backdoor_data_handle_t;
 
 /*

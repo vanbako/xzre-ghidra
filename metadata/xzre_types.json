@@ -1400,7 +1400,7 @@
       "names": [
         "backdoor_data_handle_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_data_handle {\n backdoor_data_t *data;\n elf_handles_t *elf_handles;\n} backdoor_data_handle_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_data_handle {\n backdoor_data_t *runtime_data; /* Aggregated loader/global state (link_map cache, string refs, imports, etc.) captured during init. */\n elf_handles_t *cached_elf_handles; /* Pointer to runtime_data->elf_handles so helpers can dereference ELF metadata without reaching through the enclosing blob. */\n} backdoor_data_handle_t;"
     },
     {
       "kind": "struct",

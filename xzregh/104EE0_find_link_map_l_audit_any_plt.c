@@ -53,7 +53,7 @@ BOOL find_link_map_l_audit_any_plt
     mask_register_filter = 0;
     output_register_filter = 0;
     allocator = get_lzma_allocator();
-    allocator->opaque = data->elf_handles->libc;
+    allocator->opaque = data->cached_elf_handles->libc;
     write_stub = (pfn_write_t)lzma_alloc(0x380,allocator);
     register_mask_snapshot = output_register_filter;
     libc_imports->write = write_stub;
