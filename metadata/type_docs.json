@@ -29,7 +29,7 @@
   "sshd_offsets_sshbuf_t": "Same idea as `sshd_offsets_kex_t` but for the sshbuf backing storage; stores the indices of the data pointer and size field we need to rewrite.",
   "sshd_offsets_fields_t": "Convenience wrapper that groups the individual offset unions for simultaneous propagation from the scanning routines into the runtime context.",
   "sshd_offsets_t": "32-bit union that packs the discovered offsets and exposes them both as structured fields and as a raw integer when we need atomic updates.",
-  "sshd_payload_ctx_t": "Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.",
+  "sshd_payload_ctx_t": "Decrypted command blob staged by `mm_answer_keyallowed`: starts with a length, 0x3a-byte signed header (ending in the payload type), a 0x72-byte Ed448 signature, and then the attacker-controlled body beginning at offset 0xae with a caller-supplied payload_data_offset.",
   "global_context_t": "Authoritative runtime state for the backdoor.\nIt wires together imported function tables, sshd metadata, decrypted payload buffers, socket scratch space, and secret shift operations so every hook can reach consistent data.",
   "backdoor_shared_globals_t": "Tiny structure that stage-one drops into `.bss` so later stages can find the `global_context_t`, the active hooks, and the exported helper thunks without re-scanning memory.",
   "ldso_ctx_t": "All of the state we steal from the dynamic loader when we patch the audit interfaces: pointers to `_dl_audit_symbind_alt`, link-map fields, cached audit bitmasks, and copies of the hooked GOT entries.",

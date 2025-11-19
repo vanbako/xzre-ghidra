@@ -4913,22 +4913,22 @@
       },
       {
         "name": "payload_type",
-        "original": "cVar2",
-        "type": "char"
+        "original": "uVar1",
+        "type": "u8"
       },
       {
         "name": "payload_state",
-        "original": "uVar3",
+        "original": "uVar2",
         "type": "u32"
       },
       {
         "name": "libc_imports_ref",
-        "original": "plVar4",
+        "original": "plVar3",
         "type": "libc_imports_t *"
       },
       {
         "name": "sshd_ctx",
-        "original": "psVar5",
+        "original": "psVar4",
         "type": "sshd_ctx_t *"
       },
       {
@@ -4938,98 +4938,93 @@
       },
       {
         "name": "sock_read_buf_len",
-        "original": "uVar6",
+        "original": "uVar5",
         "type": "size_t"
       },
       {
         "name": "sshd_ctx_cursor",
-        "original": "psVar7",
+        "original": "psVar6",
         "type": "sshd_ctx_t *"
       },
       {
         "name": "keyverify_handler",
-        "original": "pvVar8",
+        "original": "pvVar7",
         "type": "sshd_monitor_func_t"
       },
       {
         "name": "uid_gid_pair",
-        "original": "uVar9",
+        "original": "uVar8",
         "type": "u64"
       },
       {
         "name": "exit_fn",
-        "original": "ppVar10",
+        "original": "ppVar9",
         "type": "pfn_exit_t"
       },
       {
         "name": "state_ok",
-        "original": "BVar11",
+        "original": "BVar10",
         "type": "BOOL"
       },
       {
         "name": "orig_call_result",
-        "original": "iVar12",
+        "original": "iVar11",
         "type": "int"
       },
       {
-        "name": "write_result",
-        "original": "sVar16",
-        "type": "ssize_t"
-      },
-      {
-        "name": "payload_copy_idx",
-        "original": "lVar17",
+        "name": "header_copy_idx",
+        "original": "lVar12",
         "type": "size_t"
       },
       {
-        "name": "payload_len",
-        "original": "uVar15",
+        "name": "payload_copy_idx",
+        "original": "lVar16",
         "type": "size_t"
       },
       {
         "name": "payload_data_offset",
-        "original": "uVar18",
+        "original": "uVar17",
         "type": "size_t"
       },
       {
         "name": "clear_cursor",
-        "original": "ppsVar19",
+        "original": "ppsVar18",
         "type": "sshd_payload_ctx_t **"
       },
       {
         "name": "payload_header_cursor",
-        "original": "puVar20",
+        "original": "puVar19",
         "type": "u8 *"
       },
       {
-        "name": "payload_data_cursor",
-        "original": "puVar21",
-        "type": "u8 *"
-      },
-      {
-        "name": "payload_words",
-        "original": "puVar22",
-        "type": "ushort *"
+        "name": "payload_record",
+        "original": "psVar20",
+        "type": "sshd_payload_ctx_t *"
       },
       {
         "name": "zero_seed",
-        "original": "bVar23",
+        "original": "bVar21",
         "type": "u8"
       },
       {
-        "name": "writebuf_len_bytes",
-        "original": "puVar1",
-        "type": "u8 *"
-      },
-      {
-        "name": "copy_idx",
+        "name": "payload_len",
         "original": "uVar14",
         "type": "size_t"
       },
       {
-        "name": "header_copy_idx",
-        "original": "lVar13",
+        "name": "copy_idx",
+        "original": "payload_copy_idx",
         "type": "size_t"
+      },
+      {
+        "name": "sock_copy_idx",
+        "original": "uVar13",
+        "type": "size_t"
+      },
+      {
+        "name": "write_result",
+        "original": "sVar15",
+        "type": "ssize_t"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c"

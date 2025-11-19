@@ -1267,7 +1267,7 @@
       "names": [
         "sshd_payload_ctx_t"
       ],
-      "code": "typedef u8 sshd_payload_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) sshd_payload_ctx {\n u16 payload_size;\n u8 signed_header[0x39];\n u8 payload_type;\n u8 signature[0x72];\n u16 payload_data_offset;\n u8 payload_body[];\n} sshd_payload_ctx_t;"
     },
     {
       "kind": "struct",
@@ -1407,7 +1407,7 @@
       "names": [
         "string_item_t"
       ],
-      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id;\n u8 entry_bytes[4];\n void *func_start;\n void *func_end;\n void *xref;\n} string_item_t;"
+      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id;\n u32 reserved;\n void *func_start;\n void *func_end;\n void *xref;\n} string_item_t;"
     },
     {
       "kind": "struct",

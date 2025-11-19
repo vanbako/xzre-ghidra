@@ -972,9 +972,16 @@ typedef struct sshbuf sshbuf;
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
 
 /*
- * Reserved pointer that will eventually hold sshd-specific payload book-keeping; today it is only used as a typed placeholder hanging off `global_context_t`.
+ * Decrypted command blob staged by `mm_answer_keyallowed`: starts with a length, 0x3a-byte signed header (ending in the payload type), a 0x72-byte Ed448 signature, and then the attacker-controlled body beginning at offset 0xae with a caller-supplied payload_data_offset.
  */
-typedef u8 sshd_payload_ctx_t;
+typedef struct __attribute__((packed)) sshd_payload_ctx {
+ u16 payload_size;
+ u8 signed_header[0x39];
+ u8 payload_type;
+ u8 signature[0x72];
+ u16 payload_data_offset;
+ u8 payload_body[];
+} sshd_payload_ctx_t;
 
 /*
  * Snapshot of the sshd monitor state that tracks where each `mm_answer_*` handler lives, whether it has already been hooked, and which request IDs correspond to the sensitive operations we intercept.
@@ -1266,7 +1273,7 @@ typedef struct __attribute__((packed)) backdoor_data_handle {
  */
 typedef struct __attribute__((packed)) string_item {
  EncodedStringId string_id;
- u8 entry_bytes[4];
+ u32 reserved;
  void *func_start;
  void *func_end;
  void *xref;

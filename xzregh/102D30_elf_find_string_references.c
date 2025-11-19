@@ -61,11 +61,11 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
       if (string_ptr == (char *)0x0) break;
       entry_offset = 0;
       do {
-        if (((*(long *)(refs->entries[0].entry_bytes + entry_offset + 0x14) == 0) &&
-            (*(EncodedStringId *)(refs->entries[0].entry_bytes + entry_offset + -4) == string_id_cursor)) &&
+        if (((*(long *)((long)&refs->entries[0].xref + entry_offset) == 0) &&
+            (*(EncodedStringId *)((long)&refs->entries[0].string_id + entry_offset) == string_id_cursor)) &&
            (xref_addr = find_string_reference((u8 *)code_segment_start,(u8 *)code_segment_end,string_ptr),
            xref_addr != (u8 *)0x0)) {
-          *(u8 **)(refs->entries[0].entry_bytes + entry_offset + 0x14) = xref_addr;
+          *(u8 **)((long)&refs->entries[0].xref + entry_offset) = xref_addr;
         }
         entry_offset = entry_offset + 0x20;
       } while (entry_offset != 0x360);

