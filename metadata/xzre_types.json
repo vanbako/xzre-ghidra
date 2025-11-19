@@ -1372,7 +1372,7 @@
       "names": [
         "backdoor_setup_params_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_setup_params {\n u8 _unknown1649[0x8];\n backdoor_shared_globals_t *shared;\n backdoor_hooks_ctx_t *hook_params;\n lzma_check_state dummy_check_state;\n elf_entry_ctx_t *entry_ctx;\n} backdoor_setup_params_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_setup_params {\n u8 bootstrap_padding[0x8]; /* Scratch bytes stage two zeroes while stack-allocating the struct; keeps the later pointers aligned and doubles as the memset target. */\n backdoor_shared_globals_t *shared_globals; /* Pointer to the published `backdoor_shared_globals_t` block (authpassword hook entry, EVP hook entry, global_ctx slot). */\n backdoor_hooks_ctx_t *hook_ctx; /* Active hook descriptor produced by init_hooks_ctx (contains the mm/RSA trampolines and hooks_data slot). */\n lzma_check_state dummy_check_state; /* Throwaway check_state initialised with lzma_check_init so stage two can satisfy the API while building the params. */\n elf_entry_ctx_t *entry_ctx; /* Captured GOT/stack metadata for the currently hijacked cpuid thunk. */\n} backdoor_setup_params_t;"
     },
     {
       "kind": "struct",

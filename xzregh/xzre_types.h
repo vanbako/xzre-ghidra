@@ -1226,14 +1226,14 @@ typedef struct __attribute__((packed)) backdoor_hooks_ctx {
 } backdoor_hooks_ctx_t;
 
 /*
- * Argument bundle handed to `backdoor_setup` so the second stage has references to the shared globals, hook descriptors, dummy lzma state, and the entry context it should continue from.
+ * Argument bundle handed to `backdoor_setup`: zeroed scratch + the shared-globals pointer, hook context, dummy lzma_check_state, and the active `elf_entry_ctx_t` describing the hijacked cpuid GOT slot.
  */
 typedef struct __attribute__((packed)) backdoor_setup_params {
- u8 _unknown1649[0x8];
- backdoor_shared_globals_t *shared;
- backdoor_hooks_ctx_t *hook_params;
- lzma_check_state dummy_check_state;
- elf_entry_ctx_t *entry_ctx;
+ u8 bootstrap_padding[0x8]; /* Scratch bytes stage two zeroes while stack-allocating the struct; keeps the later pointers aligned and doubles as the memset target. */
+ backdoor_shared_globals_t *shared_globals; /* Pointer to the published `backdoor_shared_globals_t` block (authpassword hook entry, EVP hook entry, global_ctx slot). */
+ backdoor_hooks_ctx_t *hook_ctx; /* Active hook descriptor produced by init_hooks_ctx (contains the mm/RSA trampolines and hooks_data slot). */
+ lzma_check_state dummy_check_state; /* Throwaway check_state initialised with lzma_check_init so stage two can satisfy the API while building the params. */
+ elf_entry_ctx_t *entry_ctx; /* Captured GOT/stack metadata for the currently hijacked cpuid thunk. */
 } backdoor_setup_params_t;
 
 /*

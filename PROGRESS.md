@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `backdoor_setup_params_t`: finished the stage-two payload structs by renaming the padding/ptr fields (`bootstrap_padding`, `shared_globals`, `hook_ctx`) and documenting how the dummy `lzma_check_state` + `elf_entry_ctx_t` are used during `backdoor_setup`. Ran `./scripts/refresh_xzre_project.sh` (user confirmed) so the exported headers/project picked up the annotations, then updated STRUCT_PROGRESS.
+- Next: move on to `backdoor_data_handle_t` or the remaining loader structs now that the setup argument bundle is clarified.
+
+## 2025-11-19
 - `key_payload_t`: completed the payload chain by annotating the streaming frame—renamed the raw ChaCha ciphertext buffer, length field, and body view, documented how decrypt_payload_message consumes the plaintext header/length, and refreshed the project so the exported headers and Ghidra snapshot now show the improved layout. STRUCT_PROGRESS updated for review #1.
 - Next: move down the struct queue (e.g., `backdoor_setup_params_t` or `backdoor_data_handle_t`) now that the payload family is fully documented.
 

