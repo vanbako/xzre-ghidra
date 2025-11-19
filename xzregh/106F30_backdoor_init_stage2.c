@@ -72,7 +72,7 @@ BOOL backdoor_init_stage2
     status = init_hooks_ctx(hooks_ctx_ptr);
     hooks_ctx_ptr = extraout_RDX_00;
   } while (status != 5);
-  ctx->symbol_ptr = (void *)0x1;
+  ctx->cpuid_random_symbol_addr = (void *)0x1;
   (ctx->got_ctx).got_ptr = (void *)0x0;
   (ctx->got_ctx).return_address = (void *)0x0;
   (ctx->got_ctx).cpuid_fn = (void *)0x0;

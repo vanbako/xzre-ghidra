@@ -2,6 +2,14 @@
 
 Track how many focused RE/documentation passes each struct has received. Increment the count and summarize changes whenever you touch a struct so future analysts can prioritize the lowest numbers first.
 
+## Recommended Struct Review Order
+
+1. **Loader / Relocation Core** – Nail down the structs that drive GOT patching and loader context first so later analyses rest on solid ground: `elf_entry_ctx_t`, `got_ctx_t`, `backdoor_cpuid_reloc_consts_t`, `backdoor_tls_get_addr_reloc_consts_t`, `backdoor_data_t`, `backdoor_data_handle_t`, `backdoor_shared_libraries_data_t`, `elf_handles_t`, `elf_info_t`, `global_context_t`.
+2. **Hook Orchestration & Metadata** – Next document the structs that thread state between loader passes and liblzma-resident blobs: `backdoor_shared_globals_t`, `backdoor_hooks_ctx_t`, `backdoor_hooks_data_t`, `imported_funcs_t`, `string_references_t`, `string_item_t`, `backdoor_setup_params_t`.
+3. **SSHD / Monitor State** – Once the loader is clear, focus on sshd-facing structs so sensitive-data scans and hook trampolines can be reasoned about: `sshd_ctx_t`, `sshd_log_ctx_t`, `monitor`, `monitor_data_t`, `sshd_payload_ctx_t`, `run_backdoor_commands_data_t`, `secret_data_item_t`, `secret_data_shift_cursor_t`.
+4. **Payload / Crypto Plumbing** – With runtime structures mapped, cover the payload buffers and key material used when executing attacker commands: `backdoor_payload_hdr_t`, `backdoor_payload_body_t`, `backdoor_payload_t`, `key_payload_t`, `key_ctx_t`, `cmd_arguments_t`, `key_buf`.
+5. **Third-Party Types** – Finally, align OpenSSH/OpenSSL/XZ imports with the reversed code so cross-references stay accurate: `sshbuf`, `sshkey`, `RSA`, `EVP_*`, `EC_*`, `kex`, `auditstate`, `audit_ifaces`, etc. These can be treated opportunistically once the bespoke structs are documented.
+
 | Struct | Review Count | Notes |
 | --- | --- | --- |
 | `audit_ifaces` | 0 |  |
@@ -31,7 +39,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `Elf64_Phdr` | 0 |  |
 | `Elf64_Rela` | 0 |  |
 | `Elf64_Sym` | 0 |  |
-| `elf_entry_ctx_t` | 0 |  |
+| `elf_entry_ctx_t` | 1 | Documented the cpuid relocation anchors (`cpuid_random_symbol_addr`, resolver frame/GOT slot reuse) and clarified the GOT bookkeeping role (2025-11-19). |
 | `elf_functions_t` | 0 |  |
 | `elf_handles_t` | 0 |  |
 | `elf_info_t` | 1 | Fields renamed/annotated (2025-11-18) |

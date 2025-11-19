@@ -861,7 +861,7 @@
       "names": [
         "elf_entry_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_entry_ctx {\n void *symbol_ptr;\n got_ctx_t got_ctx;\n u64 *frame_address;\n} elf_entry_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) elf_entry_ctx {\n void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_offset` recreates the GOT base for the cpuid trampolines. */\n got_ctx_t got_ctx; /* Local copy of the GOT pointer/index/offset mashup that `backdoor_init` mutates while hijacking the resolver. */\n u64 *resolver_frame; /* Points to the resolver’s saved frame slots on entry; after init this field is repurposed to stash the cpuid GOT slot pointer that stage two patches. */\n} elf_entry_ctx_t;"
     },
     {
       "kind": "enum",

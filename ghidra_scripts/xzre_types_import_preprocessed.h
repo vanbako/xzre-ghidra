@@ -660,9 +660,9 @@ typedef struct __attribute__((packed)) got_ctx {
  * Bundles the loader-provided symbol pointer, the `got_ctx_t` used for the patch, and the caller’s stack frame for later restoration.
  */
 typedef struct __attribute__((packed)) elf_entry_ctx {
- void *symbol_ptr;
- got_ctx_t got_ctx;
- u64 *frame_address;
+ void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_offset` recreates the GOT base for the cpuid trampolines. */
+ got_ctx_t got_ctx; /* Local copy of the GOT pointer/index/offset mashup that `backdoor_init` mutates while hijacking the resolver. */
+ u64 *resolver_frame; /* Points to the resolver’s saved frame slots on entry; after init this field is repurposed to stash the cpuid GOT slot pointer that stage two patches. */
 } elf_entry_ctx_t;
 
 /*

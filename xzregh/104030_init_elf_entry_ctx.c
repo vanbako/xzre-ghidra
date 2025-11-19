@@ -16,8 +16,8 @@
 void init_elf_entry_ctx(elf_entry_ctx_t *ctx)
 
 {
-  ctx->symbol_ptr = &_Lrc_read_destroy;
-  (ctx->got_ctx).return_address = (void *)ctx->frame_address[3];
+  ctx->cpuid_random_symbol_addr = &_Lrc_read_destroy;
+  (ctx->got_ctx).return_address = (void *)ctx->resolver_frame[3];
   update_got_offset(ctx);
   update_cpuid_got_index(ctx);
   (ctx->got_ctx).got_ptr = (void *)0x0;
