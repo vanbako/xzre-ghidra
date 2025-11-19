@@ -19,7 +19,7 @@ BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *func
   pfn_EVP_DecryptInit_ex_t decrypt_init;
   BOOL has_missing_imports;
   int decrypt_status;
-  EVP_CIPHER_CTX *ctx;
+  EVP_CIPHER_CTX *cipher_ctx;
   const EVP_CIPHER *chacha_cipher;
   imported_funcs_t *imports;
   int outl;
@@ -28,21 +28,21 @@ BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *func
   if (((((in != (u8 *)0x0) && (inl != 0)) && (iv != (u8 *)0x0)) &&
       ((out != (u8 *)0x0 && (funcs != (imported_funcs_t *)0x0)))) &&
      ((imports = funcs, has_missing_imports = contains_null_pointers(&funcs->EVP_CIPHER_CTX_new,6), has_missing_imports == FALSE
-      && (ctx = (*imports->EVP_CIPHER_CTX_new)(), ctx != (EVP_CIPHER_CTX *)0x0)))) {
+      && (cipher_ctx = (*imports->EVP_CIPHER_CTX_new)(), cipher_ctx != (EVP_CIPHER_CTX *)0x0)))) {
     decrypt_init = funcs->EVP_DecryptInit_ex;
     chacha_cipher = (*funcs->EVP_chacha20)();
-    decrypt_status = (*decrypt_init)(ctx,chacha_cipher,(ENGINE *)0x0,key,iv);
+    decrypt_status = (*decrypt_init)(cipher_ctx,chacha_cipher,(ENGINE *)0x0,key,iv);
     if (decrypt_status == 1) {
-      decrypt_status = (*funcs->EVP_DecryptUpdate)(ctx,out,&outl,in,inl);
+      decrypt_status = (*funcs->EVP_DecryptUpdate)(cipher_ctx,out,&outl,in,inl);
       if (((decrypt_status == 1) && (-1 < outl)) &&
-         ((decrypt_status = (*funcs->EVP_DecryptFinal_ex)(ctx,out + outl,&outl), decrypt_status == 1 &&
+         ((decrypt_status = (*funcs->EVP_DecryptFinal_ex)(cipher_ctx,out + outl,&outl), decrypt_status == 1 &&
           ((-1 < outl && ((uint)outl <= (uint)inl)))))) {
-        (*funcs->EVP_CIPHER_CTX_free)(ctx);
+        (*funcs->EVP_CIPHER_CTX_free)(cipher_ctx);
         return TRUE;
       }
     }
     if (funcs->EVP_CIPHER_CTX_free != (pfn_EVP_CIPHER_CTX_free_t)0x0) {
-      (*funcs->EVP_CIPHER_CTX_free)(ctx);
+      (*funcs->EVP_CIPHER_CTX_free)(cipher_ctx);
     }
   }
   return FALSE;

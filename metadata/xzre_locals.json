@@ -1564,11 +1564,6 @@
     ],
     "register_temps": [
       {
-        "name": "used_relr_lookup",
-        "original": "bVar22",
-        "type": "BOOL"
-      },
-      {
         "name": "resolved_count_ptr",
         "original": "puVar1",
         "type": "u32 *"
@@ -1779,11 +1774,6 @@
         "type": "Elf64_Sym *"
       },
       {
-        "name": "rsa_new_sym",
-        "original": "pEVar39",
-        "type": "Elf64_Sym *"
-      },
-      {
         "name": "hook_table_bytes",
         "original": "pbVar18",
         "type": "byte *"
@@ -1829,11 +1819,6 @@
         "type": "sshd_ctx_t *"
       },
       {
-        "name": "sshd_log_ctx_cursor",
-        "original": "psVar53",
-        "type": "sshd_log_ctx_t *"
-      },
-      {
         "name": "imported_funcs_cursor",
         "original": "piVar54",
         "type": "imported_funcs_t *"
@@ -1857,11 +1842,6 @@
         "name": "lzma_code_end",
         "original": "puVar55",
         "type": "u8 *"
-      },
-      {
-        "name": "shared_hooks",
-        "original": "plVar3",
-        "type": "backdoor_hooks_data_t *"
       },
       {
         "name": "log_string_slot",
@@ -2037,7 +2017,7 @@
       },
       {
         "name": "cipher_ctx",
-        "original": "ctx_00",
+        "original": "ctx",
         "type": "EVP_CIPHER_CTX *"
       },
       {
@@ -2546,10 +2526,6 @@
         "original": "local_80",
         "replacement": "scanner_ctx",
         "type": "dasm_ctx_t"
-      },
-      {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&scanner_ctx.opcode_window[3]"
       },
       {
         "original": "local_90",
@@ -3419,19 +3395,14 @@
         "type": "char *"
       },
       {
-        "name": "audit_symbol",
-        "original": "pEVar7",
+        "name": "symbol_entry",
+        "original": "pEVar9",
         "type": "Elf64_Sym *"
       },
       {
         "name": "success",
         "original": "BVar8",
         "type": "BOOL"
-      },
-      {
-        "name": "audit_symbol_size",
-        "original": "uVar9",
-        "type": "u64"
       },
       {
         "name": "evp_pkey_free_stub",
@@ -3715,25 +3686,13 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&lea_ctx.opcode_window[3]"
-      },
-      {
-        "original": "local_80.prefix._0_4_",
-        "replacement": "lea_ctx.prefix.flags_u16"
-      },
-      {
-        "original": "local_80.prefix._14_1_",
-        "replacement": "lea_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_80.prefix._15_1_",
-        "replacement": "lea_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
         "original": "local_80",
         "replacement": "lea_ctx",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "lea_ctx._40_4_",
+        "replacement": "*(u32 *)&lea_ctx.opcode_window[3]"
       },
       {
         "name": "decode_ok",
@@ -4012,26 +3971,6 @@
         "name": "zero_seed",
         "original": "bVar17",
         "type": "u8"
-      },
-      {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&insn_ctx.opcode_window[3]"
-      },
-      {
-        "original": "local_80.prefix._0_4_",
-        "replacement": "insn_ctx.prefix.flags_u16"
-      },
-      {
-        "original": "local_80.prefix._13_1_",
-        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "local_80.prefix._14_1_",
-        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_80.prefix._15_1_",
-        "replacement": "insn_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -4821,14 +4760,6 @@
   "mm_answer_authpassword_hook": {
     "locals": [],
     "register_temps": [
-      {
-        "original": "libc_imports._0_4_",
-        "replacement": "*(uint *)&libc_imports"
-      },
-      {
-        "original": "libc_imports._4_4_",
-        "replacement": "*(uint *)((u8 *)&libc_imports + 4)"
-      },
       {
         "name": "libc_imports",
         "original": "funcs",
@@ -5803,16 +5734,6 @@
         "type": "u64"
       },
       {
-        "name": "rsa_exponent",
-        "original": "expSize",
-        "type": "const BIGNUM *"
-      },
-      {
-        "name": "rsa_modulus",
-        "original": "n",
-        "type": "const BIGNUM *"
-      },
-      {
         "name": "fingerprint_buf",
         "original": "local_1042",
         "type": "u8[0x100a]"
@@ -6604,8 +6525,8 @@
         "type": "u8 *"
       },
       {
-        "name": "code_scan_limit",
-        "original": "puVar4",
+        "name": "code_segment_end",
+        "original": "puVar5",
         "type": "u8 *"
       },
       {
@@ -6695,10 +6616,6 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "client_fd._0_1_",
-        "replacement": "*(u8 *)&client_fd"
-      },
-      {
         "name": "read_probe_buf",
         "original": "local_39",
         "type": "u8[9]"
@@ -6740,38 +6657,6 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
-      },
-      {
-        "original": "local_d8._40_4_",
-        "replacement": "*(u32 *)&local_d8.opcode_window[3]"
-      },
-      {
-        "original": "local_80.prefix._0_4_",
-        "replacement": "local_80.prefix.flags_u16"
-      },
-      {
-        "original": "local_80.prefix._14_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_80.prefix._15_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
-        "original": "local_d8.prefix._13_1_",
-        "replacement": "local_d8.prefix.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "local_d8.prefix._14_1_",
-        "replacement": "local_d8.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_d8.prefix._15_1_",
-        "replacement": "local_d8.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
         "name": "krb5_string_ref",
         "original": "code_start_00",
         "type": "u8 *"
@@ -6800,6 +6685,30 @@
         "name": "store_scan_ctx",
         "original": "local_80",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "string_scan_ctx._40_4_",
+        "replacement": "*(u32 *)&string_scan_ctx.opcode_window[3]"
+      },
+      {
+        "original": "string_scan_ctx.prefix._13_1_",
+        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_mod"
+      },
+      {
+        "original": "string_scan_ctx.prefix._14_1_",
+        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
+      },
+      {
+        "original": "string_scan_ctx.prefix._15_1_",
+        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
+      },
+      {
+        "original": "store_scan_ctx._40_4_",
+        "replacement": "*(u32 *)&store_scan_ctx.opcode_window[3]"
+      },
+      {
+        "original": "store_scan_ctx.prefix._14_1_",
+        "replacement": "store_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
       },
       {
         "name": "dest_reg",
@@ -6847,22 +6756,6 @@
   "sshd_get_sensitive_data_address_via_xcalloc": {
     "locals": [],
     "register_temps": [
-      {
-        "original": "local_100._0_8_",
-        "replacement": "((dasm_ctx_t *)local_100)->instruction"
-      },
-      {
-        "original": "local_100._8_8_",
-        "replacement": "((dasm_ctx_t *)local_100)->instruction_size"
-      },
-      {
-        "original": "local_100._16_2_",
-        "replacement": "((dasm_ctx_t *)local_100)->prefix.flags_u16"
-      },
-      {
-        "original": "local_e4._2_1_",
-        "replacement": "*(((u8 *)&local_e4) + 2)"
-      },
       {
         "name": "xcalloc_call_target",
         "original": "call_target",
@@ -7314,22 +7207,6 @@
         "replacement": "(local_e40 >> 8)"
       },
       {
-        "original": "local_c40[0].off._0_4_",
-        "replacement": "*(uint *)&local_c40[0].off"
-      },
-      {
-        "original": "local_c40[0].off._4_4_",
-        "replacement": "*(uint *)((u8 *)&local_c40[0].off + 4)"
-      },
-      {
-        "original": "off._0_4_",
-        "replacement": "*(uint *)&off"
-      },
-      {
-        "original": "off._4_4_",
-        "replacement": "*(uint *)((u8 *)&off + 4)"
-      },
-      {
         "original": "payload_hash._1_4_",
         "replacement": "*(uint *)(payload_hash + 1)"
       },
@@ -7417,6 +7294,14 @@
         "name": "sshbuf_vec",
         "original": "local_c40",
         "type": "sshbuf[4]"
+      },
+      {
+        "original": "sshbuf_vec[0].off._0_4_",
+        "replacement": "*(uint *)&sshbuf_vec[0].off"
+      },
+      {
+        "original": "sshbuf_vec[0].off._4_4_",
+        "replacement": "*(uint *)((u8 *)&sshbuf_vec[0].off + 4)"
       },
       {
         "name": "netlen_tmp",
@@ -7618,14 +7503,6 @@
         "replacement": "*(uint *)serialized_key ="
       },
       {
-        "original": "ec_point_len << 0x18);",
-        "replacement": "ec_point_len << 0x18;"
-      },
-      {
-        "original": "<< 0x18);",
-        "replacement": "<< 0x18;"
-      },
-      {
         "original": "serialized_key = 0;",
         "replacement": "*(u64 *)serialized_key = 0;"
       },
@@ -7636,6 +7513,14 @@
       {
         "original": "&serialized_key",
         "replacement": "serialized_key"
+      },
+      {
+        "original": "ec_point_len << 0x18);",
+        "replacement": "ec_point_len << 0x18;"
+      },
+      {
+        "original": "<< 0x18);",
+        "replacement": "<< 0x18;"
       },
       {
         "name": "imports",

