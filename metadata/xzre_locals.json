@@ -7515,14 +7515,6 @@
         "replacement": "serialized_key"
       },
       {
-        "original": "ec_point_len << 0x18);",
-        "replacement": "ec_point_len << 0x18;"
-      },
-      {
-        "original": "<< 0x18);",
-        "replacement": "<< 0x18;"
-      },
-      {
         "name": "imports",
         "original": "piVar1",
         "type": "imported_funcs_t *"
@@ -7541,6 +7533,14 @@
         "name": "ec_point_len",
         "original": "uVar4",
         "type": "uint"
+      },
+      {
+        "original": "ec_point_len << 0x18);",
+        "replacement": "ec_point_len << 0x18;"
+      },
+      {
+        "original": "<< 0x18);",
+        "replacement": "<< 0x18;"
       },
       {
         "name": "status",

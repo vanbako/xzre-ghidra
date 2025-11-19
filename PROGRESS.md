@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `backdoor_hooks_ctx_t`: renamed the scratch/pointer fields (`bootstrap_scratch`, `hooks_data_slot_ptr`, `symbind64_trampoline`, `rsa_*_entry`, `mm_*_entry`) and clarified that the remaining pointer slots are placeholders for future log/monitor contexts. Ran the refresh pipeline so `init_hooks_ctx`/`backdoor_setup` now refer to the updated names and updated STRUCT_PROGRESS.
+- Next: keep marching down the backdoor struct list (`backdoor_payload_body_t` still pending) so all of the payload plumbing is equally well documented.
+
+## 2025-11-19
 - `backdoor_payload_hdr_t`: replaced the anonymous field_a/b/c triplet with the stride/index/bias naming, documented how run_backdoor_commands collapses them into `cmd_type` and how decrypt_payload_message reuses the 16 bytes as the ChaCha IV, and refreshed the project so the updated comments propagate into `xzregh`/Ghidra. Struct tracker bumped to reflect the pass.
 - Next: continue down the payload record chain by documenting `backdoor_payload_body_t` so the decrypted args/signature/body layout is just as clear.
 
