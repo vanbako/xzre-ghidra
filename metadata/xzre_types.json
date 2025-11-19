@@ -1540,14 +1540,14 @@
       "names": [
         "backdoor_cpuid_reloc_consts_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {\n ptrdiff_t cpuid_random_symbol_got_offset;\n u64 cpuid_got_index;\n ptrdiff_t backdoor_init_stage2_got_offset;\n} backdoor_cpuid_reloc_consts_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {\n ptrdiff_t random_cpuid_slot_offset_from_got_anchor; /* Delta from `update_got_offset`’s sentinel to the GOT entry storing `cpuid_random_symbol`; used to find the shimmed cpuid resolver. */\n u64 cpuid_stub_got_index; /* GOT index (as seen by liblzma’s cpuid IFUNC) for the slot we later overwrite with backdoor_init_stage2. */\n ptrdiff_t stage2_trampoline_offset_from_got_anchor; /* Delta from the same GOT anchor to the `backdoor_init_stage2` function pointer so the loader can jump to stage two without rescanning code. */\n} backdoor_cpuid_reloc_consts_t;"
     },
     {
       "kind": "struct",
       "names": [
         "backdoor_tls_get_addr_reloc_consts_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {\n ptrdiff_t tls_get_addr_plt_offset;\n ptrdiff_t tls_get_addr_random_symbol_got_offset;\n} backdoor_tls_get_addr_reloc_consts_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {\n ptrdiff_t plt_stub_offset_from_got_anchor; /* Delta applied to `update_got_offset`’s sentinel (`_Llzma_block_buffer_decode_0`) so helpers can jump straight into the `__tls_get_addr` PLT stub. */\n ptrdiff_t random_slot_offset_from_got_anchor; /* Delta from the relocation-safe GOT anchor (`elf_functions_offset`) to the randomized slot that holds `tls_get_addr_random_symbol`. */\n} backdoor_tls_get_addr_reloc_consts_t;"
     },
     {
       "kind": "typedef",

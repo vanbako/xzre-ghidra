@@ -1519,17 +1519,17 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
  * Constant offsets harvested from liblzma that describe where the cpuid GOT slot and stage-two trampoline live so the hook can update them without rescanning instructions.
  */
 typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {
- ptrdiff_t cpuid_random_symbol_got_offset;
- u64 cpuid_got_index;
- ptrdiff_t backdoor_init_stage2_got_offset;
+ ptrdiff_t random_cpuid_slot_offset_from_got_anchor; /* Delta from `update_got_offset`’s sentinel to the GOT entry storing `cpuid_random_symbol`; used to find the shimmed cpuid resolver. */
+ u64 cpuid_stub_got_index; /* GOT index (as seen by liblzma’s cpuid IFUNC) for the slot we later overwrite with backdoor_init_stage2. */
+ ptrdiff_t stage2_trampoline_offset_from_got_anchor; /* Delta from the same GOT anchor to the `backdoor_init_stage2` function pointer so the loader can jump to stage two without rescanning code. */
 } backdoor_cpuid_reloc_consts_t;
 
 /*
  * Similar relocation constants for the `__tls_get_addr` thunk so we can locate the PLT stub and randomized GOT slot at runtime.
  */
 typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
- ptrdiff_t tls_get_addr_plt_offset;
- ptrdiff_t tls_get_addr_random_symbol_got_offset;
+ ptrdiff_t plt_stub_offset_from_got_anchor; /* Delta applied to `update_got_offset`’s sentinel (`_Llzma_block_buffer_decode_0`) so helpers can jump straight into the `__tls_get_addr` PLT stub. */
+ ptrdiff_t random_slot_offset_from_got_anchor; /* Delta from the relocation-safe GOT anchor (`elf_functions_offset`) to the randomized slot that holds `tls_get_addr_random_symbol`. */
 } backdoor_tls_get_addr_reloc_consts_t;
 
 typedef int (*init_hook_functions_fn)(backdoor_hooks_ctx_t *funcs);
