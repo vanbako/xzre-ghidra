@@ -3,6 +3,21 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-18
+- Added inline comments for every field in `imported_funcs_t`, explaining which slots hold the preserved libcrypto entry points, which track the PLT jumps, and how the crypto/helper stubs (BN/EVP/ChaCha) are used by the payload pipeline. The struct now mirrors the level of documentation we have on `elf_info_t`/`libc_imports_t`.
+- Ran `./scripts/refresh_xzre_project.sh` so the annotations propagated into `xzregh/xzre_types.h` and the Ghidra project.
+- Next: continue annotating the remaining structs in `docs/STRUCT_PROGRESS.md` (starting with the zero-count entries) to keep the metadata self-documenting.
+
+## 2025-11-18
+- Annotated every field in `elf_info_t` and `libc_imports_t`, capturing what each pointer/flag represents (PT_DYNAMIC tables, segment caches, GNU hash metadata, libc trampolines, etc.) so future reversing sessions can reason about the data without re-reading the importers.
+- Regenerated the headless project via `./scripts/refresh_xzre_project.sh` so the inline comments propagate into `xzregh/xzre_types.h` and the Ghidra project.
+- Next: continue working through the remaining structs with review count `0` (see `docs/STRUCT_PROGRESS.md`) and add similar inline annotations as they are understood.
+
+## 2025-11-18
+- Added `docs/STRUCT_PROGRESS.md`, auto-populated it with every struct from `metadata/xzre_types.json`, and seeded the review counts/notes for the structs we have already annotated (`elf_info_t`, `libc_imports_t`, `imported_funcs_t`, `sshd_payload_ctx_t`). Future analysts can bump the counts and add notes as they work through the lower-priority entries.
+- Documented the struct-tracking workflow in `AGENTS.md` so each session knows to update the progress file whenever a struct is revisited or a new one is added.
+- Next: continue tackling the structs with a review count of `0` and update the tracker after each pass so prioritization stays obvious.
+
+## 2025-11-18
 - opco_patt locals sweep: typed the scratch decoder contexts in the MOV/LEA/CALL/string finders as `dasm_ctx_t`, renamed the range/xref iterators inside `elf_find_string_references`, and made the string-entry offsets unsigned so the decomp reflects the underlying tables.
 - Ran `./scripts/refresh_xzre_project.sh`; locals rename report is clean and `xzregh/102D30_elf_find_string_references.c` picked up the new naming.
 - Continued unwinding `elf_find_string_references`: forced the code segment bounds and target calculations to use plain `u8 *` math instead of the decoder-struct offsets and normalized the return path to a simple TRUE.

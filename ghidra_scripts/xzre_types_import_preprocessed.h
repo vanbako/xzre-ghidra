@@ -743,43 +743,43 @@ typedef struct __attribute__((packed)) dasm_ctx {
  * Parsed view of an ELF image that exposes the headers, relocation tables, version info, code/data segments, and GNU hash metadata needed by the import fix-ups.
  */
 typedef struct __attribute__((packed)) elf_info {
- Elf64_Ehdr *elfbase;
- u64 load_base_vaddr;
- Elf64_Phdr *phdrs;
- u64 phdr_count;
- Elf64_Dyn *dynamic_segment;
- u64 dyn_entry_count;
- char *dynstr;
- Elf64_Sym *dynsym;
- Elf64_Rela *plt_relocs;
- u32 plt_reloc_count;
- BOOL gnurelro_present;
- u64 gnurelro_vaddr;
- u64 gnurelro_memsize;
- Elf64_Verdef *verdef;
- u64 verdef_count;
- Elf64_Versym *versym;
- Elf64_Rela *rela_relocs;
- u32 rela_reloc_count;
- u32 relr_reserved0;
- Elf64_Relr *relr_relocs;
- u32 relr_reloc_count;
- u32 relr_reserved1;
- u64 text_segment_start;
- u64 text_segment_size;
- u64 rodata_segment_start;
- u64 rodata_segment_size;
- u64 data_segment_start;
- u64 data_segment_size;
- u64 data_segment_padding;
- u64 feature_flags;
- u32 gnu_hash_nbuckets;
- u32 gnu_hash_last_bloom;
- u32 gnu_hash_bloom_shift;
- u32 gnu_hash_reserved;
- u64 *gnu_hash_bloom;
- u32 *gnu_hash_buckets;
- u32 *gnu_hash_chain;
+ Elf64_Ehdr *elfbase; /* Base pointer to the mapped ELF header used for pointer arithmetic. */
+ u64 load_base_vaddr; /* Lowest PT_LOAD virtual address so runtime addrs can be rebased into the file image. */
+ Elf64_Phdr *phdrs; /* Program header table inside the mapped object. */
+ u64 phdr_count; /* Number of program headers validated by elf_parse. */
+ Elf64_Dyn *dynamic_segment; /* PT_DYNAMIC table extracted from the load. */
+ u64 dyn_entry_count; /* Number of meaningful dynamic entries discovered before DT_NULL. */
+ char *dynstr; /* .dynstr (string table for dynamic symbols). */
+ Elf64_Sym *dynsym; /* .dynsym pointer used by the GNU hash walker. */
+ Elf64_Rela *plt_relocs; /* DT_JMPREL relocations (PLT/GOT). */
+ u32 plt_reloc_count; /* Number of PLT reloc entries. */
+ BOOL gnurelro_present; /* TRUE if a PT_GNU_RELRO segment was found. */
+ u64 gnurelro_vaddr; /* Virtual address of the GNU_RELRO segment. */
+ u64 gnurelro_memsize; /* Length of the GNU_RELRO mapping. */
+ Elf64_Verdef *verdef; /* Pointer to version definition records (.gnu.version_d). */
+ u64 verdef_count; /* Number of version definitions copied from DT_VERDEFNUM. */
+ Elf64_Versym *versym; /* Pointer to .gnu.version for per-symbol version tags. */
+ Elf64_Rela *rela_relocs; /* DT_RELA relocation table (non-PLT). */
+ u32 rela_reloc_count; /* Number of DT_RELA entries. */
+ u32 relr_reserved0; /* Padding/alignment so the RELR pair stays 16-byte aligned. */
+ Elf64_Relr *relr_relocs; /* DT_RELR table when the binary uses compact RELR relocations. */
+ u32 relr_reloc_count; /* Number of DT_RELR entries. */
+ u32 relr_reserved1; /* Additional padding for RELR metadata. */
+ u64 text_segment_start; /* Cached start of the executable PT_LOAD segment (page aligned). */
+ u64 text_segment_size; /* Size of the cached executable segment. */
+ u64 rodata_segment_start; /* Cached start of the read-only data segment. */
+ u64 rodata_segment_size; /* Size of the cached rodata segment. */
+ u64 data_segment_start; /* Start of the writable PT_LOAD segment (file-backed bytes). */
+ u64 data_segment_size; /* Size of writable segment excluding alignment padding. */
+ u64 data_segment_padding; /* Extra bytes between the file-backed end and the page boundary. */
+ u64 feature_flags; /* Bitmask tracking optional tables (1=PLT,2=RELA,4=RELR,8=VERDEF,0x10=VERSYM,0x20=BIND_NOW). */
+ u32 gnu_hash_nbuckets; /* GNU hash header: bucket count. */
+ u32 gnu_hash_last_bloom; /* GNU hash header: bloom filter size minus one. */
+ u32 gnu_hash_bloom_shift; /* GNU hash header: shift count used by the bloom filter. */
+ u32 gnu_hash_reserved; /* Alignment padding before the bloom/bucket/chain pointers. */
+ u64 *gnu_hash_bloom; /* Pointer to the bloom filter words. */
+ u32 *gnu_hash_buckets; /* Pointer to the GNU hash buckets array. */
+ u32 *gnu_hash_chain; /* Pointer to the GNU hash chain table (starting at symbias). */
 } elf_info_t;
 
 typedef size_t (*pfn_malloc_usable_size_t)(void *ptr);
@@ -813,21 +813,21 @@ typedef int (*pfn_shutdown_t)(int sockfd, int how);
  * Resolved libc entrypoints used by the implant (pselect/read/write/setresgid/etc.) along with the book-keeping counters for how many symbols were patched successfully.
  */
 typedef struct __attribute__((packed)) libc_imports {
- u32 resolved_imports_count;
- u32 reserved_imports_padding;
- pfn_malloc_usable_size_t malloc_usable_size;
- pfn_getuid_t getuid;
- pfn_exit_t exit;
- pfn_setresgid_t setresgid;
- pfn_setresuid_t setresuid;
- pfn_system_t system;
- pfn_write_t write;
- pfn_pselect_t pselect;
- pfn_read_t read;
- pfn___errno_location_t __errno_location;
- pfn_setlogmask_t setlogmask;
- pfn_shutdown_t shutdown;
- void *__libc_stack_end;
+ u32 resolved_imports_count; /* Incremented whenever a libc stub resolves; reaching the expected total gates later stages. */
+ u32 reserved_imports_padding; /* Alignment padding before the function pointer block. */
+ pfn_malloc_usable_size_t malloc_usable_size; /* Fake allocator stub returned by find_dl_audit_offsets so liblzma callers can probe chunk sizes. */
+ pfn_getuid_t getuid; /* Used when deciding whether payload commands should attempt privilege changes. */
+ pfn_exit_t exit; /* Hard-exit path when hooks fail and sshd should terminate immediately. */
+ pfn_setresgid_t setresgid; /* Applied by payload handlers before running `system()` commands. */
+ pfn_setresuid_t setresuid; /* Companion to setresgid for privilege swaps. */
+ pfn_system_t system; /* Executes decoded attacker commands (payload type 0x3). */
+ pfn_write_t write; /* Socket write helper (e.g., feeding canned monitor replies). */
+ pfn_pselect_t pselect; /* Used by the fd I/O helpers to mirror sshd's blocking behaviour. */
+ pfn_read_t read; /* Read stub allocated during libc resolution so fd_read can avoid the PLT. */
+ pfn___errno_location_t __errno_location; /* Provides thread-local errno access for the fd shims. */
+ pfn_setlogmask_t setlogmask; /* Lets the implant silence syslog noise before patching. */
+ pfn_shutdown_t shutdown; /* Allows hooks to close sockets cleanly when aborting connections. */
+ void *__libc_stack_end; /* Snapshot of libc's __libc_stack_end so the fake allocator/import resolver can restore stack metadata. */
 } libc_imports_t;
 
 typedef int (*pfn_RSA_public_decrypt_t)(
@@ -920,19 +920,19 @@ typedef void (*pfn_BN_free_t)(BIGNUM *a);
  * All non-libc function pointers the payload needs (RSA/EVP/BN helpers, chacha decrypt, etc.) plus access to the owning `libc_imports_t` so callers can reach both sets via one pointer.
  */
 typedef struct __attribute__((packed)) imported_funcs {
- pfn_RSA_public_decrypt_t RSA_public_decrypt_orig;
- pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA_orig;
- pfn_RSA_get0_key_t RSA_get0_key_orig;
- pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt; /* Non-NULL once the loader records sshd’s RSA_public_decrypt PLT slot */
- pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt; /* Populated when the EVP_PKEY_set1_RSA PLT entry is located */
- pfn_RSA_get0_key_t *RSA_get0_key_plt; /* Set after we capture RSA_get0_key’s PLT so the hook can fall back safely */
- pfn_DSA_get0_pqg_t DSA_get0_pqg;
+ pfn_RSA_public_decrypt_t RSA_public_decrypt_orig; /* Saved pointer to the genuine RSA_public_decrypt implementation. */
+ pfn_EVP_PKEY_set1_RSA_t EVP_PKEY_set1_RSA_orig; /* Original EVP_PKEY_set1_RSA before hooks attach. */
+ pfn_RSA_get0_key_t RSA_get0_key_orig; /* Original RSA_get0_key before hooks attach. */
+ pfn_RSA_public_decrypt_t *RSA_public_decrypt_plt; /* sshd’s PLT slot; populated when the loader finds the GOT entry. */
+ pfn_EVP_PKEY_set1_RSA_t *EVP_PKEY_set1_RSA_plt; /* sshd’s PLT slot for EVP_PKEY_set1_RSA. */
+ pfn_RSA_get0_key_t *RSA_get0_key_plt; /* sshd’s PLT slot for RSA_get0_key (used for fallback jumps). */
+ pfn_DSA_get0_pqg_t DSA_get0_pqg; /* DSA helpers used while hashing/serialising host keys. */
  pfn_DSA_get0_pub_key_t DSA_get0_pub_key;
  pfn_EC_POINT_point2oct_t EC_POINT_point2oct;
  pfn_EC_KEY_get0_public_key_t EC_KEY_get0_public_key;
  pfn_EC_KEY_get0_group_t EC_KEY_get0_group;
- pfn_EVP_sha256_t EVP_sha256;
- pfn_RSA_get0_key_t RSA_get0_key_resolved;
+ pfn_EVP_sha256_t EVP_sha256; /* Hash primitive consumed by rsa/dsa key hashers. */
+ pfn_RSA_get0_key_t RSA_get0_key_resolved; /* Direct pointer into libcrypto (bypassing PLT) for payload parsing. */
  pfn_BN_num_bits_t BN_num_bits;
  pfn_EVP_PKEY_new_raw_public_key_t EVP_PKEY_new_raw_public_key;
  pfn_EVP_MD_CTX_new_t EVP_MD_CTX_new;
@@ -945,7 +945,7 @@ typedef struct __attribute__((packed)) imported_funcs {
  pfn_EVP_DecryptUpdate_t EVP_DecryptUpdate;
  pfn_EVP_DecryptFinal_ex_t EVP_DecryptFinal_ex;
  pfn_EVP_CIPHER_CTX_free_t EVP_CIPHER_CTX_free;
- pfn_EVP_chacha20_t EVP_chacha20;
+ pfn_EVP_chacha20_t EVP_chacha20; /* ChaCha primitive used to decrypt payload bodies. */
  pfn_RSA_new_t RSA_new;
  pfn_BN_dup_t BN_dup;
  pfn_BN_bin2bn_t BN_bin2bn;
@@ -955,9 +955,9 @@ typedef struct __attribute__((packed)) imported_funcs {
  pfn_BN_bn2bin_t BN_bn2bin;
  pfn_RSA_free_t RSA_free;
  pfn_BN_free_t BN_free;
- libc_imports_t *libc;
- u32 resolved_imports_count;
- u32 reserved_imports_padding;
+ libc_imports_t *libc; /* Back-pointer so RSA/MM hooks can reach libc shims. */
+ u32 resolved_imports_count; /* Number of successfully resolved libcrypto symbols (init expects 0x1d). */
+ u32 reserved_imports_padding; /* Alignment padding after the count. */
 } imported_funcs_t;
 
 struct ssh;
@@ -974,12 +974,12 @@ typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
  * Decrypted command blob staged by `mm_answer_keyallowed`: starts with a length, 0x3a-byte signed header (ending in the payload type), a 0x72-byte Ed448 signature, and then the attacker-controlled body beginning at offset 0xae with a caller-supplied payload_data_offset.
  */
 typedef struct __attribute__((packed)) sshd_payload_ctx {
- u16 payload_size;
- u8 signed_header[0x39];
- u8 payload_type;
- u8 signature[0x72];
- u16 payload_data_offset;
- u8 payload_body[];
+ u16 payload_total_size; /* Total decrypted payload length (header + trailer + body). */
+ u8 signed_header_prefix[0x39]; /* First 0x39 bytes of header metadata that the Ed448 signature covers. */
+ u8 command_type; /* 0x1 => stash mm_answer_authpassword payload, 0x2 => mm_answer_keyverify reply, 0x3 => system/elevate command. */
+ u8 ed448_signature[0x72];
+ u16 body_payload_offset; /* Offset into `payload_body` where the attacker-supplied command stream begins. */
+ u8 payload_body[]; /* Decrypted body (begins at offset 0xae of the blob, includes padding + command bytes). */
 } sshd_payload_ctx_t;
 
 /*
