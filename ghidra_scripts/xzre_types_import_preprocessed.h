@@ -1289,23 +1289,23 @@ typedef struct __attribute__((packed)) string_references {
  * Master structure built during the loader pass that holds every `link_map`, the parsed `elf_info_t` objects for key libraries, resolved libc imports, string references, and the fake allocator we expose to liblzma.
  */
 typedef struct __attribute__((packed)) backdoor_data {
- struct link_map *main_map;
- struct link_map *dynamic_linker_map;
- struct link_map *liblzma_map;
- struct link_map *libcrypto_map;
- struct link_map *libsystemd_map;
- struct link_map *libc_map;
- elf_handles_t elf_handles;
- backdoor_data_handle_t data_handle;
- elf_info_t main_info;
- elf_info_t dynamic_linker_info;
- elf_info_t libc_info;
- elf_info_t liblzma_info;
- elf_info_t libcrypto_info;
- libc_imports_t libc_imports;
- string_references_t string_refs;
- lzma_allocator fake_allocator;
- lzma_allocator *import_resolver;
+ struct link_map *sshd_link_map; /* Live `link_map` entry for sshd’s main binary (aka r_debug->r_map head when basename is empty). */
+ struct link_map *ldso_link_map; /* ld-linux / ld.so entry used when verifying _rtld_global and later when patching the audit tables. */
+ struct link_map *liblzma_link_map; /* Active liblzma entry so we can locate the RW data segment housing the hook blob + allocator. */
+ struct link_map *libcrypto_link_map; /* Live libcrypto entry whose `l_audit` fields get overwritten to redirect PLT binds. */
+ struct link_map *libsystemd_link_map; /* Captured libsystemd entry; primarily used as a canary so the r_map walk sees the expected baseline. */
+ struct link_map *libc_link_map; /* Live libc entry used for import resolution and syscalls proxied through the fake allocator. */
+ elf_handles_t elf_handles; /* Parsed `elf_info_t` descriptors for {sshd, ld.so, libc, liblzma, libcrypto}. */
+ backdoor_data_handle_t data_handle; /* Self-referential handle pairing this blob with `elf_handles` for helper callers. */
+ elf_info_t main_info; /* Cached ELF metadata for sshd’s main binary. */
+ elf_info_t dynamic_linker_info; /* Cached ELF metadata for ld.so (audit target). */
+ elf_info_t libc_info; /* Cached ELF metadata for glibc. */
+ elf_info_t liblzma_info; /* Cached ELF metadata for liblzma (where the hooks live). */
+ elf_info_t libcrypto_info; /* Cached ELF metadata for libcrypto (RSA/EVP targets). */
+ libc_imports_t libc_imports; /* Table of libc imports resolved once the libc rwx ranges are known. */
+ string_references_t sshd_string_refs; /* Catalog of key sshd strings and their xrefs; drives the recon scans. */
+ lzma_allocator saved_lzma_allocator; /* Copy of the ambient liblzma allocator callbacks (restored after we borrow them). */
+ lzma_allocator *active_lzma_allocator; /* Live allocator pointer exposed to helpers; we swap its opaque pointer to resolve imports. */
 } backdoor_data_t;
 
 /*

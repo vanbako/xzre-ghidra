@@ -15,7 +15,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_payload_t` | 1 | Backdoor review order #7 – renamed the raw bytes view, documented the parsed header/body union, and noted why the hooks need both representations (2025-11-19). |
 | `backdoor_setup_params_t` | 1 | Backdoor review order #8 – renamed the scratch/pointer fields, documented the dummy lzma state plus entry ctx usage (2025-11-19). |
 | `backdoor_data_handle_t` | 1 | Backdoor review order #9 – renamed the pointers to `runtime_data`/`cached_elf_handles` and documented why helpers need both views (2025-11-19). |
-| `backdoor_data_t` | 0 | Backdoor review order #10 – aggregate of decrypted/derived blobs. |
+| `backdoor_data_t` | 1 | Backdoor review order #10 – renamed the link_map snapshots + allocator fields and documented the sshd string table + ELF handles (2025-11-19). |
 | `backdoor_tls_get_addr_reloc_consts_t` | 0 | Backdoor review order #11 – metadata for TLS GOT fixups. |
 | `backdoor_cpuid_reloc_consts_t` | 0 | Backdoor review order #12 – final enum of CPUID GOT relocs. |
 | `BIGNUM` | 0 |  |
