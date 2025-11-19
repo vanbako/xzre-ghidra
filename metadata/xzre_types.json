@@ -1470,7 +1470,7 @@
       "names": [
         "backdoor_payload_body_t"
       ],
-      "code": "typedef struct __attribute__((packed)) key_payload_body {\n u8 signature[114];\n cmd_arguments_t args;\n u8 data[0x1A1];\n} backdoor_payload_body_t;"
+      "code": "typedef struct __attribute__((packed)) key_payload_body {\n u8 ed448_signature[114]; /* 0x72-byte Ed448 signature covering the decrypted cmd flags and payload bytes; verified against sshd host keys. */\n cmd_arguments_t cmd_flags; /* Three command flag bytes (plus the u_cmd_arguments_t union) that govern PAM/log toggles, socket selection, and continuation sizing semantics. */\n u8 monitor_payload[0x1A1]; /* Attacker-supplied body starting 0x87 bytes into the decrypted blob (0x10-byte header + 0x77-byte signed prefix); holds the monitor command stream/sshbuf data. */\n} backdoor_payload_body_t;"
     },
     {
       "kind": "struct",

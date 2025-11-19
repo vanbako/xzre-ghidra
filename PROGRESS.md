@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `backdoor_payload_body_t`: renamed the Ed448/signature/args/body fields to `ed448_signature`, `cmd_flags`, and `monitor_payload`, added inline comments that capture the signature coverage plus the 0x87 payload offset, and ran `./scripts/refresh_xzre_project.sh` so `xzregh/xzre_types.h` and the Ghidra project now show the annotated layout. Updated STRUCT_PROGRESS for review #1.
+- Next: continue documenting the rest of the payload chain (`backdoor_payload_t` → `key_payload_t`) so every layer of the RSA transport is described before moving on to the remaining backdoor structs.
+
+## 2025-11-19
 - `backdoor_hooks_ctx_t`: renamed the scratch/pointer fields (`bootstrap_scratch`, `hooks_data_slot_ptr`, `symbind64_trampoline`, `rsa_*_entry`, `mm_*_entry`) and clarified that the remaining pointer slots are placeholders for future log/monitor contexts. Ran the refresh pipeline so `init_hooks_ctx`/`backdoor_setup` now refer to the updated names and updated STRUCT_PROGRESS.
 - Next: keep marching down the backdoor struct list (`backdoor_payload_body_t` still pending) so all of the payload plumbing is equally well documented.
 

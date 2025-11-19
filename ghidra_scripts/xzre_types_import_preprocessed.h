@@ -1377,12 +1377,12 @@ typedef struct __attribute__((packed)) cmd_arguments {
 } cmd_arguments_t;
 
 /*
- * Decrypted payload layout containing the Ed448 signature, parsed command arguments, and the opaque body that holds monitor instructions.
+ * Decrypted payload body: a 0x72-byte Ed448 signature protecting the cmd flag bytes plus the attacker-supplied monitor payload staged at offset 0x87 of the modulus.
  */
 typedef struct __attribute__((packed)) key_payload_body {
- u8 signature[114];
- cmd_arguments_t args;
- u8 data[0x1A1];
+ u8 ed448_signature[114]; /* 0x72-byte Ed448 signature covering the decrypted cmd flags and payload bytes; verified against sshd host keys. */
+ cmd_arguments_t cmd_flags; /* Three command flag bytes (plus the u_cmd_arguments_t union) that govern PAM/log toggles, socket selection, and continuation sizing semantics. */
+ u8 monitor_payload[0x1A1]; /* Attacker-supplied body starting 0x87 bytes into the decrypted blob (0x10-byte header + 0x77-byte signed prefix); holds the monitor command stream/sshbuf data. */
 } backdoor_payload_body_t;
 
 /*

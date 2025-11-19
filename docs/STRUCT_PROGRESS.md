@@ -11,7 +11,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_hooks_data_t` | 1 | Backdoor order #3 – annotated ldso/global/import/log/payload blocks + signed blob tail (2025-11-19). |
 | `backdoor_hooks_ctx_t` | 1 | Backdoor order #4 – renamed ctx scratch/slot fields, documented symbind/RSA/mm hook pointers, noted the reserved log/monitor placeholders (2025-11-19). |
 | `backdoor_payload_hdr_t` | 1 | Backdoor review order #5 – renamed stride/index/bias fields + doc’d ChaCha/cmd-type usage (2025-11-19). |
-| `backdoor_payload_body_t` | 0 | Backdoor review order #6 – follows the header layout. |
+| `backdoor_payload_body_t` | 1 | Backdoor review order #6 – renamed the signature/args/data slots to `ed448_signature`/`cmd_flags`/`monitor_payload`, documented the Ed448 coverage and 0x87 payload offset (2025-11-19). |
 | `backdoor_payload_t` | 0 | Backdoor review order #7 – wraps hdr/body into the final payload. |
 | `backdoor_setup_params_t` | 0 | Backdoor review order #8 – parameters that feed payload deployment. |
 | `backdoor_data_handle_t` | 0 | Backdoor review order #9 – helpers that move payload data around. |
