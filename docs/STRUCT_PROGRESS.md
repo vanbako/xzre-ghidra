@@ -51,7 +51,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `kex` | 0 |  |
 | `key_buf` | 0 |  |
 | `key_ctx_t` | 0 |  |
-| `key_payload_t` | 0 |  |
+| `key_payload_t` | 1 | Backdoor review order #7.2 – renamed the flat buffer/length/body view, documented the ChaCha ciphertext framing, and tied it back to decrypt_payload_message (2025-11-19). |
 | `La_i86_regs` | 0 |  |
 | `La_i86_retval` | 0 |  |
 | `La_x32_regs` | 0 |  |

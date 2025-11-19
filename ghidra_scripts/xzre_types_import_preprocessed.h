@@ -1399,15 +1399,15 @@ typedef struct __attribute__((packed)) backdoor_payload {
 } backdoor_payload_t;
 
 /*
- * Variable-length framing used while streaming RSA payload chunks; repeats the header, length field, and byte array to support incremental decrypts.
+ * Outer frame for each streamed chunk: ChaCha ciphertext that carries the plaintext header + length prefix + body, giving decrypt_payload_message enough structure to stage the decrypted command bytes.
  */
 typedef struct __attribute__((packed)) key_payload {
  union {
-  u8 data[0];
+  u8 raw[0]; /* ChaCha ciphertext as delivered via the RSA modulus stream (header + length + body). */
   struct __attribute__((packed)) {
-   backdoor_payload_hdr_t hdr;
-   u16 body_length;
-   u8 body[0];
+   backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by decrypt_payload_message. */
+   u16 encrypted_body_length; /* Little-endian body length in ciphertext; decrypted to learn how many bytes to copy. */
+   u8 encrypted_body[0]; /* Variable-length ciphertext immediately following the length field. */
   };
  };
 } key_payload_t;

@@ -56,13 +56,14 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
       hdr.field0_0x0.field1.cmd_type_bias = *(int64_t *)((long)&payload->field0_0x0 + 8);
       decrypt_ok = secret_data_get_decrypted((u8 *)&data,ctx);
       if (decrypt_ok != FALSE) {
-        body_length_cursor = &(payload->field0_0x0).field1.body_length;
+        body_length_cursor = &(payload->field0_0x0).field1.encrypted_body_length;
         inl = (int)payload_size + -0x10;
         decrypt_ok = chacha_decrypt((u8 *)body_length_cursor,inl,(u8 *)&data,(u8 *)&hdr,(u8 *)body_length_cursor,
                                ctx->imported_funcs);
         if (((decrypt_ok != FALSE) &&
-            (body_len = (ulong)(payload->field0_0x0).field1.body_length, body_len <= payload_size - 0x12))
-           && (payload_offset = ctx->current_data_size, body_len < ctx->payload_data_size - payload_offset)) {
+            (body_len = (ulong)(payload->field0_0x0).field1.encrypted_body_length,
+            body_len <= payload_size - 0x12)) &&
+           (payload_offset = ctx->current_data_size, body_len < ctx->payload_data_size - payload_offset)) {
           payload_data_ptr = ctx->payload_data;
           for (copy_idx = 0; body_len != copy_idx; copy_idx = copy_idx + 1) {
             payload_data_ptr[copy_idx + payload_offset] = *(u8 *)((long)&payload->field0_0x0 + copy_idx + 0x12);

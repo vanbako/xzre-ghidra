@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-19
+- `key_payload_t`: completed the payload chain by annotating the streaming frame—renamed the raw ChaCha ciphertext buffer, length field, and body view, documented how decrypt_payload_message consumes the plaintext header/length, and refreshed the project so the exported headers and Ghidra snapshot now show the improved layout. STRUCT_PROGRESS updated for review #1.
+- Next: move down the struct queue (e.g., `backdoor_setup_params_t` or `backdoor_data_handle_t`) now that the payload family is fully documented.
+
+## 2025-11-19
 - `backdoor_payload_t`: clarified the union that wraps the decrypted payload by renaming the flat buffer to `raw`, annotating the embedded header/body view, and explaining how the RSA hooks use the raw bytes for hashing versus the structured fields for parsing. Ran `./scripts/refresh_xzre_project.sh` so the regenerated headers and Ghidra project expose the new comments, then bumped STRUCT_PROGRESS for review #1.
 - Next: finish the payload chain by documenting `key_payload_t` (streaming frame with length prefix) before tackling the remaining backdoor structs.
 

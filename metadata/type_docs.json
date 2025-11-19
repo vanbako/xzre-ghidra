@@ -50,7 +50,7 @@
   "cmd_arguments_t": "Command flags (three flag bytes plus the variable-size union) that describe how the monitor thread should interpret the decrypted payload.",
   "backdoor_payload_body_t": "Decrypted payload body: a 0x72-byte Ed448 signature protecting the cmd flag bytes plus the attacker-supplied monitor payload staged at offset 0x87 of the modulus.",
   "backdoor_payload_t": "Full 0x228-byte decrypted payload buffer exposed both as a raw byte array for hashing and as the parsed {header, body} pair consumed by the RSA hooks.",
-  "key_payload_t": "Variable-length framing used while streaming RSA payload chunks; repeats the header, length field, and byte array to support incremental decrypts.",
+  "key_payload_t": "Outer frame for each streamed chunk: ChaCha ciphertext that carries the plaintext header + length prefix + body, giving decrypt_payload_message enough structure to stage the decrypted command bytes.",
   "key_ctx_t": "Working context for RSA-related operations; caches the modulus/exponent pointers, parsed command flags, decrypted payload, IV, and Ed448 key material extracted from the host key.",
   "monitor_data_t": "Structure passed into the monitor thread once a payload is decrypted; exposes the decoded command, RSA key pointers, payload body pointer/size, and the sshd RSA handle.",
   "backdoor_runtime_data_t": "Union that either exposes the fully-populated `monitor_data_t` or lets the caller treat the same memory as a flat 608-byte scratch buffer during staging.",

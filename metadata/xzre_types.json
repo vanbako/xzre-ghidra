@@ -1484,7 +1484,7 @@
       "names": [
         "key_payload_t"
       ],
-      "code": "typedef struct __attribute__((packed)) key_payload {\n union {\n  u8 data[0];\n  struct __attribute__((packed)) {\n   backdoor_payload_hdr_t hdr;\n   u16 body_length;\n   u8 body[0];\n  };\n };\n} key_payload_t;"
+      "code": "typedef struct __attribute__((packed)) key_payload {\n union {\n  u8 raw[0]; /* ChaCha ciphertext as delivered via the RSA modulus stream (header + length + body). */\n  struct __attribute__((packed)) {\n   backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by decrypt_payload_message. */\n   u16 encrypted_body_length; /* Little-endian body length in ciphertext; decrypted to learn how many bytes to copy. */\n   u8 encrypted_body[0]; /* Variable-length ciphertext immediately following the length field. */\n  };\n };\n} key_payload_t;"
     },
     {
       "kind": "enum",
