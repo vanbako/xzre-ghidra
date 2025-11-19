@@ -91,7 +91,7 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
                 glro_slot_ptr = slot_ptr;
               }
             }
-            scan_cursor = insn_ctx.instruction + (ulong)insn_ctx.insn_offset + 1;
+            scan_cursor = insn_ctx.instruction + (ulong)insn_ctx.opcode_offset + 1;
           }
         }
         if ((glro_slot_ptr == (uint *)0x0) ||

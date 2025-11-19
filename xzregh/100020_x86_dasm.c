@@ -103,7 +103,7 @@ LAB_001004f1:
             }
             goto LAB_00100aa5;
           }
-          ctx->insn_offset = (u8)((long)cursor - (long)code_start);
+          ctx->opcode_offset = (u8)((long)cursor - (long)code_start);
           normalized_opcode = opcode;
           if (((ctx->prefix).decoded.flags & 0x10) != 0) {
             normalized_opcode = (uint)current_byte;
@@ -113,7 +113,7 @@ LAB_001004f1:
 LAB_001004a7:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
             *flags2_ptr = *flags2_ptr | 8;
-            ctx->operand_size = operand_width;
+            ctx->imm_size = operand_width;
           }
           else {
             if ((byte)normalized_opcode < 0x74) {
@@ -128,7 +128,7 @@ LAB_001004a2:
               if ((opcode_high_bits < 0x23) && ((0x740400101U >> ((byte)opcode_high_bits & 0x3f) & 1) != 0))
               goto LAB_001004a2;
             }
-            ctx->operand_size = 0;
+            ctx->imm_size = 0;
           }
           opcode_ptr = cursor;
           if (((byte)(&dasm_twobyte_has_modrm)[normalized_opcode >> 3 & 0x1f] >> (normalized_opcode & 7) & 1) == 0) {
@@ -173,7 +173,7 @@ LAB_0010092e:
             if ((opcode - 0xf6 < 2) && (((int)(uint)modrm_byte >> 3 & 7U) != 0)) {
               flags2_ptr = &(ctx->prefix).decoded.flags2;
               *flags2_ptr = *flags2_ptr & 0xf7;
-              ctx->operand_size = 0;
+              ctx->imm_size = 0;
             }
             if ((char)(ctx->prefix).decoded.flags < '\0') {
               if (code_end <= opcode_ptr + 2) goto LAB_00100aa5;
@@ -364,12 +364,12 @@ LAB_001003fa:
               }
               else if ((0x1000080001U >> (current_byte + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
-              ctx->insn_offset = (char)cursor - (char)code_start;
+              ctx->opcode_offset = (char)cursor - (char)code_start;
               if (opcode_high_bits == 0x3a00) {
 LAB_0010063c:
                 flags2_ptr = &(ctx->prefix).decoded.flags2;
                 *flags2_ptr = *flags2_ptr | 8;
-                ctx->operand_size = 1;
+                ctx->imm_size = 1;
                 goto LAB_001008c5;
               }
             }
@@ -400,19 +400,19 @@ LAB_00100604:
                   return FALSE;
                 }
               }
-              ctx->insn_offset = (char)cursor - (char)code_start;
+              ctx->opcode_offset = (char)cursor - (char)code_start;
               if ((opcode_high_bits == 0x3a00) && (2 < opcode - 0x4a)) goto LAB_0010063c;
             }
-            ctx->operand_size = 0;
+            ctx->imm_size = 0;
             goto LAB_001008c5;
           }
           opcode_high_bits = normalized_opcode >> 3 & 0x1f;
           if (((byte)(&dasm_threebyte_0x38_is_valid)[opcode_high_bits] >> (normalized_opcode & 7) & 1) == 0) {
             return FALSE;
           }
-          ctx->operand_size = 0;
+          ctx->imm_size = 0;
           current_byte = (&dasm_threebyte_has_modrm)[opcode_high_bits];
-          ctx->insn_offset = (u8)((long)cursor - (long)code_start);
+          ctx->opcode_offset = (u8)((long)cursor - (long)code_start);
           if ((current_byte >> (normalized_opcode & 7) & 1) != 0) goto LAB_001008c5;
           if (((ctx->prefix).decoded.flags2 & 8) == 0) {
             ctx->instruction = code_start;
@@ -423,24 +423,24 @@ LAB_0010067d:
           cursor = cursor + 1;
 LAB_00100680:
           if (code_end <= cursor) goto LAB_00100aa5;
-          operand_width = ctx->operand_size;
+          operand_width = ctx->imm_size;
           current_byte = *cursor;
           if (operand_width != 1) {
             opcode_ptr = cursor + 1;
             if (((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==
                 (undefined1  [16])0x66000000000004) {
               if (operand_width == 2) {
-                ctx->operand_size = 4;
+                ctx->imm_size = 4;
               }
               else if (operand_width == 4) {
-                ctx->operand_size = 2;
+                ctx->imm_size = 2;
               }
             }
             if (code_end <= opcode_ptr) goto LAB_00100aa5;
             imm16_word = CONCAT11(*opcode_ptr,current_byte);
-            if (ctx->operand_size == 2) {
-              ctx->operand_zeroextended = (ulong)imm16_word;
-              ctx->operand = (long)(short)imm16_word;
+            if (ctx->imm_size == 2) {
+              ctx->imm_zeroextended = (ulong)imm16_word;
+              ctx->imm_signed = (long)(short)imm16_word;
               cursor = opcode_ptr + (1 - (long)code_start);
               ctx->instruction = code_start;
               goto LAB_001007e4;
@@ -449,8 +449,8 @@ LAB_00100680:
             operand_cursor = cursor + 3;
             if (code_end <= operand_cursor) goto LAB_00100aa5;
             opcode = CONCAT13(cursor[3],CONCAT12(cursor[2],imm16_word));
-            if (ctx->operand_size == 4) {
-              ctx->operand_zeroextended = (ulong)opcode;
+            if (ctx->imm_size == 4) {
+              ctx->imm_zeroextended = (ulong)opcode;
               operand_width = (u64)(int)opcode;
             }
             else {
@@ -461,14 +461,14 @@ LAB_00100680:
               operand_width = CONCAT17(cursor[7],
                                CONCAT16(cursor[6],CONCAT15(cursor[5],CONCAT14(cursor[4],opcode)))
                               );
-              ctx->operand_zeroextended = operand_width;
+              ctx->imm_zeroextended = operand_width;
             }
-            ctx->operand = operand_width;
+            ctx->imm_signed = operand_width;
             goto LAB_0010089f;
           }
-          ctx->operand_zeroextended = (ulong)current_byte;
+          ctx->imm_zeroextended = (ulong)current_byte;
           cursor = cursor + (1 - (long)code_start);
-          ctx->operand = (long)(char)current_byte;
+          ctx->imm_signed = (long)(char)current_byte;
           ctx->instruction = code_start;
           ctx->instruction_size = (u64)cursor;
         }
@@ -492,14 +492,14 @@ LAB_001001c5:
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)current_byte;
           opcode_class_masks[0] = 0x3030303030303030;
-          ctx->insn_offset = (u8)((long)cursor - (long)code_start);
+          ctx->opcode_offset = (u8)((long)cursor - (long)code_start);
           opcode_class_masks[1] = 0xffff0fc000000000;
           opcode_class_masks[2] = 0xffff03000000000b;
           opcode_class_masks[3] = 0xc00bff000025c7;
           opcode_class_mask = opcode_class_masks[current_byte >> 6] >> (current_byte & 0x3f);
           opcode_class_flag = (ulong)((uint)opcode_class_mask & 1);
           if ((opcode_class_mask & 1) == 0) {
-            ctx->operand_size = 0;
+            ctx->imm_size = 0;
           }
           else {
             if (current_byte < 0xf8) {
@@ -538,7 +538,7 @@ LAB_001001c5:
 LAB_00100344:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
             *flags2_ptr = *flags2_ptr | 8;
-            ctx->operand_size = opcode_class_flag;
+            ctx->imm_size = opcode_class_flag;
           }
           opcode_index = (sbyte)normalized_opcode;
           opcode_ptr = cursor;
@@ -549,9 +549,9 @@ LAB_00100344:
             if ((tmp_byte & 8) != 0) {
               if (((((ctx->prefix).decoded.flags & 0x20) != 0) &&
                   (((ctx->prefix).decoded.rex.rex_byte & 8) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
-                ctx->operand_size = 8;
+                ctx->imm_size = 8;
                 (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
-                ctx->imm64_reg = opcode_index;
+                ctx->mov_imm_reg_index = opcode_index;
                 *(undefined4 *)(ctx->opcode_window + 3) = 0xb8;
               }
               goto LAB_0010067d;

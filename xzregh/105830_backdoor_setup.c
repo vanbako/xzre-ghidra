@@ -610,9 +610,9 @@ LAB_001067cf:
             }
             reg_upper = local_a30.prefix.decoded.flags2 & 0x10;
             if ((local_a30.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
-            reg_tmp = local_a30.imm64_reg;
+            reg_tmp = local_a30.mov_imm_reg_index;
             if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
-              reg_tmp = local_a30.imm64_reg | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
+              reg_tmp = local_a30.mov_imm_reg_index | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
             }
             reg_upper = 0;
 LAB_001067ed:
@@ -640,7 +640,8 @@ LAB_001067fb:
               if ((local_9d8.prefix.flags_u16 & 0x40) == 0) {
                 reg_lower = local_9d8.prefix.decoded.flags2 & 0x10;
                 if (((local_9d8.prefix.flags_u16 & 0x1000) != 0) &&
-                   (reg_lower = local_9d8.imm64_reg, (local_9d8.prefix.flags_u16 & 0x20) != 0)) {
+                   (reg_lower = local_9d8.mov_imm_reg_index, (local_9d8.prefix.flags_u16 & 0x20) != 0))
+                {
                   reg_tmp = (char)local_9d8.prefix.decoded.rex << 3;
                   goto LAB_001068e4;
                 }
@@ -726,8 +727,8 @@ LAB_00106b3c:
         }
         else if ((((*(u32 *)&local_a30.opcode_window[3] == 0x147) &&
                   ((uint)local_a30.prefix.decoded.modrm >> 8 == 0x50000)) &&
-                 ((local_a30.prefix.flags_u16 & 0x800) != 0)) &&
-                (local_a30.operand_zeroextended == 0)) {
+                 ((local_a30.prefix.flags_u16 & 0x800) != 0)) && (local_a30.imm_zeroextended == 0))
+        {
           payload_end = (u8 *)0x0;
           if ((local_a30.prefix.flags_u16 & 0x100) != 0) {
             payload_end = local_a30.instruction + local_a30.instruction_size + local_a30.mem_disp;
@@ -746,8 +747,8 @@ LAB_00106b3c:
                                  (sshd_code_end_ptr,(u8 *)local_980.string_refs.entries[0x1a].func_end,
                                   &local_9d8,0x147,(void *)0x0);
               if (BVar26 == FALSE) break;
-              if ((local_9d8.operand_zeroextended == 0) &&
-                 ((local_9d8.prefix.flags_u16 & 0x100) != 0)) {
+              if ((local_9d8.imm_zeroextended == 0) && ((local_9d8.prefix.flags_u16 & 0x100) != 0))
+              {
                 sshd_code_end_ptr = (u8 *)local_9d8.mem_disp;
                 if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
                   sshd_code_end_ptr = (u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +

@@ -69,7 +69,7 @@
 - Keep `docs/STRUCT_PROGRESS.md` up to date. It lists every struct exported in `metadata/xzre_types.json`, a running review count, and any notes so the next analyst can focus on the least-touched types first.
 - Whenever you perform a meaningful pass on a struct (renaming fields, annotating behavior, documenting layout), increment its `Review Count` and summarize what changed in the `Notes` column.
 - If new structs are added to the metadata, re-run the helper script or manually add a new row initialized with count `0` so it appears in the queue.
-- A possible prompt: "Can you give meaningfull names for the possible unknowns and improve the other names if needed in the sshd_payload_ctx_t struct? You can look for the functions which use it in xzregh to find out. Can you also annotate where appropriate? Remember to make changes in the json, run the pipeline afterwards and check if changes are good."
+- A possible prompt: "Can you give meaningfull names for the possible unknowns and improve the other names if needed in the sshd_payload_ctx_t struct? You can look for the functions which use it in xzregh to find out. Can you also annotate where appropriate? Remember to make changes in the json, run the pipeline afterwards and check if changes are good. Don't forget to update STRUCT_PROGRESS.md"
 
 ## Next Steps for Analysts
 - Review the imported program under `ghidra_projects/xzre_ghidra` and determine additional binaries or archives that should be brought into the workspace.

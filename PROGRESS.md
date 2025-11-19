@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-19
+- Renamed the opaque `dasm_ctx_t` slots (`imm64_reg`, `operand*`, `insn_offset`, etc.) to descriptive names, annotated every field in `metadata/xzre_types.json`, and ran `./scripts/refresh_xzre_project.sh` so the header plus all MOV/LEA/CALL scanners now describe and use the updated members.
+- Next: continue documenting decoder-adjacent structs (e.g., the `string_references_t` scaffolding) so cross-referencing helpers rely on typed fields instead of ad-hoc offsets.
+
 ## 2025-11-18
 - Added inline comments for every field in `imported_funcs_t`, explaining which slots hold the preserved libcrypto entry points, which track the PLT jumps, and how the crypto/helper stubs (BN/EVP/ChaCha) are used by the payload pipeline. The struct now mirrors the level of documentation we have on `elf_info_t`/`libc_imports_t`.
 - Ran `./scripts/refresh_xzre_project.sh` so the annotations propagated into `xzregh/xzre_types.h` and the Ghidra project.

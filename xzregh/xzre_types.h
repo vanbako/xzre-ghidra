@@ -723,22 +723,22 @@ typedef union __attribute__((packed)) {
  * It records prefix bits, VEX/REX state, ModRM/SIB breakdowns, computed operands, and scratch fields so pattern searchers can share one structure.
  */
 typedef struct __attribute__((packed)) dasm_ctx {
- u8* instruction;
- u64 instruction_size;
- x86_prefix_state_t prefix;
- u8 imm64_reg;
- u8 sib_byte;
- u8 sib_scale_bits;
- u8 sib_index_bits;
- u8 sib_base_bits;
- u8 opcode_window[4];
- u8 branch_disp_scratch[4];
- u64 mem_disp;
- u64 operand;
- u64 operand_zeroextended;
- u64 operand_size;
- u8 insn_offset;
- u8 scratch_bytes[7];
+ u8* instruction; /* Base pointer to the decoded instruction so scanners can rescan or compute RIP-relative targets. */
+ u64 instruction_size; /* Number of bytes consumed while decoding `instruction`. */
+ x86_prefix_state_t prefix; /* Cached legacy-prefix/VEX/REX breakdown for this decode. */
+ u8 mov_imm_reg_index; /* Lower 3 bits of the MOV r64, imm64 destination register (combine with REX.B when present). */
+ u8 sib_byte; /* Raw SIB byte when the addressing mode uses one. */
+ u8 sib_scale_bits; /* SIB scale component extracted from `sib_byte`. */
+ u8 sib_index_bits; /* SIB index register (prior to applying REX.X). */
+ u8 sib_base_bits; /* SIB base register (prior to applying REX.B). */
+ u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
+ u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */
+ u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */
+ u64 imm_signed; /* Immediate value sign-extended to 64 bits. */
+ u64 imm_zeroextended; /* Immediate value zero-extended to 64 bits. */
+ u64 imm_size; /* Size in bytes of the decoded immediate (0 when the opcode lacks one). */
+ u8 opcode_offset; /* Offset from `instruction` to the current opcode byte used during decoding. */
+ u8 decoder_scratch[7]; /* Zeroed padding the decoder reuses as scratch state. */
 } dasm_ctx_t;
 
 /*

@@ -99,10 +99,10 @@ LAB_00102e64:
         insn_cursor = (dasm_ctx_t *)
                   ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));
         if (*(u32 *)&scanner_ctx.opcode_window[3] == 0x168) {
-          if (scanner_ctx.operand == 0) goto LAB_00102e64;
+          if (scanner_ctx.imm_signed == 0) goto LAB_00102e64;
           target_addr = (dasm_ctx_t *)
                    ((u8 *)((long)scanner_ctx.instruction + 0x25) +
-                   scanner_ctx.operand + scanner_ctx.instruction_size + -0x25);
+                   scanner_ctx.imm_signed + scanner_ctx.instruction_size + -0x25);
 LAB_00102ee5:
           if (target_addr == (dasm_ctx_t *)0x0) goto LAB_00102e64;
         }

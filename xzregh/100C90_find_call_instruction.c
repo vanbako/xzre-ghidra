@@ -40,7 +40,7 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
       else {
         if ((*(int *)(dctx->opcode_window + 3) == 0x168) &&
            ((call_target == (u8 *)0x0 ||
-            (dctx->instruction + dctx->instruction_size + dctx->operand == call_target)))) {
+            (dctx->instruction + dctx->instruction_size + dctx->imm_signed == call_target)))) {
           return TRUE;
         }
         code_start = code_start + dctx->instruction_size;

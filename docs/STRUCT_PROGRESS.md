@@ -21,7 +21,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `BIGNUM` | 0 |  |
 | `BN_CTX` | 0 |  |
 | `cmd_arguments_t` | 0 |  |
-| `dasm_ctx_t` | 0 |  |
+| `dasm_ctx_t` | 1 | Renamed decoder fields and documented each slot (2025-11-19) |
 | `DSA` | 0 |  |
 | `EC_GROUP` | 0 |  |
 | `EC_KEY` | 0 |  |

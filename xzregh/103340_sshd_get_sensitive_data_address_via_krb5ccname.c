@@ -69,9 +69,10 @@ LAB_00103450:
                 if ((string_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
                   tracked_reg = string_scan_ctx.prefix.decoded.flags2 & 0x10;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_0010346b;
-                  tracked_reg = string_scan_ctx.imm64_reg;
+                  tracked_reg = string_scan_ctx.mov_imm_reg_index;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
-                    tracked_reg = string_scan_ctx.imm64_reg | ((byte)string_scan_ctx.prefix.decoded.rex & 1) << 3;
+                    tracked_reg = string_scan_ctx.mov_imm_reg_index |
+                             ((byte)string_scan_ctx.prefix.decoded.rex & 1) << 3;
                   }
                 }
                 else {
@@ -103,7 +104,8 @@ LAB_0010346b:
                       if ((store_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
                         dest_reg = store_scan_ctx.prefix.decoded.flags2 & 0x10;
                         if (((store_scan_ctx.prefix.flags_u16 & 0x1000) != 0) &&
-                           (dest_reg = store_scan_ctx.imm64_reg, (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {
+                           (dest_reg = store_scan_ctx.mov_imm_reg_index,
+                           (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {
                           rex_extension = (char)store_scan_ctx.prefix.decoded.rex << 3;
                           goto LAB_00103553;
                         }
@@ -139,7 +141,7 @@ LAB_00103553:
         else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {
           if ((((((byte)string_scan_ctx.prefix.decoded.rex & 8) == 0) &&
                ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
-              ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.operand_zeroextended == 0)) {
+              ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.imm_zeroextended == 0)) {
             store_scan_cursor = (u8 *)0x0;
             if ((string_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size + string_scan_ctx.mem_disp;

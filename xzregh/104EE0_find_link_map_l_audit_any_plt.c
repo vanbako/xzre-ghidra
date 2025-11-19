@@ -83,8 +83,8 @@ BOOL find_link_map_l_audit_any_plt
           lea_target_reg = 0;
           if ((((insn_ctx.prefix._0_4_ & 0x1040) != 0) &&
               (lea_target_reg = insn_ctx.prefix.decoded.flags2 & 0x10, (insn_ctx.prefix._0_4_ & 0x1000) != 0)
-              ) && (lea_target_reg = insn_ctx.imm64_reg, (insn_ctx.prefix._0_4_ & 0x20) != 0)) {
-            lea_target_reg = insn_ctx.imm64_reg | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
+              ) && (lea_target_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix._0_4_ & 0x20) != 0)) {
+            lea_target_reg = insn_ctx.mov_imm_reg_index | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
           }
         }
         else {
