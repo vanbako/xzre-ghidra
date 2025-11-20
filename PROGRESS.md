@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-20
+- `elf_handles_t`: renamed the handles to `sshd`/`ldso`/`libc`/`liblzma`/`libcrypto`, added inline comments explaining what each descriptor feeds (r_debug head, audit hooks, allocator glue, hook blob, RSA/EVP trampolines), and reran `./scripts/refresh_xzre_project.sh` so the updated names propagate through xzregh and the portable archive. Updated STRUCT_PROGRESS for review #1.
+- Next: consider aligning nearby wrappers (`main_elf_t`, backdoor data consumers) if any helper conventions still mention the old handle names; refresh reported an AutoDoc mismatch vs metadata, so review `ghidra_scripts/generated/xzre_autodoc.json` when convenient.
+
+## 2025-11-20
 - `got_ctx_t`: reworked the GOT patch context to name the __tls_get_addr anchor and cpuid slot bookkeeping (`tls_got_entry`, `cpuid_got_slot`, `cpuid_slot_index`, `got_base_offset`), refreshed the type docs/AutoDocs to explain how `cpuid_random_symbol_addr` reconstructs the GOT base, and ran `./scripts/refresh_xzre_project.sh` so xzregh/xzre_types.h and the portable archive show the new layout. Updated STRUCT_PROGRESS for review #1.
 - Next: continue tightening the loader relocation structs (e.g., `global_context_t` or the remaining GOT helpers) now that the GOT anchor/slot naming is settled.
 

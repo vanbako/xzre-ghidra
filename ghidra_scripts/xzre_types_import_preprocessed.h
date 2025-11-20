@@ -1233,14 +1233,14 @@ typedef struct __attribute__((packed)) backdoor_setup_params {
 } backdoor_setup_params_t;
 
 /*
- * Pointers to each parsed ELF info block (main binary, ld.so, libc, liblzma, libcrypto) so helper routines can iterate the fleet without repeating lookups.
+ * Pointers to the parsed ELF descriptors for sshd, ld.so, libc, liblzma, and libcrypto so helpers can share metadata without re-parsing each image.
  */
 typedef struct __attribute__((packed)) elf_handles {
- elf_info_t *main;
- elf_info_t *dynamic_linker;
- elf_info_t *libc;
- elf_info_t *liblzma;
- elf_info_t *libcrypto;
+ elf_info_t *sshd; /* Parsed ELF metadata for sshd's main binary (the head of r_debug->r_map). */
+ elf_info_t *ldso; /* ld-linux/ld.so descriptor used when validating _rtld_global and patching audit tables. */
+ elf_info_t *libc; /* glibc descriptor feeding libc_imports_t and the fake allocator glue. */
+ elf_info_t *liblzma; /* liblzma descriptor that houses the hook blob and allocator overrides. */
+ elf_info_t *libcrypto; /* libcrypto descriptor targeted by RSA/EVP hooks and audit trampolines. */
 } elf_handles_t;
 
 /*

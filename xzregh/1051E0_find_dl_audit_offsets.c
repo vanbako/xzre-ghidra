@@ -72,9 +72,9 @@ BOOL find_dl_audit_offsets
         imported_funcs->EC_KEY_get0_public_key =
              (pfn_EC_KEY_get0_public_key_t)(libcrypto_ehdr->e_ident + symbol_offset);
       }
-      symbol_entry = elf_symbol_get(elf_handles->dynamic_linker,STR_dl_audit_symbind_alt,0);
+      symbol_entry = elf_symbol_get(elf_handles->ldso,STR_dl_audit_symbind_alt,0);
       if (symbol_entry != (Elf64_Sym *)0x0) {
-        libcrypto_info = data->cached_elf_handles->dynamic_linker;
+        libcrypto_info = data->cached_elf_handles->ldso;
         size = symbol_entry->st_size;
         audit_symbol_vaddr = libcrypto_info->elfbase->e_ident + symbol_entry->st_value;
         (hooks->ldso_ctx)._dl_audit_symbind_alt__size = size;
@@ -88,8 +88,8 @@ BOOL find_dl_audit_offsets
           if (cipher_ctx_free_stub != (pfn_EVP_CIPHER_CTX_free_t)0x0) {
             imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           }
-          success = find_dl_naudit(data->cached_elf_handles->dynamic_linker,
-                                 data->cached_elf_handles->libcrypto,hooks,imported_funcs);
+          success = find_dl_naudit(data->cached_elf_handles->ldso,data->cached_elf_handles->libcrypto,
+                                 hooks,imported_funcs);
           if ((success != FALSE) &&
              (success = find_link_map_l_audit_any_plt(data,*libname_offset,hooks,imported_funcs),
              success != FALSE)) {

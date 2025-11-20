@@ -66,7 +66,7 @@ BOOL find_link_map_l_name
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
     libcrypto_allocator = get_lzma_allocator();
-    ldso_elf = data_handle->cached_elf_handles->dynamic_linker;
+    ldso_elf = data_handle->cached_elf_handles->ldso;
     libcrypto_allocator->opaque = data_handle->cached_elf_handles->libcrypto;
     audit_preinit_symbol = elf_symbol_get(ldso_elf,STR_dl_audit_preinit,0);
     if (audit_preinit_symbol != (Elf64_Sym *)0x0) {
@@ -75,7 +75,7 @@ BOOL find_link_map_l_name
       if (bn_num_bits_fn != (pfn_BN_num_bits_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
-      ldso_elf = data_handle->cached_elf_handles->dynamic_linker;
+      ldso_elf = data_handle->cached_elf_handles->ldso;
       audit_sym_start = ldso_elf->elfbase->e_ident + audit_preinit_symbol->st_value;
       success = elf_contains_vaddr(ldso_elf,audit_sym_start,audit_preinit_symbol->st_size,4);
       snapshot_iter = liblzma_snapshot + 0x960;

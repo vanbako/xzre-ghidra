@@ -36,7 +36,7 @@
   "backdoor_hooks_data_t": "Blob that actually lives inside liblzma’s data segment and holds the loader context (`ldso_ctx_t`), `global_context_t`, resolved imports, sshd/log contexts, and the signed payload bytes the implant enforces.",
   "backdoor_hooks_ctx_t": "Ephemeral orchestrator that stage one reuses while replaying the GOT patches: `hooks_data_slot_ptr` hands back liblzma’s resident blob, the symbind/RSA/mm_* entries point at the trampolines we splice into sshd, and the scratch/placeholder slots keep the structure ABI stable between bootstrap attempts.",
   "backdoor_setup_params_t": "Argument bundle handed to `backdoor_setup`: zeroed scratch + the shared-globals pointer, hook context, dummy lzma_check_state, and the active `elf_entry_ctx_t` describing the hijacked cpuid GOT slot.",
-  "elf_handles_t": "Pointers to each parsed ELF info block (main binary, ld.so, libc, liblzma, libcrypto) so helper routines can iterate the fleet without repeating lookups.",
+  "elf_handles_t": "Pointers to the parsed ELF descriptors for sshd, ld.so, libc, liblzma, and libcrypto so helpers can share metadata without re-parsing each image.",
   "main_elf_t": "Lightweight bootstrap record containing the `elf_handles_t`, ld.so’s header, and a pointer to `__libc_stack_end`; used while pivoting into the loader context.",
   "backdoor_data_handle_t": "Pairs the monolithic `backdoor_data_t` blob with its `elf_handles_t` so loader helpers can take one argument yet still access both structures.",
   "string_item_t": "Single entry in the string-reference table that records which encoded string we matched along with the function bounds and the exact xref address.",

@@ -1379,7 +1379,7 @@
       "names": [
         "elf_handles_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_handles {\n elf_info_t *main;\n elf_info_t *dynamic_linker;\n elf_info_t *libc;\n elf_info_t *liblzma;\n elf_info_t *libcrypto;\n} elf_handles_t;"
+      "code": "typedef struct __attribute__((packed)) elf_handles {\n elf_info_t *sshd; /* Parsed ELF metadata for sshd's main binary (the head of r_debug->r_map). */\n elf_info_t *ldso; /* ld-linux/ld.so descriptor used when validating _rtld_global and patching audit tables. */\n elf_info_t *libc; /* glibc descriptor feeding libc_imports_t and the fake allocator glue. */\n elf_info_t *liblzma; /* liblzma descriptor that houses the hook blob and allocator overrides. */\n elf_info_t *libcrypto; /* libcrypto descriptor targeted by RSA/EVP hooks and audit trampolines. */\n} elf_handles_t;"
     },
     {
       "kind": "struct",

