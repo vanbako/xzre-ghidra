@@ -23,10 +23,10 @@ uint backdoor_entry(uint cpuid_request,u64 *caller_frame)
   
   if (resolver_call_count == 1) {
     state.cpuid_random_symbol_addr = (void *)0x1;
-    state.got_ctx.got_ptr = (void *)0x0;
-    state.got_ctx.return_address = (void *)0x0;
-    state.got_ctx.cpuid_fn = (void *)0x0;
-    state.got_ctx.got_offset = 0;
+    state.got_ctx.tls_got_entry = (void *)0x0;
+    state.got_ctx.cpuid_got_slot = (void *)0x0;
+    state.got_ctx.cpuid_slot_index = 0;
+    state.got_ctx.got_base_offset = 0;
     state.resolver_frame = caller_frame;
     backdoor_init(&state,caller_frame);
   }

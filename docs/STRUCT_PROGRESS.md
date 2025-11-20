@@ -53,7 +53,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `fake_lzma_allocator_t` | 0 |  |
 | `global_context_t` | 0 |  |
 | `gnu_hash_table_t` | 0 |  |
-| `got_ctx_t` | 0 |  |
+| `got_ctx_t` | 1 | Loader review #13 – renamed the GOT anchor/slot/index fields (`tls_got_entry`, `cpuid_got_slot`, `cpuid_slot_index`, `got_base_offset`) and documented how cpuid_random_symbol_addr is used to rebuild the GOT base (2025-11-20). |
 | `imported_funcs_t` | 1 | Orig/PLT slots + helper stubs fully annotated (2025-11-18) |
 | `instruction_search_ctx_t` | 0 |  |
 | `kex` | 0 |  |

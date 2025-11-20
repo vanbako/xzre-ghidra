@@ -854,14 +854,14 @@
       "names": [
         "got_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) got_ctx {\n void *got_ptr;\n void *return_address;\n void *cpuid_fn;\n ptrdiff_t got_offset;\n} got_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) got_ctx {\n void *tls_got_entry; /* Seeded with the expected __tls_get_addr PLT displacement (0x2600) and overwritten with the resolved GOT slot pointer once the stub is parsed. */\n void *cpuid_got_slot; /* Captures the resolver’s saved return-address slot until it is repointed at the cpuid GOT entry being hijacked. */\n u64 cpuid_slot_index; /* GOT index for liblzma’s cpuid resolver; used to stride from the __tls_get_addr anchor to the cpuid slot when patching. */\n ptrdiff_t got_base_offset; /* Offset from the randomized GOT base to the cpuid relocation anchor; subtracting it from `cpuid_random_symbol_addr` recreates the GOT base (also reused as the TLS anchor while locating the PLT stub). */\n} got_ctx_t;"
     },
     {
       "kind": "struct",
       "names": [
         "elf_entry_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_entry_ctx {\n void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_offset` recreates the GOT base for the cpuid trampolines. */\n got_ctx_t got_ctx; /* Local copy of the GOT pointer/index/offset mashup that `backdoor_init` mutates while hijacking the resolver. */\n u64 *resolver_frame; /* Points to the resolver’s saved frame slots on entry; after init this field is repurposed to stash the cpuid GOT slot pointer that stage two patches. */\n} elf_entry_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) elf_entry_ctx {\n void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_base_offset` recreates the GOT base for the cpuid trampolines. */\n got_ctx_t got_ctx; /* Tracks the __tls_get_addr GOT anchor, the cpuid slot pointer/index, and the relocation offset while stage one rewrites the resolver. */\n u64 *resolver_frame; /* Points to the resolver’s saved frame slots on entry; after init this field is repurposed to stash the cpuid GOT slot pointer that stage two patches. */\n} elf_entry_ctx_t;"
     },
     {
       "kind": "enum",

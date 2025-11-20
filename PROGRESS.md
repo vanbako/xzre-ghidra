@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-20
+- `got_ctx_t`: reworked the GOT patch context to name the __tls_get_addr anchor and cpuid slot bookkeeping (`tls_got_entry`, `cpuid_got_slot`, `cpuid_slot_index`, `got_base_offset`), refreshed the type docs/AutoDocs to explain how `cpuid_random_symbol_addr` reconstructs the GOT base, and ran `./scripts/refresh_xzre_project.sh` so xzregh/xzre_types.h and the portable archive show the new layout. Updated STRUCT_PROGRESS for review #1.
+- Next: continue tightening the loader relocation structs (e.g., `global_context_t` or the remaining GOT helpers) now that the GOT anchor/slot naming is settled.
+
 ## 2025-11-19
 - `backdoor_setup_params_t`: finished the stage-two payload structs by renaming the padding/ptr fields (`bootstrap_padding`, `shared_globals`, `hook_ctx`) and documenting how the dummy `lzma_check_state` + `elf_entry_ctx_t` are used during `backdoor_setup`. Ran `./scripts/refresh_xzre_project.sh` (user confirmed) so the exported headers/project picked up the annotations, then updated STRUCT_PROGRESS.
 - Next: move on to `backdoor_data_handle_t` or the remaining loader structs now that the setup argument bundle is clarified.

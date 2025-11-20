@@ -647,23 +647,21 @@ struct sshkey {
 typedef struct sshkey sshkey;
 
 /*
- * Tracks the GOT slot that is currently being patched while hijacking liblzma’s resolver.
- * Holds the slot pointer itself, the original return site, the cpuid trampoline, and the signed displacement so we can roll back or advance the hook safely.
+ * Bookkeeping for the cpuid/TLS GOT patch: seeds the expected __tls_get_addr displacement, caches the resolved GOT anchor, the cpuid slot pointer/index, and the offset back to the randomized GOT base so stage one can rewrite and later restore the cpuid entry.
  */
 typedef struct __attribute__((packed)) got_ctx {
- void *got_ptr;
- void *return_address;
- void *cpuid_fn;
- ptrdiff_t got_offset;
+ void *tls_got_entry; /* Seeded with the expected __tls_get_addr PLT displacement (0x2600) and overwritten with the resolved GOT slot pointer once the stub is parsed. */
+ void *cpuid_got_slot; /* Captures the resolver’s saved return-address slot until it is repointed at the cpuid GOT entry being hijacked. */
+ u64 cpuid_slot_index; /* GOT index for liblzma’s cpuid resolver; used to stride from the __tls_get_addr anchor to the cpuid slot when patching. */
+ ptrdiff_t got_base_offset; /* Offset from the randomized GOT base to the cpuid relocation anchor; subtracting it from `cpuid_random_symbol_addr` recreates the GOT base (also reused as the TLS anchor while locating the PLT stub). */
 } got_ctx_t;
 
 /*
- * Lightweight record describing the symbol import we are about to tamper with.
- * Bundles the loader-provided symbol pointer, the `got_ctx_t` used for the patch, and the caller’s stack frame for later restoration.
+ * Lightweight record describing the hijacked cpuid import: the runtime address of `cpuid_random_symbol`, the GOT patch context (tls anchor + cpuid slot pointer/index + GOT offset), and the resolver frame pointer reused to stash the cpuid GOT slot.
  */
 typedef struct __attribute__((packed)) elf_entry_ctx {
- void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_offset` recreates the GOT base for the cpuid trampolines. */
- got_ctx_t got_ctx; /* Local copy of the GOT pointer/index/offset mashup that `backdoor_init` mutates while hijacking the resolver. */
+ void *cpuid_random_symbol_addr; /* Runtime VA of the `cpuid_random_symbol` relocation; subtracting `got_ctx.got_base_offset` recreates the GOT base for the cpuid trampolines. */
+ got_ctx_t got_ctx; /* Tracks the __tls_get_addr GOT anchor, the cpuid slot pointer/index, and the relocation offset while stage one rewrites the resolver. */
  u64 *resolver_frame; /* Points to the resolver’s saved frame slots on entry; after init this field is repurposed to stash the cpuid GOT slot pointer that stage two patches. */
 } elf_entry_ctx_t;
 

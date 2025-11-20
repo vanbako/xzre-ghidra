@@ -73,20 +73,20 @@ BOOL backdoor_init_stage2
     hooks_ctx_ptr = extraout_RDX_00;
   } while (status != 5);
   ctx->cpuid_random_symbol_addr = (void *)0x1;
-  (ctx->got_ctx).got_ptr = (void *)0x0;
-  (ctx->got_ctx).return_address = (void *)0x0;
-  (ctx->got_ctx).cpuid_fn = (void *)0x0;
-  (ctx->got_ctx).got_offset = 0;
+  (ctx->got_ctx).tls_got_entry = (void *)0x0;
+  (ctx->got_ctx).cpuid_got_slot = (void *)0x0;
+  (ctx->got_ctx).cpuid_slot_index = 0;
+  (ctx->got_ctx).got_base_offset = 0;
   max_leaf_info = (int *)cpuid_basic_info(0);
   if (*max_leaf_info != 0) {
     cpuid_info = (undefined4 *)cpuid_Version_info(1);
     ebx_val = cpuid_info[1];
     ecx_val = cpuid_info[2];
     edx_val = cpuid_info[3];
-    *(undefined4 *)&(ctx->got_ctx).got_ptr = *cpuid_info;
-    *(undefined4 *)&(ctx->got_ctx).return_address = ebx_val;
-    *(undefined4 *)&(ctx->got_ctx).cpuid_fn = edx_val;
-    *(undefined4 *)&(ctx->got_ctx).got_offset = ecx_val;
+    *(undefined4 *)&(ctx->got_ctx).tls_got_entry = *cpuid_info;
+    *(undefined4 *)&(ctx->got_ctx).cpuid_got_slot = ebx_val;
+    *(undefined4 *)&(ctx->got_ctx).cpuid_slot_index = edx_val;
+    *(undefined4 *)&(ctx->got_ctx).got_base_offset = ecx_val;
   }
   return FALSE;
 }
