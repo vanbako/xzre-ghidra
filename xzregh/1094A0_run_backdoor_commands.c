@@ -257,22 +257,22 @@ LAB_00109aa2:
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
                                (setlogmask_fn = ctx->libc_imports->setlogmask,
                                setlogmask_fn == (pfn_setlogmask_t)0x0)) {
-                              ctx->sshd_log_ctx->syslog_disabled = FALSE;
+                              ctx->sshd_log_ctx->syslog_mask_applied = FALSE;
                               if ((local_2e0[0] & 5) == 5) goto LAB_0010a1ba;
                             }
                             else {
                               (*setlogmask_fn)(-0x80000000);
-                              ctx->sshd_log_ctx->syslog_disabled = TRUE;
+                              ctx->sshd_log_ctx->syslog_mask_applied = TRUE;
                             }
                             uVar18 = (*ctx->libc_imports->getuid)();
                             bVar13 = local_2e0[0];
                             ctx->caller_uid = uVar18;
                             bVar33 = local_2e0[0] & 0x10;
-                            if (((bVar33 == 0) || (ctx->sshd_log_ctx->log_hooking_possible != FALSE)
-                                ) && (((local_2e0[0] & 2) == 0 ||
-                                      ((BVar16 = sshd_configure_log_hook
-                                                           ((cmd_arguments_t *)local_2e0,ctx),
-                                       BVar16 != FALSE || (bVar33 == 0)))))) {
+                            if (((bVar33 == 0) || (ctx->sshd_log_ctx->handler_slots_valid != FALSE))
+                               && (((local_2e0[0] & 2) == 0 ||
+                                   ((BVar16 = sshd_configure_log_hook
+                                                        ((cmd_arguments_t *)local_2e0,ctx),
+                                    BVar16 != FALSE || (bVar33 == 0)))))) {
                               if (uVar27 == 0) {
                                 if (((char)local_2e0[1] < '\0') ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {

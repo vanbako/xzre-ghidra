@@ -82,7 +82,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `ssh` | 0 |  |
 | `sshbuf` | 0 |  |
 | `sshd_ctx_t` | 1 | Renamed the monitor hook entries/slots, keyed the staged keyverify/authpassword payload buffers, and documented the authfmt rodata probe + PAM/root globals (2025-11-20). |
-| `sshd_log_ctx_t` | 0 |  |
+| `sshd_log_ctx_t` | 1 | Renamed the logging gate/syslog flags, clarified the handler/ctx slot pointers, and documented the sshlogv/log-fragment anchors used by the hook (2025-11-20). |
 | `sshd_offsets_fields_t` | 0 |  |
 | `sshd_offsets_t` | 0 |  |
 | `sshd_payload_ctx_t` | 1 | Payload layout documented (2025-11-18) |

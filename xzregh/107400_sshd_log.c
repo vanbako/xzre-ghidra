@@ -65,7 +65,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   saved_rcx = in_RCX;
   saved_r8 = in_R8;
   saved_r9 = in_R9;
-  (*(code *)log_ctx->sshlogv)(&sse_args_present,&sse_args_present,0,0,level,0,fmt,&va_gp_offset);
+  (*(code *)log_ctx->sshlogv_impl)(&sse_args_present,&sse_args_present,0,0,level,0,fmt,&va_gp_offset);
   return;
 }
 

