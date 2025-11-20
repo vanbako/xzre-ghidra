@@ -51,7 +51,8 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
     if (success != FALSE) {
       buf1.words[0x12] = 0x108257;
       buf1.words[0x13] = 0;
-      success = chacha_decrypt(ctx->secret_data,0x39,seed_block,payload_iv,output,ctx->imported_funcs);
+      success = chacha_decrypt(ctx->encrypted_secret_data,0x39,seed_block,payload_iv,output,
+                             ctx->imported_funcs);
       return (uint)(success != FALSE);
     }
   }

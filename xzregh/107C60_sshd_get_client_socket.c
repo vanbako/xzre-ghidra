@@ -29,8 +29,8 @@ BOOL sshd_get_client_socket
       (imports = ctx->libc_imports, imports == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
     return FALSE;
   }
-  if (ctx->struct_monitor_ptr_address != (monitor **)0x0) {
-    monitor_candidate = *ctx->struct_monitor_ptr_address;
+  if (ctx->monitor_struct_slot != (monitor **)0x0) {
+    monitor_candidate = *ctx->monitor_struct_slot;
     range_ok = is_range_mapped((u8 *)monitor_candidate,4,ctx);
     if (range_ok != FALSE) {
       if (socket_direction == DIR_WRITE) {

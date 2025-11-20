@@ -51,7 +51,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `EVP_PKEY` | 0 |  |
 | `EVP_PKEY_CTX` | 0 |  |
 | `fake_lzma_allocator_t` | 0 |  |
-| `global_context_t` | 0 |  |
+| `global_context_t` | 1 | Renamed context fields (imports, monitor slot, code/data bounds, payload/secret tracking) and annotated roles (2025-11-20). |
 | `gnu_hash_table_t` | 0 |  |
 | `got_ctx_t` | 1 | Loader review #13 – renamed the GOT anchor/slot/index fields (`tls_got_entry`, `cpuid_got_slot`, `cpuid_slot_index`, `got_base_offset`) and documented how cpuid_random_symbol_addr is used to rebuild the GOT base (2025-11-20). |
 | `imported_funcs_t` | 1 | Orig/PLT slots + helper stubs fully annotated (2025-11-18) |

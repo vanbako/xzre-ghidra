@@ -1111,45 +1111,44 @@ typedef struct __attribute__((packed)) sshd_offsets {
 } sshd_offsets_t;
 
 /*
- * Authoritative runtime state for the backdoor.
- * It wires together imported function tables, sshd metadata, decrypted payload buffers, socket scratch space, and secret shift operations so every hook can reach consistent data.
+ * Authoritative runtime state for the backdoor: resolved libc/libcrypto imports, sshd monitor/log metadata, code/data bounds for scans, payload streaming buffers/state, and the secret-data attestation flags so every hook can share consistent context.
  */
 typedef struct __attribute__((packed)) global_context {
- BOOL uses_endbr64;
- u32 endbr_padding;
- imported_funcs_t *imported_funcs;
- libc_imports_t* libc_imports;
- BOOL disable_backdoor;
- u32 disable_padding;
- sshd_ctx_t *sshd_ctx;
- struct sensitive_data *sshd_sensitive_data;
- sshd_log_ctx_t *sshd_log_ctx;
- char *STR_ssh_rsa_cert_v01_openssh_com;
- char *STR_rsa_sha2_256;
- struct monitor **struct_monitor_ptr_address;
- u32 exit_flag;
- sshd_offsets_t sshd_offsets;
- void *sshd_code_start;
- void *sshd_code_end;
- void *sshd_data_start;
+ BOOL uses_endbr64; /* sshd uses ENDBR64 prologues (CET); gates relocation validation. */
+ u32 uses_endbr64_padding; /* Alignment padding. */
+ imported_funcs_t *imported_funcs; /* Resolved libcrypto helpers (RSA/BN/ChaCha/etc.) sourced from hooks_data. */
+ libc_imports_t *libc_imports; /* Resolved libc syscalls (read/write/pselect/exit) used by the hooks. */
+ BOOL disable_backdoor; /* When TRUE, hooks bail out to the original OpenSSL/sshd logic. */
+ u32 disable_backdoor_padding; /* Alignment padding. */
+ sshd_ctx_t *sshd_ctx; /* sshd hook state (mm handler addresses, request types, monitor offsets). */
+ sensitive_data *sshd_sensitive_data; /* Captured sshd secrets/hostkeys table produced by the recon scans. */
+ sshd_log_ctx_t *sshd_log_ctx; /* Bookkeeping for the mm_log_handler shim. */
+ char *ssh_rsa_cert_alg; /* Pointer to "ssh-rsa-cert-v01@openssh.com" string inside sshd (modulus carving). */
+ char *rsa_sha2_256_alg; /* Pointer to "rsa-sha2-256" string inside sshd (modulus carving). */
+ monitor **monitor_struct_slot; /* BSS slot holding the active monitor* pointer discovered via xref voting. */
+ u32 exit_flag; /* If set, keyallowed hook will exit(0) after payload handling. */
+ sshd_offsets_t sshd_offsets; /* Packed indexes into monitor/kex/sshbuf fields for socket/payload lookups. */
+ void *sshd_text_start; /* Bounds of sshd .text used by pattern searches and secret-data scanners. */
+ void *sshd_text_end;
+ void *sshd_data_start; /* Bounds of sshd .data/.bss used while hunting monitor globals. */
  void *sshd_data_end;
- void *sshd_main;
- void *lzma_code_start;
- void *lzma_code_end;
- u32 uid;
- u32 uid_padding;
- u64 sock_read_buf_size;
- u8 sock_read_buf[64];
- u64 payload_data_size;
- u64 current_data_size;
- u8 *payload_data;
- sshd_payload_ctx_t *sshd_payload_ctx;
- u32 sshd_host_pubkey_idx;
- u32 payload_state;
- u8 secret_data[57];
- u8 shift_operations[31];
- u32 num_shifted_bits;
- u32 secret_data_padding;
+ void *sshd_main_entry; /* Resolved sshd main() pointer (and CET ENDBR check anchor). */
+ void *liblzma_text_start; /* Bounds of liblzma code segment that houses the hook blob. */
+ void *liblzma_text_end;
+ u32 caller_uid; /* getuid() snapshot used to gate PAM/log overrides. */
+ u32 caller_uid_padding; /* Alignment padding. */
+ u64 sock_read_len; /* Bytes staged from the monitor socket for the pending payload. */
+ u8 sock_read_buf[64]; /* Scratch buffer holding the staged payload tail read from keyallowed. */
+ u64 payload_buffer_size; /* Total size of the signed payload buffer resident in hooks_data. */
+ u64 payload_bytes_buffered; /* Number of payload bytes currently assembled into payload_buffer. */
+ u8 *payload_buffer; /* Pointer to the shared payload scratch (hooks_data->signed_data). */
+ sshd_payload_ctx_t *payload_ctx; /* Parsed payload header/context produced by keyallowed hook. */
+ u32 sshd_host_pubkey_idx; /* Hostkey slot that verified the Ed448 signature. */
+ u32 payload_state; /* Streaming state machine enforced by check_backdoor_state. */
+ u8 encrypted_secret_data[57]; /* ChaCha-encrypted secret blob; decrypted by secret_data_get_decrypted. */
+ u8 shift_operation_flags[31]; /* Per-operation guard bits so secret_data_append_* runs each attestation once. */
+ u32 secret_bits_filled; /* Total bits shifted into the secret_data buffer so far. */
+ u32 secret_data_padding; /* Alignment padding. */
 } global_context_t;
 
 /*

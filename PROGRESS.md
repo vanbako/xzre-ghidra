@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-20
+- `global_context_t`: renamed the ambiguous fields (string anchors, monitor slot, code/data bounds, payload buffer/state, secret-data flags) and annotated each member so callers know how the imports, sshd metadata, streaming buffers, and attestation bookkeeping fit together. Ran `./scripts/refresh_xzre_project.sh` so the new names propagate into xzregh and the portable archive. STRUCT_PROGRESS bumped for review #1.
+- Next: if we want the AutoDoc warning cleared, diff `ghidra_scripts/generated/xzre_autodoc.json` against `metadata/functions_autodoc.json` and sync the remaining comment delta.
+
+## 2025-11-20
 - `elf_handles_t`: renamed the handles to `sshd`/`ldso`/`libc`/`liblzma`/`libcrypto`, added inline comments explaining what each descriptor feeds (r_debug head, audit hooks, allocator glue, hook blob, RSA/EVP trampolines), and reran `./scripts/refresh_xzre_project.sh` so the updated names propagate through xzregh and the portable archive. Updated STRUCT_PROGRESS for review #1.
 - Next: consider aligning nearby wrappers (`main_elf_t`, backdoor data consumers) if any helper conventions still mention the old handle names; refresh reported an AutoDoc mismatch vs metadata, so review `ghidra_scripts/generated/xzre_autodoc.json` when convenient.
 

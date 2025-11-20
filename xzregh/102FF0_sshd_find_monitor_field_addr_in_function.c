@@ -71,8 +71,8 @@ LAB_001030d4:
       code_start = insn_ctx.instruction + insn_ctx.instruction_size;
       if ((data_start <= monitor_field_addr) && (monitor_field_addr < data_end)) {
         call_window_end = code_start + 0x40;
-        if (ctx->sshd_code_end < code_start + 0x40) {
-          call_window_end = (u8 *)ctx->sshd_code_end;
+        if (ctx->sshd_text_end < code_start + 0x40) {
+          call_window_end = (u8 *)ctx->sshd_text_end;
         }
         mirrored_reg = 0;
         candidate_reg = 0;
