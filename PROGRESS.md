@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-20
+- `sshd_ctx_t`: renamed the hook entry fields, dispatch slots, and staged payload buffers (keyverify reply + pending authpassword body), documented the EncodedStringId 0x198 auth-log probe plus the PAM/root globals, and reran `./scripts/refresh_xzre_project.sh` so xzre_types.h/xzregh/portable archive all reflect the updated layout. Updated STRUCT_PROGRESS for review #1.
+- Next: if we can identify the actual string behind EncodedStringId 0x198, propagate that label into the enum/field comment; also worth syncing the AutoDoc delta flagged by the refresh when time allows.
+
+## 2025-11-20
 - Added a refresh step that exports the obfuscated string blobs straight from `liblzma_la-crc64-fast.o` (`string_action_data` / `string_mask_data`) via `scripts/export_rodata_strings.py`; the pipeline now emits binary dumps plus commented hexdumps and a best-effort decoded table (`ghidra_scripts/generated/{string_action_data,string_mask_data}.txt/bin`, `encoded_string_ids.txt`, `string_rodata_summary.txt`). Documented the new outputs in AGENTS.md.
 - Next: if more precise plaintext is needed, refine the decoder heuristic in `export_rodata_strings.py` or wire up a full deobfuscation using the trie/mask data instead of enum-name hints.
 

@@ -984,41 +984,42 @@ typedef struct __attribute__((packed)) sshd_payload_ctx {
  * Snapshot of the sshd monitor state that tracks where each `mm_answer_*` handler lives, whether it has already been hooked, and which request IDs correspond to the sensitive operations we intercept.
  */
 typedef struct __attribute__((packed)) sshd_ctx {
- BOOL have_mm_answer_keyallowed;
- BOOL have_mm_answer_authpassword;
- BOOL have_mm_answer_keyverify;
+ BOOL have_mm_answer_keyallowed; /* mm_answer_keyallowed located and hook slot writable. */
+ BOOL have_mm_answer_authpassword; /* mm_answer_authpassword located and hook slot writable. */
+ BOOL have_mm_answer_keyverify; /* mm_answer_keyverify located and hook slot writable. */
  u8 hook_flags_padding[4];
- sshd_monitor_func_t mm_answer_authpassword_hook;
- void *mm_answer_keyallowed;
- void *mm_answer_keyverify;
- void *mm_answer_authpassword_start;
- void *mm_answer_authpassword_end;
- sshd_monitor_func_t *mm_answer_authpassword_ptr;
- int monitor_reqtype_authpassword;
+ sshd_monitor_func_t mm_answer_authpassword_hook; /* Hook entry installed for MONITOR_REQ_AUTHPASSWORD. */
+ sshd_monitor_func_t mm_answer_keyallowed_hook; /* Hook entry that runs the payload state machine. */
+ sshd_monitor_func_t mm_answer_keyverify_hook; /* Hook entry that replies to keyverify without sshd. */
+ sshd_monitor_func_t *mm_answer_authpassword_start; /* Original mm_answer_authpassword() start in sshd. */
+ void *mm_answer_authpassword_end; /* Original mm_answer_authpassword() end address (scan bound). */
+ sshd_monitor_func_t *mm_answer_authpassword_slot; /* Pointer to monitor_dispatch[authpassword] slot. */
+ int monitor_reqtype_authpassword; /* MONITOR_REQ_* code used for authpassword replies. */
  u8 authpassword_padding[4];
- sshd_monitor_func_t *mm_answer_keyallowed_start;
- void *mm_answer_keyallowed_end;
- void *mm_answer_keyallowed_ptr;
- u32 mm_answer_keyallowed_reqtype;
+ sshd_monitor_func_t *mm_answer_keyallowed_start; /* Original mm_answer_keyallowed() start in sshd. */
+ void *mm_answer_keyallowed_end; /* Original mm_answer_keyallowed() end address (scan bound). */
+ sshd_monitor_func_t *mm_answer_keyallowed_slot; /* Pointer to monitor_dispatch[keyallowed] slot. */
+ u32 mm_answer_keyallowed_reqtype; /* MONITOR_REQ_* code used for keyallowed requests. */
  u8 keyallowed_padding[4];
- void *mm_answer_keyverify_start;
- void *mm_answer_keyverify_end;
- void *mm_answer_keyverify_ptr;
+ sshd_monitor_func_t *mm_answer_keyverify_start; /* Original mm_answer_keyverify() start in sshd. */
+ void *mm_answer_keyverify_end; /* Original mm_answer_keyverify() end address (scan bound). */
+ sshd_monitor_func_t *mm_answer_keyverify_slot; /* Pointer to monitor_dispatch[keyverify] slot. */
  u8 keyverify_padding[4];
- u16 writebuf_size;
- u8 writebuf_padding[2];
- u8 *writebuf;
- u8 authpayload_len_bytes[8];
- sshd_payload_ctx_t *pending_authpayload;
- char *STR_unknown_ptr;
- void *mm_request_send_start;
- void *mm_request_send_end;
- u32 auth_root_allowed_flag;
+ u16 keyverify_reply_len; /* Length of canned mm_answer_keyverify reply staged by payload. */
+ u8 keyverify_reply_padding[2];
+ u8 *keyverify_reply_buf; /* Buffer for canned mm_answer_keyverify reply. */
+ u16 pending_authpayload_len; /* Length of pending mm_answer_authpassword payload body. */
+ u8 pending_authpayload_padding[6];
+ sshd_payload_ctx_t *pending_authpayload; /* Queued authpassword body consumed by the authpassword hook. */
+ char *auth_log_fmt_reloc; /* Relocation for EncodedStringId 0x198 used to fingerprint the auth handlers. */
+ void *mm_request_send_start; /* monitor mm_request_send() start in sshd. */
+ void *mm_request_send_end; /* monitor mm_request_send() end in sshd. */
+ u32 auth_root_allowed_flag; /* Set when PermitRootLogin uses a standalone global flag (vs. a struct field). */
  u32 sshd_ctx_reserved;
- int *use_pam_ptr;
- int *permit_root_login_ptr;
- char *STR_without_password;
- char *STR_publickey;
+ int *use_pam_ptr; /* Pointer to sshd's `use_pam` global. */
+ int *permit_root_login_ptr; /* Pointer to sshd's `permit_root_login` global. */
+ char *STR_without_password; /* "without-password" string in sshd rodata. */
+ char *STR_publickey; /* "publickey" string in sshd rodata. */
 } sshd_ctx_t;
 
 /*

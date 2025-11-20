@@ -81,7 +81,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `sensitive_data` | 0 |  |
 | `ssh` | 0 |  |
 | `sshbuf` | 0 |  |
-| `sshd_ctx_t` | 0 |  |
+| `sshd_ctx_t` | 1 | Renamed the monitor hook entries/slots, keyed the staged keyverify/authpassword payload buffers, and documented the authfmt rodata probe + PAM/root globals (2025-11-20). |
 | `sshd_log_ctx_t` | 0 |  |
 | `sshd_offsets_fields_t` | 0 |  |
 | `sshd_offsets_t` | 0 |  |
