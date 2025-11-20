@@ -21,10 +21,11 @@ int sshd_get_sensitive_data_score_in_demote_sensitive_data
   int score;
   u8 *demote_start;
   
-  code_start = (u8 *)refs->entries[3].func_start;
+  code_start = (u8 *)(refs->demote_sensitive_data).func_start;
   if (code_start != (u8 *)0x0) {
     demote_hit = find_instruction_with_mem_operand
-                      (code_start,(u8 *)refs->entries[3].func_end,(dasm_ctx_t *)0x0,sensitive_data);
+                      (code_start,(u8 *)(refs->demote_sensitive_data).func_end,(dasm_ctx_t *)0x0,
+                       sensitive_data);
     if (demote_hit == FALSE) {
       score = 0;
     }

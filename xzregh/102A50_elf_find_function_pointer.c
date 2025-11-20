@@ -22,12 +22,12 @@ BOOL elf_find_function_pointer
   Elf64_Rela *rela_slot;
   Elf64_Relr *relr_slot;
   
-  func_start = xrefs->entries[xref_id].func_start;
+  func_start = (&xrefs->xcalloc_zero_size)[xref_id].func_start;
   if (func_start == (void *)0x0) {
     return FALSE;
   }
   *pOutCodeStart = func_start;
-  *pOutCodeEnd = xrefs->entries[xref_id].func_end;
+  *pOutCodeEnd = (&xrefs->xcalloc_zero_size)[xref_id].func_end;
   rela_slot = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
   *pOutFptrAddr = rela_slot;
   if (rela_slot == (Elf64_Rela *)0x0) {

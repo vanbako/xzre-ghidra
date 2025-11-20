@@ -1265,21 +1265,47 @@ typedef struct __attribute__((packed)) backdoor_data_handle {
 } backdoor_data_handle_t;
 
 /*
- * Single entry in the string-reference table that records which encoded string we matched along with the function bounds and the exact xref address.
+ * Per-string entry storing the encoded literal ID (with padding for alignment), the bounded function range that references it, and the LEA xref.
  */
 typedef struct __attribute__((packed)) string_item {
- EncodedStringId string_id;
- u32 reserved;
- void *func_start;
- void *func_end;
- void *xref;
+ EncodedStringId string_id; /* Identifier for the literal this entry tracks. */
+ u32 padding; /* Alignment padding; unused by the heuristics. */
+ void *func_start; /* Lower bound for the routine that references the string. */
+ void *func_end; /* Upper bound after branch/reloc sweeps. */
+ void *xref; /* LEA that materialises the string literal. */
 } string_item_t;
 
 /*
- * Fixed-size array of `string_item_t` records covering the 27 status strings we track inside sshd to anchor later scans.
+ * Ordered set of 27 `string_item_t` slots keyed by `StringXrefId` for the sshd/PAM/log anchors (xcalloc, monitor RPCs, sshlogv/syslog helpers) that drive the recon heuristics.
  */
 typedef struct __attribute__((packed)) string_references {
- string_item_t entries[27];
+ string_item_t xcalloc_zero_size; /* Zero-size xcalloc site that seeds sensitive-data scans. */
+ string_item_t chdir_home_error; /* do_child chdir failure path. */
+ string_item_t list_hostkey_types; /* main() hostkey banner anchor. */
+ string_item_t demote_sensitive_data; /* demote_sensitive_data helper. */
+ string_item_t mm_terminate; /* monitor mm_terminate RPC. */
+ string_item_t mm_pty_allocate; /* monitor PTY allocation RPC. */
+ string_item_t mm_do_pam_account; /* monitor PAM account RPC. */
+ string_item_t mm_session_pty_cleanup2; /* monitor sess-pty cleanup helper. */
+ string_item_t mm_getpwnamallow; /* monitor passwd lookup helper. */
+ string_item_t mm_sshpam_init_ctx; /* monitor sshpam init. */
+ string_item_t mm_sshpam_query; /* monitor sshpam query. */
+ string_item_t mm_sshpam_respond; /* monitor sshpam respond. */
+ string_item_t mm_sshpam_free_ctx; /* monitor sshpam ctx teardown. */
+ string_item_t mm_choose_dh; /* monitor Diffie-Hellman chooser. */
+ string_item_t sshpam_respond; /* server-side sshpam respond helper. */
+ string_item_t sshpam_auth_passwd; /* server-side sshpam auth password helper. */
+ string_item_t sshpam_query; /* server-side sshpam query helper. */
+ string_item_t start_pam; /* start_pam helper. */
+ string_item_t mm_request_send; /* monitor mm_request_send framing helper. */
+ string_item_t mm_log_handler; /* mm_log_handler trampoline used to grab handler context. */
+ string_item_t agent_socket_error; /* Agent-socket failure string that anchors the log-handler scan. */
+ string_item_t auth_root_allowed; /* PermitRootLogin flag string. */
+ string_item_t mm_answer_authpassword; /* monitor mm_answer_authpassword RPC. */
+ string_item_t mm_answer_keyallowed; /* monitor mm_answer_keyallowed RPC. */
+ string_item_t mm_answer_keyverify; /* monitor mm_answer_keyverify RPC. */
+ string_item_t sshlogv_format; /* sshlogv formatter string anchoring sshlogv(). */
+ string_item_t syslog_bad_level; /* Syslog-level fallback used to locate log handler wiring. */
 } string_references_t;
 
 /*

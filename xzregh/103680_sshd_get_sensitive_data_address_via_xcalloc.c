@@ -35,7 +35,7 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   u8 *store_hits[16];
   
   *sensitive_data_out = (void *)0x0;
-  xcalloc_call_target = (u8 *)string_refs->entries[0].func_start;
+  xcalloc_call_target = (u8 *)(string_refs->xcalloc_zero_size).func_start;
   if (xcalloc_call_target == (u8 *)0x0) {
     return FALSE;
   }

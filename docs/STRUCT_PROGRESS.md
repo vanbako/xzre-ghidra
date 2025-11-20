@@ -87,6 +87,6 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `sshd_offsets_t` | 0 |  |
 | `sshd_payload_ctx_t` | 1 | Payload layout documented (2025-11-18) |
 | `sshkey` | 0 |  |
-| `string_item_t` | 0 |  |
-| `string_references_t` | 0 |  |
+| `string_item_t` | 1 | Renamed the padding field and clarified how each entry captures the function bounds/xref for a decoded string (2025-11-20). |
+| `string_references_t` | 1 | Broke out the 27 entries into named sshd/PAM/log anchors and annotated what each string reference is used to find (2025-11-20). |
 | `tls_index` | 0 |  |

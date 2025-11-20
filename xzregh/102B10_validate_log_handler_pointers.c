@@ -47,9 +47,9 @@ BOOL validate_log_handler_pointers
       pointer_gap = (long)addr1 - (long)addr2;
     }
     if (((pointer_gap < 0x10) &&
-        (mem_address = refs->entries[0x13].func_start, mem_address != (void *)0x0)) &&
-       (function_start = (u8 *)refs->entries[0x14].func_start, function_start != (u8 *)0x0)) {
-      function_end_ptr = (u8 **)refs->entries[0x14].func_end;
+        (mem_address = (refs->mm_log_handler).func_start, mem_address != (void *)0x0)) &&
+       (function_start = (u8 *)(refs->agent_socket_error).func_start, function_start != (u8 *)0x0)) {
+      function_end_ptr = (u8 **)(refs->agent_socket_error).func_end;
       success = find_lea_instruction_with_mem_operand
                         (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)&block_end,mem_address);
       function_start = block_end;

