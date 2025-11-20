@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-20
+- Added a refresh step that exports the obfuscated string blobs straight from `liblzma_la-crc64-fast.o` (`string_action_data` / `string_mask_data`) via `scripts/export_rodata_strings.py`; the pipeline now emits binary dumps plus commented hexdumps and a best-effort decoded table (`ghidra_scripts/generated/{string_action_data,string_mask_data}.txt/bin`, `encoded_string_ids.txt`, `string_rodata_summary.txt`). Documented the new outputs in AGENTS.md.
+- Next: if more precise plaintext is needed, refine the decoder heuristic in `export_rodata_strings.py` or wire up a full deobfuscation using the trie/mask data instead of enum-name hints.
+
+## 2025-11-20
 - `global_context_t`: renamed the ambiguous fields (string anchors, monitor slot, code/data bounds, payload buffer/state, secret-data flags) and annotated each member so callers know how the imports, sshd metadata, streaming buffers, and attestation bookkeeping fit together. Ran `./scripts/refresh_xzre_project.sh` so the new names propagate into xzregh and the portable archive. STRUCT_PROGRESS bumped for review #1.
 - Next: if we want the AutoDoc warning cleared, diff `ghidra_scripts/generated/xzre_autodoc.json` against `metadata/functions_autodoc.json` and sync the remaining comment delta.
 

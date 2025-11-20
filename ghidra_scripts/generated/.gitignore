@@ -1,0 +1,8 @@
+# Obfuscated rodata exports are volatile; they live under /tmp by default
+# and should not be tracked when overridden.
+string_action_data.bin
+string_action_data.txt
+string_mask_data.bin
+string_mask_data.txt
+encoded_string_ids.txt
+string_rodata_summary.txt

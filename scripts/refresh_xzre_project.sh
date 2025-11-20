@@ -177,6 +177,14 @@ if ! cmp -s "$AUTODOC_SOURCE" "$AUTODOC_EXPORT"; then
 fi
 
 if [[ "$CHECK_ONLY" -eq 0 ]]; then
+python3 "$ROOT_DIR/scripts/export_rodata_strings.py" \
+  --binary "$OBJECT_PATH" \
+  --linker-map "$LINKER_MAP_JSON" \
+  --types "$TYPES_SOURCE" \
+  --output-dir "$GENERATED_DIR"
+fi
+
+if [[ "$CHECK_ONLY" -eq 0 ]]; then
 python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
   --comments-json "$AUTODOC_EXPORT" \
   --xzregh-dir "$XZREGH_EXPORT_DIR" \
