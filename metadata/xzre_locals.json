@@ -1809,26 +1809,6 @@
         "type": "byte *"
       },
       {
-        "name": "tls_slot",
-        "original": "piVar43",
-        "type": "int *"
-      },
-      {
-        "name": "offset_patch_ptr",
-        "original": "puVar44",
-        "type": "u8 *"
-      },
-      {
-        "name": "payload_cursor",
-        "original": "puVar46",
-        "type": "u8 *"
-      },
-      {
-        "name": "payload_end",
-        "original": "puVar47",
-        "type": "u8 *"
-      },
-      {
         "name": "authprobe_func_end",
         "original": "puVar43",
         "type": "u8 *"
@@ -1837,11 +1817,6 @@
         "name": "int_ptr",
         "original": "piVar44",
         "type": "int *"
-      },
-      {
-        "name": "lzma_code_end",
-        "original": "puVar55",
-        "type": "u8 *"
       },
       {
         "name": "insn_ctx_cursor",
@@ -1899,11 +1874,6 @@
         "type": "void *"
       },
       {
-        "name": "lzma_code_end",
-        "original": "puVar55",
-        "type": "u8 *"
-      },
-      {
         "name": "log_string_slot",
         "original": "uVar4",
         "type": "uint"
@@ -1919,19 +1889,9 @@
         "type": "u8"
       },
       {
-        "name": "search_hit_count",
-        "original": "iVar61",
-        "type": "int"
-      },
-      {
         "name": "loop_idx",
         "original": "lVar47",
         "type": "long"
-      },
-      {
-        "name": "mm_answer_keyverify_sym",
-        "original": "code_start",
-        "type": "sshd_monitor_func_t *"
       },
       {
         "name": "reg_lower",
@@ -1941,11 +1901,6 @@
       {
         "name": "reg_upper",
         "original": "uVar59",
-        "type": "u8"
-      },
-      {
-        "name": "zero_seed",
-        "original": "bVar62",
         "type": "u8"
       },
       {
@@ -4953,11 +4908,6 @@
         "type": "sshd_ctx_t *"
       },
       {
-        "name": "keyverify_handler",
-        "original": "pvVar7",
-        "type": "sshd_monitor_func_t"
-      },
-      {
         "name": "uid_gid_pair",
         "original": "uVar8",
         "type": "u64"
@@ -6018,11 +5968,6 @@
         "name": "use_pam_ptr",
         "original": "puVar10",
         "type": "uint *"
-      },
-      {
-        "name": "mm_answer_slot",
-        "original": "plVar11",
-        "type": "long *"
       },
       {
         "name": "exit_fn",
