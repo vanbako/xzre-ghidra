@@ -148,7 +148,7 @@ cp "$LOCALS_SOURCE" "$LOCALS_GENERATED"
   -noanalysis \
   -scriptPath "$SCRIPT_PATH" \
   -postScript ApplyAutoDocComments.py comments="$AUTODOC_GENERATED" \
-  -postScript ExportAutoDocComments.py output="$AUTODOC_EXPORT" \
+  -postScript ExportAutoDocComments.py output="$AUTODOC_EXPORT" metadata="$AUTODOC_GENERATED" \
   -postScript ExportProjectArchive.py archive="$ARCHIVE_PATH"
 
 echo "Clearing existing decomp files under $XZREGH_EXPORT_DIR"

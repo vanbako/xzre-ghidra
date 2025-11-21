@@ -29,7 +29,7 @@ def load_metadata(path: Path) -> Dict[str, str]:
 
 
 def write_metadata(path: Path, data: Dict[str, str]) -> None:
-    serialized = json.dumps(data, indent=2)
+    serialized = json.dumps(data, indent=2, ensure_ascii=False)
     serialized += "\n"
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     with tmp_path.open("w", encoding="utf-8") as handle:

@@ -3,6 +3,14 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-21
+- Authored the missing `xzre_globals` AutoDoc so the headless refresh stops complaining about the shared hooks blob; updated notes/progress metadata and reran the helper to keep the data symbol documented as the canonical runtime snapshot (`ldso_ctx_t`, `global_ctx`, resolved imports, payload buffers).
+- Next: confirm the next refresh run reports a clean AutoDoc delta now that the blob is documented, then resume OP3 work.
+
+## 2025-11-21
+- Function session `OP2`: documented the MOV/LEA scanners and the register-only predicate, renamed every scratch decoder temp in `metadata/xzre_locals.json`, refreshed the notes/progress tracker, and reran `./scripts/refresh_xzre_project.sh` so xzregh plus the portable archive show the new AutoDocs/locals (rename report stayed clean; only the long-standing `xzre_globals` AutoDoc delta remains).
+- Next: roll the same treatment into `OP3` (memory operand sweeps) or finally author the missing `xzre_globals` AutoDoc so the refresh warning disappears.
+
+## 2025-11-21
 - `find_function`: taught the metadata locals pass about the scratch output array (`prologue_result`) so `local_40` is now renamed via `register_temps`; reran `./scripts/refresh_xzre_project.sh` to propagate the change and confirm the rename report stays clean.
 - Next: consider whether `find_function_prologue` needs a similar treatment for the nested pointer window before moving deeper into OP2.
 

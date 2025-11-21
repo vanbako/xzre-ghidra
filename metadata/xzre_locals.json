@@ -3709,22 +3709,22 @@
         "replacement": "*(u32 *)&lea_ctx.opcode_window[3]"
       },
       {
-        "name": "decode_ok",
+        "name": "decoded",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "clear_stride_marker",
+        "name": "ctx_stride_sign",
         "original": "bVar4",
         "type": "byte"
       }
@@ -3740,22 +3740,22 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "decoded",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "clear_stride_marker",
+        "name": "ctx_stride_sign",
         "original": "bVar4",
         "type": "byte"
       }
@@ -4104,22 +4104,22 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "decoded",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "opcode_match",
+        "name": "is_expected_opcode",
         "original": "bVar4",
         "type": "BOOL"
       }
@@ -4135,27 +4135,27 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "opcode",
+        "name": "decoded_opcode",
         "original": "iVar1",
         "type": "int"
       },
       {
-        "name": "decode_ok",
+        "name": "decoded",
         "original": "BVar2",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar3",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "opcode_match",
+        "name": "is_expected_opcode",
         "original": "bVar5",
         "type": "BOOL"
       }
@@ -4166,12 +4166,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "decode_ok",
+        "name": "decoded",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "opcode_index",
+        "name": "opcode_lookup_index",
         "original": "uVar2",
         "type": "uint"
       }

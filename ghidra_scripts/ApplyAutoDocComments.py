@@ -6,7 +6,12 @@ import json
 import os
 import codecs
 
-from ghidra.program.model.listing import Function
+from ghidra.program.model.listing import Function, CodeUnit
+
+
+DATA_AUTODOC_SYMBOLS = {
+    "xzre_globals",
+}
 
 
 AUTO_TAG = "AutoDoc:"
@@ -42,6 +47,9 @@ def main():
     with codecs.open(comments_file, "r", "utf-8") as fh:
         comment_map = json.load(fh)
 
+    listing = currentProgram.getListing()
+    symbol_table = currentProgram.getSymbolTable()
+
     fm = currentProgram.getFunctionManager()
     name_map = {}
     it = fm.getFunctions(True)
@@ -50,12 +58,46 @@ def main():
         if isinstance(func, Function):
             name_map.setdefault(func.getName(), func)
 
+    data_symbol_map = {}
+    for name in DATA_AUTODOC_SYMBOLS:
+        symbols = symbol_table.getSymbols(name)
+        if symbols is None:
+            continue
+        target = None
+        while symbols.hasNext():
+            sym = symbols.next()
+            if target is None:
+                target = sym
+            if sym.isGlobal():
+                target = sym
+                break
+        if target is not None:
+            data_symbol_map[name] = target
+
     applied = 0
     missing = []
     for name, comment in comment_map.items():
         func = name_map.get(name)
         if func is None:
-            missing.append(name)
+            data_symbol = data_symbol_map.get(name)
+            if data_symbol is None:
+                if name not in DATA_AUTODOC_SYMBOLS:
+                    missing.append(name)
+                continue
+            code_unit = listing.getCodeUnitAt(data_symbol.getAddress())
+            if code_unit is None:
+                missing.append(name)
+                continue
+            existing = code_unit.getComment(CodeUnit.PLATE_COMMENT)
+            base = strip_existing_autodoc(existing)
+            if base:
+                new_comment = base + "\n\n" + comment
+            else:
+                new_comment = comment
+            if existing == new_comment:
+                continue
+            code_unit.setComment(CodeUnit.PLATE_COMMENT, new_comment)
+            applied += 1
             continue
         existing = func.getComment()
         base = strip_existing_autodoc(existing)

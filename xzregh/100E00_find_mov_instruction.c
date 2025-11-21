@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: MOV-only variant of the pointer scan: decodes sequentially, requires the memory↔register ModRM form, enforces the REX.W width test when `is_64bit_operand` is TRUE (waived for stores), and accepts only opcode `0x10b` (load) or `0x109` (store) per `load_flag`.
- * Decode failures advance one byte; otherwise the loop walks by `instruction_size`, returning TRUE with `dctx` on the matching MOV.
+ * AutoDoc: MOV-only variant of the pointer scan.
+ * If `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.
+ * Successful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.
  */
 
 #include "xzre_types.h"
@@ -15,16 +16,16 @@ BOOL find_mov_instruction
                (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)
 
 {
-  BOOL decode_ok;
-  long clear_idx;
-  dasm_ctx_t *zero_ctx;
-  BOOL opcode_match;
+  BOOL decoded;
+  long ctx_clear_idx;
+  dasm_ctx_t *ctx_clear_cursor;
+  BOOL is_expected_opcode;
   dasm_ctx_t scratch_ctx;
   
-  zero_ctx = &scratch_ctx;
-  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx->instruction = 0;
-    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
+  ctx_clear_cursor = &scratch_ctx;
+  for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
+    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &scratch_ctx;
@@ -34,20 +35,20 @@ BOOL find_mov_instruction
       if (code_end <= code_start) {
         return FALSE;
       }
-      decode_ok = x86_dasm(dctx,code_start,code_end);
-      if (decode_ok != FALSE) break;
+      decoded = x86_dasm(dctx,code_start,code_end);
+      if (decoded != FALSE) break;
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
        (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {
-        opcode_match = *(int *)(dctx->opcode_window + 3) == 0x109;
+        is_expected_opcode = *(int *)(dctx->opcode_window + 3) == 0x109;
       }
       else {
-        opcode_match = *(int *)(dctx->opcode_window + 3) == 0x10b;
+        is_expected_opcode = *(int *)(dctx->opcode_window + 3) == 0x10b;
       }
-      if (opcode_match) {
+      if (is_expected_opcode) {
         return TRUE;
       }
     }

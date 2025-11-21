@@ -85,11 +85,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `100B10_find_function_prologue` | `opco_patt` | 1 | 2025-11-21 (OP1) – documented the ENDBR+alignment path and retagged the ctx zeroing cursor. |
 | `100BA0_find_function` | `opco_patt` | 1 | 2025-11-21 (OP1) – refreshed the backward/forward scan summary; `local_40` scratch still needs a future rename. |
 | `100C90_find_call_instruction` | `opco_patt` | 1 | 2025-11-21 (OP1) – wrote up the telemetry+call-target logic and renamed the scratch ctx zeroing temps. |
-| `100D40_find_mov_lea_instruction` | `opco_patt` | 0 |  |
-| `100E00_find_mov_instruction` | `opco_patt` | 0 |  |
-| `100EB0_find_lea_instruction` | `opco_patt` | 0 |  |
-| `100F60_find_lea_instruction_with_mem_operand` | `opco_patt` | 0 |  |
-| `10AC40_find_reg2reg_instruction` | `opco_patt` | 0 |  |
+| `100D40_find_mov_lea_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – Documented the hybrid MOV/LEA filter, tied AutoDoc to the load/store + REX.W checks, and renamed the scratch decoder zeroing temps (`ctx_clear_idx/cursor`, `decoded_opcode`, `is_expected_opcode`). |
+| `100E00_find_mov_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – MOV-only path now describes the byte-by-byte retry behaviour, enforces the load/store width constraint in doc, and adopts the same ctx zeroing/local names as the other pointer scanners. |
+| `100EB0_find_lea_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – Added the secret-data breadcrumb + ±displacement explanation and renamed the stack decoder wipe loop (`ctx_clear_idx/cursor`, `ctx_stride_sign`). |
+| `100F60_find_lea_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-21 (OP2) – Clarified the optional RIP target comparison, the REX.W+ModRM requirements, and synced the scratch ctx locals/notes with the other LEA helpers. |
+| `10AC40_find_reg2reg_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – Wrote up the ModRM/prefix rejects, documented the arithmetic opcode bitmask, and renamed the temps to `decoded`/`opcode_lookup_index`. |
 | `101020_find_string_reference` | `opco_patt` | 0 |  |
 | `101060_find_instruction_with_mem_operand_ex` | `opco_patt` | 0 |  |
 | `101120_find_instruction_with_mem_operand` | `opco_patt` | 0 |  |
@@ -177,7 +177,7 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `10A800_get_cpuid_modified` | `loader_rt` | 0 |  |
 | `10A700_cpuid_gcc` | `loader_rt` | 0 |  |
 | `1074B0_count_pointers` | `loader_rt` | 0 |  |
-| `xzre_globals` | `loader_rt` | 0 |  |
+| `xzre_globals` | `loader_rt` | 1 | 2025-11-21 – Authored the missing AutoDoc so the liblzma data blob is documented as the shared hooks state (`ldso_ctx_t`, `global_ctx`, resolved imports, sshd/log metadata, payload queues). |
 | `107030_c_strlen` | `loader_rt` | 0 |  |
 | `107050_c_strnlen` | `loader_rt` | 0 |  |
 | `107080_fd_read` | `loader_rt` | 0 |  |
