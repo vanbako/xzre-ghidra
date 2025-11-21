@@ -1442,7 +1442,7 @@
       "names": [
         "secret_data_item_t"
       ],
-      "code": "typedef struct __attribute__((packed)) secret_data_item {\n u8 *code;\n secret_data_shift_cursor_t shift_cursor;\n u32 operation_index;\n u32 shift_count;\n u32 index;\n} secret_data_item_t;"
+      "code": "typedef struct __attribute__((packed)) secret_data_item {\n u8 *anchor_pc; /* Instruction pointer identifying the helper/function we attest; used to locate the containing routine before appending. */\n secret_data_shift_cursor_t bit_cursor; /* Bit-stream cursor describing where this item lands inside the obfuscated secret data log. */\n u32 operation_slot; /* Index into global_ctx->shift_operations[] so each helper shifts at most once. */\n u32 bits_to_shift; /* Number of bits consumed/emitted when this descriptor succeeds (rolls into global_ctx->num_shifted_bits). */\n u32 ordinal; /* Non-zero slot ordinal assigned by secret_data_append_items; zero marks disabled entries. */\n} secret_data_item_t;"
     },
     {
       "kind": "struct",

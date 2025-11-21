@@ -1366,14 +1366,14 @@ typedef union {
 } secret_data_shift_cursor_t;
 
 /*
- * One decoded chunk of the secret data stream including the original code reference, the shift cursor, the operation index, and bookkeeping counters.
+ * Descriptor for a single secret-data attestation entry: anchor_pc identifies the helper, bit_cursor selects the target slot in the obfuscated stream, operation_slot gates once-only execution, bits_to_shift feeds the accounting counter, and ordinal tracks the batch-assigned slot.
  */
 typedef struct __attribute__((packed)) secret_data_item {
- u8 *code;
- secret_data_shift_cursor_t shift_cursor;
- u32 operation_index;
- u32 shift_count;
- u32 index;
+ u8 *anchor_pc; /* Instruction pointer identifying the helper/function we attest; used to locate the containing routine before appending. */
+ secret_data_shift_cursor_t bit_cursor; /* Bit-stream cursor describing where this item lands inside the obfuscated secret data log. */
+ u32 operation_slot; /* Index into global_ctx->shift_operations[] so each helper shifts at most once. */
+ u32 bits_to_shift; /* Number of bits consumed/emitted when this descriptor succeeds (rolls into global_ctx->num_shifted_bits). */
+ u32 ordinal; /* Non-zero slot ordinal assigned by secret_data_append_items; zero marks disabled entries. */
 } secret_data_item_t;
 
 /*

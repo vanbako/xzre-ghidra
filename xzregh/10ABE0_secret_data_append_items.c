@@ -32,11 +32,11 @@ BOOL secret_data_append_items
       index = (int)item_index + 1;
       item = items + item_index;
       item_index = (ulong)index;
-      if (item->index != 0) break;
-      item->index = slot_index;
+      if (item->ordinal != 0) break;
+      item->ordinal = slot_index;
     }
-    success = (*appender)((secret_data_shift_cursor_t)(item->shift_cursor).index,
-                        item->operation_index,item->shift_count,index,item->code);
+    success = (*appender)((secret_data_shift_cursor_t)(item->bit_cursor).index,
+                        item->operation_slot,item->bits_to_shift,index,item->anchor_pc);
     if (success == FALSE) break;
     slot_index = slot_index + 1;
   }

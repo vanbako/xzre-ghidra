@@ -77,7 +77,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `monitor_data_t` | 1 | Privsep struct review #2 – documented cmd opcode usage, annotated the RSA/payload pointers, and renamed the padding slots to explain why the runtime_data union keeps them aligned (2025-11-21). |
 | `RSA` | 0 |  |
 | `run_backdoor_commands_data_t` | 1 | RSA dispatcher struct pass – renamed the payload sizing/do_orig/hostkey fields, documented the staging union (socket RX vs. Ed448 key data), and refreshed the metadata/export (2025-11-23). |
-| `secret_data_item_t` | 0 |  |
+| `secret_data_item_t` | 1 | Renamed entries to anchor_pc/bit_cursor/operation_slot/bits_to_shift/ordinal and annotated how each controls the secret-data attestation flow (2025-11-21). |
 | `sensitive_data` | 0 |  |
 | `ssh` | 0 |  |
 | `sshbuf` | 0 |  |
