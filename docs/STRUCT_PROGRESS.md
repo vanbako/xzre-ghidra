@@ -28,7 +28,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_cpuid_reloc_consts_t` | 1 | Backdoor review order #12 – renamed the GOT displacement/index fields so they describe the cpuid random slot and stage-two trampoline anchors (2025-11-19). |
 | `BIGNUM` | 0 |  |
 | `BN_CTX` | 0 |  |
-| `cmd_arguments_t` | 0 |  |
+| `cmd_arguments_t` | 1 | Payload/Crypto review – renamed the three flag bytes to control/monitor/request flags, annotated their bit semantics (log hook, PAM, socket/payload sourcing), and documented how payload_hint doubles as a length vs. sshd_offsets overlay (2025-11-21). |
 | `dasm_ctx_t` | 1 | Renamed decoder fields and documented each slot (2025-11-19) |
 | `DSA` | 0 |  |
 | `EC_GROUP` | 0 |  |

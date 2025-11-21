@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-21
+- `cmd_arguments_t`: renamed the anonymous flag bytes to `control_flags`/`monitor_flags`/`request_flags`, documented each bit’s role (log-hook install, PAM disablement, explicit socket selection, payload sourcing/continuations), spelled out how `payload_hint` doubles as a continuation length vs. sshd_offsets overlay, and reran `./scripts/refresh_xzre_project.sh` so `xzre_types.h`/`xzregh/*` reflect the new names. STRUCT_PROGRESS updated for review #1.
+- Next: tighten the `CommandFlags*` enums (they still describe the old bit meanings) and reconcile the AutoDoc delta the refresh keeps reporting for `xzre_globals`.
+
 ## 2025-11-20
 - `sshd_log_ctx_t`: renamed the squelch/syslog flags, typed the handler/ctx slot pointers, and documented the sshlogv + log-fragment anchors used by the mm_log_handler hook; reran `./scripts/refresh_xzre_project.sh` so xzre_types.h/xzregh/portable snapshot match the metadata and updated STRUCT_PROGRESS for review #1.
 - Next: either re-express the libc_imports copy in backdoor_setup to avoid the negative-offset hack or sync the AutoDoc delta the refresh keeps flagging.

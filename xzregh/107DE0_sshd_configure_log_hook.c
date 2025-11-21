@@ -34,7 +34,7 @@ BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
      (log_ctx->handler_slots_valid == FALSE)) {
     return FALSE;
   }
-  flags1 = cmd_flags->flags1;
+  flags1 = cmd_flags->control_flags;
   logging_requested = flags1 & 8;
   if ((logging_requested == 0) || (ctx->caller_uid == 0)) {
     orig_ctx = *ctx_slot;

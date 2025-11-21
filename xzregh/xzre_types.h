@@ -1401,13 +1401,13 @@ typedef union __attribute__((packed)) {
 } u_cmd_arguments_t;
 
 /*
- * Command flags (three flag bytes plus the variable-size union) that describe how the monitor thread should interpret the decrypted payload.
+ * control_flags/monitor_flags/request_flags plus a two-byte payload_hint that collectively drive log-hook installs, PAM disablement, socket selection, monitor request IDs, and whether sshd_proxy_elevate should stream payloads or patch ctx->sshd_offsets.
  */
 typedef struct __attribute__((packed)) cmd_arguments {
- u8 flags1;
- u8 flags2;
- u8 flags3;
- u_cmd_arguments_t u;
+ u8 control_flags; /* Primary toggles consumed by run_backdoor_commands()/sshd_proxy_elevate: bit0 requests sshd exit after dispatch (propagates into ctx->exit_flag and calls libc_exit(0) on parse failures), bit1 asks sshd_configure_log_hook() to run, bit2 requests setlogmask(-0x80000000), bit3 differentiates "squelch" logging from the filter mode, bit4 requires that the attacker-supplied format strings are present before enabling the filter, bit5 forces sshd_proxy_elevate to use sshd_get_usable_socket() with the encoded socket ids, bit6 disables PAM by zeroing use_pam_ptr, and bit7 tells sshd_proxy_elevate to wait for replies while letting opcode 0 treat the tail bytes as sshd_offsets overrides. */
+ u8 monitor_flags; /* Secondary command byte: bit0 marks that continuation chunks include an 8-byte prefix before the little-endian size, bit1/bit2 tell run_backdoor_commands() that flags3/payload_hint carry sshd_offsets nibbles, bits3-5 hold the socket ordinal for cmd_type 0/1/2 when manual sockets are requested, and the high bits (0xC0) describe how cmd_type 3 sources payloads (0x40 = exit immediately, 0x00/0x80 = find the ChaCha blob on the stack, 0xC0 = payload_body/payload_body_size already populated). */
+ u8 request_flags; /* Monitor/socket selector: the low 5 bits either override the MONITOR_REQ_* opcode or carry an additional socket index, bit5 advertises that sshd_proxy_elevate must pull an sshbuf payload via sshd_get_sshbuf(), and bit6 repurposes the tail bytes when opcode 0 patches ctx->sshd_offsets (see run_backdoor_commands()). */
+ u_cmd_arguments_t payload_hint; /* Final two bytes reused as either a payload length (continuation chunks streamed into ctx->payload_buffer) or as raw bitfields when opcode 0 repacks ctx->sshd_offsets/monitor request selectors. */
 } cmd_arguments_t;
 
 /*
