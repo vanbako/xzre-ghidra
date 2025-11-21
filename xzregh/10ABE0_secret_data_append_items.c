@@ -35,7 +35,7 @@ BOOL secret_data_append_items
       if (item->ordinal != 0) break;
       item->ordinal = slot_index;
     }
-    success = (*appender)((secret_data_shift_cursor_t)(item->bit_cursor).index,
+    success = (*appender)((secret_data_shift_cursor_t)(item->bit_cursor).bit_position,
                         item->operation_slot,item->bits_to_shift,index,item->anchor_pc);
     if (success == FALSE) break;
     slot_index = slot_index + 1;

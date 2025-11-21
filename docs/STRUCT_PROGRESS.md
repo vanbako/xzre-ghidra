@@ -78,6 +78,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `RSA` | 0 |  |
 | `run_backdoor_commands_data_t` | 1 | RSA dispatcher struct pass – renamed the payload sizing/do_orig/hostkey fields, documented the staging union (socket RX vs. Ed448 key data), and refreshed the metadata/export (2025-11-23). |
 | `secret_data_item_t` | 1 | Renamed entries to anchor_pc/bit_cursor/operation_slot/bits_to_shift/ordinal and annotated how each controls the secret-data attestation flow (2025-11-21). |
+| `secret_data_shift_cursor_t` | 1 | Renamed the union view to bit_position/signed_bit_position/intra_byte_bit/byte_offset and documented how it indexes global_ctx->secret_data (2025-11-21). |
 | `sensitive_data` | 0 |  |
 | `ssh` | 0 |  |
 | `sshbuf` | 0 |  |

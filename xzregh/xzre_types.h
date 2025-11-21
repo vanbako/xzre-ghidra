@@ -1354,14 +1354,16 @@ typedef struct __attribute__((packed)) backdoor_shared_libraries_data {
 } backdoor_shared_libraries_data_t;
 
 /*
- * Bit-packed cursor (3-bit bit index + 29-bit byte index) used when reconstructing the obfuscated secret data stream stored inside the RSA payload.
+ * Cursor for the secret-data bitstream: bit_position tracks the absolute offset, signed_bit_position is used for arithmetic, and the intra_byte_bit/byte_offset view exposes the decomposed byte+bit for callers that need to poke global_ctx->secret_data directly.
  */
 typedef union {
- u32 index;
- int signed_index;
+ u32 bit_position; /* Absolute bit offset inside global_ctx->secret_data (0..0x1C7). */
+ u32 index; /* Legacy alias for bit_position kept for existing helpers. */
+ int signed_bit_position; /* Signed view for comparisons/subtractions during cursor arithmetic. */
+ int signed_index; /* Legacy alias for signed_bit_position used by existing heuristics. */
  struct {
-  u32 bit_index : 3;
-  u32 byte_index : 29;
+  u32 intra_byte_bit : 3; /* Bit number within the current byte (bit_position & 7). */
+  u32 byte_offset : 29; /* Byte index inside the obfuscated log (bit_position >> 3). */
  };
 } secret_data_shift_cursor_t;
 

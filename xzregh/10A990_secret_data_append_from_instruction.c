@@ -19,7 +19,7 @@ BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_curs
   uint cursor_index;
   int opcode;
   
-  cursor_index = cursor->index;
+  cursor_index = cursor->bit_position;
   if (cursor_index < 0x1c8) {
     opcode = *(int *)(dctx->opcode_window + 3);
     if (((opcode != 0x109) && (opcode != 0xbb)) &&
@@ -27,7 +27,7 @@ BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_curs
       secret_byte = (byte *)(global_ctx + 0x108 + (ulong)(cursor_index >> 3));
       *secret_byte = *secret_byte | (byte)(1 << ((byte)cursor_index & 7));
     }
-    cursor->index = cursor_index + 1;
+    cursor->bit_position = cursor_index + 1;
   }
   return TRUE;
 }
