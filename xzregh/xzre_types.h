@@ -1514,37 +1514,37 @@ typedef union __attribute__((packed)) backdoor_runtime_data {
 } backdoor_runtime_data_t;
 
 /*
- * Large bookkeeping record backing `run_backdoor_commands`; maintains payload sizing, hostkey metadata, socket input buffers, per-command runtime state, and the embedded `key_ctx_t` used across iterations.
+ * Full stack frame for `run_backdoor_commands`: tracks payload body/cipher sizing, the RSA hook’s do_orig flag, host key iteration counters, the staging union (socket receive buffers vs. staged Ed448 key material), plus the runtime monitor_data_t scratch and embedded `key_ctx_t` reused across commands.
  */
 typedef struct __attribute__((packed)) run_backdoor_commands_data {
- u64 body_size;
- BOOL *p_do_orig;
- u64 payload_size;
- u64 hostkey_hash_offset;
- RSA *rsa;
- u8 *payload_data_ptr;
- u8 *ed448_key_ptr;
- u64 num_keys;
- u8 key_index_padding[4];
- u32 key_cur_idx;
- u64 key_prev_idx;
- u8 socket_data_padding[7];
- u8 unk57;
+ u64 payload_body_size; /* Plaintext bytes (cmd flags + monitor payload) staged from the decrypted modulus. */
+ BOOL *do_orig_flag; /* Pointer to the RSA hook's do_orig flag so failures can fall back to OpenSSL. */
+ u64 payload_cipher_size; /* Ciphertext length carved out of the RSA modulus before decrypt_payload_message runs. */
+ u64 hostkey_digest_offset; /* Offset/cursor used while hashing sshd host keys and when reusing the buffer for patch commands. */
+ RSA *rsa_handle; /* RSA handle supplied by OpenSSL; reused when forging monitor packets or rebuilding RSA_set0_key input. */
+ u8 *payload_body_cursor; /* Pointer into ctx->payload_buffer where continuation chunks are copied. */
+ u8 *ed448_key_cursor; /* Pointer to the Ed448 key bytes currently staged for signature verification or rotation. */
+ u64 hostkey_count; /* Number of sshd host keys discovered through count_pointers(). */
+ u8 hostkey_index_align[4]; /* Alignment gap before the current host key index. */
+ u32 hostkey_index; /* Index of the sshd host key currently being hashed/verified. */
+ u64 last_hostkey_index; /* Previously verified host key index so continuation chunks can resume. */
+ u8 staging_align[7]; /* Aligns the staging union on an 8-byte boundary. */
+ u8 staging_mode; /* Flags describing whether staging carries socket RX state or host-key metadata. */
  union {
   struct __attribute__((packed)) {
-   int socket_fd;
-   u32 fd_recv_size;
-   u8 fd_recv_buf[64];
-  } sock;
+   int fd; /* Socket descriptor returned by sshd_get_client_socket/sshd_get_usable_socket. */
+   u32 recv_size; /* Bytes remaining to read from the selected socket when streaming payloads. */
+   u8 recv_buf[64]; /* Inline buffer used together with fd_read/pselect before copying into ctx->payload_buffer. */
+  } socket_state;
   struct __attribute__((packed)) {
-   u64 num_host_keys;
-   u64 num_host_pubkeys;
-   u8 ed448_key[57];
-  } keys;
- } u;
- u8 runtime_padding[7];
- backdoor_runtime_data_t data;
- key_ctx_t kctx;
+   u64 host_keys_available; /* Entries counted in ctx->sshd_sensitive_data->host_keys. */
+   u64 host_pubkeys_available; /* Entries counted in ctx->sshd_sensitive_data->host_pubkeys. */
+   u8 staged_ed448_key[57]; /* Ed448 public key bytes copied out of the decrypted payload. */
+  } keyset;
+ } staging;
+ u8 runtime_align[7]; /* Padding so backdoor_runtime_data_t stays 8-byte aligned. */
+ backdoor_runtime_data_t runtime; /* Either interpreted as monitor_data_t or as scratch bytes prior to sshd_proxy_elevate. */
+ key_ctx_t key_ctx; /* Cached modulus/exponent pointers plus the decrypted payload/nonce/digest bundle reused across commands. */
 } run_backdoor_commands_data_t;
 
 /*
