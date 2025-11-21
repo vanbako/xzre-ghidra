@@ -1476,18 +1476,18 @@ enum CommandFlags3 {
 };
 
 /*
- * Working context for RSA-related operations; caches the modulus/exponent pointers, parsed command flags, decrypted payload, IV, and Ed448 key material extracted from the host key.
+ * Working context for RSA-related operations; caches the cloned modulus/exponent, parsed cmd flags, decrypted payload bytes, the 32-byte host-key digest slot, ChaCha nonce/IV snapshots, and the attacker’s unwrapped Ed448 key (whose low 32 bytes double as the ChaCha key) so run_backdoor_commands can replay decryptions without re-reading secret_data.
  */
 typedef struct __attribute__((packed)) key_ctx {
- const BIGNUM *rsa_n;
- const BIGNUM *rsa_e;
- cmd_arguments_t args;
- backdoor_payload_t payload;
- u8 payload_digest[32];
- u8 payload_nonce[16];
- u8 ivec[16];
- u8 ed448_key[57];
- u8 ed448_key_padding[2];
+ const BIGNUM *rsa_modulus; /* RSA modulus returned by RSA_get0_key; reused when forging RSA_set0_key input. */
+ const BIGNUM *rsa_exponent; /* RSA public exponent grafted onto the forged key context. */
+ cmd_arguments_t cmd_args; /* Command flag triple parsed out of payload.body.cmd_flags. */
+ backdoor_payload_t decrypted_payload; /* Entire decrypted payload blob (header + body) kept around for signature checks/replays. */
+ u8 hostkey_digest[32]; /* SHA-256 digest of the current sshd host key before it is spliced into decrypted_payload. */
+ u8 payload_nonce[16]; /* Plaintext nonce lifted from the payload header (cmd_type seeds) reused as the ChaCha nonce. */
+ u8 chacha_iv[16]; /* ChaCha IV/counter snapshot so decrypt_payload_message can rewind the keystream for replays. */
+ u8 attacker_ed448_key[57]; /* Raw Ed448 public key bytes from secret_data_get_decrypted (low 32 bytes double as the ChaCha key). */
+ u8 ed448_key_align[2]; /* Padding to keep the struct 8-byte aligned after the 57-byte key. */
 } key_ctx_t;
 
 /*

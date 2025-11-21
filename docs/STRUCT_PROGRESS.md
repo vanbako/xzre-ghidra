@@ -58,7 +58,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `instruction_search_ctx_t` | 0 |  |
 | `kex` | 0 |  |
 | `key_buf` | 0 |  |
-| `key_ctx_t` | 0 |  |
+| `key_ctx_t` | 1 | Payload/Crypto pass – renamed the modulus/exponent/args/payload scratch to describe the ChaCha + Ed448 reuse, annotated the hostkey digest slot and nonce/IV snapshots, and documented the secret_data linkage (2025-11-21). |
 | `key_payload_t` | 1 | Backdoor review order #7.2 – renamed the flat buffer/length/body view, documented the ChaCha ciphertext framing, and tied it back to decrypt_payload_message (2025-11-19). |
 | `La_i86_regs` | 0 |  |
 | `La_i86_retval` | 0 |  |
