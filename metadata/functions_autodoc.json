@@ -47,24 +47,29 @@
     "plate": "Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_dasm`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.",
     "inline": [
       {
-        "match": "decode_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);",
+        "match_regex": "secret_data_append_from_address\\(\\(void \\*\\)0x0,\\(secret_data_shift_cursor_t\\)0x81,4,7\\);",
+        "match_type": "regex",
         "comment": "Telemetry hooks track each pointer scan so the secret-data log mirrors our search paths.",
         "placement": "after"
       },
       {
-        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Scratch decoders get wiped between attempts so prefixes/immediates never leak."
       },
       {
-        "match": "while (code_start < code_end) {",
+        "match": "while (* < *) {",
+        "match_type": "wildcard",
         "comment": "Decode one instruction at a time until a CALL (optionally to call_target) appears."
       },
       {
-        "match": "if (decode_ok == FALSE) {",
+        "match": "if (* == FALSE) {",
+        "match_type": "wildcard",
         "comment": "Decoder failed, so retry one byte later just like a pattern scan."
       },
       {
-        "match": "code_start = code_start + dctx->instruction_size;",
+        "match": "* = * + *->instruction_size;",
+        "match_type": "wildcard",
         "comment": "Successful decodes hop past the instruction so the next iteration sees the following op."
       }
     ]
@@ -75,11 +80,13 @@
     "plate": "Wraps `find_function_prologue` to recover the full function bounds surrounding an instruction. When `func_start` is requested it walks backward from `code_start` toward `search_base`, probing each byte with the prologue helper until it finds a landing pad; hitting `search_base` without success aborts. When `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that offset as the end marker. Successful runs populate whichever out pointers the caller requested so later passes can reason about bounded regions instead of raw addresses.",
     "inline": [
       {
-        "match": "while ((search_base < scan_cursor &&",
+        "match": "while ((* < * &&",
+        "match_type": "wildcard",
         "comment": "Walk backward byte-by-byte until we rediscover a prologue or hit the supplied floor."
       },
       {
-        "match": "for (; scan_cursor < code_end + -4; scan_cursor = scan_cursor + 1) {",
+        "match": "for (; * < * + -4; * = * + 1) {",
+        "match_type": "wildcard",
         "comment": "Scan forward until the next landing pad so callers know where the function stops."
       }
     ]
@@ -88,16 +95,19 @@
     "plate": "Recognises CET-style prologues. In `FIND_ENDBR64` mode it zeroes a scratch `dasm_ctx_t`, asks `x86_dasm` to decode at `code_start`, requires the normalised opcode to be ENDBR64, and only succeeds if the ENDBR padding ends on a 16-byte boundary (optionally returning the instruction immediately after the pad through `output`). Legacy mode skips the decoder and reuses `is_endbr64_instruction` with the simple mask; when it hits it reports the exact byte it just tested so callers can keep walking until they find the landing pad they need.",
     "inline": [
       {
-        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Zero a scratch decoder context so we can peek at the opcode without mutating caller state."
       },
       {
-        "match": "if (((decoded != FALSE) && (*(u32 *)&prologue_ctx.opcode_window[3] == 3999)) &&",
+        "match_regex": "if \\(\\(\\([^)]* != FALSE\\) && \\(\\*\\(u32 \\*\\)&[^.]+\\.opcode_window\\[3] == 3999\\)\\) &&",
+        "match_type": "regex",
         "comment": "Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.",
         "placement": "after"
       },
       {
-        "match": "if (prologue_found != FALSE) {",
+        "match": "if (* != FALSE) {",
+        "match_type": "wildcard",
         "comment": "Legacy mode simply reports the matching byte so the caller can keep searching."
       }
     ]
@@ -108,20 +118,24 @@
     "plate": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nIt emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
     "inline": [
       {
-        "match": "decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);",
+        "match": "* = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);",
+        "match_type": "wildcard",
         "comment": "Breadcrumb the scan so we know which helper touched each code window.",
         "placement": "after"
       },
       {
-        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Reset the decoder context between attempts (the stride sign flip is a compiler artefact)."
       },
       {
-        "match": "decoded = x86_dasm(&lea_ctx,code_start,code_end);",
+        "match": "* = x86_dasm(&*,*,*);",
+        "match_type": "wildcard",
         "comment": "Decode byte-by-byte until a LEA with a bare displacement materialises."
       },
       {
-        "match": "if ((((decoded != FALSE) && (*(u32 *)&lea_ctx.opcode_window[3] == 0x10d)) &&",
+        "match_regex": "if .*\\(\\*\\(u32 \\*\\)&[^.]+\\.opcode_window\\[3] == 0x10d\\)",
+        "match_type": "regex",
         "comment": "Accept mirrored displacements so searches anchored at ±delta both succeed.",
         "placement": "after"
       }
@@ -131,20 +145,24 @@
     "plate": "LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.\nAfter logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.\nIf `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.",
     "inline": [
       {
-        "match": "decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);",
+        "match": "* = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);",
+        "match_type": "wildcard",
         "comment": "Log the caller so later telemetry can explain which helper touched a given memory range.",
         "placement": "after"
       },
       {
-        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Zero the scratch decoder so we only evaluate the LEA we just decoded."
       },
       {
-        "match": "decoded = x86_dasm(dctx,code_start,code_end);",
+        "match": "* = x86_dasm(*,*,*);",
+        "match_type": "wildcard",
         "comment": "Keep decoding until we see a 64-bit LEA that genuinely targets memory."
       },
       {
-        "match": "if ((((decoded != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x10d)) &&",
+        "match_regex": "if .*\\(\\*\\(int \\*\\)\\([^)]*opcode_window \\+ 3\\) == 0x10d\\)",
+        "match_type": "regex",
         "comment": "Optional RIP target comparison lets callers lock onto a single absolute pointer.",
         "placement": "after"
       }
@@ -157,15 +175,18 @@
     "plate": "MOV-only variant of the pointer scan.\nIf `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.\nSuccessful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
     "inline": [
       {
-        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Keep the decoder context pristine so predicates only see the current instruction."
       },
       {
-        "match": "code_start = code_start + 1;",
+        "match": "* = * + 1;",
+        "match_type": "wildcard",
         "comment": "Retry at the next byte boundary when the decoder chokes on garbage."
       },
       {
-        "match": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match_type": "wildcard",
         "comment": "Enforce the memory↔register ModRM form and the caller-requested operand width.",
         "placement": "after"
       }
@@ -175,15 +196,18 @@
     "plate": "Hybrid MOV/LEA predicate that underpins the pointer scanners.\nIt zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.\nOpcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.",
     "inline": [
       {
-        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Keep the scratch decoder pristine so stale state never influences later scans."
       },
       {
-        "match": "code_start = code_start + 1;",
+        "match": "* = * + 1;",
+        "match_type": "wildcard",
         "comment": "Failed decodes advance byte-by-byte until the next valid opcode appears."
       },
       {
-        "match": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match_type": "wildcard",
         "comment": "Only accept true memory operands plus the caller-requested width (unless we are hunting stores).",
         "placement": "after"
       }
@@ -193,16 +217,19 @@
     "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only transfer.\nIt rejects every decode that carries lock/rep prefixes, sets REX.W/B, or uses a ModRM mode other than 3, and then checks whether the opcode is either MOV reg↔reg or one of the arithmetic-immediate opcodes addressed via `opcode_lookup_index = opcode - 0x81` (the precomputed bitmask tracks the admissible subset).\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
     "inline": [
       {
-        "match": "if (dctx == (dasm_ctx_t *)0x0) {",
+        "match_regex": "if \\([^=]+== \\(dasm_ctx_t \\*\\)0x0\\) \\{",
+        "match_type": "regex",
         "comment": "Unlike the other helpers we require a persistent decoder supplied by the caller.",
         "placement": "after"
       },
       {
-        "match": "if (((((*(uint *)(dctx->opcode_window + 3) & 0xfffffffd) == 0x109) ||",
+        "match_regex": "if .*\\(\\*\\(uint \\*\\)\\([^)]*opcode_window \\+ 3\\) & 0xfffffffd\\) == 0x109",
+        "match_type": "regex",
         "comment": "Accept MOV reg↔reg or whitelisted arithmetic immediates with no prefixes and ModRM mode 3."
       },
       {
-        "match": "code_start = dctx->instruction + dctx->instruction_size;",
+        "match": "* = *->instruction + *->instruction_size;",
+        "match_type": "wildcard",
         "comment": "Skip past any instruction that still touches memory or flips prefixes we care about."
       }
     ]
@@ -225,7 +252,8 @@
     "plate": "Fast equality test used when scanning for CET landing pads. When at least four bytes remain it ORs ENDBR64 (`0xF30F1EFA`) with the caller-supplied `low_mask_part` so both ENDBR64 and ENDBR32 collapse into a single signature, then compares the resulting dword against the bytes at `code_start`. Returns TRUE only when the stream contains a full ENDBR instruction; otherwise the prologue walkers keep scanning.",
     "inline": [
       {
-        "match": "if (3 < (long)code_end - (long)code_start) {",
+        "match": "if (3 < (long)* - (long)*) {",
+        "match_type": "wildcard",
         "comment": "Require a full dword window before comparing against the masked ENDBR32/64 signature."
       }
     ]
@@ -284,12 +312,14 @@
     "plate": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",
     "inline": [
       {
-        "match": "telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);",
+        "match_regex": "secret_data_append_from_address\\(\\(void \\*\\)0x0,\\(secret_data_shift_cursor_t\\)0x12,0x46,2\\);",
+        "match_type": "regex",
         "comment": "Emit the breadcrumb before touching attacker-controlled bytes so later passes know a decode ran.",
         "placement": "after"
       },
       {
-        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "match": "for (* = 0x16; * != 0; * = * + -1)",
+        "match_type": "wildcard",
         "comment": "Clear every field in the decoder context so prefixes/immediates never leak between attempts."
       },
       {
@@ -298,12 +328,14 @@
         "placement": "after"
       },
       {
-        "match": "if (current_byte == 0xf) {",
+        "match": "if (* == 0xf) {",
+        "match_type": "wildcard",
         "comment": "0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).",
         "placement": "after"
       },
       {
-        "match": "if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {",
+        "match": "if (((*->prefix).decoded.lock_rep_byte == 0xf3) && (* == 0x1e)) {",
+        "match_type": "wildcard",
         "comment": "Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.",
         "placement": "after"
       }

@@ -9,6 +9,7 @@ the corresponding block comment ahead of each function wrapper in xzregh/.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import re
 from pathlib import Path
@@ -178,15 +179,67 @@ def render_inline_comment(indent: str, comment_text: str) -> List[str]:
     return lines
 
 
+def _compile_wildcard_pattern(pattern: str) -> re.Pattern[str]:
+    translated = fnmatch.translate(pattern)
+    if translated.endswith(r"\Z"):
+        translated = translated[:-2]
+    return re.compile(translated)
+
+
+def _match_type_from_block(block: Dict[str, object], default: str) -> str:
+    raw = block.get("match_type")
+    if isinstance(raw, str):
+        lowered = raw.strip().lower()
+        if lowered in {"regex", "regexp", "re"}:
+            return "regex"
+        if lowered in {"wildcard", "glob"}:
+            return "wildcard"
+        if lowered in {"exact"}:
+            return "exact"
+        if lowered in {"substring", "contains"}:
+            return "substring"
+    if block.get("regex") is True:
+        return "regex"
+    if block.get("wildcard") is True:
+        return "wildcard"
+    return default
+
+
+def _line_matches(line: str, spec: Dict[str, object]) -> bool:
+    pattern = spec.get("pattern")
+    if not isinstance(pattern, str):
+        return False
+
+    match_type = spec.get("match_type", "substring")
+    if match_type == "regex":
+        compiled = spec.get("_compiled_pattern")
+        if compiled is None:
+            compiled = re.compile(pattern)
+            spec["_compiled_pattern"] = compiled
+        return compiled.search(line) is not None
+
+    if match_type == "wildcard":
+        compiled = spec.get("_compiled_pattern")
+        if compiled is None:
+            compiled = _compile_wildcard_pattern(pattern)
+            spec["_compiled_pattern"] = compiled
+        return compiled.search(line) is not None
+
+    if match_type == "exact":
+        return line.strip() == pattern.strip()
+
+    return pattern in line
+
+
 def insert_inline_comments(content: str, comments: Sequence[Dict[str, object]], file_path: Path) -> str:
     if not comments:
         return content
 
     lines = content.splitlines()
     for spec in comments:
-        match_text = spec.get("match")
+        pattern = spec.get("pattern")
         comment_text = spec.get("comment")
-        if not isinstance(match_text, str) or not isinstance(comment_text, str):
+        if not isinstance(pattern, str) or not isinstance(comment_text, str):
             continue
         occurrence = spec.get("occurrence", 1)
         if not isinstance(occurrence, int) or occurrence < 1:
@@ -198,13 +251,18 @@ def insert_inline_comments(content: str, comments: Sequence[Dict[str, object]], 
         match_index = None
         seen = 0
         for idx, line in enumerate(lines):
-            if match_text in line:
+            if _line_matches(line, spec):
                 seen += 1
                 if seen == occurrence:
                     match_index = idx
                     break
         if match_index is None:
-            print(f"[apply-inline] warning: could not find match '{match_text}' in {file_path}")
+            match_type = spec.get("match_type", "substring")
+            print(
+                "[apply-inline] warning: could not find match '{}' (mode {}) in {}".format(
+                    pattern, match_type, file_path
+                )
+            )
             continue
         indent_match = re.match(r"\s*", lines[match_index])
         indent = indent_match.group(0) if indent_match else ""
@@ -233,13 +291,26 @@ def load_inline_metadata(path: Optional[Path]) -> Dict[str, List[Dict[str, objec
         for block in blocks:
             if not isinstance(block, dict):
                 continue
-            match_text = block.get("match")
             comment_text = block.get("comment")
-            if not isinstance(match_text, str) or not isinstance(comment_text, str):
+            if not isinstance(comment_text, str):
                 continue
+            match_regex = block.get("match_regex")
+            pattern: Optional[str] = None
+            default_type = "substring"
+            if isinstance(match_regex, str):
+                pattern = match_regex
+                default_type = "regex"
+            else:
+                match_text = block.get("match")
+                if isinstance(match_text, str):
+                    pattern = match_text
+            if pattern is None:
+                continue
+            match_type = _match_type_from_block(block, default_type)
             normalized.append(
                 {
-                    "match": match_text,
+                    "pattern": pattern,
+                    "match_type": match_type,
                     "comment": comment_text,
                     "occurrence": int(block.get("occurrence", 1) or 1),
                     "placement": block.get("placement", "before"),
