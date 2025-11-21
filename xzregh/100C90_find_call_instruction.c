@@ -21,8 +21,10 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
   
   ctx_zero_stride = 0;
   decode_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);
+  // AutoDoc: Telemetry hooks track each pointer scan so the secret-data log mirrors our search paths.
   if (decode_ok != FALSE) {
     ctx_zero_cursor = &scratch_ctx;
+    // AutoDoc: Scratch decoders get wiped between attempts so prefixes/immediates never leak.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(undefined4 *)&ctx_zero_cursor->instruction = 0;
       ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + ((ulong)ctx_zero_stride * -2 + 1) * 4);
@@ -30,8 +32,10 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
     if (dctx == (dasm_ctx_t *)0x0) {
       dctx = &scratch_ctx;
     }
+    // AutoDoc: Decode one instruction at a time until a CALL (optionally to call_target) appears.
     while (code_start < code_end) {
       decode_ok = x86_dasm(dctx,code_start,code_end);
+      // AutoDoc: Decoder failed, so retry one byte later just like a pattern scan.
       if (decode_ok == FALSE) {
         code_start = code_start + 1;
       }
@@ -41,6 +45,7 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
             (dctx->instruction + dctx->instruction_size + dctx->imm_signed == call_target)))) {
           return TRUE;
         }
+        // AutoDoc: Successful decodes hop past the instruction so the next iteration sees the following op.
         code_start = code_start + dctx->instruction_size;
       }
     }

@@ -16,6 +16,7 @@ BOOL is_endbr64_instruction(u8 *code_start,u8 *code_end,u32 low_mask_part)
   BOOL has_endbr;
   
   has_endbr = FALSE;
+  // AutoDoc: Require a full dword window before comparing against the masked ENDBR32/64 signature.
   if (3 < (long)code_end - (long)code_start) {
     has_endbr = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
   }

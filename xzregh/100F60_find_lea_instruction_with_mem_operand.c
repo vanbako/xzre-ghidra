@@ -24,8 +24,10 @@ BOOL find_lea_instruction_with_mem_operand
   
   ctx_stride_sign = 0;
   decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);
+  // AutoDoc: Log the caller so later telemetry can explain which helper touched a given memory range.
   if (decoded != FALSE) {
     ctx_clear_cursor = &scratch_ctx;
+    // AutoDoc: Zero the scratch decoder so we only evaluate the LEA we just decoded.
     for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
       *(undefined4 *)&ctx_clear_cursor->instruction = 0;
       ctx_clear_cursor = (dasm_ctx_t *)((long)ctx_clear_cursor + ((ulong)ctx_stride_sign * -2 + 1) * 4);
@@ -34,8 +36,10 @@ BOOL find_lea_instruction_with_mem_operand
       dctx = &scratch_ctx;
     }
     for (; code_start < code_end; code_start = code_start + 1) {
+      // AutoDoc: Keep decoding until we see a 64-bit LEA that genuinely targets memory.
       decoded = x86_dasm(dctx,code_start,code_end);
       if ((((decoded != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x10d)) &&
+      // AutoDoc: Optional RIP target comparison lets callers lock onto a single absolute pointer.
           (((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48)) &&
          ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000 &&
           ((mem_address == (void *)0x0 ||

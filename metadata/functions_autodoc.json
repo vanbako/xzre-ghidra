@@ -43,21 +43,170 @@
   "fd_write": "Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short writes as fatal so callers\neither send the entire buffer or receive -1. It is the plumbing used whenever the implant forges monitor messages.",
   "find_add_instruction_with_mem_operand": "Specialised scanner for `add [mem],reg`: decodes forward byte-by-byte until opcode `0x103` appears with a memory ModRM form.\nWhen `mem_address` is supplied it also requires DF2 to show a displacement and the recomputed RIP-relative address to match.\nReturns TRUE with `dctx` still on the ADD so callers can read the increment immediate.",
   "find_addr_referenced_in_mov_instruction": "Walks the function owning a string reference, repeatedly calling `find_instruction_with_mem_operand_ex` for opcode `0x10b` to find MOV loads that touch data.\nSkips register-only forms and 64-bit REX.W MOVs, recomputes the absolute address for displacement-based operands (RIP-relative when ModRM encodes it), and returns the first address that falls inside `[mem_range_start, mem_range_end)`.\nReturns NULL when no qualifying reference is found or when register-only forms surface and no range was requested.",
-  "find_call_instruction": "Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_dasm`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.",
+  "find_call_instruction": {
+    "plate": "Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_dasm`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.",
+    "inline": [
+      {
+        "match": "decode_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);",
+        "comment": "Telemetry hooks track each pointer scan so the secret-data log mirrors our search paths.",
+        "placement": "after"
+      },
+      {
+        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "comment": "Scratch decoders get wiped between attempts so prefixes/immediates never leak."
+      },
+      {
+        "match": "while (code_start < code_end) {",
+        "comment": "Decode one instruction at a time until a CALL (optionally to call_target) appears."
+      },
+      {
+        "match": "if (decode_ok == FALSE) {",
+        "comment": "Decoder failed, so retry one byte later just like a pattern scan."
+      },
+      {
+        "match": "code_start = code_start + dctx->instruction_size;",
+        "comment": "Successful decodes hop past the instruction so the next iteration sees the following op."
+      }
+    ]
+  },
   "find_dl_audit_offsets": "Coordinates the entire ld.so reconnaissance pass. It resolves the necessary EC/EVP helpers via the fake allocator, copies\n`_dl_audit_symbind_alt`’s address/size out of ld.so, and uses `find_link_map_l_name` to compute the displacement between the\ncached and live link_map entries. With that offset it invokes `find_dl_naudit` to capture the `_dl_naudit`/`_dl_audit` pointers\nand `find_link_map_l_audit_any_plt` to learn where the audit bit lives. Finally it copies libcrypto’s basename into\n`hooks->ldso_ctx` so the forged `l_name` string looks correct. Any failure frees the temporary imports and aborts the audit-hook\ninstall path.",
   "find_dl_naudit": "Harvests the `_dl_naudit` counter and `_dl_audit` pointer from ld.so so the loader can toggle audit modules. After resolving\n`DSA_get0_pqg`, `DSA_get0_pub_key`, and `EVP_MD_CTX_free` via the fake allocator, it finds `rtld_global_ro`, searches for the\n`GLRO(dl_naudit)` string reference, and decodes the MOV that loads that slot. The same memory address is then matched inside\n`_dl_audit_symbind_alt`; if the MOV/TEST pair is found and the slot is still zero, the function records the `_dl_naudit` and\n`_dl_audit` pointers in `hooks->ldso_ctx`. Any deviation or pre-existing audit module aborts the attempt.",
-  "find_function": "Wraps `find_function_prologue` to recover the full function bounds surrounding an instruction. When `func_start` is requested it walks backward from `code_start` toward `search_base`, probing each byte with the prologue helper until it finds a landing pad; hitting `search_base` without success aborts. When `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that offset as the end marker. Successful runs populate whichever out pointers the caller requested so later passes can reason about bounded regions instead of raw addresses.",
-  "find_function_prologue": "Recognises CET-style prologues. In `FIND_ENDBR64` mode it zeroes a scratch `dasm_ctx_t`, asks `x86_dasm` to decode at `code_start`, requires the normalised opcode to be ENDBR64, and only succeeds if the ENDBR padding ends on a 16-byte boundary (optionally returning the instruction immediately after the pad through `output`). Legacy mode skips the decoder and reuses `is_endbr64_instruction` with the simple mask; when it hits it reports the exact byte it just tested so callers can keep walking until they find the landing pad they need.",
+  "find_function": {
+    "plate": "Wraps `find_function_prologue` to recover the full function bounds surrounding an instruction. When `func_start` is requested it walks backward from `code_start` toward `search_base`, probing each byte with the prologue helper until it finds a landing pad; hitting `search_base` without success aborts. When `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that offset as the end marker. Successful runs populate whichever out pointers the caller requested so later passes can reason about bounded regions instead of raw addresses.",
+    "inline": [
+      {
+        "match": "while ((search_base < scan_cursor &&",
+        "comment": "Walk backward byte-by-byte until we rediscover a prologue or hit the supplied floor."
+      },
+      {
+        "match": "for (; scan_cursor < code_end + -4; scan_cursor = scan_cursor + 1) {",
+        "comment": "Scan forward until the next landing pad so callers know where the function stops."
+      }
+    ]
+  },
+  "find_function_prologue": {
+    "plate": "Recognises CET-style prologues. In `FIND_ENDBR64` mode it zeroes a scratch `dasm_ctx_t`, asks `x86_dasm` to decode at `code_start`, requires the normalised opcode to be ENDBR64, and only succeeds if the ENDBR padding ends on a 16-byte boundary (optionally returning the instruction immediately after the pad through `output`). Legacy mode skips the decoder and reuses `is_endbr64_instruction` with the simple mask; when it hits it reports the exact byte it just tested so callers can keep walking until they find the landing pad they need.",
+    "inline": [
+      {
+        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "comment": "Zero a scratch decoder context so we can peek at the opcode without mutating caller state."
+      },
+      {
+        "match": "if (((decoded != FALSE) && (*(u32 *)&prologue_ctx.opcode_window[3] == 3999)) &&",
+        "comment": "Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.",
+        "placement": "after"
+      },
+      {
+        "match": "if (prologue_found != FALSE) {",
+        "comment": "Legacy mode simply reports the matching byte so the caller can keep searching."
+      }
+    ]
+  },
   "find_instruction_with_mem_operand": "Chases an absolute address without exposing the LEA vs MOV distinction: first tries `find_lea_instruction_with_mem_operand`, then falls back to `find_instruction_with_mem_operand_ex` for opcode `0x10b` (MOV load) if the LEA path fails.\nTRUE means `dctx` now describes an instruction that touches `mem_address`.",
   "find_instruction_with_mem_operand_ex": "Generic predicate for locating a specific `opcode` that reads/writes memory.\nDecodes forward (scratch context if needed), requires a memory ModRM form, and when `mem_address` is non-null also requires DF2 to indicate a displacement operand and the RIP-relative address (`instruction + instruction_size + mem_disp`) to equal that address.\nOn success it leaves `dctx` populated so callers like the add/mov/addr scanners can inspect operands without re-decoding.",
-  "find_lea_instruction": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nIt emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
-  "find_lea_instruction_with_mem_operand": "LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.\nAfter logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.\nIf `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.",
+  "find_lea_instruction": {
+    "plate": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nIt emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
+    "inline": [
+      {
+        "match": "decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);",
+        "comment": "Breadcrumb the scan so we know which helper touched each code window.",
+        "placement": "after"
+      },
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "comment": "Reset the decoder context between attempts (the stride sign flip is a compiler artefact)."
+      },
+      {
+        "match": "decoded = x86_dasm(&lea_ctx,code_start,code_end);",
+        "comment": "Decode byte-by-byte until a LEA with a bare displacement materialises."
+      },
+      {
+        "match": "if ((((decoded != FALSE) && (*(u32 *)&lea_ctx.opcode_window[3] == 0x10d)) &&",
+        "comment": "Accept mirrored displacements so searches anchored at ±delta both succeed.",
+        "placement": "after"
+      }
+    ]
+  },
+  "find_lea_instruction_with_mem_operand": {
+    "plate": "LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.\nAfter logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.\nIf `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.",
+    "inline": [
+      {
+        "match": "decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);",
+        "comment": "Log the caller so later telemetry can explain which helper touched a given memory range.",
+        "placement": "after"
+      },
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "comment": "Zero the scratch decoder so we only evaluate the LEA we just decoded."
+      },
+      {
+        "match": "decoded = x86_dasm(dctx,code_start,code_end);",
+        "comment": "Keep decoding until we see a 64-bit LEA that genuinely targets memory."
+      },
+      {
+        "match": "if ((((decoded != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x10d)) &&",
+        "comment": "Optional RIP target comparison lets callers lock onto a single absolute pointer.",
+        "placement": "after"
+      }
+    ]
+  },
   "find_link_map_l_audit_any_plt": "Primes an `instruction_search_ctx_t` before invoking the bitmask helper. It sweeps `_dl_audit_symbind_alt` for the LEA that\nmaterialises `link_map::l_name` using the caller-provided displacement, records which registers capture the pointer versus the\nmask, initialises the register filters/output buffers, and then calls `find_link_map_l_audit_any_plt_bitmask`. Success means\nboth the byte offset and AND mask are now stored in `hooks->ldso_ctx`; failure either means the pattern never appeared or the\nbit was already non-zero.",
   "find_link_map_l_audit_any_plt_bitmask": "Takes the displacement from `find_link_map_l_name` and hunts for the byte and mask that back ld.so’s `link_map::l_audit_any_plt`\nflag. It temporarily resolves `EVP_DecryptInit_ex` and libc’s `getuid`, decodes `_dl_audit_symbind_alt` with `x86_dasm`, and\ntracks which register holds the computed pointer. Once it sees the MOV-from-link_map followed by a TEST/BT it validates that the\nmask is a single set bit, records the absolute address in `hooks->ldso_ctx.sshd_link_map_l_audit_any_plt_addr`, stores the byte-\nwide mask, and insists the bit is still clear; otherwise the helper sets the search context’s `result` flag and bails out.",
   "find_link_map_l_name": "Locates the live `link_map::l_name` byte inside ld.so and gathers the libc/libcrypto imports needed later in the run. It\npiggybacks on the fake `lzma_alloc` resolver to look up `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`,\nand `BN_num_bits`, then walks the cached liblzma link_map snapshot inside the binary until it finds the entry whose RELRO tuple\nmatches the running liblzma image. The resulting displacement becomes both `*libname_offset` and the pointer used to index\n`hooks->ldso_ctx.libcrypto_l_name`, and the helper double-checks that `_dl_audit_symbind_alt` references the same offset so\nlater code can safely rewrite the `l_name` field when posing as an audit module.",
-  "find_mov_instruction": "MOV-only variant of the pointer scan.\nIf `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.\nSuccessful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
-  "find_mov_lea_instruction": "Hybrid MOV/LEA predicate that underpins the pointer scanners.\nIt zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.\nOpcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.",
-  "find_reg2reg_instruction": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only transfer.\nIt rejects every decode that carries lock/rep prefixes, sets REX.W/B, or uses a ModRM mode other than 3, and then checks whether the opcode is either MOV reg↔reg or one of the arithmetic-immediate opcodes addressed via `opcode_lookup_index = opcode - 0x81` (the precomputed bitmask tracks the admissible subset).\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
+  "find_mov_instruction": {
+    "plate": "MOV-only variant of the pointer scan.\nIf `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.\nSuccessful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
+    "inline": [
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "comment": "Keep the decoder context pristine so predicates only see the current instruction."
+      },
+      {
+        "match": "code_start = code_start + 1;",
+        "comment": "Retry at the next byte boundary when the decoder chokes on garbage."
+      },
+      {
+        "match": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "comment": "Enforce the memory↔register ModRM form and the caller-requested operand width.",
+        "placement": "after"
+      }
+    ]
+  },
+  "find_mov_lea_instruction": {
+    "plate": "Hybrid MOV/LEA predicate that underpins the pointer scanners.\nIt zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.\nOpcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.",
+    "inline": [
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "comment": "Keep the scratch decoder pristine so stale state never influences later scans."
+      },
+      {
+        "match": "code_start = code_start + 1;",
+        "comment": "Failed decodes advance byte-by-byte until the next valid opcode appears."
+      },
+      {
+        "match": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "comment": "Only accept true memory operands plus the caller-requested width (unless we are hunting stores).",
+        "placement": "after"
+      }
+    ]
+  },
+  "find_reg2reg_instruction": {
+    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only transfer.\nIt rejects every decode that carries lock/rep prefixes, sets REX.W/B, or uses a ModRM mode other than 3, and then checks whether the opcode is either MOV reg↔reg or one of the arithmetic-immediate opcodes addressed via `opcode_lookup_index = opcode - 0x81` (the precomputed bitmask tracks the admissible subset).\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
+    "inline": [
+      {
+        "match": "if (dctx == (dasm_ctx_t *)0x0) {",
+        "comment": "Unlike the other helpers we require a persistent decoder supplied by the caller.",
+        "placement": "after"
+      },
+      {
+        "match": "if (((((*(uint *)(dctx->opcode_window + 3) & 0xfffffffd) == 0x109) ||",
+        "comment": "Accept MOV reg↔reg or whitelisted arithmetic immediates with no prefixes and ModRM mode 3."
+      },
+      {
+        "match": "code_start = dctx->instruction + dctx->instruction_size;",
+        "comment": "Skip past any instruction that still touches memory or flips prefixes we care about."
+      }
+    ]
+  },
   "find_string_reference": "Zeroes a scratch decoder and asks `find_lea_instruction_with_mem_operand` to locate the first LEA in `[code_start, code_end)` that materialises the absolute address `str`.\nReturns the LEA's address as the xref anchor or NULL when no such reference exists.",
   "get_elf_functions_address": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives\nnear `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer\nmath lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the\nloader a stable way to reach its helper vtable.",
   "get_lzma_allocator": "Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand\nliblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the\nimplant's `elf_info_t`.",
@@ -72,7 +221,15 @@
   "init_imported_funcs": "Sanity-checks the OpenSSL import table before the hooks are allowed to run. It requires `resolved_imports_count` to equal 0x1d\nand then inspects the `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key` PLT shims. If at least one of them is\nresolved it returns TRUE so later code can jump through the host's libcrypto. When all three slots are still NULL it plants\n`backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps\nwaiting until the imports are ready.",
   "init_ldso_ctx": "Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets\nthe copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`\nso the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with\nthe original ld.so state.",
   "init_shared_globals": "Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone `global_ctx` instance. Every hook\nconsults this block at runtime, so the function simply wires the exported function pointers into the struct and returns success\nonce the pointer checks pass.",
-  "is_endbr64_instruction": "Fast equality test used when scanning for CET landing pads. When at least four bytes remain it ORs ENDBR64 (`0xF30F1EFA`) with the caller-supplied `low_mask_part` so both ENDBR64 and ENDBR32 collapse into a single signature, then compares the resulting dword against the bytes at `code_start`. Returns TRUE only when the stream contains a full ENDBR instruction; otherwise the prologue walkers keep scanning.",
+  "is_endbr64_instruction": {
+    "plate": "Fast equality test used when scanning for CET landing pads. When at least four bytes remain it ORs ENDBR64 (`0xF30F1EFA`) with the caller-supplied `low_mask_part` so both ENDBR64 and ENDBR32 collapse into a single signature, then compares the resulting dword against the bytes at `code_start`. Returns TRUE only when the stream contains a full ENDBR instruction; otherwise the prologue walkers keep scanning.",
+    "inline": [
+      {
+        "match": "if (3 < (long)code_end - (long)code_start) {",
+        "comment": "Require a full dword window before comparing against the masked ENDBR32/64 signature."
+      }
+    ]
+  },
   "is_gnu_relro": "Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller\nsupplied `addend` (always `0xa0000000`) and checks for the magic constant, which makes the instruction stream look less like a\nstraightforward RELRO probe in the object file.",
   "is_range_mapped": "Userland page-probe that avoids importing `mincore(2)`. The helper aligns the requested address downward, then walks one page at\na time toward `addr + length`, invoking the host's `pselect` with NULL fd sets and the page pointer passed in as the signal mask\nargument. If `pselect` faults with EFAULT the page is unmapped, otherwise the loop continues until every page succeeds. The\nroutine relies on `ctx->libc_imports` to surface both `pselect` and `__errno_location`, and it refuses to touch addresses below\n0x01000000 to avoid probing NULL or vsyscall.",
   "j_tls_get_addr": "Jumps straight into the real `__tls_get_addr` resolver. The backdoor keeps both this wrapper and the trapping stub exported so\nit can redirect GOT entries during setup: hooks call `j_tls_get_addr` when they want the legit resolver, while the relocation\nconstants point at the trapping version until the loader patches things up.",
@@ -123,6 +280,34 @@
   "update_got_offset": "Copies `_Llzma_block_buffer_decode_0` into `ctx->got_ctx.got_base_offset`, giving the loader a reproducible base when\ntranslating between the baked relocation constants and runtime addresses. It pairs with `update_got_address` during the cpuid\nGOT patch.",
   "validate_log_handler_pointers": "Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.\nThe helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference\nentries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then\nsearches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept\nthe pair as the genuine log-handler slots.",
   "verify_signature": "Computes the host-key digest that sits at sshkey_digest_offset inside the signed blob and then verifies the Ed448 command\nsignature. RSA and DSA keys delegate to rsa_key_hash/dsa_key_hash, ECDSA serialises the EC_POINT in uncompressed form with a\n32-bit length prefix, and Ed25519 prepends a 0x20000000 tag plus the raw 32-byte key. Once the digest is spliced into\nsigned_data the helper loads the attacker’s Ed448 public key with EVP_PKEY_new_raw_public_key(0x440, …) and invokes\nEVP_DigestVerify over the signed_data[0:tbslen) region; only a valid Ed448 signature lets the caller continue.",
-  "x86_dasm": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",
+  "x86_dasm": {
+    "plate": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",
+    "inline": [
+      {
+        "match": "telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);",
+        "comment": "Emit the breadcrumb before touching attacker-controlled bytes so later passes know a decode ran.",
+        "placement": "after"
+      },
+      {
+        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1)",
+        "comment": "Clear every field in the decoder context so prefixes/immediates never leak between attempts."
+      },
+      {
+        "match": "do {",
+        "comment": "Decode sequentially until the cursor falls off the buffer or we fail a predicate.",
+        "placement": "after"
+      },
+      {
+        "match": "if (current_byte == 0xf) {",
+        "comment": "0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).",
+        "placement": "after"
+      },
+      {
+        "match": "if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {",
+        "comment": "Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.",
+        "placement": "after"
+      }
+    ]
+  },
   "xzre_globals": "Data symbol anchoring the packed `backdoor_hooks_data_t` blob in liblzma's .data segment.\nThe blob is the loader's rendezvous point: it caches the live `ldso_ctx_t` (cpuid GOT offsets and every `_dl_audit` pointer),\nthe shared `global_context_t` (payload buffers, sshd/log/secret-data state), resolved libc/libcrypto import tables, sshd/log metadata\n(`sshd_offsets_t`, `sshd_log_ctx_t`, socket handles), plus the encrypted/plaintext payload queues and shift cursors that the RSA/MM hooks stream through.\n`init_shared_globals` publishes its address to every hook so mm/EVP interceptors just follow the `hooks_data`/`global_ctx` pointers instead of poking liblzma statics; corrupting it blinds the loader, so the refresh pipeline treats the blob as the canonical snapshot of runtime state shared across all hooks.\n"
 }

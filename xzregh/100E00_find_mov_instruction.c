@@ -23,6 +23,7 @@ BOOL find_mov_instruction
   dasm_ctx_t scratch_ctx;
   
   ctx_clear_cursor = &scratch_ctx;
+  // AutoDoc: Keep the decoder context pristine so predicates only see the current instruction.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
     *(undefined4 *)&ctx_clear_cursor->instruction = 0;
     ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
@@ -37,9 +38,11 @@ BOOL find_mov_instruction
       }
       decoded = x86_dasm(dctx,code_start,code_end);
       if (decoded != FALSE) break;
+      // AutoDoc: Retry at the next byte boundary when the decoder chokes on garbage.
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
+    // AutoDoc: Enforce the memory↔register ModRM form and the caller-requested operand width.
        (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {

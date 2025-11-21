@@ -21,6 +21,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
   
   if (find_mode == FIND_ENDBR64) {
     ctx_zero_cursor = &prologue_ctx;
+    // AutoDoc: Zero a scratch decoder context so we can peek at the opcode without mutating caller state.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(undefined4 *)&ctx_zero_cursor->instruction = 0;
       ctx_zero_cursor = (dasm_ctx_t *)((long)&ctx_zero_cursor->instruction + 4);
@@ -28,6 +29,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
     decoded = x86_dasm(&prologue_ctx,code_start,code_end);
     prologue_found = FALSE;
     if (((decoded != FALSE) && (*(u32 *)&prologue_ctx.opcode_window[3] == 3999)) &&
+    // AutoDoc: Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.
        (((ulong)(prologue_ctx.instruction + prologue_ctx.instruction_size) & 0xf) == 0)) {
       if (output != (u8 **)0x0) {
         *output = prologue_ctx.instruction + prologue_ctx.instruction_size;
@@ -37,6 +39,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
   }
   else {
     prologue_found = is_endbr64_instruction(code_start,code_end,0xe230);
+    // AutoDoc: Legacy mode simply reports the matching byte so the caller can keep searching.
     if (prologue_found != FALSE) {
       if (output != (u8 **)0x0) {
         *output = code_start;

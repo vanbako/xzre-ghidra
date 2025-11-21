@@ -23,15 +23,19 @@ BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)
   
   ctx_stride_sign = 0;
   decoded = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);
+  // AutoDoc: Breadcrumb the scan so we know which helper touched each code window.
   if (decoded != FALSE) {
     ctx_clear_cursor = &lea_ctx;
+    // AutoDoc: Reset the decoder context between attempts (the stride sign flip is a compiler artefact).
     for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
       *(undefined4 *)&ctx_clear_cursor->instruction = 0;
       ctx_clear_cursor = (dasm_ctx_t *)((long)ctx_clear_cursor + ((ulong)ctx_stride_sign * -2 + 1) * 4);
     }
     for (; code_start < code_end; code_start = code_start + 1) {
+      // AutoDoc: Decode byte-by-byte until a LEA with a bare displacement materialises.
       decoded = x86_dasm(&lea_ctx,code_start,code_end);
       if ((((decoded != FALSE) && (*(u32 *)&lea_ctx.opcode_window[3] == 0x10d)) &&
+      // AutoDoc: Accept mirrored displacements so searches anchored at ±delta both succeed.
           ((lea_ctx.prefix.decoded.flags2 & 7) == 1)) &&
          ((lea_ctx.mem_disp == displacement || (lea_ctx.mem_disp == -displacement)))) {
         return TRUE;

@@ -188,7 +188,8 @@ if [[ "$CHECK_ONLY" -eq 0 ]]; then
 python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
   --comments-json "$AUTODOC_EXPORT" \
   --xzregh-dir "$XZREGH_EXPORT_DIR" \
-  --ensure-include '#include "xzre_types.h"'
+  --ensure-include '#include "xzre_types.h"' \
+  --inline-metadata "$AUTODOC_SOURCE"
 else
   echo "[check-only] skipped applying comments to xzregh; temporary artifacts removed on exit."
 fi

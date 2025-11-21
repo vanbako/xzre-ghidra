@@ -43,10 +43,12 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   
   ctx_zero_stride = 0;
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
+  // AutoDoc: Emit the breadcrumb before touching attacker-controlled bytes so later passes know a decode ran.
   if (telemetry_ok == FALSE) {
     return FALSE;
   }
   ctx_zero_cursor = ctx;
+  // AutoDoc: Clear every field in the decoder context so prefixes/immediates never leak between attempts.
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(undefined4 *)&ctx_zero_cursor->instruction = 0;
     ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
@@ -54,6 +56,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   predicate_ok = code_start < code_end;
   cursor = code_start;
   do {
+  // AutoDoc: Decode sequentially until the cursor falls off the buffer or we fail a predicate.
     if (!predicate_ok) {
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
@@ -66,6 +69,7 @@ LAB_00100aa5:
     if (current_byte < 0x68) {
       if (current_byte < 0x2e) {
         if (current_byte == 0xf) {
+        // AutoDoc: 0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).
           *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
           cursor = cursor + 1;
 LAB_001001c9:
@@ -87,6 +91,7 @@ LAB_001001c9:
             return FALSE;
           }
           if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {
+          // AutoDoc: Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.
             if (cursor + 1 < code_end) {
               prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {

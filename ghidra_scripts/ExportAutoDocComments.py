@@ -5,6 +5,12 @@
 import json
 import os
 import codecs
+import copy
+
+try:
+    string_types = (basestring,)  # type: ignore[name-defined]
+except NameError:
+    string_types = (str,)
 
 from ghidra.program.model.listing import CodeUnit
 
@@ -12,6 +18,16 @@ from ghidra.program.model.listing import CodeUnit
 DATA_AUTODOC_SYMBOLS = {
     "xzre_globals",
 }
+
+
+def extract_plate_comment(entry):
+    if isinstance(entry, string_types):
+        return entry
+    if isinstance(entry, dict):
+        text = entry.get("plate") or entry.get("comment") or entry.get("text")
+        if text is not None:
+            return text
+    return None
 
 def parse_args(raw_args):
     output_path = None
@@ -66,35 +82,49 @@ def main():
             comment_map[name] = comment
 
     metadata = None
+    metadata_plate_map = {}
     if metadata_file and os.path.exists(metadata_file):
         with codecs.open(metadata_file, "r", "utf-8") as fh:
             metadata = json.load(fh)
+        for key, value in metadata.items():
+            plate = extract_plate_comment(value)
+            if plate is not None:
+                metadata_plate_map[key] = plate
         for name in DATA_AUTODOC_SYMBOLS:
             if name in comment_map:
                 continue
-            meta_comment = metadata.get(name)
+            meta_comment = metadata_plate_map.get(name)
             if meta_comment:
                 comment_map[name] = meta_comment
 
     if metadata:
         ordered_map = {}
-        for key in metadata:
-            if key in comment_map:
-                ordered_map[key] = comment_map[key]
-        # Include any stragglers (shouldn't happen).
+        for key, meta_value in metadata.items():
+            if isinstance(meta_value, dict):
+                entry = copy.deepcopy(meta_value)
+                if key in comment_map:
+                    entry["plate"] = comment_map[key]
+                elif key in metadata_plate_map:
+                    entry["plate"] = metadata_plate_map[key]
+                ordered_map[key] = entry
+            else:
+                if key in comment_map:
+                    ordered_map[key] = comment_map[key]
+                else:
+                    ordered_map[key] = meta_value
         for key, value in comment_map.items():
             ordered_map.setdefault(key, value)
         if ordered_map == metadata:
-            # When everything matches, mirror the metadata text exactly so the cmp check stays happy.
             with codecs.open(metadata_file, "r", "utf-8") as fh:
                 contents = fh.read()
             with codecs.open(output_file, "w", "utf-8") as fh:
                 fh.write(contents)
             return
+        ordered_map_serialized = ordered_map
     else:
-        ordered_map = comment_map
+        ordered_map_serialized = comment_map
 
-    serialized = json.dumps(ordered_map, indent=2, ensure_ascii=False)
+    serialized = json.dumps(ordered_map_serialized, indent=2, ensure_ascii=False)
     serialized += "\n"
     with codecs.open(output_file, "w", "utf-8") as fh:
         fh.write(serialized)

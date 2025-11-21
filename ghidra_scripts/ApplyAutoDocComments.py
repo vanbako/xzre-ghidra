@@ -8,6 +8,11 @@ import codecs
 
 from ghidra.program.model.listing import Function, CodeUnit
 
+try:
+    string_types = (basestring,)  # type: ignore[name-defined]
+except NameError:
+    string_types = (str,)
+
 
 DATA_AUTODOC_SYMBOLS = {
     "xzre_globals",
@@ -15,6 +20,16 @@ DATA_AUTODOC_SYMBOLS = {
 
 
 AUTO_TAG = "AutoDoc:"
+
+
+def extract_plate_comment(entry):
+    if isinstance(entry, string_types):
+        return entry
+    if isinstance(entry, dict):
+        text = entry.get("plate") or entry.get("comment") or entry.get("text")
+        if text is not None:
+            return text
+    raise RuntimeError("AutoDoc entry must be a string or object with a 'plate' key")
 
 
 def parse_args(raw_args):
@@ -45,7 +60,10 @@ def main():
         return
 
     with codecs.open(comments_file, "r", "utf-8") as fh:
-        comment_map = json.load(fh)
+        raw_comment_map = json.load(fh)
+        comment_map = {}
+        for name, entry in raw_comment_map.items():
+            comment_map[name] = extract_plate_comment(entry)
 
     listing = currentProgram.getListing()
     symbol_table = currentProgram.getSymbolTable()

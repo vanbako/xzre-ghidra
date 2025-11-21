@@ -19,18 +19,21 @@ BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
   uint opcode_lookup_index;
   
   if (dctx == (dasm_ctx_t *)0x0) {
+  // AutoDoc: Unlike the other helpers we require a persistent decoder supplied by the caller.
     return FALSE;
   }
   while( TRUE ) {
     if ((code_end <= code_start) || (decoded = x86_dasm(dctx,code_start,code_end), decoded == FALSE)) {
       return FALSE;
     }
+    // AutoDoc: Accept MOV reg↔reg or whitelisted arithmetic immediates with no prefixes and ModRM mode 3.
     if (((((*(uint *)(dctx->opcode_window + 3) & 0xfffffffd) == 0x109) ||
          ((opcode_lookup_index = *(uint *)(dctx->opcode_window + 3) - 0x81, opcode_lookup_index < 0x3b &&
           ((0x505050500000505U >> ((byte)opcode_lookup_index & 0x3f) & 1) != 0)))) &&
         (((dctx->prefix).flags_u16 & 0xf80) == 0)) &&
        ((((dctx->prefix).decoded.rex.rex_byte & 5) == 0 &&
         (*(char *)((long)&dctx->prefix + 0xd) == '\x03')))) break;
+    // AutoDoc: Skip past any instruction that still touches memory or flips prefixes we care about.
     code_start = dctx->instruction + dctx->instruction_size;
   }
   return TRUE;

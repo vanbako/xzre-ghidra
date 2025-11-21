@@ -24,6 +24,7 @@ BOOL find_mov_lea_instruction
   dasm_ctx_t scratch_ctx;
   
   ctx_clear_cursor = &scratch_ctx;
+  // AutoDoc: Keep the scratch decoder pristine so stale state never influences later scans.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
     *(undefined4 *)&ctx_clear_cursor->instruction = 0;
     ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
@@ -38,9 +39,11 @@ BOOL find_mov_lea_instruction
       }
       decoded = x86_dasm(dctx,code_start,code_end);
       if (decoded != FALSE) break;
+      // AutoDoc: Failed decodes advance byte-by-byte until the next valid opcode appears.
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
+    // AutoDoc: Only accept true memory operands plus the caller-requested width (unless we are hunting stores).
        (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       decoded_opcode = *(int *)(dctx->opcode_window + 3);
