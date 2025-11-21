@@ -19,7 +19,6 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   BOOL success;
   long clear_idx;
   u8 *seed_cursor;
-  u8 *buf_zero_cursor;
   key_buf buf2;
   key_buf buf1;
   u8 seed_iv[0x10];
@@ -31,26 +30,38 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
   }
   if ((ctx != (global_context_t *)0x0) &&
      (funcs = ctx->imported_funcs, funcs != (imported_funcs_t *)0x0)) {
-    seed_cursor = buf1.words + 0x14;
+    seed_cursor = buf1.encrypted_seed + 0x20;
     for (clear_idx = 0xc; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *seed_cursor = 0;
-      seed_cursor = seed_cursor + 1;
+      *(undefined4 *)seed_cursor = 0;
+      seed_cursor = (u8 *)((long)seed_cursor + 4);
     }
-    buf_zero_cursor = seed_block;
+    seed_cursor = seed_block;
     for (clear_idx = 0x1c; clear_idx != 0; clear_idx = clear_idx + -1) {
-      buf_zero_cursor[0] = '\0';
-      buf_zero_cursor[1] = '\0';
-      buf_zero_cursor[2] = '\0';
-      buf_zero_cursor[3] = '\0';
-      buf_zero_cursor = buf_zero_cursor + 4;
+      seed_cursor[0] = '\0';
+      seed_cursor[1] = '\0';
+      seed_cursor[2] = '\0';
+      seed_cursor[3] = '\0';
+      seed_cursor = seed_cursor + 4;
     }
-    buf1.words[0x12] = 0x108233;
-    buf1.words[0x13] = 0;
-    success = chacha_decrypt((u8 *)(buf1.words + 0x14),0x30,(u8 *)(buf1.words + 0x14),seed_iv,
+    buf1.encrypted_seed[0x18] = '3';
+    buf1.encrypted_seed[0x19] = 0x82;
+    buf1.encrypted_seed[0x1a] = '\x10';
+    buf1.encrypted_seed[0x1b] = '\0';
+    buf1.encrypted_seed[0x1c] = '\0';
+    buf1.encrypted_seed[0x1d] = '\0';
+    buf1.encrypted_seed[0x1e] = '\0';
+    buf1.encrypted_seed[0x1f] = '\0';
+    success = chacha_decrypt(buf1.encrypted_seed + 0x20,0x30,buf1.encrypted_seed + 0x20,seed_iv,
                            seed_block,funcs);
     if (success != FALSE) {
-      buf1.words[0x12] = 0x108257;
-      buf1.words[0x13] = 0;
+      buf1.encrypted_seed[0x18] = 'W';
+      buf1.encrypted_seed[0x19] = 0x82;
+      buf1.encrypted_seed[0x1a] = '\x10';
+      buf1.encrypted_seed[0x1b] = '\0';
+      buf1.encrypted_seed[0x1c] = '\0';
+      buf1.encrypted_seed[0x1d] = '\0';
+      buf1.encrypted_seed[0x1e] = '\0';
+      buf1.encrypted_seed[0x1f] = '\0';
       success = chacha_decrypt(ctx->encrypted_secret_data,0x39,seed_block,payload_iv,output,
                              ctx->imported_funcs);
       return (uint)(success != FALSE);

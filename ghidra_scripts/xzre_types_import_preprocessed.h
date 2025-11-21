@@ -2175,9 +2175,11 @@ extern const u8 dasm_onebyte_has_modrm[32];
 
 extern const u8 dasm_onebyte_is_invalid[32];
 
-typedef struct __attribute__((packed))
-{
-  u32 words[28];
+typedef struct __attribute__((packed)) key_buf {
+ u8 seed_key[0x20]; /* ChaCha key baked into the binary; decrypts the 0x30-byte seed blob. */
+ u8 seed_iv[0x10]; /* Static ChaCha nonce/counter paired with seed_key. */
+ u8 encrypted_seed[0x30]; /* Ciphertext that yields the runtime ChaCha key once decrypted. */
+ u8 payload_iv[0x10]; /* Fixed nonce used when decrypting ctx->encrypted_secret_data. */
 } key_buf;
 
 extern const u64 string_mask_data[238];
