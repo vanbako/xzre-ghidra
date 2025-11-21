@@ -812,7 +812,7 @@
       "names": [
         "monitor"
       ],
-      "code": "struct monitor {\n int m_recvfd;\n int m_sendfd;\n int m_log_recvfd;\n int m_log_sendfd;\n struct kex **m_pkex;\n pid_t m_pid;\n};"
+      "code": "struct monitor {\n int child_to_monitor_fd; /* sshd child writes monitor RPCs to this pipe; monitor reads replies back when forging requests (DIR_WRITE). */\n int monitor_to_child_fd; /* Monitor thread writes responses here; child reads them when draining forged packets (DIR_READ). */\n int log_child_to_monitor_fd; /* Logging channel equivalent of child_to_monitor_fd (used by sshd_log/mm_log_handler). */\n int log_monitor_to_child_fd; /* Logging channel equivalent of monitor_to_child_fd so mm_log_handler can read monitor output. */\n struct kex **pkex_table; /* Pointer to the monitor's pkex table (array of sshbuf-backed kex records discovered via sshd_offsets). */\n pid_t monitor_pid; /* Process ID of the active monitor helper once privsep spins up. */\n};"
     },
     {
       "kind": "typedef",
@@ -1519,7 +1519,7 @@
       "names": [
         "monitor_data_t"
       ],
-      "code": "typedef struct __attribute__((packed)) monitor_data {\n u32 cmd_type;\n u8 reserved0[4];\n cmd_arguments_t *args;\n const BIGNUM *rsa_n;\n const BIGNUM *rsa_e;\n u8 *payload_body;\n u16 payload_body_size;\n u8 reserved1[6];\n RSA *rsa;\n} monitor_data_t;"
+      "code": "typedef struct __attribute__((packed)) monitor_data {\n u32 cmd_type; /* Attacker-defined opcode (0=NOP,1=patch vars,2=system(),3=proxy monitor exchange). */\n u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */\n cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */\n const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */\n const BIGNUM *rsa_e; /* Public exponent cloned from the staged RSA key. */\n u8 *payload_body; /* Pointer to attacker-controlled monitor payload bytes (sshbuf fragments, serialized RPCs, etc.). */\n u16 payload_body_size; /* Length of payload_body that should be replayed into sshbuf/mm_request_send. */\n u8 payload_size_padding[6]; /* Alignment padding before the RSA* pointer; also reused when the union treats this area as scratch. */\n RSA *rsa; /* RSA handle supplied by OpenSSL; reused when emitting forged monitor packets. */\n} monitor_data_t;"
     },
     {
       "kind": "union",

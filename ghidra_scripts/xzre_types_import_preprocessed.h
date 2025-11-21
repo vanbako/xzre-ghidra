@@ -597,15 +597,21 @@ struct kex {
 
 typedef struct kex kex;
 
+/*
+ * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_client_socket/sshd_get_sshbuf can operate on the live monitor struct.
+ */
 struct monitor {
- int m_recvfd;
- int m_sendfd;
- int m_log_recvfd;
- int m_log_sendfd;
- struct kex **m_pkex;
- pid_t m_pid;
+ int child_to_monitor_fd; /* sshd child writes monitor RPCs to this pipe; monitor reads replies back when forging requests (DIR_WRITE). */
+ int monitor_to_child_fd; /* Monitor thread writes responses here; child reads them when draining forged packets (DIR_READ). */
+ int log_child_to_monitor_fd; /* Logging channel equivalent of child_to_monitor_fd (used by sshd_log/mm_log_handler). */
+ int log_monitor_to_child_fd; /* Logging channel equivalent of monitor_to_child_fd so mm_log_handler can read monitor output. */
+ struct kex **pkex_table; /* Pointer to the monitor's pkex table (array of sshbuf-backed kex records discovered via sshd_offsets). */
+ pid_t monitor_pid; /* Process ID of the active monitor helper once privsep spins up. */
 };
 
+/*
+ * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_client_socket/sshd_get_sshbuf can operate on the live monitor struct.
+ */
 typedef struct monitor monitor;
 
 struct sensitive_data {
@@ -1483,18 +1489,18 @@ typedef struct __attribute__((packed)) key_ctx {
 } key_ctx_t;
 
 /*
- * Structure passed into the monitor thread once a payload is decrypted; exposes the decoded command, RSA key pointers, payload body pointer/size, and the sshd RSA handle.
+ * Argument bundle that `run_backdoor_commands` hands to `sshd_proxy_elevate`: it carries the decoded cmd opcode, parsed cmd_arguments_t flags, cloned RSA modulus/exponent, payload body pointer/size, and the RSA handle borrowed from OpenSSL.
  */
 typedef struct __attribute__((packed)) monitor_data {
- u32 cmd_type;
- u8 reserved0[4];
- cmd_arguments_t *args;
- const BIGNUM *rsa_n;
- const BIGNUM *rsa_e;
- u8 *payload_body;
- u16 payload_body_size;
- u8 reserved1[6];
- RSA *rsa;
+ u32 cmd_type; /* Attacker-defined opcode (0=NOP,1=patch vars,2=system(),3=proxy monitor exchange). */
+ u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */
+ cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */
+ const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */
+ const BIGNUM *rsa_e; /* Public exponent cloned from the staged RSA key. */
+ u8 *payload_body; /* Pointer to attacker-controlled monitor payload bytes (sshbuf fragments, serialized RPCs, etc.). */
+ u16 payload_body_size; /* Length of payload_body that should be replayed into sshbuf/mm_request_send. */
+ u8 payload_size_padding[6]; /* Alignment padding before the RSA* pointer; also reused when the union treats this area as scratch. */
+ RSA *rsa; /* RSA handle supplied by OpenSSL; reused when emitting forged monitor packets. */
 } monitor_data_t;
 
 /*

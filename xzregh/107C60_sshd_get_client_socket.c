@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Prefers the recovered monitor struct when one is available: it selects monitor->m_recvfd for DIR_WRITE and
- * monitor->m_sendfd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and
+ * AutoDoc: Prefers the recovered monitor struct when one is available: it selects monitor->child_to_monitor_fd for DIR_WRITE and
+ * monitor->monitor_to_child_fd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and
  * returns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to
  * `sshd_get_usable_socket`, letting callers still obtain a socket handle by index.
  */
@@ -34,13 +34,13 @@ BOOL sshd_get_client_socket
     range_ok = is_range_mapped((u8 *)monitor_candidate,4,ctx);
     if (range_ok != FALSE) {
       if (socket_direction == DIR_WRITE) {
-        socket_fd = monitor_candidate->m_recvfd;
+        socket_fd = monitor_candidate->child_to_monitor_fd;
       }
       else {
         if (socket_direction != DIR_READ) {
           return FALSE;
         }
-        socket_fd = monitor_candidate->m_sendfd;
+        socket_fd = monitor_candidate->monitor_to_child_fd;
       }
       read_probe_buf[0] = 0;
       imports = ctx->libc_imports;

