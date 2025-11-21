@@ -5,8 +5,7 @@
 
 
 /*
- * AutoDoc: Guards that at least four bytes remain and then compares the dword at `code_start` against ENDBR64, or'd with the caller-supplied `low_mask_part` so both CET prefix variants collapse to a single equality test.
- * Used by the prologue finders to cheaply vet potential landing pads before accepting them as function entries.
+ * AutoDoc: Fast equality test used when scanning for CET landing pads. When at least four bytes remain it ORs ENDBR64 (`0xF30F1EFA`) with the caller-supplied `low_mask_part` so both ENDBR64 and ENDBR32 collapse into a single signature, then compares the resulting dword against the bytes at `code_start`. Returns TRUE only when the stream contains a full ENDBR instruction; otherwise the prologue walkers keep scanning.
  */
 
 #include "xzre_types.h"
@@ -14,12 +13,12 @@
 BOOL is_endbr64_instruction(u8 *code_start,u8 *code_end,u32 low_mask_part)
 
 {
-  BOOL is_endbr;
+  BOOL has_endbr;
   
-  is_endbr = FALSE;
+  has_endbr = FALSE;
   if (3 < (long)code_end - (long)code_start) {
-    is_endbr = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
+    has_endbr = (BOOL)((low_mask_part | 0x5e20000) + *(int *)code_start == 0xf223);
   }
-  return is_endbr;
+  return has_endbr;
 }
 

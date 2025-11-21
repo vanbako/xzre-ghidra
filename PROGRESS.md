@@ -3,6 +3,14 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-21
+- `find_function`: taught the metadata locals pass about the scratch output array (`prologue_result`) so `local_40` is now renamed via `register_temps`; reran `./scripts/refresh_xzre_project.sh` to propagate the change and confirm the rename report stays clean.
+- Next: consider whether `find_function_prologue` needs a similar treatment for the nested pointer window before moving deeper into OP2.
+
+## 2025-11-21
+- Function session `OP1`: expanded the AutoDoc copy for `x86_dasm`, `is_endbr64_instruction`, `find_function_prologue`, `find_function`, and `find_call_instruction`, renamed the decoder/modrm/immediate temps plus the scratch ctx zeroing variables in `metadata/xzre_locals.json`, updated `docs/FUNCTION_PROGRESS.md`, and reran `./scripts/refresh_xzre_project.sh` so xzregh + the portable archive reflect the changes (locals rename report stayed clean despite multiple reruns while iterating on the find_function scratch array).
+- Next: roll the same treatment into `OP2` (MOV/LEA scanners) and see if we can replace the remaining `local_40` pointer array in `find_function` with a properly named helper once we understand how Ghidra models that stack slot.
+
+## 2025-11-21
 - `cmd_arguments_t`: renamed the anonymous flag bytes to `control_flags`/`monitor_flags`/`request_flags`, documented each bit’s role (log-hook install, PAM disablement, explicit socket selection, payload sourcing/continuations), spelled out how `payload_hint` doubles as a continuation length vs. sshd_offsets overlay, and reran `./scripts/refresh_xzre_project.sh` so `xzre_types.h`/`xzregh/*` reflect the new names. STRUCT_PROGRESS updated for review #1.
 - Next: tighten the `CommandFlags*` enums (they still describe the old bit meanings) and reconcile the AutoDoc delta the refresh keeps reporting for `xzre_globals`.
 

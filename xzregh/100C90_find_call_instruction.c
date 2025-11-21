@@ -5,9 +5,7 @@
 
 
 /*
- * AutoDoc: Emits a secret-data telemetry record, then decodes forward using a scratch or caller-supplied context.
- * Decode failures advance a single byte; successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen, and when `call_target` is provided the rel32 destination (`instruction + instruction_size + operand`) must match it.
- * Returns TRUE with `dctx` still describing the CALL so hook installers can patch immediately after it.
+ * AutoDoc: Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_dasm`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.
  */
 
 #include "xzre_types.h"
@@ -17,17 +15,17 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
 {
   BOOL decode_ok;
   long clear_idx;
-  dasm_ctx_t *zero_ctx;
-  byte clear_stride_marker;
+  dasm_ctx_t *ctx_zero_cursor;
+  byte ctx_zero_stride;
   dasm_ctx_t scratch_ctx;
   
-  clear_stride_marker = 0;
+  ctx_zero_stride = 0;
   decode_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7);
   if (decode_ok != FALSE) {
-    zero_ctx = &scratch_ctx;
+    ctx_zero_cursor = &scratch_ctx;
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *(undefined4 *)&zero_ctx->instruction = 0;
-      zero_ctx = (dasm_ctx_t *)((long)zero_ctx + ((ulong)clear_stride_marker * -2 + 1) * 4);
+      *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+      ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + ((ulong)ctx_zero_stride * -2 + 1) * 4);
     }
     if (dctx == (dasm_ctx_t *)0x0) {
       dctx = &scratch_ctx;

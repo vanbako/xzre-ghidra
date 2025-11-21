@@ -5,8 +5,7 @@
 
 
 /*
- * AutoDoc: Resets the supplied `dasm_ctx_t` and incrementally decodes from `code_start`, honoring legacy prefixes, REX, 2- and 3-byte VEX, and ModRM/SIB so `opcode_window`, prefix bits, displacement/immediates, and the derived `operand`/`mem_disp` fields are normalised.
- * Invalid encodings or truncated buffers zero the context and return FALSE so callers can slide one byte and reattempt; a clean decode leaves `instruction`/`instruction_size` populated for upstream scanners like the MOV/LEA and prologue finders.
+ * AutoDoc: Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.
  */
 
 #include "xzre_types.h"
@@ -22,7 +21,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   byte tmp_byte;
   BOOL telemetry_ok;
   int derived_opcode;
-  u64 operand_width;
+  u64 imm_field;
   sbyte opcode_index;
   uint opcode;
   uint opcode_high_bits;
@@ -31,35 +30,35 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   u8 *opcode_ptr;
   byte current_byte;
   uint normalized_opcode;
-  ulong opcode_class_mask;
-  ulong opcode_class_flag;
-  u8 *operand_cursor;
-  dasm_ctx_t *ctx_clear;
-  ulong opcode_class_shift;
-  x86_prefix_state_t *prefix_clear;
-  BOOL condition_match;
-  BOOL range_eq_boundary;
-  byte clear_stride_marker;
+  ulong opcode_class_entry;
+  ulong imm_size_hint;
+  u8 *imm_cursor;
+  dasm_ctx_t *ctx_zero_cursor;
+  ulong opcode_class_offset;
+  x86_prefix_state_t *prefix_zero_cursor;
+  BOOL predicate_ok;
+  BOOL range_hits_upper_bound;
+  byte ctx_zero_stride;
   ulong opcode_class_masks [4];
   
-  clear_stride_marker = 0;
+  ctx_zero_stride = 0;
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
   if (telemetry_ok == FALSE) {
     return FALSE;
   }
-  ctx_clear = ctx;
+  ctx_zero_cursor = ctx;
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&ctx_clear->instruction = 0;
-    ctx_clear = (dasm_ctx_t *)((long)ctx_clear + (ulong)clear_stride_marker * -8 + 4);
+    *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+    ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
   }
-  condition_match = code_start < code_end;
+  predicate_ok = code_start < code_end;
   cursor = code_start;
   do {
-    if (!condition_match) {
+    if (!predicate_ok) {
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(undefined4 *)&ctx->instruction = 0;
-        ctx = (dasm_ctx_t *)((long)ctx + (ulong)clear_stride_marker * -8 + 4);
+        ctx = (dasm_ctx_t *)((long)ctx + (ulong)ctx_zero_stride * -8 + 4);
       }
       return FALSE;
     }
@@ -89,10 +88,10 @@ LAB_001001c9:
           }
           if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {
             if (cursor + 1 < code_end) {
-              prefix_clear = &ctx->prefix;
+              prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
-                *(undefined4 *)prefix_clear = 0;
-                prefix_clear = (x86_prefix_state_t *)((long)prefix_clear + (ulong)clear_stride_marker * -8 + 4);
+                *(undefined4 *)prefix_zero_cursor = 0;
+                prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
@@ -109,17 +108,17 @@ LAB_001004f1:
             normalized_opcode = (uint)current_byte;
           }
           if ((normalized_opcode & 0xf0) == 0x80) {
-            operand_width = 4;
+            imm_field = 4;
 LAB_001004a7:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
             *flags2_ptr = *flags2_ptr | 8;
-            ctx->imm_size = operand_width;
+            ctx->imm_size = imm_field;
           }
           else {
             if ((byte)normalized_opcode < 0x74) {
               if (0x6f < (normalized_opcode & 0xff)) {
 LAB_001004a2:
-                operand_width = 1;
+                imm_field = 1;
                 goto LAB_001004a7;
               }
             }
@@ -353,14 +352,14 @@ LAB_001003fa:
               if (opcode < 0xcc) {
                 if (opcode < 0x3a) {
                   if (0x37 < opcode) goto LAB_001005bf;
-                  condition_match = opcode - 0x20 < 2;
-                  range_eq_boundary = opcode - 0x20 == 2;
+                  predicate_ok = opcode - 0x20 < 2;
+                  range_hits_upper_bound = opcode - 0x20 == 2;
                 }
                 else {
-                  condition_match = opcode - 0x60 < 3;
-                  range_eq_boundary = opcode - 0x60 == 3;
+                  predicate_ok = opcode - 0x60 < 3;
+                  range_hits_upper_bound = opcode - 0x60 == 3;
                 }
-                if (!condition_match && !range_eq_boundary) goto LAB_001005d6;
+                if (!predicate_ok && !range_hits_upper_bound) goto LAB_001005d6;
               }
               else if ((0x1000080001U >> (current_byte + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
@@ -378,7 +377,7 @@ LAB_001005d6:
               tmp_byte = current_byte & 0xf;
               if (current_byte >> 4 == 1) {
                 if (tmp_byte < 10) {
-                  condition_match = (normalized_opcode & 0xc) == 0;
+                  predicate_ok = (normalized_opcode & 0xc) == 0;
                   goto LAB_00100604;
                 }
                 if (tmp_byte != 0xd) {
@@ -387,16 +386,16 @@ LAB_001005d6:
               }
               else {
                 if (current_byte >> 4 == 4) {
-                  condition_match = (0x1c57UL >> tmp_byte & 1) == 0;
+                  predicate_ok = (0x1c57UL >> tmp_byte & 1) == 0;
                 }
                 else {
                   if (current_byte >> 4 != 0) {
                     return FALSE;
                   }
-                  condition_match = (current_byte & 0xb) == 3;
+                  predicate_ok = (current_byte & 0xb) == 3;
                 }
 LAB_00100604:
-                if (condition_match) {
+                if (predicate_ok) {
                   return FALSE;
                 }
               }
@@ -423,16 +422,16 @@ LAB_0010067d:
           cursor = cursor + 1;
 LAB_00100680:
           if (code_end <= cursor) goto LAB_00100aa5;
-          operand_width = ctx->imm_size;
+          imm_field = ctx->imm_size;
           current_byte = *cursor;
-          if (operand_width != 1) {
+          if (imm_field != 1) {
             opcode_ptr = cursor + 1;
             if (((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==
                 (undefined1  [16])0x66000000000004) {
-              if (operand_width == 2) {
+              if (imm_field == 2) {
                 ctx->imm_size = 4;
               }
-              else if (operand_width == 4) {
+              else if (imm_field == 4) {
                 ctx->imm_size = 2;
               }
             }
@@ -446,24 +445,24 @@ LAB_00100680:
               goto LAB_001007e4;
             }
             if (code_end <= cursor + 2) goto LAB_00100aa5;
-            operand_cursor = cursor + 3;
-            if (code_end <= operand_cursor) goto LAB_00100aa5;
+            imm_cursor = cursor + 3;
+            if (code_end <= imm_cursor) goto LAB_00100aa5;
             opcode = CONCAT13(cursor[3],CONCAT12(cursor[2],imm16_word));
             if (ctx->imm_size == 4) {
               ctx->imm_zeroextended = (ulong)opcode;
-              operand_width = (u64)(int)opcode;
+              imm_field = (u64)(int)opcode;
             }
             else {
               if (((code_end <= cursor + 4) || (code_end <= cursor + 5)) ||
                  (code_end <= cursor + 6)) goto LAB_00100aa5;
-              operand_cursor = cursor + 7;
-              if (code_end <= operand_cursor) goto LAB_00100aa5;
-              operand_width = CONCAT17(cursor[7],
+              imm_cursor = cursor + 7;
+              if (code_end <= imm_cursor) goto LAB_00100aa5;
+              imm_field = CONCAT17(cursor[7],
                                CONCAT16(cursor[6],CONCAT15(cursor[5],CONCAT14(cursor[4],opcode)))
                               );
-              ctx->imm_zeroextended = operand_width;
+              ctx->imm_zeroextended = imm_field;
             }
-            ctx->imm_signed = operand_width;
+            ctx->imm_signed = imm_field;
             goto LAB_0010089f;
           }
           ctx->imm_zeroextended = (ulong)current_byte;
@@ -477,7 +476,7 @@ LAB_00100680:
 LAB_00100191:
           if (code_end <= cursor) goto LAB_00100aa5;
           current_byte = *cursor;
-          opcode_class_shift = (ulong)current_byte;
+          opcode_class_offset = (ulong)current_byte;
           if (current_byte == 0xf) {
             *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
             opcode_ptr = cursor;
@@ -496,9 +495,9 @@ LAB_001001c5:
           opcode_class_masks[1] = 0xffff0fc000000000;
           opcode_class_masks[2] = 0xffff03000000000b;
           opcode_class_masks[3] = 0xc00bff000025c7;
-          opcode_class_mask = opcode_class_masks[current_byte >> 6] >> (current_byte & 0x3f);
-          opcode_class_flag = (ulong)((uint)opcode_class_mask & 1);
-          if ((opcode_class_mask & 1) == 0) {
+          opcode_class_entry = opcode_class_masks[current_byte >> 6] >> (current_byte & 0x3f);
+          imm_size_hint = (ulong)((uint)opcode_class_entry & 1);
+          if ((opcode_class_entry & 1) == 0) {
             ctx->imm_size = 0;
           }
           else {
@@ -507,38 +506,38 @@ LAB_001001c5:
                 if (current_byte < 0x6a) {
                   if (current_byte < 0x2d) {
                     if (0x20 < (byte)(current_byte - 5)) goto LAB_00100344;
-                    opcode_class_mask = 0x2020202020;
+                    opcode_class_entry = 0x2020202020;
                   }
                   else {
-                    opcode_class_mask = 0x1800000000010101;
-                    opcode_class_shift = (ulong)(current_byte - 0x2d);
+                    opcode_class_entry = 0x1800000000010101;
+                    opcode_class_offset = (ulong)(current_byte - 0x2d);
                   }
                 }
                 else {
-                  opcode_class_mask = 0x7f80010000000001;
-                  opcode_class_shift = (ulong)(current_byte + 0x7f);
+                  opcode_class_entry = 0x7f80010000000001;
+                  opcode_class_offset = (ulong)(current_byte + 0x7f);
                   if (0x3e < (byte)(current_byte + 0x7f)) goto LAB_00100344;
                 }
-                if ((opcode_class_mask >> (opcode_class_shift & 0x3f) & 1) != 0) {
-                  opcode_class_flag = 4;
+                if ((opcode_class_entry >> (opcode_class_offset & 0x3f) & 1) != 0) {
+                  imm_size_hint = 4;
                 }
               }
               else {
-                opcode_class_shift = 1L << (current_byte + 0x3e & 0x3f);
-                if ((opcode_class_shift & 0x2000c800000020) == 0) {
-                  if ((opcode_class_shift & 0x101) != 0) {
-                    opcode_class_flag = 2;
+                opcode_class_offset = 1L << (current_byte + 0x3e & 0x3f);
+                if ((opcode_class_offset & 0x2000c800000020) == 0) {
+                  if ((opcode_class_offset & 0x101) != 0) {
+                    imm_size_hint = 2;
                   }
                 }
                 else {
-                  opcode_class_flag = 4;
+                  imm_size_hint = 4;
                 }
               }
             }
 LAB_00100344:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
             *flags2_ptr = *flags2_ptr | 8;
-            ctx->imm_size = opcode_class_flag;
+            ctx->imm_size = imm_size_hint;
           }
           opcode_index = (sbyte)normalized_opcode;
           opcode_ptr = cursor;
@@ -567,8 +566,8 @@ LAB_0010065f:
 LAB_0010073c:
           if (((code_end <= opcode_ptr) || (code_end <= opcode_ptr + 1)) || (code_end <= opcode_ptr + 2))
           goto LAB_00100aa5;
-          operand_cursor = opcode_ptr + 3;
-          if (code_end <= operand_cursor) goto LAB_00100aa5;
+          imm_cursor = opcode_ptr + 3;
+          if (code_end <= imm_cursor) goto LAB_00100aa5;
           current_byte = (ctx->prefix).decoded.flags2;
           ctx->mem_disp =
                (long)CONCAT13(opcode_ptr[3],CONCAT12(opcode_ptr[2],CONCAT11(opcode_ptr[1],*opcode_ptr)));
@@ -579,7 +578,7 @@ LAB_0010073c:
             }
 LAB_0010089f:
             ctx->instruction = code_start;
-            cursor = operand_cursor + (1 - (long)code_start);
+            cursor = imm_cursor + (1 - (long)code_start);
           }
           else {
             if (((code_end <= opcode_ptr + 4) || (code_end <= opcode_ptr + 5)) ||
@@ -612,7 +611,7 @@ LAB_001000cf:
     }
 LAB_00100675:
     cursor = cursor + 1;
-    condition_match = cursor < code_end;
+    predicate_ok = cursor < code_end;
   } while( TRUE );
 }
 

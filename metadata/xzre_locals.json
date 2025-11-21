@@ -3374,12 +3374,12 @@
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_zero_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "clear_stride_marker",
+        "name": "ctx_zero_stride",
         "original": "bVar4",
         "type": "byte"
       }
@@ -3599,28 +3599,7 @@
     "source": "xzre/xzre_code/find_dl_naudit.c"
   },
   "find_function": {
-    "locals": [
-      {
-        "name": "res",
-        "type": "u8 *"
-      },
-      {
-        "name": "p",
-        "type": "u8 *"
-      },
-      {
-        "name": "search_from",
-        "type": "u8 *"
-      },
-      {
-        "name": "search_to",
-        "type": "u8 *"
-      },
-      {
-        "name": "found",
-        "type": "BOOL"
-      }
-    ],
+    "locals": [],
     "register_temps": [
       {
         "name": "prologue_found",
@@ -3631,6 +3610,11 @@
         "name": "scan_cursor",
         "original": "puVar2",
         "type": "u8 *"
+      },
+      {
+        "name": "prologue_result",
+        "original": "local_40",
+        "type": "u8 *[2]"
       }
     ],
     "source": "xzre/xzre_code/find_function.c"
@@ -3663,7 +3647,7 @@
         "type": "long"
       },
       {
-        "name": "ctx_cursor",
+        "name": "ctx_zero_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
       }
@@ -4584,7 +4568,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "is_endbr",
+        "name": "has_endbr",
         "original": "BVar1",
         "type": "BOOL"
       }
@@ -7663,7 +7647,7 @@
         "type": "int"
       },
       {
-        "name": "operand_width",
+        "name": "imm_field",
         "original": "uVar9",
         "type": "u64"
       },
@@ -7703,17 +7687,17 @@
         "type": "uint"
       },
       {
-        "name": "opcode_class_mask",
+        "name": "opcode_class_entry",
         "original": "uVar18",
         "type": "ulong"
       },
       {
-        "name": "opcode_class_flag",
+        "name": "imm_size_hint",
         "original": "uVar19",
         "type": "ulong"
       },
       {
-        "name": "operand_cursor",
+        "name": "imm_cursor",
         "original": "pbVar20",
         "type": "u8 *"
       },
@@ -7723,12 +7707,12 @@
         "type": "byte"
       },
       {
-        "name": "ctx_clear",
+        "name": "ctx_zero_cursor",
         "original": "pdVar21",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "prefix_clear",
+        "name": "prefix_zero_cursor",
         "original": "pxVar23",
         "type": "x86_prefix_state_t *"
       },
@@ -7753,22 +7737,22 @@
         "type": "long"
       },
       {
-        "name": "opcode_class_shift",
+        "name": "opcode_class_offset",
         "original": "uVar22",
         "type": "ulong"
       },
       {
-        "name": "condition_match",
+        "name": "predicate_ok",
         "original": "bVar24",
         "type": "BOOL"
       },
       {
-        "name": "range_eq_boundary",
+        "name": "range_hits_upper_bound",
         "original": "bVar25",
         "type": "BOOL"
       },
       {
-        "name": "clear_stride_marker",
+        "name": "ctx_zero_stride",
         "original": "bVar26",
         "type": "byte"
       }

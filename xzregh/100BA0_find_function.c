@@ -5,9 +5,7 @@
 
 
 /*
- * AutoDoc: Recovers function bounds around an instruction.
- * With `func_start` non-null it scans backward toward `search_base`, checking every byte with `find_function_prologue`; failing to find a match or hitting `search_base` without one aborts.
- * With `func_end` it scans forward to the next prologue (or `code_end`) and uses that address as the end marker, yielding dependable start/end pointers for later string/reloc walkers.
+ * AutoDoc: Wraps `find_function_prologue` to recover the full function bounds surrounding an instruction. When `func_start` is requested it walks backward from `code_start` toward `search_base`, probing each byte with the prologue helper until it finds a landing pad; hitting `search_base` without success aborts. When `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that offset as the end marker. Successful runs populate whichever out pointers the caller requested so later passes can reason about bounded regions instead of raw addresses.
  */
 
 #include "xzre_types.h"
@@ -18,21 +16,18 @@ BOOL find_function(u8 *code_start,void **func_start,void **func_end,u8 *search_b
 {
   BOOL prologue_found;
   u8 *scan_cursor;
-  BOOL found;
-  u8 *search_to;
-  u8 *search_from;
-  u8 *p;
+  u8 *prologue_result[2];
   
-  p = (u8 *)0x0;
+  prologue_result[0] = (u8 *)0x0;
   scan_cursor = code_start;
   if (func_start != (void **)0x0) {
     while ((search_base < scan_cursor &&
-           (prologue_found = find_function_prologue(scan_cursor,code_end,&p,find_mode), prologue_found == FALSE))) {
+           (prologue_found = find_function_prologue(scan_cursor,code_end,prologue_result,find_mode), prologue_found == FALSE))) {
       scan_cursor = scan_cursor + -1;
     }
-    scan_cursor = p;
-    if ((p == (u8 *)0x0) ||
-       ((p == search_base &&
+    scan_cursor = prologue_result[0];
+    if ((prologue_result[0] == (u8 *)0x0) ||
+       ((prologue_result[0] == search_base &&
         (prologue_found = find_function_prologue(search_base,code_end,(u8 **)0x0,find_mode), prologue_found == FALSE))
        )) {
       return FALSE;

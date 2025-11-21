@@ -5,9 +5,7 @@
 
 
 /*
- * AutoDoc: Validates that an address matches the requested prologue form.
- * For `FIND_ENDBR64` it zeros a decoder, runs `x86_dasm`, requires the ENDBR64 opcode, and only succeeds if the pad ends on a 16-byte boundary (returning the first post-pad instruction through `output`).
- * In legacy mode it calls `is_endbr64_instruction` with the simple mask and, on success, returns the prologue address itself so callers can sweep until a match is found.
+ * AutoDoc: Recognises CET-style prologues. In `FIND_ENDBR64` mode it zeroes a scratch `dasm_ctx_t`, asks `x86_dasm` to decode at `code_start`, requires the normalised opcode to be ENDBR64, and only succeeds if the ENDBR padding ends on a 16-byte boundary (optionally returning the instruction immediately after the pad through `output`). Legacy mode skips the decoder and reuses `is_endbr64_instruction` with the simple mask; when it hits it reports the exact byte it just tested so callers can keep walking until they find the landing pad they need.
  */
 
 #include "xzre_types.h"
@@ -18,14 +16,14 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
   BOOL prologue_found;
   BOOL decoded;
   long clear_idx;
-  dasm_ctx_t *ctx_cursor;
+  dasm_ctx_t *ctx_zero_cursor;
   dasm_ctx_t prologue_ctx;
   
   if (find_mode == FIND_ENDBR64) {
-    ctx_cursor = &prologue_ctx;
+    ctx_zero_cursor = &prologue_ctx;
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *(undefined4 *)&ctx_cursor->instruction = 0;
-      ctx_cursor = (dasm_ctx_t *)((long)&ctx_cursor->instruction + 4);
+      *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+      ctx_zero_cursor = (dasm_ctx_t *)((long)&ctx_zero_cursor->instruction + 4);
     }
     decoded = x86_dasm(&prologue_ctx,code_start,code_end);
     prologue_found = FALSE;
