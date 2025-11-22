@@ -3307,17 +3307,17 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "add_found",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       }
@@ -3333,24 +3333,34 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "mov_found",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "referenced_addr",
+        "name": "candidate_addr",
         "original": "puVar2",
         "type": "u8 *"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar3",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "name": "func_end",
+        "original": "code_end",
+        "type": "u8 *"
+      },
+      {
+        "name": "func_cursor",
+        "original": "code_start",
+        "type": "u8 *"
       }
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
@@ -3658,7 +3668,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "decode_ok",
+        "name": "match_found",
         "original": "BVar1",
         "type": "BOOL"
       }
@@ -3674,22 +3684,22 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "search_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "clear_stride_marker",
+        "name": "ctx_stride_selector",
         "original": "bVar4",
         "type": "byte"
       }
@@ -4187,22 +4197,22 @@
         "type": "dasm_ctx_t"
       },
       {
-        "name": "decode_ok",
+        "name": "lea_found",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "xref",
+        "name": "lea_anchor",
         "original": "puVar2",
         "type": "u8 *"
       },
       {
-        "name": "clear_idx",
+        "name": "ctx_clear_idx",
         "original": "lVar3",
         "type": "long"
       },
       {
-        "name": "zero_ctx",
+        "name": "ctx_clear_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
       }

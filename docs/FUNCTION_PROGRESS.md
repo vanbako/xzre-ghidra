@@ -90,11 +90,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `100EB0_find_lea_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – Added the secret-data breadcrumb + ±displacement explanation and renamed the stack decoder wipe loop (`ctx_clear_idx/cursor`, `ctx_stride_sign`). |
 | `100F60_find_lea_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-21 (OP2) – Clarified the optional RIP target comparison, the REX.W+ModRM requirements, and synced the scratch ctx locals/notes with the other LEA helpers. |
 | `10AC40_find_reg2reg_instruction` | `opco_patt` | 1 | 2025-11-21 (OP2) – Wrote up the ModRM/prefix rejects, documented the arithmetic opcode bitmask, and renamed the temps to `decoded`/`opcode_lookup_index`. |
-| `101020_find_string_reference` | `opco_patt` | 0 |  |
-| `101060_find_instruction_with_mem_operand_ex` | `opco_patt` | 0 |  |
-| `101120_find_instruction_with_mem_operand` | `opco_patt` | 0 |  |
-| `101170_find_add_instruction_with_mem_operand` | `opco_patt` | 0 |  |
-| `102C60_find_addr_referenced_in_mov_instruction` | `opco_patt` | 0 |  |
+| `101020_find_string_reference` | `opco_patt` | 1 | 2025-11-22 (OP3) – Named the LEA hit/ctx wipe temps and documented how the helper returns the LEA site as the string xref anchor. |
+| `101060_find_instruction_with_mem_operand_ex` | `opco_patt` | 1 | 2025-11-22 (OP3) – Captured the secret-data instrumentation, renamed the ctx stride controls, and added inline notes for the sliding window plus DF2/RIP predicate. |
+| `101120_find_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-22 (OP3) – Clarified the LEA-vs-MOV handoff and inserted the inline comment that explains why the MOV predicate re-runs with opcode `0x10b`. |
+| `101170_find_add_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-22 (OP3) – Synced the scratch decoder locals, documented the opcode `0x103` + ModRM requirements, and noted the optional RIP comparison inline. |
+| `102C60_find_addr_referenced_in_mov_instruction` | `opco_patt` | 1 | 2025-11-22 (OP3) – Introduced `func_cursor/func_end`, described the 32-bit MOV/DF2 gating, and added inline commentary for the RIP-relative recompute and range test. |
 | `102A50_elf_find_function_pointer` | `opco_patt` | 0 |  |
 | `102D30_elf_find_string_references` | `opco_patt` | 0 |  |
 | `1032C0_elf_find_string_reference` | `opco_patt` | 0 |  |

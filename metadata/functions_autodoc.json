@@ -41,8 +41,66 @@
   "fake_lzma_free": "No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub\ninto `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other\nthan prove that the fake allocator is still active.\n\nHaving an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a\nreliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.",
   "fd_read": "Wraps libc’s read with retry logic. It refuses to run without both `read` and `__errno_location`, loops on EINTR, and aborts\nwith -1 when the helper sees EOF before the requested byte count. Successful reads consume the entire length so callers can\ntreat any non-zero return as \"buffer filled\".",
   "fd_write": "Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short writes as fatal so callers\neither send the entire buffer or receive -1. It is the plumbing used whenever the implant forges monitor messages.",
-  "find_add_instruction_with_mem_operand": "Specialised scanner for `add [mem],reg`: decodes forward byte-by-byte until opcode `0x103` appears with a memory ModRM form.\nWhen `mem_address` is supplied it also requires DF2 to show a displacement and the recomputed RIP-relative address to match.\nReturns TRUE with `dctx` still on the ADD so callers can read the increment immediate.",
-  "find_addr_referenced_in_mov_instruction": "Walks the function owning a string reference, repeatedly calling `find_instruction_with_mem_operand_ex` for opcode `0x10b` to find MOV loads that touch data.\nSkips register-only forms and 64-bit REX.W MOVs, recomputes the absolute address for displacement-based operands (RIP-relative when ModRM encodes it), and returns the first address that falls inside `[mem_range_start, mem_range_end)`.\nReturns NULL when no qualifying reference is found or when register-only forms surface and no range was requested.",
+  "find_add_instruction_with_mem_operand": {
+    "plate": "ADD predicate for register-to-memory increments.\nIt wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.\nIf `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.",
+    "inline": [
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match_type": "wildcard",
+        "comment": "Keep the scratch decoder clean so each scan starts from a known state."
+      },
+      {
+        "match": "if ((((add_found != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&",
+        "match_type": "wildcard",
+        "comment": "Only accept opcode 0x103 (ADD r/m64,r64) when it actually targets memory."
+      },
+      {
+        "match": "((mem_address == (void *)0x0 ||",
+        "match_type": "wildcard",
+        "comment": "Optionally demand DF2 plus the RIP-relative displacement that lands on the requested pointer.",
+        "placement": "after"
+      }
+    ]
+  },
+  "find_addr_referenced_in_mov_instruction": {
+    "plate": "Given a `StringXrefId`, this helper looks up the owning function span and walks it for MOV-load references.\nIt repeatedly calls `find_instruction_with_mem_operand_ex` (opcode 0x10b), ignores 64-bit/REX.W MOVs, and either recomputes the absolute address (handling RIP-relative displacements) or bails out if the candidate lacked DF2 and the caller never supplied a range.\nThe first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.",
+    "inline": [
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match_type": "wildcard",
+        "comment": "Reset the scratch decoder we hand to `find_instruction_with_mem_operand_ex`."
+      },
+      {
+        "match_regex": "func_cursor = \\(u8 \\*\\)\\(&refs->xcalloc_zero_size\\)\\[id\\]\\.func_start;",
+        "match_type": "regex",
+        "comment": "Fetch the cached `[func_start, func_end)` range associated with this string ID."
+      },
+      {
+        "match": "if (((byte)scratch_ctx.prefix.decoded.rex & 0x48) != 0x48)",
+        "match_type": "wildcard",
+        "comment": "Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.",
+        "placement": "after"
+      },
+      {
+        "match": "if ((scratch_ctx.prefix.decoded.flags2 & 1) == 0)",
+        "match_type": "wildcard",
+        "comment": "Without DF2 there is no displacement to recompute, so abort unless the caller insisted on a range.",
+        "placement": "after"
+      },
+      {
+        "match": "if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)",
+        "match_type": "wildcard",
+        "comment": "RIP-relative ModRM forms need the extra `instruction + instruction_size` correction.",
+        "placement": "after"
+      },
+      {
+        "match": "if ((mem_range_start <= candidate_addr) && (candidate_addr <= (u8 *)((long)mem_range_end + -4)))",
+        "match_type": "wildcard",
+        "comment": "Treat the range as inclusive of the start and exclusive of the four-byte tail so we only return pointers inside the blob.",
+        "placement": "after"
+      }
+    ]
+  },
   "find_call_instruction": {
     "plate": "Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_dasm`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.",
     "inline": [
@@ -112,8 +170,47 @@
       }
     ]
   },
-  "find_instruction_with_mem_operand": "Chases an absolute address without exposing the LEA vs MOV distinction: first tries `find_lea_instruction_with_mem_operand`, then falls back to `find_instruction_with_mem_operand_ex` for opcode `0x10b` (MOV load) if the LEA path fails.\nTRUE means `dctx` now describes an instruction that touches `mem_address`.",
-  "find_instruction_with_mem_operand_ex": "Generic predicate for locating a specific `opcode` that reads/writes memory.\nDecodes forward (scratch context if needed), requires a memory ModRM form, and when `mem_address` is non-null also requires DF2 to indicate a displacement operand and the RIP-relative address (`instruction + instruction_size + mem_disp`) to equal that address.\nOn success it leaves `dctx` populated so callers like the add/mov/addr scanners can inspect operands without re-decoding.",
+  "find_instruction_with_mem_operand": {
+    "plate": "Two-stage absolute-pointer predicate shared by the recon helpers.\nIt prefers LEA results (via `find_lea_instruction_with_mem_operand`) so RIP-relative references never touch memory, and only falls back to the MOV-load predicate (`find_instruction_with_mem_operand_ex` with opcode `0x10b`) once the LEA attempt fails.\nTRUE means `dctx` is still positioned on the instruction that materialised `mem_address`.",
+    "inline": [
+      {
+        "match": "match_found = find_instruction_with_mem_operand_ex(*",
+        "match_type": "wildcard",
+        "comment": "Fallback to MOV loads when the LEA scan cannot find the requested pointer."
+      }
+    ]
+  },
+  "find_instruction_with_mem_operand_ex": {
+    "plate": "Generic predicate used by the pointer scanners to match one opcode that actually touches memory.\nIt logs the probe via `secret_data_append_from_call_site`, wipes a scratch decoder when the caller passes NULL, and then slides a one-byte window from `code_start` to `code_end` until `x86_dasm` decodes the requested opcode.\nEach hit still has to present a memory ModRM form and, when `mem_address` is provided, set DF2 and produce a RIP-relative displacement that recomputes to that address before the helper returns TRUE with `dctx` left on the instruction.",
+    "inline": [
+      {
+        "match": "search_ok = secret_data_append_from_call_site(*",
+        "match_type": "wildcard",
+        "comment": "Feed the instrumentation/log buffer so we can recover which opcode sweep triggered this search."
+      },
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match_type": "wildcard",
+        "comment": "Zero the scratch decoder whenever the caller does not supply one."
+      },
+      {
+        "match": "for (; code_start < code_end; code_start = code_start + 1)",
+        "match_type": "wildcard",
+        "comment": "Slide a single-byte window forward so failed decodes simply advance to the next offset."
+      },
+      {
+        "match": "if ((((search_ok != FALSE) && (*(int *)(dctx->opcode_window + 3) == opcode)) &&",
+        "match_type": "wildcard",
+        "comment": "Require the decoded opcode plus a memory ModRM form before considering the DF2/RIP tests."
+      },
+      {
+        "match": "((mem_address == (void *)0x0 ||",
+        "match_type": "wildcard",
+        "comment": "When the caller provides a target pointer, insist DF2 is set and the RIP-relative recomputation lands exactly on it.",
+        "placement": "after"
+      }
+    ]
+  },
   "find_lea_instruction": {
     "plate": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nIt emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
     "inline": [
@@ -234,7 +331,22 @@
       }
     ]
   },
-  "find_string_reference": "Zeroes a scratch decoder and asks `find_lea_instruction_with_mem_operand` to locate the first LEA in `[code_start, code_end)` that materialises the absolute address `str`.\nReturns the LEA's address as the xref anchor or NULL when no such reference exists.",
+  "find_string_reference": {
+    "plate": "Bootstraps the LEA pointer scan used by the string-reference tables.\nIt wipes a scratch `dasm_ctx_t`, runs `find_lea_instruction_with_mem_operand` across `[code_start, code_end)`, and only considers hits whose computed pointer equals `str`.\nSuccess returns the LEA's address so callers can treat that instruction as the reference site; otherwise NULL bubbles up.",
+    "inline": [
+      {
+        "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
+        "match_type": "wildcard",
+        "comment": "Reset the scratch decoder before handing it to the LEA searcher."
+      },
+      {
+        "match": "lea_anchor = scratch_ctx.instruction;",
+        "match_type": "wildcard",
+        "comment": "Return the successful LEA's address so string walkers can anchor the xref there.",
+        "placement": "after"
+      }
+    ]
+  },
   "get_elf_functions_address": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives\nnear `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer\nmath lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the\nloader a stable way to reach its helper vtable.",
   "get_lzma_allocator": "Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand\nliblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the\nimplant's `elf_info_t`.",
   "get_lzma_allocator_address": "Manual pointer arithmetic that recovers the runtime address of the fake `fake_lzma_allocator_t` blob without requiring\nrelocatable absolute addresses. The compiler emits a sentinel (`fake_lzma_allocator`) followed by padding, so this helper starts\nat that symbol and steps through the struct 12 times, effectively adding the baked-in 0x160-byte offset that lands on the real\nallocator instance the loader populated at build time.",

@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Zeroes a scratch decoder and asks `find_lea_instruction_with_mem_operand` to locate the first LEA in `[code_start, code_end)` that materialises the absolute address `str`.
- * Returns the LEA's address as the xref anchor or NULL when no such reference exists.
+ * AutoDoc: Bootstraps the LEA pointer scan used by the string-reference tables.
+ * It wipes a scratch `dasm_ctx_t`, runs `find_lea_instruction_with_mem_operand` across `[code_start, code_end)`, and only considers hits whose computed pointer equals `str`.
+ * Success returns the LEA's address so callers can treat that instruction as the reference site; otherwise NULL bubbles up.
  */
 
 #include "xzre_types.h"
@@ -14,22 +15,24 @@
 u8 * find_string_reference(u8 *code_start,u8 *code_end,char *str)
 
 {
-  BOOL decode_ok;
-  u8 *xref;
-  long clear_idx;
-  dasm_ctx_t *zero_ctx;
+  BOOL lea_found;
+  u8 *lea_anchor;
+  long ctx_clear_idx;
+  dasm_ctx_t *ctx_clear_cursor;
   dasm_ctx_t scratch_ctx;
   
-  zero_ctx = &scratch_ctx;
-  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx->instruction = 0;
-    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
+  ctx_clear_cursor = &scratch_ctx;
+  // AutoDoc: Reset the scratch decoder before handing it to the LEA searcher.
+  for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
+    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
-  decode_ok = find_lea_instruction_with_mem_operand(code_start,code_end,&scratch_ctx,str);
-  xref = (u8 *)0x0;
-  if (decode_ok != FALSE) {
-    xref = scratch_ctx.instruction;
+  lea_found = find_lea_instruction_with_mem_operand(code_start,code_end,&scratch_ctx,str);
+  lea_anchor = (u8 *)0x0;
+  if (lea_found != FALSE) {
+    lea_anchor = scratch_ctx.instruction;
+    // AutoDoc: Return the successful LEA's address so string walkers can anchor the xref there.
   }
-  return xref;
+  return lea_anchor;
 }
 

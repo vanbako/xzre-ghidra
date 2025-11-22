@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Walks the function owning a string reference, repeatedly calling `find_instruction_with_mem_operand_ex` for opcode `0x10b` to find MOV loads that touch data.
- * Skips register-only forms and 64-bit REX.W MOVs, recomputes the absolute address for displacement-based operands (RIP-relative when ModRM encodes it), and returns the first address that falls inside `[mem_range_start, mem_range_end)`.
- * Returns NULL when no qualifying reference is found or when register-only forms surface and no range was requested.
+ * AutoDoc: Given a `StringXrefId`, this helper looks up the owning function span and walks it for MOV-load references.
+ * It repeatedly calls `find_instruction_with_mem_operand_ex` (opcode 0x10b), ignores 64-bit/REX.W MOVs, and either recomputes the absolute address (handling RIP-relative displacements) or bails out if the candidate lacked DF2 and the caller never supplied a range.
+ * The first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.
  */
 
 #include "xzre_types.h"
@@ -17,46 +17,52 @@ void * find_addr_referenced_in_mov_instruction
                  void *mem_range_end)
 
 {
-  u8 *code_end;
-  BOOL decode_ok;
-  u8 *referenced_addr;
-  long clear_idx;
-  dasm_ctx_t *zero_ctx;
-  u8 *code_start;
+  u8 *func_end;
+  BOOL mov_found;
+  u8 *candidate_addr;
+  long ctx_clear_idx;
+  dasm_ctx_t *ctx_clear_cursor;
+  u8 *func_cursor;
   dasm_ctx_t scratch_ctx;
   
-  zero_ctx = &scratch_ctx;
-  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx->instruction = 0;
-    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
+  ctx_clear_cursor = &scratch_ctx;
+  // AutoDoc: Reset the scratch decoder we hand to `find_instruction_with_mem_operand_ex`.
+  for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
+    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
-  code_start = (u8 *)(&refs->xcalloc_zero_size)[id].func_start;
-  if (code_start != (u8 *)0x0) {
-    code_end = (u8 *)(&refs->xcalloc_zero_size)[id].func_end;
-    while (code_start < code_end) {
-      decode_ok = find_instruction_with_mem_operand_ex(code_start,code_end,&scratch_ctx,0x10b,(void *)0x0);
-      if (decode_ok == FALSE) {
-        code_start = code_start + 1;
+  // AutoDoc: Fetch the cached `[func_start, func_end)` range associated with this string ID.
+  func_cursor = (u8 *)(&refs->xcalloc_zero_size)[id].func_start;
+  if (func_cursor != (u8 *)0x0) {
+    func_end = (u8 *)(&refs->xcalloc_zero_size)[id].func_end;
+    while (func_cursor < func_end) {
+      mov_found = find_instruction_with_mem_operand_ex(func_cursor,func_end,&scratch_ctx,0x10b,(void *)0x0);
+      if (mov_found == FALSE) {
+        func_cursor = func_cursor + 1;
       }
       else {
         if (((byte)scratch_ctx.prefix.decoded.rex & 0x48) != 0x48) {
+        // AutoDoc: Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.
           if ((scratch_ctx.prefix.decoded.flags2 & 1) == 0) {
+          // AutoDoc: Without DF2 there is no displacement to recompute, so abort unless the caller insisted on a range.
             if (mem_range_start == (void *)0x0) {
               return (u8 *)0x0;
             }
           }
           else {
-            referenced_addr = (u8 *)scratch_ctx.mem_disp;
+            candidate_addr = (u8 *)scratch_ctx.mem_disp;
             if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-              referenced_addr = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
+            // AutoDoc: RIP-relative ModRM forms need the extra `instruction + instruction_size` correction.
+              candidate_addr = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
                        scratch_ctx.instruction_size;
             }
-            if ((mem_range_start <= referenced_addr) && (referenced_addr <= (u8 *)((long)mem_range_end + -4))) {
-              return referenced_addr;
+            if ((mem_range_start <= candidate_addr) && (candidate_addr <= (u8 *)((long)mem_range_end + -4))) {
+            // AutoDoc: Treat the range as inclusive of the start and exclusive of the four-byte tail so we only return pointers inside the blob.
+              return candidate_addr;
             }
           }
         }
-        code_start = code_start + scratch_ctx.instruction_size;
+        func_cursor = func_cursor + scratch_ctx.instruction_size;
       }
     }
   }

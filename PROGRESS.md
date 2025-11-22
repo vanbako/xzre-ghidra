@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-22
+- Session `OP3`: renamed the decoder scratch temps across the string/MOV/ADD helpers, expanded each AutoDoc (plus inline comments) to explain the instrumentation, sliding-window predicate, and RIP-relative range tests, and reran `./scripts/refresh_xzre_project.sh` twice so the inline injection finished cleanly (locals rename report stayed green).
+- Next: roll the same treatment into `OP4` (ELF pointer & string crossovers) now that the memory-operand sweepers are documented.
+
 ## 2025-11-21
 - Inline AutoDocs: taught `metadata/functions_autodoc.json` to store `plate` + `inline` blocks, updated the Ghidra scripts/export helpers to understand the new format, extended `apply_ghidra_comments_to_decomp.py` to inject `// AutoDoc:` inline notes, wired the refresh pipeline to feed the metadata into that script, and re-ran `./scripts/refresh_xzre_project.sh` so the exported `xzregh/*.c` now pick up the metadata-driven inline comments automatically.
 - Next: migrate any remaining hand-written inline notes into `metadata/functions_autodoc.json` so future refreshes keep them stable, then continue OP3 work.

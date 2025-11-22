@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Specialised scanner for `add [mem],reg`: decodes forward byte-by-byte until opcode `0x103` appears with a memory ModRM form.
- * When `mem_address` is supplied it also requires DF2 to show a displacement and the recomputed RIP-relative address to match.
- * Returns TRUE with `dctx` still on the ADD so callers can read the increment immediate.
+ * AutoDoc: ADD predicate for register-to-memory increments.
+ * It wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.
+ * If `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.
  */
 
 #include "xzre_types.h"
@@ -16,15 +16,16 @@ BOOL find_add_instruction_with_mem_operand
                (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_address)
 
 {
-  BOOL decode_ok;
-  long clear_idx;
-  dasm_ctx_t *zero_ctx;
+  BOOL add_found;
+  long ctx_clear_idx;
+  dasm_ctx_t *ctx_clear_cursor;
   dasm_ctx_t scratch_ctx;
   
-  zero_ctx = &scratch_ctx;
-  for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx->instruction = 0;
-    zero_ctx = (dasm_ctx_t *)((long)&zero_ctx->instruction + 4);
+  ctx_clear_cursor = &scratch_ctx;
+  // AutoDoc: Keep the scratch decoder clean so each scan starts from a known state.
+  for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
+    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &scratch_ctx;
@@ -33,10 +34,12 @@ BOOL find_add_instruction_with_mem_operand
     if (code_end <= code_start) {
       return FALSE;
     }
-    decode_ok = x86_dasm(dctx,code_start,code_end);
-    if ((((decode_ok != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&
+    add_found = x86_dasm(dctx,code_start,code_end);
+    // AutoDoc: Only accept opcode 0x103 (ADD r/m64,r64) when it actually targets memory.
+    if ((((add_found != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&
         (((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000)) &&
        ((mem_address == (void *)0x0 ||
+       // AutoDoc: Optionally demand DF2 plus the RIP-relative displacement that lands on the requested pointer.
         ((((dctx->prefix).decoded.flags2 & 1) != 0 &&
          ((u8 *)mem_address == dctx->instruction + dctx->instruction_size + dctx->mem_disp))))))
     break;
