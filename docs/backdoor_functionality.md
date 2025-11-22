@@ -157,6 +157,108 @@ flowchart TD
     run_cmds --> loghook
 ```
 
+## Struct Layouts (Mermaid)
+Understanding the backdoor’s internal structs makes it easier to trace how state flows between the loader, hooks, and payload handlers. The diagrams below capture the layouts and relationships that matter most in this document.
+
+### `backdoor_hooks_data_t` Container
+Lives in liblzma’s `.data` segment and glues all loader state together.
+
+```mermaid
+flowchart LR
+    hooks["backdoor_hooks_data_t (.data blob)"]
+    ldso["ldso_ctx_t\nld.so audit / GOT snapshot"]
+    global_ctx["global_context_t\nruntime shared by hooks"]
+    imports["imported_funcs_t\nresolved libcrypto helpers"]
+    sshdctx["sshd_ctx_t\nmonitor hook metadata"]
+    libc["libc_imports_t\nread/write/pselect/exit"]
+    logctx["sshd_log_ctx_t\nmm_log_handler state"]
+    payload["signed_data_size + signed_data[]\nattacker-signed payload tail"]
+
+    hooks --> ldso
+    hooks --> global_ctx
+    hooks --> imports
+    hooks --> sshdctx
+    hooks --> libc
+    hooks --> logctx
+    hooks --> payload
+```
+
+### `global_context_t` Runtime State
+Authoritative runtime store every hook consults: imports, sshd/monitor metadata, payload buffers, and secret-data progress.
+
+```mermaid
+flowchart LR
+    global["global_context_t"]
+    imports["Imports\n- imported_funcs_t *\n- libc_imports_t *"]
+    sshdmeta["SSHD metadata\n- sshd_ctx_t *\n- sensitive_data *\n- sshd_log_ctx_t *\n- monitor **slot\n- sshd_offsets_t"]
+    knobs["Guards/flags\n- uses_endbr64\n- disable_backdoor\n- exit_flag\n- caller_uid"]
+    strings["String anchors\n- ssh_rsa_cert_alg\n- rsa_sha2_256_alg"]
+    bounds["Bounds\n- sshd text/data start/end\n- liblzma text start/end\n- sshd_main_entry"]
+    payload["Payload streaming\n- payload_buffer*\n- payload_buffer_size\n- payload_bytes_buffered\n- payload_ctx*\n- payload_state\n- sshd_host_pubkey_idx"]
+    sockbuf["Socket staging\n- sock_read_len\n- sock_read_buf[64]"]
+    secret["Secret-data tracking\n- encrypted_secret_data[57]\n- shift_operation_flags[31]\n- secret_bits_filled"]
+
+    global --> imports
+    global --> sshdmeta
+    global --> knobs
+    global --> strings
+    global --> bounds
+    global --> payload
+    global --> sockbuf
+    global --> secret
+    payload --> sockbuf
+```
+
+### `sshd_payload_ctx_t` Payload Blob
+Represents the ChaCha-decrypted command blob produced by `mm_answer_keyallowed_hook`.
+
+```mermaid
+classDiagram
+    class sshd_payload_ctx_t {
+        +payload_total_size : u16
+        +signed_header_prefix[0x39]
+        +command_type : u8
+        +ed448_signature[0x72]
+        +body_payload_offset : u16
+        +payload_body[]
+    }
+```
+
+### `monitor_data_t` Elevation Bundle
+Argument block handed to `sshd_proxy_elevate` after `run_backdoor_commands` parses the opcode and arguments.
+
+```mermaid
+classDiagram
+    class monitor_data_t {
+        +cmd_type : u32
+        +args : cmd_arguments_t *
+        +rsa_n : const BIGNUM *
+        +rsa_e : const BIGNUM *
+        +payload_body : u8 *
+        +payload_body_size : u16
+        +rsa : RSA *
+    }
+```
+
+### `elf_handles_t` Parsed Images
+Helper struct produced by the loader so every pass can touch the same parsed ELF descriptors without re-reading `r_debug`.
+
+```mermaid
+flowchart TD
+    handles["elf_handles_t"]
+    sshd["elf_info_t\nsshd"]
+    ldso["elf_info_t\nld-linux.so"]
+    libc["elf_info_t\nlibc"]
+    liblzma["elf_info_t\nliblzma"]
+    libcrypto["elf_info_t\nlibcrypto"]
+
+    handles --> sshd
+    handles --> ldso
+    handles --> libc
+    handles --> liblzma
+    handles --> libcrypto
+```
+
 ## Dynamic RE Prereqs & Tips
 - Keys and payloads: you need a valid Ed448 signing key and a payload encrypted with the baked-in ChaCha key/IV pairs (`secret_data_get_decrypted` unwraps the public key and keying material). Without a valid signature on the modulus-encoded payload, `run_backdoor_commands` will fall back to the host OpenSSL routines.
 - Imports and globals: the loader and hooks expect resolved libcrypto/libc imports and a non-null `xzre_globals` with payload buffers. If you instrument dynamically, ensure the headless refresh has applied metadata so imports resolve, or patch the import table in-memory to point at real OpenSSL/libc functions before invoking the hooks.
