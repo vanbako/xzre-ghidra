@@ -2378,22 +2378,22 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "func_start",
+        "name": "xref_func_start",
         "original": "pvVar1",
         "type": "void *"
       },
       {
-        "name": "ok",
+        "name": "slot_valid",
         "original": "BVar2",
         "type": "BOOL"
       },
       {
-        "name": "rela_slot",
+        "name": "rela_match",
         "original": "pEVar3",
         "type": "Elf64_Rela *"
       },
       {
-        "name": "relr_slot",
+        "name": "relr_match",
         "original": "pEVar4",
         "type": "Elf64_Relr *"
       }
@@ -2532,17 +2532,17 @@
         "type": "EncodedStringId"
       },
       {
-        "name": "decode_ok",
+        "name": "telemetry_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "string_ptr",
+        "name": "string_cursor",
         "original": "pcVar2",
         "type": "char *"
       },
       {
-        "name": "xref",
+        "name": "xref_site",
         "original": "puVar3",
         "type": "u8 *"
       }
@@ -2568,17 +2568,17 @@
         "type": "EncodedStringId"
       },
       {
-        "name": "range_end",
+        "name": "range_table_end",
         "original": "ppvVar1",
         "type": "void **"
       },
       {
-        "name": "entry_xref",
+        "name": "xref_site",
         "original": "pdVar2",
         "type": "u8 *"
       },
       {
-        "name": "range_xref",
+        "name": "slot_reloc",
         "original": "pEVar3",
         "type": "void *"
       },
@@ -2588,42 +2588,42 @@
         "type": "EncodedStringId"
       },
       {
-        "name": "decoded",
+        "name": "insn_decoded",
         "original": "BVar5",
         "type": "BOOL"
       },
       {
-        "name": "code_segment_start",
+        "name": "text_segment_start",
         "original": "code_start",
         "type": "u8 *"
       },
       {
-        "name": "string_ptr",
+        "name": "string_cursor",
         "original": "pcVar6",
         "type": "char *"
       },
       {
-        "name": "xref_addr",
+        "name": "xref_instruction",
         "original": "puVar7",
         "type": "u8 *"
       },
       {
-        "name": "range_iter",
+        "name": "range_slot",
         "original": "ppvVar8",
         "type": "void **"
       },
       {
-        "name": "target_addr",
+        "name": "candidate_addr",
         "original": "pdVar9",
         "type": "u8 *"
       },
       {
-        "name": "rela_cursor",
+        "name": "rela_slot",
         "original": "pEVar10",
         "type": "Elf64_Rela *"
       },
       {
-        "name": "scan_ctx",
+        "name": "scratch_ctx",
         "original": "pdVar11",
         "type": "dasm_ctx_t *"
       },
@@ -2638,7 +2638,7 @@
         "type": "string_item_t *"
       },
       {
-        "name": "code_segment_end",
+        "name": "text_segment_end",
         "original": "code_end",
         "type": "u8 *"
       },
@@ -2648,7 +2648,7 @@
         "type": "void **"
       },
       {
-        "name": "insn_cursor",
+        "name": "decode_cursor",
         "original": "pdVar15",
         "type": "u8 *"
       },

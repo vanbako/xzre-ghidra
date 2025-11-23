@@ -95,9 +95,9 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `101120_find_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-22 (OP3) – Clarified the LEA-vs-MOV handoff and inserted the inline comment that explains why the MOV predicate re-runs with opcode `0x10b`. |
 | `101170_find_add_instruction_with_mem_operand` | `opco_patt` | 1 | 2025-11-22 (OP3) – Synced the scratch decoder locals, documented the opcode `0x103` + ModRM requirements, and noted the optional RIP comparison inline. |
 | `102C60_find_addr_referenced_in_mov_instruction` | `opco_patt` | 1 | 2025-11-22 (OP3) – Introduced `func_cursor/func_end`, described the 32-bit MOV/DF2 gating, and added inline commentary for the RIP-relative recompute and range test. |
-| `102A50_elf_find_function_pointer` | `opco_patt` | 0 |  |
-| `102D30_elf_find_string_references` | `opco_patt` | 0 |  |
-| `1032C0_elf_find_string_reference` | `opco_patt` | 0 |  |
+| `102A50_elf_find_function_pointer` | `opco_patt` | 1 | 2025-11-23 (OP4) – Documented the RELA/RELR slot hunt, renamed the slot/xref temps, and annotated the RELRO + ENDBR checks. |
+| `102D30_elf_find_string_references` | `opco_patt` | 1 | 2025-11-23 (OP4) – Clarified the catalogue builder loops, renamed the range/xref temps, and added inline notes for the rodata/text/reloc passes. |
+| `1032C0_elf_find_string_reference` | `opco_patt` | 1 | 2025-11-23 (OP4) – Captured the telemetry gate + rodata walk, renamed the temps, and documented the LEA search inline. |
 | `101210_fake_lzma_free` | `elf_mem` | 0 |  |
 | `101240_elf_contains_vaddr_impl` | `elf_mem` | 0 |  |
 | `1013A0_elf_contains_vaddr` | `elf_mem` | 0 |  |

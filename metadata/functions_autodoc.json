@@ -21,12 +21,85 @@
   "elf_contains_vaddr": "Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader\nfunnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a\npointer falls outside the parsed ELF image.",
   "elf_contains_vaddr_impl": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the\nrequested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recurses when the\nrange straddles multiple segments so partial overlaps are rechecked piecemeal.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside\nthe mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to\ndifferentiate text, data, and RELRO spans.",
   "elf_contains_vaddr_relro": "Combines `elf_contains_vaddr` with the GNU_RELRO metadata harvested during `elf_parse`. The range must sit inside a read-only\nPT_LOAD (PF_R), and the module must have advertised a RELRO segment; if so the helper also verifies that `[vaddr, vaddr+size)`\nfalls within the page-aligned RELRO window cached in `elf_info_t`. Anything outside that protected span returns FALSE, which\nprevents the loader from treating writable data as RELRO by mistake.",
-  "elf_find_function_pointer": "Given a populated string-reference entry, copies its `func_start`/`func_end` and searches RELA (then RELR) for a relocation that targets the function, treating the relocation address as the writable function-pointer slot.\nThe slot must live in RELRO (`elf_contains_vaddr_relro` enforces this); if the runtime flagged ENDBR usage, the referenced code is revalidated with `is_endbr64_instruction` before returning TRUE.\nReturns FALSE when the xref is missing, no relocation is found, or the slot is outside RELRO.",
+  "elf_find_function_pointer": {
+    "plate": "Looks up the string-reference entry keyed by `xref_id`, copies its cached `[func_start, func_end)` range into the caller’s outputs, and then hunts for a relocation that targets that start address.\nIt prefers RELA records (matching `r_addend` against the function pointer) and falls back to RELR bitmaps when the addend table is missing; whichever relocation hits becomes the writable slot returned via `pOutFptrAddr`.\nSuccess requires that slot to sit inside GNU_RELRO and, when CET telemetry says sshd uses ENDBR, a final `is_endbr64_instruction` check ensures the callee still begins with ENDBR so we never patch a stale helper. Missing xrefs or relocations immediately return FALSE.",
+    "inline": [
+      {
+        "match": "rela_match = elf_find_rela_reloc(",
+        "match_type": "wildcard",
+        "comment": "Prefer RELA so we match the explicit addend/GOT slot before bothering with the packed RELR table."
+      },
+      {
+        "match": "relr_match = elf_find_relr_reloc(",
+        "match_type": "wildcard",
+        "comment": "RELR fallback covers PIE builds where the GOT slot only appears inside the bitmap run."
+      },
+      {
+        "match": "slot_valid = elf_contains_vaddr_relro(",
+        "match_type": "wildcard",
+        "comment": "Only hand back slots inside GNU_RELRO; anything outside hardened memory is rejected."
+      },
+      {
+        "match": "if (ctx->uses_endbr64 != FALSE) {",
+        "match_type": "wildcard",
+        "comment": "CET builds expect ENDBR at entry, so double-check the cached function really still starts with it."
+      }
+    ]
+  },
   "elf_find_rela_reloc": "Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nA pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present\nthey force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index.\nFailing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was\nprovided, stores the position it stopped at.",
   "elf_find_relr_reloc": "Performs the same search as `elf_find_rela_reloc` but against the packed RELR format. It replays the RELR decoding algorithm\n(literal entry vs bitmap entry), sanity-checks each decoded pointer with `elf_contains_vaddr`, compares the pointed-to value\nagainst the requested target address, and optionally enforces a lower/upper bound plus an iteration cursor via the extra\nargument registers. Returning NULL means there were no RELR records, the address never appeared in the run, or one of the\ndecoded pointers failed validation.",
   "elf_find_string": "Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or constrain the search to a suffix of the segment.\n\nThe scan is gated by `secret_data_append_from_call_site`: if the telemetry helper returns FALSE the routine skips the walk entirely, ensuring rodata scrapes are always reflected in the secret-data log.\n",
-  "elf_find_string_reference": "Single-shot helper for the string catalogue that emits secret-data telemetry, then iterates `elf_find_string` until the requested `encoded_string_id` is found.\nFor each occurrence it invokes `find_string_reference` between `code_start` and `code_end`, returning the first instruction that materialises the literal or NULL if none exist in that range.",
-  "elf_find_string_references": "Builds the 27-entry `string_references_t` catalogue used by the loader heuristics.\nSeeds each entry with its `EncodedStringId`, walks .rodata via `elf_find_string`, and records the first LEA that materialises each literal with `find_string_reference`.\nThen sweeps `.text` with `x86_dasm`, tightening each entry's `func_start`/`func_end` around calls, PLT/JMP stubs, and RIP-relative LEAs that target the recorded xrefs, and finally reconciles the ranges against RELA/RELR relocations and the code-segment bounds so later scans can trust the table.",
+  "elf_find_string_reference": {
+    "plate": "Single-slot helper for the string catalogue. It emits a secret-data breadcrumb, then repeatedly calls `elf_find_string` (resuming from the last rodata pointer) until the requested `encoded_string_id` is encountered.\nEach discovery is checked with `find_string_reference` inside `[code_start, code_end)`, and the first instruction that materialises the literal is returned so later passes can clamp function ranges around it. Telemetry failures or missing xrefs return NULL.",
+    "inline": [
+      {
+        "match": "telemetry_ok = secret_data_append_from_call_site(",
+        "match_type": "wildcard",
+        "comment": "Abort the scan if we cannot log the breadcrumb—string hunts only run when the secret-data recorder is active."
+      },
+      {
+        "match": "while (string_cursor = elf_find_string(",
+        "match_type": "wildcard",
+        "comment": "Walk `.rodata`, resuming from the previous pointer so every occurrence of the encoded literal is examined."
+      },
+      {
+        "match": "xref_site = find_string_reference(",
+        "match_type": "wildcard",
+        "comment": "Return the first LEA/MOV inside the requested code window that materialises this literal."
+      }
+    ]
+  },
+  "elf_find_string_references": {
+    "plate": "Populates the 27-entry `string_references_t` table that anchors every sshd heuristic.\nIt seeds each slot with its fixed `EncodedStringId`, scrapes `.rodata` with `elf_find_string`, and latches the first LEA that materialises every literal via `find_string_reference`.\nThe routine then decodes `.text` start-to-finish with `x86_dasm`, shrinking each `[func_start, func_end)` around CALLs, PLT/JMPs, and RIP-relative LEAs that hit the recorded xrefs, and finally folds in RELA/RELR relocation hits plus code-segment bounds so the resulting ranges are trustworthy and always executable.",
+    "inline": [
+      {
+        "match": "(entry_cursor->xcalloc_zero_size).string_id = string_id_seed;",
+        "match_type": "wildcard",
+        "comment": "Pre-seed every slot with the encoded literal it should track before the heavy scans begin."
+      },
+      {
+        "match": "xref_instruction = find_string_reference(",
+        "match_type": "wildcard",
+        "comment": "Record the first LEA/MOV that materialises each literal so the later range tightening has an anchor."
+      },
+      {
+        "match": "insn_decoded = x86_dasm(",
+        "match_type": "wildcard",
+        "comment": "Walk the entire text range with the decoder, tightening function bounds whenever a CALL/JMP/LEA targets our xrefs."
+      },
+      {
+        "match": "while (rela_slot = elf_find_rela_reloc(",
+        "match_type": "wildcard",
+        "comment": "Sweep the relocation tables too so GOT/PLT slots that touch the literal keep the enclosing range in view."
+      },
+      {
+        "match": "if (text_segment_end <= scratch_ctx) {",
+        "match_type": "wildcard",
+        "comment": "Clamp any straggling ranges/xrefs back inside `.text` so later scans cannot wander past executable memory.",
+        "occurrence": 1
+      }
+    ]
+  },
   "elf_get_code_segment": "Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent calls use the cached values to avoid rescanning the headers.\n\nBefore touching the headers it emits a `secret_data_append_from_address` telemetry record and refuses to proceed if that hook fails, keeping the text-range discovery tied to the secret-data accounting path.\n",
   "elf_get_data_segment": "Walks every PT_LOAD segment looking for the last read/write mapping (PF_W|PF_R). Once found it caches three pieces of\ninformation: the base of the mapped data (`data_segment_start`), the amount of padding between the end of the file-backed bytes\nand the next page boundary (`data_segment_alignment`), and the total size of the aligned segment. Callers either request the\ntrue segment span (`get_alignment == FALSE`) or the padding region (when TRUE), which is where the implant later tucks the\n`backdoor_hooks_data_t` structure.",
   "elf_get_got_symbol": "Identical pattern but aimed at the main RELA table: it requires `flags & 2` (meaning RELA records were found) and then calls\n`elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT). Successful lookups hand back the writable GOT slot for the\nsymbol so the loader can redirect it; failure means the symbol was not imported through a GOT relocation.",

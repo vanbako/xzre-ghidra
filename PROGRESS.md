@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-23
+- Session `OP4`: reversed `elf_find_function_pointer`, `elf_find_string_references`, and `elf_find_string_reference` by renaming the slot/range/xref register temps in `metadata/xzre_locals.json`, upgrading their AutoDocs to full `plate+inline` entries, and adding inline comment placements that explain the RELA/RELR hunt plus the rodata/text sweeps. Ran `./scripts/refresh_xzre_project.sh` so the metadata synced into Ghidra/xzregh, verified the inline comments injected correctly, and updated FUNCTION_PROGRESS/notes (locals rename report stayed clean).
+- Next: start `EL1` (ELF containment + parser entry) now that the opcode batch is wrapped and the string catalogue helpers are documented.
+
 ## 2025-11-22
 - Session `OP3`: renamed the decoder scratch temps across the string/MOV/ADD helpers, expanded each AutoDoc (plus inline comments) to explain the instrumentation, sliding-window predicate, and RIP-relative range tests, and reran `./scripts/refresh_xzre_project.sh` twice so the inline injection finished cleanly (locals rename report stayed green).
 - Next: roll the same treatment into `OP4` (ELF pointer & string crossovers) now that the memory-operand sweepers are documented.
