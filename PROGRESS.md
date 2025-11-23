@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `EL1`: reviewed `fake_lzma_free`, the `elf_contains_vaddr*` helpers, `is_gnu_relro`, and `elf_parse`; renamed the ambiguous register temps (recursion depth/page windows/program-header cursors) plus the struct-wipe pointer in `metadata/xzre_locals.json`, upgraded every AutoDoc entry to `plate+inline` form, and threaded inline comments through the exported C so the struct wipe, PT_DYNAMIC validation, RELRO obfuscation, and range-splitting behavior are obvious in `xzregh/*.c`. Ran `./scripts/refresh_xzre_project.sh` to sync the metadata into the headless project/exported sources and updated FUNCTION_PROGRESS accordingly (locals rename report remained clean).
+- Next: move to `EL2` (symbol + allocator priming) so the rest of the ELF utilities have the same locals/inline coverage before diving into the sshd discovery batches.
+
+## 2025-11-23
 - Session `JMP-cleanup`: added `scripts/remove_hook_jumptable_warnings.py` plus a new refresh step so the exported hook wrappers automatically replace Ghidra’s false “Could not recover jumptable” warnings with an inline explanation of the tail-call back into the preserved OpenSSL/mm handlers; reran `./scripts/refresh_xzre_project.sh` so the change propagated into `xzregh/*.c`, the portable archive, and the rename/rodata outputs (rename report stayed green).
 - Next: extend the helper if any other hook wrappers pick up the same warning pattern, or revisit this once Ghidra exposes a knob to suppress the indirect-jump detection without post-processing.
 

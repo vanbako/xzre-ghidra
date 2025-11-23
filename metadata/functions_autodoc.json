@@ -17,8 +17,36 @@
   "count_pointers": "Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries until it hits either a NULL or\nthe allocation boundary. Sensitive-data heuristics call it when walking sshd tables whose length isn’t stored explicitly.",
   "decrypt_payload_message": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_data`,\nit copies the plaintext body into the staging buffer, bumps `current_data_size`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.",
   "dsa_key_hash": "Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with\nbignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized\nBIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.",
-  "elf_contains_vaddr": "Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader\nfunnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a\npointer falls outside the parsed ELF image.",
-  "elf_contains_vaddr_impl": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the\nrequested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recurses when the\nrange straddles multiple segments so partial overlaps are rechecked piecemeal.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside\nthe mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to\ndifferentiate text, data, and RELRO spans.",
+  "elf_contains_vaddr": {
+    "plate": "Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader funnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a pointer falls outside the parsed ELF image.",
+    "inline": [
+      {
+        "match": "range_ok = elf_contains_vaddr_impl(",
+        "match_type": "wildcard",
+        "comment": "Delegate the heavy lifting (alignment, recursion depth, and flag filtering) to the recursive helper."
+      }
+    ]
+  },
+  "elf_contains_vaddr_impl": {
+    "plate": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire interval is proven resident.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.",
+    "inline": [
+      {
+        "match": "segment_page_floor = (Elf64_Ehdr *)(segment_runtime_start & 0xfffffffffffff000);",
+        "match_type": "wildcard",
+        "comment": "Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages."
+      },
+      {
+        "match": "if ((segment_page_ceil < range_limit) && (segment_page_floor > vaddr)) {",
+        "match_type": "wildcard",
+        "comment": "Range pierces both edges of this segment—split it into left/right halves and validate them recursively."
+      },
+      {
+        "match": "else if (segment_page_ceil < range_limit) {",
+        "match_type": "wildcard",
+        "comment": "Otherwise advance `vaddr` past the current segment and continue checking the remaining bytes."
+      }
+    ]
+  },
   "elf_contains_vaddr_relro": "Combines `elf_contains_vaddr` with the GNU_RELRO metadata harvested during `elf_parse`. The range must sit inside a read-only\nPT_LOAD (PF_R), and the module must have advertised a RELRO segment; if so the helper also verifies that `[vaddr, vaddr+size)`\nfalls within the page-aligned RELRO window cached in `elf_info_t`. Anything outside that protected span returns FALSE, which\nprevents the loader from treating writable data as RELRO by mistake.",
   "elf_find_function_pointer": {
     "plate": "Looks up the string-reference entry keyed by `xref_id`, copies its cached `[func_start, func_end)` range into the caller’s outputs, and then hunts for a relocation that targets that start address.\nIt prefers RELA records (matching `r_addend` against the function pointer) and falls back to RELR bitmaps when the addend table is missing; whichever relocation hits becomes the writable slot returned via `pOutFptrAddr`.\nSuccess requires that slot to sit inside GNU_RELRO and, when CET telemetry says sshd uses ENDBR, a final `is_endbr64_instruction` check ensures the callee still begins with ENDBR so we never patch a stale helper. Missing xrefs or relocations immediately return FALSE.",
@@ -105,12 +133,45 @@
   "elf_get_plt_symbol": "Looks up the PLT thunk for a given symbol by delegating to `elf_get_reloc_symbol` with relocation type 7 (R_X86_64_JUMP_SLOT).\nIt first makes sure the module actually advertised a PLT relocation table (flag bit 1) and caches its size, then returns the\nGOT/PLT entry that will be overwritten during hook installation. NULL means either the relocation table was absent or the\nrequested symbol never appeared there.",
   "elf_get_reloc_symbol": "Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT) and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch GOT/PLT entries in place.\n\nEach call starts by logging the lookup with `secret_data_append_from_address`, and it immediately aborts if the telemetry helper reports failure. That keeps relocation patching tied to the secret-data accounting path so the loader never quietly rewrites GOT/PLT entries when the recorder is disabled.\n",
   "elf_get_rodata_segment": "Locates the first read-only PT_LOAD segment that lives entirely after the executable code. It first asks `elf_get_code_segment` for the text range so it can ignore overlapping pages, then scans for PF_R-only segments, page-aligns their bounds, and picks the lowest segment whose start is beyond the end of `.text`. The result is cached in `elf_info_t` and handed to callers alongside its size so later routines (string searches, RELRO probes) can reuse the computed window.\n\nThe helper begins by logging a `secret_data_append_from_call_site` record; failure to emit that telemetry causes the search to abort, so the rodata queries only run when the secret-data recorder is active.\n",
-  "elf_parse": "Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address,\nlocates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash\nbuckets, version records, and GNU_RELRO metadata. Each pointer retrieved from the dynamic table is validated with\n`elf_contains_vaddr` so forged headers are rejected.\n\nIt also enforces invariants such as 'only one PT_GNU_RELRO segment', derives the number of dynamic entries, and flips feature\nbits (`flags`) so later helpers know whether RELR, versym, or gnurelro data is present. Failure to locate the dynamic segment,\nfind the required headers, or keep derived pointers inside mapped memory causes the parse to abort with FALSE.",
+  "elf_parse": {
+    "plate": "Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address, locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash buckets, version records, and GNU_RELRO metadata. Each derived pointer is validated with `elf_contains_vaddr`, and the parser keeps feature bits synchronized so later helpers know which tables were present.\n\nIt enforces invariants such as \"only one PT_GNU_RELRO segment\", derives the number of dynamic entries, honours BIND_NOW/RELR/versym toggles, and refuses to trust any header that leaves the module boundaries.",
+    "inline": [
+      {
+        "match": "for (dynamic_phdr_idx = 0x3e; dynamic_phdr_idx != 0; dynamic_phdr_idx = dynamic_phdr_idx + -1)",
+        "match_type": "wildcard",
+        "comment": "Clear the cached `elf_info_t` with a fixed-count wipe so partially parsed state never leaks across runs."
+      },
+      {
+        "match": "range_valid = elf_contains_vaddr(elf_info,vaddr,phnum,4);",
+        "match_type": "wildcard",
+        "comment": "Reject the ELF immediately if the PT_DYNAMIC payload does not live entirely inside readable memory."
+      },
+      {
+        "match": "if (strtab_base <= ehdr) {",
+        "match_type": "wildcard",
+        "comment": "Convert relative pointers (PIE layout) into process addresses before recording them in `elf_info_t`."
+      },
+      {
+        "match": "if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||",
+        "match_type": "wildcard",
+        "comment": "Every relocation/metadata pointer gets revalidated before harvesting the GNU hash bucket/chain tables."
+      }
+    ]
+  },
   "elf_symbol_get": "Symbol resolver that trusts the GNU hash table the loader extracted earlier. After setting a telemetry bit it walks each hash\nbucket, validates the bucket and chain addresses, and replays the classic GNU hash lookup to pull `Elf64_Sym` entries out of\n`.dynsym`. When a candidate symbol has a non-zero value and section index, the helper hashes the associated string with\n`get_string_id` and compares it against the requested encoded id.\n\nIf a symbol version is supplied it additionally consults `.gnu.version`/`.gnu.version_d`: the version index is read from\n`versym`, then matched against the verifier definitions by walking the linked `verdef` list and comparing the underlying string\nid. Returning NULL means either the target symbol is missing, the module did not advertise GNU hash+version tables, or the\nstring/relocation pointers failed validation.",
   "elf_symbol_get_addr": "Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are\nnon-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates\neither the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.",
   "extract_payload_message": "Searches an sshbuf blob for either `\"ssh-rsa-cert-v01@openssh.com\"` or `\"rsa-sha2-256\"`, using the surrounding length\nfields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at\n0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point\ndirectly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly\nhow many bytes to peel off.",
   "fake_lzma_alloc": "Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as\nan `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever\n`elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it\nonly masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.",
-  "fake_lzma_free": "No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub\ninto `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other\nthan prove that the fake allocator is still active.\n\nHaving an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a\nreliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.",
+  "fake_lzma_free": {
+    "plate": "No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other than prove that the fake allocator is still active.\n\nHaving an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.",
+    "inline": [
+      {
+        "match": "return;",
+        "comment": "Both `opaque` and `ptr` are ignored on purpose—the stub merely signals that the fake allocator table is still installed.",
+        "occurrence": 1
+      }
+    ]
+  },
   "fd_read": "Wraps libc’s read with retry logic. It refuses to run without both `read` and `__errno_location`, loops on EINTR, and aborts\nwith -1 when the helper sees EOF before the requested byte count. Successful reads consume the entire length so callers can\ntreat any non-zero return as \"buffer filled\".",
   "fd_write": "Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short writes as fatal so callers\neither send the entire buffer or receive -1. It is the plumbing used whenever the implant forges monitor messages.",
   "find_add_instruction_with_mem_operand": {
@@ -442,7 +503,15 @@
       }
     ]
   },
-  "is_gnu_relro": "Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller\nsupplied `addend` (always `0xa0000000`) and checks for the magic constant, which makes the instruction stream look less like a\nstraightforward RELRO probe in the object file.",
+  "is_gnu_relro": {
+    "plate": "Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller supplied `addend` (always `0xa0000000`) plus 1 and checks for the wrapped constant, which makes the instruction stream look less like a straightforward RELRO probe in the object file.",
+    "inline": [
+      {
+        "match": "return (BOOL)(p_type + 1 + addend == 0x474e553);",
+        "comment": "The arithmetic bakes the real magic (`0x6474e552`) into a wrapped constant so static scanners never see the literal."
+      }
+    ]
+  },
   "is_range_mapped": "Userland page-probe that avoids importing `mincore(2)`. The helper aligns the requested address downward, then walks one page at\na time toward `addr + length`, invoking the host's `pselect` with NULL fd sets and the page pointer passed in as the signal mask\nargument. If `pselect` faults with EFAULT the page is unmapped, otherwise the loop continues until every page succeeds. The\nroutine relies on `ctx->libc_imports` to surface both `pselect` and `__errno_location`, and it refuses to touch addresses below\n0x01000000 to avoid probing NULL or vsyscall.",
   "j_tls_get_addr": "Jumps straight into the real `__tls_get_addr` resolver. The backdoor keeps both this wrapper and the trapping stub exported so\nit can redirect GOT entries during setup: hooks call `j_tls_get_addr` when they want the legit resolver, while the relocation\nconstants point at the trapping version until the loader patches things up.",
   "main_elf_parse": "Given a `main_elf_t` that already points at ld.so's ELF header, this routine parses the interpreter, looks up\n`__libc_stack_end`, and then calls `process_is_sshd` to verify that the captured runtime really belongs to sshd. If the checks\npass it stores the resolved `__libc_stack_end` pointer back through `main_elf->__libc_stack_end`, giving later stages an easy\nway to reach sshd's argument/environment block.",

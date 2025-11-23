@@ -98,11 +98,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `102A50_elf_find_function_pointer` | `opco_patt` | 1 | 2025-11-23 (OP4) – Documented the RELA/RELR slot hunt, renamed the slot/xref temps, and annotated the RELRO + ENDBR checks. |
 | `102D30_elf_find_string_references` | `opco_patt` | 1 | 2025-11-23 (OP4) – Clarified the catalogue builder loops, renamed the range/xref temps, and added inline notes for the rodata/text/reloc passes. |
 | `1032C0_elf_find_string_reference` | `opco_patt` | 1 | 2025-11-23 (OP4) – Captured the telemetry gate + rodata walk, renamed the temps, and documented the LEA search inline. |
-| `101210_fake_lzma_free` | `elf_mem` | 0 |  |
-| `101240_elf_contains_vaddr_impl` | `elf_mem` | 0 |  |
-| `1013A0_elf_contains_vaddr` | `elf_mem` | 0 |  |
-| `1013B0_is_gnu_relro` | `elf_mem` | 0 |  |
-| `1013D0_elf_parse` | `elf_mem` | 0 |  |
+| `101210_fake_lzma_free` | `elf_mem` | 1 | 2025-11-23 (EL1) – Clarified the bootstrap stub’s purpose and dropped an inline `return` comment so the fake allocator wiring is obvious. |
+| `101240_elf_contains_vaddr_impl` | `elf_mem` | 1 | 2025-11-23 (EL1) – Renamed the recursion-depth/page-window locals and annotated the alignment + range-splitting paths for overlapping segments. |
+| `1013A0_elf_contains_vaddr` | `elf_mem` | 1 | 2025-11-23 (EL1) – Documented the wrapper role, added inline telemetry about passing work to the recursive helper, and confirmed the flag semantics. |
+| `1013B0_is_gnu_relro` | `elf_mem` | 1 | 2025-11-23 (EL1) – Captured the additive obfuscation for PT_GNU_RELRO and inserted an inline note explaining the wrapped constant. |
+| `1013D0_elf_parse` | `elf_mem` | 1 | 2025-11-23 (EL1) – Renamed the program-header/dynamic-scan locals and added inline comments for the struct wipe, PT_DYNAMIC validation, pointer fixups, and relocation rechecks. |
 | `101880_elf_symbol_get` | `elf_mem` | 0 |  |
 | `101B00_elf_symbol_get_addr` | `elf_mem` | 0 |  |
 | `101B30_c_memmove` | `elf_mem` | 0 |  |

@@ -2311,42 +2311,42 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "range_end",
+        "name": "range_limit",
         "original": "pEVar1",
         "type": "u8 *"
       },
       {
-        "name": "phdr",
+        "name": "load_segment",
         "original": "pEVar3",
         "type": "Elf64_Phdr *"
       },
       {
-        "name": "segment_start",
+        "name": "segment_runtime_start",
         "original": "uVar4",
         "type": "ulong"
       },
       {
-        "name": "segment_page_start",
+        "name": "segment_page_floor",
         "original": "pEVar5",
         "type": "u8 *"
       },
       {
-        "name": "segment_page_end",
+        "name": "segment_page_ceil",
         "original": "pEVar6",
         "type": "u8 *"
       },
       {
-        "name": "phdr_index",
+        "name": "phdr_idx",
         "original": "lVar7",
         "type": "ulong"
       },
       {
-        "name": "depth_param",
+        "name": "recursion_depth",
         "original": "in_R8D",
         "type": "int"
       },
       {
-        "name": "range_ok",
+        "name": "range_fits",
         "original": "BVar2",
         "type": "BOOL"
       }
@@ -2919,7 +2919,7 @@
     ],
     "register_temps": [
       {
-        "name": "min_load_vaddr",
+        "name": "lowest_load_vaddr",
         "original": "uVar21",
         "type": "ulong"
       },
@@ -2929,24 +2929,29 @@
         "type": "ulong"
       },
       {
-        "name": "phdr_idx",
+        "name": "phdr_index",
         "original": "uVar24",
         "type": "uint"
       },
       {
-        "name": "phdrs",
+        "name": "program_headers",
         "original": "pEVar20",
         "type": "Elf64_Phdr *"
       },
       {
-        "name": "phdr_cursor",
+        "name": "phdr_scan",
         "original": "pEVar22",
         "type": "Elf64_Phdr *"
       },
       {
-        "name": "dynamic_phdr_index",
+        "name": "dynamic_phdr_idx",
         "original": "lVar17",
         "type": "long"
+      },
+      {
+        "name": "info_wipe_cursor",
+        "original": "puVar19",
+        "type": "u64 *"
       },
       {
         "name": "dyn_entry_capacity",
@@ -2954,12 +2959,12 @@
         "type": "int"
       },
       {
-        "name": "dyn_index",
+        "name": "dyn_entry_index",
         "original": "iVar16",
         "type": "int"
       },
       {
-        "name": "dyn_cursor",
+        "name": "dyn_entry_fields",
         "original": "pEVar15",
         "type": "Elf64_DynValue *"
       },
@@ -3014,7 +3019,7 @@
         "type": "uint"
       },
       {
-        "name": "gnu_hash_header",
+        "name": "gnu_hash_header_words",
         "original": "puVar25",
         "type": "uint *"
       },
@@ -3040,7 +3045,7 @@
         "replacement": "*(u64 *)(auVar10 + 8)"
       },
       {
-        "name": "range_ok",
+        "name": "range_valid",
         "original": "BVar13",
         "type": "BOOL"
       },
