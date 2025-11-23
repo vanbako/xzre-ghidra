@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `EL5`: tackled `j_tls_get_addr`, the allocator/vtable address helpers, `main_elf_parse`, and `init_elf_entry_ctx`—added the missing `register_temps` entry for the TLS wrapper, promoted each AutoDoc to a `plate+inline` description (covering the sentinel walks, ld.so verification path, and cpuid GOT prep), dropped inline comments into the exported C, and reran `./scripts/refresh_xzre_project.sh` twice (to fix an inline placement) so Ghidra/xzregh/`xzre_ghidra_portable.zip` reflect the new metadata with a clean locals-rename report.
+- Next: close out `elf_mem` with session `EL6` (`get_lzma_allocator`) so every ELF helper has the same locals/inline coverage before pivoting to the sshd discovery batches.
+
+## 2025-11-23
 - Session `EL4`: deep-dived `elf_get_rodata_segment`, `elf_find_string`, `elf_get_data_segment`, `elf_contains_vaddr_relro`, and `is_range_mapped`—renamed their register temps in `metadata/xzre_locals.json`, promoted each AutoDoc to `plate+inline` form (documenting the telemetry gates, PF_R/PF_W sweeps, RELRO clamp, and the `pselect`-based range probe), and reran `./scripts/refresh_xzre_project.sh` twice to land the new inline comments in `xzregh/*`, refresh the portable archive, and keep the locals rename report clean.
 - Next: start session `EL5` (TLS + allocator wrappers) so the remaining ELF utilities carry the same level of locals/inline coverage before pivoting to sshd-recon work.
 

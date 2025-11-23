@@ -724,15 +724,63 @@
       }
     ]
   },
-  "get_elf_functions_address": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives\nnear `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer\nmath lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the\nloader a stable way to reach its helper vtable.",
+  "get_elf_functions_address": {
+    "plate": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives near `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer math lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the loader a stable way to reach its helper vtable.",
+    "inline": [
+      {
+        "match": "table_cursor = (elf_functions_t *)fake_lzma_allocator_offset;",
+        "comment": "Start from the relocation-safe sentinel that ships next to the fake allocator blob so the pointer stays valid pre-patch."
+      },
+      {
+        "match": "for (slot_idx = 0; slot_idx < 0xc; slot_idx = slot_idx + 1) {",
+        "comment": "Advance 12 struct slots (~0x160 bytes) to land on the live dispatch table populated by the loader."
+      }
+    ]
+  },
   "get_lzma_allocator": "Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand\nliblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the\nimplant's `elf_info_t`.",
-  "get_lzma_allocator_address": "Manual pointer arithmetic that recovers the runtime address of the fake `fake_lzma_allocator_t` blob without requiring\nrelocatable absolute addresses. The compiler emits a sentinel (`fake_lzma_allocator`) followed by padding, so this helper starts\nat that symbol and steps through the struct 12 times, effectively adding the baked-in 0x160-byte offset that lands on the real\nallocator instance the loader populated at build time.",
+  "get_lzma_allocator_address": {
+    "plate": "Manual pointer arithmetic that recovers the runtime address of the fake `fake_lzma_allocator_t` blob without requiring relocatable absolute addresses. The compiler emits a sentinel (`fake_lzma_allocator`) followed by padding, so this helper starts at that symbol and steps through the struct 12 times, effectively adding the baked-in 0x160-byte offset that lands on the real allocator instance the loader populated at build time.",
+    "inline": [
+      {
+        "match": "allocator_cursor = (fake_lzma_allocator_t *)fake_lzma_allocator;",
+        "comment": "Start from the relocation-safe sentinel the compiler left embedded right before the real allocator blob."
+      },
+      {
+        "match": "for (slot_idx = 0; slot_idx < 0xc; slot_idx = slot_idx + 1) {",
+        "comment": "Walk 12 struct slots (~0x160 bytes) forward to reach the live allocator instance stage two writes."
+      }
+    ]
+  },
   "get_string_id": "Maps runtime strings to EncodedStringId identifiers without shipping plaintext literals. Each call logs itself via\nsecret_data_append_from_address, clamps the scan to 0x2c bytes, and walks two packed bitmaps (_Lcrc64_clmul_1+0x760 and the\nstring_action_data trie) while repeatedly calling count_bits to compute the next child index. It returns the encoded ID when it\nreaches a terminal node or 0 when the bytes miss the trie, and is used to find SSH banner strings during sshd heuristics.",
   "get_tls_get_addr_random_symbol_got_offset": "Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the canned values associated with the fake `__tls_get_addr`\nsymbol. The loader uses those numbers as the starting point for `update_got_address`, which refines them into the concrete GOT\nentry address.",
   "hook_EVP_PKEY_set1_RSA": "Tap point for EVP_PKEY_set1_RSA so the backdoor sees every RSA handle even when the decrypt hook never fires. It simply calls\nrun_backdoor_commands on the key and then invokes the preserved OpenSSL routine.",
   "hook_RSA_get0_key": "Mirrors the same idea for RSA_get0_key: every consumer that asks OpenSSL for the modulus/exponent triggers run_backdoor_commands\nfirst, letting the implant inspect/track the RSA handle before delegating to the original function.",
   "hook_RSA_public_decrypt": "Replacement for RSA_public_decrypt: it ensures the PLT pointer is resolved, hands the RSA key to run_backdoor_commands (passing\na do_orig flag by reference), and either returns the backdoor’s result or forwards the call to the genuine OpenSSL symbol\ndepending on whether the dispatcher consumed the ciphertext.",
-  "init_elf_entry_ctx": "Seeds an `elf_entry_ctx_t` prior to running the IFUNC resolvers. It records the address of `cpuid_random_symbol`, captures the\ncaller's return address from the saved frame (slot 3), recomputes the GOT anchor offset via `update_got_offset`, primes the\ncpuid GOT index with `update_cpuid_got_index`, and clears the cached `tls_got_entry` so the resolver will refill it. The context\nis later consumed by the GOT patching code that splices the malicious cpuid stub into sshd.",
+  "init_elf_entry_ctx": {
+    "plate": "Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the `cpuid_random_symbol` anchor, copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.",
+    "inline": [
+      {
+        "match": "ctx->cpuid_random_symbol_addr = &_Lrc_read_destroy;",
+        "comment": "Record the benign cpuid resolver's address so GOT math has a stable anchor."
+      },
+      {
+        "match": "(ctx->got_ctx).cpuid_got_slot = (void *)ctx->resolver_frame[3];",
+        "comment": "Lift the resolver's saved return address (slot 3) as the GOT slot that will be patched."
+      },
+      {
+        "match": "update_got_offset(ctx);",
+        "comment": "Recompute the GOT base offset before the hook splices anything into the table."
+      },
+      {
+        "match": "update_cpuid_got_index(ctx);",
+        "comment": "Refresh the cpuid GOT index while the resolver's frame is still intact."
+      },
+      {
+        "match": "(ctx->got_ctx).tls_got_entry = (void *)0x0;",
+        "comment": "Clear the cached TLS entry so the impending hook forces a new `__tls_get_addr` resolution."
+      }
+    ]
+  },
   "init_hooks_ctx": "Primes a transient `backdoor_hooks_ctx_t` before stage two patches the GOT. It always points `hooks_data_addr` at the\n`hooks_data` blob baked into liblzma, zeros the scratch flags, and, when `ctx->shared` is still NULL, drops in the static hook\nentry points (`backdoor_symbind64`, the RSA shims, and the mm_* monitor hooks) before returning 0x65 so the caller can retry\nafter the shared globals are published. Once the shared block exists it simply returns 0, signalling that the structure now\ninherits every pointer from the shared globals.",
   "init_imported_funcs": "Sanity-checks the OpenSSL import table before the hooks are allowed to run. It requires `resolved_imports_count` to equal 0x1d\nand then inspects the `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key` PLT shims. If at least one of them is\nresolved it returns TRUE so later code can jump through the host's libcrypto. When all three slots are still NULL it plants\n`backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps\nwaiting until the imports are ready.",
   "init_ldso_ctx": "Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets\nthe copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`\nso the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with\nthe original ld.so state.",
@@ -781,8 +829,40 @@
       }
     ]
   },
-  "j_tls_get_addr": "Jumps straight into the real `__tls_get_addr` resolver. The backdoor keeps both this wrapper and the trapping stub exported so\nit can redirect GOT entries during setup: hooks call `j_tls_get_addr` when they want the legit resolver, while the relocation\nconstants point at the trapping version until the loader patches things up.",
-  "main_elf_parse": "Given a `main_elf_t` that already points at ld.so's ELF header, this routine parses the interpreter, looks up\n`__libc_stack_end`, and then calls `process_is_sshd` to verify that the captured runtime really belongs to sshd. If the checks\npass it stores the resolved `__libc_stack_end` pointer back through `main_elf->__libc_stack_end`, giving later stages an easy\nway to reach sshd's argument/environment block.",
+  "j_tls_get_addr": {
+    "plate": "Thin trampoline that jumps straight into glibc's `__tls_get_addr`. Stage two keeps both exports (the trapping stub and this wrapper) alive so relocations can point at the trap until the loader patches GOT entries to the legit resolver via `j_tls_get_addr`.",
+    "inline": [
+      {
+        "match": "resolved_tls = __tls_get_addr(ti);",
+        "comment": "Always delegate to glibc—the wrapper only exists so the hook infrastructure has a trusted target."
+      }
+    ]
+  },
+  "main_elf_parse": {
+    "plate": "Parses the saved ld.so headers inside `main_elf_t`, resolves the versioned `__libc_stack_end` symbol, and confirms the captured runtime is sshd before publishing the pointer for later stages. Successful runs hand later hooks a stable way to reach argv/envp via `main_elf->__libc_stack_end`.",
+    "inline": [
+      {
+        "match": "parse_ok = elf_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->ldso);",
+        "comment": "Re-parse ld.so using the cached ELF header so the ldso `elf_info_t` is populated."
+      },
+      {
+        "match": "libc_stack_end_sym = elf_symbol_get(main_elf->elf_handles->ldso,STR_libc_stack_end,STR_GLIBC_2_2_5)",
+        "comment": "Resolve the versioned `__libc_stack_end` symbol from the interpreter image."
+      },
+      {
+        "match": "libc_stack_end_ptr = elf->elfbase->e_ident + libc_stack_end_sym->st_value;",
+        "comment": "Convert the symbol's st_value into a pointer inside ld.so's ELF image (double indirection)."
+      },
+      {
+        "match": "parse_ok = process_is_sshd(elf,*(u8 **)libc_stack_end_ptr);",
+        "comment": "Use `__libc_stack_end` to read sshd's argv/envp pointer and confirm the process really is sshd."
+      },
+      {
+        "match": "*main_elf->__libc_stack_end = *(void **)libc_stack_end_ptr;",
+        "comment": "Publish the resolved pointer so later hooks can reach sshd's stack without redoing the ELF walk."
+      }
+    ]
+  },
   "mm_answer_authpassword_hook": "Handles `MONITOR_REQ_AUTHPASSWORD` by replaying a prebuilt reply buffer whenever the payload provided one, or by\nsynthesizing the four-field success packet when no payload data is pending. The hook emits the reply through\n`fd_write()`, mirrors sshd's bookkeeping by copying the saved dispatch target back into the table at lVar1+0xa0, and\nreturns 1 so the monitor thread believes password authentication finished successfully without ever touching sshd's\npassword logic. Any structural error falls back to libc's `exit()` to keep the daemon from running partially patched.",
   "mm_answer_keyallowed_hook": "Runs the decrypted payload state machine. It first validates `payload_state`, extracts sshbuf chunks from the monitor\nmessage, and when state==0 it copies the signed header into `payload_data`, decrypts it via `secret_data_get_decrypted`,\nand verifies the Ed448 signature against the cached host key. State 1 and 2 append additional chunks until the\nadvertised body_length is consumed, then state 3 interprets the decrypted command: copying payloads for\nmm_answer_keyverify/mm_answer_authpassword, invoking `sshd_proxy_elevate` to run system/PAM commands, or queueing auth\npayloads. On success it patches the monitor dispatch table to point at the attacker's hooks before tail-calling the\ngenuine `mm_answer_keyallowed`; any failure resets `payload_state` (or even exits sshd) so no partially decrypted data\nis reused.",
   "mm_answer_keyverify_hook": "Pulls the canned monitor reply out of the global payload context and writes it straight to the requesting socket via\n`fd_write()`. If the write succeeds it restores the original mm_answer_keyverify pointer so sshd's dispatcher advances\nas if verification succeeded; if it fails the hook invokes libc's `exit()` to avoid leaving sshd mid-patch. Either way\nit never consults sshd's own logic, short-circuiting the verification phase entirely.",

@@ -118,11 +118,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `102150_elf_get_data_segment` | `elf_mem` | 1 | 2025-11-23 (EL4) – renamed the selected-segment locals, expanded the AutoDoc around the PF_W scan + padding math, and annotated the cache hit, segment selection, and alignment branches inline. |
 | `1022D0_elf_contains_vaddr_relro` | `elf_mem` | 1 | 2025-11-23 (EL4) – refreshed the RELRO plate to cover the `p_flags` gate, renamed the relro window temps, and injected inline notes for the PF_R check plus the page-aligned RELRO clamp. |
 | `102370_is_range_mapped` | `elf_mem` | 1 | 2025-11-23 (EL4) – rewrote the AutoDoc around the `pselect` probe, renamed the libc/import/time cursors, and annotated the low-address guard, import validation, probe call, and EFAULT bailouts inline. |
-| `102440_j_tls_get_addr` | `elf_mem` | 0 |  |
-| `102490_get_lzma_allocator_address` | `elf_mem` | 0 |  |
-| `1024F0_get_elf_functions_address` | `elf_mem` | 0 |  |
-| `103CE0_main_elf_parse` | `elf_mem` | 0 |  |
-| `104030_init_elf_entry_ctx` | `elf_mem` | 0 |  |
+| `102440_j_tls_get_addr` | `elf_mem` | 1 | 2025-11-23 (EL5) – renamed the lone register temp to `resolved_tls` and documented why this wrapper always jumps straight into glibc’s resolver while the trap stub handles relocations. |
+| `102490_get_lzma_allocator_address` | `elf_mem` | 1 | 2025-11-23 (EL5) – spelled out the sentinel+offset trick, renamed the cursor/index temps, and added inline notes for the relocation-safe base pointer and 12-slot walk. |
+| `1024F0_get_elf_functions_address` | `elf_mem` | 1 | 2025-11-23 (EL5) – mirrored the relocation-safe pointer math for the helper vtable and annotated the sentinel start plus the 12-slot advance. |
+| `103CE0_main_elf_parse` | `elf_mem` | 1 | 2025-11-23 (EL5) – clarified the ld.so parse, `__libc_stack_end` lookup, sshd verification, and pointer publish with inline comments tied to each step. |
+| `104030_init_elf_entry_ctx` | `elf_mem` | 1 | 2025-11-23 (EL5) – documented every cpuid GOT prep write (random symbol, resolver-frame slot, GOT math, TLS reset) and added inline breadcrumbs for each field assignment. |
 | `104060_get_lzma_allocator` | `elf_mem` | 0 |  |
 | `102550_sshd_find_main` | `sshd_recon` | 0 |  |
 | `102FF0_sshd_find_monitor_field_addr_in_function` | `sshd_recon` | 0 |  |

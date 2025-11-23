@@ -4633,6 +4633,17 @@
     ],
     "source": "xzre/xzre_code/is_range_mapped.c"
   },
+  "j_tls_get_addr": {
+    "locals": [],
+    "register_temps": [
+      {
+        "name": "resolved_tls",
+        "original": "pvVar1",
+        "type": "void *"
+      }
+    ],
+    "source": "xzre/xzre_code/j_tls_get_addr.c"
+  },
   "main": {
     "locals": [
       {
