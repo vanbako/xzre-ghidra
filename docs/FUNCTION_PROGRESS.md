@@ -113,11 +113,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `101E60_elf_get_plt_symbol` | `elf_mem` | 1 | 2025-11-23 (EL3) – captured the PLT feature-bit guard and the hand-off into `elf_get_reloc_symbol` (R_X86_64_JUMP_SLOT) with inline notes; renamed the scratch slot pointer. |
 | `101E90_elf_get_got_symbol` | `elf_mem` | 1 | 2025-11-23 (EL3) – mirrored the RELA feature-bit requirements and inline commentary for the GOT flow (R_X86_64_GLOB_DAT) plus the slot temp rename. |
 | `101EC0_elf_get_code_segment` | `elf_mem` | 1 | 2025-11-23 (EL3) – expanded the AutoDoc/inline notes around the telemetry breadcrumb, `.text` caching, and PT_LOAD alignment maths so the locals explain why the scan only runs once. |
-| `101F70_elf_get_rodata_segment` | `elf_mem` | 0 |  |
-| `1020A0_elf_find_string` | `elf_mem` | 0 |  |
-| `102150_elf_get_data_segment` | `elf_mem` | 0 |  |
-| `1022D0_elf_contains_vaddr_relro` | `elf_mem` | 0 |  |
-| `102370_is_range_mapped` | `elf_mem` | 0 |  |
+| `101F70_elf_get_rodata_segment` | `elf_mem` | 1 | 2025-11-23 (EL4) – documented the secret-data gate and rodata caching, renamed the rodata cursor/size temps, and added inline breadcrumbs for the cache short-circuit plus the PF_R segment sweep. |
+| `1020A0_elf_find_string` | `elf_mem` | 1 | 2025-11-23 (EL4) – captured the `stringId_inOut` semantics, renamed the rodata span buffer, and added inline comments for the telemetry gate, resume pointer clamp, and zero-id fast path. |
+| `102150_elf_get_data_segment` | `elf_mem` | 1 | 2025-11-23 (EL4) – renamed the selected-segment locals, expanded the AutoDoc around the PF_W scan + padding math, and annotated the cache hit, segment selection, and alignment branches inline. |
+| `1022D0_elf_contains_vaddr_relro` | `elf_mem` | 1 | 2025-11-23 (EL4) – refreshed the RELRO plate to cover the `p_flags` gate, renamed the relro window temps, and injected inline notes for the PF_R check plus the page-aligned RELRO clamp. |
+| `102370_is_range_mapped` | `elf_mem` | 1 | 2025-11-23 (EL4) – rewrote the AutoDoc around the `pselect` probe, renamed the libc/import/time cursors, and annotated the low-address guard, import validation, probe call, and EFAULT bailouts inline. |
 | `102440_j_tls_get_addr` | `elf_mem` | 0 |  |
 | `102490_get_lzma_allocator_address` | `elf_mem` | 0 |  |
 | `1024F0_get_elf_functions_address` | `elf_mem` | 0 |  |

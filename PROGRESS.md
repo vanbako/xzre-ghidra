@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `EL4`: deep-dived `elf_get_rodata_segment`, `elf_find_string`, `elf_get_data_segment`, `elf_contains_vaddr_relro`, and `is_range_mapped`—renamed their register temps in `metadata/xzre_locals.json`, promoted each AutoDoc to `plate+inline` form (documenting the telemetry gates, PF_R/PF_W sweeps, RELRO clamp, and the `pselect`-based range probe), and reran `./scripts/refresh_xzre_project.sh` twice to land the new inline comments in `xzregh/*`, refresh the portable archive, and keep the locals rename report clean.
+- Next: start session `EL5` (TLS + allocator wrappers) so the remaining ELF utilities carry the same level of locals/inline coverage before pivoting to sshd-recon work.
+
+## 2025-11-23
 - Session `EL3`: reversed `elf_find_relr_reloc`, `elf_get_reloc_symbol`, `elf_get_{plt,got}_symbol`, and `elf_get_code_segment` by renaming the RELR slot/bounds/resume temps plus the PLT/GOT scratch pointers in `metadata/xzre_locals.json`, promoting their AutoDocs to `plate+inline` form (telemetry breadcrumbs, literal-vs-bitmap decoding, relocation filters, text-segment caching/alignment), and rerunning `./scripts/refresh_xzre_project.sh` twice so the regenerated `xzregh/*.c`, locals report, and portable archive all picked up the new inline matches without warnings.
 - Next: start session `EL4` (segment/string queries) so the remaining ELF walkers match the same level of locals + inline coverage before pivoting to sshd work.
 

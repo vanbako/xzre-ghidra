@@ -2357,17 +2357,17 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "range_ok",
+        "name": "range_is_protected",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "relro_start",
+        "name": "relro_window_start",
         "original": "uVar3",
         "type": "ulong"
       },
       {
-        "name": "relro_end",
+        "name": "relro_window_end",
         "original": "uVar2",
         "type": "ulong"
       }
@@ -2528,7 +2528,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "rodata_window",
+        "name": "rodata_span",
         "original": "local_30",
         "type": "u64[2]"
       },
@@ -2613,11 +2613,6 @@
         "name": "insn_decoded",
         "original": "BVar5",
         "type": "BOOL"
-      },
-      {
-        "name": "text_segment_start",
-        "original": "code_start",
-        "type": "u8 *"
       },
       {
         "name": "string_cursor",
@@ -2741,7 +2736,7 @@
         "type": "Elf64_Phdr *"
       },
       {
-        "name": "best_segment_index",
+        "name": "selected_segment_index",
         "original": "uVar3",
         "type": "ulong"
       },
@@ -2751,32 +2746,32 @@
         "type": "ulong"
       },
       {
-        "name": "best_segment_start",
+        "name": "selected_segment_start",
         "original": "uVar8",
         "type": "ulong"
       },
       {
-        "name": "best_segment_span",
+        "name": "selected_segment_span",
         "original": "lVar13",
         "type": "u64"
       },
       {
-        "name": "seg_start",
+        "name": "segment_runtime_start",
         "original": "uVar9",
         "type": "ulong"
       },
       {
-        "name": "seg_end",
+        "name": "segment_runtime_end",
         "original": "uVar12",
         "type": "ulong"
       },
       {
-        "name": "segment_file_end",
+        "name": "filebacked_end",
         "original": "pvVar5",
         "type": "void *"
       },
       {
-        "name": "segment_mem_end",
+        "name": "segment_mem_end_ptr",
         "original": "pvVar10",
         "type": "void *"
       },
@@ -2786,7 +2781,7 @@
         "type": "void *"
       },
       {
-        "name": "alignment_size",
+        "name": "padding_length",
         "original": "uVar7",
         "type": "u64"
       }
@@ -2833,7 +2828,7 @@
         "type": "BOOL"
       },
       {
-        "name": "cached_rodata",
+        "name": "segment_start_ptr",
         "original": "pvVar4",
         "type": "void *"
       },
@@ -2863,7 +2858,7 @@
         "type": "void *"
       },
       {
-        "name": "selected_size",
+        "name": "selected_segment_size",
         "original": "uVar9",
         "type": "u64"
       },
@@ -4601,7 +4596,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "imports",
+        "name": "libc_imports",
         "original": "plVar1",
         "type": "libc_imports_t *"
       },
@@ -4621,17 +4616,17 @@
         "type": "int *"
       },
       {
-        "name": "probe_page",
+        "name": "probe_cursor",
         "original": "sigmask",
         "type": "u8 *"
       },
       {
-        "name": "timeout_sec",
+        "name": "timeout_seconds",
         "original": "local_38",
         "type": "long"
       },
       {
-        "name": "timeout_nsec",
+        "name": "timeout_nanoseconds",
         "original": "local_30",
         "type": "long"
       }
