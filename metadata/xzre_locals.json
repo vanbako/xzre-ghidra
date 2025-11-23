@@ -1988,7 +1988,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "backward_idx",
+        "name": "reverse_idx",
         "original": "lVar1",
         "type": "ssize_t"
       },
@@ -2404,7 +2404,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "result_upper_bound",
+        "name": "slot_upper_bound",
         "original": "in_RCX",
         "type": "u8 *"
       },
@@ -2424,7 +2424,7 @@
         "type": "Elf64_Ehdr *"
       },
       {
-        "name": "rela",
+        "name": "rela_cursor",
         "original": "pEVar2",
         "type": "Elf64_Rela *"
       },
@@ -3066,77 +3066,77 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "version_index",
+        "name": "versym_index",
         "original": "uVar1",
         "type": "ushort"
       },
       {
-        "name": "name_offset",
+        "name": "dynstr_offset",
         "original": "uVar2",
         "type": "uint"
       },
       {
-        "name": "gnu_hash_cursor",
+        "name": "gnu_hash_table",
         "original": "puVar3",
         "type": "u32 *"
       },
       {
-        "name": "candidate_name",
+        "name": "dynstr_base",
         "original": "pcVar4",
         "type": "char *"
       },
       {
-        "name": "chain_hash",
+        "name": "chain_hash_word",
         "original": "uVar5",
         "type": "u32"
       },
       {
-        "name": "addr_ok",
+        "name": "range_ok",
         "original": "BVar6",
         "type": "BOOL"
       },
       {
-        "name": "candidate_id",
+        "name": "candidate_string_id",
         "original": "EVar7",
         "type": "EncodedStringId"
       },
       {
-        "name": "sym",
+        "name": "sym_entry",
         "original": "vaddr",
         "type": "Elf64_Sym *"
       },
       {
-        "name": "symbol_index",
+        "name": "chain_index",
         "original": "uVar8",
         "type": "ulong"
       },
       {
-        "name": "versym_slot",
+        "name": "versym_entry",
         "original": "vaddr_00",
         "type": "ushort *"
       },
       {
-        "name": "verdef_cursor",
+        "name": "verdef_entry",
         "original": "vaddr_01",
         "type": "Elf64_Verdef *"
       },
       {
-        "name": "bucket_index",
+        "name": "bucket_idx",
         "original": "uVar9",
         "type": "uint"
       },
       {
-        "name": "verdef_name_ptr",
+        "name": "verdef_aux_ptr",
         "original": "vaddr_02",
         "type": "uint *"
       },
       {
-        "name": "chain_entry",
+        "name": "chain_cursor",
         "original": "local_40",
         "type": "u32 *"
       },
       {
-        "name": "verdef_idx",
+        "name": "verdef_iter",
         "original": "local_34",
         "type": "uint"
       }
@@ -3144,9 +3144,11 @@
     "source": "xzre/xzre_code/elf_symbol_get.c"
   },
   "elf_symbol_get_addr": {
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "sym",
+        "name": "sym_entry",
+        "original": "pEVar1",
         "type": "Elf64_Sym *"
       }
     ],
@@ -3245,14 +3247,12 @@
     "source": "xzre/xzre_code/extract_payload_message.c"
   },
   "fake_lzma_alloc": {
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
-        "name": "elf_info",
-        "type": "elf_info_t *"
-      },
-      {
-        "name": "string_id",
-        "type": "EncodedStringId"
+        "name": "symbol_addr",
+        "original": "pvVar1",
+        "type": "void *"
       }
     ],
     "source": "xzre/xzre_code/fake_lzma_alloc.c"

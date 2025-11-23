@@ -20,7 +20,7 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   void *slot_reloc;
   EncodedStringId string_id_seed;
   BOOL insn_decoded;
-  u8 *text_segment_start;
+  dasm_ctx_t *slot_lower_bound;
   char *string_cursor;
   u8 *xref_instruction;
   void **range_slot;
@@ -51,10 +51,10 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   }
   code_segment_size[0] = 0;
   code_segment_size[1] = 0;
-  text_segment_start = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_size);
+  slot_lower_bound = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_size);
   scratch_ctx = &scanner_ctx;
-  if ((text_segment_start != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0])) {
-    text_segment_end = (dasm_ctx_t *)(text_segment_start->opcode_window + (code_segment_size[0] - 0x25));
+  if ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0])) {
+    text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size[0] - 0x25));
     string_cursor = (char *)0x0;
     while( TRUE ) {
       string_id_cursor = 0;
@@ -65,7 +65,7 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
         if (((*(long *)((long)&(refs->xcalloc_zero_size).xref + entry_offset) == 0) &&
             (*(EncodedStringId *)((long)&(refs->xcalloc_zero_size).string_id + entry_offset) == string_id_cursor))
            // AutoDoc: Record the first LEA/MOV that materialises each literal so the later range tightening has an anchor.
-           && (xref_instruction = find_string_reference((u8 *)text_segment_start,(u8 *)text_segment_end,string_cursor),
+           && (xref_instruction = find_string_reference((u8 *)slot_lower_bound,(u8 *)text_segment_end,string_cursor),
               xref_instruction != (u8 *)0x0)) {
           *(u8 **)((long)&(refs->xcalloc_zero_size).xref + entry_offset) = xref_instruction;
         }
@@ -79,19 +79,19 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
     do {
       decode_cursor = (dasm_ctx_t *)range_slot[2];
       if (decode_cursor != (dasm_ctx_t *)0x0) {
-        if (text_segment_start <= decode_cursor) {
-          if ((dasm_ctx_t *)*range_slot < text_segment_start) {
-            *range_slot = text_segment_start;
+        if (slot_lower_bound <= decode_cursor) {
+          if ((dasm_ctx_t *)*range_slot < slot_lower_bound) {
+            *range_slot = slot_lower_bound;
           }
-          if (text_segment_start != decode_cursor) goto LAB_00102e58;
+          if (slot_lower_bound != decode_cursor) goto LAB_00102e58;
         }
-        if (text_segment_start <= (dasm_ctx_t *)((long)range_slot[1] - 1U)) {
-          range_slot[1] = text_segment_start;
+        if (slot_lower_bound <= (dasm_ctx_t *)((long)range_slot[1] - 1U)) {
+          range_slot[1] = slot_lower_bound;
         }
       }
 LAB_00102e58:
       range_slot = range_slot + 4;
-      decode_cursor = text_segment_start;
+      decode_cursor = slot_lower_bound;
     } while (range_slot != range_table_end);
 LAB_00102e64:
     if (decode_cursor < text_segment_end) {
@@ -117,7 +117,7 @@ LAB_00102ee5:
           goto LAB_00102e64;
           candidate_addr = (dasm_ctx_t *)(decode_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));
         }
-        if ((text_segment_start <= candidate_addr) && (range_slot = range_cursor, candidate_addr <= text_segment_end)) {
+        if ((slot_lower_bound <= candidate_addr) && (range_slot = range_cursor, candidate_addr <= text_segment_end)) {
           do {
             xref_site = (dasm_ctx_t *)range_slot[2];
             if (xref_site != (dasm_ctx_t *)0x0) {
@@ -139,7 +139,7 @@ LAB_00102f31:
       goto LAB_00102e64;
     }
     // AutoDoc: Sweep the relocation tables too so GOT/PLT slots that touch the literal keep the enclosing range in view.
-    while (rela_slot = elf_find_rela_reloc(elf_info,0,(u64)text_segment_start), range_slot = range_cursor,
+    while (rela_slot = elf_find_rela_reloc(elf_info,0,(u8 *)slot_lower_bound), range_slot = range_cursor,
           rela_slot != (Elf64_Rela *)0x0) {
       do {
         slot_reloc = (Elf64_Rela *)range_slot[2];

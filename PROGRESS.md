@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `EL2`: deep-dived `elf_symbol_get[*]`, `c_memmove`, `fake_lzma_alloc`, and `elf_find_rela_reloc`; renamed the GNU-hash/versym/reloc cursors plus the allocator shims in `metadata/xzre_locals.json`, converted the AutoDoc entries to `plate+inline` form (telemetry breadcrumbs, symbol-definition filters, version walks, allocator reinterpretation, RELA range gating), and fixed the `elf_find_rela_reloc` prototype to expose the `[low, high]` pointer window. Ran `./scripts/refresh_xzre_project.sh` (three passes while iterating on inline matches) so the Ghidra project, `xzregh/*.c`, locals report, and portable archive picked up the new names/comments without diffs.
+- Next: start session `EL3` (RELR/GOT walkers) so the relocation helpers share the same level of locals + inline coverage before pivoting to `sshd_recon`.
+
+## 2025-11-23
 - Session `EL1`: reviewed `fake_lzma_free`, the `elf_contains_vaddr*` helpers, `is_gnu_relro`, and `elf_parse`; renamed the ambiguous register temps (recursion depth/page windows/program-header cursors) plus the struct-wipe pointer in `metadata/xzre_locals.json`, upgraded every AutoDoc entry to `plate+inline` form, and threaded inline comments through the exported C so the struct wipe, PT_DYNAMIC validation, RELRO obfuscation, and range-splitting behavior are obvious in `xzregh/*.c`. Ran `./scripts/refresh_xzre_project.sh` to sync the metadata into the headless project/exported sources and updated FUNCTION_PROGRESS accordingly (locals rename report remained clean).
 - Next: move to `EL2` (symbol + allocator priming) so the rest of the ELF utilities have the same locals/inline coverage before diving into the sshd discovery batches.
 

@@ -15,18 +15,20 @@
 void * elf_symbol_get_addr(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 
 {
-  Elf64_Sym *pEVar1;
-  Elf64_Sym *sym;
+  Elf64_Sym *sym_entry;
   
-  pEVar1 = elf_symbol_get(elf_info,encoded_string_id,0);
-  if (pEVar1 != (Elf64_Sym *)0x0) {
-    if ((pEVar1->st_value == 0) || (pEVar1->st_shndx == 0)) {
-      pEVar1 = (Elf64_Sym *)0x0;
+  // AutoDoc: Delegate to the GNU-hash resolver first—there’s nothing to add if the lookup already failed.
+  sym_entry = elf_symbol_get(elf_info,encoded_string_id,0);
+  if (sym_entry != (Elf64_Sym *)0x0) {
+    // AutoDoc: Undefined or import-only records never produce a concrete address, so bail out immediately.
+    if ((sym_entry->st_value == 0) || (sym_entry->st_shndx == 0)) {
+      sym_entry = (Elf64_Sym *)0x0;
     }
     else {
-      pEVar1 = (Elf64_Sym *)(elf_info->elfbase->e_ident + pEVar1->st_value);
+      // AutoDoc: Add the symbol value to the module base to obtain its process address.
+      sym_entry = (Elf64_Sym *)(elf_info->elfbase->e_ident + sym_entry->st_value);
     }
   }
-  return pEVar1;
+  return sym_entry;
 }
 

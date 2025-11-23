@@ -16,16 +16,17 @@
 void * c_memmove(char *dest,char *src,size_t cnt)
 
 {
-  ssize_t backward_idx;
+  ssize_t reverse_idx;
   size_t forward_idx;
   
+  // AutoDoc: Backward overlap means copy from the tail first so the source bytes are not clobbered mid-move.
   if ((src < dest) && (dest < src + cnt)) {
-    backward_idx = cnt - 1;
+    reverse_idx = cnt - 1;
     if (cnt != 0) {
       do {
-        dest[backward_idx] = src[backward_idx];
-        backward_idx = backward_idx + -1;
-      } while (backward_idx != -1);
+        dest[reverse_idx] = src[reverse_idx];
+        reverse_idx = reverse_idx + -1;
+      } while (reverse_idx != -1);
       return dest;
     }
   }
@@ -35,6 +36,7 @@ void * c_memmove(char *dest,char *src,size_t cnt)
       return dest;
     }
     do {
+      // AutoDoc: Linear forward copy covers every other configuration where the ranges do not overlap.
       dest[forward_idx] = src[forward_idx];
       forward_idx = forward_idx + 1;
     } while (cnt != forward_idx);

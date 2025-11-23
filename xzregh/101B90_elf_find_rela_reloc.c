@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101B90_elf_find_rela_reloc.c
 // Function: elf_find_rela_reloc @ 0x101B90
 // Calling convention: __stdcall
-// Prototype: Elf64_Rela * __stdcall elf_find_rela_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id, u64 reloc_type)
+// Prototype: Elf64_Rela * __stdcall elf_find_rela_reloc(elf_info_t * elf_info, EncodedStringId encoded_string_id, u8 * slot_lower_bound)
 
 
 /*
@@ -10,8 +10,8 @@
  * the relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper
  * immediately returns `elfbase + r_addend`.
  *
- * A pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present
- * they force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index.
+ * Callers can optionally supply `[low, high]` bounds (third argument + RCX) and a resume cursor (R8). Those extra registers force the
+ * returned address to fall inside a desired window and allow the next invocation to continue scanning without starting over.
  * Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was
  * provided, stores the position it stopped at.
  */
@@ -19,16 +19,17 @@
 #include "xzre_types.h"
 
 Elf64_Rela *
-elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 reloc_type)
+elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u8 *slot_lower_bound)
 
 {
   Elf64_Ehdr *elfbase;
-  Elf64_Rela *rela;
-  u8 *result_upper_bound;
+  Elf64_Rela *rela_cursor;
+  u8 *slot_upper_bound;
   ulong rela_index;
   u32 target_addr_high;
   ulong *resume_index_ptr;
   
+  // AutoDoc: Bail out immediately when the module never published RELA entries.
   if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {
     return (Elf64_Rela *)0x0;
   }
@@ -44,24 +45,26 @@ elf_find_rela_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id,u64 r
       }
       return (Elf64_Rela *)0x0;
     }
-    rela = elf_info->rela_relocs + rela_index;
-    if ((int)rela->r_info == 8) {
+    rela_cursor = elf_info->rela_relocs + rela_index;
+    // AutoDoc: Only R_X86_64_RELATIVE entries are interesting here; everything else is ignored.
+    if ((int)rela_cursor->r_info == 8) {
       if (CONCAT44(target_addr_high,encoded_string_id) == 0) {
-        rela = (Elf64_Rela *)(elfbase->e_ident + rela->r_addend);
+        rela_cursor = (Elf64_Rela *)(elfbase->e_ident + rela_cursor->r_addend);
       }
       else {
-        if (rela->r_addend != CONCAT44(target_addr_high,encoded_string_id) - (long)elfbase)
+        if (rela_cursor->r_addend != CONCAT44(target_addr_high,encoded_string_id) - (long)elfbase)
         goto LAB_00101c07;
-        rela = (Elf64_Rela *)(elfbase->e_ident + rela->r_offset);
-        if (reloc_type == 0) goto LAB_00101c18;
+        rela_cursor = (Elf64_Rela *)(elfbase->e_ident + rela_cursor->r_offset);
+        if (slot_lower_bound == (u8 *)0x0) goto LAB_00101c18;
       }
-      if ((reloc_type <= rela) && (rela <= result_upper_bound)) {
+      // AutoDoc: Honor the optional `[low, high]` window before handing the relocation slot back to the caller.
+      if ((slot_lower_bound <= rela_cursor) && (rela_cursor <= slot_upper_bound)) {
 LAB_00101c18:
         if (resume_index_ptr == (ulong *)0x0) {
-          return rela;
+          return rela_cursor;
         }
         *resume_index_ptr = rela_index + 1;
-        return rela;
+        return rela_cursor;
       }
     }
 LAB_00101c07:

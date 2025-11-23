@@ -103,11 +103,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `1013A0_elf_contains_vaddr` | `elf_mem` | 1 | 2025-11-23 (EL1) – Documented the wrapper role, added inline telemetry about passing work to the recursive helper, and confirmed the flag semantics. |
 | `1013B0_is_gnu_relro` | `elf_mem` | 1 | 2025-11-23 (EL1) – Captured the additive obfuscation for PT_GNU_RELRO and inserted an inline note explaining the wrapped constant. |
 | `1013D0_elf_parse` | `elf_mem` | 1 | 2025-11-23 (EL1) – Renamed the program-header/dynamic-scan locals and added inline comments for the struct wipe, PT_DYNAMIC validation, pointer fixups, and relocation rechecks. |
-| `101880_elf_symbol_get` | `elf_mem` | 0 |  |
-| `101B00_elf_symbol_get_addr` | `elf_mem` | 0 |  |
-| `101B30_c_memmove` | `elf_mem` | 0 |  |
-| `101B80_fake_lzma_alloc` | `elf_mem` | 0 |  |
-| `101B90_elf_find_rela_reloc` | `elf_mem` | 0 |  |
+| `101880_elf_symbol_get` | `elf_mem` | 1 | 2025-11-23 (EL2) – renamed the GNU-hash bucket/chain/versym cursors, added telemetry + versym-walk inline comments, and refreshed the exported C so the secret-data breadcrumb plus version gating read clearly. |
+| `101B00_elf_symbol_get_addr` | `elf_mem` | 1 | 2025-11-23 (EL2) – collapsed the misnamed temp to `sym_entry`, documented the defined-symbol gate + module-base addition inline, and re-synced the metadata so the stub mirrors `elf_symbol_get`. |
+| `101B30_c_memmove` | `elf_mem` | 1 | 2025-11-23 (EL2) – retitled the reverse copy index and injected inline comments that spell out the backward- vs forward-copy paths. |
+| `101B80_fake_lzma_alloc` | `elf_mem` | 1 | 2025-11-23 (EL2) – removed the unused locals, renamed the return temp to `symbol_addr`, and annotated that `opaque/size` are just `elf_info_t`+EncodedStringId indirection into `elf_symbol_get_addr`. |
+| `101B90_elf_find_rela_reloc` | `elf_mem` | 1 | 2025-11-23 (EL2) – renamed the RELA cursor/resume/range temps, exposed the slot lower-bound parameter, and added inline comments covering the RELATIVE-only filter plus optional `[low, high]`/resume handling. |
 | `101C30_elf_find_relr_reloc` | `elf_mem` | 0 |  |
 | `101DC0_elf_get_reloc_symbol` | `elf_mem` | 0 |  |
 | `101E60_elf_get_plt_symbol` | `elf_mem` | 0 |  |

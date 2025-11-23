@@ -6,7 +6,21 @@
   "backdoor_init_stage2": "Runs inside the hijacked cpuid resolver. It builds temporary `backdoor_shared_globals_t`, `backdoor_hooks_ctx_t`, and\n`backdoor_setup_params_t` objects, repeatedly calls `init_hooks_ctx()` until the shared globals are available, and then hands\nthe bundle to `backdoor_setup`. If setup succeeds it never returns (the hooks stay installed); if setup fails it zeroes the GOT\ncontext and falls back to issuing a real CPUID so liblzma’s resolver still fulfils glibc’s contract.",
   "backdoor_setup": "The loader’s main workhorse. It snapshots the caller’s GOT/stack, builds a local `backdoor_data_t` describing all observed\nmodules, resolves sshd/libcrypto/liblzma/libc/ld.so via `process_shared_libraries`, initialises the shared globals, and pulls in\nthe `backdoor_hooks_data_t` blob sitting inside liblzma. With those pieces it refreshes the string-reference catalogue,\nconfigures the global context (payload buffers, sshd/log contexts, import tables), runs the sensitive-data + sshd-metadata\ndiscovery routines, and finally rewires ld.so’s audit tables so `backdoor_symbind64` is invoked for every sshd→libcrypto PLT\ncall. On success it copies the updated hook table back into liblzma and leaves the cpuid GOT slot ready to resume execution.",
   "bignum_serialize": "Normalises a BIGNUM into the [len||value] format used by the fingerprinting code. It caps inputs at 0x4000 bits, emits a 4-byte\nbig-endian length, copies the magnitude, and prepends a zero byte (or memmoves the data) whenever the top bit would otherwise\nmake the number negative so SHA-256 sees a canonical stream.",
-  "c_memmove": "Private implementation of `memmove` so the object never has to import libc for something this trivial. It detects backwards\noverlap (`src < dest < src+cnt`) and copies from the end towards the beginning in that case; every other scenario devolves into\na forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with\nthe libc version.",
+  "c_memmove": {
+    "plate": "Private implementation of `memmove` so the object never has to import libc for something this trivial. It detects backwards\noverlap (`src < dest < src+cnt`) and copies from the end towards the beginning in that case; every other scenario devolves into\na forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with\nthe libc version.",
+    "inline": [
+      {
+        "match": "if ((src < dest) && (dest < src + cnt)) {",
+        "comment": "Backward overlap means copy from the tail first so the source bytes are not clobbered mid-move."
+      },
+      {
+        "match": "\\s*dest\\[forward_idx\\] = src\\[forward_idx\\];",
+        "match_type": "regex",
+        "comment": "Linear forward copy covers every other configuration where the ranges do not overlap."
+      }
+    ]
+  },
+
   "c_strlen": "Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the buffer one byte at a time and\nreturns the length as a signed size, allowing other helpers to sanity-check argv/envp strings without resolving libc symbols.",
   "c_strnlen": "Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it sees a NUL or reaches `max_len`,\nreturning the limit unchanged if the string is unterminated so callers can treat that as an error.",
   "chacha_decrypt": "Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null\n(contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that\nthe final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls\nsucceed.",
@@ -73,7 +87,27 @@
       }
     ]
   },
-  "elf_find_rela_reloc": "Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nA pair of optional range bounds and a resumption index can be supplied in the additional SysV argument registers; if present\nthey force the returned address to fall inside `[low, high]` and let the caller continue scanning from the previous index.\nFailing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was\nprovided, stores the position it stopped at.",
+  "elf_find_rela_reloc": {
+    "plate": "Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nCallers can optionally supply `[low, high]` bounds (third argument + RCX) and a resume cursor (R8). Those extra registers force the\nreturned address to fall inside a desired window and allow the next invocation to continue scanning without starting over.\nFailing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was\nprovided, stores the position it stopped at.",
+    "inline": [
+      {
+        "match": "if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {",
+        "match_type": "wildcard",
+        "comment": "Bail out immediately when the module never published RELA entries."
+      },
+      {
+        "match": "if ((int)rela_cursor->r_info == 8) {",
+        "match_type": "wildcard",
+        "comment": "Only R_X86_64_RELATIVE entries are interesting here; everything else is ignored."
+      },
+      {
+        "match": "if ((slot_lower_bound <= rela_cursor) && (rela_cursor <= slot_upper_bound)) {",
+        "match_type": "wildcard",
+        "comment": "Honor the optional `[low, high]` window before handing the relocation slot back to the caller."
+      }
+    ]
+  },
+
   "elf_find_relr_reloc": "Performs the same search as `elf_find_rela_reloc` but against the packed RELR format. It replays the RELR decoding algorithm\n(literal entry vs bitmap entry), sanity-checks each decoded pointer with `elf_contains_vaddr`, compares the pointed-to value\nagainst the requested target address, and optionally enforces a lower/upper bound plus an iteration cursor via the extra\nargument registers. Returning NULL means there were no RELR records, the address never appeared in the run, or one of the\ndecoded pointers failed validation.",
   "elf_find_string": "Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or constrain the search to a suffix of the segment.\n\nThe scan is gated by `secret_data_append_from_call_site`: if the telemetry helper returns FALSE the routine skips the walk entirely, ensuring rodata scrapes are always reflected in the secret-data log.\n",
   "elf_find_string_reference": {
@@ -158,10 +192,59 @@
       }
     ]
   },
-  "elf_symbol_get": "Symbol resolver that trusts the GNU hash table the loader extracted earlier. After setting a telemetry bit it walks each hash\nbucket, validates the bucket and chain addresses, and replays the classic GNU hash lookup to pull `Elf64_Sym` entries out of\n`.dynsym`. When a candidate symbol has a non-zero value and section index, the helper hashes the associated string with\n`get_string_id` and compares it against the requested encoded id.\n\nIf a symbol version is supplied it additionally consults `.gnu.version`/`.gnu.version_d`: the version index is read from\n`versym`, then matched against the verifier definitions by walking the linked `verdef` list and comparing the underlying string\nid. Returning NULL means either the target symbol is missing, the module did not advertise GNU hash+version tables, or the\nstring/relocation pointers failed validation.",
-  "elf_symbol_get_addr": "Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are\nnon-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates\neither the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.",
+  "elf_symbol_get": {
+    "plate": "Symbol resolver that trusts the GNU hash table the loader extracted earlier. After emitting secret-data telemetry it iterates every\nbucket, validates the bucket and chain addresses, and replays the GNU hash walk to pull `Elf64_Sym` entries out of `.dynsym`.\nCandidates must have both `st_value` and `st_shndx` populated and their names get hashed (via `get_string_id`) so the caller’s\nencoded id can be matched without copying strings around.\n\nWhen a version id is supplied the helper also consults `.gnu.version`/`.gnu.version_d`: it reads the `versym` slot, walks the\nlinked `Elf64_Verdef` list, and compares the version string id. Returning NULL means the symbol/version was missing, the module\nnever exposed the GNU hash + version tables, or one of the string/relocation pointers failed validation mid-walk.",
+    "inline": [
+      {
+        "match": "*range_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x58,0xf,3,FALSE);*",
+        "match_type": "wildcard",
+        "comment": "Emit a secret-data breadcrumb before touching the GNU hash tables so symbol hunts show up in the telemetry log."
+      },
+      {
+        "match": "if ((sym_entry->st_value != 0) && (sym_entry->st_shndx != 0)) {",
+        "match_type": "wildcard",
+        "comment": "Skip undefined/imported symbols—the resolver only accepts entries that already have a concrete value and section."
+      },
+      {
+        "match": "if (((elf_info->feature_flags & 0x18) == 0x18) && ((versym_index & 0x7ffe) != 0)) {",
+        "match_type": "wildcard",
+        "comment": "When versioning metadata exists, walk `.gnu.version_d` to make sure the caller’s requested version string also matches."
+      }
+    ]
+  },
+
+  "elf_symbol_get_addr": {
+    "plate": "Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are\nnon-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates\neither the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.",
+    "inline": [
+      {
+        "match": "sym_entry = elf_symbol_get(elf_info,encoded_string_id,0);",
+        "comment": "Delegate to the GNU-hash resolver first—there’s nothing to add if the lookup already failed."
+      },
+      {
+        "match": "if ((sym_entry->st_value == 0) || (sym_entry->st_shndx == 0)) {",
+        "match_type": "wildcard",
+        "comment": "Undefined or import-only records never produce a concrete address, so bail out immediately."
+      },
+      {
+        "match": "sym_entry = (Elf64_Sym *)(elf_info->elfbase->e_ident + sym_entry->st_value);",
+        "match_type": "wildcard",
+        "comment": "Add the symbol value to the module base to obtain its process address."
+      }
+    ]
+  },
+
   "extract_payload_message": "Searches an sshbuf blob for either `\"ssh-rsa-cert-v01@openssh.com\"` or `\"rsa-sha2-256\"`, using the surrounding length\nfields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at\n0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point\ndirectly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly\nhow many bytes to peel off.",
-  "fake_lzma_alloc": "Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as\nan `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever\n`elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it\nonly masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.",
+  "fake_lzma_alloc": {
+    "plate": "Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as\nan `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever\n`elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it\nonly masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.",
+    "inline": [
+      {
+        "match": "symbol_addr = elf_symbol_get_addr((elf_info_t *)opaque,(EncodedStringId)size);",
+        "match_type": "wildcard",
+        "comment": "Treat `opaque` as `elf_info_t *` and `size` as the EncodedStringId the loader wants resolved."
+      }
+    ]
+  },
+
   "fake_lzma_free": {
     "plate": "No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other than prove that the fake allocator is still active.\n\nHaving an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.",
     "inline": [

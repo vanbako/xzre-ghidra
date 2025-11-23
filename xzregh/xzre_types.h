@@ -1731,7 +1731,7 @@ extern void *elf_get_got_symbol(elf_info_t *elf_info, EncodedStringId encoded_st
 extern Elf64_Rela *elf_find_rela_reloc(
  elf_info_t *elf_info,
  EncodedStringId encoded_string_id,
- u64 reloc_type);
+ u8 *slot_lower_bound);
 
 extern Elf64_Relr *elf_find_relr_reloc(
  elf_info_t *elf_info,
