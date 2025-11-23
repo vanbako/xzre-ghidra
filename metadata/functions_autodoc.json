@@ -20,7 +20,6 @@
       }
     ]
   },
-
   "c_strlen": "Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the buffer one byte at a time and\nreturns the length as a signed size, allowing other helpers to sanity-check argv/envp strings without resolving libc symbols.",
   "c_strnlen": "Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it sees a NUL or reaches `max_len`,\nreturning the limit unchanged if the string is unterminated so callers can treat that as an error.",
   "chacha_decrypt": "Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null\n(contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that\nthe final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls\nsucceed.",
@@ -107,8 +106,31 @@
       }
     ]
   },
-
-  "elf_find_relr_reloc": "Performs the same search as `elf_find_rela_reloc` but against the packed RELR format. It replays the RELR decoding algorithm\n(literal entry vs bitmap entry), sanity-checks each decoded pointer with `elf_contains_vaddr`, compares the pointed-to value\nagainst the requested target address, and optionally enforces a lower/upper bound plus an iteration cursor via the extra\nargument registers. Returning NULL means there were no RELR records, the address never appeared in the run, or one of the\ndecoded pointers failed validation.",
+  "elf_find_relr_reloc": {
+    "plate": "Performs the same search as `elf_find_rela_reloc` but against the packed RELR bitmap stream. The helper requires\nRELR metadata (feature bit 4), rebuilds literal entries vs. bitmap runs into candidate pointers, validates each\npointer with `elf_contains_vaddr`, and compares the dereferenced value against the requested absolute address.\nOptional `[slot_lower_bound, slot_upper_bound]` and `resume_index_ptr` parameters let callers clamp the acceptable\nslot range and resume the walk mid-stream. NULL means the module had no RELR entries, none targeted the requested\naddress, or the decoded pointer failed validation.\n",
+    "inline": [
+      {
+        "match": "if ((elf_info->feature_flags & 4) != 0) {",
+        "match_type": "wildcard",
+        "comment": "RELR support is optional—bail immediately when the module never published bitmap metadata."
+      },
+      {
+        "match": "if ((relr_entry & 1) == 0) {",
+        "match_type": "wildcard",
+        "comment": "Literal entries carry an absolute pointer; validate it and compare the stored addend once."
+      },
+      {
+        "match": "while (relr_entry = relr_entry >> 1, relr_entry != 0) {",
+        "match_type": "wildcard",
+        "comment": "Bitmap entries expand into 63 consecutive slots—each set bit hands back another 8-byte pointer."
+      },
+      {
+        "match": "if ((*(Elf64_Relr *)relr_slot_ptr == target_offset) &&",
+        "match_type": "wildcard",
+        "comment": "Only return matches that land inside the optional `[slot_lower_bound, slot_upper_bound]` window."
+      }
+    ]
+  },
   "elf_find_string": "Iterates through the cached `.rodata` window, calling `get_string_id` on each byte offset until it encounters a recognizable encoded string. If `*stringId_inOut` is zero the first discovered string wins and its id is written back; otherwise the search continues until an exact id match is found. The optional `rodata_start_ptr` lets callers resume from a previous location or constrain the search to a suffix of the segment.\n\nThe scan is gated by `secret_data_append_from_call_site`: if the telemetry helper returns FALSE the routine skips the walk entirely, ensuring rodata scrapes are always reflected in the secret-data log.\n",
   "elf_find_string_reference": {
     "plate": "Single-slot helper for the string catalogue. It emits a secret-data breadcrumb, then repeatedly calls `elf_find_string` (resuming from the last rodata pointer) until the requested `encoded_string_id` is encountered.\nEach discovery is checked with `find_string_reference` inside `[code_start, code_end)`, and the first instruction that materialises the literal is returned so later passes can clamp function ranges around it. Telemetry failures or missing xrefs return NULL.",
@@ -161,11 +183,77 @@
       }
     ]
   },
-  "elf_get_code_segment": "Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent calls use the cached values to avoid rescanning the headers.\n\nBefore touching the headers it emits a `secret_data_append_from_address` telemetry record and refuses to proceed if that hook fails, keeping the text-range discovery tied to the secret-data accounting path.\n",
+  "elf_get_code_segment": {
+    "plate": "Finds and caches the first executable PT_LOAD segment. The helper emits a telemetry breadcrumb, walks the program\nheaders until it sees PF_X set, converts `p_vaddr` into a runtime pointer (subtracting the ELF load base), page\naligns the `[start, end)` window, and records both the base and span in `elf_info_t`. Subsequent calls reuse the\ncached `text_segment_start/size` so the expensive scan only happens once.\n",
+    "inline": [
+      {
+        "match": "telemetry_ok = secret_data_append_from_address(",
+        "match_type": "wildcard",
+        "comment": "Emit a secret-data breadcrumb before touching program headers so text discovery stays audited."
+      },
+      {
+        "match": "code_segment_start = (void *)elf_info->text_segment_start;",
+        "match_type": "wildcard",
+        "comment": "Once the text range is cached, future callers reuse it instead of rescanning the headers."
+      },
+      {
+        "match": "if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {",
+        "match_type": "wildcard",
+        "comment": "Pick the first executable PT_LOAD entry and align its `[start, end)` window to page boundaries."
+      }
+    ]
+  },
   "elf_get_data_segment": "Walks every PT_LOAD segment looking for the last read/write mapping (PF_W|PF_R). Once found it caches three pieces of\ninformation: the base of the mapped data (`data_segment_start`), the amount of padding between the end of the file-backed bytes\nand the next page boundary (`data_segment_alignment`), and the total size of the aligned segment. Callers either request the\ntrue segment span (`get_alignment == FALSE`) or the padding region (when TRUE), which is where the implant later tucks the\n`backdoor_hooks_data_t` structure.",
-  "elf_get_got_symbol": "Identical pattern but aimed at the main RELA table: it requires `flags & 2` (meaning RELA records were found) and then calls\n`elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT). Successful lookups hand back the writable GOT slot for the\nsymbol so the loader can redirect it; failure means the symbol was not imported through a GOT relocation.",
-  "elf_get_plt_symbol": "Looks up the PLT thunk for a given symbol by delegating to `elf_get_reloc_symbol` with relocation type 7 (R_X86_64_JUMP_SLOT).\nIt first makes sure the module actually advertised a PLT relocation table (flag bit 1) and caches its size, then returns the\nGOT/PLT entry that will be overwritten during hook installation. NULL means either the relocation table was absent or the\nrequested symbol never appeared there.",
-  "elf_get_reloc_symbol": "Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT) and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch GOT/PLT entries in place.\n\nEach call starts by logging the lookup with `secret_data_append_from_address`, and it immediately aborts if the telemetry helper reports failure. That keeps relocation patching tied to the secret-data accounting path so the loader never quietly rewrites GOT/PLT entries when the recorder is disabled.\n",
+  "elf_get_got_symbol": {
+    "plate": "Mirrors `elf_get_plt_symbol` but targets the main RELA table. It requires feature bit 2 (RELA metadata), then calls\n`elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT) to retrieve the writable GOT slot for the\nrequested import. Failure means the module never imported the symbol through a standard GOT relocation.\n",
+    "inline": [
+      {
+        "match": "if (((elf_info->feature_flags & 2) != 0) && (elf_info->rela_reloc_count != 0)) {",
+        "match_type": "wildcard",
+        "comment": "Skip immediately when the RELA table was missing."
+      },
+      {
+        "match": "symbol_slot = elf_get_reloc_symbol",
+        "match_type": "wildcard",
+        "comment": "Reuse the generic helper with R_X86_64_GLOB_DAT to land on the writable GOT slot."
+      }
+    ]
+  },
+  "elf_get_plt_symbol": {
+    "plate": "Looks up the PLT thunk for a given symbol by delegating to `elf_get_reloc_symbol` with relocation type 7\n(R_X86_64_JUMP_SLOT). It first verifies that PLT relocations exist (feature bit 1 plus a non-zero count) and then\nreturns the GOT/PLT entry that will be rewritten during hook installation. NULL indicates the table was absent or\nthe symbol never appeared in it.\n",
+    "inline": [
+      {
+        "match": "if (((elf_info->feature_flags & 1) != 0) && (elf_info->plt_reloc_count != 0)) {",
+        "match_type": "wildcard",
+        "comment": "Fast fail when the binary never exposed PLT relocation metadata."
+      },
+      {
+        "match": "symbol_slot = elf_get_reloc_symbol",
+        "match_type": "wildcard",
+        "comment": "Delegate to the generic helper with R_X86_64_JUMP_SLOT so we capture the PLT thunk."
+      }
+    ]
+  },
+  "elf_get_reloc_symbol": {
+    "plate": "Generic helper that scans any relocation array for undefined symbols of a particular relocation type (e.g.,\nGOT vs. PLT) and encoded name. It walks `num_relocs`, enforces the requested `reloc_type`, confirms the symbol is\nreally an import (`st_shndx == 0`), and hashes the name via `get_string_id` before comparing it to\n`encoded_string_id`. Matching entries return the relocated slot (`elfbase + r_offset`) so callers can patch GOT/PLT\nentries in place. Every lookup is gated by `secret_data_append_from_address` so relocation edits only happen while\nthe secret-data recorder is active.\n",
+    "inline": [
+      {
+        "match": "telemetry_ok = secret_data_append_from_address(",
+        "match_type": "wildcard",
+        "comment": "Relocation hunts stay tied to the secret-data log; skip the scan entirely when telemetry fails."
+      },
+      {
+        "match": "if ((((relocs->r_info & 0xffffffff) == reloc_type) &&",
+        "match_type": "wildcard",
+        "comment": "Filter on the relocation type and insist the associated symbol is an unresolved import before hashing the name."
+      },
+      {
+        "match": "return elf_info->elfbase->e_ident + relocs->r_offset;",
+        "match_type": "wildcard",
+        "comment": "Hand the caller the writable relocation slot (module base + `r_offset`) once a match is found."
+      }
+    ]
+  },
   "elf_get_rodata_segment": "Locates the first read-only PT_LOAD segment that lives entirely after the executable code. It first asks `elf_get_code_segment` for the text range so it can ignore overlapping pages, then scans for PF_R-only segments, page-aligns their bounds, and picks the lowest segment whose start is beyond the end of `.text`. The result is cached in `elf_info_t` and handed to callers alongside its size so later routines (string searches, RELRO probes) can reuse the computed window.\n\nThe helper begins by logging a `secret_data_append_from_call_site` record; failure to emit that telemetry causes the search to abort, so the rodata queries only run when the secret-data recorder is active.\n",
   "elf_parse": {
     "plate": "Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address, locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash buckets, version records, and GNU_RELRO metadata. Each derived pointer is validated with `elf_contains_vaddr`, and the parser keeps feature bits synchronized so later helpers know which tables were present.\n\nIt enforces invariants such as \"only one PT_GNU_RELRO segment\", derives the number of dynamic entries, honours BIND_NOW/RELR/versym toggles, and refuses to trust any header that leaves the module boundaries.",
@@ -212,7 +300,6 @@
       }
     ]
   },
-
   "elf_symbol_get_addr": {
     "plate": "Convenience layer on top of `elf_symbol_get`: look up the symbol, make sure it is defined (both `st_value` and `st_shndx` are\nnon-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates\neither the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.",
     "inline": [
@@ -232,7 +319,6 @@
       }
     ]
   },
-
   "extract_payload_message": "Searches an sshbuf blob for either `\"ssh-rsa-cert-v01@openssh.com\"` or `\"rsa-sha2-256\"`, using the surrounding length\nfields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at\n0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point\ndirectly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly\nhow many bytes to peel off.",
   "fake_lzma_alloc": {
     "plate": "Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as\nan `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever\n`elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it\nonly masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.",
@@ -244,7 +330,6 @@
       }
     ]
   },
-
   "fake_lzma_free": {
     "plate": "No-op placeholder that exists solely to satisfy the liblzma allocator interface the implant exposes. The loader wires this stub into `lzma_allocator.free` until it can swap in the genuine host callbacks, so any invocation is guaranteed to do nothing other than prove that the fake allocator is still active.\n\nHaving an inert body keeps the import surface small while still exporting a correctly typed symbol, and it gives the runtime a reliable indicator that a caller incorrectly tried to free memory through the bootstrap allocator.",
     "inline": [

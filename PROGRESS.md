@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `EL3`: reversed `elf_find_relr_reloc`, `elf_get_reloc_symbol`, `elf_get_{plt,got}_symbol`, and `elf_get_code_segment` by renaming the RELR slot/bounds/resume temps plus the PLT/GOT scratch pointers in `metadata/xzre_locals.json`, promoting their AutoDocs to `plate+inline` form (telemetry breadcrumbs, literal-vs-bitmap decoding, relocation filters, text-segment caching/alignment), and rerunning `./scripts/refresh_xzre_project.sh` twice so the regenerated `xzregh/*.c`, locals report, and portable archive all picked up the new inline matches without warnings.
+- Next: start session `EL4` (segment/string queries) so the remaining ELF walkers match the same level of locals + inline coverage before pivoting to sshd work.
+
+## 2025-11-23
 - Session `EL2`: deep-dived `elf_symbol_get[*]`, `c_memmove`, `fake_lzma_alloc`, and `elf_find_rela_reloc`; renamed the GNU-hash/versym/reloc cursors plus the allocator shims in `metadata/xzre_locals.json`, converted the AutoDoc entries to `plate+inline` form (telemetry breadcrumbs, symbol-definition filters, version walks, allocator reinterpretation, RELA range gating), and fixed the `elf_find_rela_reloc` prototype to expose the `[low, high]` pointer window. Ran `./scripts/refresh_xzre_project.sh` (three passes while iterating on inline matches) so the Ghidra project, `xzregh/*.c`, locals report, and portable archive picked up the new names/comments without diffs.
 - Next: start session `EL3` (RELR/GOT walkers) so the relocation helpers share the same level of locals + inline coverage before pivoting to `sshd_recon`.
 

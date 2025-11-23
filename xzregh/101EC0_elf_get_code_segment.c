@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Finds and caches the first executable PT_LOAD segment. The routine walks the program headers until it sees a segment with PF_X set, computes the runtime address by subtracting the ELF's minimum virtual address from `p_vaddr`, page-aligns both ends, stores the start/size inside `elf_info_t`, and returns the aligned base while writing the computed size through `pSize`. Subsequent calls use the cached values to avoid rescanning the headers.
- *
- * Before touching the headers it emits a `secret_data_append_from_address` telemetry record and refuses to proceed if that hook fails, keeping the text-range discovery tied to the secret-data accounting path.
+ * AutoDoc: Finds and caches the first executable PT_LOAD segment. The helper emits a telemetry breadcrumb, walks the program
+ * headers until it sees PF_X set, converts `p_vaddr` into a runtime pointer (subtracting the ELF load base), page
+ * aligns the `[start, end)` window, and records both the base and span in `elf_info_t`. Subsequent calls reuse the
+ * cached `text_segment_start/size` so the expensive scan only happens once.
  */
 
 #include "xzre_types.h"
@@ -23,13 +24,16 @@ void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)
   u64 segment_size;
   ulong phdr_index;
   
+  // AutoDoc: Emit a secret-data breadcrumb before touching program headers so text discovery stays audited.
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xcb,7,0xc);
   code_segment_start = (void *)0x0;
   if (telemetry_ok != FALSE) {
+    // AutoDoc: Once the text range is cached, future callers reuse it instead of rescanning the headers.
     code_segment_start = (void *)elf_info->text_segment_start;
     if (code_segment_start == (void *)0x0) {
       for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
         phdr = elf_info->phdrs + phdr_index;
+        // AutoDoc: Pick the first executable PT_LOAD entry and align its `[start, end)` window to page boundaries.
         if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {
           segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_end = phdr->p_memsz + segment_start;

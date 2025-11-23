@@ -108,11 +108,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `101B30_c_memmove` | `elf_mem` | 1 | 2025-11-23 (EL2) – retitled the reverse copy index and injected inline comments that spell out the backward- vs forward-copy paths. |
 | `101B80_fake_lzma_alloc` | `elf_mem` | 1 | 2025-11-23 (EL2) – removed the unused locals, renamed the return temp to `symbol_addr`, and annotated that `opaque/size` are just `elf_info_t`+EncodedStringId indirection into `elf_symbol_get_addr`. |
 | `101B90_elf_find_rela_reloc` | `elf_mem` | 1 | 2025-11-23 (EL2) – renamed the RELA cursor/resume/range temps, exposed the slot lower-bound parameter, and added inline comments covering the RELATIVE-only filter plus optional `[low, high]`/resume handling. |
-| `101C30_elf_find_relr_reloc` | `elf_mem` | 0 |  |
-| `101DC0_elf_get_reloc_symbol` | `elf_mem` | 0 |  |
-| `101E60_elf_get_plt_symbol` | `elf_mem` | 0 |  |
-| `101E90_elf_get_got_symbol` | `elf_mem` | 0 |  |
-| `101EC0_elf_get_code_segment` | `elf_mem` | 0 |  |
+| `101C30_elf_find_relr_reloc` | `elf_mem` | 1 | 2025-11-23 (EL3) – renamed the RELR slot/bounds/resume temps and added inline comments for the literal vs. bitmap decoding paths plus the optional clamp. |
+| `101DC0_elf_get_reloc_symbol` | `elf_mem` | 1 | 2025-11-23 (EL3) – documented the telemetry gate + undefined-symbol filter inline so the relocation sweep logic and writable-slot return path read clearly. |
+| `101E60_elf_get_plt_symbol` | `elf_mem` | 1 | 2025-11-23 (EL3) – captured the PLT feature-bit guard and the hand-off into `elf_get_reloc_symbol` (R_X86_64_JUMP_SLOT) with inline notes; renamed the scratch slot pointer. |
+| `101E90_elf_get_got_symbol` | `elf_mem` | 1 | 2025-11-23 (EL3) – mirrored the RELA feature-bit requirements and inline commentary for the GOT flow (R_X86_64_GLOB_DAT) plus the slot temp rename. |
+| `101EC0_elf_get_code_segment` | `elf_mem` | 1 | 2025-11-23 (EL3) – expanded the AutoDoc/inline notes around the telemetry breadcrumb, `.text` caching, and PT_LOAD alignment maths so the locals explain why the scan only runs once. |
 | `101F70_elf_get_rodata_segment` | `elf_mem` | 0 |  |
 | `1020A0_elf_find_string` | `elf_mem` | 0 |  |
 | `102150_elf_get_data_segment` | `elf_mem` | 0 |  |

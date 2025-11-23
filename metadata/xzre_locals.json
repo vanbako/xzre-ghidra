@@ -2440,12 +2440,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "result_lower_bound",
+        "name": "slot_lower_bound",
         "original": "in_RDX",
         "type": "u8 *"
       },
       {
-        "name": "result_upper_bound",
+        "name": "slot_upper_bound",
         "original": "in_RCX",
         "type": "u8 *"
       },
@@ -2480,12 +2480,12 @@
         "type": "ulong"
       },
       {
-        "name": "candidate_ptr",
+        "name": "relr_slot_ptr",
         "original": "vaddr",
         "type": "u8 *"
       },
       {
-        "name": "relr_offset",
+        "name": "relr_stream_offset",
         "original": "lVar5",
         "type": "long"
       },
@@ -2495,12 +2495,34 @@
         "type": "u64"
       },
       {
-        "name": "encoded_entry",
+        "name": "relr_entry",
         "original": "uVar7",
         "type": "ulong"
       }
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"
+  },
+  "elf_get_got_symbol": {
+    "locals": [],
+    "register_temps": [
+      {
+        "name": "symbol_slot",
+        "original": "pvVar1",
+        "type": "void *"
+      }
+    ],
+    "source": "xzre/xzre_code/elf_get_got_symbol.c"
+  },
+  "elf_get_plt_symbol": {
+    "locals": [],
+    "register_temps": [
+      {
+        "name": "symbol_slot",
+        "original": "pvVar1",
+        "type": "void *"
+      }
+    ],
+    "source": "xzre/xzre_code/elf_get_plt_symbol.c"
   },
   "elf_find_string": {
     "locals": [],

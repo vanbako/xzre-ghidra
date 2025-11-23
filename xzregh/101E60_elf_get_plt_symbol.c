@@ -5,10 +5,10 @@
 
 
 /*
- * AutoDoc: Looks up the PLT thunk for a given symbol by delegating to `elf_get_reloc_symbol` with relocation type 7 (R_X86_64_JUMP_SLOT).
- * It first makes sure the module actually advertised a PLT relocation table (flag bit 1) and caches its size, then returns the
- * GOT/PLT entry that will be overwritten during hook installation. NULL means either the relocation table was absent or the
- * requested symbol never appeared there.
+ * AutoDoc: Looks up the PLT thunk for a given symbol by delegating to `elf_get_reloc_symbol` with relocation type 7
+ * (R_X86_64_JUMP_SLOT). It first verifies that PLT relocations exist (feature bit 1 plus a non-zero count) and then
+ * returns the GOT/PLT entry that will be rewritten during hook installation. NULL indicates the table was absent or
+ * the symbol never appeared in it.
  */
 
 #include "xzre_types.h"
@@ -16,13 +16,15 @@
 void * elf_get_plt_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id)
 
 {
-  void *pvVar1;
+  void *symbol_slot;
   
+  // AutoDoc: Fast fail when the binary never exposed PLT relocation metadata.
   if (((elf_info->feature_flags & 1) != 0) && (elf_info->plt_reloc_count != 0)) {
-    pvVar1 = elf_get_reloc_symbol
+    // AutoDoc: Delegate to the generic helper with R_X86_64_JUMP_SLOT so we capture the PLT thunk.
+    symbol_slot = elf_get_reloc_symbol
                        (elf_info,elf_info->plt_relocs,elf_info->plt_reloc_count,7,encoded_string_id)
     ;
-    return pvVar1;
+    return symbol_slot;
   }
   return (void *)0x0;
 }

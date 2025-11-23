@@ -5,11 +5,12 @@
 
 
 /*
- * AutoDoc: Performs the same search as `elf_find_rela_reloc` but against the packed RELR format. It replays the RELR decoding algorithm
- * (literal entry vs bitmap entry), sanity-checks each decoded pointer with `elf_contains_vaddr`, compares the pointed-to value
- * against the requested target address, and optionally enforces a lower/upper bound plus an iteration cursor via the extra
- * argument registers. Returning NULL means there were no RELR records, the address never appeared in the run, or one of the
- * decoded pointers failed validation.
+ * AutoDoc: Performs the same search as `elf_find_rela_reloc` but against the packed RELR bitmap stream. The helper requires
+ * RELR metadata (feature bit 4), rebuilds literal entries vs. bitmap runs into candidate pointers, validates each
+ * pointer with `elf_contains_vaddr`, and compares the dereferenced value against the requested absolute address.
+ * Optional `[slot_lower_bound, slot_upper_bound]` and `resume_index_ptr` parameters let callers clamp the acceptable
+ * slot range and resume the walk mid-stream. NULL means the module had no RELR entries, none targeted the requested
+ * address, or the decoded pointer failed validation.
  */
 
 #include "xzre_types.h"
@@ -20,17 +21,18 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
   uint relr_count;
   Elf64_Ehdr *elfbase;
   BOOL addr_ok;
-  u8 *result_upper_bound;
-  u8 *result_lower_bound;
+  u8 *slot_upper_bound;
+  u8 *slot_lower_bound;
   ulong relr_index;
   u32 target_addr_high;
-  u8 *candidate_ptr;
+  u8 *relr_slot_ptr;
   ulong *resume_index_ptr;
-  long relr_offset;
+  long relr_stream_offset;
   u64 target_offset;
-  ulong encoded_entry;
+  ulong relr_entry;
   
   elfbase = elf_info->elfbase;
+  // AutoDoc: RELR support is optional—bail immediately when the module never published bitmap metadata.
   if ((elf_info->feature_flags & 4) != 0) {
     relr_count = elf_info->relr_reloc_count;
     if ((CONCAT44(target_addr_high,encoded_string_id) != 0) && (relr_count != 0)) {
@@ -39,41 +41,44 @@ Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_st
         relr_index = *resume_index_ptr;
       }
       target_offset = CONCAT44(target_addr_high,encoded_string_id) - (long)elfbase;
-      relr_offset = 0;
+      relr_stream_offset = 0;
       for (; relr_index < relr_count; relr_index = relr_index + 1) {
-        candidate_ptr = elfbase->e_ident + relr_offset;
-        encoded_entry = elf_info->relr_relocs[relr_index];
-        if ((encoded_entry & 1) == 0) {
-          candidate_ptr = elfbase->e_ident + encoded_entry;
-          addr_ok = elf_contains_vaddr(elf_info,candidate_ptr,8,4);
+        relr_slot_ptr = elfbase->e_ident + relr_stream_offset;
+        relr_entry = elf_info->relr_relocs[relr_index];
+        // AutoDoc: Literal entries carry an absolute pointer; validate it and compare the stored addend once.
+        if ((relr_entry & 1) == 0) {
+          relr_slot_ptr = elfbase->e_ident + relr_entry;
+          addr_ok = elf_contains_vaddr(elf_info,relr_slot_ptr,8,4);
           if (addr_ok == FALSE) {
             return (Elf64_Relr *)0x0;
           }
-          if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
-             ((result_lower_bound == (Elf64_Relr *)0x0 || ((result_lower_bound <= candidate_ptr && (candidate_ptr <= result_upper_bound)))))) {
+          // AutoDoc: Only return matches that land inside the optional `[slot_lower_bound, slot_upper_bound]` window.
+          if ((*(Elf64_Relr *)relr_slot_ptr == target_offset) &&
+             ((slot_lower_bound == (Elf64_Relr *)0x0 || ((slot_lower_bound <= relr_slot_ptr && (relr_slot_ptr <= slot_upper_bound)))))) {
 LAB_00101d98:
             if (resume_index_ptr != (ulong *)0x0) {
               *resume_index_ptr = relr_index + 1;
-              return (Elf64_Relr *)candidate_ptr;
+              return (Elf64_Relr *)relr_slot_ptr;
             }
-            return (Elf64_Relr *)candidate_ptr;
+            return (Elf64_Relr *)relr_slot_ptr;
           }
-          relr_offset = encoded_entry + 8;
+          relr_stream_offset = relr_entry + 8;
         }
         else {
-          while (encoded_entry = encoded_entry >> 1, encoded_entry != 0) {
-            if ((encoded_entry & 1) != 0) {
-              addr_ok = elf_contains_vaddr(elf_info,candidate_ptr,8,4);
+          // AutoDoc: Bitmap entries expand into 63 consecutive slots—each set bit hands back another 8-byte pointer.
+          while (relr_entry = relr_entry >> 1, relr_entry != 0) {
+            if ((relr_entry & 1) != 0) {
+              addr_ok = elf_contains_vaddr(elf_info,relr_slot_ptr,8,4);
               if (addr_ok == FALSE) {
                 return (Elf64_Relr *)0x0;
               }
-              if ((*(Elf64_Relr *)candidate_ptr == target_offset) &&
-                 ((result_lower_bound == (Elf64_Relr *)0x0 || ((result_lower_bound <= candidate_ptr && (candidate_ptr <= result_upper_bound))))))
+              if ((*(Elf64_Relr *)relr_slot_ptr == target_offset) &&
+                 ((slot_lower_bound == (Elf64_Relr *)0x0 || ((slot_lower_bound <= relr_slot_ptr && (relr_slot_ptr <= slot_upper_bound))))))
               goto LAB_00101d98;
             }
-            candidate_ptr = candidate_ptr + 8;
+            relr_slot_ptr = relr_slot_ptr + 8;
           }
-          relr_offset = relr_offset + 0x1f8;
+          relr_stream_offset = relr_stream_offset + 0x1f8;
         }
       }
       if (resume_index_ptr != (ulong *)0x0) {
