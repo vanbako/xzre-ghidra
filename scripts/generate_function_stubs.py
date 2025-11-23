@@ -77,10 +77,6 @@ BATCHES: "OrderedDict[str, Dict[str, object]]" = OrderedDict(
                 "103CE0_main_elf_parse",
                 "104030_init_elf_entry_ctx",
                 "104060_get_lzma_allocator",
-                "10D000_lzma_check_init",
-                "10D008_tls_get_addr",
-                "10D010_lzma_free",
-                "10D018_lzma_alloc",
             ],
         },
         "sshd_recon": {

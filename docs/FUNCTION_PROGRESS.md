@@ -35,7 +35,7 @@ _Tackle the ELF walkers from containment → relocations → allocator/tls glue.
 | `EL3` | Reloc walkers | `101C30_elf_find_relr_reloc`, `101DC0_elf_get_reloc_symbol`, `101E60_elf_get_plt_symbol`, `101E90_elf_get_got_symbol`, `101EC0_elf_get_code_segment` |
 | `EL4` | Segment/string queries | `101F70_elf_get_rodata_segment`, `1020A0_elf_find_string`, `102150_elf_get_data_segment`, `1022D0_elf_contains_vaddr_relro`, `102370_is_range_mapped` |
 | `EL5` | TLS + function lookup | `102440_j_tls_get_addr`, `102490_get_lzma_allocator_address`, `1024F0_get_elf_functions_address`, `103CE0_main_elf_parse`, `104030_init_elf_entry_ctx` |
-| `EL6` | Allocator/tls wrappers | `104060_get_lzma_allocator`, `10D000_lzma_check_init`, `10D008_tls_get_addr`, `10D010_lzma_free`, `10D018_lzma_alloc` |
+| `EL6` | Allocator/tls wrappers | `104060_get_lzma_allocator` |
 
 ### SSHD Discovery & Sensitive Data Recon (`sshd_recon`)
 
@@ -124,10 +124,6 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `103CE0_main_elf_parse` | `elf_mem` | 0 |  |
 | `104030_init_elf_entry_ctx` | `elf_mem` | 0 |  |
 | `104060_get_lzma_allocator` | `elf_mem` | 0 |  |
-| `10D000_lzma_check_init` | `elf_mem` | 0 |  |
-| `10D008_tls_get_addr` | `elf_mem` | 0 |  |
-| `10D010_lzma_free` | `elf_mem` | 0 |  |
-| `10D018_lzma_alloc` | `elf_mem` | 0 |  |
 | `102550_sshd_find_main` | `sshd_recon` | 0 |  |
 | `102FF0_sshd_find_monitor_field_addr_in_function` | `sshd_recon` | 0 |  |
 | `103340_sshd_get_sensitive_data_address_via_krb5ccname` | `sshd_recon` | 0 |  |

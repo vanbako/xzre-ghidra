@@ -14,6 +14,12 @@ import shutil
 from ghidra.app.decompiler import DecompInterface
 
 OUTPUT_DEFAULT = "xzregh"
+SKIP_FUNCTIONS = {
+    "__tls_get_addr",
+    "lzma_alloc",
+    "lzma_check_init",
+    "lzma_free",
+}
 
 
 def resolve_path(candidate):
@@ -101,6 +107,9 @@ def main():
     if not functions:
         printerr("Program has no functions to export.")
         return
+    functions = [
+        func for func in functions if func.getName() not in SKIP_FUNCTIONS
+    ]
     functions.sort(key=lambda func: func.getEntryPoint().getOffset())
 
     monitor.initialize(len(functions))

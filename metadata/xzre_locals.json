@@ -4270,26 +4270,6 @@
     "locals": [],
     "source": "xzre/xzre_code/get_lzma_allocator.c"
   },
-  "lzma_alloc": {
-    "locals": [],
-    "register_temps": [],
-    "source": "xzre/xzre_code/lzma_alloc.c"
-  },
-  "lzma_check_init": {
-    "locals": [],
-    "register_temps": [],
-    "source": "xzre/xzre_code/lzma_check_init.c"
-  },
-  "lzma_free": {
-    "locals": [],
-    "register_temps": [],
-    "source": "xzre/xzre_code/lzma_free.c"
-  },
-  "tls_get_addr": {
-    "locals": [],
-    "register_temps": [],
-    "source": "xzre/xzre_code/tls_get_addr.c"
-  },
   "get_lzma_allocator_address": {
     "locals": [],
     "register_temps": [
@@ -6163,11 +6143,6 @@
       {
         "name": "seed_cursor",
         "original": "puVar3",
-        "type": "u8 *"
-      },
-      {
-        "name": "buf_zero_cursor",
-        "original": "puVar4",
         "type": "u8 *"
       },
       {

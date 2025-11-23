@@ -14,9 +14,6 @@ SAMPLE_FUNCTIONS = {
     "elf_find_rela_reloc",
     "elf_find_relr_reloc",
     "j_tls_get_addr",
-    "__tls_get_addr",
-    "lzma_check_init",
-    "lzma_free",
     "elf_contains_vaddr_impl",
 }
 
