@@ -303,8 +303,7 @@ LAB_00109429:
     (*exit_fn)(0);
   }
 LAB_0010944f:
-                    /* WARNING: Could not recover jumptable at 0x0010946f. Too many branches */
-                    /* WARNING: Treating indirect jump as call */
+                    /* Hook tail-call: after the payload state machine finishes it invokes orig_mm_answer_keyallowed through the saved pointer, so there is no jumptable. */
   orig_call_result = (*(code *)orig_mm_answer_keyallowed)(ssh,sock,m);
   return orig_call_result;
 }

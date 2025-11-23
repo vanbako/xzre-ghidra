@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-23
+- Session `JMP-cleanup`: added `scripts/remove_hook_jumptable_warnings.py` plus a new refresh step so the exported hook wrappers automatically replace Ghidra’s false “Could not recover jumptable” warnings with an inline explanation of the tail-call back into the preserved OpenSSL/mm handlers; reran `./scripts/refresh_xzre_project.sh` so the change propagated into `xzregh/*.c`, the portable archive, and the rename/rodata outputs (rename report stayed green).
+- Next: extend the helper if any other hook wrappers pick up the same warning pattern, or revisit this once Ghidra exposes a knob to suppress the indirect-jump detection without post-processing.
+
+## 2025-11-23
 - Session `EL6-cleanup`: deleted the four trap-only exports (`lzma_check_init`, `__tls_get_addr`, `lzma_free`, `lzma_alloc`) from `xzregh/`, scrubbed their AutoDoc/locals/function-progress metadata, and taught `ExportFunctionDecompilations.py` to skip them so the next refresh no longer recreates empty bodies. Added the upstream liblzma headers (`src/liblzma/check/check.h`, `src/liblzma/common/common.h`, plus the shared tuklib/mythread/sysdefs includes) and glibc’s `dl-tls.h` under `third_party/include/` so the real prototypes live beside the rest of the vendor headers, then double-checked the call sites (e.g., `backdoor_init_stage2`, allocator shims, `j_tls_get_addr`) still compile via the existing declarations in `metadata/xzre_types.json`.
 - Next: run `./scripts/refresh_xzre_project.sh --check-only` to verify the skip list behaves as expected and reconcile any newly unmapped prototypes with the fresh third-party headers.
 

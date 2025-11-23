@@ -33,8 +33,7 @@ int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)
         return dispatcher_result;
       }
     }
-                    /* WARNING: Could not recover jumptable at 0x0010a2bd. Too many branches */
-                    /* WARNING: Treating indirect jump as call */
+                    /* Hook tail-call: once the dispatcher forwards to OpenSSL it jumps via orig_RSA_public_decrypt, not through a jumptable. */
     orig_status = (*orig_RSA_public_decrypt)(flen,from,to,rsa,padding);
     return orig_status;
   }

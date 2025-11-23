@@ -190,6 +190,8 @@ python3 "$ROOT_DIR/scripts/apply_ghidra_comments_to_decomp.py" \
   --xzregh-dir "$XZREGH_EXPORT_DIR" \
   --ensure-include '#include "xzre_types.h"' \
   --inline-metadata "$AUTODOC_SOURCE"
+python3 "$ROOT_DIR/scripts/remove_hook_jumptable_warnings.py" \
+  --xzregh-dir "$XZREGH_EXPORT_DIR"
 else
   echo "[check-only] skipped applying comments to xzregh; temporary artifacts removed on exit."
 fi
