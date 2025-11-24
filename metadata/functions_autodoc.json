@@ -1,7 +1,59 @@
 {
-  "_cpuid_gcc": "GCC-style CPUID shim that dispatches through the individual helper thunks for every supported leaf (basic, cache, topology,\nextended brand strings, etc.). Whatever leaf pointer it chooses has EAX/EBX/ECX/EDX copied into the provided outputs so callers\ndon\u2019t need inline assembly.",
-  "_get_cpuid_modified": "Wrapper around `_cpuid_gcc` that first invokes `backdoor_entry` with the high-bit leaf to make sure the loader ran, checks the\nreturned maximum leaf, and only executes the requested CPUID if the CPU claims to support it. This is the exported symbol glibc\nbinds, so the loader\u2019s work is triggered before any sshd thread asks for cpuid data.",
-  "backdoor_entry": "IFUNC resolver entry point. It increments a global invocation counter, calling `backdoor_init()` on the second pass so the\nloader can stage its hooks while glibc thinks it is still choosing a cpuid implementation. Regardless of setup, it finally\ndelegates to `_cpuid_gcc` to satisfy liblzma\u2019s original resolver contract.",
+  "_cpuid_gcc": {
+    "plate": "GCC-style CPUID shim that mirrors glibc\u2019s helper: it picks a dedicated thunk for every well-known leaf (basic IDs,\ncaches, topology, brand strings, etc.) and only falls back to the raw `cpuid()` stub when the table has no match. After executing\nthe thunk it copies the register tuple back into the caller-provided buffers, preserving GCC\u2019s `[EAX, EBX, EDX, ECX]` ordering so\ncallers never need inline assembly.",
+    "inline": [
+      {
+        "match": "if (level == 0) {",
+        "comment": "Walk a straight if/else ladder of helpers so each canonical leaf (0, 1, cache descriptors, brand strings, etc.) has its own thunk."
+      },
+      {
+        "match": "leaf_info = (uint *)cpuid(level);",
+        "comment": "Anything outside the curated list falls back to the raw `cpuid()` stub so oddball leaves still work."
+      },
+      {
+        "match": "*c = edx_val;",
+        "comment": "Match GCC\u2019s ABI by returning `[EAX, EBX, EDX, ECX]`\u2014note the deliberate swap compared to the hardware register order."
+      }
+    ]
+  },
+  "_get_cpuid_modified": {
+    "plate": "Exported resolver glibc binds as `_get_cpuid`/`__get_cpuid`. It first calls `backdoor_entry()` with either leaf 0 or\n0x80000000 (depending on the caller\u2019s high bit) so the loader runs before any sshd worker queries CPUID. The returned EAX value is\ninterpreted as the CPU-advertised maximum leaf; only when the requested leaf is <= that bound does it forward the request to the\nreal `_cpuid_gcc()` implementation and report success.",
+    "inline": [
+      {
+        "match": "max_leaf = backdoor_entry(leaf & 0x80000000,caller_frame);",
+        "comment": "Force the IFUNC resolver to run (and thus the loader to initialize) before satisfying any caller-supplied leaf."
+      },
+      {
+        "match": "if ((max_leaf == 0) || (max_leaf < leaf)) {",
+        "comment": "Reject callers that ask for leaves the CPU refused to advertise\u2014glibc expects us to return FALSE instead of faulting."
+      },
+      {
+        "match": "  _cpuid_gcc(leaf,eax,ebx,ecx,edx);",
+        "comment": "Defer to the shared dispatcher once we know the leaf is valid; the helper mirrors GCC\u2019s register order."
+      }
+    ]
+  },
+  "backdoor_entry": {
+    "plate": "IFUNC resolver entry. Glibc probes it twice; the first call merely bumps `resolver_call_count`, while the second call\nbuilds a scratch `elf_entry_ctx_t`, records the resolver frame, and hands the bundle to `backdoor_init()` so the loader can hijack\nthe cpuid GOT slot while glibc still thinks it is selecting an implementation. Every invocation ultimately calls `_cpuid_gcc()` and\nreturns EAX so liblzma\u2019s resolver contract stays intact.",
+    "inline": [
+      {
+        "match": "if (resolver_call_count == 1) {",
+        "comment": "Only the second resolver invocation runs the heavyweight loader work; the first probe just increments the counter."
+      },
+      {
+        "match": "state.cpuid_random_symbol_addr = (void *)0x1;",
+        "comment": "Clear the stack `elf_entry_ctx_t` and stash the resolver frame so `backdoor_init()` can rebuild the GOT math deterministically."
+      },
+      {
+        "match": "    backdoor_init(&state,caller_frame);",
+        "comment": "Let the loader patch the cpuid GOT entry, install the hooks, and then restore the original target before glibc resumes."
+      },
+      {
+        "match": "_cpuid_gcc(cpuid_request,&cpuid_eax,&cpuid_ebx,&cpuid_edx,(uint *)&state);",
+        "comment": "Regardless of loader state we still execute the canonical cpuid dispatcher and return its EAX result to satisfy IFUNC callers."
+      }
+    ]
+  },
   "backdoor_init": {
     "plate": "IFUNC stub that patches the cpuid GOT entry long enough to run `backdoor_init_stage2`. It normalises the GOT bookkeeping\nvia `init_elf_entry_ctx`, derives the cpuid slot address using the embedded relocation constants, temporarily replaces the slot\nwith the attacker\u2019s resolver, issues the genuine cpuid to keep glibc happy, and finally restores the original target so future\ncpuid calls enter the newly installed hook path.",
     "inline": [
@@ -158,7 +210,31 @@
   },
   "contains_null_pointers": "Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters\na NULL slot, letting callers bail out if any required import failed to resolve.",
   "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
-  "count_pointers": "Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries until it hits either a NULL or\nthe allocation boundary. Sensitive-data heuristics call it when walking sshd tables whose length isn\u2019t stored explicitly.",
+  "count_pointers": {
+    "plate": "Counts consecutive non-NULL entries inside an sshd pointer table. It first confirms the caller handed in both the array and a\n`malloc_usable_size()` hook, queries the allocator for the actual buffer size, and only trusts tables smaller than ~0x80 bytes to\navoid chasing attacker-sized allocations. The loop stops at the first NULL or the allocation boundary, then reports how many slots\nwere populated so the sensitive-data heuristics can reason about argv/envp-style arrays.",
+    "inline": [
+      {
+        "match": "if (((ptrs == (void **)0x0) || (funcs == (libc_imports_t *)0x0)) ||",
+        "comment": "Refuse to run without both the pointer list and libc\u2019s `malloc_usable_size()`; this helper never guesses lengths."
+      },
+      {
+        "match": "  allocation_size = (*funcs->malloc_usable_size)(ptrs);",
+        "comment": "Measure the actual chunk so the scan can stop exactly at the allocator boundary."
+      },
+      {
+        "match": "  if (allocation_size - 8 < 0x80) {",
+        "comment": "Only trust reasonably small pointer tables (<=0x87 bytes) to avoid spending time on obviously bogus chunks."
+      },
+      {
+        "match": "      if (ptrs[probe_index] == (void *)0x0) break;",
+        "comment": "Stop counting as soon as we see a NULL terminator; argv/envp arrays always use that sentinel."
+      },
+      {
+        "match": "      live_count = allocation_size >> 3;",
+        "comment": "If we hit the allocation boundary without seeing NULL, treat the whole buffer as populated."
+      }
+    ]
+  },
   "decrypt_payload_message": {
     "plate": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_buffer`,\nit copies the plaintext body into the staging buffer, bumps `payload_bytes_buffered`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.",
     "inline": [

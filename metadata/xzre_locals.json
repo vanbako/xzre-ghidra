@@ -1414,19 +1414,23 @@
   "backdoor_entry": {
     "locals": [
       {
-        "name": "a",
+        "name": "cpuid_eax",
+        "original": "a",
         "type": "u32"
       },
       {
-        "name": "b",
+        "name": "cpuid_ebx",
+        "original": "b",
         "type": "u32"
       },
       {
-        "name": "c",
+        "name": "cpuid_edx",
+        "original": "c",
         "type": "u32"
       },
       {
-        "name": "d",
+        "name": "cpuid_ecx",
+        "original": "d",
         "type": "u32"
       }
     ],
@@ -2139,19 +2143,24 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "block_size",
+        "name": "allocation_size",
         "original": "sVar2",
         "type": "size_t"
       },
       {
-        "name": "index",
+        "name": "probe_index",
         "original": "uVar3",
         "type": "ulong"
       },
       {
-        "name": "count",
+        "name": "live_count",
         "original": "uVar4",
         "type": "ulong"
+      },
+      {
+        "name": "success",
+        "original": "BVar1",
+        "type": "BOOL"
       }
     ],
     "source": "xzre/xzre_code/count_pointers.c"

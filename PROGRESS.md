@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `LR5`: reviewed `backdoor_entry`, `_get_cpuid_modified`, `_cpuid_gcc`, and `count_pointers` (plus re-verified `xzre_globals`); renamed the cpuid scratch registers and pointer counters in `metadata/xzre_locals.json`, promoted their AutoDocs to plate+inline form, and added inline anchors for the resolver gating, cpuid fallback, and pointer-table heuristics.
+- Ran `./scripts/refresh_xzre_project.sh` repeatedly while fixing an inline match and converting the new AutoDoc text to ASCII; final pass completed cleanly (rename report stayed green, inline comments landed, portable archive refreshed).
+- Next: move into session `LR6` (c stdlib + IO helpers) so the last loader/runtime exports have the same locals/inline coverage before pivoting to the crypto batches.
+
+## 2025-11-24
 - Session `LR4`: reviewed `find_link_map_l_audit_any_plt`, `find_dl_audit_offsets`, `backdoor_setup`, `backdoor_init_stage2`, and `backdoor_init`; renamed the lingering register temps (decoder wipes, libcrypto basename buffer, audit bit toggles, cpuid slot pointers), promoted each AutoDoc to plate+inline form, and dropped new inline anchors for the `_dl_audit_symbind_alt` sweep, ld.so offset hunt, GOT sanity gate, secret_data telemetry, and stage-two cpuid patch.
 - Ran `./scripts/refresh_xzre_project.sh` twice (fixing inline match strings) until `xzregh/`, the locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all reflected the new metadata with no warnings.
 - Next: start session `LR5` (backdoor entry/cpuid helpers + globals) so the remaining loader/runtime exports have the same locals + inline coverage.

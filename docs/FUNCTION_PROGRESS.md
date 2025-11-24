@@ -169,10 +169,10 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `105830_backdoor_setup` | `loader_rt` | 1 | 2025-11-24 (LR4) – Documented the GOT distance gate, shared-libraries walk, ld.so audit patch, sensitive-data/monitor/log discovery, secret_data telemetry, and audit-bit write-back; refreshed the sprawling locals metadata. |
 | `106F30_backdoor_init_stage2` | `loader_rt` | 1 | 2025-11-24 (LR4) – Named the bootstrap scratch cursors, annotated the zeroization loops, retry/fallback flow, and GOT reset, and synced the inline breadcrumbs. |
 | `10A794_backdoor_init` | `loader_rt` | 1 | 2025-11-24 (LR4) – Clarified the GOT bookkeeping/resolver swap, renamed the cpuid slot pointers, and added inline comments covering the relocation math plus the temporary stage-two patch. |
-| `10A720_backdoor_entry` | `loader_rt` | 0 |  |
-| `10A800_get_cpuid_modified` | `loader_rt` | 0 |  |
-| `10A700_cpuid_gcc` | `loader_rt` | 0 |  |
-| `1074B0_count_pointers` | `loader_rt` | 0 |  |
+| `10A720_backdoor_entry` | `loader_rt` | 1 | 2025-11-24 (LR5) – renamed the cpuid scratch registers, documented the second-call bootstrap, and added inline notes for the `backdoor_init` handoff plus the final `_cpuid_gcc` dispatch. |
+| `10A800_get_cpuid_modified` | `loader_rt` | 1 | 2025-11-24 (LR5) – clarified the high-bit probe/max-leaf gate, updated the AutoDoc to ASCII, and added inline anchors for the resolver call, bounds check, and success return. |
+| `10A700_cpuid_gcc` | `loader_rt` | 1 | 2025-11-24 (LR5) – captured the helper ladder vs. raw `cpuid()` fallback, highlighted the GCC register ordering inline, and kept the dispatcher locals in sync with metadata. |
+| `1074B0_count_pointers` | `loader_rt` | 1 | 2025-11-24 (LR5) – renamed the malloc-derived counters, explained the pointer-table heuristics, and added inline comments for the guard, NULL terminator break, and allocation-cap fallback. |
 | `xzre_globals` | `loader_rt` | 1 | 2025-11-21 – Authored the missing AutoDoc so the liblzma data blob is documented as the shared hooks state (`ldso_ctx_t`, `global_ctx`, resolved imports, sshd/log metadata, payload queues). |
 | `107030_c_strlen` | `loader_rt` | 0 |  |
 | `107050_c_strnlen` | `loader_rt` | 0 |  |

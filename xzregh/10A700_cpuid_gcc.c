@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: GCC-style CPUID shim that dispatches through the individual helper thunks for every supported leaf (basic, cache, topology,
- * extended brand strings, etc.). Whatever leaf pointer it chooses has EAX/EBX/ECX/EDX copied into the provided outputs so callers
- * don’t need inline assembly.
+ * AutoDoc: GCC-style CPUID shim that mirrors glibc’s helper: it picks a dedicated thunk for every well-known leaf (basic IDs,
+ * caches, topology, brand strings, etc.) and only falls back to the raw `cpuid()` stub when the table has no match. After executing
+ * the thunk it copies the register tuple back into the caller-provided buffers, preserving GCC’s `[EAX, EBX, EDX, ECX]` ordering so
+ * callers never need inline assembly.
  */
 
 #include "xzre_types.h"
@@ -20,6 +21,7 @@ void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
   uint ecx_val;
   uint edx_val;
   
+  // AutoDoc: Walk a straight if/else ladder of helpers so each canonical leaf (0, 1, cache descriptors, brand strings, etc.) has its own thunk.
   if (level == 0) {
     leaf_info = (uint *)cpuid_basic_info(0);
   }
@@ -69,6 +71,7 @@ void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
     leaf_info = (uint *)cpuid_brand_part3_info(0x80000004);
   }
   else {
+    // AutoDoc: Anything outside the curated list falls back to the raw `cpuid()` stub so oddball leaves still work.
     leaf_info = (uint *)cpuid(level);
   }
   ebx_val = leaf_info[1];
@@ -76,6 +79,7 @@ void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
   edx_val = leaf_info[3];
   *a = *leaf_info;
   *b = ebx_val;
+  // AutoDoc: Match GCC’s ABI by returning `[EAX, EBX, EDX, ECX]`—note the deliberate swap compared to the hardware register order.
   *c = edx_val;
   *d = ecx_val;
   return;
