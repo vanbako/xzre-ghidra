@@ -897,16 +897,133 @@
   "sshbuf_bignum_is_negative": "Treats an sshbuf as a serialized big integer. When the payload is between 0x20 and 0x40 bytes it scans forward until it finds a\nbyte with the sign bit set; encountering such a byte before hitting the end marks the buffer as “negative” and therefore\nsuitable for modulus harvesting.",
   "sshbuf_extract": "Reads out an sshbuf’s d pointer and size field using the dynamic layout encoded in global_ctx->sshd_offsets. Depending on\nwhether each qword index is negative it either uses the struct fields directly or walks to the encoded offset, confirms both the\nstruct and the pointed-to range are mapped with is_range_mapped, and hands the caller the live pointer/length pair.",
   "sshd_configure_log_hook": "Validates that the caller provided writable log handler slots plus the format strings needed to rewrite messages, and\nonly honours logging requests when the controlling flag (bit 3 in `cmd_flags->flags1`) is set or the backdoor is already\nrunning as root. If the existing handler/context pointers already reside inside sshd it swaps them so the implant can\nhijack them safely, snapshots the original function/context, and either disables logging entirely or enables filtering\nmode. In filter mode it verifies that the `%s`, `\"Connection closed by\"`, and `\"(preauth)\"` strings are available before\ndropping `mm_log_handler_hook` into place.",
-  "sshd_find_main": "Walks sshd's entry thunk from `Elf64_Ehdr::e_entry`, borrowing the fake lzma allocator (with `libcrypto` stored in\n`opaque`) to fetch `EVP_PKEY_new_raw_public_key`, `EVP_Digest`, and `EVP_sha256`. While decoding instructions it watches\nfor a RIP-relative MOV/LEA that materialises the real `sshd_main` pointer and insists that the very next CALL targets\nthe `__libc_start_main@GOT` slot via the same register. When the pattern matches it records the discovered entry point,\nbumps the resolved-count for every EVP helper it cached into `imported_funcs`, and hands the caller the exact code\naddress instead of the PLT stub.",
-  "sshd_find_monitor_field_addr_in_function": "Disassembles a monitor helper and repeatedly calls `find_mov_lea_instruction` until it sees a register loaded from the\nsshd .bss/.data window. It then limits itself to the next ~0x40 bytes of code, tracks that register through LEA/MOV\nmirroring, and confirms that it flows unmodified into a nearby call to `mm_request_send`. When those conditions hold it\nreturns the referenced data address so the caller can treat it as the monitor struct slot (sendfd, recvfd, sshbuf\npointer, etc.).",
+  "sshd_find_main": {
+    "plate": "Walks sshd's entry thunk from `Elf64_Ehdr::e_entry`, bounding the decoder to the first 0x200 bytes of `.text` so it only\nhas to understand the glibc crt1 shim. The helper temporarily points the fake lzma allocator at libcrypto, resolves all required\nEVP helpers up front, and then looks for a RIP-relative MOV/LEA that produces an address inside sshd's text segment. The very\nnext CALL must target `__libc_start_main@GOT` through the same register, at which point the discovered `sshd_main` pointer and\nfully primed `imported_funcs` table are returned to the caller.",
+    "inline": [
+      {
+        "match": "allocator->opaque = libcrypto;",
+        "comment": "Point the fake allocator at libcrypto so the `lzma_alloc` shim can resolve EVP helpers from that module."
+      },
+      {
+        "match": "code_end = code_start + 0x200;",
+        "comment": "Only scan the crt1-sized entry stub—clamp the walk to 0x200 bytes or the end of `.text`, whichever comes first."
+      },
+      {
+        "match": "symbol_entry = elf_symbol_get(libcrypto,STR_EVP_Digest,0);",
+        "comment": "Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed."
+      },
+      {
+        "match": "if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10d) {",
+        "comment": "Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer."
+      },
+      {
+        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (*(u32 *)&insn_ctx.opcode_window[3] == 0x17f)) &&",
+        "comment": "The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register."
+      }
+    ]
+  },
+  "sshd_find_monitor_field_addr_in_function": {
+    "plate": "Disassembles a monitor helper, finds a MOV/LEA that pulls from sshd's `.data/.bss`, and then spends the next ~0x40 bytes tracking that register through copies until it lands in RDI and flows into `mm_request_send`. When every predicate fires the referenced `.bss` address is returned as the monitor struct field (sendfd/recvfd/sshbuf pointer, etc.).",
+    "inline": [
+      {
+        "match": "decode_ok = find_mov_lea_instruction(code_start,code_end,TRUE,TRUE,&insn_ctx);",
+        "comment": "Seed the analysis by re-running the MOV/LEA scanner until a writable sshd address is loaded into a register."
+      },
+      {
+        "match": "if ((data_start <= monitor_field_addr) && (monitor_field_addr < data_end)) {",
+        "comment": "Only consider MOV/LEA hits that touch sshd's `.data/.bss` window—the monitor struct lives there."
+      },
+      {
+        "match": "call_window_end = code_start + 0x40;",
+        "comment": "Clamp the search window to roughly 0x40 bytes so only the prologue-sized snippet is analysed."
+      },
+      {
+        "match": "if (mirrored_reg == 7) {",
+        "comment": "Once the tracked pointer flows into RDI (argument register 7) the helper expects a nearby `mm_request_send` call."
+      },
+      {
+        "match": "decode_ok = find_call_instruction",
+        "comment": "Verify that the mm_request_send call immediately follows; if it does, the captured address becomes the monitor slot."
+      }
+    ]
+  },
   "sshd_find_monitor_struct": "Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths,\netc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned BSS address is tallied, and\nonce a value shows up at least five times the routine records it in `ctx->struct_monitor_ptr_address` so later hooks can\ndereference monitor->monitor_to_child_fd/child_to_monitor_fd directly. The helper also emits a `secret_data_append_from_call_site`\nbreadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.",
   "sshd_find_sensitive_data": "Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers\ninto the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`,\n`EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that\nthe library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real\n`sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME`\nheuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and\nwhichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved\nlibcrypto stubs are freed before the helper reports that no recon data was found.",
   "sshd_get_client_socket": "Prefers the recovered monitor struct when one is available: it selects monitor->child_to_monitor_fd for DIR_WRITE and\nmonitor->monitor_to_child_fd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and\nreturns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to\n`sshd_get_usable_socket`, letting callers still obtain a socket handle by index.",
-  "sshd_get_sensitive_data_address_via_krb5ccname": "Starts from the unique reference to `\"KRB5CCNAME\"` and walks forward through the surrounding basic blocks. It only\naccepts MOV/LEA instructions that copy getenv's return value into memory inside sshd's .data/.bss range with the same\n-0x18 displacement pattern used by OpenSSH's `sensitive_data` struct. The address (minus 0x18) is returned as the\ncandidate base pointer that later holds host key material and Kerberos cache metadata.",
-  "sshd_get_sensitive_data_address_via_xcalloc": "Consults the precomputed string-reference table to find the code region that contains sshd's zero-initialisation\n`xcalloc` call. Immediately after each matching CALL it scans the next handful of instructions for stores into .bss,\nrecords up to sixteen unique destinations, and looks for three consecutive slots separated by eight bytes (ptr, ptr+8,\nptr+0x10). That stride pattern matches the layout of `sensitive_data`, so the lowest address of the triplet becomes the\npreferred candidate.",
+  "sshd_get_sensitive_data_address_via_krb5ccname": {
+    "plate": "Starts from the unique `\"KRB5CCNAME\"` reference, proves that getenv's return value is copied into sshd's `.data/.bss` region with the familiar -0x18 stride, and hands the caller the computed struct base. It tolerates both register-tracking MOV sequences and the LEA/zero-immediate variant OpenSSH uses when the pointer is materialised directly.",
+    "inline": [
+      {
+        "match": "krb5_string_ref = elf_find_string_reference(elf,STR_KRB5CCNAME,code_start,code_end);",
+        "comment": "Use the cached string table to jump straight to the block that references `KRB5CCNAME`."
+      },
+      {
+        "match": "store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size;",
+        "comment": "After spotting the getenv result, walk the next few instructions looking for stores into `.bss`."
+      },
+      {
+        "match": "candidate_store = (u8 *)0x0;",
+        "comment": "The following RIP-relative add reconstructs the absolute `.bss` pointer that getenv's return register is being stored into."
+      },
+      {
+        "match": "data_cursor = candidate_store + -0x18;",
+        "comment": "Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address."
+      },
+      {
+        "match": "else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {",
+        "comment": "Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register."
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_address_via_xcalloc": {
+    "plate": "Consults the cached string references to find sshd's zero-initialisation `xcalloc` call, watches the next handful of instructions for `.bss` stores of the return value, and records up to sixteen unique destinations. Whenever it sees three pointers separated by eight bytes (ptr/ptr+8/ptr+0x10) it treats the lowest slot as the `sensitive_data` base.",
+    "inline": [
+      {
+        "match": "xcalloc_call_target = (u8 *)(string_refs->xcalloc_zero_size).func_start;",
+        "comment": "Use the precomputed string catalogue to seed the scan with the `xcalloc` call site."
+      },
+      {
+        "match_regex": "find_call_instruction\\(code_start,code_end,xcalloc_call_target,&store_probe_ctx\\)",
+        "comment": "Hunt for the direct CALL into `xcalloc`; each hit restarts the post-call analysis window."
+      },
+      {
+        "match": "decode_ok = find_instruction_with_mem_operand_ex",
+        "comment": "Immediately scan the following bytes for a MOV [mem],reg instruction that stores the allocated pointer."
+      },
+      {
+        "match": "store_operand_ptr = (u8 *)(store_probe_ctx.mem_disp + (long)store_probe_ctx.instruction) + store_probe_ctx.instruction_size;",
+        "comment": "Convert the RIP-relative store into an absolute `.bss` pointer before recording it."
+      },
+      {
+        "match": "if (((void *)store_hits[clear_idx] == (void *)(store_hits[hit_scan_idx] + -8)) &&",
+        "comment": "Look for three slots spaced eight bytes apart; that stride matches the struct layout (base, base+8, base+0x10)."
+      }
+    ]
+  },
   "sshd_get_sensitive_data_score": "Combines the per-function heuristics by doubling the `demote_sensitive_data` and `main()` scores, adding them together,\nand finally tacking on the `do_child` result. Only candidates that reach eight or more points are surfaced to the rest\nof the implant; weaker hits are ignored even if one heuristic thought they were promising.",
   "sshd_get_sensitive_data_score_in_demote_sensitive_data": "Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand\ntouches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as\nstrong evidence in the aggregate score.",
-  "sshd_get_sensitive_data_score_in_do_child": "Uses the string catalogue to locate `do_child` and counts how many memory operands touch the supplied pointer at offsets\n0 and +0x10. Touching the base is worth one point while seeing multiple hits on +0x10 yields up to two more, so routines\nthat read both halves of the struct bubble to the top. The tiny score (0–3) feeds into the aggregate heuristic that\nselects the best candidate.",
+  "sshd_get_sensitive_data_score_in_do_child": {
+    "plate": "Uses the cached string reference for `do_child`, awards one point if it ever touches the candidate pointer, and then probes for one or two references to offset +0x10. The second half of the struct buys up to two additional points, yielding a 0–3 score that feeds the aggregate heuristic.",
+    "inline": [
+      {
+        "match": "code_start = (u8 *)(refs->chdir_home_error).func_start;",
+        "comment": "Locate `do_child` via the `chdir_home_error` string reference and bail out if the symbol is missing."
+      },
+      {
+        "match": "hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);",
+        "comment": "Touching the base pointer once awards the initial point in the score."
+      },
+      {
+        "match": "hit_found = find_instruction_with_mem_operand",
+        "comment": "Reuse the same scanner to hunt for accesses to `sensitive_data + 0x10`; the first hit collects +1."
+      },
+      {
+        "match": "hit_found = find_instruction_with_mem_operand",
+        "occurrence": 3,
+        "comment": "A second access to the +0x10 field within the remaining code bumps the score by another point."
+      }
+    ]
+  },
   "sshd_get_sensitive_data_score_in_main": "Looks inside the cached `main()` range and searches for memory references to the struct at offsets 0, +8, and +0x10. It\ngives +1 when the base is accessed, +1 when +0x10 is touched, and subtracts one when +8 never shows up, producing a\nsigned score between -1 and +3. The result is doubled later so the decision logic favours pointers that the main daemon\nmanipulates frequently.",
   "sshd_get_sshbuf": "Finds the sshbuf inside sshd’s monitor structure that now holds the forged modulus. It dereferences\nglobal_ctx->struct_monitor_ptr_address, uses the packed sshd_offsets to identify the m_pkex pointer and the sshbuf data/size\nfields, and validates any candidate via sshbuf_extract. When offsets are unknown it brute-forces the pkex table: two buffers\nmust decode to “SSH-2.0”/“ssh-2.0” string IDs and the next buffer must look like a negative bignum (sshbuf_bignum_is_negative).\nOnly then does it return the mapped sshbuf->d pointer and length.",
   "sshd_get_usable_socket": "Runs a brute-force probe across file descriptors 0–63, calling `shutdown(fd, SHUT_RDWR)` on each one and treating\n`EINVAL`/`ENOTCONN` (or a non-zero return) as evidence that the descriptor is open but idle. Every candidate bumps a\ncounter, and when the counter reaches the requested `socket_index` the fd is returned to the caller so implants can\nrecycle sshd's sockets even when the monitor struct is missing.",

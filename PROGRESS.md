@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `SR1`: reviewed the sshd entrypoint/sensitive-data helpers (`sshd_find_main`, monitor-field finder, the `KRB5CCNAME` and xcalloc heuristics, plus the `do_child` scorer), renamed their remaining register temps in `metadata/xzre_locals.json`, promoted each AutoDoc to `plate+inline` form with new inline comment anchors, and reran `./scripts/refresh_xzre_project.sh` multiple times while iterating on the regex matches until the inline injection finished cleanly (locals rename report stayed green, `xzregh/*.c` + portable archive regenerated).
+- Next: move on to session `SR2` (score aggregation and monitor discovery) so the rest of the sshd-sensitive-data pipeline carries the same locals/inline coverage before diving into the hook plumbing.
+
+## 2025-11-24
 - Session `EL6`: wrapped `get_lzma_allocator` by promoting its AutoDoc entry to a `plate+inline` block, renaming the lone register temp to `fake_allocator` in `metadata/xzre_locals.json`, and re-running `./scripts/refresh_xzre_project.sh` so the inline comments and locals rewrite landed in `xzregh/104060_get_lzma_allocator.c`, the Ghidra project, and the portable archive (locals rename report stayed clean).
 - Next: pivot into `sshd_recon` session `SR1` now that the ELF helpers are fully documented.
 

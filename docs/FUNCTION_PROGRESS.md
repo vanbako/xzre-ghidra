@@ -124,11 +124,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `103CE0_main_elf_parse` | `elf_mem` | 1 | 2025-11-23 (EL5) – clarified the ld.so parse, `__libc_stack_end` lookup, sshd verification, and pointer publish with inline comments tied to each step. |
 | `104030_init_elf_entry_ctx` | `elf_mem` | 1 | 2025-11-23 (EL5) – documented every cpuid GOT prep write (random symbol, resolver-frame slot, GOT math, TLS reset) and added inline breadcrumbs for each field assignment. |
 | `104060_get_lzma_allocator` | `elf_mem` | 1 | 2025-11-24 (EL6) – wrapped the helper in a `plate+inline` AutoDoc, renamed `pfVar1` to `fake_allocator` via `metadata/xzre_locals.json`, and reran the refresh so the inline comments/locals rewrite landed in `xzregh/104060_get_lzma_allocator.c`. |
-| `102550_sshd_find_main` | `sshd_recon` | 0 |  |
-| `102FF0_sshd_find_monitor_field_addr_in_function` | `sshd_recon` | 0 |  |
-| `103340_sshd_get_sensitive_data_address_via_krb5ccname` | `sshd_recon` | 0 |  |
-| `103680_sshd_get_sensitive_data_address_via_xcalloc` | `sshd_recon` | 0 |  |
-| `103870_sshd_get_sensitive_data_score_in_do_child` | `sshd_recon` | 0 |  |
+| `102550_sshd_find_main` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Renamed the anonymous ELF symbol temps, documented the allocator/libc bootstrap, and added inline notes for the LEA→`__libc_start_main` pattern so the entry hunt is readable. |
+| `102FF0_sshd_find_monitor_field_addr_in_function` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Captured the MOV/LEA seeding flow, the 0x40-byte tracking window, and the RDI→`mm_request_send` requirement via inline comments to make the register chase obvious. |
+| `103340_sshd_get_sensitive_data_address_via_krb5ccname` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Expanded the AutoDoc for both getenv/LEA cases, renamed the tracker locals, and annotated the scan/stride math that proves the `.bss` stores. |
+| `103680_sshd_get_sensitive_data_address_via_xcalloc` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Clarified how the helper finds the xcalloc call, records each `.bss` store, and tests the ptr/ptr+8/ptr+0x10 triplet, with new inline breadcrumbs on the decoder loop. |
+| `103870_sshd_get_sensitive_data_score_in_do_child` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Documented the score math (base + first/second +0x10 hits), renamed the context scratch, and dropped inline notes on each pass over `do_child`. |
 | `103910_sshd_get_sensitive_data_score_in_main` | `sshd_recon` | 0 |  |
 | `103990_sshd_get_sensitive_data_score_in_demote_sensitive_data` | `sshd_recon` | 0 |  |
 | `103D50_sshd_get_sensitive_data_score` | `sshd_recon` | 0 |  |

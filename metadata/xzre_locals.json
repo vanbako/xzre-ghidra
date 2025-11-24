@@ -6340,6 +6340,36 @@
         "replacement": "*(u32 *)&local_80.opcode_window[3]"
       },
       {
+        "name": "raw_pubkey_helper",
+        "original": "ppVar5",
+        "type": "pfn_EVP_PKEY_new_raw_public_key_t"
+      },
+      {
+        "name": "symbol_entry",
+        "original": "pEVar7",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "symbol_value",
+        "original": "EVar1",
+        "type": "Elf64_Addr"
+      },
+      {
+        "name": "libcrypto_ehdr",
+        "original": "pEVar2",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "name": "mov_target",
+        "original": "puVar8",
+        "type": "u8 *"
+      },
+      {
+        "name": "ctx_cursor",
+        "original": "pdVar10",
+        "type": "dasm_ctx_t *"
+      },
+      {
         "name": "allocator",
         "original": "allocator_00",
         "type": "lzma_allocator *"

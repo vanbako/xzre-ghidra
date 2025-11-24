@@ -5,11 +5,7 @@
 
 
 /*
- * AutoDoc: Disassembles a monitor helper and repeatedly calls `find_mov_lea_instruction` until it sees a register loaded from the
- * sshd .bss/.data window. It then limits itself to the next ~0x40 bytes of code, tracks that register through LEA/MOV
- * mirroring, and confirms that it flows unmodified into a nearby call to `mm_request_send`. When those conditions hold it
- * returns the referenced data address so the caller can treat it as the monitor struct slot (sendfd, recvfd, sshbuf
- * pointer, etc.).
+ * AutoDoc: Disassembles a monitor helper, finds a MOV/LEA that pulls from sshd's `.data/.bss`, and then spends the next ~0x40 bytes tracking that register through copies until it lands in RDI and flows into `mm_request_send`. When every predicate fires the referenced `.bss` address is returned as the monitor struct field (sendfd/recvfd/sshbuf pointer, etc.).
  */
 
 #include "xzre_types.h"
@@ -40,6 +36,7 @@ BOOL sshd_find_monitor_field_addr_in_function
       zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
     }
     while( TRUE ) {
+      // AutoDoc: Seed the analysis by re-running the MOV/LEA scanner until a writable sshd address is loaded into a register.
       decode_ok = find_mov_lea_instruction(code_start,code_end,TRUE,TRUE,&insn_ctx);
       monitor_field_addr = (u8 *)(ulong)decode_ok;
       if (decode_ok == FALSE) break;
@@ -69,7 +66,9 @@ LAB_001030d4:
         }
       }
       code_start = insn_ctx.instruction + insn_ctx.instruction_size;
+      // AutoDoc: Only consider MOV/LEA hits that touch sshd's `.data/.bss` window—the monitor struct lives there.
       if ((data_start <= monitor_field_addr) && (monitor_field_addr < data_end)) {
+        // AutoDoc: Clamp the search window to roughly 0x40 bytes so only the prologue-sized snippet is analysed.
         call_window_end = code_start + 0x40;
         if (ctx->sshd_text_end < code_start + 0x40) {
           call_window_end = (u8 *)ctx->sshd_text_end;
@@ -136,7 +135,9 @@ LAB_00103237:
             }
             if (tracked_reg == candidate_reg) {
               tracked_reg = mirrored_reg;
+              // AutoDoc: Once the tracked pointer flows into RDI (argument register 7) the helper expects a nearby `mm_request_send` call.
               if (mirrored_reg == 7) {
+                // AutoDoc: Verify that the mm_request_send call immediately follows; if it does, the captured address becomes the monitor slot.
                 decode_ok = find_call_instruction
                                   (insn_ctx.instruction + insn_ctx.instruction_size,call_window_end,
                                    (u8 *)ctx->sshd_ctx->mm_request_send_start,&insn_ctx);

