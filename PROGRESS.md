@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `CC2`: reviewed `verify_signature`, `sshd_get_sshbuf`, `sshbuf_bignum_is_negative`, `sshbuf_extract`, and `secret_data_get_decrypted`; renamed their lingering scratch locals (`wipe_cursor`, `pkex_entry_span`, `banner_hits`, `payload_offset`, `sshbuf_span`, `seed_key_buf`, etc.) and promoted each metadata entry to plate+inline form so the sha256 splice/Ed448 verify, pkex brute-force heuristics, MSB scan, dynamic sshbuf layout, and two-stage ChaCha decrypt are documented directly in the decomp.
+- Ran `./scripts/refresh_xzre_project.sh` multiple times while fixing inline match strings and reverting a locals rename that clobbered `seed_iv`; the final pass completed cleanly (rename report green, portable archive refreshed) with only the longstanding `piVar2` warning noted by postprocess.
+- Next: move on to session `CC3` (RSA hook wrappers) so the rest of the crypto helpers pick up the same locals/inline coverage before diving into the appenders.
+
+## 2025-11-24
 - Session `CC1`: reviewed `dsa_key_hash`, `chacha_decrypt`, `sha256`, `bignum_serialize`, and `rsa_key_hash`; renamed their lingering locals/register temps (`fingerprint_stream`, `wipe_words`, `bytes_written`, `fingerprint_bytes`, etc.) and promoted each AutoDoc to plate+inline form so the zeroization passes, import guards, serialization loops, and sha256 hand-offs are documented directly in the decomp.
 - Ran `./scripts/refresh_xzre_project.sh` repeatedly while fixing a JSON escape and a few inline match strings; final pass completed cleanly (no warnings, rename report stayed green, portable archive refreshed, inline comments landed in `xzregh/*`).
 - Next: move on to session `CC2` (verify_signature + sshbuf helpers + secret_data_get_decrypted) so the rest of the crypto stack gains the same locals/inline coverage before diving into the RSA hook wrappers.

@@ -6230,32 +6230,27 @@
   "secret_data_get_decrypted": {
     "locals": [
       {
-        "name": "buf1",
+        "name": "seed_key_buf",
         "type": "struct key_buf"
       },
       {
-        "name": "buf2",
+        "name": "payload_key_buf",
         "type": "struct key_buf"
       }
     ],
     "register_temps": [
       {
-        "name": "funcs",
-        "original": "piVar2",
-        "type": "imported_funcs_t *"
-      },
-      {
-        "name": "success",
+        "name": "decrypt_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "clear_idx",
+        "name": "wipe_rounds",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "seed_cursor",
+        "name": "wipe_cursor",
         "original": "puVar3",
         "type": "u8 *"
       },
@@ -6312,12 +6307,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "is_negative",
+        "name": "has_negative_mark",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "index",
+        "name": "payload_offset",
         "original": "sVar2",
         "type": "size_t"
       }
@@ -6328,37 +6323,37 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "size_index",
+        "name": "size_slot_index",
         "original": "bVar1",
         "type": "byte"
       },
       {
-        "name": "data_index",
+        "name": "data_slot_index",
         "original": "bVar2",
         "type": "byte"
       },
       {
-        "name": "success",
+        "name": "probe_ok",
         "original": "BVar3",
         "type": "BOOL"
       },
       {
-        "name": "size_offset",
+        "name": "size_field_offset",
         "original": "uVar4",
         "type": "ulong"
       },
       {
-        "name": "data_offset",
+        "name": "data_field_offset",
         "original": "uVar5",
         "type": "ulong"
       },
       {
-        "name": "span",
+        "name": "sshbuf_span",
         "original": "uVar6",
         "type": "u64"
       },
       {
-        "name": "data_ptr",
+        "name": "sshbuf_data",
         "original": "addr",
         "type": "u8 *"
       }
@@ -7167,12 +7162,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "pkex_end",
+        "name": "pkex_table_end",
         "original": "pkVar1",
         "type": "kex *"
       },
       {
-        "name": "pkex_index",
+        "name": "pkex_slot_index",
         "original": "cVar2",
         "type": "char"
       },
@@ -7192,7 +7187,7 @@
         "type": "monitor *"
       },
       {
-        "name": "success",
+        "name": "probe_ok",
         "original": "BVar5",
         "type": "BOOL"
       },
@@ -7222,12 +7217,12 @@
         "type": "kex *"
       },
       {
-        "name": "entry_span",
+        "name": "pkex_entry_span",
         "original": "length",
         "type": "u64"
       },
       {
-        "name": "banner_matches",
+        "name": "banner_hits",
         "original": "uVar9",
         "type": "uint"
       }
@@ -7907,22 +7902,22 @@
         "type": "int"
       },
       {
-        "name": "written_len",
+        "name": "ec_point_bytes_written",
         "original": "sVar6",
         "type": "size_t"
       },
       {
-        "name": "serialized_len",
+        "name": "serialized_key_len",
         "original": "sVar8",
         "type": "size_t"
       },
       {
-        "name": "i",
+        "name": "loop_idx",
         "original": "lVar7",
         "type": "long"
       },
       {
-        "name": "digest_cursor",
+        "name": "wipe_cursor",
         "original": "puVar9",
         "type": "u8 *"
       },

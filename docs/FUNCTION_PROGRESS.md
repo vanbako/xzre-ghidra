@@ -184,11 +184,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `1072B0_sha256` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – renamed the unused `md` spill, documented the input/size/import guard, and added inline comments for the EVP_Digest lookup plus the final hashing call. |
 | `107320_bignum_serialize` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – documented the buffer/bit-length guard, the BN_bn2bin copy, the top-bit padding branch, and the len-header write so the canonical `[len||value]` framing is obvious in-line. |
 | `107510_rsa_key_hash` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – renamed the stack wipes (`scratch_wipe_cursor`, `fingerprint_bytes/fingerprint_stream`) and annotated the exponent/modulus serialization sequence plus the final sha256 fingerprint. |
-| `107630_verify_signature` | `crypto_cmd` | 0 |  |
-| `107A20_sshd_get_sshbuf` | `crypto_cmd` | 0 |  |
-| `107920_sshbuf_bignum_is_negative` | `crypto_cmd` | 0 |  |
-| `107950_sshbuf_extract` | `crypto_cmd` | 0 |  |
-| `1081D0_secret_data_get_decrypted` | `crypto_cmd` | 0 |  |
+| `107630_verify_signature` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the fingerprint wipe/loop temps, clarified the RSA/DSA/ECDSA/Ed25519 fingerprint paths, and added inline anchors for the sha256 splice plus Ed448 verify. |
+| `107A20_sshd_get_sshbuf` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – retitled the pkex cursors/probe flags, documented the offset override vs. brute-force scan, and added inline comments for the banner hits + negative-bignum gate. |
+| `107920_sshbuf_bignum_is_negative` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the boolean/index locals and documented the size window plus MSB scan so the modulus predicate is obvious inline. |
+| `107950_sshbuf_extract` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the slot indices/span cursor, explained the dynamic field lookup in the plate, and added inline notes for the struct/data range probes. |
+| `1081D0_secret_data_get_decrypted` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the ChaCha wipe/seed buffers and documented the two-stage decrypt with inline anchors for the zeroization + both `chacha_decrypt` calls. |
 | `1094A0_run_backdoor_commands` | `crypto_cmd` | 0 |  |
 | `10A240_hook_RSA_public_decrypt` | `crypto_cmd` | 0 |  |
 | `10A2D0_hook_EVP_PKEY_set1_RSA` | `crypto_cmd` | 0 |  |

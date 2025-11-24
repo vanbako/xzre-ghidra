@@ -1828,7 +1828,23 @@
   "secret_data_append_item": "Convenience wrapper used by the secret-data descriptor tables: when the supplied index is non-zero it simply calls\nsecret_data_append_singleton with the provided code pointer and cursor, otherwise it treats the entry as disabled and reports\nFALSE so the batch runner can bail out early.",
   "secret_data_append_items": "Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,\ncalls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the\nfirst failure so callers know whether the entire batch completed.",
   "secret_data_append_singleton": "Guarantees each attestation slot runs at most once. It uses the per-operation byte array inside global_ctx->shift_operations to\nguard entry, resolves the function boundaries with find_function relative to the recorded sshd code limits, invokes\nsecret_data_append_from_code (starting after the call site if present), and increments global_ctx->num_shifted_bits by\nshift_count on success.",
-  "secret_data_get_decrypted": "Unwraps the 57-byte global_ctx->secret_data blob with two ChaCha passes. A baked-in key/IV pair (the key_buf constants) decrypts\na 0x30-byte seed, that seed becomes the real ChaCha key, and a second decrypt peels the runtime secret into the caller buffer\nusing another static IV. All operations go through the resolved EVP entry points so no static crypto ships with the implant.",
+  "secret_data_get_decrypted": {
+    "plate": "Unwraps the 0x39-byte `ctx->secret_data` blob using two ChaCha passes routed through the resolver’s EVP imports. First it zeroes the\nstack copies of the seed/IV buffers, patches the baked-in `key_buf` header, and decrypts a 0x30-byte seed chunk with the static\nkey/IV stored beside the function. That seed is treated as the runtime ChaCha key for a second decrypt that finally emits the\nplaintext secret into the caller buffer, proving no portable crypto ships with the implant.",
+    "inline": [
+      {
+        "match": "wipe_cursor = seed_key_buf.encrypted_seed + 0x20;",
+        "comment": "Scrub the stack copy of the seed/IV trailer before reusing it as the ChaCha input/output buffer."
+      },
+      {
+        "match": "decrypt_ok = chacha_decrypt(seed_key_buf.encrypted_seed + 0x20,0x30,",
+        "comment": "Stage one: decrypt the embedded 0x30-byte seed with the static key/IV constants baked into the binary."
+      },
+      {
+        "match": "decrypt_ok = chacha_decrypt(ctx->encrypted_secret_data,0x39,seed_block,payload_iv,output,",
+        "comment": "Stage two: feed the freshly decrypted seed in as the ChaCha key to unwrap the live secret-data blob."
+      }
+    ]
+  },
 
   "sha256": {
     "plate": "Thin wrapper around EVP_Digest/Evp_sha256: it rejects NULL buffers, zero lengths, or output buffers smaller than 32 bytes, looks up OpenSSL's SHA-256 descriptor, and hashes the payload through EVP_Digest.",
@@ -1851,8 +1867,40 @@
       }
     ]
   },
-  "sshbuf_bignum_is_negative": "Treats an sshbuf as a serialized big integer. When the payload is between 0x20 and 0x40 bytes it scans forward until it finds a\nbyte with the sign bit set; encountering such a byte before hitting the end marks the buffer as \u201cnegative\u201d and therefore\nsuitable for modulus harvesting.",
-  "sshbuf_extract": "Reads out an sshbuf\u2019s d pointer and size field using the dynamic layout encoded in global_ctx->sshd_offsets. Depending on\nwhether each qword index is negative it either uses the struct fields directly or walks to the encoded offset, confirms both the\nstruct and the pointed-to range are mapped with is_range_mapped, and hands the caller the live pointer/length pair.",
+  "sshbuf_bignum_is_negative": {
+    "plate": "Treats an `sshbuf` as a serialized big integer. Only buffers between 0x20 and 0x40 bytes qualify; the helper scans until it\nfinds a byte with the sign bit set and tags the buffer as a \"negative\" modulus candidate. Any buffer that never trips the MSB\nprobe (or sits outside the size window) is rejected.",
+    "inline": [
+      {
+        "match": "if (buf->size - 0x20 < 0x21) {",
+        "comment": "Enforce the expected `[0x20, 0x40]` payload span\u2014anything shorter/longer clearly is not the forged modulus."
+      },
+      {
+        "match": "while (-1 < (char)buf->d[payload_offset]) {",
+        "comment": "Walk forward until a byte with bit 7 set appears; if we hit the end first the buffer is not considered negative."
+      }
+    ]
+  },
+  "sshbuf_extract": {
+    "plate": "Reads an sshbuf's `d` pointer and `size` field using the packed layout stored in `global_ctx->sshd_offsets`. Negative qword\nindices mean the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally checks the\nreferenced buffer is mapped before returning the pointer/length pair.",
+    "inline": [
+      {
+        "match": "if ((char)(size_slot_index & data_slot_index) < '\\0') {",
+        "comment": "When either index is negative we trust the inline struct layout; otherwise derive the byte offset for each field."
+      },
+      {
+        "match": "probe_ok = is_range_mapped((u8 *)buf,sshbuf_span,ctx);",
+        "comment": "Never touch the data/size fields unless the surrounding struct bytes are readable."
+      },
+      {
+        "match": "if (*(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 2) < '\\0') {",
+        "comment": "Negative `data` indices use the literal field; otherwise hop over to the encoded offset to fetch the pointer."
+      },
+      {
+        "match": "probe_ok = is_range_mapped(sshbuf_data,sshbuf_span,ctx);",
+        "comment": "Verify the derived pointer/length pair lands inside a mapped buffer before surfacing it to callers."
+      }
+    ]
+  },
   "sshd_configure_log_hook": {
     "plate": "Validates that the caller provided writable log handler slots plus the format strings needed to rewrite messages, and\nonly honours logging requests when the controlling flag (bit 3 in `cmd_flags->flags1`) is set or the backdoor is already\nrunning as root. If the existing handler/context pointers already reside inside sshd it swaps them so the implant can\nhijack them safely, snapshots the original function/context, and either disables logging entirely or enables filtering\nmode. In filter mode it verifies that the `%s`, `\"Connection closed by\"`, and `\"(preauth)\"` strings are available before\ndropping `mm_log_handler_hook` into place.",
     "inline": [
@@ -2208,7 +2256,35 @@
       }
     ]
   },
-  "sshd_get_sshbuf": "Finds the sshbuf inside sshd\u2019s monitor structure that now holds the forged modulus. It dereferences\nglobal_ctx->struct_monitor_ptr_address, uses the packed sshd_offsets to identify the m_pkex pointer and the sshbuf data/size\nfields, and validates any candidate via sshbuf_extract. When offsets are unknown it brute-forces the pkex table: two buffers\nmust decode to \u201cSSH-2.0\u201d/\u201cssh-2.0\u201d string IDs and the next buffer must look like a negative bignum (sshbuf_bignum_is_negative).\nOnly then does it return the mapped sshbuf->d pointer and length.",
+  "sshd_get_sshbuf": {
+    "plate": "Recovers the `sshbuf` that now holds the forged modulus inside sshd's monitor context. It validates the cached\n`monitor_struct_slot`, uses `sshd_offsets` to locate the pkex table plus the sshbuf data/size fields, and either dereferences the\nknown slot or brute-forces the pkex array when offsets are unknown. Every candidate goes through `sshbuf_extract`; two buffers\nmust decode to the SSH banner string IDs before the third is accepted as the negative bignum carrying the fake modulus.",
+    "inline": [
+      {
+        "match": "pkex_table = monitor_ptr->pkex_table;",
+        "comment": "Start from the in-struct pkex table pointer; when the offsets cache supplies an override we follow that instead."
+      },
+      {
+        "match": "if (-1 < (char)(data_index & size_index)) {",
+        "comment": "When both qword indices are known, derive byte offsets so the later field probes land on the remapped struct layout."
+      },
+      {
+        "match": "probe_ok = is_range_mapped(&pkex_cursor->opaque,pkex_entry_span,ctx);",
+        "comment": "Walk each pkex slot only if its inline struct is mapped\u2014a partially initialised monitor entry is ignored."
+      },
+      {
+        "match": "probe_ok = sshbuf_extract(*(sshbuf **)pkex_cursor,ctx,&sshbuf->d,&sshbuf->size)",
+        "comment": "Project the candidate `sshbuf` through the offset helper so we can safely read its data pointer and length."
+      },
+      {
+        "match": "banner_id = get_string_id((char *)sshbuf->d,(char *)(sshbuf->d + 7));",
+        "comment": "Require two buffers in a row to look like SSH handshake banners before trusting the subsequent pkex entry."
+      },
+      {
+        "match": "probe_ok = sshbuf_bignum_is_negative(sshbuf);",
+        "comment": "Finally ensure the extracted buffer resembles a negative big integer\u2014the forged modulus always sets its sign bit."
+      }
+    ]
+  },
   "sshd_get_usable_socket": {
     "plate": "Brute-force walks file descriptors 0\u201363, calling `shutdown(fd, 0x7fffffff)` on each one and interpreting the expected `EINVAL`/`ENOTCONN` errors as proof the descriptor is open (but idle). Every qualifying fd increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd\u2019s sockets even if the monitor struct was never recovered.",
     "inline": [
@@ -2404,7 +2480,32 @@
       }
     ]
   },
-  "verify_signature": "Computes the host-key digest that sits at sshkey_digest_offset inside the signed blob and then verifies the Ed448 command\nsignature. RSA and DSA keys delegate to rsa_key_hash/dsa_key_hash, ECDSA serialises the EC_POINT in uncompressed form with a\n32-bit length prefix, and Ed25519 prepends a 0x20000000 tag plus the raw 32-byte key. Once the digest is spliced into\nsigned_data the helper loads the attacker\u2019s Ed448 public key with EVP_PKEY_new_raw_public_key(0x440, \u2026) and invokes\nEVP_DigestVerify over the signed_data[0:tbslen) region; only a valid Ed448 signature lets the caller continue.",
+  "verify_signature": {
+    "plate": "Builds the sshkey fingerprint that must sit at `sshkey_digest_offset` inside `signed_data`, patches the digest in place, and then\nverifies the attacker-supplied Ed448 signature. RSA/DSA keys reuse `rsa_key_hash`/`dsa_key_hash`, ECDSA serialises the live\n`EC_POINT` in uncompressed form with a 32-bit big-endian length prefix, and Ed25519 prepends the `0x20000000` tag plus the raw\n32-byte key. Once the fingerprint lands in the blob the helper instantiates an Ed448 `EVP_PKEY` from the baked public key and\nruns `EVP_DigestVerify` over the `[0, tbs_len)` bytes; only a clean verify lets callers keep processing the monitor command.",
+    "inline": [
+      {
+        "match": "serialized_key_len = (*imports->EC_POINT_point2oct)(ecdsa_group,ecdsa_pubkey,4,(uchar *)0x0,0,(BN_CTX *)0x0);",
+        "comment": "Probe the uncompressed EC point length first so we can size-check and reserve 4 bytes for the big-endian length prefix."
+      },
+      {
+        "match": "*(u32 *)serialized_key = 0x20000000;",
+        "comment": "Ed25519 fingerprints are tagged: write the hard-coded `0x20000000` word before copying the 32-byte public key."
+      },
+      {
+        "match": "success = sha256(serialized_key,serialized_key_len,signed_data + sshkey_digest_offset,",
+        "comment": "Insert the freshly serialised fingerprint into the payload and hash it in place so the caller can verify the signed blob.",
+        "match_type": "wildcard"
+      },
+      {
+        "match": "ed448_pkey = (*imports->EVP_PKEY_new_raw_public_key)(0x440,(ENGINE *)0x0,ed448_raw_key,0x39),",
+        "comment": "Load the embedded Ed448 public key (NID 0x440) directly from the attacker-provided raw bytes."
+      },
+      {
+        "match": "status = (*imports->EVP_DigestVerify)(mdctx,signature,0x72,signed_data,tbs_len), status == 1)) {",
+        "comment": "Run the Ed448 verify across `[signed_data, signed_data + tbs_len)`; the caller only proceeds on a `EVP_DigestVerify` success."
+      }
+    ]
+  },
   "x86_dasm": {
     "plate": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",
     "inline": [
