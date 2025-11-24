@@ -6677,6 +6677,76 @@
         "name": "client_socket_flags",
         "original": "local_30",
         "type": "u64"
+      },
+      {
+        "name": "operation_ok",
+        "original": "BVar6",
+        "type": "BOOL"
+      },
+      {
+        "name": "krb_candidate_found",
+        "original": "BVar7",
+        "type": "BOOL"
+      },
+      {
+        "name": "xzcalloc_score",
+        "original": "uVar8",
+        "type": "uint"
+      },
+      {
+        "name": "krb_score",
+        "original": "uVar9",
+        "type": "uint"
+      },
+      {
+        "name": "digest_verify_init",
+        "original": "ppVar10",
+        "type": "pfn_EVP_DigestVerifyInit_t"
+      },
+      {
+        "name": "text_segment",
+        "original": "pvVar11",
+        "type": "void *"
+      },
+      {
+        "name": "digest_verify_sym",
+        "original": "pEVar12",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "evp_sm_sym",
+        "original": "pEVar13",
+        "type": "Elf64_Sym *"
+      },
+      {
+        "name": "cipher_ctx_new",
+        "original": "ppVar14",
+        "type": "pfn_EVP_CIPHER_CTX_new_t"
+      },
+      {
+        "name": "chacha20_ctor",
+        "original": "ppVar15",
+        "type": "pfn_EVP_chacha20_t"
+      },
+      {
+        "name": "probe_clear_idx",
+        "original": "lVar16",
+        "type": "long"
+      },
+      {
+        "name": "probe_cursor",
+        "original": "psVar17",
+        "type": "secret_data_item_t *"
+      },
+      {
+        "name": "winning_candidate",
+        "original": "psVar18",
+        "type": "sensitive_data *"
+      },
+      {
+        "name": "zero_stride",
+        "original": "bVar19",
+        "type": "u8"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_sensitive_data.c"

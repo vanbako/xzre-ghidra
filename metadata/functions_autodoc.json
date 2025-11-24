@@ -947,8 +947,121 @@
       }
     ]
   },
-  "sshd_find_monitor_struct": "Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths,\netc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned BSS address is tallied, and\nonce a value shows up at least five times the routine records it in `ctx->struct_monitor_ptr_address` so later hooks can\ndereference monitor->monitor_to_child_fd/child_to_monitor_fd directly. The helper also emits a `secret_data_append_from_call_site`\nbreadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.",
-  "sshd_find_sensitive_data": "Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers\ninto the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`,\n`EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that\nthe library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real\n`sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME`\nheuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and\nwhichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved\nlibcrypto stubs are freed before the helper reports that no recon data was found.",
+  "sshd_find_monitor_struct": {
+    "plate": "Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths, etc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned BSS address is tallied, and once a value shows up at least five times the routine records it in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->monitor_to_child_fd/child_to_monitor_fd directly. The helper also emits a `secret_data_append_from_call_site` breadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.",
+    "inline": [
+      {
+        "match": "secret_append_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);",
+        "comment": "Log the monitor discovery entry point so the secret-data tap can mirror that progress later."
+      },
+      {
+        "match": "ctx->sshd_ctx->mm_request_send_start != (void *)0x0",
+        "comment": "Abort when the mm_request metadata is missing—without it there is no stable monitor struct to discover."
+      },
+      {
+        "match": "data_start = (u8 *)elf_get_data_segment(elf,&data_segment_size,FALSE);",
+        "comment": "Limit all candidate addresses to sshd’s writable data segment so stray pointers never skew the vote."
+      },
+      {
+        "match": "monitor_vote_table[0] = 4;",
+        "comment": "Seed the first half of the vote table with the string-reference indexes for the ten monitor helper functions we trust."
+      },
+      {
+        "match": "for (vote_inner_idx = 0x14; vote_inner_idx != 0; vote_inner_idx = vote_inner_idx + -1) {",
+        "comment": "Zero both the candidate slots and the tail half of the vote table before collecting fresh samples."
+      },
+      {
+        "match": "code_start = (u8 *)(&refs->xcalloc_zero_size)[monitor_vote_table[vote_idx]].func_start;",
+        "comment": "Walk each monitor helper via its cached function bounds before searching for BSS writes."
+      },
+      {
+        "match": "          sshd_find_monitor_field_addr_in_function",
+        "comment": "Ask the helper to look for MOV [mem],reg stores and cache whatever monitor struct pointer those routines touch.",
+        "placement": "after"
+      },
+      {
+        "match": "vote_cursor = monitor_vote_table + 10;",
+        "comment": "Reuse the upper ten entries of the vote table as counters that track how many times each slot matched."
+      },
+      {
+        "match": "if ((uint)vote_inner_idx <= (uint)candidate_slot) {",
+        "comment": "Empty candidate buckets fall through to here, causing the next unused slot to inherit the vote."
+      },
+      {
+        "match": "monitor_vote_table[winning_candidate_idx + 10] = monitor_vote_table[winning_candidate_idx + 10] + 1;",
+        "comment": "Otherwise increment the counter for whichever pointer matched so the most popular candidate can be selected later."
+      },
+      {
+        "match": "if ((4 < top_vote_count) && ((monitor **)monitor_candidates[winning_candidate_idx] != (monitor **)0x0)) {",
+        "comment": "Only accept a result once at least five helpers agreed on the same pointer, which filters out incidental hits."
+      }
+    ]
+  },
+  "sshd_find_sensitive_data": {
+    "plate": "Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers into the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`, `EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that the library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real `sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME` heuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and whichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved libcrypto stubs are freed before the helper reports that no recon data was found.",
+    "inline": [
+      {
+        "match": "operation_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);",
+        "comment": "Emit breadcrumbs for the monitor command handlers so later refreshes can see that the recon code ran."
+      },
+      {
+        "match": "secret_probe_items.anchor_pc = (u8 *)sshd_proxy_elevate;",
+        "comment": "Pre-populate a four-entry batch that records the proxy elevate helper plus the monitor socket discovery routines."
+      },
+      {
+        "match": "operation_ok = secret_data_append_items(&secret_probe_items,4,secret_data_append_item);",
+        "comment": "Push all four breadcrumbs into the log in one shot; a failure here aborts before any ELF parsing happens."
+      },
+      {
+        "match": "allocator = get_lzma_allocator();",
+        "comment": "Point the fake lzma allocator at libcrypto so subsequent `lzma_alloc` calls actually resolve EVP helpers."
+      },
+      {
+        "match": "allocator->opaque = libcrypto;",
+        "comment": "Remember the target image so the allocator resolves symbols inside libcrypto instead of sshd."
+      },
+      {
+        "match": "digest_verify_init = (pfn_EVP_DigestVerifyInit_t)lzma_alloc(0x118,allocator);",
+        "comment": "Resolve and pin each crypto helper by allocating a stub from libcrypto; success bumps `resolved_imports_count`."
+      },
+      {
+        "match": "text_segment = elf_get_code_segment(sshd,&code_segment_size);",
+        "comment": "Grab sshd’s text segment (and later the data segment) so both heuristics operate on real in-memory bounds."
+      },
+      {
+        "match": "digest_verify_sym = elf_symbol_get(libcrypto,STR_EVP_DigestVerify,0);",
+        "comment": "Check that libcrypto export tables still contain the EVP entry points the payload expects to hijack."
+      },
+      {
+        "match": "operation_ok = sshd_find_main(&sshd_main_addr,sshd,libcrypto,funcs);",
+        "comment": "Locate the actual `main()` body and remember its address for later scoring and hook decisions."
+      },
+      {
+        "match": "operation_ok = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);",
+        "comment": "Capture whether sshd used CET/ENDBR64 so downstream patches can keep the landing pad intact."
+      },
+      {
+        "match": "operation_ok = sshd_get_sensitive_data_address_via_xcalloc",
+        "comment": "Use the xcalloc heuristic to find a struct candidate by following the xcalloc(result) stores into .bss."
+      },
+      {
+        "match": "krb_candidate_found = sshd_get_sensitive_data_address_via_krb5ccname",
+        "comment": "Run the independent KRB5CCNAME-based scan in parallel so two separate heuristics can vote on the same address."
+      },
+      {
+        "match": "xzcalloc_score = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);",
+        "comment": "Score whichever candidate(s) were recovered; the function only accepts pointers that reach eight or more points."
+      },
+      {
+        "match": "ctx->sshd_sensitive_data = winning_candidate;",
+        "comment": "Persist the winning pointer into the global context so every hook can dereference sshd’s sensitive_data struct."
+      },
+      {
+        "match": "lzma_free(funcs->EVP_DigestVerifyInit,allocator);",
+        "comment": "Tear down any temporary EVP handles when discovery fails so the loader does not leak libcrypto objects."
+      }
+    ]
+  },
   "sshd_get_client_socket": "Prefers the recovered monitor struct when one is available: it selects monitor->child_to_monitor_fd for DIR_WRITE and\nmonitor->monitor_to_child_fd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and\nreturns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to\n`sshd_get_usable_socket`, letting callers still obtain a socket handle by index.",
   "sshd_get_sensitive_data_address_via_krb5ccname": {
     "plate": "Starts from the unique `\"KRB5CCNAME\"` reference, proves that getenv's return value is copied into sshd's `.data/.bss` region with the familiar -0x18 stride, and hands the caller the computed struct base. It tolerates both register-tracking MOV sequences and the LEA/zero-immediate variant OpenSSH uses when the pointer is materialised directly.",
@@ -1000,8 +1113,44 @@
       }
     ]
   },
-  "sshd_get_sensitive_data_score": "Combines the per-function heuristics by doubling the `demote_sensitive_data` and `main()` scores, adding them together,\nand finally tacking on the `do_child` result. Only candidates that reach eight or more points are surfaced to the rest\nof the implant; weaker hits are ignored even if one heuristic thought they were promising.",
-  "sshd_get_sensitive_data_score_in_demote_sensitive_data": "Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand\ntouches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as\nstrong evidence in the aggregate score.",
+  "sshd_get_sensitive_data_score": {
+    "plate": "Combines the per-function heuristics by doubling the `demote_sensitive_data` and `main()` scores, adding them together, and finally tacking on the `do_child` result. Only candidates that reach eight or more points are surfaced to the rest of the implant; weaker hits are ignored even if one heuristic thought they were promising.",
+    "inline": [
+      {
+        "match": "score_demote = sshd_get_sensitive_data_score_in_demote_sensitive_data(sensitive_data,elf,refs);",
+        "comment": "Pull the high-confidence score from `demote_sensitive_data` first — those three points get doubled later."
+      },
+      {
+        "match": "score_main = sshd_get_sensitive_data_score_in_main(sensitive_data,elf,refs);",
+        "comment": "Fold in the `main()`-specific heuristic so candidates the daemon manipulates frequently accrue bonus weight."
+      },
+      {
+        "match": "score_do_child = sshd_get_sensitive_data_score_in_do_child(sensitive_data,elf,refs);",
+        "comment": "Finally, add any points earned inside `do_child`, which is the only part of the aggregate that is not doubled."
+      },
+      {
+        "match": "return score_do_child + (score_demote + score_main) * 2;",
+        "comment": "Demote/Main scores are doubled before adding the `do_child` total, yielding the >=8 threshold enforced by callers."
+      }
+    ]
+  },
+  "sshd_get_sensitive_data_score_in_demote_sensitive_data": {
+    "plate": "Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand touches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.",
+    "inline": [
+      {
+        "match": "code_start = (u8 *)(refs->demote_sensitive_data).func_start;",
+        "comment": "Leverage the cached string reference so we only run the scan when `demote_sensitive_data` was actually located."
+      },
+      {
+        "match": "demote_hit = find_instruction_with_mem_operand",
+        "comment": "Walk the routine until a MOV/LEA mentions the candidate struct pointer; that hit is worth the full three points."
+      },
+      {
+        "match": "score = 3;",
+        "comment": "Return an immediate +3 because any true reference inside `demote_sensitive_data` is a very strong signal."
+      }
+    ]
+  },
   "sshd_get_sensitive_data_score_in_do_child": {
     "plate": "Uses the cached string reference for `do_child`, awards one point if it ever touches the candidate pointer, and then probes for one or two references to offset +0x10. The second half of the struct buys up to two additional points, yielding a 0–3 score that feeds the aggregate heuristic.",
     "inline": [
@@ -1024,7 +1173,31 @@
       }
     ]
   },
-  "sshd_get_sensitive_data_score_in_main": "Looks inside the cached `main()` range and searches for memory references to the struct at offsets 0, +8, and +0x10. It\ngives +1 when the base is accessed, +1 when +0x10 is touched, and subtracts one when +8 never shows up, producing a\nsigned score between -1 and +3. The result is doubled later so the decision logic favours pointers that the main daemon\nmanipulates frequently.",
+  "sshd_get_sensitive_data_score_in_main": {
+    "plate": "Looks inside the cached `main()` range and searches for memory references to the struct at offsets 0, +8, and +0x10. It gives +1 when the base is accessed, +1 when +0x10 is touched, and subtracts one when +8 never shows up, producing a signed score between -1 and +3. The result is doubled later so the decision logic favours pointers that the main daemon manipulates frequently.",
+    "inline": [
+      {
+        "match": "code_start = (u8 *)(refs->list_hostkey_types).func_start;",
+        "comment": "Reuse the `list_hostkey_types` string reference to bound sshd’s `main()` implementation before scanning."
+      },
+      {
+        "match": "base_hit = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);",
+        "comment": "Award the first point when any instruction in `main()` touches the candidate struct base."
+      },
+      {
+        "match": "offset10_hit = find_instruction_with_mem_operand",
+        "comment": "Look for a second access at offset +0x10; most true positives tick that bookkeeping field at least once."
+      },
+      {
+        "match": "offset8_hit = find_instruction_with_mem_operand",
+        "comment": "Track whether the +8 slot ever gets referenced so we can penalise pointers that never resemble the real layout."
+      },
+      {
+        "match": "score = (((uint)(base_hit != FALSE) - (uint)(offset10_hit == FALSE)) + 2) - (uint)(offset8_hit == FALSE);",
+        "comment": "Collapse the three booleans into the signed -1…+3 score that later feeds the aggregate heuristic."
+      }
+    ]
+  },
   "sshd_get_sshbuf": "Finds the sshbuf inside sshd’s monitor structure that now holds the forged modulus. It dereferences\nglobal_ctx->struct_monitor_ptr_address, uses the packed sshd_offsets to identify the m_pkex pointer and the sshbuf data/size\nfields, and validates any candidate via sshbuf_extract. When offsets are unknown it brute-forces the pkex table: two buffers\nmust decode to “SSH-2.0”/“ssh-2.0” string IDs and the next buffer must look like a negative bignum (sshbuf_bignum_is_negative).\nOnly then does it return the mapped sshbuf->d pointer and length.",
   "sshd_get_usable_socket": "Runs a brute-force probe across file descriptors 0–63, calling `shutdown(fd, SHUT_RDWR)` on each one and treating\n`EINVAL`/`ENOTCONN` (or a non-zero return) as evidence that the descriptor is open but idle. Every candidate bumps a\ncounter, and when the counter reaches the requested `socket_index` the fd is returned to the caller so implants can\nrecycle sshd's sockets even when the monitor struct is missing.",
   "sshd_log": "Builds a fresh `va_list` that mirrors sshd's sshlogv() calling convention, saving and restoring the XMM argument\nregisters when the ABI says variadic SSE arguments are present. It then tail-calls the resolved sshlogv pointer stored\nin the logging context so higher-level hooks can format log lines exactly the way sshd expects without resolving libc\nwrappers first.",

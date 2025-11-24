@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `SR2`: deep-reviewed the score aggregation helpers, monitor vote collector, and `sshd_find_sensitive_data`, renamed their lingering `BVar*/uVar*/p*` temps in `metadata/xzre_locals.json`, promoted each AutoDoc entry to `plate+inline` form (covering the voting math, heuristics, and libcrypto bootstrap), and reran `./scripts/refresh_xzre_project.sh` twice while fixing inline match strings so `xzregh/`, the Ghidra project, locals report, and the portable archive all reflect the new annotations with no warnings.
+- Next: move on to session `SR3` to finish documenting the remaining sshd monitor helpers and hook plumbing before pivoting to the loader/runtime batches.
+
+## 2025-11-24
 - Session `SR1`: reviewed the sshd entrypoint/sensitive-data helpers (`sshd_find_main`, monitor-field finder, the `KRB5CCNAME` and xcalloc heuristics, plus the `do_child` scorer), renamed their remaining register temps in `metadata/xzre_locals.json`, promoted each AutoDoc to `plate+inline` form with new inline comment anchors, and reran `./scripts/refresh_xzre_project.sh` multiple times while iterating on the regex matches until the inline injection finished cleanly (locals rename report stayed green, `xzregh/*.c` + portable archive regenerated).
 - Next: move on to session `SR2` (score aggregation and monitor discovery) so the rest of the sshd-sensitive-data pipeline carries the same locals/inline coverage before diving into the hook plumbing.
 
