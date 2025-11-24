@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `SR5`: finished the monitor message hook batch (`mm_answer_keyverify_hook`, `mm_answer_authpassword_hook`, `mm_answer_keyallowed_hook`, `mm_log_handler_hook`, `decrypt_payload_message`) by promoting each AutoDoc to plate+inline form with literal anchors, renaming the lingering register temps (`sshd_ctx`, payload seed/header buffers, log rewrite fragments), and refreshing the metadata-driven inline comments. `metadata/functions_autodoc.json` now fully documents the payload state machine plus the log filter rewrites, and `metadata/xzre_locals.json` maps every temp so `xzregh/*.c` mirrors the Ghidra locals.
+- Reran `./scripts/refresh_xzre_project.sh` until the locals rename report stayed clean, the regenerated `xzregh` sources picked up the inline notes, and the portable project archive was refreshed for the new metadata.
+- Next: pivot to the loader batch (`LR1`) so the init/import helpers receive the same locals + inline coverage before circling back to any remaining sshd recon edge cases.
+
+## 2025-11-24
 - Session `SR4`: deep-reviewed `sshd_patch_variables`, `sshd_configure_log_hook`, `check_backdoor_state`, `extract_payload_message`, and `sshd_proxy_elevate`; renamed the lingering register temps for the monitor/PAM toggles, sshbuf parser, and proxy elevater; upgraded each AutoDoc entry to `plate+inline` form with new match anchors; and reran `./scripts/refresh_xzre_project.sh` twice to land the metadata (locals, inline comments, portable archive, rename report stayed clean).
 - Next: roll into session `SR5` (monitor message hooks) so the remaining sshd recon exports inherit the same locals + inline coverage before pivoting to the loader batches.
 

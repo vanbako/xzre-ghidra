@@ -144,11 +144,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `107EA0_check_backdoor_state` | `sshd_recon` | 1 | 2025-11-24 (SR4) – promoted the state-machine plate to plate+inline, renamed the total-length temp, and annotated the state 0/1/2 window plus the failure reset path. |
 | `107F20_extract_payload_message` | `sshd_recon` | 1 | 2025-11-24 (SR4) – renamed the sshbuf cursors and BE length temps, added inline comments for the certificate search and record-length validation, and documented the modulus pointer rewrite. |
 | `108270_sshd_proxy_elevate` | `sshd_recon` | 1 | 2025-11-24 (SR4) – renamed the command/import/context temps, added inline notes for the stack-scan/decrypt path, RSA frame forging, socket selection, and the wait/exit reply handling. |
-| `108080_mm_answer_keyverify_hook` | `sshd_recon` | 0 |  |
-| `108100_mm_answer_authpassword_hook` | `sshd_recon` | 0 |  |
-| `108EA0_mm_answer_keyallowed_hook` | `sshd_recon` | 0 |  |
-| `10A3A0_mm_log_handler_hook` | `sshd_recon` | 0 |  |
-| `108D50_decrypt_payload_message` | `sshd_recon` | 0 |  |
+| `108080_mm_answer_keyverify_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – documented the staged keyverify reply/dispatch restore, renamed the locals to `sshd_ctx`, and added inline notes for the fd_write/exit guards. |
+| `108100_mm_answer_authpassword_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – covered both the payload-backed and synthetic reply paths, renamed the sshd_ctx scratch, and dropped inline comments on the fatal guard and slot restore. |
+| `108EA0_mm_answer_keyallowed_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – expanded the state-machine AutoDoc, added inline comments for the type1/2/3 payload branches plus decrypt/signature checks, and synced the locals metadata. |
+| `10A3A0_mm_log_handler_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – renamed the log/context fragments, documented the filtering/masking flow, and added inline comments for the Connection closed/Accepted rewrites and syslog toggles. |
+| `108D50_decrypt_payload_message` | `sshd_recon` | 1 | 2025-11-24 (SR5) – renamed the ChaCha seed scratch, documented the double-decrypt/copy loop, and added inline comments for the buffer append and payload_state reset. |
 | `102770_init_ldso_ctx` | `loader_rt` | 0 |  |
 | `1027D0_init_hooks_ctx` | `loader_rt` | 0 |  |
 | `102850_init_shared_globals` | `loader_rt` | 0 |  |

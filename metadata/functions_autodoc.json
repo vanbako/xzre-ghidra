@@ -76,7 +76,33 @@
   "contains_null_pointers": "Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters\na NULL slot, letting callers bail out if any required import failed to resolve.",
   "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
   "count_pointers": "Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries until it hits either a NULL or\nthe allocation boundary. Sensitive-data heuristics call it when walking sshd tables whose length isn’t stored explicitly.",
-  "decrypt_payload_message": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_data`,\nit copies the plaintext body into the staging buffer, bumps `current_data_size`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.",
+  "decrypt_payload_message": {
+    "plate": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_buffer`,\nit copies the plaintext body into the staging buffer, bumps `payload_bytes_buffered`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.",
+    "inline": [
+      {
+        "match": "decrypt_ok = secret_data_get_decrypted((u8 *)&payload_key_seed,ctx);",
+        "comment": "Recover the ChaCha key/IV pair from the encrypted secret blob before touching the ciphertext."
+      },
+      {
+        "match": "decrypt_ok = chacha_decrypt((u8 *)body_length_cursor,inl,(u8 *)&payload_key_seed,(u8 *)&hdr,(u8 *)body_length_cursor,",
+        "occurrence": 1,
+        "comment": "First pass decrypts the header/trailer in place so the claimed body length can be validated."
+      },
+      {
+        "match": "for (copy_idx = 0; body_len != copy_idx; copy_idx = copy_idx + 1) {",
+        "comment": "Copy the plaintext body directly into `ctx->payload_buffer`, preserving the stream order."
+      },
+      {
+        "match": "decrypt_ok = chacha_decrypt((u8 *)body_length_cursor,inl,(u8 *)&payload_key_seed,(u8 *)&hdr,(u8 *)body_length_cursor,",
+        "occurrence": 2,
+        "comment": "Re-run the decrypt so ChaCha’s keystream pointer stays aligned with sshd’s original consumer."
+      },
+      {
+        "match": "ctx->payload_state = 0xffffffff;",
+        "comment": "Any validation failure poisons the state machine so the caller restarts the stream from scratch."
+      }
+    ]
+  },
   "dsa_key_hash": "Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with\nbignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized\nBIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.",
   "elf_contains_vaddr": {
     "plate": "Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader funnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a pointer falls outside the parsed ELF image.",
@@ -948,10 +974,115 @@
       }
     ]
   },
-  "mm_answer_authpassword_hook": "Handles `MONITOR_REQ_AUTHPASSWORD` by replaying a prebuilt reply buffer whenever the payload provided one, or by\nsynthesizing the four-field success packet when no payload data is pending. The hook emits the reply through\n`fd_write()`, mirrors sshd's bookkeeping by copying the saved dispatch target back into the table at lVar1+0xa0, and\nreturns 1 so the monitor thread believes password authentication finished successfully without ever touching sshd's\npassword logic. Any structural error falls back to libc's `exit()` to keep the daemon from running partially patched.",
-  "mm_answer_keyallowed_hook": "Runs the decrypted payload state machine. It first validates `payload_state`, extracts sshbuf chunks from the monitor\nmessage, and when state==0 it copies the signed header into `payload_data`, decrypts it via `secret_data_get_decrypted`,\nand verifies the Ed448 signature against the cached host key. State 1 and 2 append additional chunks until the\nadvertised body_length is consumed, then state 3 interprets the decrypted command: copying payloads for\nmm_answer_keyverify/mm_answer_authpassword, invoking `sshd_proxy_elevate` to run system/PAM commands, or queueing auth\npayloads. On success it patches the monitor dispatch table to point at the attacker's hooks before tail-calling the\ngenuine `mm_answer_keyallowed`; any failure resets `payload_state` (or even exits sshd) so no partially decrypted data\nis reused.",
-  "mm_answer_keyverify_hook": "Pulls the canned monitor reply out of the global payload context and writes it straight to the requesting socket via\n`fd_write()`. If the write succeeds it restores the original mm_answer_keyverify pointer so sshd's dispatcher advances\nas if verification succeeded; if it fails the hook invokes libc's `exit()` to avoid leaving sshd mid-patch. Either way\nit never consults sshd's own logic, short-circuiting the verification phase entirely.",
-  "mm_log_handler_hook": "Interposes on sshd's log handler, bailing out entirely when logging has been globally disabled or sshd already dropped\nprivileges back to the sandbox. In filtering mode it scans the formatted string for the `\"Connection closed by ...\n(preauth)\"` pattern, rebuilds a safe replacement message from attacker-provided format strings, and emits it through\n`sshd_log()` while optionally muting syslog via the saved libc pointers. Messages that mention accepted authentication\nevents trigger a second rewrite path so only the sanitised strings ever reach sshd's real logger.",
+  "mm_answer_authpassword_hook": {
+    "plate": "Short-circuits `MONITOR_REQ_AUTHPASSWORD`: validates the ssh/monitor arguments, replays the payload-provided reply when\n`pending_authpayload_len/pending_authpayload` are set, or synthesizes the four-word success packet (request ID + root flag)\nwhen no payload chunk is queued. The reply is emitted via `fd_write()` and the saved dispatch entry is restored so sshd\ncontinues as if the original routine ran; malformed inputs fall back to libc’s `exit(0)` so the monitor never stays\nhalf-patched.",
+    "inline": [
+      {
+        "match": "if ((m == (sshbuf *)0x0 || sock < 0) || (ssh == (ssh *)0x0)) {",
+        "comment": "Missing ssh or monitor arguments mean the hook can’t safely forge a reply—exit immediately to avoid corrupting sshd’s dispatcher."
+      },
+      {
+        "match": "if ((*(ushort *)(sshd_ctx + 0x90) == 0) ||",
+        "comment": "When no payload queued an authpassword body, build the canned success packet locally using the cached request ID and PermitRootLogin tweak."
+      },
+      {
+        "match": "fd_write(sock,reply_buf,reply_len,libc_imports);",
+        "comment": "Whether the reply came from the payload or was synthesized on the stack, push it straight to the monitor socket so sshd never re-enters its password handler."
+      },
+      {
+        "match": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd0);",
+        "comment": "Restore the saved monitor dispatch entry so the next request drops back into sshd’s genuine `mm_answer_authpassword` implementation."
+      }
+    ]
+  },
+  "mm_answer_keyallowed_hook": {
+    "plate": "Runs the decrypted payload state machine. It first validates `payload_state`, extracts sshbuf chunks from the monitor\nmessage, and when state==0 it copies the signed header into `payload_data`, decrypts it via `secret_data_get_decrypted`,\nand verifies the Ed448 signature against the cached host key. State 1 and 2 append additional chunks until the\nadvertised body_length is consumed, then state 3 interprets the decrypted command: copying payloads for\nmm_answer_keyverify/mm_answer_authpassword, invoking `sshd_proxy_elevate` to run system/PAM commands, or queueing auth\npayloads. On success it patches the monitor dispatch table to point at the attacker's hooks before tail-calling the\ngenuine `mm_answer_keyallowed`; any failure resets `payload_state` (or even exits sshd) so no partially decrypted data\nis reused.",
+    "inline": [
+      {
+        "match": "state_ok = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);",
+        "comment": "Pull the next sshbuf payload chunk straight out of the monitor message so the streaming decrypt can resume where it left off."
+      },
+      {
+        "match": "decrypt_payload_message((key_payload_t *)payload_ctx,payload_chunk_size,ctx);",
+        "comment": "Decrypt the framed chunk, append it into `ctx->payload_buffer`, and advance `payload_state` if enough bytes have arrived."
+      },
+      {
+        "match": "if (payload_type == '\\x02') {",
+        "comment": "Type 2 payloads carry a complete `mm_answer_keyverify` reply—copy its length/buffer into `sshd_ctx` and write it back immediately."
+      },
+      {
+        "match": "else if (payload_type == '\\x03') {",
+        "comment": "Type 3 payloads request privilege escalation: honor the supplied uid/gid pair and exec the decrypted body via libc’s `system()`."
+      },
+      {
+        "match": "else if (((payload_type == '\\x01') &&",
+        "comment": "Type 1 payloads stash an authpassword body for later—record the length/pointer so the authpassword hook can emit it on demand."
+      },
+      {
+        "match": "state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);",
+        "comment": "As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won’t trip sshd’s guards."
+      },
+      {
+        "match": "state_ok = secret_data_get_decrypted(payload_seed_buf,ctx);",
+        "comment": "State 0: decrypt the signed header seed into `payload_seed_buf` before copying the 0x3a-byte header into `ctx->payload_ctx`."
+      },
+      {
+        "match": "ctx->payload_ctx->ed448_signature,payload_seed_buf,ctx),",
+        "comment": "Verify the Ed448 signature over the fixed header before allowing the state machine to advance beyond stage zero."
+      },
+      {
+        "match": "ctx->payload_ctx->signed_header_prefix,ctx);",
+        "comment": "State 1 completion: once the final body chunk is spliced in, re-run the signature check across the assembled buffer before switching to command execution."
+      }
+    ]
+  },
+  "mm_answer_keyverify_hook": {
+    "plate": "Short-circuits `MONITOR_REQ_KEYVERIFY` by streaming the payload-staged reply instead of running sshd’s verifier. Once\n`global_ctx` exposes libc imports and `sshd_ctx` recorded a reply length/buffer, the hook writes the blob to the monitor\nsocket, restores the saved dispatch slot, and reports success; missing metadata or a failed write triggers libc’s\n`exit(0)` so sshd never continues with a partially installed hook.",
+    "inline": [
+      {
+        "match": "if ((*(ushort *)(sshd_ctx + 0x84) != 0) &&",
+        "comment": "Only run when keyallowed already staged both the reply length and buffer; otherwise keep sshd’s original handler."
+      },
+      {
+        "match": "(write_result = fd_write(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports),",
+        "comment": "Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded."
+      },
+      {
+        "match": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd8);",
+        "comment": "Drop the preserved mm_answer_keyverify pointer back into the live dispatch slot before returning success."
+      },
+      {
+        "match": "if (libc_imports->exit != (pfn_exit_t)0x0) {",
+        "comment": "Any missing metadata or short write forces an immediate `exit(0)` so sshd never continues with a half-applied hook."
+      }
+    ]
+  },
+  "mm_log_handler_hook": {
+    "plate": "Interposes on sshd's log handler, bailing out entirely when logging has been globally disabled or sshd already dropped\nprivileges back to the sandbox. In filtering mode it scans the formatted string for the `\"Connection closed by ...\n(preauth)\"` pattern, rebuilds a safe replacement message from attacker-provided format strings, and emits it through\n`sshd_log()` while optionally muting syslog via the saved libc pointers. Messages that mention accepted authentication\nevents trigger a second rewrite path so only the sanitised strings ever reach sshd's real logger.",
+    "inline": [
+      {
+        "match": "if (log_ctx_state->log_squelched == TRUE) {",
+        "comment": "Respect the payload’s \"logging disabled\" flag—once set, every log request immediately bails."
+      },
+      {
+        "match": "if ((string_id == STR_Accepted_password_for) || (string_id == STR_Accepted_publickey_for)) {",
+        "comment": "Track log lines announcing a successful authentication so the hook can harvest the username/host fragments for rewriting."
+      },
+      {
+        "match": "if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&",
+        "match_type": "wildcard",
+        "comment": "Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd’s own handler stays quiet while we inject a sanitized line."
+      },
+      {
+        "match": "if ((user_fragment_len != 0) && (host_fragment_len != 0)) {",
+        "comment": "Only rebuild the \"Connection closed by … (preauth)\" string once both the username and host fragments were captured."
+      },
+      {
+        "match": "(**(code **)(libc_imports + 0x58))(0x80000000);",
+        "comment": "Restore sshd’s original syslog mask after the sanitized message has been emitted."
+      }
+    ]
+  },
   "process_is_sshd": {
     "plate": "Walks the argc/argv/envp layout straight off the caller’s stack pointer and only returns TRUE when the process really looks like sshd. It demands a sane argc, an argv[0] pointer that lives on the stack and hashes to `/usr/sbin/sshd`, and then walks argv[1…] ensuring every pointer stays within 0x4000 bytes of the saved SP and never triggers `check_argument`’s debug filter. Once argv terminates, envp entries must either remain stack-resident or fall inside sshd’s writable `.data/.bss` span, and any environment string that maps to a known encoded ID aborts the probe.",
     "inline": [

