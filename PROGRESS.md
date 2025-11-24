@@ -3,6 +3,12 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `LR2`: reviewed `update_cpuid_got_index`, `get_tls_get_addr_random_symbol_got_offset`, `update_got_address`, `update_got_offset`, and `find_link_map_l_name`; renamed the GOT math temps (plt stub, disp offset, runtime map trackers), added the missing inline AutoDoc anchors (sentinel GOT seed, long/short JMP handling, RELRO + dual-LEA checks), and refreshed `metadata/functions_autodoc.json` / `metadata/xzre_locals.json` accordingly.
+- Ran `./scripts/refresh_xzre_project.sh` after each metadata tweak until the inline matcher landed cleanly (no warnings, rename report stayed green) and the regenerated `xzregh/*.c` / portable archive picked up the new comments.
+- Updated `docs/FUNCTION_PROGRESS.md` to mark LR2 complete.
+- Next: continue into session `LR3` (link-map walks and libc import wiring) so the rest of the loader helpers have the same locals + inline coverage.
+
+## 2025-11-24
 - Session `LR1`: reviewed `init_ldso_ctx`, `init_hooks_ctx`, `init_shared_globals`, `init_imported_funcs`, and `validate_log_handler_pointers`; renamed the bindflag/audit/log-handler temps in `metadata/xzre_locals.json`, promoted all five AutoDocs to `plate+inline` form (covering the ld.so reset, hook-publishing retries, shared-global wiring, libcrypto import sanity checks, and the MOV/LEA validator), and reran `./scripts/refresh_xzre_project.sh` so xzregh/`ghidra_projects/xzre_ghidra_portable.zip` picked up the locals + inline comments (rename report stayed clean).
 - Next: proceed with session `LR2` (GOT math + symbol resolution) so the remaining loader helpers gain the same locals/inline coverage before pivoting deeper into the runtime batches.
 

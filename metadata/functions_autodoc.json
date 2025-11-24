@@ -741,7 +741,67 @@
   },
   "find_link_map_l_audit_any_plt": "Primes an `instruction_search_ctx_t` before invoking the bitmask helper. It sweeps `_dl_audit_symbind_alt` for the LEA that\nmaterialises `link_map::l_name` using the caller-provided displacement, records which registers capture the pointer versus the\nmask, initialises the register filters/output buffers, and then calls `find_link_map_l_audit_any_plt_bitmask`. Success means\nboth the byte offset and AND mask are now stored in `hooks->ldso_ctx`; failure either means the pattern never appeared or the\nbit was already non-zero.",
   "find_link_map_l_audit_any_plt_bitmask": "Takes the displacement from `find_link_map_l_name` and hunts for the byte and mask that back ld.so’s `link_map::l_audit_any_plt`\nflag. It temporarily resolves `EVP_DecryptInit_ex` and libc’s `getuid`, decodes `_dl_audit_symbind_alt` with `x86_dasm`, and\ntracks which register holds the computed pointer. Once it sees the MOV-from-link_map followed by a TEST/BT it validates that the\nmask is a single set bit, records the absolute address in `hooks->ldso_ctx.sshd_link_map_l_audit_any_plt_addr`, stores the byte-\nwide mask, and insists the bit is still clear; otherwise the helper sets the search context’s `result` flag and bails out.",
-  "find_link_map_l_name": "Locates the live `link_map::l_name` byte inside ld.so and gathers the libc/libcrypto imports needed later in the run. It\npiggybacks on the fake `lzma_alloc` resolver to look up `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`,\nand `BN_num_bits`, then walks the cached liblzma link_map snapshot inside the binary until it finds the entry whose RELRO tuple\nmatches the running liblzma image. The resulting displacement becomes both `*libname_offset` and the pointer used to index\n`hooks->ldso_ctx.libcrypto_l_name`, and the helper double-checks that `_dl_audit_symbind_alt` references the same offset so\nlater code can safely rewrite the `l_name` field when posing as an audit module.",
+  "find_link_map_l_name": {
+    "plate": "Locates liblzma’s live `link_map::l_name` byte and resolves the libc/libcrypto imports required for the audit-hook pivot. The helper\nruns every lookup through the fake liblzma allocator (logging the probe via `secret_data_append_from_address`) so it can safely\npull in `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`, and `BN_num_bits`. With `_dl_audit_preinit`\nvalidated inside ld.so, it walks the baked link_map snapshot until a candidate entry’s RELRO tuple matches the runtime liblzma\nimage, then measures the displacement between the snapshot and runtime pointer. That delta populates both `*libname_offset` and\n`hooks->ldso_ctx.libcrypto_l_name`, and the helper insists that `_dl_audit_preinit` and `_dl_audit_symbind_alt` each issue an\nLEA that applies the same delta before finalizing the import list.",
+    "inline": [
+      {
+        "match": "status_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);",
+        "comment": "Log the recon step through the secret-data channel so later telemetry can tie GOT patches back to this probe."
+      },
+      {
+        "match": "allocator = get_lzma_allocator();",
+        "comment": "Route libc imports through the attacker-controlled allocator so `lzma_alloc` lands on the right PLT offsets."
+      },
+      {
+        "match": "exit_fn = (pfn_exit_t)lzma_alloc(0x8a8,allocator);",
+        "comment": "Each `lzma_alloc` call reuses the fake allocator offsets to resolve the target libc symbol and bump the import counter."
+      },
+      {
+        "match": "audit_preinit_symbol = elf_symbol_get(ldso_image,STR_dl_audit_preinit,0);",
+        "comment": "Only proceed when ld.so exposes `_dl_audit_preinit`; its body contains the LEA we pattern-match later."
+      },
+      {
+        "match": "status_ok = elf_contains_vaddr(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,4);",
+        "comment": "Clamp the `_dl_audit_preinit` span to mapped ld.so pages so bogus symbol data cannot trick the search."
+      },
+      {
+        "match": "if ((*(u64 *)snapshot_cursor != ldso_image->gnurelro_vaddr) ||",
+        "match_type": "wildcard",
+        "comment": "Skip snapshot entries whose RELRO tuple doesn’t match the running liblzma image."
+      },
+      {
+        "match": "for (snapshot_slot = data_handle->runtime_data->liblzma_link_map;",
+        "comment": "Walk the baked link_map array and pick the runtime pointer whose address range overlaps the cached struct."
+      },
+      {
+        "match": "displacement = (long)best_runtime_map - (long)snapshot_cursor;",
+        "comment": "Measure how far the runtime `link_map` lives from the snapshot; this becomes `*libname_offset`."
+      },
+      {
+        "match": "libname_snapshot_offset = (int)snapshot_cursor - (int)best_snapshot_slot;",
+        "comment": "Reuse the same offset against the cached libcrypto map so both libraries’ `l_name` slots are addressed consistently."
+      },
+      {
+        "match": "(hooks->ldso_ctx).libcrypto_l_name =",
+        "match_type": "wildcard",
+        "comment": "Point the libcrypto `l_name` pointer at the runtime map so later hooks can mirror the forged basename there too."
+      },
+      {
+        "match": "status_ok = find_lea_instruction(audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement)",
+        "comment": "Require `_dl_audit_preinit` to materialise the displacement via LEA before trusting the offset."
+      },
+      {
+        "match": "code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;",
+        "comment": "Grab `_dl_audit_symbind_alt`’s entry point so the second LEA search runs against its relocated body."
+      },
+      {
+        "match": "status_ok = find_lea_instruction",
+        "occurrence": 2,
+        "comment": "Mirror the LEA search inside `_dl_audit_symbind_alt` to ensure both audit paths agree on the displacement.",
+        "placement": "before"
+      }
+    ]
+  },
   "find_mov_instruction": {
     "plate": "MOV-only variant of the pointer scan.\nIf `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.\nSuccessful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
     "inline": [
@@ -861,7 +921,23 @@
     ]
   },
   "get_string_id": "Maps runtime strings to EncodedStringId identifiers without shipping plaintext literals. Each call logs itself via\nsecret_data_append_from_address, clamps the scan to 0x2c bytes, and walks two packed bitmaps (_Lcrc64_clmul_1+0x760 and the\nstring_action_data trie) while repeatedly calling count_bits to compute the next child index. It returns the encoded ID when it\nreaches a terminal node or 0 when the bytes miss the trie, and is used to find SSH banner strings during sshd heuristics.",
-  "get_tls_get_addr_random_symbol_got_offset": "Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the canned values associated with the fake `__tls_get_addr`\nsymbol. The loader uses those numbers as the starting point for `update_got_address`, which refines them into the concrete GOT\nentry address.",
+  "get_tls_get_addr_random_symbol_got_offset": {
+    "plate": "Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the relocation constants that stand in for the fake `__tls_get_addr`\nsymbol embedded in liblzma. The helper writes the sentinel GOT index (0x2600) into the context, mirrors `elf_functions_offset` into both\nits return value and the GOT base, and hands those numbers to `update_got_address`, which replays the PLT stub to find the concrete GOT entry.",
+    "inline": [
+      {
+        "match": "(ctx->got_ctx).tls_got_entry = (void *)0x2600;",
+        "comment": "Prime the GOT context with the baked 0x2600 index; later disassembly insists the PLT stub still references this slot before patching it."
+      },
+      {
+        "match": "seeded_offset = elf_functions_offset;",
+        "comment": "Return the relocation baseline published in the fake function table so callers and the context agree on the same offset."
+      },
+      {
+        "match": "(ctx->got_ctx).got_base_offset = elf_functions_offset;",
+        "comment": "Copy the same baseline into `got_base_offset`; helpers like `update_got_address` subtract it when turning sentinel symbols into live pointers."
+      }
+    ]
+  },
   "hook_EVP_PKEY_set1_RSA": "Tap point for EVP_PKEY_set1_RSA so the backdoor sees every RSA handle even when the decrypt hook never fires. It simply calls\nrun_backdoor_commands on the key and then invokes the preserved OpenSSL routine.",
   "hook_RSA_get0_key": "Mirrors the same idea for RSA_get0_key: every consumer that asks OpenSSL for the modulus/exponent triggers run_backdoor_commands\nfirst, letting the implant inspect/track the RSA handle before delegating to the original function.",
   "hook_RSA_public_decrypt": "Replacement for RSA_public_decrypt: it ensures the PLT pointer is resolved, hands the RSA key to run_backdoor_commands (passing\na do_orig flag by reference), and either returns the backdoor’s result or forwards the call to the genuine OpenSSL symbol\ndepending on whether the dispatcher consumed the ciphertext.",
@@ -1676,9 +1752,62 @@
       }
     ]
   },
-  "update_cpuid_got_index": "Copies the relocation constants baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That value is the\nGOT index of the cpuid resolver inside liblzma, so later code can patch the correct slot without rescanning the PLT stub.",
-  "update_got_address": "Disassembles liblzma's `__tls_get_addr` PLT stub, accounts for the short/long JMP encodings, and then computes the true GOT\nentry by applying the stub's 32-bit displacement. The resulting pointer is cached in `ctx->got_ctx.tls_got_entry` and later used\nas the anchor when swapping the cpuid GOT slot over to the implant's resolver.",
-  "update_got_offset": "Copies `_Llzma_block_buffer_decode_0` into `ctx->got_ctx.got_base_offset`, giving the loader a reproducible base when\ntranslating between the baked relocation constants and runtime addresses. It pairs with `update_got_address` during the cpuid\nGOT patch.",
+  "update_cpuid_got_index": {
+    "plate": "Copies the relocation constant baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That index identifies the cpuid\nIFUNC slot within liblzma’s GOT, letting later hooks patch the right entry without rescanning the PLT after relocations.",
+    "inline": [
+      {
+        "match": "(ctx->got_ctx).cpuid_slot_index = (u64)PTR_PTR_0010ca98;",
+        "comment": "Lift the precomputed cpuid GOT index out of the relocation table and cache it so GOT surgery happens at the correct slot."
+      }
+    ]
+  },
+  "update_got_address": {
+    "plate": "Replays the relocated `__tls_get_addr` PLT stub to recover the live GOT pointer. Starting from the `_Lx86_coder_destroy` anchor plus the cached\n`got_base_offset`, it locates the stub, determines whether the long-jump encoding is in use, and applies the resulting disp32 to\narrive at the GOT slot. When the stub still references the baked 0x2600 index, the helper trusts the computed address, caches it\nin `ctx->got_ctx.tls_got_entry`, and returns the PLT pointer so follow-up code can repoint the cpuid IFUNC slot.",
+    "inline": [
+      {
+        "match": "get_tls_get_addr_random_symbol_got_offset(entry_ctx);",
+        "comment": "Ensure the base offsets and sentinel GOT index are refreshed before touching the PLT stub."
+      },
+      {
+        "match": "tls_get_addr_stub = (void *)((long)&_Lx86_coder_destroy +",
+        "comment": "Pivot off `_Lx86_coder_destroy` plus the cached offset to land on liblzma’s `__tls_get_addr` PLT entry."
+      },
+      {
+        "match": "(entry_ctx->got_ctx).cpuid_got_slot = (void *)0x0;",
+        "comment": "Zero the cpuid slot bookkeeping so the subsequent pass always re-detects the live GOT slot."
+      },
+      {
+        "match": "has_long_jump_prefix = (ulong)(*(char *)((long)tls_get_addr_stub + 1) == '\\x0f');",
+        "comment": "Check whether the stub begins with `0F` so we know if the JMP uses the long (5-byte) encoding."
+      },
+      {
+        "match": "if (*(char *)((long)tls_get_addr_stub + has_long_jump_prefix * 4) == -0xe) {",
+        "comment": "Adjust the displacement when the stub inserts an extra short JMP (0xF2) before the real disp32."
+      },
+      {
+        "match": "if ((void *)(ulong)(*(ushort *)((long)tls_get_addr_stub + stub_disp_offset) + 1 & 0xffff) ==",
+        "match_type": "wildcard",
+        "comment": "Only trust the calculation when the stub still references the sentinel GOT index seeded earlier."
+      },
+      {
+        "match": "resolved_tls_entry = (void *)((long)tls_get_addr_stub + stub_disp_offset + -0x12 + (ulong)*(uint *)((long)tls_get_addr_stub + stub_disp_offset + 2));",
+        "comment": "Apply the stub’s disp32 to compute the absolute GOT pointer for `__tls_get_addr`."
+      },
+      {
+        "match": "(entry_ctx->got_ctx).tls_got_entry = resolved_tls_entry;",
+        "comment": "Cache the resolved GOT entry so the cpuid hook can overwrite it with the implant’s resolver."
+      }
+    ]
+  },
+  "update_got_offset": {
+    "plate": "Copies `_Llzma_block_buffer_decode_0` (another relocation-safe symbol embedded beside the fake function table) into `ctx->got_ctx.got_base_offset`.\nEvery GOT helper subtracts this anchor when converting the baked relocation constants back into runtime addresses, so the helper\nkeeps the base in sync after IFUNC code mutates the resolver stack.",
+    "inline": [
+      {
+        "match": "(ctx->got_ctx).got_base_offset = _Llzma_block_buffer_decode_0;",
+        "comment": "Re-anchor the GOT math to `_Llzma_block_buffer_decode_0` so later helpers subtract the same baseline."
+      }
+    ]
+  },
   "validate_log_handler_pointers": {
     "plate": "Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.\nThe helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference\nentries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then\nsearches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept\nthe pair as the genuine log-handler slots.",
     "inline": [

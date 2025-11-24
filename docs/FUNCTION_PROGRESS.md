@@ -154,11 +154,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `102850_init_shared_globals` | `loader_rt` | 1 | 2025-11-24 (LR1) – renamed the status temp, annotated how the shared block publishes the authpassword/RSA hooks + `global_ctx`, and upgraded the AutoDoc to plate+inline form. |
 | `102890_init_imported_funcs` | `loader_rt` | 1 | 2025-11-24 (LR1) – promoted the AutoDoc to plate+inline, added commentary around the 0x1d import count gate plus the fallback trampolines, and confirmed the exported C mirrors the metadata. |
 | `102B10_validate_log_handler_pointers` | `loader_rt` | 1 | 2025-11-24 (LR1) – renamed the LEA/scan locals (`slot_distance`, `bounded_func_range`, etc.), explained the pointer-gap/LEA/MOV checks inline, and expanded the AutoDoc accordingly. |
-| `103F60_update_cpuid_got_index` | `loader_rt` | 0 |  |
-| `103F80_get_tls_get_addr_random_symbol_got_offset` | `loader_rt` | 0 |  |
-| `103FA0_update_got_address` | `loader_rt` | 0 |  |
-| `104010_update_got_offset` | `loader_rt` | 0 |  |
-| `104080_find_link_map_l_name` | `loader_rt` | 0 |  |
+| `103F60_update_cpuid_got_index` | `loader_rt` | 1 | 2025-11-24 (LR2) – promoted the AutoDoc to plate+inline form and added the inline note on the relocation constant so the cpuid slot index copy is obvious in `xzregh/103F60`. |
+| `103F80_get_tls_get_addr_random_symbol_got_offset` | `loader_rt` | 1 | 2025-11-24 (LR2) – renamed the return temp to `seeded_offset`, documented the sentinel 0x2600 write + GOT-base mirroring inline, and refreshed the metadata so the helper explains why the fake `__tls_get_addr` constants exist. |
+| `103FA0_update_got_address` | `loader_rt` | 1 | 2025-11-24 (LR2) – renamed the PLT/disp locals (`tls_get_addr_stub`, `has_long_jump_prefix`, `stub_disp_offset`, `resolved_tls_entry`) and added inline comments covering each branch of the stub disassembly so the GOT math is easy to follow. |
+| `104010_update_got_offset` | `loader_rt` | 1 | 2025-11-24 (LR2) – expanded the AutoDoc/inline note around the `_Llzma_block_buffer_decode_0` write so the GOT baseline refresh is captured in metadata. |
+| `104080_find_link_map_l_name` | `loader_rt` | 1 | 2025-11-24 (LR2) – renamed the link-map trackers (`snapshot_cursor`, `best_runtime_map`, etc.), threaded inline comments through the import resolution, RELRO match, and dual-LEA verification, and synced everything via the pipeline. |
 | `104370_find_dl_naudit` | `loader_rt` | 0 |  |
 | `1045E0_resolve_libc_imports` | `loader_rt` | 0 |  |
 | `104660_process_shared_libraries_map` | `loader_rt` | 0 |  |

@@ -4037,32 +4037,32 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "liblzma_snapshot",
+        "name": "snapshot_cursor",
         "original": "plVar18",
         "type": "link_map *"
       },
       {
-        "name": "relro_limit",
+        "name": "runtime_upper_bound",
         "original": "plVar17",
         "type": "link_map *"
       },
       {
-        "name": "snapshot_iter",
+        "name": "snapshot_slot",
         "original": "plVar16",
         "type": "link_map *"
       },
       {
-        "name": "runtime_entry",
+        "name": "best_runtime_map",
         "original": "plVar15",
         "type": "link_map *"
       },
       {
-        "name": "snapshot_entry",
+        "name": "best_snapshot_slot",
         "original": "plVar14",
         "type": "link_map *"
       },
       {
-        "name": "candidate_map",
+        "name": "candidate_runtime_map",
         "original": "plVar3",
         "type": "link_map *"
       },
@@ -4072,17 +4072,17 @@
         "type": "libc_imports_t *"
       },
       {
-        "name": "ldso_elf",
+        "name": "ldso_image",
         "original": "peVar2",
         "type": "elf_info_t *"
       },
       {
-        "name": "success",
+        "name": "status_ok",
         "original": "BVar4",
         "type": "BOOL"
       },
       {
-        "name": "snapshot_offset",
+        "name": "libname_snapshot_offset",
         "original": "uVar5",
         "type": "ptrdiff_t"
       },
@@ -4402,7 +4402,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "got_offset",
+        "name": "seeded_offset",
         "original": "pVar1",
         "type": "ptrdiff_t"
       }
@@ -7749,22 +7749,22 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "plt_entry",
+        "name": "tls_get_addr_stub",
         "original": "pvVar1",
         "type": "void *"
       },
       {
-        "name": "jump_flags",
+        "name": "has_long_jump_prefix",
         "original": "uVar2",
         "type": "ulong"
       },
       {
-        "name": "reloc_offset",
+        "name": "stub_disp_offset",
         "original": "lVar3",
         "type": "long"
       },
       {
-        "name": "got_entry",
+        "name": "resolved_tls_entry",
         "original": "pvVar4",
         "type": "void *"
       }
