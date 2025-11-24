@@ -19,16 +19,16 @@ BOOL extract_payload_message
                global_context_t *ctx)
 
 {
-  uint *record_tail_ptr;
-  char cVar2;
-  u8 *sshbuf_cursor;
-  size_t search_offset;
-  uint *modulus_field_ptr;
-  u32 be_length;
+  uint *record_end_ptr;
+  char expected_char;
+  u8 *sshbuf_start;
+  size_t cursor_offset;
+  uint *modulus_cursor;
+  u32 field_length;
   long cmp_index;
-  u8 *match_cursor;
-  uint *length_field_ptr;
-  size_t window_len;
+  u8 *alg_match_cursor;
+  uint *field_cursor;
+  size_t window_size;
   size_t modulus_length;
   u8 *modulus_data;
   size_t cert_type_namelen;
@@ -50,75 +50,80 @@ BOOL extract_payload_message
     if (ctx->rsa_sha2_256_alg == (char *)0x0) {
       return FALSE;
     }
-    sshbuf_cursor = sshbuf_data->d;
-    if (CARRY8((ulong)sshbuf_cursor,sshbuf_size)) {
+    sshbuf_start = sshbuf_data->d;
+    // AutoDoc: Reject buffers whose base-plus-size would wrap the address space—those pointers would leave the sshbuf view.
+    if (CARRY8((ulong)sshbuf_start,sshbuf_size)) {
       return FALSE;
     }
-    search_offset = 0;
+    cursor_offset = 0;
     do {
-      match_cursor = sshbuf_cursor + search_offset;
+      // AutoDoc: Slide a search window across the buffer, preferring the cert algorithm tag and falling back to the RSA-SHA2 string.
+      alg_match_cursor = sshbuf_start + cursor_offset;
       cmp_index = 0;
-      window_len = sshbuf_size - search_offset;
+      window_size = sshbuf_size - cursor_offset;
       while( TRUE ) {
-        cVar2 = ctx->ssh_rsa_cert_alg[cmp_index];
-        if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
+        expected_char = ctx->ssh_rsa_cert_alg[cmp_index];
+        if (((char)alg_match_cursor[cmp_index] < expected_char) || (expected_char < (char)alg_match_cursor[cmp_index])) break;
         cmp_index = cmp_index + 1;
         if (cmp_index == 7) goto LAB_00107fd1;
       }
       cmp_index = 0;
       while( TRUE ) {
-        cVar2 = ctx->rsa_sha2_256_alg[cmp_index];
-        if (((char)match_cursor[cmp_index] < cVar2) || (cVar2 < (char)match_cursor[cmp_index])) break;
+        expected_char = ctx->rsa_sha2_256_alg[cmp_index];
+        if (((char)alg_match_cursor[cmp_index] < expected_char) || (expected_char < (char)alg_match_cursor[cmp_index])) break;
         cmp_index = cmp_index + 1;
         if (cmp_index == 7) goto LAB_00107fd1;
       }
-      search_offset = search_offset + 1;
-    } while (sshbuf_size - search_offset != 6);
-    match_cursor = (u8 *)0x0;
-    window_len = 6;
+      cursor_offset = cursor_offset + 1;
+    } while (sshbuf_size - cursor_offset != 6);
+    alg_match_cursor = (u8 *)0x0;
+    window_size = 6;
 LAB_00107fd1:
-    if ((7 < search_offset) && (match_cursor != (u8 *)0x0)) {
-      be_length = *(uint *)(match_cursor + -8);
-      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
-      if (0x10000 < be_length) {
+    if ((7 < cursor_offset) && (alg_match_cursor != (u8 *)0x0)) {
+      // AutoDoc: Use the big-endian length that precedes the algorithm name to clamp the serialized key record.
+      field_length = *(uint *)(alg_match_cursor + -8);
+      field_length = field_length >> 0x18 | (field_length & 0xff0000) >> 8 | (field_length & 0xff00) << 8 | field_length << 0x18;
+      if (0x10000 < field_length) {
         return FALSE;
       }
-      record_tail_ptr = (uint *)(match_cursor + ((ulong)be_length - 8));
-      if (sshbuf_cursor + sshbuf_size < record_tail_ptr) {
+      record_end_ptr = (uint *)(alg_match_cursor + ((ulong)field_length - 8));
+      if (sshbuf_start + sshbuf_size < record_end_ptr) {
         return FALSE;
       }
-      search_offset = c_strnlen((char *)match_cursor,window_len);
-      if (window_len <= search_offset) {
+      // AutoDoc: Treat the algorithm string as bounded input so we never read past the declared record tail.
+      cursor_offset = c_strnlen((char *)alg_match_cursor,window_size);
+      if (window_size <= cursor_offset) {
         return FALSE;
       }
-      length_field_ptr = (uint *)(match_cursor + search_offset);
-      if (record_tail_ptr <= length_field_ptr) {
+      field_cursor = (uint *)(alg_match_cursor + cursor_offset);
+      if (record_end_ptr <= field_cursor) {
         return FALSE;
       }
-      be_length = *length_field_ptr;
-      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
-      if (0x10000 < be_length) {
+      field_length = *field_cursor;
+      field_length = field_length >> 0x18 | (field_length & 0xff0000) >> 8 | (field_length & 0xff00) << 8 | field_length << 0x18;
+      if (0x10000 < field_length) {
         return FALSE;
       }
-      length_field_ptr = (uint *)((long)length_field_ptr + (ulong)(be_length + 4));
-      if (record_tail_ptr <= length_field_ptr) {
+      field_cursor = (uint *)((long)field_cursor + (ulong)(field_length + 4));
+      if (record_end_ptr <= field_cursor) {
         return FALSE;
       }
-      be_length = *length_field_ptr;
-      be_length = be_length >> 0x18 | (be_length & 0xff0000) >> 8 | (be_length & 0xff00) << 8 | be_length << 0x18;
-      if (0x10000 < be_length) {
+      field_length = *field_cursor;
+      field_length = field_length >> 0x18 | (field_length & 0xff0000) >> 8 | (field_length & 0xff00) << 8 | field_length << 0x18;
+      if (0x10000 < field_length) {
         return FALSE;
       }
-      modulus_field_ptr = length_field_ptr + 1;
-      if ((uint *)((ulong)be_length + (long)modulus_field_ptr) <= record_tail_ptr) {
+      modulus_cursor = field_cursor + 1;
+      if ((uint *)((ulong)field_length + (long)modulus_cursor) <= record_end_ptr) {
         return FALSE;
       }
-      if ((char)length_field_ptr[1] == '\0') {
-        modulus_field_ptr = (uint *)((long)length_field_ptr + 5);
-        be_length = be_length - 1;
+      if ((char)field_cursor[1] == '\0') {
+        modulus_cursor = (uint *)((long)field_cursor + 5);
+        field_length = field_length - 1;
       }
-      sshbuf_data->d = (u8 *)modulus_field_ptr;
-      *out_payload_size = (ulong)be_length;
+      // AutoDoc: Point the caller's sshbuf directly at the modulus blob and report its length via `out_payload_size`.
+      sshbuf_data->d = (u8 *)modulus_cursor;
+      *out_payload_size = (ulong)field_length;
       return TRUE;
     }
   }

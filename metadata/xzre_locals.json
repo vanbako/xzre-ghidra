@@ -2111,7 +2111,7 @@
         "type": "u32"
       },
       {
-        "name": "payload_length_candidate",
+        "name": "payload_total_length",
         "original": "uVar2",
         "type": "ulong"
       }
@@ -3223,27 +3223,27 @@
     ],
     "register_temps": [
       {
-        "name": "sshbuf_cursor",
+        "name": "sshbuf_start",
         "original": "puVar3",
         "type": "u8 *"
       },
       {
-        "name": "search_offset",
+        "name": "cursor_offset",
         "original": "uVar4",
         "type": "size_t"
       },
       {
-        "name": "match_cursor",
+        "name": "alg_match_cursor",
         "original": "str",
         "type": "u8 *"
       },
       {
-        "name": "window_len",
+        "name": "window_size",
         "original": "max_len",
         "type": "size_t"
       },
       {
-        "name": "record_tail_ptr",
+        "name": "record_end_ptr",
         "original": "puVar1",
         "type": "uint *"
       },
@@ -3253,19 +3253,24 @@
         "type": "long"
       },
       {
-        "name": "be_length",
+        "name": "field_length",
         "original": "uVar6",
         "type": "u32"
       },
       {
-        "name": "length_field_ptr",
+        "name": "field_cursor",
         "original": "puVar8",
         "type": "uint *"
       },
       {
-        "name": "modulus_field_ptr",
+        "name": "modulus_cursor",
         "original": "puVar5",
         "type": "uint *"
+      },
+      {
+        "name": "expected_char",
+        "original": "cVar2",
+        "type": "char"
       }
     ],
     "source": "xzre/xzre_code/extract_payload_message.c"
@@ -6325,32 +6330,32 @@
         "type": "sshd_log_ctx_t *"
       },
       {
-        "name": "handler_slot",
+        "name": "log_handler_slot",
         "original": "pplVar6",
         "type": "log_handler_fn *"
       },
       {
-        "name": "ctx_slot",
+        "name": "handler_ctx_slot",
         "original": "pplVar3",
         "type": "void **"
       },
       {
-        "name": "selected_ctx_slot",
+        "name": "active_ctx_slot",
         "original": "pplVar5",
         "type": "void **"
       },
       {
-        "name": "orig_ctx",
+        "name": "saved_ctx_value",
         "original": "plVar4",
         "type": "void *"
       },
       {
-        "name": "flags1",
+        "name": "control_flags",
         "original": "bVar1",
         "type": "byte"
       },
       {
-        "name": "logging_requested",
+        "name": "log_flag",
         "original": "bVar7",
         "type": "byte"
       }
@@ -7321,17 +7326,17 @@
         "type": "sshd_monitor_func_t"
       },
       {
-        "name": "permit_root_login",
+        "name": "permit_root_login_ptr",
         "original": "piVar4",
         "type": "int *"
       },
       {
-        "name": "use_pam",
+        "name": "use_pam_ptr",
         "original": "puVar5",
         "type": "uint *"
       },
       {
-        "name": "permit_root_value",
+        "name": "current_permit_root",
         "original": "iVar1",
         "type": "int"
       }
@@ -7362,6 +7367,156 @@
       }
     ],
     "register_temps": [
+      {
+        "name": "current_byte",
+        "original": "uVar1",
+        "type": "u8"
+      },
+      {
+        "name": "expected_digest_byte",
+        "original": "cVar2",
+        "type": "char"
+      },
+      {
+        "name": "cmd_type",
+        "original": "uVar3",
+        "type": "uint"
+      },
+      {
+        "name": "imports",
+        "original": "piVar4",
+        "type": "imported_funcs_t *"
+      },
+      {
+        "name": "libc_funcs",
+        "original": "plVar5",
+        "type": "libc_imports_t *"
+      },
+      {
+        "name": "sshd_ctx",
+        "original": "psVar6",
+        "type": "sshd_ctx_t *"
+      },
+      {
+        "name": "payload_header",
+        "original": "plVar7",
+        "type": "long *"
+      },
+      {
+        "name": "stack_limit",
+        "original": "puVar8",
+        "type": "u64 *"
+      },
+      {
+        "name": "evp_digest",
+        "original": "ppVar9",
+        "type": "pfn_EVP_Digest_t"
+      },
+      {
+        "name": "success",
+        "original": "BVar10",
+        "type": "BOOL"
+      },
+      {
+        "name": "status",
+        "original": "iVar12",
+        "type": "int"
+      },
+      {
+        "name": "cmd_args",
+        "original": "pcVar13",
+        "type": "cmd_arguments_t *"
+      },
+      {
+        "name": "payload_scan_end",
+        "original": "plVar14",
+        "type": "long *"
+      },
+      {
+        "name": "io_result",
+        "original": "sVar15",
+        "type": "ssize_t"
+      },
+      {
+        "name": "errno_slot",
+        "original": "piVar16",
+        "type": "int *"
+      },
+      {
+        "name": "rsa_ctx",
+        "original": "r",
+        "type": "RSA *"
+      },
+      {
+        "name": "rsa_e_bn",
+        "original": "pBVar17",
+        "type": "BIGNUM *"
+      },
+      {
+        "name": "rsa_n_bn",
+        "original": "pBVar18",
+        "type": "BIGNUM *"
+      },
+      {
+        "name": "rsa_d_bn",
+        "original": "d",
+        "type": "BIGNUM *"
+      },
+      {
+        "name": "digest_type",
+        "original": "type",
+        "type": "EVP_MD *"
+      },
+      {
+        "name": "loop_idx",
+        "original": "lVar19",
+        "type": "long"
+      },
+      {
+        "name": "payload_size",
+        "original": "sVar20",
+        "type": "size_t"
+      },
+      {
+        "name": "monitor_flag_mask",
+        "original": "bVar21",
+        "type": "byte"
+      },
+      {
+        "name": "stack_slot",
+        "original": "puVar22",
+        "type": "u64 *"
+      },
+      {
+        "name": "payload_room",
+        "original": "bufferSize",
+        "type": "u64"
+      },
+      {
+        "name": "request_words",
+        "original": "puVar26",
+        "type": "uint *"
+      },
+      {
+        "name": "rsa_alg_name",
+        "original": "pcVar32",
+        "type": "char *"
+      },
+      {
+        "name": "payload_remaining",
+        "original": "uVar33",
+        "type": "ulong"
+      },
+      {
+        "name": "stack_candidate",
+        "original": "addr",
+        "type": "long *"
+      },
+      {
+        "name": "digest_idx",
+        "original": "lVar34",
+        "type": "long"
+      },
       {
         "original": "local_e40._1_7_",
         "replacement": "(local_e40 >> 8)"

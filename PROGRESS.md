@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `SR4`: deep-reviewed `sshd_patch_variables`, `sshd_configure_log_hook`, `check_backdoor_state`, `extract_payload_message`, and `sshd_proxy_elevate`; renamed the lingering register temps for the monitor/PAM toggles, sshbuf parser, and proxy elevater; upgraded each AutoDoc entry to `plate+inline` form with new match anchors; and reran `./scripts/refresh_xzre_project.sh` twice to land the metadata (locals, inline comments, portable archive, rename report stayed clean).
+- Next: roll into session `SR5` (monitor message hooks) so the remaining sshd recon exports inherit the same locals + inline coverage before pivoting to the loader batches.
+
+## 2025-11-24
 - Session `SR3`: deep-reviewed `check_argument`, `process_is_sshd`, `sshd_log`, `sshd_get_usable_socket`, and `sshd_get_client_socket`; renamed their lingering `lVar*/puVar*/sockfd_*` temps via `metadata/xzre_locals.json`, upgraded each AutoDoc to `plate+inline` form (covering the dash filter, stack/env vetting, sshlogv wrapper, fd probe, and monitor fallback), and reran `./scripts/refresh_xzre_project.sh` twice until the inline matches stuck and the locals rename report stayed clean. Updated FUNCTION_PROGRESS for SR3.
 - Next: move on to session `SR4` (monitor patch/log hook/payload path) now that the process vetting + socket plumbing helpers are documented.
 
