@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `CC3`: deep-reviewed `run_backdoor_commands`, the RSA hook wrappers, and `count_bits`; renamed the do-orig/control flag temps via `metadata/xzre_locals.json`, converted their AutoDocs to plate+inline form, and added inline anchors covering the opcode dispatch (log/PAM toggles, socket plumbing, sshd_proxy_elevate) plus the hook short-circuit/wrap behaviour so the exported C explains how the dispatcher decides when to fall back to OpenSSL.
+- Ran `./scripts/refresh_xzre_project.sh` twice while fixing inline match strings; the final pass refreshed `xzregh/`, the portable archive, and the locals rename report with no warnings.
+- Next: move on to session `CC4` (secret-data appenders I) so the remaining crypto helpers inherit the same locals + inline coverage before finishing the command channel batch.
+
+## 2025-11-24
 - Session `CC2`: reviewed `verify_signature`, `sshd_get_sshbuf`, `sshbuf_bignum_is_negative`, `sshbuf_extract`, and `secret_data_get_decrypted`; renamed their lingering scratch locals (`wipe_cursor`, `pkex_entry_span`, `banner_hits`, `payload_offset`, `sshbuf_span`, `seed_key_buf`, etc.) and promoted each metadata entry to plate+inline form so the sha256 splice/Ed448 verify, pkex brute-force heuristics, MSB scan, dynamic sshbuf layout, and two-stage ChaCha decrypt are documented directly in the decomp.
 - Ran `./scripts/refresh_xzre_project.sh` multiple times while fixing inline match strings and reverting a locals rename that clobbered `seed_iv`; the final pass completed cleanly (rename report green, portable archive refreshed) with only the longstanding `piVar2` warning noted by postprocess.
 - Next: move on to session `CC3` (RSA hook wrappers) so the rest of the crypto helpers pick up the same locals/inline coverage before diving into the appenders.

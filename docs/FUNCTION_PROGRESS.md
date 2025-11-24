@@ -189,11 +189,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `107920_sshbuf_bignum_is_negative` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the boolean/index locals and documented the size window plus MSB scan so the modulus predicate is obvious inline. |
 | `107950_sshbuf_extract` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the slot indices/span cursor, explained the dynamic field lookup in the plate, and added inline notes for the struct/data range probes. |
 | `1081D0_secret_data_get_decrypted` | `crypto_cmd` | 1 | 2025-11-24 (CC2) – renamed the ChaCha wipe/seed buffers and documented the two-stage decrypt with inline anchors for the zeroization + both `chacha_decrypt` calls. |
-| `1094A0_run_backdoor_commands` | `crypto_cmd` | 0 |  |
-| `10A240_hook_RSA_public_decrypt` | `crypto_cmd` | 0 |  |
-| `10A2D0_hook_EVP_PKEY_set1_RSA` | `crypto_cmd` | 0 |  |
-| `10A330_hook_RSA_get0_key` | `crypto_cmd` | 0 |  |
-| `10A860_count_bits` | `crypto_cmd` | 0 |  |
+| `1094A0_run_backdoor_commands` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – renamed the control_flags/cmd_opcode temps, documented the opcode fan-out, socket selection, and PAM/log toggles with inline anchors, and promoted the AutoDoc to plate+inline form. |
+| `10A240_hook_RSA_public_decrypt` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – clarified the do_orig flag handling, renamed the dispatcher/OpenSSL status temps, and added inline comments for the pointer gate plus the dispatcher short-circuit. |
+| `10A2D0_hook_EVP_PKEY_set1_RSA` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – added locals coverage for the do_orig/status temps, documented the shim’s role, and dropped inline anchors for the pointer gate and tail-call. |
+| `10A330_hook_RSA_get0_key` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – renamed the do_orig stub, captured the pointer gate, and documented how the hook feeds every modulus/exponent request into run_backdoor_commands. |
+| `10A860_count_bits` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – converted the entry to plate+inline form and added the Wegner-loop inline comment so the popcount helper is self-explanatory. |
 | `10A880_get_string_id` | `crypto_cmd` | 0 |  |
 | `10A990_secret_data_append_from_instruction` | `crypto_cmd` | 0 |  |
 | `10AA00_secret_data_append_from_code` | `crypto_cmd` | 0 |  |

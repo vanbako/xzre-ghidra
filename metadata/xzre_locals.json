@@ -4463,9 +4463,14 @@
         "type": "pfn_EVP_PKEY_set1_RSA_t"
       },
       {
-        "name": "call_orig",
+        "name": "do_orig_flag",
         "original": "local_1c",
         "type": "BOOL"
+      },
+      {
+        "name": "openssl_status",
+        "original": "iVar1",
+        "type": "int"
       }
     ],
     "source": "xzre/xzre_code/hook_EVP_PKEY_set1_RSA.c"
@@ -4479,7 +4484,7 @@
         "type": "pfn_RSA_get0_key_t"
       },
       {
-        "name": "call_orig",
+        "name": "do_orig_flag",
         "original": "local_1c",
         "type": "BOOL"
       }
@@ -4489,16 +4494,16 @@
   "hook_RSA_public_decrypt": {
     "locals": [
       {
-        "name": "RSA_public_decrypt",
+        "name": "rsa_public_decrypt_stub",
         "type": "pfn_RSA_public_decrypt_t"
       },
       {
-        "name": "call_orig",
+        "name": "unused_call_orig_stub",
         "type": "BOOL"
       },
       {
-        "name": "result",
-        "type": "int"
+        "name": "do_orig_flag",
+        "type": "BOOL"
       }
     ],
     "register_temps": [
@@ -4508,12 +4513,12 @@
         "type": "pfn_RSA_public_decrypt_t"
       },
       {
-        "name": "dispatcher_result",
+        "name": "backdoor_result",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "orig_status",
+        "name": "openssl_status",
         "original": "iVar2",
         "type": "int"
       }
@@ -6066,6 +6071,21 @@
         "name": "keyallowed_slot",
         "original": "ppsVar11",
         "type": "sshd_monitor_func_t *"
+      },
+      {
+        "name": "control_flags",
+        "original": "bVar13",
+        "type": "byte"
+      },
+      {
+        "name": "cmd_opcode",
+        "original": "uVar27",
+        "type": "ulong"
+      },
+      {
+        "name": "payload_body_offset",
+        "original": "uVar36",
+        "type": "ulong"
       }
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"

@@ -303,7 +303,15 @@
       }
     ]
   },
-  "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
+  "count_bits": {
+    "plate": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into child indexes without storing per-node counts.",
+    "inline": [
+      {
+        "match": "for (; x != 0; x = x & x - 1) {",
+        "comment": "Classic Wegner popcount: repeatedly clear the low bit until the mask is empty, incrementing the tally each time."
+      }
+    ]
+  },
   "count_pointers": {
     "plate": "Counts consecutive non-NULL entries inside an sshd pointer table. It first confirms the caller handed in both the array and a\n`malloc_usable_size()` hook, queries the allocator for the actual buffer size, and only trusts tables smaller than ~0x80 bytes to\navoid chasing attacker-sized allocations. The loop stops at the first NULL or the allocation boundary, then reports how many slots\nwere populated so the sensitive-data heuristics can reason about argv/envp-style arrays.",
     "inline": [
@@ -1379,9 +1387,57 @@
       }
     ]
   },
-  "hook_EVP_PKEY_set1_RSA": "Tap point for EVP_PKEY_set1_RSA so the backdoor sees every RSA handle even when the decrypt hook never fires. It simply calls\nrun_backdoor_commands on the key and then invokes the preserved OpenSSL routine.",
-  "hook_RSA_get0_key": "Mirrors the same idea for RSA_get0_key: every consumer that asks OpenSSL for the modulus/exponent triggers run_backdoor_commands\nfirst, letting the implant inspect/track the RSA handle before delegating to the original function.",
-  "hook_RSA_public_decrypt": "Replacement for RSA_public_decrypt: it ensures the PLT pointer is resolved, hands the RSA key to run_backdoor_commands (passing\na do_orig flag by reference), and either returns the backdoor\u2019s result or forwards the call to the genuine OpenSSL symbol\ndepending on whether the dispatcher consumed the ciphertext.",
+  "hook_EVP_PKEY_set1_RSA": {
+    "plate": "Shims EVP_PKEY_set1_RSA so the dispatcher inspects every RSA handle even if RSA_public_decrypt never fires. It validates the preserved OpenSSL pointer, hands the key to run_backdoor_commands with a stack do_orig flag, and always tail-calls the genuine EVP_PKEY_set1_RSA so sshd's key bookkeeping stays intact.",
+    "inline": [
+      {
+        "match": "orig_EVP_PKEY_set1_RSA = global_ctx->imported_funcs->EVP_PKEY_set1_RSA_orig",
+        "comment": "Abort unless the loader recorded the original EVP entry point; without it the shim cannot re-enter OpenSSL safely."
+      },
+      {
+        "match": "run_backdoor_commands(key,global_ctx",
+        "comment": "Every EVP install pumps the RSA handle through run_backdoor_commands so the attacker sees keys even when decrypt never executes."
+      },
+      {
+        "match": "(*orig_EVP_PKEY_set1_RSA)(pkey,key);",
+        "comment": "Always tail-call the preserved pointer so EVP_PKEY_set1_RSA behaves exactly like the upstream implementation."
+      }
+    ]
+  },
+  "hook_RSA_get0_key": {
+    "plate": "Mirrors the EVP hook for RSA_get0_key: any consumer that asks OpenSSL for the modulus/exponent first triggers run_backdoor_commands so the dispatcher can inspect the handle and opportunistically process commands before delegating to the real function.",
+    "inline": [
+      {
+        "match": "orig_RSA_get0_key = global_ctx->imported_funcs->RSA_get0_key_orig",
+        "comment": "Refuse to run unless the loader already discovered the original RSA_get0_key pointer."
+      },
+      {
+        "match": "run_backdoor_commands(r,global_ctx",
+        "comment": "Treat the modulus/exponent fetch as another opportunity to drive the RSA command channel."
+      },
+      {
+        "match": "(*orig_RSA_get0_key)(r,n,e,d);",
+        "comment": "After the dispatcher returns, immediately tail-call the genuine RSA_get0_key so callers see the untouched OpenSSL behaviour."
+      }
+    ]
+  },
+  "hook_RSA_public_decrypt": {
+    "plate": "Drop-in replacement for RSA_public_decrypt. The shim validates that the loader captured the original PLT target, seeds a stack do_orig flag, and calls run_backdoor_commands so attacker payloads can consume the ciphertext. If the dispatcher clears the flag the hook returns its BOOL result directly; otherwise it tail-calls the preserved RSA_public_decrypt pointer so OpenSSL decrypts the buffer as normal.",
+    "inline": [
+      {
+        "match": "orig_RSA_public_decrypt = global_ctx->imported_funcs->RSA_public_decrypt_orig",
+        "comment": "Bail unless the loader resolved the genuine RSA_public_decrypt pointer; without it we cannot forward the call."
+      },
+      {
+        "match": "backdoor_result = run_backdoor_commands",
+        "comment": "Treat the stack BOOL as the do_orig flag run_backdoor_commands mutates; returning FALSE here means the dispatcher already handled the ciphertext."
+      },
+      {
+        "match": "openssl_status = (*orig_RSA_public_decrypt)",
+        "comment": "When the dispatcher leaves do_orig TRUE we tail-call directly into OpenSSL's implementation."
+      }
+    ]
+  },
   "init_elf_entry_ctx": {
     "plate": "Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the `cpuid_random_symbol` anchor, copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.",
     "inline": [
@@ -1820,7 +1876,60 @@
       }
     ]
   },
-  "run_backdoor_commands": "Master dispatcher for the RSA hooks. It refuses to run unless the secret-data bitmap is complete, extracts the modulus and\nexponent via RSA_get0_key, and uses the modulus bytes as a transport for an encrypted payload header/body. The body is decrypted\nwith the ChaCha keys from secret_data_get_decrypted, every cached sshd host key is hashed (rsa_key_hash/dsa_key_hash/etc.) until\nthe embedded Ed448 signature verifies, and the resulting command toggles global_ctx state (sshd_offsets, syslog/PAM controls,\nsocket selection, payload streaming state). When a payload wants execution it populates a monitor_data_t and calls\nsshd_proxy_elevate; otherwise it patches sshd variables/logging in place. Any parse/signature failure sets\nctx->disable_backdoor, leaves *do_orig = TRUE, and the real OpenSSL routine proceeds untouched.",
+  "run_backdoor_commands": {
+    "plate": "Command dispatcher invoked by every RSA hook. It refuses to run unless the loader finished initialising, the secret-data bitmap hit 0x1c8 bits, and a valid modulus/exponent pair is available. The modulus bytes are copied out of RSA_get0_key, decrypted with ChaCha keys unwrapped via secret_data_get_decrypted, and spliced with the current host-key digest before iterating sshd host keys until verify_signature accepts the Ed448 signature. The decoded cmd_arguments_t drives opcode-specific actions: opcode 0 updates sshd_offsets/logging/PAM bits and selects sockets, opcode 1 rewrites sshd variables or reseeds RSA_set0_key, opcode 2 runs setresuid/setresgid/system commands, and opcode 3 packages monitor_data_t payloads for sshd_proxy_elevate (including continuation chunks streamed into ctx->payload_buffer). Any parse/signature/socket failure flips disable_backdoor (and may call libc exit when requested) before forcing the RSA hook to defer to the original OpenSSL routine.",
+    "inline": [
+      {
+        "match": "((ctx->disable_backdoor == FALSE) && (key != (RSA *)0x0))",
+        "match_type": "wildcard",
+        "comment": "Refuse to inspect RSA handles until the loader finished initialising, imports resolved, and the RSA hook passed in a writable do_orig flag."
+      },
+      {
+        "match": "bn_num_bits = ctx->imported_funcs->BN_num_bits",
+        "comment": "Clamp the modulus to <0x4001 bits and ensure BN_bn2bin has room before treating the key bytes as a payload carrier."
+      },
+      {
+        "match": "secret_data_get_decrypted((u8 *)&payload_size,ctx);",
+        "comment": "Unwrap the ChaCha key/nonce from secret_data and decrypt the modulus bytes into the temporary payload buffer."
+      },
+      {
+        "match": "count_pointers(host_keys",
+        "comment": "Sanity-check both host key arrays; if the cached counts do not match, signature verification is skipped and the hook bails."
+      },
+      {
+        "match": "verify_signature(ctx->sshd_sensitive_data->host_pubkeys",
+        "comment": "Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates."
+      },
+      {
+        "match": "(*setlogmask_fn)(-0x80000000);",
+        "comment": "Control flag bit 2 requests `setlogmask(INT_MIN)` so syslog stops emitting anything before the hook swaps handlers."
+      },
+      {
+        "match": "sshd_configure_log_hook",
+        "comment": "Optional logging instructions drop the mm_log_handler hook into place once the caller proved the handler/context slots are writable."
+      },
+      {
+        "match": "sshd_patch_variables",
+        "comment": "Opcode 1 rewrites sshd globals (PermitRootLogin, use_pam, etc.) based on the control-flag bits before re-entering the monitor loop."
+      },
+      {
+        "match": "sshd_get_client_socket",
+        "comment": "Opcode 0 either reuses the live monitor client socket or captures a fresh one so payload replies can be streamed back to the attacker."
+      },
+      {
+        "match": "sshd_get_usable_socket",
+        "comment": "When the control flags request a manual socket ordinal the helper probes each fd via shutdown/read until a viable descriptor is found."
+      },
+      {
+        "match": "sshd_proxy_elevate((monitor_data_t *)local_550,ctx);",
+        "comment": "Opcode 3 populates a monitor_data_t and lets sshd_proxy_elevate forge replies or run system commands under the requested uid/gid."
+      },
+      {
+        "match": "(*exit_fn)(0);",
+        "comment": "Bit0 doubles as a kill switch: on fatal parse/signature errors the hook calls libc exit(0) instead of handing control back to OpenSSL."
+      }
+    ]
+  },
   "secret_data_append_from_address": "Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller\u2019s return address,\notherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to\nsecret_data_append_singleton.",
   "secret_data_append_from_call_site": "Shortcut used directly inside hooks: it grabs the caller\u2019s return address (unaff_retaddr), runs secret_data_append_singleton\nwith it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.",
   "secret_data_append_from_code": "Sweeps a code range and feeds instructions to secret_data_append_from_instruction. When start_from_call is TRUE it first finds\nthe next CALL via find_call_instruction, then loops up to shift_count times, each time calling find_reg2reg_instruction to\nlocate a qualifying instruction and shifting the supplied cursor. Returning FALSE means it could not find enough instructions in\nthe provided span.",
