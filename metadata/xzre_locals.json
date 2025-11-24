@@ -4539,7 +4539,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "status",
+        "name": "init_status",
         "original": "iVar1",
         "type": "int"
       }
@@ -4554,12 +4554,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "libcrypto_bindflags_ptr",
+        "name": "libcrypto_bindflags_slot",
         "original": "puVar1",
         "type": "u32 *"
       },
       {
-        "name": "audit_flag_byte",
+        "name": "sshd_audit_flag_byte",
         "original": "pbVar2",
         "type": "byte *"
       }
@@ -4570,7 +4570,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "status",
+        "name": "init_status",
         "original": "iVar1",
         "type": "int"
       }
@@ -7778,73 +7778,73 @@
   "validate_log_handler_pointers": {
     "locals": [
       {
-        "name": "log_handler_slot",
+        "name": "lea_ctx_slot",
         "type": "void *"
       },
       {
-        "name": "scan_success",
-        "type": "BOOL"
+        "name": "lea_opcode_signature",
+        "type": "u32"
       },
       {
-        "name": "gap",
+        "name": "slot_delta",
         "type": "long"
       },
       {
-        "name": "insn_ptr",
+        "name": "lea_ctx_instr_ptr",
         "type": "u8 *"
       },
       {
-        "name": "scan_ctx",
+        "name": "bounded_func_range",
         "type": "u8 **"
       },
       {
-        "name": "block_end",
+        "name": "lea_insn_ptr",
         "type": "u8 *"
       },
       {
-        "name": "function_end",
+        "name": "lea_rel32_disp",
         "type": "u8 *"
       },
       {
-        "name": "dasm_ip",
+        "name": "lea_insn_size",
         "type": "u8 *"
       },
       {
-        "name": "insn_size",
+        "name": "lea_mem_disp_bytes",
         "type": "u64"
       },
       {
-        "name": "opcode",
+        "name": "lea_opcode_word",
         "type": "int"
       },
       {
-        "name": "branch_disp",
+        "name": "lea_rel32_copy",
         "type": "u64"
       }
     ],
     "register_temps": [
       {
-        "name": "mem_address",
+        "name": "handler_struct_addr",
         "original": "mem_address",
         "type": "void *"
       },
       {
-        "name": "success",
+        "name": "match_success",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "pointer_gap",
+        "name": "slot_distance",
         "original": "lVar2",
         "type": "ptrdiff_t"
       },
       {
-        "name": "function_start",
+        "name": "scan_range_start",
         "original": "puVar3",
         "type": "u8 *"
       },
       {
-        "name": "function_end_ptr",
+        "name": "scan_range_end",
         "original": "ppuVar4",
         "type": "u8 **"
       }

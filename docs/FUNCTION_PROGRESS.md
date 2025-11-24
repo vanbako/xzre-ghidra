@@ -149,11 +149,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `108EA0_mm_answer_keyallowed_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – expanded the state-machine AutoDoc, added inline comments for the type1/2/3 payload branches plus decrypt/signature checks, and synced the locals metadata. |
 | `10A3A0_mm_log_handler_hook` | `sshd_recon` | 1 | 2025-11-24 (SR5) – renamed the log/context fragments, documented the filtering/masking flow, and added inline comments for the Connection closed/Accepted rewrites and syslog toggles. |
 | `108D50_decrypt_payload_message` | `sshd_recon` | 1 | 2025-11-24 (SR5) – renamed the ChaCha seed scratch, documented the double-decrypt/copy loop, and added inline comments for the buffer append and payload_state reset. |
-| `102770_init_ldso_ctx` | `loader_rt` | 0 |  |
-| `1027D0_init_hooks_ctx` | `loader_rt` | 0 |  |
-| `102850_init_shared_globals` | `loader_rt` | 0 |  |
-| `102890_init_imported_funcs` | `loader_rt` | 0 |  |
-| `102B10_validate_log_handler_pointers` | `loader_rt` | 0 |  |
+| `102770_init_ldso_ctx` | `loader_rt` | 1 | 2025-11-24 (LR1) – renamed the bindflag/audit scratch temps, added inline comments for each reset (`l_name`, auditstate, `_dl_*`), and refreshed the AutoDoc to spell out how ld.so is restored. |
+| `1027D0_init_hooks_ctx` | `loader_rt` | 1 | 2025-11-24 (LR1) – retitled the status scratch to `init_status`, documented the hooks_data publication and 0x65 retry semantics, and wired inline notes into the exported C. |
+| `102850_init_shared_globals` | `loader_rt` | 1 | 2025-11-24 (LR1) – renamed the status temp, annotated how the shared block publishes the authpassword/RSA hooks + `global_ctx`, and upgraded the AutoDoc to plate+inline form. |
+| `102890_init_imported_funcs` | `loader_rt` | 1 | 2025-11-24 (LR1) – promoted the AutoDoc to plate+inline, added commentary around the 0x1d import count gate plus the fallback trampolines, and confirmed the exported C mirrors the metadata. |
+| `102B10_validate_log_handler_pointers` | `loader_rt` | 1 | 2025-11-24 (LR1) – renamed the LEA/scan locals (`slot_distance`, `bounded_func_range`, etc.), explained the pointer-gap/LEA/MOV checks inline, and expanded the AutoDoc accordingly. |
 | `103F60_update_cpuid_got_index` | `loader_rt` | 0 |  |
 | `103F80_get_tls_get_addr_random_symbol_got_offset` | `loader_rt` | 0 |  |
 | `103FA0_update_got_address` | `loader_rt` | 0 |  |

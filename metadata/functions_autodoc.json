@@ -72,7 +72,6 @@
       }
     ]
   },
-
   "contains_null_pointers": "Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters\na NULL slot, letting callers bail out if any required import failed to resolve.",
   "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
   "count_pointers": "Uses `malloc_usable_size()` to measure a pointer array and counts consecutive non-NULL entries until it hits either a NULL or\nthe allocation boundary. Sensitive-data heuristics call it when walking sshd tables whose length isn’t stored explicitly.",
@@ -494,7 +493,6 @@
       }
     ]
   },
-
   "fake_lzma_alloc": {
     "plate": "Companion to `fake_lzma_free` that turns the liblzma allocation API into a symbol resolver. The `opaque` parameter is treated as\nan `elf_info_t *`, the requested `size` is reinterpreted as an `EncodedStringId`, and it simply returns whatever\n`elf_symbol_get_addr()` produces. The `nmemb` argument is ignored because the helper is never asked to allocate real memory—it\nonly masquerades as an allocator long enough to bootstrap symbol lookups inside ld.so.",
     "inline": [
@@ -892,10 +890,86 @@
       }
     ]
   },
-  "init_hooks_ctx": "Primes a transient `backdoor_hooks_ctx_t` before stage two patches the GOT. It always points `hooks_data_addr` at the\n`hooks_data` blob baked into liblzma, zeros the scratch flags, and, when `ctx->shared` is still NULL, drops in the static hook\nentry points (`backdoor_symbind64`, the RSA shims, and the mm_* monitor hooks) before returning 0x65 so the caller can retry\nafter the shared globals are published. Once the shared block exists it simply returns 0, signalling that the structure now\ninherits every pointer from the shared globals.",
-  "init_imported_funcs": "Sanity-checks the OpenSSL import table before the hooks are allowed to run. It requires `resolved_imports_count` to equal 0x1d\nand then inspects the `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key` PLT shims. If at least one of them is\nresolved it returns TRUE so later code can jump through the host's libcrypto. When all three slots are still NULL it plants\n`backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps\nwaiting until the imports are ready.",
-  "init_ldso_ctx": "Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets\nthe copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`\nso the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with\nthe original ld.so state.",
-  "init_shared_globals": "Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone `global_ctx` instance. Every hook\nconsults this block at runtime, so the function simply wires the exported function pointers into the struct and returns success\nonce the pointer checks pass.",
+  "init_hooks_ctx": {
+    "plate": "Primes a transient `backdoor_hooks_ctx_t` before stage two patches the GOT. It always points `hooks_data_slot_ptr` at the\n`hooks_data` blob baked into liblzma, resets the bootstrap flags, and when `shared_globals_ptr` is still NULL it seeds every\nhook entry (audit shim, RSA helpers, and the mm_* monitor handlers) before returning 0x65 so the caller retries after the shared\nglobals are published. Once the shared block exists it simply returns 0, signalling that the structure now inherits every\npointer from the shared globals.",
+    "inline": [
+      {
+        "match": "ctx->hooks_data_slot_ptr = (backdoor_hooks_data_t **)&hooks_data;",
+        "comment": "Expose the static hook blob immediately so even transient contexts can dereference the shared state."
+      },
+      {
+        "match": "if (ctx->shared_globals_ptr == (backdoor_shared_globals_t *)0x0) {",
+        "comment": "Only burn in the literal hook entry points while we are still waiting for the shared globals to exist."
+      },
+      {
+        "match": "init_status = 0x65;",
+        "comment": "0x65 forces the caller to keep looping until another thread publishes the shared globals."
+      }
+    ]
+  },
+  "init_imported_funcs": {
+    "plate": "Sanity-checks the OpenSSL import table before the hooks are allowed to run. It requires `resolved_imports_count` to equal 0x1d\nand then inspects the `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key` PLT shims. If at least one of them is\nresolved it returns TRUE so later code can jump through the host's libcrypto. When all three slots are still NULL it plants\n`backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps\nwaiting until the imports are ready.",
+    "inline": [
+      {
+        "match": "if (imported_funcs->resolved_imports_count == 0x1d) {",
+        "comment": "Short-circuit unless the expected 0x1d-symbol libcrypto table was populated."
+      },
+      {
+        "match": "if (imported_funcs->RSA_public_decrypt_plt != (pfn_RSA_public_decrypt_t *)0x0) {",
+        "comment": "Treat the imports as ready as soon as any RSA helper resolved; the hooks can now jump through the host PLT."
+      },
+      {
+        "match": "imported_funcs->RSA_public_decrypt_plt = (pfn_RSA_public_decrypt_t *)backdoor_init_stage2;",
+        "comment": "When none resolved, wire in the stage-two/bootstrap fallbacks so unexpected calls just re-enter our setup."
+      }
+    ]
+  },
+  "init_ldso_ctx": {
+    "plate": "Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets\nthe copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`\nso the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with\nthe original ld.so state.",
+    "inline": [
+      {
+        "match": "*libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_old_value;",
+        "comment": "Reapply the saved libcrypto bindflags so ld.so’s audit hooks see their original mask."
+      },
+      {
+        "match": "*ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_slot;",
+        "comment": "Undo the byte we NUL’d inside `l_name` while the hooks were active."
+      },
+      {
+        "match": "*ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;",
+        "comment": "Mirror the same restoration for sshd’s auditstate structure."
+      },
+      {
+        "match": "*sshd_audit_flag_byte = *sshd_audit_flag_byte & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;",
+        "comment": "Clear the `l_audit_any_plt` bit the loader set so `_dl_audit` stops forcing our trampolines."
+      },
+      {
+        "match": "*ldso_ctx->_dl_naudit_ptr = 0;",
+        "comment": "Drop `_dl_naudit` back to zero so ld.so forgets about the registered audit module."
+      },
+      {
+        "match": "*ldso_ctx->_dl_audit_ptr = (audit_ifaces *)0x0;",
+        "comment": "NULL out `_dl_audit` as well so future binds can’t reach into freed hook tables."
+      }
+    ]
+  },
+  "init_shared_globals": {
+    "plate": "Seeds the shared global block with the mm/EVP hook entry points and a pointer to the lone `global_ctx` instance. Every hook\nconsults this block at runtime, so the function simply wires the exported function pointers into the struct and returns success\nonce the pointer checks pass.",
+    "inline": [
+      {
+        "match": "shared_globals->authpassword_hook_entry = mm_answer_authpassword_hook;",
+        "comment": "Publish the authpassword monitor hook so every process sees the same entry point."
+      },
+      {
+        "match": "shared_globals->evp_set1_rsa_hook_entry = hook_EVP_PKEY_set1_RSA;",
+        "comment": "Point the shared block at the RSA/EVP shim so later callers inherit the resolved trampoline."
+      },
+      {
+        "match": "shared_globals->global_ctx_slot = (global_context_t **)&global_ctx;",
+        "comment": "Expose the singleton `global_ctx` pointer that carries payload buffers, sshd metadata, and imports."
+      }
+    ]
+  },
   "is_endbr64_instruction": {
     "plate": "Fast equality test used when scanning for CET landing pads. When at least four bytes remain it ORs ENDBR64 (`0xF30F1EFA`) with the caller-supplied `low_mask_part` so both ENDBR64 and ENDBR32 collapse into a single signature, then compares the resulting dword against the bytes at `code_start`. Returns TRUE only when the stream contains a full ENDBR instruction; otherwise the prologue walkers keep scanning.",
     "inline": [
@@ -1162,7 +1236,6 @@
       }
     ]
   },
-
   "sshd_find_main": {
     "plate": "Walks sshd's entry thunk from `Elf64_Ehdr::e_entry`, bounding the decoder to the first 0x200 bytes of `.text` so it only\nhas to understand the glibc crt1 shim. The helper temporarily points the fake lzma allocator at libcrypto, resolves all required\nEVP helpers up front, and then looks for a RIP-relative MOV/LEA that produces an address inside sshd's text segment. The very\nnext CALL must target `__libc_start_main@GOT` through the same register, at which point the discovered `sshd_main` pointer and\nfully primed `imported_funcs` table are returned to the caller.",
     "inline": [
@@ -1561,7 +1634,6 @@
       }
     ]
   },
-
   "sshd_proxy_elevate": {
     "plate": "Implements the privileged side of the monitor command channel. It validates the supplied RSA components, command flags,\nand libc/import tables; rejects unsupported command types; and decides whether PAM should be disabled or sshd should\nexit outright based on the flag bits. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the\nstack, decrypts and hashes it, emits a forged `MONITOR_REQ_KEYALLOWED` packet (creating temporary BIGNUM/RSA objects\npopulated with the attacker's modulus/exponent), and writes it over the selected monitor socket or the fd discovered via\n`sshd_get_client_socket`. After sending optional sshbuf payloads it drains replies, honours \"wait\" vs \"fire-and-forget\"\nsemantics, and updates the monitor request IDs so sshd's dispatcher believes the forged exchange was legitimate.",
     "inline": [
@@ -1604,11 +1676,37 @@
       }
     ]
   },
-
   "update_cpuid_got_index": "Copies the relocation constants baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That value is the\nGOT index of the cpuid resolver inside liblzma, so later code can patch the correct slot without rescanning the PLT stub.",
   "update_got_address": "Disassembles liblzma's `__tls_get_addr` PLT stub, accounts for the short/long JMP encodings, and then computes the true GOT\nentry by applying the stub's 32-bit displacement. The resulting pointer is cached in `ctx->got_ctx.tls_got_entry` and later used\nas the anchor when swapping the cpuid GOT slot over to the implant's resolver.",
   "update_got_offset": "Copies `_Llzma_block_buffer_decode_0` into `ctx->got_ctx.got_base_offset`, giving the loader a reproducible base when\ntranslating between the baked relocation constants and runtime addresses. It pairs with `update_got_address` during the cpuid\nGOT patch.",
-  "validate_log_handler_pointers": "Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.\nThe helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference\nentries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then\nsearches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept\nthe pair as the genuine log-handler slots.",
+  "validate_log_handler_pointers": {
+    "plate": "Given two candidate addresses for sshd’s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.\nThe helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference\nentries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then\nsearches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept\nthe pair as the genuine log-handler slots.",
+    "inline": [
+      {
+        "match": "if ((addr1 != addr2 && addr1 != (void *)0x0) && (addr2 != (void *)0x0)) {",
+        "comment": "Reject identical or NULL slots up front—the handler and ctx pointers must be distinct globals."
+      },
+      {
+        "match": "if (((slot_distance < 0x10) &&",
+        "match_type": "wildcard",
+        "comment": "Only chase candidates that sit within 0x10 bytes of one another; the globals live side-by-side in `.bss`."
+      },
+      {
+        "match": "match_success = find_lea_instruction_with_mem_operand",
+        "match_type": "wildcard",
+        "comment": "Use the cached string reference to find the LEA that materialises the handler struct."
+      },
+      {
+        "match": "find_function(scan_range_start,(void **)0x0,&bounded_func_range,(u8 *)search_base,code_end,",
+        "comment": "Once the LEA decodes cleanly, bound the owning routine so the MOV scan stays inside that function."
+      },
+      {
+        "match": "match_success = find_instruction_with_mem_operand_ex",
+        "match_type": "wildcard",
+        "comment": "Require two independent MOV [mem],reg hits—one targeting each candidate slot—before accepting the pair."
+      }
+    ]
+  },
   "verify_signature": "Computes the host-key digest that sits at sshkey_digest_offset inside the signed blob and then verifies the Ed448 command\nsignature. RSA and DSA keys delegate to rsa_key_hash/dsa_key_hash, ECDSA serialises the EC_POINT in uncompressed form with a\n32-bit length prefix, and Ed25519 prepends a 0x20000000 tag plus the raw 32-byte key. Once the digest is spliced into\nsigned_data the helper loads the attacker’s Ed448 public key with EVP_PKEY_new_raw_public_key(0x440, …) and invokes\nEVP_DigestVerify over the signed_data[0:tbslen) region; only a valid Ed448 signature lets the caller continue.",
   "x86_dasm": {
     "plate": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",

