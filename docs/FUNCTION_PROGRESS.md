@@ -174,11 +174,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `10A700_cpuid_gcc` | `loader_rt` | 1 | 2025-11-24 (LR5) – captured the helper ladder vs. raw `cpuid()` fallback, highlighted the GCC register ordering inline, and kept the dispatcher locals in sync with metadata. |
 | `1074B0_count_pointers` | `loader_rt` | 1 | 2025-11-24 (LR5) – renamed the malloc-derived counters, explained the pointer-table heuristics, and added inline comments for the guard, NULL terminator break, and allocation-cap fallback. |
 | `xzre_globals` | `loader_rt` | 1 | 2025-11-21 – Authored the missing AutoDoc so the liblzma data blob is documented as the shared hooks state (`ldso_ctx_t`, `global_ctx`, resolved imports, sshd/log metadata, payload queues). |
-| `107030_c_strlen` | `loader_rt` | 0 |  |
-| `107050_c_strnlen` | `loader_rt` | 0 |  |
-| `107080_fd_read` | `loader_rt` | 0 |  |
-| `1070F0_fd_write` | `loader_rt` | 0 |  |
-| `107170_contains_null_pointers` | `loader_rt` | 0 |  |
+| `107030_c_strlen` | `loader_rt` | 1 | 2025-11-24 (LR6) – renamed the byte counter to `bytes_counted`, promoted the AutoDoc to plate+inline, and added inline anchors for the empty-string fast path and scan loop. |
+| `107050_c_strnlen` | `loader_rt` | 1 | 2025-11-24 (LR6) – renamed the bounded counter to `bytes_checked`, documented the unterminated-path return value, and added inline comments for the zero-cap/terminator exits. |
+| `107080_fd_read` | `loader_rt` | 1 | 2025-11-24 (LR6) – retitled the chunk/errno/remaining temps, expanded the plate with the EINTR + EOF semantics, and dropped inline anchors for the guard, retry loop, and pointer advance. |
+| `1070F0_fd_write` | `loader_rt` | 1 | 2025-11-24 (LR6) – mirrored the new names, documented the fatal short-write behavior, and added inline comments for the EINTR retry gate plus the buffer/remaining updates. |
+| `107170_contains_null_pointers` | `loader_rt` | 1 | 2025-11-24 (LR6) – renamed the slot/index temps, clarified the TRUE/FALSE exit criteria, and added inline anchors for the loop bound and NULL-hit return. |
 | `103B80_dsa_key_hash` | `crypto_cmd` | 0 |  |
 | `107190_chacha_decrypt` | `crypto_cmd` | 0 |  |
 | `1072B0_sha256` | `crypto_cmd` | 0 |  |

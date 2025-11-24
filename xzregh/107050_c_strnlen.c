@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it sees a NUL or reaches `max_len`,
- * returning the limit unchanged if the string is unterminated so callers can treat that as an error.
+ * AutoDoc: Bounded strlen variant used on attacker-controlled buffers. It counts until it has inspected `max_len` bytes or hits a NUL,
+ * returning `max_len` unchanged when the string is unterminated so callers can treat that as a failure.
  */
 
 #include "xzre_types.h"
@@ -14,18 +14,21 @@
 ssize_t c_strnlen(char *str,size_t max_len)
 
 {
-  size_t len;
+  size_t bytes_checked;
   
-  len = 0;
+  bytes_checked = 0;
+  // AutoDoc: Zero-length caps return immediately so callers can treat `max_len == 0` as a trivial pass.
   if (max_len == 0) {
     return max_len;
   }
   do {
-    if (str[len] == '\0') {
-      return len;
+    // AutoDoc: Stop as soon as a terminator arrives before the bound; the helper returns how many bytes were actually consumed.
+    if (str[bytes_checked] == '\0') {
+      return bytes_checked;
     }
-    len = len + 1;
-  } while (max_len != len);
+    bytes_checked = bytes_checked + 1;
+  // AutoDoc: If the loop walks the entire bound it reports `max_len` unchanged so callers know the string never terminated.
+  } while (max_len != bytes_checked);
   return max_len;
 }
 

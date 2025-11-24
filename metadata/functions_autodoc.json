@@ -156,8 +156,36 @@
       }
     ]
   },
-  "c_strlen": "Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the buffer one byte at a time and\nreturns the length as a signed size, allowing other helpers to sanity-check argv/envp strings without resolving libc symbols.",
-  "c_strnlen": "Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it sees a NUL or reaches `max_len`,\nreturning the limit unchanged if the string is unterminated so callers can treat that as an error.",
+  "c_strlen": {
+    "plate": "Stage-two strlen replacement that runs before libc is trustworthy. It assumes `str` already points to a readable buffer,\nshort-circuits when the first byte is NUL, and otherwise increments a counter until it encounters `\\0`, returning the byte count\nas a signed size.",
+    "inline": [
+      {
+        "match": "if (*str != '\\0') {",
+        "comment": "Skip the scan entirely when the buffer already begins with a terminator so empty strings return 0 immediately."
+      },
+      {
+        "match": "} while (str[bytes_counted] != '\\0');",
+        "comment": "Walk byte-by-byte until a NUL sentinel shows up; the total bytes seen becomes the returned length."
+      }
+    ]
+  },
+  "c_strnlen": {
+    "plate": "Bounded strlen variant used on attacker-controlled buffers. It counts until it has inspected `max_len` bytes or hits a NUL,\nreturning `max_len` unchanged when the string is unterminated so callers can treat that as a failure.",
+    "inline": [
+      {
+        "match": "if (max_len == 0) {",
+        "comment": "Zero-length caps return immediately so callers can treat `max_len == 0` as a trivial pass."
+      },
+      {
+        "match": "if (str[bytes_checked] == '\\0') {",
+        "comment": "Stop as soon as a terminator arrives before the bound; the helper returns how many bytes were actually consumed."
+      },
+      {
+        "match": "} while (max_len != bytes_checked);",
+        "comment": "If the loop walks the entire bound it reports `max_len` unchanged so callers know the string never terminated."
+      }
+    ]
+  },
   "chacha_decrypt": "Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null\n(contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that\nthe final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls\nsucceed.",
   "check_argument": {
     "plate": "Slides a two-byte window across dash-prefixed argv entries and reports the first position whose bytes contain lowercase `d`. `process_is_sshd` treats that non-NULL pointer as proof sshd was launched with `-d`/`--debug`, so the loader stays away from debug-mode daemons. Control bytes, tabs, and `=` terminate the walk early and force a NULL return so only clean switches reach the matcher.",
@@ -208,7 +236,19 @@
       }
     ]
   },
-  "contains_null_pointers": "Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters\na NULL slot, letting callers bail out if any required import failed to resolve.",
+  "contains_null_pointers": {
+    "plate": "Linear probe used before invoking crypto helpers. It walks an array of pointers until it reaches `num_pointers` entries or\nfinds a NULL slot; the helper returns TRUE the moment it spots a NULL so callers can abort when any import failed to resolve.",
+    "inline": [
+      {
+        "match": "if (num_pointers <= (uint)slot_index) {",
+        "comment": "Stop once we have checked the requested number of slots and report FALSE when no NULL pointers were seen."
+      },
+      {
+        "match": "} while (*candidate_slot != (void *)0x0);",
+        "comment": "Return TRUE the instant a NULL slot is encountered so callers can bail out before dereferencing it."
+      }
+    ]
+  },
   "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
   "count_pointers": {
     "plate": "Counts consecutive non-NULL entries inside an sshd pointer table. It first confirms the caller handed in both the array and a\n`malloc_usable_size()` hook, queries the allocator for the actual buffer size, and only trusts tables smaller than ~0x80 bytes to\navoid chasing attacker-sized allocations. The loop stops at the first NULL or the allocation boundary, then reports how many slots\nwere populated so the sensitive-data heuristics can reason about argv/envp-style arrays.",
@@ -673,8 +713,56 @@
       }
     ]
   },
-  "fd_read": "Wraps libc\u2019s read with retry logic. It refuses to run without both `read` and `__errno_location`, loops on EINTR, and aborts\nwith -1 when the helper sees EOF before the requested byte count. Successful reads consume the entire length so callers can\ntreat any non-zero return as \"buffer filled\".",
-  "fd_write": "Mirror of `fd_read`: it requires valid write/errno pointers, retries on EINTR, and treats short writes as fatal so callers\neither send the entire buffer or receive -1. It is the plumbing used whenever the implant forges monitor messages.",
+  "fd_read": {
+    "plate": "Libc `read` wrapper with strict import validation. It refuses to run unless both `read` and `__errno_location` are present,\nloops on EINTR, and treats EOF/short reads as fatal so callers either receive -1 or know the entire `count` bytes were filled.",
+    "inline": [
+      {
+        "match": "funcs->__errno_location == (pfn___errno_location_t)0x0",
+        "comment": "Bail out unless the caller supplied valid `libc_imports_t` hooks and a non-negative fd."
+      },
+      {
+        "match": "chunk_size = (*funcs->read)(fd,buffer,bytes_left);",
+        "comment": "Retry the read until it succeeds or an error other than EINTR surfaces."
+      },
+      {
+        "match": "if (*errno_value_ptr != 4) goto LAB_0010709e;",
+        "comment": "Only EINTR (errno == 4) causes a retry; every other errno trips the failure path."
+      },
+      {
+        "match": "if (chunk_size == 0) goto LAB_0010709e;",
+        "comment": "Treat EOF before `count` bytes have been read as a fatal short read."
+      },
+      {
+        "match": "buffer = (void *)((long)buffer + chunk_size);",
+        "comment": "Advance the moving buffer pointer and remaining byte counter after every successful chunk."
+      }
+    ]
+  },
+  "fd_write": {
+    "plate": "Write-side twin of `fd_read`. It demands working `write`/`__errno_location` imports, retries short-term EINTR failures, and\nfalls back to -1 if the kernel reports 0 bytes or any other error before the requested `count` is flushed.",
+    "inline": [
+      {
+        "match": "funcs->__errno_location == (pfn___errno_location_t)0x0",
+        "comment": "Guard against bad descriptors, NULL buffers, or missing libc shims before attempting the write."
+      },
+      {
+        "match": "chunk_size = (*funcs->write)(fd,buffer,bytes_left);",
+        "comment": "Issue blocking writes until the entire buffer is sent or an unrecoverable error appears."
+      },
+      {
+        "match": "if (*errno_value_ptr != 4) goto LAB_0010711f;",
+        "comment": "Only EINTR causes a retry; any other errno aborts and returns -1."
+      },
+      {
+        "match": "if (chunk_size == 0) goto LAB_0010711f;",
+        "comment": "A zero-byte write means the peer closed early, so propagate -1 to signal the failure."
+      },
+      {
+        "match": "buffer = (void *)((long)buffer + chunk_size);",
+        "comment": "Advance the source pointer and remaining byte count after every successful chunk."
+      }
+    ]
+  },
   "find_add_instruction_with_mem_operand": {
     "plate": "ADD predicate for register-to-memory increments.\nIt wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.\nIf `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.",
     "inline": [
