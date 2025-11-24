@@ -179,11 +179,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `107080_fd_read` | `loader_rt` | 1 | 2025-11-24 (LR6) – retitled the chunk/errno/remaining temps, expanded the plate with the EINTR + EOF semantics, and dropped inline anchors for the guard, retry loop, and pointer advance. |
 | `1070F0_fd_write` | `loader_rt` | 1 | 2025-11-24 (LR6) – mirrored the new names, documented the fatal short-write behavior, and added inline comments for the EINTR retry gate plus the buffer/remaining updates. |
 | `107170_contains_null_pointers` | `loader_rt` | 1 | 2025-11-24 (LR6) – renamed the slot/index temps, clarified the TRUE/FALSE exit criteria, and added inline anchors for the loop bound and NULL-hit return. |
-| `103B80_dsa_key_hash` | `crypto_cmd` | 0 |  |
-| `107190_chacha_decrypt` | `crypto_cmd` | 0 |  |
-| `1072B0_sha256` | `crypto_cmd` | 0 |  |
-| `107320_bignum_serialize` | `crypto_cmd` | 0 |  |
-| `107510_rsa_key_hash` | `crypto_cmd` | 0 |  |
+| `103B80_dsa_key_hash` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – renamed the scratch arrays (`fingerprint_stream`, `wipe_words`, `bn_components`) and added inline notes for the zeroize loop, pqg+y harvesting, per-component `bignum_serialize`, and final sha256. |
+| `107190_chacha_decrypt` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – retitled `outl` → `bytes_written` and threaded inline anchors through the contains_null_pointers gate, EVP init/update/final calls, and the success/failure cleanup paths. |
+| `1072B0_sha256` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – renamed the unused `md` spill, documented the input/size/import guard, and added inline comments for the EVP_Digest lookup plus the final hashing call. |
+| `107320_bignum_serialize` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – documented the buffer/bit-length guard, the BN_bn2bin copy, the top-bit padding branch, and the len-header write so the canonical `[len||value]` framing is obvious in-line. |
+| `107510_rsa_key_hash` | `crypto_cmd` | 1 | 2025-11-24 (CC1) – renamed the stack wipes (`scratch_wipe_cursor`, `fingerprint_bytes/fingerprint_stream`) and annotated the exponent/modulus serialization sequence plus the final sha256 fingerprint. |
 | `107630_verify_signature` | `crypto_cmd` | 0 |  |
 | `107A20_sshd_get_sshbuf` | `crypto_cmd` | 0 |  |
 | `107920_sshbuf_bignum_is_negative` | `crypto_cmd` | 0 |  |

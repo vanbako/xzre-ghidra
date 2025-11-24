@@ -2014,7 +2014,7 @@
   "chacha_decrypt": {
     "locals": [
       {
-        "name": "outl",
+        "name": "bytes_written",
         "type": "int"
       }
     ],
@@ -2250,12 +2250,12 @@
         "type": "size_t"
       },
       {
-        "name": "serialized_len",
+        "name": "serialized_bytes",
         "original": "count",
         "type": "size_t"
       },
       {
-        "name": "component_len",
+        "name": "component_bytes",
         "original": "local_688",
         "type": "u64"
       },
@@ -2275,22 +2275,22 @@
         "type": "BIGNUM *"
       },
       {
-        "name": "components",
+        "name": "bn_components",
         "original": "local_680",
         "type": "BIGNUM *[4]"
       },
       {
-        "name": "scratch_cursor",
+        "name": "scratch_wipe_cursor",
         "original": "puVar4",
         "type": "u32 *"
       },
       {
-        "name": "serialized_components",
+        "name": "fingerprint_stream",
         "original": "local_660",
         "type": "u8[0x628]"
       },
       {
-        "name": "serialized_words",
+        "name": "wipe_words",
         "original": "local_650",
         "type": "u32[392]"
       }
@@ -5813,7 +5813,7 @@
   "rsa_key_hash": {
     "locals": [
       {
-        "name": "written",
+        "name": "fingerprint_bytes",
         "type": "u64"
       },
       {
@@ -5832,12 +5832,12 @@
     ],
     "register_temps": [
       {
-        "name": "wipe_cursor",
+        "name": "scratch_wipe_cursor",
         "original": "pBVar4",
         "type": "u8 *"
       },
       {
-        "name": "wipe_length",
+        "name": "scratch_wipe_count",
         "original": "lVar3",
         "type": "long"
       },
@@ -5852,7 +5852,7 @@
         "type": "u64"
       },
       {
-        "name": "fingerprint_buf",
+        "name": "fingerprint_stream",
         "original": "local_1042",
         "type": "u8[0x100a]"
       }
@@ -6280,7 +6280,7 @@
   "sha256": {
     "locals": [
       {
-        "name": "md",
+        "name": "digest_impl",
         "type": "const EVP_MD *"
       }
     ],

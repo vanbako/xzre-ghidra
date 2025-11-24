@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `CC1`: reviewed `dsa_key_hash`, `chacha_decrypt`, `sha256`, `bignum_serialize`, and `rsa_key_hash`; renamed their lingering locals/register temps (`fingerprint_stream`, `wipe_words`, `bytes_written`, `fingerprint_bytes`, etc.) and promoted each AutoDoc to plate+inline form so the zeroization passes, import guards, serialization loops, and sha256 hand-offs are documented directly in the decomp.
+- Ran `./scripts/refresh_xzre_project.sh` repeatedly while fixing a JSON escape and a few inline match strings; final pass completed cleanly (no warnings, rename report stayed green, portable archive refreshed, inline comments landed in `xzregh/*`).
+- Next: move on to session `CC2` (verify_signature + sshbuf helpers + secret_data_get_decrypted) so the rest of the crypto stack gains the same locals/inline coverage before diving into the RSA hook wrappers.
+
+## 2025-11-24
 - Session `LR6`: reviewed `c_strlen`, `c_strnlen`, `fd_read`, `fd_write`, and `contains_null_pointers`; renamed their lingering `len`/`slot`/`count` register temps (`bytes_counted`, `bytes_checked`, `chunk_size`, `bytes_left`, `candidate_slot`, etc.), converted their metadata entries to plate+inline form, and added inline anchors covering the fast-path exits, EINTR retry loops, and NULL-pointer checks.
 - Ran `./scripts/refresh_xzre_project.sh` once the metadata settled; the locals rename report stayed green, `xzregh/*.c` picked up the inline comments/new names, and the portable archive refreshed without warnings.
 - Next: pivot into `CC1` (crypto primitives) so the first crypto batch gains the same locals + inline coverage before digging into the secret-data appenders.

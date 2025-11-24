@@ -141,7 +141,32 @@
       }
     ]
   },
-  "bignum_serialize": "Normalises a BIGNUM into the [len||value] format used by the fingerprinting code. It caps inputs at 0x4000 bits, emits a 4-byte\nbig-endian length, copies the magnitude, and prepends a zero byte (or memmoves the data) whenever the top bit would otherwise\nmake the number negative so SHA-256 sees a canonical stream.",
+
+  "bignum_serialize": {
+    "plate": "Normalises a BIGNUM into the `[len||value]` framing used by the fingerprinting helpers. It refuses NULL inputs, requires at least six bytes of scratch space, caps magnitudes at 0x4000 bits (0x2001 bytes with the optional sign byte), emits a four-byte big-endian length, and copies the magnitude. When the highest value bit would otherwise set the sign bit it prepends a zero byte; otherwise it memmoves the data down so the caller sees a tightly packed blob. Successful runs report the exact number of bytes written back through `*pOutSize` so callers can concatenate multiple serialisations safely.",
+    "inline": [
+      {
+        "match": "if (((funcs != (imported_funcs_t *)0x0 && 5 < bufferSize) && (bn != (BIGNUM *)0x0)) &&",
+        "comment": "All callers must provide a non-NULL BIGNUM, at least `[len(4) + value(>=1)]` bytes of scratch, and the BN helpers before any work begins."
+      },
+      {
+        "match": "bit_length_bits = (*funcs->BN_num_bits)(bn), bit_length_bits < 0x4001",
+        "comment": "Reject values larger than 0x4000 bits so the stack scratch buffer never overflows."
+      },
+      {
+        "match": "written_bytes = (*funcs->BN_bn2bin)(bn,buffer + 5);",
+        "comment": "Serialise the magnitude directly after the length field; the spare byte at `buffer[4]` gives us room to insert a leading zero if needed."
+      },
+      {
+        "match_regex": "buffer\\[5\\] < '\\\\0'",
+        "comment": "When the uppermost bit is 1 treat the value as negative: insert a zero byte and bump the reported length, otherwise slide the payload down to fill the placeholder."
+      },
+      {
+        "match": "*(uint *)buffer =",
+        "comment": "Write the big-endian length header last so callers can parse the `[len||value]` blob without re-counting."
+      }
+    ]
+  },
   "c_memmove": {
     "plate": "Private implementation of `memmove` so the object never has to import libc for something this trivial. It detects backwards\noverlap (`src < dest < src+cnt`) and copies from the end towards the beginning in that case; every other scenario devolves into\na forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with\nthe libc version.",
     "inline": [
@@ -186,7 +211,36 @@
       }
     ]
   },
-  "chacha_decrypt": "Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null\n(contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that\nthe final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls\nsucceed.",
+
+  "chacha_decrypt": {
+    "plate": "Validates caller buffers and imported EVP symbols, allocates a temporary EVP_CIPHER_CTX, runs the ChaCha20 decrypt pipeline (Init -> Update -> Final), enforces that the accumulated plaintext never exceeds the input length, and tears the context down on every path. Only a full set of successful EVP calls returns TRUE.",
+    "inline": [
+      {
+        "match": "has_missing_imports = contains_null_pointers(&funcs->EVP_CIPHER_CTX_new,6)",
+        "comment": "Refuse to touch the cipher until every EVP dependency (CTX allocators, cipher lookup, init/update/final, free) is live."
+      },
+      {
+        "match": "cipher_ctx = (*imports->EVP_CIPHER_CTX_new)(), cipher_ctx != (EVP_CIPHER_CTX *)0x0",
+        "comment": "Allocate a scratch EVP_CIPHER_CTX for the decrypt; any failure short-circuits the helper."
+      },
+      {
+        "match": "decrypt_status = (*decrypt_init)(cipher_ctx,chacha_cipher,(ENGINE *)0x0,key,iv);",
+        "comment": "Prime the context with EVP_chacha20 (no ENGINE override) before streaming bytes."
+      },
+      {
+        "match": "decrypt_status = (*funcs->EVP_DecryptUpdate)(cipher_ctx,out,&bytes_written,in,inl);",
+        "comment": "Process the entire ciphertext in one shot and remember how many bytes were produced so Final can append safely."
+      },
+      {
+        "match": "decrypt_status = (*funcs->EVP_DecryptFinal_ex)(cipher_ctx,out + bytes_written,&bytes_written),",
+        "comment": "Finalise the decrypt and insist the trailing chunk neither underflows nor overruns the caller-supplied buffer."
+      },
+      {
+        "match": "if (funcs->EVP_CIPHER_CTX_free != (pfn_EVP_CIPHER_CTX_free_t)0x0) {",
+        "comment": "Best-effort cleanup: even on failure it tries to free the context when the import table exposes EVP_CIPHER_CTX_free."
+      }
+    ]
+  },
   "check_argument": {
     "plate": "Slides a two-byte window across dash-prefixed argv entries and reports the first position whose bytes contain lowercase `d`. `process_is_sshd` treats that non-NULL pointer as proof sshd was launched with `-d`/`--debug`, so the loader stays away from debug-mode daemons. Control bytes, tabs, and `=` terminate the walk early and force a NULL return so only clean switches reach the matcher.",
     "inline": [
@@ -302,7 +356,32 @@
       }
     ]
   },
-  "dsa_key_hash": "Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with\nbignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized\nBIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.",
+
+  "dsa_key_hash": {
+    "plate": "Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with bignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized BIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.",
+    "inline": [
+      {
+        "match": "for (component_idx = 0x186; component_idx != 0; component_idx = component_idx + -1) {",
+        "comment": "Manually zero the 0x628-byte workspace up front so no residual bytes leak into the fingerprint stream."
+      },
+      {
+        "match": "if ((((dsa != (DSA *)0x0) && (ctx != (global_context_t *)0x0)) &&",
+        "comment": "Require a valid DSA handle, populated global context, and both DSA_get0 helpers before reading any BIGNUMs."
+      },
+      {
+        "match": "bn_components[3] = (*ctx->imported_funcs->DSA_get0_pub_key)(dsa);",
+        "comment": "Capture the public key y alongside p/q/g so all four components are hashed in a consistent order."
+      },
+      {
+        "match": "success = bignum_serialize(fingerprint_stream + serialized_bytes,0x628 - serialized_bytes,&component_bytes,bn_components[component_idx],",
+        "comment": "Serialise each component back-to-back, aborting if any write fails or would run past the 0x628-byte scratch buffer."
+      },
+      {
+        "match": "success = sha256(fingerprint_stream,serialized_bytes,mdBuf,mdBufSize,ctx->imported_funcs);",
+        "comment": "Hash the concatenated `[p||q||g||y]` blob with sha256; the caller only sees TRUE when the digest lands cleanly."
+      }
+    ]
+  },
   "elf_contains_vaddr": {
     "plate": "Thin wrapper around `elf_contains_vaddr_impl` that keeps the public API surface simple. Every range-checker in the loader funnels through it so the flag handling, recursion guard, and alignment fixes stay centralized, making it easy to detect when a pointer falls outside the parsed ELF image.",
     "inline": [
@@ -1711,7 +1790,36 @@
       }
     ]
   },
-  "rsa_key_hash": "Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into\na ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the\n0x100a-byte scratch cancels the fingerprint.",
+
+  "rsa_key_hash": {
+    "plate": "Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into a ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the 0x100a-byte scratch cancels the fingerprint.",
+    "inline": [
+      {
+        "match": "for (scratch_wipe_count = 0xffa; scratch_wipe_count != 0; scratch_wipe_count = scratch_wipe_count + -1) {",
+        "comment": "Pre-wipe the 0x100a-byte scratch arena so no stack garbage contaminates the serialized fingerprint."
+      },
+      {
+        "match": "if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&",
+        "comment": "Guard every lookup behind the resolved import table and a non-NULL RSA pointer before touching the key material."
+      },
+      {
+        "match": "(*funcs->RSA_get0_key_resolved)(rsa,&rsa_modulus,&rsa_exponent,(BIGNUM **)0x0);",
+        "comment": "Extract the modulus/exponent pair that will be serialized; missing components abort immediately."
+      },
+      {
+        "match": "success = bignum_serialize(fingerprint_stream,0x100a,&fingerprint_bytes,rsa_exponent,funcs);",
+        "comment": "Write the public exponent first so the fingerprint starts with its `[len||value]` header."
+      },
+      {
+        "match": "fingerprint_stream + fingerprint_bytes,0x100a - fingerprint_bytes,",
+        "comment": "Append the modulus immediately after the exponent and refuse any write that would exhaust the 0x100a-byte buffer."
+      },
+      {
+        "match": "success = sha256(fingerprint_stream,exp_serialized_len + fingerprint_bytes,mdBuf,mdBufSize,funcs);",
+        "comment": "Hash the exact number of serialized bytes (`exponent_len + modulus_len`) and bubble the SHA-256 status back to the caller."
+      }
+    ]
+  },
   "run_backdoor_commands": "Master dispatcher for the RSA hooks. It refuses to run unless the secret-data bitmap is complete, extracts the modulus and\nexponent via RSA_get0_key, and uses the modulus bytes as a transport for an encrypted payload header/body. The body is decrypted\nwith the ChaCha keys from secret_data_get_decrypted, every cached sshd host key is hashed (rsa_key_hash/dsa_key_hash/etc.) until\nthe embedded Ed448 signature verifies, and the resulting command toggles global_ctx state (sshd_offsets, syslog/PAM controls,\nsocket selection, payload streaming state). When a payload wants execution it populates a monitor_data_t and calls\nsshd_proxy_elevate; otherwise it patches sshd variables/logging in place. Any parse/signature failure sets\nctx->disable_backdoor, leaves *do_orig = TRUE, and the real OpenSSL routine proceeds untouched.",
   "secret_data_append_from_address": "Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller\u2019s return address,\notherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to\nsecret_data_append_singleton.",
   "secret_data_append_from_call_site": "Shortcut used directly inside hooks: it grabs the caller\u2019s return address (unaff_retaddr), runs secret_data_append_singleton\nwith it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.",
@@ -1721,7 +1829,28 @@
   "secret_data_append_items": "Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,\ncalls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the\nfirst failure so callers know whether the entire batch completed.",
   "secret_data_append_singleton": "Guarantees each attestation slot runs at most once. It uses the per-operation byte array inside global_ctx->shift_operations to\nguard entry, resolves the function boundaries with find_function relative to the recorded sshd code limits, invokes\nsecret_data_append_from_code (starting after the call site if present), and increments global_ctx->num_shifted_bits by\nshift_count on success.",
   "secret_data_get_decrypted": "Unwraps the 57-byte global_ctx->secret_data blob with two ChaCha passes. A baked-in key/IV pair (the key_buf constants) decrypts\na 0x30-byte seed, that seed becomes the real ChaCha key, and a second decrypt peels the runtime secret into the caller buffer\nusing another static IV. All operations go through the resolved EVP entry points so no static crypto ships with the implant.",
-  "sha256": "Thin wrapper around EVP_Digest/Evp_sha256: it rejects empty buffers, refuses to write unless mdBuf has at least 32 bytes of\nspace, looks up OpenSSL\u2019s SHA-256 implementation via the import table, and hashes the supplied payload in place.",
+
+  "sha256": {
+    "plate": "Thin wrapper around EVP_Digest/Evp_sha256: it rejects NULL buffers, zero lengths, or output buffers smaller than 32 bytes, looks up OpenSSL's SHA-256 descriptor, and hashes the payload through EVP_Digest.",
+    "inline": [
+      {
+        "match": "if ((((data == (void *)0x0) || (count == 0)) || (mdBufSize < 0x20)) ||",
+        "comment": "Bail out when the caller hands us nothing to hash, an undersized digest buffer, or a missing import table."
+      },
+      {
+        "match": "digest_fn = funcs->EVP_Digest;",
+        "comment": "Fetch the EVP_Digest entry point once so repeated hashing never has to chase the import table."
+      },
+      {
+        "match": "sha256_md = (*funcs->EVP_sha256)();",
+        "comment": "Resolve OpenSSL's SHA-256 descriptor and treat a NULL return as a fatal error."
+      },
+      {
+        "match": "digest_status = (*digest_fn)(data,count,mdBuf,(uint *)0x0,sha256_md,(ENGINE *)0x0);",
+        "comment": "Delegate to EVP_Digest with a NULL ENGINE/context so the helper mirrors libcrypto's canonical SHA-256 call."
+      }
+    ]
+  },
   "sshbuf_bignum_is_negative": "Treats an sshbuf as a serialized big integer. When the payload is between 0x20 and 0x40 bytes it scans forward until it finds a\nbyte with the sign bit set; encountering such a byte before hitting the end marks the buffer as \u201cnegative\u201d and therefore\nsuitable for modulus harvesting.",
   "sshbuf_extract": "Reads out an sshbuf\u2019s d pointer and size field using the dynamic layout encoded in global_ctx->sshd_offsets. Depending on\nwhether each qword index is negative it either uses the struct fields directly or walks to the encoded offset, confirms both the\nstruct and the pointed-to range are mapped with is_range_mapped, and hands the caller the live pointer/length pair.",
   "sshd_configure_log_hook": {
