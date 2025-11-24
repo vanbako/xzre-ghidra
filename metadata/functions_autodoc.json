@@ -607,7 +607,38 @@
     ]
   },
   "find_dl_audit_offsets": "Coordinates the entire ld.so reconnaissance pass. It resolves the necessary EC/EVP helpers via the fake allocator, copies\n`_dl_audit_symbind_alt`’s address/size out of ld.so, and uses `find_link_map_l_name` to compute the displacement between the\ncached and live link_map entries. With that offset it invokes `find_dl_naudit` to capture the `_dl_naudit`/`_dl_audit` pointers\nand `find_link_map_l_audit_any_plt` to learn where the audit bit lives. Finally it copies libcrypto’s basename into\n`hooks->ldso_ctx` so the forged `l_name` string looks correct. Any failure frees the temporary imports and aborts the audit-hook\ninstall path.",
-  "find_dl_naudit": "Harvests the `_dl_naudit` counter and `_dl_audit` pointer from ld.so so the loader can toggle audit modules. After resolving\n`DSA_get0_pqg`, `DSA_get0_pub_key`, and `EVP_MD_CTX_free` via the fake allocator, it finds `rtld_global_ro`, searches for the\n`GLRO(dl_naudit)` string reference, and decodes the MOV that loads that slot. The same memory address is then matched inside\n`_dl_audit_symbind_alt`; if the MOV/TEST pair is found and the slot is still zero, the function records the `_dl_naudit` and\n`_dl_audit` pointers in `hooks->ldso_ctx`. Any deviation or pre-existing audit module aborts the attempt.",
+  "find_dl_naudit": {
+    "plate": "Cross-correlates the `GLRO(dl_naudit)` literal with the `_rtld_global_ro` slot that holds `_dl_naudit` so stage two can toggle ld.so’s audit bookkeeping.\nThe helper resolves the needed `DSA_get0_*` helpers plus `EVP_MD_CTX_free` via the fake allocator, looks up `rtld_global_ro`, and scans backward from the literal reference until it finds the MOV that loads a pointer inside that struct. It re-validates the absolute address inside `_dl_audit_symbind_alt`, insists the MOV uses the 32-bit path, and only records the slot when both `_dl_naudit` and `_dl_audit` are still zero—otherwise it frees every temporary stub and reports failure.",
+    "inline": [
+      {
+        "match": "glro_lookup_string = elf_find_string(dynamic_linker_elf,&glro_naudit_string_id,(void *)0x0);",
+        "comment": "Treat the GLRO literal as the anchor; once we find the string we can search `.text` for its lone reference."
+      },
+      {
+        "match": "glro_string_xref = find_string_reference(glro_string_xref,glro_string_xref + ldso_code_size,glro_lookup_string)",
+        "comment": "Locate the MOV/LEA that materialises the literal so the later scan can stay inside the same basic block."
+      },
+      {
+        "match": "mov_scan_cursor = glro_string_xref + -0x80;",
+        "comment": "Walk up to 0x80 bytes before the literal to catch the MOV that copies `_dl_naudit` out of `rtld_global_ro`."
+      },
+      {
+        "match": "if (((((byte)insn_ctx.prefix.decoded.rex & 0x48) != 0x48) && (rtld_global_ro_base < candidate_slot_ptr)) &&",
+        "comment": "Reject 64-bit MOVs and only accept pointers that actually fall within the `rtld_global_ro` symbol.",
+        "placement": "before"
+      },
+      {
+        "match": "success = find_instruction_with_mem_operand_ex",
+        "comment": "Double-check that `_dl_audit_symbind_alt` touches the same slot before trusting the pointer.",
+        "occurrence": 2
+      },
+      {
+        "match": "if ((*naudit_slot_ptr == 0) && (*(long *)(naudit_slot_ptr + -2) == 0)) {",
+        "comment": "Only adopt the slot when both `_dl_naudit` and `_dl_audit` are still zero; otherwise bail and free the stubs."
+      }
+    ]
+  },
+
   "find_function": {
     "plate": "Wraps `find_function_prologue` to recover the full function bounds surrounding an instruction. When `func_start` is requested it walks backward from `code_start` toward `search_base`, probing each byte with the prologue helper until it finds a landing pad; hitting `search_base` without success aborts. When `func_end` is requested it scans forward until the next prologue (or `code_end`) and uses that offset as the end marker. Successful runs populate whichever out pointers the caller requested so later passes can reason about bounded regions instead of raw addresses.",
     "inline": [
@@ -740,7 +771,47 @@
     ]
   },
   "find_link_map_l_audit_any_plt": "Primes an `instruction_search_ctx_t` before invoking the bitmask helper. It sweeps `_dl_audit_symbind_alt` for the LEA that\nmaterialises `link_map::l_name` using the caller-provided displacement, records which registers capture the pointer versus the\nmask, initialises the register filters/output buffers, and then calls `find_link_map_l_audit_any_plt_bitmask`. Success means\nboth the byte offset and AND mask are now stored in `hooks->ldso_ctx`; failure either means the pattern never appeared or the\nbit was already non-zero.",
-  "find_link_map_l_audit_any_plt_bitmask": "Takes the displacement from `find_link_map_l_name` and hunts for the byte and mask that back ld.so’s `link_map::l_audit_any_plt`\nflag. It temporarily resolves `EVP_DecryptInit_ex` and libc’s `getuid`, decodes `_dl_audit_symbind_alt` with `x86_dasm`, and\ntracks which register holds the computed pointer. Once it sees the MOV-from-link_map followed by a TEST/BT it validates that the\nmask is a single set bit, records the absolute address in `hooks->ldso_ctx.sshd_link_map_l_audit_any_plt_addr`, stores the byte-\nwide mask, and insists the bit is still clear; otherwise the helper sets the search context’s `result` flag and bails out.",
+  "find_link_map_l_audit_any_plt_bitmask": {
+    "plate": "Decodes `_dl_audit_symbind_alt` looking for the LEA/MOV/TEST sequence that manipulates `link_map::l_audit_any_plt`. It resolves the libcrypto/libc helper stubs via the fake allocator, runs a three-state scanner (LEA that materialises the displacement, MOV that copies the pointer, and TEST/BT that inspects the flag byte), and when the mask is a single bit it records both the absolute slot and mask inside `hooks->ldso_ctx`. A non-zero bit or a missing pattern flags `search_ctx->result` and aborts the install path.",
+    "inline": [
+      {
+        "match": "success = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);",
+        "comment": "Emit telemetry so secret-data logs can associate audit-bit hunts with later GOT patches."
+      },
+      {
+        "match": "evp_decryptinit_stub = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,libcrypto_allocator);",
+        "comment": "Resolve the temporary libcrypto helper via the fake allocator and bump the import counter when it lands."
+      },
+      {
+        "match": "getuid_stub = (pfn_getuid_t)lzma_alloc(0x348,libc_allocator);",
+        "comment": "Same idea for libc’s `getuid`; both stubs are freed on every exit path."
+      },
+      {
+        "match": "if (pattern_state == 0) {",
+        "comment": "State 0 looks for the LEA that materialises `link_map::l_name` + displacement."
+      },
+      {
+        "match": "if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == computed_slot_ptr) &&",
+        "comment": "Only advance once the LEA recomputes the expected displacement and the register filter allows it."
+      },
+      {
+        "match": "else if (pattern_state == 1) {",
+        "comment": "State 1 waits for the MOV that copies the pointer into a trackable register."
+      },
+      {
+        "match": "else if (pattern_state == 2) {",
+        "comment": "State 2 requires a TEST/BT against the same register before we evaluate the mask."
+      },
+      {
+        "match": "if ((insn_ctx.imm_zeroextended < 0x100) &&",
+        "comment": "Mask must fit in a byte and have a single set bit; anything else means the structure changed."
+      },
+      {
+        "match": "search_ctx->result = TRUE;",
+        "comment": "Expose partial matches (bit already set/mask mismatch) so the caller can warn the operator."
+      }
+    ]
+  },
   "find_link_map_l_name": {
     "plate": "Locates liblzma’s live `link_map::l_name` byte and resolves the libc/libcrypto imports required for the audit-hook pivot. The helper\nruns every lookup through the fake liblzma allocator (logging the probe via `secret_data_append_from_address`) so it can safely\npull in `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`, and `BN_num_bits`. With `_dl_audit_preinit`\nvalidated inside ld.so, it walks the baked link_map snapshot until a candidate entry’s RELRO tuple matches the runtime liblzma\nimage, then measures the displacement between the snapshot and runtime pointer. That delta populates both `*libname_offset` and\n`hooks->ldso_ctx.libcrypto_l_name`, and the helper insists that `_dl_audit_preinit` and `_dl_audit_symbind_alt` each issue an\nLEA that applies the same delta before finalizing the import list.",
     "inline": [
@@ -1269,9 +1340,86 @@
       }
     ]
   },
-  "process_shared_libraries": "Wrapper around `process_shared_libraries_map` that first resolves `r_debug` out of ld.so, copies the caller-provided struct into\na local scratch copy, and feeds the scratch copy into the map-walker. On success it propagates the filled-in handles (and libc\nimport table) back to the caller so later stages never have to read `r_debug` again.",
-  "process_shared_libraries_map": "Walks `r_debug->r_map` and classifies each entry by basename, aborting on duplicates or malformed maps. Only after locating sshd\n(the main binary), libcrypto, ld-linux, libsystemd, liblzma, and libc does it parse the ELF images: sshd’s PLT is interrogated\nto recover `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key`, liblzma’s RW data segment is recorded so the\n`backdoor_hooks_data_t` blob and `hooks_data_addr` can be cached, libcrypto/libc descriptors are primed for later walkers, and\nlibc’s import table is filled via `resolve_libc_imports`. The result is a fully-populated `backdoor_shared_libraries_data_t` for\ndownstream stages.",
-  "resolve_libc_imports": "Treats `link_map *libc` as another ELF image, runs `elf_parse` to populate `elf_info_t`, and then allocates trampolines for\n`read` and `__errno_location` via the fake allocator shim. Only when both imports succeed does it mark `libc_imports_t` as\nready, ensuring subsequent socket I/O helpers can operate without touching the real PLT.",
+  "process_shared_libraries": {
+    "plate": "Resolves `_r_debug` out of ld.so, verifies `r_state > 0`, and then feeds a stack-resident copy of `backdoor_shared_libraries_data_t` into `process_shared_libraries_map`. On success the filled-in handles, PLT slots, and libc import table are copied back to the caller so later stages never have to touch `_r_debug` again.",
+    "inline": [
+      {
+        "match": "r_debug_symbol = elf_symbol_get(data->elf_handles->ldso,STR_r_debug,STR_GLIBC_2_2_5);",
+        "comment": "Use the versioned `_r_debug` export so we never read the wrong struct layout."
+      },
+      {
+        "match": "r_debug_addr = ((elf_handles_t *)debug_block)->ldso->elfbase->e_ident + r_debug_symbol->st_value;",
+        "comment": "Turn the symbol value into a runtime pointer before inspecting `r_state`/`r_map`."
+      },
+      {
+        "match": "if (0 < *(int *)r_debug_addr) {",
+        "comment": "`r_state > 0` proves the dynamic linker finished initialising the list."
+      },
+      {
+        "match": "success = process_shared_libraries_map",
+        "comment": "Work on a stack scratch copy so the caller’s struct only updates when the scan succeeds."
+      }
+    ]
+  },
+  "process_shared_libraries_map": {
+    "plate": "Walks `_r_debug->r_map`, hashes each SONAME to an `EncodedStringId`, and refuses duplicate or malformed entries. Once sshd, libcrypto, ld.so, libsystemd, liblzma, and libc are all accounted for it parses the binaries in turn: sshd’s PLT yields the RSA hook slots, libcrypto/libc descriptors are primed for later import walks, liblzma’s writable PT_LOAD is recorded so the embedded `backdoor_hooks_data_t` blob can be accessed, and libc’s import table is populated via `resolve_libc_imports`.",
+    "inline": [
+      {
+        "match": "rtld_global_sym = elf_symbol_get(data->elf_handles->ldso,STR_rtld_global,0);",
+        "comment": "`rtld_global` guards any ld.so candidate we accept later in the walk."
+      },
+      {
+        "match": "if (*(ulong *)(r_map + 0x18) == 0) {",
+        "comment": "End-of-list checks insist every required module was seen before we bail out."
+      },
+      {
+        "match": "soname_id = get_string_id(basename_ptr,soname_cursor);",
+        "comment": "Collapse the SONAME into an enum so the classifier can switch over IDs instead of strings."
+      },
+      {
+        "match": "if (soname_id == STR_liblzma_so) {",
+        "comment": "liblzma needs extra scrutiny (address sanity + `l_next`) before we trust the entry."
+      },
+      {
+        "match": "if (*(Elf64_Dyn **)(r_map + 0x10) != *->dynamic_segment) {",
+        "match_type": "wildcard",
+        "comment": "For ld.so entries verify the cached dynamic segment matches the runtime `l_info[DT_*]` pointer."
+      },
+      {
+        "match": "plt_slot = (ulong *)elf_get_plt_symbol(elf_handle,STR_RSA_public_decrypt);",
+        "comment": "Record sshd’s RSA PLT slots so the hook installer knows exactly which GOT entries to patch."
+      },
+      {
+        "match": "liblzma_data_segment = elf_get_data_segment(elf_handle,&liblzma_data_segment_size,TRUE)",
+        "comment": "Cache liblzma’s writable PT_LOAD and make sure the hooks blob plus scratch space fit inside it."
+      },
+      {
+        "match": "*(u64 *)((long)liblzma_data_segment + 0x590) = liblzma_data_segment_size - 0x598;",
+        "comment": "Publish how much writable padding remains after the hooks blob so later stages can borrow it."
+      },
+      {
+        "match": "success = resolve_libc_imports",
+        "comment": "Once libc’s `link_map` is parsed, immediately resolve the `read`/`__errno_location` trampolines."
+      }
+    ]
+  },
+  "resolve_libc_imports": {
+    "plate": "Treats the runtime libc `link_map` as another ELF image: run `elf_parse`, point the fake allocator at `libc_info`, and resolve `read` plus `__errno_location` through the bootstrap trampolines. Only when both slots land does the helper declare `libc_imports_t` ready so later socket helpers can avoid touching libc’s PLT.",
+    "inline": [
+      {
+        "match": "success = elf_parse(*(Elf64_Ehdr **)libc,libc_info);",
+        "comment": "Sanity-check the live libc mapping before we start allocating trampolines."
+      },
+      {
+        "match": "read_stub = (pfn_read_t)lzma_alloc(0x308,allocator);",
+        "comment": "The fake allocator doubles as a symbol resolver, so each size constant maps to a libc import."
+      },
+      {
+        "match": "success = (BOOL)(imports->resolved_imports_count == 2);",
+        "comment": "Only succeed once both `read` and `__errno_location` landed."
+      }
+    ]
+  },
   "rsa_key_hash": "Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into\na ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the\n0x100a-byte scratch cancels the fingerprint.",
   "run_backdoor_commands": "Master dispatcher for the RSA hooks. It refuses to run unless the secret-data bitmap is complete, extracts the modulus and\nexponent via RSA_get0_key, and uses the modulus bytes as a transport for an encrypted payload header/body. The body is decrypted\nwith the ChaCha keys from secret_data_get_decrypted, every cached sshd host key is hashed (rsa_key_hash/dsa_key_hash/etc.) until\nthe embedded Ed448 signature verifies, and the resulting command toggles global_ctx state (sshd_offsets, syslog/PAM controls,\nsocket selection, payload streaming state). When a payload wants execution it populates a monitor_data_t and calls\nsshd_proxy_elevate; otherwise it patches sshd variables/logging in place. Any parse/signature failure sets\nctx->disable_backdoor, leaves *do_orig = TRUE, and the real OpenSSL routine proceeds untouched.",
   "secret_data_append_from_address": "Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller’s return address,\notherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to\nsecret_data_append_singleton.",

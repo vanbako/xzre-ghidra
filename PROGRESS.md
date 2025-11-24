@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `LR3`: deep-reviewed `find_dl_naudit`, `resolve_libc_imports`, `process_shared_libraries_map`, `process_shared_libraries`, and `find_link_map_l_audit_any_plt_bitmask`; promoted their AutoDocs to plate+inline form, renamed the MOV/slot/SONAME trackers in `metadata/xzre_locals.json`, and added inline anchors for the GLRO literal hunt, libc trampoline allocations, SONAME hashing, `_r_debug` scratch copy, and audit-bit state machine.
+- Ran `./scripts/refresh_xzre_project.sh` (twice while iterating on inline matches) until the regenerated `xzregh/*.c`, locals rename report, and portable archive picked up the new comments without warnings.
+- Next: move on to session `LR4` (audit offsets + stage-two setup) so the remainder of the loader helpers share the same docs/locals coverage.
+
+## 2025-11-24
 - Session `LR2`: reviewed `update_cpuid_got_index`, `get_tls_get_addr_random_symbol_got_offset`, `update_got_address`, `update_got_offset`, and `find_link_map_l_name`; renamed the GOT math temps (plt stub, disp offset, runtime map trackers), added the missing inline AutoDoc anchors (sentinel GOT seed, long/short JMP handling, RELRO + dual-LEA checks), and refreshed `metadata/functions_autodoc.json` / `metadata/xzre_locals.json` accordingly.
 - Ran `./scripts/refresh_xzre_project.sh` after each metadata tweak until the inline matcher landed cleanly (no warnings, rename report stayed green) and the regenerated `xzregh/*.c` / portable archive picked up the new comments.
 - Updated `docs/FUNCTION_PROGRESS.md` to mark LR2 complete.

@@ -129,11 +129,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `103340_sshd_get_sensitive_data_address_via_krb5ccname` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Expanded the AutoDoc for both getenv/LEA cases, renamed the tracker locals, and annotated the scan/stride math that proves the `.bss` stores. |
 | `103680_sshd_get_sensitive_data_address_via_xcalloc` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Clarified how the helper finds the xcalloc call, records each `.bss` store, and tests the ptr/ptr+8/ptr+0x10 triplet, with new inline breadcrumbs on the decoder loop. |
 | `103870_sshd_get_sensitive_data_score_in_do_child` | `sshd_recon` | 1 | 2025-11-24 (SR1) – Documented the score math (base + first/second +0x10 hits), renamed the context scratch, and dropped inline notes on each pass over `do_child`. |
-| `103910_sshd_get_sensitive_data_score_in_main` | `sshd_recon` | 0 |  |
-| `103990_sshd_get_sensitive_data_score_in_demote_sensitive_data` | `sshd_recon` | 0 |  |
-| `103D50_sshd_get_sensitive_data_score` | `sshd_recon` | 0 |  |
-| `103DB0_sshd_find_monitor_struct` | `sshd_recon` | 0 |  |
-| `105410_sshd_find_sensitive_data` | `sshd_recon` | 0 |  |
+| `103910_sshd_get_sensitive_data_score_in_main` | `sshd_recon` | 1 | 2025-11-24 (SR2) – promoted the scoring helper to plate+inline form, renamed the base/+8/+0x10 hit flags, and added inline notes that explain how the signed score is derived. |
+| `103990_sshd_get_sensitive_data_score_in_demote_sensitive_data` | `sshd_recon` | 1 | 2025-11-24 (SR2) – captured the single-hit/three-point heuristic in metadata, added inline comments on the string-ref scan, and renamed the demote_hit/score temps. |
+| `103D50_sshd_get_sensitive_data_score` | `sshd_recon` | 1 | 2025-11-24 (SR2) – rewrote the aggregator AutoDoc, added inline annotations for each heuristic call, and retitled the `score_*` register temps to match the exported C. |
+| `103DB0_sshd_find_monitor_struct` | `sshd_recon` | 1 | 2025-11-24 (SR2) – documented the 10-function vote loop, renamed the candidate/vote cursors, and dropped inline comments describing the counter reuse and ≥5 votes gate. |
+| `105410_sshd_find_sensitive_data` | `sshd_recon` | 1 | 2025-11-24 (SR2) – expanded the libcrypto/bootstrap AutoDoc, renamed every `BVar*/uVar*/p*` temp, and added inline notes for the secret-data breadcrumbs, ENDBR64 check, dual heuristics, and cleanup paths. |
 | `1039C0_check_argument` | `sshd_recon` | 1 | 2025-11-24 (SR3) – renamed the sliding-window temps, expanded the dash/debug AutoDoc, and added inline comments that explain the exit cases. |
 | `103A20_process_is_sshd` | `sshd_recon` | 1 | 2025-11-24 (SR3) – rewrote the stack/argv/env sanity-check AutoDoc, renamed the argv/env cursors, and injected inline notes for each guard. |
 | `107400_sshd_log` | `sshd_recon` | 1 | 2025-11-24 (SR3) – documented the SSE save + va_list rebuild, renamed the scratch regs, and added inline comments for the spill/tail-call points. |
@@ -159,11 +159,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `103FA0_update_got_address` | `loader_rt` | 1 | 2025-11-24 (LR2) – renamed the PLT/disp locals (`tls_get_addr_stub`, `has_long_jump_prefix`, `stub_disp_offset`, `resolved_tls_entry`) and added inline comments covering each branch of the stub disassembly so the GOT math is easy to follow. |
 | `104010_update_got_offset` | `loader_rt` | 1 | 2025-11-24 (LR2) – expanded the AutoDoc/inline note around the `_Llzma_block_buffer_decode_0` write so the GOT baseline refresh is captured in metadata. |
 | `104080_find_link_map_l_name` | `loader_rt` | 1 | 2025-11-24 (LR2) – renamed the link-map trackers (`snapshot_cursor`, `best_runtime_map`, etc.), threaded inline comments through the import resolution, RELRO match, and dual-LEA verification, and synced everything via the pipeline. |
-| `104370_find_dl_naudit` | `loader_rt` | 0 |  |
-| `1045E0_resolve_libc_imports` | `loader_rt` | 0 |  |
-| `104660_process_shared_libraries_map` | `loader_rt` | 0 |  |
-| `104A40_process_shared_libraries` | `loader_rt` | 0 |  |
-| `104AE0_find_link_map_l_audit_any_plt_bitmask` | `loader_rt` | 0 |  |
+| `104370_find_dl_naudit` | `loader_rt` | 1 | 2025-11-24 (LR3) – documented the GLRO literal hunt plus the `_dl_audit_symbind_alt` cross-check, renamed the MOV scan/slot temps, and added inline anchors for the literal search and zeroed-slot adoption. |
+| `1045E0_resolve_libc_imports` | `loader_rt` | 1 | 2025-11-24 (LR3) – expanded the plate around the fake allocator bootstrap, added inline notes for the `elf_parse` sanity check, resolver allocs, and success gate, and synced the locals metadata so the two import slots read clearly. |
+| `104660_process_shared_libraries_map` | `loader_rt` | 1 | 2025-11-24 (LR3) – renamed the SONAME/classifier temps, captured the SONAME hashing + ld.so validation path, and annotated the liblzma hooks-blob carve out plus the libc import resolver hand-off. |
+| `104A40_process_shared_libraries` | `loader_rt` | 1 | 2025-11-24 (LR3) – described the `_r_debug` lookup, scratch-state copy, and success propagation; inline comments now call out the `r_state` guard and the map-walker invocation that keeps the caller’s struct pristine. |
+| `104AE0_find_link_map_l_audit_any_plt_bitmask` | `loader_rt` | 1 | 2025-11-24 (LR3) – documented the LEA/MOV/TEST state machine, renamed the register filters/import stubs, and dropped inline anchors for each scan state plus the single-bit mask validation. |
 | `104EE0_find_link_map_l_audit_any_plt` | `loader_rt` | 0 |  |
 | `1051E0_find_dl_audit_offsets` | `loader_rt` | 0 |  |
 | `105830_backdoor_setup` | `loader_rt` | 0 |  |

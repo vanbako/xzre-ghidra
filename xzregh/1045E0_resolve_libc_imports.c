@@ -5,9 +5,7 @@
 
 
 /*
- * AutoDoc: Treats `link_map *libc` as another ELF image, runs `elf_parse` to populate `elf_info_t`, and then allocates trampolines for
- * `read` and `__errno_location` via the fake allocator shim. Only when both imports succeed does it mark `libc_imports_t` as
- * ready, ensuring subsequent socket I/O helpers can operate without touching the real PLT.
+ * AutoDoc: Treats the runtime libc `link_map` as another ELF image: run `elf_parse`, point the fake allocator at `libc_info`, and resolve `read` plus `__errno_location` through the bootstrap trampolines. Only when both slots land does the helper declare `libc_imports_t` ready so later socket helpers can avoid touching libc’s PLT.
  */
 
 #include "xzre_types.h"
@@ -21,9 +19,11 @@ BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *i
   pfn___errno_location_t errno_stub;
   
   allocator = get_lzma_allocator();
+  // AutoDoc: Sanity-check the live libc mapping before we start allocating trampolines.
   success = elf_parse(*(Elf64_Ehdr **)libc,libc_info);
   if (success != FALSE) {
     allocator->opaque = libc_info;
+    // AutoDoc: The fake allocator doubles as a symbol resolver, so each size constant maps to a libc import.
     read_stub = (pfn_read_t)lzma_alloc(0x308,allocator);
     imports->read = read_stub;
     if (read_stub != (pfn_read_t)0x0) {
@@ -34,6 +34,7 @@ BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *i
     if (errno_stub != (pfn___errno_location_t)0x0) {
       imports->resolved_imports_count = imports->resolved_imports_count + 1;
     }
+    // AutoDoc: Only succeed once both `read` and `__errno_location` landed.
     success = (BOOL)(imports->resolved_imports_count == 2);
   }
   return success;
