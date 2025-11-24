@@ -1443,22 +1443,22 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "original_target",
+        "name": "cpuid_slot_original",
         "original": "lVar1",
         "type": "long"
       },
       {
-        "name": "reloc_consts",
+        "name": "cpuid_patch_consts",
         "original": "puVar2",
         "type": "undefined *"
       },
       {
-        "name": "got_base",
+        "name": "tls_got_base",
         "original": "pvVar3",
         "type": "void *"
       },
       {
-        "name": "got_slot",
+        "name": "cpuid_got_slot",
         "original": "plVar4",
         "type": "long *"
       }
@@ -1482,12 +1482,12 @@
     ],
     "register_temps": [
       {
-        "name": "status",
+        "name": "hooks_init_status",
         "original": "iVar6",
         "type": "int"
       },
       {
-        "name": "setup_success",
+        "name": "stage2_success",
         "original": "BVar7",
         "type": "BOOL"
       },
@@ -1497,12 +1497,12 @@
         "type": "backdoor_shared_globals_t *"
       },
       {
-        "name": "hooks_ctx_ptr",
+        "name": "hooks_ctx_cursor",
         "original": "pbVar10",
         "type": "backdoor_hooks_ctx_t *"
       },
       {
-        "name": "setup_params_ptr",
+        "name": "setup_params_cursor",
         "original": "pbVar11",
         "type": "backdoor_setup_params_t *"
       },
@@ -1517,22 +1517,22 @@
         "type": "undefined4 *"
       },
       {
-        "name": "ebx_val",
+        "name": "cpuid_ebx",
         "original": "uVar3",
         "type": "u32"
       },
       {
-        "name": "ecx_val",
+        "name": "cpuid_ecx",
         "original": "uVar4",
         "type": "u32"
       },
       {
-        "name": "edx_val",
+        "name": "cpuid_edx",
         "original": "uVar5",
         "type": "u32"
       },
       {
-        "name": "clear_idx",
+        "name": "wipe_idx",
         "original": "lVar8",
         "type": "long"
       }
@@ -1569,7 +1569,7 @@
         "type": "EncodedStringId"
       },
       {
-        "name": "bool_result",
+        "name": "probe_success",
         "original": "BVar26",
         "type": "BOOL"
       },
@@ -1579,12 +1579,12 @@
         "type": "u32 *"
       },
       {
-        "name": "audit_ifaces_ptr",
+        "name": "audit_ifaces_zero_cursor",
         "original": "paVar57",
         "type": "audit_ifaces *"
       },
       {
-        "name": "audit_ifaces_ptr",
+        "name": "audit_ifaces_slot_ptr",
         "original": "paVar2",
         "type": "audit_ifaces *"
       },
@@ -1599,97 +1599,97 @@
         "type": "u64 *"
       },
       {
-        "name": "frame_address",
+        "name": "resolver_frame_addr",
         "original": "puVar7",
         "type": "u64 *"
       },
       {
-        "name": "hooks_ctx",
+        "name": "hooks_ctx_ptr",
         "original": "pbVar8",
         "type": "backdoor_hooks_ctx_t *"
       },
       {
-        "name": "hooks_data_addr_ptr",
+        "name": "hooks_data_slot",
         "original": "ppbVar9",
         "type": "backdoor_hooks_data_t **"
       },
       {
-        "name": "signed_data_size",
+        "name": "signed_payload_size",
         "original": "uVar10",
         "type": "u64"
       },
       {
-        "name": "hook_RSA_get0_key",
+        "name": "rsa_get0_key_hook_ptr",
         "original": "ppVar11",
         "type": "pfn_RSA_get0_key_t"
       },
       {
-        "name": "hook_EVP_PKEY_set1_RSA",
+        "name": "evp_set1_rsa_hook_ptr",
         "original": "ppVar12",
         "type": "pfn_EVP_PKEY_set1_RSA_t"
       },
       {
-        "name": "mm_answer_keyverify_fn",
+        "name": "keyverify_hook_entry",
         "original": "psVar13",
         "type": "sshd_monitor_func_t"
       },
       {
-        "name": "sym_get_addr",
+        "name": "sym_resolver",
         "original": "peVar14",
         "type": "elf_symbol_get_addr_fn"
       },
       {
-        "name": "libcrypto_sym_offset",
+        "name": "symbol_rva",
         "original": "EVar15",
         "type": "Elf64_Addr"
       },
       {
-        "name": "libcrypto_ehdr",
+        "name": "symbol_module_ehdr",
         "original": "pEVar16",
         "type": "Elf64_Ehdr *"
       },
       {
-        "name": "sshd_ctx_ptr",
+        "name": "live_sshd_ctx",
         "original": "psVar17",
         "type": "sshd_ctx_t *"
       },
       {
-        "name": "hook_table_bytes",
+        "name": "audit_slot_byte",
         "original": "pbVar18",
         "type": "byte *"
       },
       {
-        "name": "resolved_count_cursor",
+        "name": "cpuid_leaf_ptr",
         "original": "puVar19",
         "type": "u32 *"
       },
       {
-        "name": "resolved_mask0",
+        "name": "cpuid_ebx",
         "original": "uVar20",
         "type": "u32"
       },
       {
-        "name": "resolved_mask1",
+        "name": "cpuid_ecx",
         "original": "uVar21",
         "type": "u32"
       },
       {
-        "name": "resolved_mask2",
+        "name": "cpuid_edx",
         "original": "uVar22",
         "type": "u32"
       },
       {
-        "name": "success_flag",
+        "name": "relr_retry_flag",
         "original": "bVar23",
         "type": "BOOL"
       },
       {
-        "name": "rsa_sign_sym",
+        "name": "rsa_sign_symbol",
         "original": "pEVar42",
         "type": "Elf64_Sym *"
       },
       {
-        "name": "sshd_log_ctx",
+        "name": "sshd_log_ctx_ptr",
         "original": "psVar54",
         "type": "sshd_log_ctx_t *"
       },
@@ -1734,7 +1734,7 @@
         "replacement": "local_9d8.prefix.decoded.modrm.breakdown.modrm_reg"
       },
       {
-        "name": "libcrypto_info",
+        "name": "search_image",
         "original": "peVar31",
         "type": "elf_info_t *"
       },
@@ -1764,32 +1764,32 @@
         "type": "elf_functions_t *"
       },
       {
-        "name": "BN_free_stub",
+        "name": "bn_free_stub",
         "original": "ppVar35",
         "type": "pfn_BN_free_t"
       },
       {
-        "name": "BN_bn2bin_stub",
+        "name": "bn_bn2bin_stub",
         "original": "ppVar38",
         "type": "pfn_BN_bn2bin_t"
       },
       {
-        "name": "bn_dup_sym",
+        "name": "bn_dup_symbol",
         "original": "pEVar39",
         "type": "Elf64_Sym *"
       },
       {
-        "name": "rsa_free_sym",
+        "name": "rsa_free_symbol",
         "original": "pEVar40",
         "type": "Elf64_Sym *"
       },
       {
-        "name": "RSA_set0_key_stub",
+        "name": "rsa_set0_key_stub",
         "original": "ppVar41",
         "type": "pfn_RSA_set0_key_t"
       },
       {
-        "name": "bn_bin2bn_sym",
+        "name": "bn_bin2bn_symbol",
         "original": "pEVar36",
         "type": "Elf64_Sym *"
       },
@@ -1799,32 +1799,22 @@
         "type": "char *"
       },
       {
-        "name": "rsa_sign_sym",
-        "original": "pEVar42",
-        "type": "Elf64_Sym *"
-      },
-      {
-        "name": "hook_table_bytes",
-        "original": "pbVar18",
-        "type": "byte *"
-      },
-      {
         "name": "authprobe_func_end",
         "original": "puVar43",
         "type": "u8 *"
       },
       {
-        "name": "int_ptr",
+        "name": "auth_log_reloc",
         "original": "piVar44",
         "type": "int *"
       },
       {
-        "name": "insn_ctx_cursor",
+        "name": "decode_ctx_cursor",
         "original": "pdVar56",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "sshd_code_end_ptr",
+        "name": "scan_cursor",
         "original": "puVar60",
         "type": "u8 *"
       },
@@ -1839,7 +1829,7 @@
         "type": "imported_funcs_t *"
       },
       {
-        "name": "backdoor_data_cursor",
+        "name": "backdoor_data_zero_cursor",
         "original": "pbVar49",
         "type": "backdoor_data_t *"
       },
@@ -1849,7 +1839,7 @@
         "type": "backdoor_hooks_data_t *"
       },
       {
-        "name": "entry_ctx",
+        "name": "entry_ctx_ptr",
         "original": "peVar50",
         "type": "elf_entry_ctx_t *"
       },
@@ -1859,12 +1849,7 @@
         "type": "global_context_t *"
       },
       {
-        "name": "sshd_code_end_ptr",
-        "original": "puVar60",
-        "type": "u8 *"
-      },
-      {
-        "name": "code_segment",
+        "name": "text_segment",
         "original": "pvVar27",
         "type": "void *"
       },
@@ -1874,17 +1859,17 @@
         "type": "void *"
       },
       {
-        "name": "log_string_slot",
+        "name": "log_literal_slot",
         "original": "uVar4",
         "type": "uint"
       },
       {
-        "name": "resolver_status",
+        "name": "auditstate_snapshot",
         "original": "uVar5",
         "type": "u32"
       },
       {
-        "name": "reg_tmp",
+        "name": "scratch_reg_index",
         "original": "bVar24",
         "type": "u8"
       },
@@ -1894,12 +1879,12 @@
         "type": "long"
       },
       {
-        "name": "reg_lower",
+        "name": "mov_src_reg",
         "original": "uVar58",
         "type": "u8"
       },
       {
-        "name": "reg_upper",
+        "name": "mov_dst_reg",
         "original": "uVar59",
         "type": "u8"
       },
@@ -1914,7 +1899,7 @@
         "type": "int"
       },
       {
-        "name": "zero_seed",
+        "name": "wipe_stride",
         "original": "bVar63",
         "type": "u8"
       }
@@ -3434,12 +3419,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "libname_len",
+        "name": "libcrypto_name_len",
         "original": "uVar1",
         "type": "uint"
       },
       {
-        "name": "libcrypto_info",
+        "name": "target_image",
         "original": "peVar2",
         "type": "elf_info_t *"
       },
@@ -3449,7 +3434,7 @@
         "type": "Elf64_Addr"
       },
       {
-        "name": "libcrypto_ehdr",
+        "name": "symbol_module_ehdr",
         "original": "pEVar4",
         "type": "Elf64_Ehdr *"
       },
@@ -3459,12 +3444,12 @@
         "type": "elf_handles_t *"
       },
       {
-        "name": "libcrypto_name_entry",
+        "name": "l_name_slot_ptr",
         "original": "ppcVar6",
         "type": "char **"
       },
       {
-        "name": "libcrypto_name_bytes",
+        "name": "l_name_src",
         "original": "pcVar7",
         "type": "char *"
       },
@@ -3474,7 +3459,7 @@
         "type": "Elf64_Sym *"
       },
       {
-        "name": "success",
+        "name": "probe_success",
         "original": "BVar8",
         "type": "BOOL"
       },
@@ -3494,32 +3479,32 @@
         "type": "pfn_EVP_CIPHER_CTX_free_t"
       },
       {
-        "name": "allocator",
+        "name": "libcrypto_allocator",
         "original": "allocator",
         "type": "lzma_allocator *"
       },
       {
-        "name": "audit_symbol_vaddr",
+        "name": "audit_symbind_cursor",
         "original": "vaddr",
         "type": "uchar *"
       },
       {
-        "name": "hooks_cursor",
+        "name": "hooks_zero_cursor",
         "original": "pbVar14",
         "type": "backdoor_hooks_data_t *"
       },
       {
-        "name": "copy_idx",
+        "name": "name_copy_idx",
         "original": "lVar13",
         "type": "long"
       },
       {
-        "name": "zero_seed",
+        "name": "wipe_stride",
         "original": "bVar15",
         "type": "byte"
       },
       {
-        "name": "size",
+        "name": "audit_symbol_size",
         "original": "size",
         "type": "u64"
       }
@@ -3825,12 +3810,12 @@
         "type": "instruction_search_ctx_t"
       },
       {
-        "name": "mask_register_filter",
+        "name": "mask_register_bitmap",
         "original": "local_c8",
         "type": "u32"
       },
       {
-        "name": "output_register_filter",
+        "name": "output_register_bitmap",
         "original": "local_c4",
         "type": "u32"
       },
@@ -3840,82 +3825,82 @@
         "type": "libc_imports_t *"
       },
       {
-        "name": "register_mask_snapshot",
+        "name": "mask_filter_snapshot",
         "original": "uVar2",
         "type": "u32"
       },
       {
-        "name": "success",
+        "name": "telemetry_ok",
         "original": "BVar4",
         "type": "BOOL"
       },
       {
-        "name": "write_stub",
+        "name": "write_stub_alloc",
         "original": "ppVar5",
         "type": "pfn_write_t"
       },
       {
-        "name": "pselect_stub",
+        "name": "pselect_stub_alloc",
         "original": "ppVar6",
         "type": "pfn_pselect_t"
       },
       {
-        "name": "lea_target_reg",
+        "name": "l_name_reg_index",
         "original": "uVar8",
         "type": "uchar"
       },
       {
-        "name": "mask_register",
+        "name": "mask_reg_index",
         "original": "uVar13",
         "type": "uchar"
       },
       {
-        "name": "lea_disp",
+        "name": "lea_operand_disp",
         "original": "puVar9",
         "type": "u8 *"
       },
       {
-        "name": "insn_size",
+        "name": "decoded_insn_size",
         "original": "uVar3",
         "type": "u64"
       },
       {
-        "name": "allocator",
+        "name": "libc_allocator",
         "original": "allocator",
         "type": "lzma_allocator *"
       },
       {
-        "name": "zero_ctx_cursor",
+        "name": "insn_ctx_wipe_cursor",
         "original": "pdVar10",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "search_ctx_cursor",
+        "name": "search_ctx_wipe_cursor",
         "original": "piVar11",
         "type": "instruction_search_ctx_t *"
       },
       {
-        "name": "offset_clear_cursor",
+        "name": "offset_wipe_cursor",
         "original": "puVar12",
         "type": "undefined4 *"
       },
       {
-        "name": "zero_seed",
+        "name": "wipe_stride",
         "original": "bVar14",
         "type": "u8"
       },
       {
-        "name": "clear_idx",
+        "name": "wipe_idx",
         "original": "lVar7",
         "type": "long"
       },
       {
-        "name": "audit_cursor",
+        "name": "audit_func_cursor",
         "original": "code_start",
         "type": "dl_audit_symbind_alt_fn"
       },
       {
-        "name": "audit_end",
+        "name": "audit_func_end",
         "original": "code_end",
         "type": "dl_audit_symbind_alt_fn"
       }

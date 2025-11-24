@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `LR4`: reviewed `find_link_map_l_audit_any_plt`, `find_dl_audit_offsets`, `backdoor_setup`, `backdoor_init_stage2`, and `backdoor_init`; renamed the lingering register temps (decoder wipes, libcrypto basename buffer, audit bit toggles, cpuid slot pointers), promoted each AutoDoc to plate+inline form, and dropped new inline anchors for the `_dl_audit_symbind_alt` sweep, ld.so offset hunt, GOT sanity gate, secret_data telemetry, and stage-two cpuid patch.
+- Ran `./scripts/refresh_xzre_project.sh` twice (fixing inline match strings) until `xzregh/`, the locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all reflected the new metadata with no warnings.
+- Next: start session `LR5` (backdoor entry/cpuid helpers + globals) so the remaining loader/runtime exports have the same locals + inline coverage.
+
+## 2025-11-24
 - Session `LR3`: deep-reviewed `find_dl_naudit`, `resolve_libc_imports`, `process_shared_libraries_map`, `process_shared_libraries`, and `find_link_map_l_audit_any_plt_bitmask`; promoted their AutoDocs to plate+inline form, renamed the MOV/slot/SONAME trackers in `metadata/xzre_locals.json`, and added inline anchors for the GLRO literal hunt, libc trampoline allocations, SONAME hashing, `_r_debug` scratch copy, and audit-bit state machine.
 - Ran `./scripts/refresh_xzre_project.sh` (twice while iterating on inline matches) until the regenerated `xzregh/*.c`, locals rename report, and portable archive picked up the new comments without warnings.
 - Next: move on to session `LR4` (audit offsets + stage-two setup) so the remainder of the loader helpers share the same docs/locals coverage.

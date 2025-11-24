@@ -164,11 +164,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `104660_process_shared_libraries_map` | `loader_rt` | 1 | 2025-11-24 (LR3) – renamed the SONAME/classifier temps, captured the SONAME hashing + ld.so validation path, and annotated the liblzma hooks-blob carve out plus the libc import resolver hand-off. |
 | `104A40_process_shared_libraries` | `loader_rt` | 1 | 2025-11-24 (LR3) – described the `_r_debug` lookup, scratch-state copy, and success propagation; inline comments now call out the `r_state` guard and the map-walker invocation that keeps the caller’s struct pristine. |
 | `104AE0_find_link_map_l_audit_any_plt_bitmask` | `loader_rt` | 1 | 2025-11-24 (LR3) – documented the LEA/MOV/TEST state machine, renamed the register filters/import stubs, and dropped inline anchors for each scan state plus the single-bit mask validation. |
-| `104EE0_find_link_map_l_audit_any_plt` | `loader_rt` | 0 |  |
-| `1051E0_find_dl_audit_offsets` | `loader_rt` | 0 |  |
-| `105830_backdoor_setup` | `loader_rt` | 0 |  |
-| `106F30_backdoor_init_stage2` | `loader_rt` | 0 |  |
-| `10A794_backdoor_init` | `loader_rt` | 0 |  |
+| `104EE0_find_link_map_l_audit_any_plt` | `loader_rt` | 1 | 2025-11-24 (LR4) – Named the register bitmaps/LEA cursors, documented the `_dl_audit_symbind_alt` sweep + register filter hand-off, and added inline anchors for the decoder wipe and bitmask dispatch. |
+| `1051E0_find_dl_audit_offsets` | `loader_rt` | 1 | 2025-11-24 (LR4) – Clarified the ld.so audit walk, renamed the libcrypto basename buffer/allocator temps, and added inline comments for the `_dl_audit_symbind_alt` lookup, `find_link_map_l_name` handoff, and libname copy. |
+| `105830_backdoor_setup` | `loader_rt` | 1 | 2025-11-24 (LR4) – Documented the GOT distance gate, shared-libraries walk, ld.so audit patch, sensitive-data/monitor/log discovery, secret_data telemetry, and audit-bit write-back; refreshed the sprawling locals metadata. |
+| `106F30_backdoor_init_stage2` | `loader_rt` | 1 | 2025-11-24 (LR4) – Named the bootstrap scratch cursors, annotated the zeroization loops, retry/fallback flow, and GOT reset, and synced the inline breadcrumbs. |
+| `10A794_backdoor_init` | `loader_rt` | 1 | 2025-11-24 (LR4) – Clarified the GOT bookkeeping/resolver swap, renamed the cpuid slot pointers, and added inline comments covering the relocation math plus the temporary stage-two patch. |
 | `10A720_backdoor_entry` | `loader_rt` | 0 |  |
 | `10A800_get_cpuid_modified` | `loader_rt` | 0 |  |
 | `10A700_cpuid_gcc` | `loader_rt` | 0 |  |
