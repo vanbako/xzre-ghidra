@@ -23,7 +23,33 @@
   "c_strlen": "Tiny strlen implementation that stage two uses before libc is trustworthy. It simply walks the buffer one byte at a time and\nreturns the length as a signed size, allowing other helpers to sanity-check argv/envp strings without resolving libc symbols.",
   "c_strnlen": "Bounded strlen variant used when scanning attacker-controlled buffers. It stops as soon as it sees a NUL or reaches `max_len`,\nreturning the limit unchanged if the string is unterminated so callers can treat that as an error.",
   "chacha_decrypt": "Checks the caller supplied pointers/lengths, verifies that the EVP entries in imported_funcs are non-null\n(contains_null_pointers), allocates an EVP_CIPHER_CTX, and runs EVP_chacha20 through Init/Update/Final. The helper enforces that\nthe final output length never exceeds the input, frees the context on every path, and reports TRUE only when all EVP calls\nsucceed.",
-  "check_argument": "Sanity-checks a dash-prefixed argv entry by sliding a two-byte window across it and immediately returning the current\npointer when either byte is the lowercase letter `d`. `process_is_sshd` treats that non-null result as grounds to abort,\nwhich keeps the implant out of sshd instances started with `-d`, `--debug`, or any argument that embeds a lowercase\ndebug flag. Arguments containing control characters or `=` bail out of the loop without ever tripping the match, so only\nthe specific `-d` style switches are rejected.",
+  "check_argument": {
+    "plate": "Slides a two-byte window across dash-prefixed argv entries and reports the first position whose bytes contain lowercase `d`. `process_is_sshd` treats that non-NULL pointer as proof sshd was launched with `-d`/`--debug`, so the loader stays away from debug-mode daemons. Control bytes, tabs, and `=` terminate the walk early and force a NULL return so only clean switches reach the matcher.",
+    "inline": [
+      {
+        "match": "if (arg_first_char == '-') {",
+        "comment": "Only inspect argv entries that began with `-`; everything else returns NULL immediately."
+      },
+      {
+        "match": "window_chars = \\*\\(ushort \\*\\)arg_name;",
+        "match_type": "regex",
+        "comment": "Load two characters at a time so the loop can compare both bytes without calling strlen()."
+      },
+      {
+        "match": "if ((following_char_word == 0x6400) || (current_char_word == 0x6400))",
+        "comment": "Stop as soon as either byte in the window equals lowercase `d` and return that pointer."
+      },
+      {
+        "match": "if ((((window_chars & 0xdf00) == 0) ||",
+        "match_type": "wildcard",
+        "comment": "Abort the scan when the pair contains control characters, TAB, or `=`—those inputs fall through to NULL."
+      },
+      {
+        "match": "arg_name = (char *)((long)arg_name + 2);",
+        "comment": "Advance by one `ushort` (two more characters) before the next comparison."
+      }
+    ]
+  },
   "check_backdoor_state": "Enforces the payload assembly state machine kept in `global_context_t`: states 1 and 2 require a populated\n`sshd_payload_ctx`, at least 0xae bytes buffered, and a sane body_length lifted from the decrypted header (including\nroom for the 0x60-byte trailer). State 0 insists that the staging buffer stays smaller than 0xae bytes, while state 3/4\naccept only those literal values. Any mismatch resets `payload_state` to 0xffffffff so the caller knows to discard\npartially buffered data.",
   "contains_null_pointers": "Linear check used before invoking crypto helpers. Given an array of pointers and a count, it reports 1 as soon as it encounters\na NULL slot, letting callers bail out if any required import failed to resolve.",
   "count_bits": "Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into\nchild indexes without storing per-node counts.",
@@ -879,7 +905,42 @@
   "mm_answer_keyallowed_hook": "Runs the decrypted payload state machine. It first validates `payload_state`, extracts sshbuf chunks from the monitor\nmessage, and when state==0 it copies the signed header into `payload_data`, decrypts it via `secret_data_get_decrypted`,\nand verifies the Ed448 signature against the cached host key. State 1 and 2 append additional chunks until the\nadvertised body_length is consumed, then state 3 interprets the decrypted command: copying payloads for\nmm_answer_keyverify/mm_answer_authpassword, invoking `sshd_proxy_elevate` to run system/PAM commands, or queueing auth\npayloads. On success it patches the monitor dispatch table to point at the attacker's hooks before tail-calling the\ngenuine `mm_answer_keyallowed`; any failure resets `payload_state` (or even exits sshd) so no partially decrypted data\nis reused.",
   "mm_answer_keyverify_hook": "Pulls the canned monitor reply out of the global payload context and writes it straight to the requesting socket via\n`fd_write()`. If the write succeeds it restores the original mm_answer_keyverify pointer so sshd's dispatcher advances\nas if verification succeeded; if it fails the hook invokes libc's `exit()` to avoid leaving sshd mid-patch. Either way\nit never consults sshd's own logic, short-circuiting the verification phase entirely.",
   "mm_log_handler_hook": "Interposes on sshd's log handler, bailing out entirely when logging has been globally disabled or sshd already dropped\nprivileges back to the sandbox. In filtering mode it scans the formatted string for the `\"Connection closed by ...\n(preauth)\"` pattern, rebuilds a safe replacement message from attacker-provided format strings, and emits it through\n`sshd_log()` while optionally muting syslog via the saved libc pointers. Messages that mention accepted authentication\nevents trigger a second rewrite path so only the sanitised strings ever reach sshd's real logger.",
-  "process_is_sshd": "Replays sshd's argc/argv/envp layout straight off the stack pointer: it checks that argc is sane, argv[0] points above\nthe stack and hashes to `/usr/sbin/sshd`, and every subsequent argv entry lives within 0x4000 bytes of the saved SP.\nEach argument is passed through `check_argument`, and once it reaches envp it enforces that every pointer is either\nstack-resident or located inside sshd's .data segment. Any environment string that matches a known identifier (via\n`get_string_id`) or falls outside those regions terminates the probe so the loader only runs inside real sshd processes.",
+  "process_is_sshd": {
+    "plate": "Walks the argc/argv/envp layout straight off the caller’s stack pointer and only returns TRUE when the process really looks like sshd. It demands a sane argc, an argv[0] pointer that lives on the stack and hashes to `/usr/sbin/sshd`, and then walks argv[1…] ensuring every pointer stays within 0x4000 bytes of the saved SP and never triggers `check_argument`’s debug filter. Once argv terminates, envp entries must either remain stack-resident or fall inside sshd’s writable `.data/.bss` span, and any environment string that maps to a known encoded ID aborts the probe.",
+    "inline": [
+      {
+        "match": "EVar3 = get_string_id((char *)argv_entry,(char *)0x0);",
+        "comment": "Hash argv[0] and insist it decodes to `/usr/sbin/sshd` before scanning any further."
+      },
+      {
+        "match": "while (more_args_to_scan = arg_index != argc, arg_index = arg_index + 1, more_args_to_scan) {",
+        "comment": "Iterate over argv[1..argc-1], checking each pointer range before handing it to the debug filter."
+      },
+      {
+        "match": "if ((argv_entry <= stack_end) || (0x4000 < (ulong)((long)argv_entry - (long)stack_end))) {",
+        "comment": "Stack-relative argv/env pointers must land within 0x4000 bytes of the saved SP; anything else falls through to the `.data` guard."
+      },
+      {
+        "match": "debug_match = check_argument\\(",
+        "match_type": "regex",
+        "comment": "Let the helper spot strings containing lowercase `d` so sshd’s debug modes never reach the hooks."
+      },
+      {
+        "match": "if (*(long *)(stack_end + arg_index * 8) == 0) {",
+        "comment": "Switch to envp processing only after confirming argv was NULL-terminated."
+      },
+      {
+        "match": "data_segment_base = \\(u8 \\*\\)elf_get_data_segment",
+        "match_type": "regex",
+        "comment": "When env pointers leave the stack, demand that they reside inside sshd’s writable `.data/.bss` range."
+      },
+      {
+        "match": "EVar3 = get_string_id\\(\\(char \\*\\)\\*env_cursor,\\(char \\*\\)0x0\\);",
+        "match_type": "regex",
+        "comment": "Known environment keys (non-zero encoded IDs) are treated as hostile and abort the probe immediately."
+      }
+    ]
+  },
   "process_shared_libraries": "Wrapper around `process_shared_libraries_map` that first resolves `r_debug` out of ld.so, copies the caller-provided struct into\na local scratch copy, and feeds the scratch copy into the map-walker. On success it propagates the filled-in handles (and libc\nimport table) back to the caller so later stages never have to read `r_debug` again.",
   "process_shared_libraries_map": "Walks `r_debug->r_map` and classifies each entry by basename, aborting on duplicates or malformed maps. Only after locating sshd\n(the main binary), libcrypto, ld-linux, libsystemd, liblzma, and libc does it parse the ELF images: sshd’s PLT is interrogated\nto recover `RSA_public_decrypt`, `EVP_PKEY_set1_RSA`, and `RSA_get0_key`, liblzma’s RW data segment is recorded so the\n`backdoor_hooks_data_t` blob and `hooks_data_addr` can be cached, libcrypto/libc descriptors are primed for later walkers, and\nlibc’s import table is filled via `resolve_libc_imports`. The result is a fully-populated `backdoor_shared_libraries_data_t` for\ndownstream stages.",
   "resolve_libc_imports": "Treats `link_map *libc` as another ELF image, runs `elf_parse` to populate `elf_info_t`, and then allocates trampolines for\n`read` and `__errno_location` via the fake allocator shim. Only when both imports succeed does it mark `libc_imports_t` as\nready, ensuring subsequent socket I/O helpers can operate without touching the real PLT.",
@@ -1062,7 +1123,34 @@
       }
     ]
   },
-  "sshd_get_client_socket": "Prefers the recovered monitor struct when one is available: it selects monitor->child_to_monitor_fd for DIR_WRITE and\nmonitor->monitor_to_child_fd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and\nreturns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to\n`sshd_get_usable_socket`, letting callers still obtain a socket handle by index.",
+  "sshd_get_client_socket": {
+    "plate": "Prefers sshd’s monitor struct when it has already been located: the helper validates that the pointer is still mapped, selects `child_to_monitor_fd` or `monitor_to_child_fd` based on the requested direction, and probes the descriptor with a zero-length `read()` (retrying on EINTR but rejecting EBADF). If the monitor is missing or the fd is dead it falls back to `sshd_get_usable_socket` and hands back the Nth idle descriptor instead.",
+    "inline": [
+      {
+        "match": "monitor_candidate = *ctx->monitor_struct_slot;",
+        "comment": "Use the recovered monitor struct when one was published through `global_context_t`."
+      },
+      {
+        "match": "monitor_mapped = is_range_mapped\\(",
+        "match_type": "regex",
+        "comment": "Skip the monitor path entirely if the cached pointer is unmapped or stale."
+      },
+      {
+        "match": "if (socket_direction == DIR_WRITE) {",
+        "comment": "DIR_WRITE expects the child→monitor pipe; DIR_READ grabs the monitor→child side."
+      },
+      {
+        "match": "read_result = \\(\\*libc_imports->read\\)",
+        "match_type": "regex",
+        "comment": "Issue a zero-length read to confirm the fd is alive, retrying on EINTR but treating EBADF as fatal."
+      },
+      {
+        "match": "monitor_mapped = sshd_get_usable_socket\\(",
+        "match_type": "regex",
+        "comment": "Fall back to the brute-force fd scanner when the monitor probe failed."
+      }
+    ]
+  },
   "sshd_get_sensitive_data_address_via_krb5ccname": {
     "plate": "Starts from the unique `\"KRB5CCNAME\"` reference, proves that getenv's return value is copied into sshd's `.data/.bss` region with the familiar -0x18 stride, and hands the caller the computed struct base. It tolerates both register-tracking MOV sequences and the LEA/zero-immediate variant OpenSSH uses when the pointer is materialised directly.",
     "inline": [
@@ -1199,8 +1287,49 @@
     ]
   },
   "sshd_get_sshbuf": "Finds the sshbuf inside sshd’s monitor structure that now holds the forged modulus. It dereferences\nglobal_ctx->struct_monitor_ptr_address, uses the packed sshd_offsets to identify the m_pkex pointer and the sshbuf data/size\nfields, and validates any candidate via sshbuf_extract. When offsets are unknown it brute-forces the pkex table: two buffers\nmust decode to “SSH-2.0”/“ssh-2.0” string IDs and the next buffer must look like a negative bignum (sshbuf_bignum_is_negative).\nOnly then does it return the mapped sshbuf->d pointer and length.",
-  "sshd_get_usable_socket": "Runs a brute-force probe across file descriptors 0–63, calling `shutdown(fd, SHUT_RDWR)` on each one and treating\n`EINVAL`/`ENOTCONN` (or a non-zero return) as evidence that the descriptor is open but idle. Every candidate bumps a\ncounter, and when the counter reaches the requested `socket_index` the fd is returned to the caller so implants can\nrecycle sshd's sockets even when the monitor struct is missing.",
-  "sshd_log": "Builds a fresh `va_list` that mirrors sshd's sshlogv() calling convention, saving and restoring the XMM argument\nregisters when the ABI says variadic SSE arguments are present. It then tail-calls the resolved sshlogv pointer stored\nin the logging context so higher-level hooks can format log lines exactly the way sshd expects without resolving libc\nwrappers first.",
+  "sshd_get_usable_socket": {
+    "plate": "Brute-force walks file descriptors 0–63, calling `shutdown(fd, 0x7fffffff)` on each one and interpreting the expected `EINVAL`/`ENOTCONN` errors as proof the descriptor is open (but idle). Every qualifying fd increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd’s sockets even if the monitor struct was never recovered.",
+    "inline": [
+      {
+        "match": "shutdown_status = \\(\\*imports->shutdown\\)\\(sockfd,0x7fffffff\\);",
+        "match_type": "regex",
+        "comment": "Probe each descriptor with an invalid `how` value so active sockets report `EINVAL`/`ENOTCONN`."
+      },
+      {
+        "match": "errno_ptr = \\(\\*imports->__errno_location\\)\\(\\);",
+        "match_type": "regex",
+        "comment": "Sample errno after failures so we can distinguish usable sockets from closed descriptors."
+      },
+      {
+        "match": "if ((*errno_ptr != 0x16) && (*errno_ptr != 0x6b)) goto",
+        "match_type": "wildcard",
+        "comment": "Only descriptors that raise EINVAL or ENOTCONN count as \"usable\"."
+      },
+      {
+        "match": "if (matches_seen == socket_index) {",
+        "comment": "Return the fd once we’ve reached the requested ordinal."
+      }
+    ]
+  },
+  "sshd_log": {
+    "plate": "Mirrors sshd’s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.",
+    "inline": [
+      {
+        "match": "if \\(in_AL != '\\\\0'\\)",
+        "match_type": "regex",
+        "comment": "When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed."
+      },
+      {
+        "match": "va_list_state = &stack0x00000008;",
+        "comment": "Recreate the gp/fp offsets, overflow area, and `va_list` pointer exactly the way sshlogv expects."
+      },
+      {
+        "match": "\\(\\*\\(code \\*\\)log_ctx->sshlogv_impl\\)",
+        "match_type": "regex",
+        "comment": "Tail-call sshd’s real sshlogv() implementation so our wrapper stays transparent."
+      }
+    ]
+  },
   "sshd_patch_variables": "Requires the mm_answer_authpassword hook and metadata to have been recovered, then applies three optional tweaks: force\nPermitRootLogin to the value `3` (\"yes\"), zero out `use_pam` when PAM should be disabled, and replace sshd's monitor\ndispatch table entry with the attacker's authpassword hook. When `monitor_reqtype` isn't explicitly supplied it is\nderived from the original dispatch table so the forged replies stay in lock-step with sshd's state machine.",
   "sshd_proxy_elevate": "Implements the privileged side of the monitor command channel. It validates the supplied RSA components, command flags,\nand libc/import tables; rejects unsupported command types; and decides whether PAM should be disabled or sshd should\nexit outright based on the flag bits. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the\nstack, decrypts and hashes it, emits a forged `MONITOR_REQ_KEYALLOWED` packet (creating temporary BIGNUM/RSA objects\npopulated with the attacker's modulus/exponent), and writes it over the selected monitor socket or the fd discovered via\n`sshd_get_client_socket`. After sending optional sshbuf payloads it drains replies, honours \"wait\" vs \"fire-and-forget\"\nsemantics, and updates the monitor request IDs so sshd's dispatcher believes the forged exchange was legitimate.",
   "update_cpuid_got_index": "Copies the relocation constants baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That value is the\nGOT index of the cpuid resolver inside liblzma, so later code can patch the correct slot without rescanning the PLT stub.",

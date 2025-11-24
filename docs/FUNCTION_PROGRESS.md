@@ -134,11 +134,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `103D50_sshd_get_sensitive_data_score` | `sshd_recon` | 0 |  |
 | `103DB0_sshd_find_monitor_struct` | `sshd_recon` | 0 |  |
 | `105410_sshd_find_sensitive_data` | `sshd_recon` | 0 |  |
-| `1039C0_check_argument` | `sshd_recon` | 0 |  |
-| `103A20_process_is_sshd` | `sshd_recon` | 0 |  |
-| `107400_sshd_log` | `sshd_recon` | 0 |  |
-| `107BC0_sshd_get_usable_socket` | `sshd_recon` | 0 |  |
-| `107C60_sshd_get_client_socket` | `sshd_recon` | 0 |  |
+| `1039C0_check_argument` | `sshd_recon` | 1 | 2025-11-24 (SR3) – renamed the sliding-window temps, expanded the dash/debug AutoDoc, and added inline comments that explain the exit cases. |
+| `103A20_process_is_sshd` | `sshd_recon` | 1 | 2025-11-24 (SR3) – rewrote the stack/argv/env sanity-check AutoDoc, renamed the argv/env cursors, and injected inline notes for each guard. |
+| `107400_sshd_log` | `sshd_recon` | 1 | 2025-11-24 (SR3) – documented the SSE save + va_list rebuild, renamed the scratch regs, and added inline comments for the spill/tail-call points. |
+| `107BC0_sshd_get_usable_socket` | `sshd_recon` | 1 | 2025-11-24 (SR3) – clarified the shutdown(EINVAL/ENOTCONN) probe, renamed the counter/errno scratch, and annotated the match/return logic inline. |
+| `107C60_sshd_get_client_socket` | `sshd_recon` | 1 | 2025-11-24 (SR3) – renamed the monitor/libc pointers, documented the zero-length read probe + fallback, and added inline comments for each branch. |
 | `107D50_sshd_patch_variables` | `sshd_recon` | 0 |  |
 | `107DE0_sshd_configure_log_hook` | `sshd_recon` | 0 |  |
 | `107EA0_check_backdoor_state` | `sshd_recon` | 0 |  |

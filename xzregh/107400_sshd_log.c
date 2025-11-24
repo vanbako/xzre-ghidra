@@ -5,10 +5,7 @@
 
 
 /*
- * AutoDoc: Builds a fresh `va_list` that mirrors sshd's sshlogv() calling convention, saving and restoring the XMM argument
- * registers when the ABI says variadic SSE arguments are present. It then tail-calls the resolved sshlogv pointer stored
- * in the logging context so higher-level hooks can format log lines exactly the way sshd expects without resolving libc
- * wrappers first.
+ * AutoDoc: Mirrors sshd’s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.
  */
 
 #include "xzre_types.h"
@@ -47,6 +44,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   u64 saved_xmm6;
   u64 saved_xmm7;
   
+  // AutoDoc: When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed.
   if (in_AL != '\0') {
     saved_xmm0 = in_XMM0_Qa;
     saved_xmm1 = in_XMM1_Qa;
@@ -58,6 +56,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
     saved_xmm7 = in_XMM7_Qa;
   }
   sse_args_present = 0;
+  // AutoDoc: Recreate the gp/fp offsets, overflow area, and `va_list` pointer exactly the way sshlogv expects.
   va_list_state = &stack0x00000008;
   va_gp_offset = 0x18;
   overflow_arg_area = reg_save_area;
@@ -65,6 +64,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   saved_rcx = in_RCX;
   saved_r8 = in_R8;
   saved_r9 = in_R9;
+  // AutoDoc: Tail-call sshd’s real sshlogv() implementation so our wrapper stays transparent.
   (*(code *)log_ctx->sshlogv_impl)(&sse_args_present,&sse_args_present,0,0,level,0,fmt,&va_gp_offset);
   return;
 }

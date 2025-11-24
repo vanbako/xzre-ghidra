@@ -2064,13 +2064,20 @@
     "source": "xzre/xzre_code/chacha_decrypt.c"
   },
   "check_argument": {
-    "locals": [
+    "register_temps": [
       {
-        "name": "flag_word",
+        "name": "window_chars",
+        "original": "uVar1",
         "type": "u16"
       },
       {
-        "name": "mirrored_word",
+        "name": "following_char_word",
+        "original": "uVar2",
+        "type": "u16"
+      },
+      {
+        "name": "current_char_word",
+        "original": "uVar3",
         "type": "u16"
       }
     ],
@@ -5533,25 +5540,43 @@
     "source": "xzre/xzre.c"
   },
   "process_is_sshd": {
-    "locals": [
+    "locals": [],
+    "register_temps": [
       {
         "name": "argc",
+        "original": "lVar1",
         "type": "long"
       },
       {
-        "name": "argv0",
+        "name": "argv_entry",
+        "original": "puVar2",
         "type": "u8 *"
       },
       {
-        "name": "envp",
+        "name": "debug_match",
+        "original": "pcVar4",
+        "type": "char *"
+      },
+      {
+        "name": "data_segment_base",
+        "original": "puVar5",
+        "type": "u8 *"
+      },
+      {
+        "name": "arg_index",
+        "original": "lVar6",
+        "type": "long"
+      },
+      {
+        "name": "env_cursor",
+        "original": "puVar7",
         "type": "ulong *"
       },
       {
-        "name": "data_segment",
-        "type": "u8 *"
-      }
-    ],
-    "register_temps": [
+        "name": "data_segment_bounds",
+        "original": "local_40",
+        "type": "u64[2]"
+      },
       {
         "name": "more_args_to_scan",
         "original": "bVar8",
@@ -6765,12 +6790,12 @@
         "type": "monitor *"
       },
       {
-        "name": "imports",
+        "name": "libc_imports",
         "original": "plVar4",
         "type": "libc_imports_t *"
       },
       {
-        "name": "range_ok",
+        "name": "monitor_mapped",
         "original": "BVar1",
         "type": "BOOL"
       },
@@ -6785,7 +6810,7 @@
         "type": "int *"
       },
       {
-        "name": "socket_fd",
+        "name": "client_fd",
         "original": "fd",
         "type": "int"
       }
@@ -7163,13 +7188,14 @@
   "sshd_get_usable_socket": {
     "locals": [
       {
-        "name": "sockfd",
+        "name": "fake_errno",
+        "original": "sockfd",
         "type": "int"
       }
     ],
     "register_temps": [
       {
-        "name": "shutdown_result",
+        "name": "shutdown_status",
         "original": "iVar1",
         "type": "int"
       },
@@ -7179,12 +7205,7 @@
         "type": "int *"
       },
       {
-        "name": "candidate_fd",
-        "original": "sockfd_00",
-        "type": "int"
-      },
-      {
-        "name": "usable_index",
+        "name": "matches_seen",
         "original": "iVar3",
         "type": "int"
       }
