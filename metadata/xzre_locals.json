@@ -4290,6 +4290,13 @@
   },
   "get_lzma_allocator": {
     "locals": [],
+    "register_temps": [
+      {
+        "name": "fake_allocator",
+        "original": "pfVar1",
+        "type": "fake_lzma_allocator_t *"
+      }
+    ],
     "source": "xzre/xzre_code/get_lzma_allocator.c"
   },
   "get_lzma_allocator_address": {

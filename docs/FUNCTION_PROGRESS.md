@@ -123,7 +123,7 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `1024F0_get_elf_functions_address` | `elf_mem` | 1 | 2025-11-23 (EL5) – mirrored the relocation-safe pointer math for the helper vtable and annotated the sentinel start plus the 12-slot advance. |
 | `103CE0_main_elf_parse` | `elf_mem` | 1 | 2025-11-23 (EL5) – clarified the ld.so parse, `__libc_stack_end` lookup, sshd verification, and pointer publish with inline comments tied to each step. |
 | `104030_init_elf_entry_ctx` | `elf_mem` | 1 | 2025-11-23 (EL5) – documented every cpuid GOT prep write (random symbol, resolver-frame slot, GOT math, TLS reset) and added inline breadcrumbs for each field assignment. |
-| `104060_get_lzma_allocator` | `elf_mem` | 0 |  |
+| `104060_get_lzma_allocator` | `elf_mem` | 1 | 2025-11-24 (EL6) – wrapped the helper in a `plate+inline` AutoDoc, renamed `pfVar1` to `fake_allocator` via `metadata/xzre_locals.json`, and reran the refresh so the inline comments/locals rewrite landed in `xzregh/104060_get_lzma_allocator.c`. |
 | `102550_sshd_find_main` | `sshd_recon` | 0 |  |
 | `102FF0_sshd_find_monitor_field_addr_in_function` | `sshd_recon` | 0 |  |
 | `103340_sshd_get_sensitive_data_address_via_krb5ccname` | `sshd_recon` | 0 |  |

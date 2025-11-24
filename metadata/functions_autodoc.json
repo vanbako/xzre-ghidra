@@ -737,7 +737,19 @@
       }
     ]
   },
-  "get_lzma_allocator": "Returns the `lzma_allocator` sub-structure embedded inside the fake allocator blob. Callers use it when they need to hand\nliblzma-style callbacks to another routine (e.g., passing an allocator into a liblzma API) while still pointing `opaque` at the\nimplant's `elf_info_t`.",
+  "get_lzma_allocator": {
+    "plate": "Wraps `get_lzma_allocator_address()` so the loader can recover the fake allocator blob at runtime and expose only its embedded `lzma_allocator` callbacks. This lets callers pass liblzma-compatible alloc/free hooks downstream while the surrounding bookkeeping (and `opaque` pointer to the implant's `elf_info_t`) stays hidden.",
+    "inline": [
+      {
+        "match": "fake_allocator = get_lzma_allocator_address();",
+        "comment": "Resolve the relocated fake allocator blob each time; the sentinel math accounts for where the loader staged it."
+      },
+      {
+        "match": "return &fake_allocator->allocator;",
+        "comment": "Publish just the nested liblzma callbacks so outside callers never learn about the rest of the blob."
+      }
+    ]
+  },
   "get_lzma_allocator_address": {
     "plate": "Manual pointer arithmetic that recovers the runtime address of the fake `fake_lzma_allocator_t` blob without requiring relocatable absolute addresses. The compiler emits a sentinel (`fake_lzma_allocator`) followed by padding, so this helper starts at that symbol and steps through the struct 12 times, effectively adding the baked-in 0x160-byte offset that lands on the real allocator instance the loader populated at build time.",
     "inline": [

@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-24
+- Session `EL6`: wrapped `get_lzma_allocator` by promoting its AutoDoc entry to a `plate+inline` block, renaming the lone register temp to `fake_allocator` in `metadata/xzre_locals.json`, and re-running `./scripts/refresh_xzre_project.sh` so the inline comments and locals rewrite landed in `xzregh/104060_get_lzma_allocator.c`, the Ghidra project, and the portable archive (locals rename report stayed clean).
+- Next: pivot into `sshd_recon` session `SR1` now that the ELF helpers are fully documented.
+
 ## 2025-11-23
 - Session `EL5`: tackled `j_tls_get_addr`, the allocator/vtable address helpers, `main_elf_parse`, and `init_elf_entry_ctx`—added the missing `register_temps` entry for the TLS wrapper, promoted each AutoDoc to a `plate+inline` description (covering the sentinel walks, ld.so verification path, and cpuid GOT prep), dropped inline comments into the exported C, and reran `./scripts/refresh_xzre_project.sh` twice (to fix an inline placement) so Ghidra/xzregh/`xzre_ghidra_portable.zip` reflect the new metadata with a clean locals-rename report.
 - Next: close out `elf_mem` with session `EL6` (`get_lzma_allocator`) so every ELF helper has the same locals/inline coverage before pivoting to the sshd discovery batches.
