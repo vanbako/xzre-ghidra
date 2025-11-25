@@ -6220,7 +6220,7 @@
       {
         "name": "cmd_opcode",
         "original": "uVar27",
-        "type": "ulong"
+        "type": "monitor_cmd_type_t"
       },
       {
         "name": "payload_body_offset",
@@ -7598,8 +7598,8 @@
       },
       {
         "name": "cmd_type",
-        "original": "uVar3",
-        "type": "uint"
+        "original": "mVar3",
+        "type": "monitor_cmd_type_t"
       },
       {
         "name": "imports",

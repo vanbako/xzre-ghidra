@@ -42,7 +42,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   uint uVar25;
   u64 sshkey_digest_offset;
   ulong uVar26;
-  ulong cmd_opcode;
+  monitor_cmd_type_t cmd_opcode;
   undefined1 uVar28;
   gid_t rgid;
   uid_t *puVar29;

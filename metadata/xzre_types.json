@@ -1508,6 +1508,13 @@
       "code": "enum CommandFlags3 {\n X_FLAGS3_SOCKET_NUM = 0x1F,\n X_FLAGS3_MONITOR_REQ_VAL = 0x3F\n};"
     },
     {
+      "kind": "enum",
+      "names": [
+        "monitor_cmd_type_t"
+      ],
+      "code": "typedef enum {\n MONITOR_CMD_CONTROL_PLANE = 0, /* Baseline command stream: updates sshd offsets/logging toggles and can stream continuation payloads through the forged monitor socket. */\n MONITOR_CMD_PATCH_VARIABLES = 1, /* Rewrites sshd globals (PermitRootLogin/use_pam/log hooks) before resuming the monitor loop. */\n MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_proxy_elevate to exit afterwards. */\n MONITOR_CMD_PROXY_EXCHANGE = 3 /* Fully populate monitor_data_t and have sshd_proxy_elevate forge a MONITOR_REQ_KEYALLOWED exchange on the chosen socket. */\n} monitor_cmd_type_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "key_ctx_t"
@@ -1519,7 +1526,7 @@
       "names": [
         "monitor_data_t"
       ],
-      "code": "typedef struct __attribute__((packed)) monitor_data {\n u32 cmd_type; /* Attacker-defined opcode (0=NOP,1=patch vars,2=system(),3=proxy monitor exchange). */\n u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */\n cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */\n const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */\n const BIGNUM *rsa_e; /* Public exponent cloned from the staged RSA key. */\n u8 *payload_body; /* Pointer to attacker-controlled monitor payload bytes (sshbuf fragments, serialized RPCs, etc.). */\n u16 payload_body_size; /* Length of payload_body that should be replayed into sshbuf/mm_request_send. */\n u8 payload_size_padding[6]; /* Alignment padding before the RSA* pointer; also reused when the union treats this area as scratch. */\n RSA *rsa; /* RSA handle supplied by OpenSSL; reused when emitting forged monitor packets. */\n} monitor_data_t;"
+      "code": "typedef struct __attribute__((packed)) monitor_data {\n monitor_cmd_type_t cmd_type; /* Attacker-defined opcode describing how sshd_proxy_elevate should respond (control-plane updates, sshd variable patches, system() exec, or forged monitor exchanges). */\n u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */\n cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */\n const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */\n const BIGNUM *rsa_e; /* Public exponent cloned from the staged RSA key. */\n u8 *payload_body; /* Pointer to attacker-controlled monitor payload bytes (sshbuf fragments, serialized RPCs, etc.). */\n u16 payload_body_size; /* Length of payload_body that should be replayed into sshbuf/mm_request_send. */\n u8 payload_size_padding[6]; /* Alignment padding before the RSA* pointer; also reused when the union treats this area as scratch. */\n RSA *rsa; /* RSA handle supplied by OpenSSL; reused when emitting forged monitor packets. */\n} monitor_data_t;"
     },
     {
       "kind": "union",
