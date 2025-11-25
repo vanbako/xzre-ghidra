@@ -5183,6 +5183,26 @@
         "type": "char *"
       },
       {
+        "name": "word_cursor",
+        "original": "puVar10",
+        "type": "uint *"
+      },
+      {
+        "name": "fragment_src",
+        "original": "pcVar9",
+        "type": "char *"
+      },
+      {
+        "name": "fragment_dst",
+        "original": "pcVar11",
+        "type": "char *"
+      },
+      {
+        "name": "fragment_bytes_remaining",
+        "original": "uVar8",
+        "type": "ulong"
+      },
+      {
         "name": "host_fragment_start",
         "original": "pcVar12",
         "type": "char *"
@@ -5211,6 +5231,16 @@
         "name": "zero_seed",
         "original": "bVar16",
         "type": "u8"
+      },
+      {
+        "name": "scratch_idx",
+        "original": "lVar7",
+        "type": "long"
+      },
+      {
+        "name": "prefix_copy_idx",
+        "original": "lVar6",
+        "type": "long"
       },
       {
         "original": "local_238._2_6_",

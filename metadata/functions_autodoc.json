@@ -1767,28 +1767,56 @@
     ]
   },
   "mm_log_handler_hook": {
-    "plate": "Interposes on sshd's log handler, bailing out entirely when logging has been globally disabled or sshd already dropped\nprivileges back to the sandbox. In filtering mode it scans the formatted string for the `\"Connection closed by ...\n(preauth)\"` pattern, rebuilds a safe replacement message from attacker-provided format strings, and emits it through\n`sshd_log()` while optionally muting syslog via the saved libc pointers. Messages that mention accepted authentication\nevents trigger a second rewrite path so only the sanitised strings ever reach sshd's real logger.",
+    "plate": "Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses\nrequests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to\ncapture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal\n`\"Connection closed by ... (preauth)\"` it replays the line via `sshd_log(log_ctx_state, level, \"%s\", msg)` after forcing\nsyslog into mask `0xff` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook\nharvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,\nand rebuilds `\"Connection closed by ... (preauth)\"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both\nrewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's\noriginal mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.",
     "inline": [
       {
         "match": "if (log_ctx_state->log_squelched == TRUE) {",
-        "comment": "Respect the payload\u2019s \"logging disabled\" flag\u2014once set, every log request immediately bails."
+        "comment": "Respect the `log_squelched` gate: each log request is rewritten at most once before the hook bails out."
+      },
+      {
+        "match": "if (*(int *)(global_ctx + 0x90) != 0) {",
+        "comment": "Stop filtering altogether once the loader flagged logging as disabled (for example after sshd drops back to the sandbox)."
+      },
+      {
+        "match": "if ((log_ctx_state->saved_log_handler != (log_handler_fn)0x0) &&",
+        "comment": "Do not intercept logs unless setup captured both the handler and ctx pointers; otherwise keep sshd's slot untouched."
+      },
+      {
+        "match": "if (string_id == STR_Connection_closed_by) break;",
+        "comment": "Slide across the message until the canned \"Connection closed by\" literal appears; those lines trigger the fast pass-through path."
       },
       {
         "match": "if ((string_id == STR_Accepted_password_for) || (string_id == STR_Accepted_publickey_for)) {",
-        "comment": "Track log lines announcing a successful authentication so the hook can harvest the username/host fragments for rewriting."
+        "comment": "Successful authentication lines enter the rewrite path so we can harvest their username/host fragments."
+      },
+      {
+        "match": "if (string_id == STR_ssh2) {",
+        "comment": "The trailing \" ssh2\" token marks the end of the host fragment; copy it into the scratch buffer once seen."
+      },
+      {
+        "match": "else if (string_id == STR_from) {",
+        "comment": "The \" from \" delimiter finalises the username fragment and records the start of the host string."
       },
       {
         "match": "if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&",
         "match_type": "wildcard",
-        "comment": "Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd\u2019s own handler stays quiet while we inject a sanitized line."
+        "comment": "Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line."
+      },
+      {
+        "match": "sshd_log(log_ctx_state,level,(char *)&prefix_chunk0,msg);",
+        "comment": "Replay already sanitised \"Connection closed\" lines through `sshd_log(log_ctx_state, level, \"%s\", msg)` so syslog stays muted."
       },
       {
         "match": "if ((user_fragment_len != 0) && (host_fragment_len != 0)) {",
-        "comment": "Only rebuild the \"Connection closed by \u2026 (preauth)\" string once both the username and host fragments were captured."
+        "comment": "Only rebuild the \"Connection closed by ... (preauth)\" string after both fragments were captured and bounded."
+      },
+      {
+        "match": "sshd_log(log_ctx_state,SYSLOG_LEVEL_INFO,(char *)&prefix_chunk0,&user_fragment_chunk0,&filtered_host_chunk0);",
+        "comment": "Emit the forged disconnect message with the cached user/host fragments so sshd sees only the redacted string."
       },
       {
         "match": "(**(code **)(libc_imports + 0x58))(0x80000000);",
-        "comment": "Restore sshd\u2019s original syslog mask after the sanitized message has been emitted."
+        "comment": "Restore sshd's original syslog mask after the sanitized message has been emitted."
       }
     ]
   },
