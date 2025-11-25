@@ -7637,6 +7637,11 @@
         "type": "BOOL"
       },
       {
+        "name": "frame_len_be",
+        "original": "uVar11",
+        "type": "uint"
+      },
+      {
         "name": "status",
         "original": "iVar12",
         "type": "int"
@@ -7712,9 +7717,49 @@
         "type": "u64"
       },
       {
+        "name": "frame_scratch_iter",
+        "original": "puVar23",
+        "type": "uint *"
+      },
+      {
+        "name": "signature_word_cursor",
+        "original": "puVar24",
+        "type": "ulong *"
+      },
+      {
+        "name": "sshbuf_cursor",
+        "original": "psVar25",
+        "type": "sshbuf *"
+      },
+      {
         "name": "request_words",
         "original": "puVar26",
         "type": "uint *"
+      },
+      {
+        "name": "rsa_words_cursor",
+        "original": "puVar27",
+        "type": "uint *"
+      },
+      {
+        "name": "hash_zero_cursor",
+        "original": "puVar28",
+        "type": "uchar *"
+      },
+      {
+        "name": "frame_copy_cursor",
+        "original": "puVar29",
+        "type": "uint *"
+      },
+      {
+        "name": "sshbuf_size_cursor",
+        "original": "psVar30",
+        "type": "size_t *"
+      },
+      {
+        "name": "payload_copy_cursor",
+        "original": "puVar31",
+        "type": "u8 *"
       },
       {
         "name": "rsa_alg_name",
@@ -7735,6 +7780,11 @@
         "name": "digest_idx",
         "original": "lVar34",
         "type": "long"
+      },
+      {
+        "name": "zero_stride_flag",
+        "original": "bVar35",
+        "type": "byte"
       },
       {
         "original": "local_e40._1_7_",

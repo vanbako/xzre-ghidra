@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-25
+- Session `SR4` revisit: reviewed `sshd_proxy_elevate`, renamed the lingering register temps (frame_scratch_iter, signature_word_cursor, sshbuf_size_cursor, zero_stride_flag, etc.) inside `metadata/xzre_locals.json`, and refreshed the AutoDoc/inline coverage to document the PermitRootLogin/PAM toggles, stack-hash hunt, secret-data unwrap, on-stack ChaCha decrypt, sshbuf continuation handling, and wait/drain logic directly in the exported C.
+- Ran `./scripts/refresh_xzre_project.sh` multiple times while fixing inline match strings; the final pass finished cleanly (inline comments present, locals rename report still green, `ghidra_projects/xzre_ghidra_portable.zip` updated) and `docs/FUNCTION_PROGRESS.md` now records the second pass over this function.
+- Next: keep tightening the SR4 backlog by propagating the new KEYALLOWED/monitor-frame insights into the neighbouring command-channel docs (e.g., `run_backdoor_commands`, struct notes) or pivot to the struct tracker once the remaining SR4 entries are refreshed.
+
+## 2025-11-25
 - Session `CC6`: introduced a dedicated `monitor_cmd_type_t` enum (control-plane, patch, system exec, proxy exchange) in `metadata/xzre_types.json`, retagged `monitor_data_t.cmd_type`, and updated the `sshd_proxy_elevate`/`run_backdoor_commands` register-temporary metadata so both decompilations now show the typed enum instead of raw integers.
 - Ran `./scripts/refresh_xzre_project.sh` twice (the second pass picked up the renamed `cmd_type` register) so `xzregh/*.c`, the locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all carry the new enum + metadata wiring.
 - Next: consider propagating the new enum names into the rest of the command-channel docs (`docs/backdoor_functionality.md`, inline AutoDoc excerpts) so future opcode analysis references the shared constants.

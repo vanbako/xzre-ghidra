@@ -2737,15 +2737,32 @@
     ]
   },
   "sshd_proxy_elevate": {
-    "plate": "Implements the privileged side of the monitor command channel. It validates the supplied RSA components, command flags,\nand libc/import tables; rejects unsupported command types; and decides whether PAM should be disabled or sshd should\nexit outright based on the flag bits. For KEYALLOWED-style payloads it hunts for the staged ChaCha-wrapped blob on the\nstack, decrypts and hashes it, emits a forged `MONITOR_REQ_KEYALLOWED` packet (creating temporary BIGNUM/RSA objects\npopulated with the attacker's modulus/exponent), and writes it over the selected monitor socket or the fd discovered via\n`sshd_get_client_socket`. After sending optional sshbuf payloads it drains replies, honours \"wait\" vs \"fire-and-forget\"\nsemantics, and updates the monitor request IDs so sshd's dispatcher believes the forged exchange was legitimate.",
+    "plate": "Implements the privileged half of the monitor command channel. It sanity-checks every pointer/import vector, enforces that\nKEYALLOWED support is present before privileged commands run, and toggles sshd's PermitRootLogin/PAM globals according\nto the request flags. For PROXY_EXCHANGE control frames lacking both monitor-flag bits it walks the stack for the staged\nChaCha header, verifies the SHA-256 digest, unwraps the secret-data key/nonce, and decrypts the pending payload in place.\nIt then clears the monitor frame buffers, serialises the attacker's modulus/exponent, signs the request, and streams it over\nwhichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,\n\"wait\" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.",
     "inline": [
       {
         "match": "if (sshd_ctx->have_mm_answer_keyallowed == FALSE) {",
         "comment": "Before the mm hooks land, only the minimal control-plane commands are accepted; anything needing KEYALLOWED is rejected."
       },
       {
-        "match": "if ((args->cmd_type == 3) && (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {",
+        "match": "*sshd_ctx->permit_root_login_ptr = 3;",
+        "comment": "Force sshd to treat PermitRootLogin as \"forced backdoor\" so the dispatcher never downgrades privileges."
+      },
+      {
+        "match": "*sshd_ctx->use_pam_ptr = 0;",
+        "comment": "Control-flag bit 0x40 disables PAM outright so the forged monitor exchange bypasses any auth stack."
+      },
+      {
+        "match": "if ((args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE) &&",
         "comment": "PRIV/EXIT payloads hunt the stack for the staged ChaCha blob, verify its hash, and decrypt it in place before forging the monitor request."
+      },
+      {
+        "match": "success = secret_data_get_decrypted((u8 *)netlen_tmp,ctx);",
+        "comment": "Once the header digest matches, fetch the ChaCha key/nonce from secret_data so the staged payload can be reused."
+      },
+      {
+        "match": "success = chacha_decrypt((u8 *)request_words",
+        "match_type": "wildcard",
+        "comment": "Decrypt the blob directly on the victim stack so the cleartext monitor arguments are ready for serialization."
       },
       {
         "match": "success = bignum_serialize(monitor_req_payload + payload_remaining,payload_room,&serialized_chunk_len,rsa_components[digest_idx],imports);",
@@ -2760,8 +2777,7 @@
         "comment": "Without an explicit socket override, call `sshd_get_client_socket`; otherwise honour the encoded socket selector bits."
       },
       {
-        "match": "if ((cmd_type == 0) || ((cmd_type == 3 && ((cmd_args->request_flags & 0x20) != 0)))) {",
-        "match_type": "wildcard",
+        "match": "if ((cmd_type == MONITOR_CMD_CONTROL_PLANE) ||",
         "comment": "COMMAND payloads (and explicit KEYALLOWED continuations) borrow an sshbuf so extra ciphertext can follow the forged frame."
       },
       {
