@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Convenience wrapper used by the secret-data descriptor tables: when the supplied index is non-zero it simply calls
- * secret_data_append_singleton with the provided code pointer and cursor, otherwise it treats the entry as disabled and reports
- * FALSE so the batch runner can bail out early.
+ * AutoDoc: Descriptor helper that optionally skips work. Index 0 entries represent disabled slots and immediately return FALSE so the
+ * batch walker can abort; any other index calls `secret_data_append_singleton` with the supplied cursor/code tuple.
  */
 
 #include "xzre_types.h"
@@ -17,12 +16,14 @@ BOOL secret_data_append_item
                int index,u8 *code)
 
 {
-  BOOL success;
+  BOOL appended;
   
+  // AutoDoc: Treat a non-zero descriptor index as active by forwarding the work to the singleton helper.
   if (index != 0) {
-    success = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
-    return success;
+    appended = secret_data_append_singleton(code,code,shift_cursor,shift_count,operation_index);
+    return appended;
   }
+  // AutoDoc: Disabled entries short-circuit the caller so the batch can stop trying to append bits for this slot.
   return FALSE;
 }
 

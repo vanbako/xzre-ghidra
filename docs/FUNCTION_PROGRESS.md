@@ -194,11 +194,11 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `10A2D0_hook_EVP_PKEY_set1_RSA` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – added locals coverage for the do_orig/status temps, documented the shim’s role, and dropped inline anchors for the pointer gate and tail-call. |
 | `10A330_hook_RSA_get0_key` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – renamed the do_orig stub, captured the pointer gate, and documented how the hook feeds every modulus/exponent request into run_backdoor_commands. |
 | `10A860_count_bits` | `crypto_cmd` | 1 | 2025-11-24 (CC3) – converted the entry to plate+inline form and added the Wegner-loop inline comment so the popcount helper is self-explanatory. |
-| `10A880_get_string_id` | `crypto_cmd` | 0 |  |
-| `10A990_secret_data_append_from_instruction` | `crypto_cmd` | 0 |  |
-| `10AA00_secret_data_append_from_code` | `crypto_cmd` | 0 |  |
-| `10AAC0_secret_data_append_singleton` | `crypto_cmd` | 0 |  |
-| `10AB70_secret_data_append_item` | `crypto_cmd` | 0 |  |
+| `10A880_get_string_id` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the trie locals (`child_entry`, `child_rank`, etc.), documented the secret-data logging gate, bitmap rank/select math, and the signed child-delta walk directly in the exported C. |
+| `10A990_secret_data_append_from_instruction` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the cursor/opcode temps, captured the 0x1c8-bit guard + opcode mask inline, and documented how each decoded instruction flips the packed secret-data bit before advancing the cursor. |
+| `10AA00_secret_data_append_from_code` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the decoder scratch (`ctx_wipe_cursor`, `cursor_work`, `bits_appended`), added inline anchors for the CALL fast-forward, reg-to-reg scan, and cursor advance, and refreshed the AutoDoc around the shift_count contract. |
+| `10AAC0_secret_data_append_singleton` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the singleton guard temps, documented the `global_ctx->shift_operations` byte, find_function bounds lookup, and `call_site`-driven scan before recording the global bit count. |
+| `10AB70_secret_data_append_item` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – clarified the descriptor gate so index 0 entries short-circuit, and inlined the singleton delegation path used by active slots. |
 | `10AB90_secret_data_append_from_address` | `crypto_cmd` | 0 |  |
 | `10ABC0_secret_data_append_from_call_site` | `crypto_cmd` | 0 |  |
 | `10ABE0_secret_data_append_items` | `crypto_cmd` | 0 |  |

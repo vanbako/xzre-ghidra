@@ -2,6 +2,11 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-25
+- Session `CC4`: deep-reviewed `get_string_id` plus the secret-data append helpers (`secret_data_append_from_instruction`, `_from_code`, `_singleton`, `_item`); renamed their register temps (`child_entry`/`child_rank`, `bit_slot`, `ctx_wipe_cursor`, `cursor_work`, `shared_ctx_addr`, etc.) in `metadata/xzre_locals.json`, and promoted each AutoDoc entry to plate+inline form so the trie bitmap math, opcode filters, CALL-skipping sweep, singleton guard bytes, and descriptor short-circuit behaviour are documented directly in `xzregh/*.c`.
+- Ran `./scripts/refresh_xzre_project.sh` once the metadata settled; the regenerated Ghidra project, `xzregh/10A88*`/`10A99*`/`10AA*`/`10AB70` sources, locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all updated cleanly with the new inline comments and names.
+- Next: close out the crypto batch with session `CC5` (the address/call-site append helpers) so every secret-data builder shares the same locals and inline documentation before circling back to the remaining backlog items.
+
 ## 2025-11-24
 - Session `CC3`: deep-reviewed `run_backdoor_commands`, the RSA hook wrappers, and `count_bits`; renamed the do-orig/control flag temps via `metadata/xzre_locals.json`, converted their AutoDocs to plate+inline form, and added inline anchors covering the opcode dispatch (log/PAM toggles, socket plumbing, sshd_proxy_elevate) plus the hook short-circuit/wrap behaviour so the exported C explains how the dispatcher decides when to fall back to OpenSSL.
 - Ran `./scripts/refresh_xzre_project.sh` twice while fixing inline match strings; the final pass refreshed `xzregh/`, the portable archive, and the locals rename report with no warnings.

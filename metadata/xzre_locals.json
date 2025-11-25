@@ -4330,62 +4330,62 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "node_entry",
+        "name": "child_entry",
         "original": "puVar1",
         "type": "ushort *"
       },
       {
-        "name": "bit_index",
+        "name": "bit_cursor",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "child_flags",
+        "name": "bitmap_delta",
         "original": "uVar3",
         "type": "ushort"
       },
       {
-        "name": "child_offset",
+        "name": "child_row_delta",
         "original": "uVar4",
         "type": "ushort"
       },
       {
-        "name": "logged",
+        "name": "logged_probe",
         "original": "BVar5",
         "type": "BOOL"
       },
       {
-        "name": "bitmap_rank",
+        "name": "child_rank",
         "original": "uVar6",
         "type": "uint"
       },
       {
-        "name": "ch",
+        "name": "current_char",
         "original": "bVar7",
         "type": "byte"
       },
       {
-        "name": "node_flags",
+        "name": "child_header",
         "original": "uVar8",
         "type": "ushort"
       },
       {
-        "name": "bitmap_row",
+        "name": "bitmap_pair",
         "original": "puVar9",
         "type": "ulong *"
       },
       {
-        "name": "scan_limit",
+        "name": "max_scan",
         "original": "pbVar10",
         "type": "byte *"
       },
       {
-        "name": "trie_cursor",
+        "name": "trie_row_offset",
         "original": "lVar11",
         "type": "long"
       },
       {
-        "name": "bitmap_word",
+        "name": "candidate_bits",
         "original": "uVar12",
         "type": "ulong"
       }
@@ -6136,32 +6136,32 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "success",
+        "name": "found_instruction",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "i",
+        "name": "wipe_index",
         "original": "lVar2",
         "type": "long"
       },
       {
-        "name": "ctx_cursor",
+        "name": "ctx_wipe_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "appended",
+        "name": "bits_appended",
         "original": "uVar4",
         "type": "ulong"
       },
       {
-        "name": "cursor_copy",
+        "name": "cursor_work",
         "original": "local_9c",
         "type": "secret_data_shift_cursor_t[3]"
       },
       {
-        "name": "scan_ctx",
+        "name": "decoder_ctx",
         "original": "local_90",
         "type": "dasm_ctx_t"
       }
@@ -6172,17 +6172,17 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "secret_byte",
+        "name": "bit_slot",
         "original": "pbVar1",
         "type": "byte *"
       },
       {
-        "name": "cursor_index",
+        "name": "bit_index",
         "original": "uVar2",
         "type": "uint"
       },
       {
-        "name": "opcode",
+        "name": "decoded_opcode",
         "original": "iVar3",
         "type": "int"
       }
@@ -6193,7 +6193,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "success",
+        "name": "appended",
         "original": "BVar1",
         "type": "BOOL"
       }
@@ -6229,18 +6229,18 @@
   "secret_data_append_singleton": {
     "locals": [
       {
-        "name": "func_start",
+        "name": "function_start",
         "type": "void *"
       }
     ],
     "register_temps": [
       {
-        "name": "ctx_addr",
+        "name": "shared_ctx_addr",
         "original": "lVar1",
         "type": "long"
       },
       {
-        "name": "success",
+        "name": "append_ok",
         "original": "BVar2",
         "type": "BOOL"
       }

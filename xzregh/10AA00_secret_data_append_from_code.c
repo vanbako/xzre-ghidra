@@ -5,10 +5,10 @@
 
 
 /*
- * AutoDoc: Sweeps a code range and feeds instructions to secret_data_append_from_instruction. When start_from_call is TRUE it first finds
- * the next CALL via find_call_instruction, then loops up to shift_count times, each time calling find_reg2reg_instruction to
- * locate a qualifying instruction and shifting the supplied cursor. Returning FALSE means it could not find enough instructions in
- * the provided span.
+ * AutoDoc: Disassembler helper that emits a contiguous run of attestation bits. It zeroes a scratch `dasm_ctx_t`, optionally hops to the
+ * instruction after the next CALL, and then keeps calling `find_reg2reg_instruction` until `shift_count` hits have been turned into
+ * bits through `secret_data_append_from_instruction`. Returning FALSE means the code range ran out before the requested number of
+ * instructions were found.
  */
 
 #include "xzre_types.h"
@@ -18,45 +18,51 @@ BOOL secret_data_append_from_code
                uint shift_count,BOOL start_from_call)
 
 {
-  BOOL success;
-  long i;
-  dasm_ctx_t *ctx_cursor;
-  ulong appended;
-  secret_data_shift_cursor_t cursor_copy[3];
-  dasm_ctx_t scan_ctx;
+  BOOL found_instruction;
+  long wipe_index;
+  dasm_ctx_t *ctx_wipe_cursor;
+  ulong bits_appended;
+  secret_data_shift_cursor_t cursor_work[3];
+  dasm_ctx_t decoder_ctx;
   
-  ctx_cursor = &scan_ctx;
-  for (i = 0x16; i != 0; i = i + -1) {
-    *(undefined4 *)&ctx_cursor->instruction = 0;
-    ctx_cursor = (dasm_ctx_t *)((long)&ctx_cursor->instruction + 4);
+  ctx_wipe_cursor = &decoder_ctx;
+  // AutoDoc: Blank the decoder context so each pass starts with predictable instruction/size windows.
+  for (wipe_index = 0x16; wipe_index != 0; wipe_index = wipe_index + -1) {
+    *(undefined4 *)&ctx_wipe_cursor->instruction = 0;
+    ctx_wipe_cursor = (dasm_ctx_t *)((long)&ctx_wipe_cursor->instruction + 4);
   }
-  cursor_copy[0] = shift_cursor;
+  cursor_work[0] = shift_cursor;
+  // AutoDoc: When the descriptor points at a call site, fast-forward to the first instruction after the next CALL before collecting bits.
   if (start_from_call != FALSE) {
-    success = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&scan_ctx);
-    if (success == FALSE) {
+    found_instruction = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&decoder_ctx);
+    if (found_instruction == FALSE) {
       return FALSE;
     }
-    code_start = scan_ctx.instruction + scan_ctx.instruction_size;
+    // AutoDoc: Bump the start pointer past the consumed instruction so the next search resumes immediately afterward.
+    code_start = decoder_ctx.instruction + decoder_ctx.instruction_size;
   }
-  appended = 0;
+  bits_appended = 0;
   do {
-    success = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&scan_ctx);
-    if (success == FALSE) {
+    // AutoDoc: Search the provided span for the next instruction that matches the reg-to-reg filter; failure exits early.
+    found_instruction = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&decoder_ctx);
+    if (found_instruction == FALSE) {
 LAB_0010aa80:
-      return (uint)(shift_count == (uint)appended);
+      return (uint)(shift_count == (uint)bits_appended);
     }
-    if (appended == shift_count) {
-      if (shift_count < (uint)appended) {
+    // AutoDoc: As soon as we have emitted `shift_count` bits, stop scanning and report success.
+    if (bits_appended == shift_count) {
+      if (shift_count < (uint)bits_appended) {
         return FALSE;
       }
       goto LAB_0010aa80;
     }
-    appended = appended + 1;
-    success = secret_data_append_from_instruction(&scan_ctx,cursor_copy);
-    if (success == FALSE) {
+    bits_appended = bits_appended + 1;
+    // AutoDoc: Append a single bit using the decoded instruction; any error bubbles up to the singleton gate.
+    found_instruction = secret_data_append_from_instruction(&decoder_ctx,cursor_work);
+    if (found_instruction == FALSE) {
       return FALSE;
     }
-    code_start = scan_ctx.instruction + scan_ctx.instruction_size;
+    code_start = decoder_ctx.instruction + decoder_ctx.instruction_size;
   } while( TRUE );
 }
 

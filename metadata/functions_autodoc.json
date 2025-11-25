@@ -1369,7 +1369,44 @@
       }
     ]
   },
-  "get_string_id": "Maps runtime strings to EncodedStringId identifiers without shipping plaintext literals. Each call logs itself via\nsecret_data_append_from_address, clamps the scan to 0x2c bytes, and walks two packed bitmaps (_Lcrc64_clmul_1+0x760 and the\nstring_action_data trie) while repeatedly calling count_bits to compute the next child index. It returns the encoded ID when it\nreaches a terminal node or 0 when the bytes miss the trie, and is used to find SSH banner strings during sshd heuristics.",
+  "get_string_id": {
+    "plate": "Trie walker that maps printable strings to `EncodedStringId` values without ever storing plaintext literals. Each lookup logs\nitself through `secret_data_append_from_address`, caps the scan at 0x2c bytes (or a caller-supplied string_end), and walks the packed\n`string_mask_data`/`string_action_data` tables. Every byte selects one half of the bitmap pair, uses `count_bits` to compute its rank,\nand looks up a two-word node entry whose flags either return the encoded ID or supply signed deltas that descend to the next bitmap row.\nMissing bits or non-printable characters immediately bail with ID 0.",
+    "inline": [
+      {
+        "match": "logged_probe = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0xa,8,1);",
+        "comment": "Record the string probe in the shift log so the attestation data captures which lookups touched the trie."
+      },
+      {
+        "match": "max_scan = (byte *)(string_begin + 0x2c);",
+        "comment": "Clamp the walk to 0x2c bytes and shrink it further when the caller hands us an explicit upper bound."
+      },
+      {
+        "match": "for (; (string_begin <= max_scan && (current_char = *string_begin, -1 < (char)current_char));",
+        "comment": "Advance through printable ASCII until either the cap or a negative/NUL byte terminates the search."
+      },
+      {
+        "match": "if (current_char < 0x40) {",
+        "comment": "Split the bitmap pair at 0x40\u2014low bytes test the first 64-bit word, while high bytes subtract 0x40 and add the popcount of the first half."
+      },
+      {
+        "match": "while( TRUE ) {",
+        "occurrence": 1,
+        "comment": "Scan the bitmap word until the desired bit index surfaces so the accumulated rank matches the child slot we need."
+      },
+      {
+        "match": "if ((child_header & 4) != 0) {",
+        "comment": "Flag 0x4 marks a terminal node, so the stored `child_row_delta` doubles as the EncodedStringId return value."
+      },
+      {
+        "match": "trie_row_offset = trie_row_offset + (short)(child_row_delta - 4);",
+        "comment": "Use the remaining flag bits as signed deltas that hop to the next packed row inside `string_action_data`."
+      },
+      {
+        "match": "bitmap_pair = (ulong *)((long)bitmap_pair + (long)(short)(bitmap_delta - 0x10));",
+        "comment": "Mirror the same signed delta math on the bitmap cursor so the next iteration reads the correct mask pair."
+      }
+    ]
+  },
   "get_tls_get_addr_random_symbol_got_offset": {
     "plate": "Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the relocation constants that stand in for the fake `__tls_get_addr`\nsymbol embedded in liblzma. The helper writes the sentinel GOT index (0x2600) into the context, mirrors `elf_functions_offset` into both\nits return value and the GOT base, and hands those numbers to `update_got_address`, which replays the PLT stub to find the concrete GOT entry.",
     "inline": [
@@ -1932,11 +1969,103 @@
   },
   "secret_data_append_from_address": "Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller\u2019s return address,\notherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to\nsecret_data_append_singleton.",
   "secret_data_append_from_call_site": "Shortcut used directly inside hooks: it grabs the caller\u2019s return address (unaff_retaddr), runs secret_data_append_singleton\nwith it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.",
-  "secret_data_append_from_code": "Sweeps a code range and feeds instructions to secret_data_append_from_instruction. When start_from_call is TRUE it first finds\nthe next CALL via find_call_instruction, then loops up to shift_count times, each time calling find_reg2reg_instruction to\nlocate a qualifying instruction and shifting the supplied cursor. Returning FALSE means it could not find enough instructions in\nthe provided span.",
-  "secret_data_append_from_instruction": "Sets the next bit inside global_ctx->secret_data based on a decoded instruction. The cursor enforces the 0x1C8-bit ceiling,\nskips certain opcodes (0x109, 0xBB, and entries in the precomputed 0x83\u20130xB1 mask), and otherwise locates the byte/bit inside\nthe secret_data array and ORs it in before advancing the cursor.",
-  "secret_data_append_item": "Convenience wrapper used by the secret-data descriptor tables: when the supplied index is non-zero it simply calls\nsecret_data_append_singleton with the provided code pointer and cursor, otherwise it treats the entry as disabled and reports\nFALSE so the batch runner can bail out early.",
+  "secret_data_append_from_code": {
+    "plate": "Disassembler helper that emits a contiguous run of attestation bits. It zeroes a scratch `dasm_ctx_t`, optionally hops to the\ninstruction after the next CALL, and then keeps calling `find_reg2reg_instruction` until `shift_count` hits have been turned into\nbits through `secret_data_append_from_instruction`. Returning FALSE means the code range ran out before the requested number of\ninstructions were found.",
+    "inline": [
+      {
+        "match": "for (wipe_index = 0x16; wipe_index != 0; wipe_index = wipe_index + -1) {",
+        "comment": "Blank the decoder context so each pass starts with predictable instruction/size windows."
+      },
+      {
+        "match": "if (start_from_call != FALSE) {",
+        "comment": "When the descriptor points at a call site, fast-forward to the first instruction after the next CALL before collecting bits."
+      },
+      {
+        "match": "found_instruction = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&decoder_ctx);",
+        "comment": "Search the provided span for the next instruction that matches the reg-to-reg filter; failure exits early."
+      },
+      {
+        "match": "if (bits_appended == shift_count) {",
+        "comment": "As soon as we have emitted `shift_count` bits, stop scanning and report success."
+      },
+      {
+        "match": "found_instruction = secret_data_append_from_instruction(&decoder_ctx,cursor_work);",
+        "comment": "Append a single bit using the decoded instruction; any error bubbles up to the singleton gate."
+      },
+      {
+        "match": "code_start = decoder_ctx.instruction + decoder_ctx.instruction_size;",
+        "comment": "Bump the start pointer past the consumed instruction so the next search resumes immediately afterward."
+      }
+    ]
+  },
+  "secret_data_append_from_instruction": {
+    "plate": "Writes a single attestation bit using the opcode selected by `find_reg2reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, peeks the canonical opcode from `dctx->opcode_window`, skips CALL/MOV identities\nplus the masked opcode table, and otherwise maps the cursor into `global_ctx->secret_data` before ORing the bit. The cursor is\nincremented regardless of whether a bit was set so the caller stays in sync.",
+    "inline": [
+      {
+        "match": "bit_index = cursor->bit_position;",
+        "comment": "Read the next attestation slot that this decode pass should fill."
+      },
+      {
+        "match": "if (bit_index < 0x1c8) {",
+        "comment": "Stop writing once the 0x1c8-bit budget is exhausted; callers still advance the cursor to keep later scans aligned."
+      },
+      {
+        "match": "decoded_opcode = *(int *)(dctx->opcode_window + 3);",
+        "comment": "Grab the canonical opcode byte from the sliding decode window."
+      },
+      {
+        "match": "if (((decoded_opcode != 0x109) && (decoded_opcode != 0xbb)) &&",
+        "comment": "Skip CALL (0x109), MOV imm64 (0xbb), and opcodes masked out by the 0x83\u20130xb1 bit table so noise does not pollute the log."
+      },
+      {
+        "match": "*bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));",
+        "comment": "Translate the global bit index into the packed secret_data array and set the corresponding bit."
+      },
+      {
+        "match": "cursor->bit_position = bit_index + 1;",
+        "comment": "Advance the cursor even when the opcode filter skipped a write so future calls keep counting forward."
+      }
+    ]
+  },
+  "secret_data_append_item": {
+    "plate": "Descriptor helper that optionally skips work. Index 0 entries represent disabled slots and immediately return FALSE so the\nbatch walker can abort; any other index calls `secret_data_append_singleton` with the supplied cursor/code tuple.",
+    "inline": [
+      {
+        "match": "if (index != 0) {",
+        "comment": "Treat a non-zero descriptor index as active by forwarding the work to the singleton helper."
+      },
+      {
+        "match": "return FALSE;",
+        "comment": "Disabled entries short-circuit the caller so the batch can stop trying to append bits for this slot."
+      }
+    ]
+  },
   "secret_data_append_items": "Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,\ncalls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the\nfirst failure so callers know whether the entire batch completed.",
-  "secret_data_append_singleton": "Guarantees each attestation slot runs at most once. It uses the per-operation byte array inside global_ctx->shift_operations to\nguard entry, resolves the function boundaries with find_function relative to the recorded sshd code limits, invokes\nsecret_data_append_from_code (starting after the call site if present), and increments global_ctx->num_shifted_bits by\nshift_count on success.",
+  "secret_data_append_singleton": {
+    "plate": "One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the\n`global_ctx->shift_operations[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text\nlimits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
+    "inline": [
+      {
+        "match": "if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\\0')) {",
+        "comment": "Skip the work when the loader never published `global_ctx` or when this slot already emitted its bits."
+      },
+      {
+        "match": "*(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
+        "comment": "Mark the shift-operation byte so later invocations bail immediately."
+      },
+      {
+        "match": "append_ok = find_function(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),",
+        "comment": "Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`."
+      },
+      {
+        "match": "append_ok = secret_data_append_from_code",
+        "comment": "Feed the resolved range to the instruction walker; when `call_site` is NULL we ask it to locate the next CALL before scanning."
+      },
+      {
+        "match": "*(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;",
+        "comment": "Keep the aggregate `num_shifted_bits` counter in sync so policy helpers can see how many attestation bits landed."
+      }
+    ]
+  },
   "secret_data_get_decrypted": {
     "plate": "Unwraps the 0x39-byte `ctx->secret_data` blob using two ChaCha passes routed through the resolver’s EVP imports. First it zeroes the\nstack copies of the seed/IV buffers, patches the baked-in `key_buf` header, and decrypts a 0x30-byte seed chunk with the static\nkey/IV stored beside the function. That seed is treated as the runtime ChaCha key for a second decrypt that finally emits the\nplaintext secret into the caller buffer, proving no portable crypto ships with the implant.",
     "inline": [

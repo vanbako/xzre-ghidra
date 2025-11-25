@@ -5,10 +5,10 @@
 
 
 /*
- * AutoDoc: Guarantees each attestation slot runs at most once. It uses the per-operation byte array inside global_ctx->shift_operations to
- * guard entry, resolves the function boundaries with find_function relative to the recorded sshd code limits, invokes
- * secret_data_append_from_code (starting after the call site if present), and increments global_ctx->num_shifted_bits by
- * shift_count on success.
+ * AutoDoc: One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the
+ * `global_ctx->shift_operations[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text
+ * limits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were
+ * emitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.
  */
 
 #include "xzre_types.h"
@@ -18,31 +18,36 @@ BOOL secret_data_append_singleton
                uint operation_index)
 
 {
-  long ctx_addr;
-  BOOL success;
-  void *func_start;
+  long shared_ctx_addr;
+  BOOL append_ok;
+  void *function_start;
   
-  ctx_addr = global_ctx;
-  func_start = (void *)0x0;
+  shared_ctx_addr = global_ctx;
+  function_start = (void *)0x0;
+  // AutoDoc: Skip the work when the loader never published `global_ctx` or when this slot already emitted its bits.
   if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\0')) {
 LAB_0010ab60:
-    success = TRUE;
+    append_ok = TRUE;
   }
   else {
+    // AutoDoc: Mark the shift-operation byte so later invocations bail immediately.
     *(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;
-    success = find_function(code,&func_start,(void **)0x0,*(u8 **)(ctx_addr + 0x80),
-                          *(u8 **)(ctx_addr + 0x88),FIND_NOP);
-    if (success != FALSE) {
-      success = secret_data_append_from_code
-                        (func_start,*(void **)(global_ctx + 0x88),shift_cursor,shift_count,
+    // AutoDoc: Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`.
+    append_ok = find_function(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),
+                          *(u8 **)(shared_ctx_addr + 0x88),FIND_NOP);
+    if (append_ok != FALSE) {
+      // AutoDoc: Feed the resolved range to the instruction walker; when `call_site` is NULL we ask it to locate the next CALL before scanning.
+      append_ok = secret_data_append_from_code
+                        (function_start,*(void **)(global_ctx + 0x88),shift_cursor,shift_count,
                          (uint)(call_site == (u8 *)0x0));
-      if (success != FALSE) {
+      if (append_ok != FALSE) {
+        // AutoDoc: Keep the aggregate `num_shifted_bits` counter in sync so policy helpers can see how many attestation bits landed.
         *(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;
         goto LAB_0010ab60;
       }
     }
-    success = FALSE;
+    append_ok = FALSE;
   }
-  return success;
+  return append_ok;
 }
 
