@@ -5,9 +5,10 @@
 
 
 /*
- * AutoDoc: Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,
- * calls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the
- * first failure so callers know whether the entire batch completed.
+ * AutoDoc: Batch driver for `secret_data_item_t` descriptors. It walks the array in order, stamping a monotonically increasing slot index
+ * onto entries whose `ordinal` is still zero, and dispatches the provided appender for whichever descriptor already carries an ordinal.
+ * Each callback receives a 1-based array index alongside the cursor/operation/code tuple, and any failure terminates the walk so
+ * callers can bail out without partially populating the log.
  */
 
 #include "xzre_types.h"
@@ -16,29 +17,35 @@ BOOL secret_data_append_items
                (secret_data_item_t *items,u64 items_count,secret_data_appender_fn appender)
 
 {
-  BOOL success;
-  secret_data_item_t *item;
-  u32 slot_index;
+  BOOL append_ok;
+  secret_data_item_t *descriptor;
+  u32 ordinal_cursor;
   uint index;
-  ulong item_index;
+  ulong items_cursor;
   
-  slot_index = 0;
-  item_index = 0;
+  ordinal_cursor = 0;
+  items_cursor = 0;
   while( TRUE ) {
     while( TRUE ) {
-      if (items_count <= item_index) {
+      // AutoDoc: Report success once we’ve scanned every descriptor without the appender signalling a failure.
+      if (items_count <= items_cursor) {
         return TRUE;
       }
-      index = (int)item_index + 1;
-      item = items + item_index;
-      item_index = (ulong)index;
-      if (item->ordinal != 0) break;
-      item->ordinal = slot_index;
+      // AutoDoc: Keep a 1-based ordinal for the callback; `secret_data_append_item` treats index 0 as “disabled descriptor”.
+      index = (int)items_cursor + 1;
+      descriptor = items + items_cursor;
+      items_cursor = (ulong)index;
+      // AutoDoc: Skip dormant entries by assigning the next slot number until we hit one that already has a published ordinal.
+      if (descriptor->ordinal != 0) break;
+      descriptor->ordinal = ordinal_cursor;
     }
-    success = (*appender)((secret_data_shift_cursor_t)(item->bit_cursor).bit_position,
-                        item->operation_slot,item->bits_to_shift,index,item->anchor_pc);
-    if (success == FALSE) break;
-    slot_index = slot_index + 1;
+    // AutoDoc: Invoke the per-descriptor appender with the recorded cursor/op-slot/bits tuple plus the array index.
+    append_ok = (*appender)((secret_data_shift_cursor_t)(descriptor->bit_cursor).bit_position,
+                        descriptor->operation_slot,descriptor->bits_to_shift,index,descriptor->anchor_pc);
+    // AutoDoc: Abort the batch immediately so callers know the attestation set is incomplete.
+    if (append_ok == FALSE) break;
+    // AutoDoc: Advance the slot so the next dormant entry we encounter gets a new ordinal.
+    ordinal_cursor = ordinal_cursor + 1;
   }
   return FALSE;
 }

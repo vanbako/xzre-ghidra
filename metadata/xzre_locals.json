@@ -6099,17 +6099,17 @@
     ],
     "register_temps": [
       {
-        "name": "success",
+        "name": "append_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "resolved_code",
+        "name": "code_pointer",
         "original": "code_00",
         "type": "u8 *"
       },
       {
-        "name": "return_address",
+        "name": "caller_return_address",
         "original": "code",
         "type": "u8 *"
       }
@@ -6120,12 +6120,12 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "success",
+        "name": "append_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "return_address",
+        "name": "caller_return_address",
         "original": "unaff_retaddr",
         "type": "u8 *"
       }
@@ -6204,22 +6204,22 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "success",
+        "name": "append_ok",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "item",
+        "name": "descriptor",
         "original": "psVar2",
         "type": "secret_data_item_t *"
       },
       {
-        "name": "slot_index",
+        "name": "ordinal_cursor",
         "original": "uVar3",
         "type": "u32"
       },
       {
-        "name": "item_index",
+        "name": "items_cursor",
         "original": "uVar4",
         "type": "ulong"
       }

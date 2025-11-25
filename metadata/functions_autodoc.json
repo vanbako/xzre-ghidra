@@ -1967,8 +1967,36 @@
       }
     ]
   },
-  "secret_data_append_from_address": "Lets hooks fingerprint themselves without a static code pointer. If addr is NULL/1 it substitutes the caller\u2019s return address,\notherwise it uses the explicit address, and in either case it forwards both the call site and the resolved code pointer to\nsecret_data_append_singleton.",
-  "secret_data_append_from_call_site": "Shortcut used directly inside hooks: it grabs the caller\u2019s return address (unaff_retaddr), runs secret_data_append_singleton\nwith it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.",
+  "secret_data_append_from_address": {
+    "plate": "Lets hooks fingerprint themselves without burning static code pointers. Callers pass either an explicit `addr` or the\nsentinel values NULL/1 when they want the helper to capture their own return address. The helper normalizes that pointer,\nforwards the sentinel call-site value plus the resolved code pointer to `secret_data_append_singleton`, and reports success\nonly when the singleton accepted the descriptor.",
+    "inline": [
+      {
+        "match": "if (addr < (void *)0x2) {",
+        "comment": "Treat NULL/1 as \u201cuse the caller\u2019s RET\u201d so instrumentation sites can re-use the same helper without threading their own code pointer."
+      },
+      {
+        "match": "append_ok = secret_data_append_singleton((u8 *)addr,code_pointer,shift_cursor,shift_count,operation_index);",
+        "comment": "Forward both the sentinel call-site value and whichever code pointer we settled on into the singleton helper."
+      },
+      {
+        "match": "return (BOOL)(0 < (int)append_ok);",
+        "comment": "Normalize the singleton\u2019s BOOL so callers only see TRUE once the descriptor actually registered."
+      }
+    ]
+  },
+  "secret_data_append_from_call_site": {
+    "plate": "Convenience wrapper used directly inside hooks that only need to log their own call site. It copies Ghidra\u2019s\n`unaff_retaddr` pseudo-variable into the code pointer slot, forces a NULL `call_site` so the singleton walks from the next CALL,\nand lets callers OR in a bypass flag when the attestation failure should not abort the enclosing logic.",
+    "inline": [
+      {
+        "match": "append_ok = secret_data_append_singleton",
+        "comment": "Pass NULL for `call_site` so `secret_data_append_singleton` starts scanning after the caller; the RET address doubles as the code pointer."
+      },
+      {
+        "match": "return append_ok | bypass;",
+        "comment": "Let instrumentation sites opt out when they already satisfied their policy (or the log slot) even if the append failed."
+      }
+    ]
+  },
   "secret_data_append_from_code": {
     "plate": "Disassembler helper that emits a contiguous run of attestation bits. It zeroes a scratch `dasm_ctx_t`, optionally hops to the\ninstruction after the next CALL, and then keeps calling `find_reg2reg_instruction` until `shift_count` hits have been turned into\nbits through `secret_data_append_from_instruction`. Returning FALSE means the code range ran out before the requested number of\ninstructions were found.",
     "inline": [
@@ -2040,7 +2068,35 @@
       }
     ]
   },
-  "secret_data_append_items": "Batch driver for arrays of secret_data_item_t. It assigns sequential indexes to entries that have not been initialised yet,\ncalls the provided appender for each descriptor (passing the 1-based ordinal and the recorded code pointer), and stops at the\nfirst failure so callers know whether the entire batch completed.",
+  "secret_data_append_items": {
+    "plate": "Batch driver for `secret_data_item_t` descriptors. It walks the array in order, stamping a monotonically increasing slot index\nonto entries whose `ordinal` is still zero, and dispatches the provided appender for whichever descriptor already carries an ordinal.\nEach callback receives a 1-based array index alongside the cursor/operation/code tuple, and any failure terminates the walk so\ncallers can bail out without partially populating the log.",
+    "inline": [
+      {
+        "match": "if (items_count <= items_cursor) {",
+        "comment": "Report success once we\u2019ve scanned every descriptor without the appender signalling a failure."
+      },
+      {
+        "match": "index = (int)items_cursor + 1;",
+        "comment": "Keep a 1-based ordinal for the callback; `secret_data_append_item` treats index 0 as \u201cdisabled descriptor\u201d."
+      },
+      {
+        "match": "if (descriptor->ordinal != 0) break;",
+        "comment": "Skip dormant entries by assigning the next slot number until we hit one that already has a published ordinal."
+      },
+      {
+        "match": "append_ok = (*appender)",
+        "comment": "Invoke the per-descriptor appender with the recorded cursor/op-slot/bits tuple plus the array index."
+      },
+      {
+        "match": "if (append_ok == FALSE) break;",
+        "comment": "Abort the batch immediately so callers know the attestation set is incomplete."
+      },
+      {
+        "match": "ordinal_cursor = ordinal_cursor + 1;",
+        "comment": "Advance the slot so the next dormant entry we encounter gets a new ordinal."
+      }
+    ]
+  },
   "secret_data_append_singleton": {
     "plate": "One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the\n`global_ctx->shift_operations[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text\nlimits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
     "inline": [

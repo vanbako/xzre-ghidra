@@ -199,6 +199,6 @@ Update this table whenever you finish a session. Keep the latest pass at the top
 | `10AA00_secret_data_append_from_code` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the decoder scratch (`ctx_wipe_cursor`, `cursor_work`, `bits_appended`), added inline anchors for the CALL fast-forward, reg-to-reg scan, and cursor advance, and refreshed the AutoDoc around the shift_count contract. |
 | `10AAC0_secret_data_append_singleton` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – renamed the singleton guard temps, documented the `global_ctx->shift_operations` byte, find_function bounds lookup, and `call_site`-driven scan before recording the global bit count. |
 | `10AB70_secret_data_append_item` | `crypto_cmd` | 1 | 2025-11-25 (CC4) – clarified the descriptor gate so index 0 entries short-circuit, and inlined the singleton delegation path used by active slots. |
-| `10AB90_secret_data_append_from_address` | `crypto_cmd` | 0 |  |
-| `10ABC0_secret_data_append_from_call_site` | `crypto_cmd` | 0 |  |
-| `10ABE0_secret_data_append_items` | `crypto_cmd` | 0 |  |
+| `10AB90_secret_data_append_from_address` | `crypto_cmd` | 1 | 2025-11-25 (CC5) – documented the NULL/1 sentinel path, renamed the call-site/code-pointer temps, and added inline comments covering the singleton hop plus boolean normalization. |
+| `10ABC0_secret_data_append_from_call_site` | `crypto_cmd` | 1 | 2025-11-25 (CC5) – clarified how unaff_retaddr feeds the singleton helper, renamed the temps, and annotated the forced NULL call_site + bypass OR logic. |
+| `10ABE0_secret_data_append_items` | `crypto_cmd` | 1 | 2025-11-25 (CC5) – renamed the descriptor/ordinal cursors, refreshed the plate to describe the nested scan, and threaded inline comments through each branch of the batch walker. |

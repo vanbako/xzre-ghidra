@@ -5,8 +5,9 @@
 
 
 /*
- * AutoDoc: Shortcut used directly inside hooks: it grabs the caller’s return address (unaff_retaddr), runs secret_data_append_singleton
- * with it, and ORs the result with the supplied bypass flag so instrumentation sites can opt out when the attestation fails.
+ * AutoDoc: Convenience wrapper used directly inside hooks that only need to log their own call site. It copies Ghidra’s
+ * `unaff_retaddr` pseudo-variable into the code pointer slot, forces a NULL `call_site` so the singleton walks from the next CALL,
+ * and lets callers OR in a bypass flag when the attestation failure should not abort the enclosing logic.
  */
 
 #include "xzre_types.h"
@@ -16,11 +17,13 @@ BOOL secret_data_append_from_call_site
                BOOL bypass)
 
 {
-  BOOL success;
-  u8 *return_address;
+  BOOL append_ok;
+  u8 *caller_return_address;
   
-  success = secret_data_append_singleton
-                    ((u8 *)0x0,return_address,shift_cursor,shift_count,operation_index);
-  return success | bypass;
+  // AutoDoc: Pass NULL for `call_site` so `secret_data_append_singleton` starts scanning after the caller; the RET address doubles as the code pointer.
+  append_ok = secret_data_append_singleton
+                    ((u8 *)0x0,caller_return_address,shift_cursor,shift_count,operation_index);
+  // AutoDoc: Let instrumentation sites opt out when they already satisfied their policy (or the log slot) even if the append failed.
+  return append_ok | bypass;
 }
 
