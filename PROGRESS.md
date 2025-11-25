@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-25
+- Session `SR2` follow-up: revisited `sshd_find_sensitive_data`, renamed the lingering digest/libcrypto/segment temps via `metadata/xzre_locals.json`, expanded its plate text, and added inline comments for the secret-data batch zeroization, `.data` span capture, CET-aware `find_function` bounds, and candidate-selection threshold.
+- Ran `./scripts/refresh_xzre_project.sh` after editing the metadata so the regenerated `xzregh/105410_sshd_find_sensitive_data.c`, the headless project, locals rename report, and portable archive all include the new names/comments.
+- Next: continue tightening the sshd recon batch (e.g., revisit `sshd_get_sensitive_data_score` for the scoring threshold docs) once higher-priority struct work is complete.
+
+## 2025-11-25
 - Session `SR3` follow-up: revisited `process_is_sshd`, renamed the lingering `EVar3`/`.data` padding temps via `metadata/xzre_locals.json`, expanded its plate text, and added inline comments covering the stack_end guard, argv count filter, envp NULL rejection, and `.bss` padding headroom rule.
 - Ran `./scripts/refresh_xzre_project.sh` after the metadata edits so `xzregh/103A20_process_is_sshd.c`, the headless project, the locals rename report, and the portable archive absorbed the new names/comments.
 - Next: keep iterating on the SR3 backlog (e.g., mirror the new env/stack guard inline detail into the neighbouring sshd recon helpers) or pivot to the struct tracker if that becomes higher priority.

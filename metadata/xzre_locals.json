@@ -6673,6 +6673,26 @@
     "locals": [],
     "register_temps": [
       {
+        "name": "digest_verify_addr",
+        "original": "EVar1",
+        "type": "Elf64_Addr"
+      },
+      {
+        "name": "libcrypto_header",
+        "original": "pEVar2",
+        "type": "Elf64_Ehdr *"
+      },
+      {
+        "name": "code_segment_span",
+        "original": "uVar3",
+        "type": "u64"
+      },
+      {
+        "name": "data_segment_span",
+        "original": "uVar4",
+        "type": "u64"
+      },
+      {
         "name": "allocator",
         "original": "allocator_00",
         "type": "lzma_allocator *"

