@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-25
+- Session `CC3` revisit: tightened `run_backdoor_commands` by renaming the stack payload buffer/hostkey locals (`payload_plaintext_size`, `payload_plaintext`, `hostkey_idx`, `pselect_result`, `bytes_read`) and adding inline anchors for the PAM disable bit, system-exec opcode, monitor kill switch, and continuation chunk streaming path.
+- Ran `./scripts/refresh_xzre_project.sh` twice to land the metadata (first pass flushed out a stale inline match; second pass was clean after updating the substring) so `xzregh/1094A0_run_backdoor_commands.c`, the locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all carry the new comments/names.
+- Next: keep iterating on the CC batch by codifying the remaining command-channel helpers (e.g., sanity-check `run_backdoor_commands_data_t` overlays or hop to the struct tracker once the dispatcher work stabilizes).
+
+## 2025-11-25
 - Session `SR4` revisit: reviewed `sshd_proxy_elevate`, renamed the lingering register temps (frame_scratch_iter, signature_word_cursor, sshbuf_size_cursor, zero_stride_flag, etc.) inside `metadata/xzre_locals.json`, and refreshed the AutoDoc/inline coverage to document the PermitRootLogin/PAM toggles, stack-hash hunt, secret-data unwrap, on-stack ChaCha decrypt, sshbuf continuation handling, and wait/drain logic directly in the exported C.
 - Ran `./scripts/refresh_xzre_project.sh` multiple times while fixing inline match strings; the final pass finished cleanly (inline comments present, locals rename report still green, `ghidra_projects/xzre_ghidra_portable.zip` updated) and `docs/FUNCTION_PROGRESS.md` now records the second pass over this function.
 - Next: keep tightening the SR4 backlog by propagating the new KEYALLOWED/monitor-frame insights into the neighbouring command-channel docs (e.g., `run_backdoor_commands`, struct notes) or pivot to the struct tracker once the remaining SR4 entries are refreshed.

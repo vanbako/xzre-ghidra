@@ -2029,6 +2029,22 @@
       {
         "match": "(*exit_fn)(0);",
         "comment": "Bit0 doubles as a kill switch: on fatal parse/signature errors the hook calls libc exit(0) instead of handing control back to OpenSSL."
+      },
+      {
+        "match": "if ((control_flags & 0x40) != 0) {",
+        "comment": "Control-flag bit 6 disables PAM by zeroing sshd_ctx->use_pam_ptr whenever the caller wants password auth rejected regardless of sshd\u2019s config."
+      },
+      {
+        "match": "else if (iVar15 == 2) {",
+        "comment": "Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system()."
+      },
+      {
+        "match": "(payload_plaintext[1] & 0xc0) == 0xc0",
+        "comment": "When the monitor flags carry the 0xC0 pattern the dispatcher sleeps for five seconds and exits sshd immediately, giving the operator a clean kill-switch path."
+      },
+      {
+        "match": "if (ed448_raw_key != (u8 *)0x0) {",
+        "comment": "Continuation chunks land here: copy the decrypted bytes into ctx->payload_buffer, extend payload_bytes_buffered, and re-verify the Ed448 signature before treating the chunk as another control-plane payload."
       }
     ]
   },
