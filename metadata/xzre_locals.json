@@ -5612,12 +5612,17 @@
         "type": "u8 *"
       },
       {
+        "name": "string_id",
+        "original": "EVar3",
+        "type": "EncodedStringId"
+      },
+      {
         "name": "debug_match",
         "original": "pcVar4",
         "type": "char *"
       },
       {
-        "name": "data_segment_base",
+        "name": "bss_padding_base",
         "original": "puVar5",
         "type": "u8 *"
       },
@@ -5629,10 +5634,10 @@
       {
         "name": "env_cursor",
         "original": "puVar7",
-        "type": "ulong *"
+        "type": "char **"
       },
       {
-        "name": "data_segment_bounds",
+        "name": "bss_padding_bytes",
         "original": "local_40",
         "type": "u64[2]"
       },

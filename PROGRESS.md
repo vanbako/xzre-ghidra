@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-25
+- Session `SR3` follow-up: revisited `process_is_sshd`, renamed the lingering `EVar3`/`.data` padding temps via `metadata/xzre_locals.json`, expanded its plate text, and added inline comments covering the stack_end guard, argv count filter, envp NULL rejection, and `.bss` padding headroom rule.
+- Ran `./scripts/refresh_xzre_project.sh` after the metadata edits so `xzregh/103A20_process_is_sshd.c`, the headless project, the locals rename report, and the portable archive absorbed the new names/comments.
+- Next: keep iterating on the SR3 backlog (e.g., mirror the new env/stack guard inline detail into the neighbouring sshd recon helpers) or pivot to the struct tracker if that becomes higher priority.
+
+## 2025-11-25
 - Session `CC5`: documented `secret_data_append_from_address`, `_from_call_site`, and `_items`; renamed their lingering register temps (`code_pointer`, `caller_return_address`, `descriptor`, `ordinal_cursor`, etc.) in `metadata/xzre_locals.json`, and promoted each AutoDoc to plate+inline form so the sentinel handling, unaff_retaddr hop, and batch walker semantics read clearly inside `xzregh/10AB9*/10ABC0/10ABE0`.
 - Ran `./scripts/refresh_xzre_project.sh` twice to land the new inline match strings; the second pass finished cleanly (inline comments present, locals rename report still green, portable archive refreshed) after the initial substring tweaks.
 - Next: with the crypto_cmd batch completed, pivot to the struct tracker (e.g., `sshd_payload_ctx_t` in `docs/STRUCT_PROGRESS.md`) unless another function session takes priority.
