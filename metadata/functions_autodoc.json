@@ -99,7 +99,7 @@
     ]
   },
   "backdoor_setup": {
-    "plate": "Loader workhorse that performs every runtime retrofit. It snapshots the resolver frame/GOT, zeros a local\n`backdoor_data_t`, parses `_r_debug` via `process_shared_libraries`, hydrates the shared globals + hooks blob from liblzma,\nrefreshes the string-reference catalogue, seeds sshd/log contexts, resolves the libcrypto/ld.so imports (including the\n`_dl_audit*` tables), runs the sensitive-data and monitor discovery heuristics, locks down the sshlogv handlers, and streams the\nresulting hook addresses into `secret_data`. On success it flips the audit-state bits, installs the symbind trampoline, and\nrestores the saved lzma allocator; any failure resets the ld.so ctx and lets glibc\u2019s cpuid bookkeeping continue untouched.",
+    "plate": "Loader workhorse that performs every runtime retrofit. After confirming the resolver-frame/cpuid GOT distance it zeroes a stack `backdoor_data_t`, parses `_r_debug` with `main_elf_parse` + `process_shared_libraries`, snaps the active liblzma allocator, and repopulates the hooks blob/shared globals from liblzma. It refreshes sshd string references, dissects the mm_request/mm_answer ranges to locate the auth-log format, PAM flag, and PermitRootLogin toggles, runs the sensitive-data + monitor heuristics, and harvests the sshlogv handlers from `syslog_bad_level`. Once libc/libcrypto imports and the secret-data telemetry hit their expected counts it streams every hook/trampoline pointer into `secret_data`, flips the `_dl_audit` bitmasks, installs the symbind trampoline, and restores the liblzma allocator; failures reset the ld.so ctx and zero the cpuid GOT bookkeeping so glibc's resolver can keep running untouched.",
     "inline": [
       {
         "match": "for (loop_idx = 0x256; loop_idx != 0; loop_idx = loop_idx + -1) {",
@@ -110,11 +110,11 @@
         "comment": "Sanity-check that the resolver frame and cpuid GOT slot live near each other; otherwise abort before touching an unrelated GOT entry."
       },
       {
-        "match": "probe_success = process_shared_libraries(&local_a68);",
+        "match": "probe_success = process_shared_libraries(&shared_maps_args);",
         "comment": "Walk `_r_debug` to populate the live module handles and capture the hook entries that will later be written back into liblzma."
       },
       {
-        "match": "probe_success = find_dl_audit_offsets(&local_980.data_handle,&local_ac8,local_b10,imported_funcs)",
+        "match": "probe_success = find_dl_audit_offsets(&loader_data.data_handle,&link_map_delta,hooks_data,imported_funcs)",
         "comment": "Resolve `_dl_audit*` metadata plus the `link_map` displacement before patching ld.so\u2019s audit tables."
       },
       {
@@ -136,12 +136,39 @@
         "comment": "Stream every resolved hook/trampoline pointer into `secret_data` so telemetry and the command channel can attest to the install."
       },
       {
-        "match": "audit_slot_byte = (byte *)(local_b10->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;",
+        "match": "audit_slot_byte = (byte *)(hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;",
         "comment": "Flip sshd\u2019s `l_audit_any_plt` bit so `_dl_audit_symbind_alt` starts calling our symbind trampoline for every sshd\u2192libcrypto PLT."
+      },
+      {
+        "match": "((hooks_data->global_ctx).sshd_ctx)->auth_log_fmt_reloc = (char *)mem_address;",
+        "comment": "Pinpoint the shared auth-log format relocation pulled from mm_answer_* so later hooks can rewrite the literal in-place without rescanning the function."
+      },
+      {
+        "match": "((hooks_data->global_ctx).sshd_ctx)->use_pam_ptr = auth_log_reloc;",
+        "comment": "Remember sshd's `use_pam` flag pointer so the monitor hooks can keep PAM-enabled builds aligned with the daemon's configuration."
+      },
+      {
+        "match": "if ((auth_root_vote_count != 0) && ((int)hooks == 0)) goto LAB_001065af;",
+        "comment": "Abort if every probe spots the auth_root literal but no MOV/ADD ever reaches it, which signals an sshd build we don't know how to patch safely."
+      },
+      {
+        "match": "((hooks_data->global_ctx).sshd_ctx)->permit_root_login_ptr = auth_log_reloc;",
+        "comment": "Publish the `PermitRootLogin` boolean only after the literal and pointer line up so later hooks can flip it without bricking sshd."
+      },
+      {
+        "match": "sshd_log_ctx_ptr->log_handler_slot = log_handler_slot_candidate;",
+        "comment": "Record the sshlogv handler/context recovered from `syslog_bad_level` so the log shim can squelch or rewrite messages without disassembling again."
+      },
+      {
+        "match": "((hooks_data->global_ctx).secret_bits_filled == 0x1c8)",
+        "comment": "Refuse to touch `_dl_audit` until telemetry shows all 0x1c8 hook/trampoline bits recorded in `secret_data`."
+      },
+      {
+        "match": "entry_ctx_ptr->cpuid_random_symbol_addr = (void *)0x1;",
+        "comment": "Clear the cpuid GOT bookkeeping on exit so glibc repopulates the slot naturally the next time `_dl_runtime_resolve` runs."
       }
     ]
   },
-
   "bignum_serialize": {
     "plate": "Normalises a BIGNUM into the `[len||value]` framing used by the fingerprinting helpers. It refuses NULL inputs, requires at least six bytes of scratch space, caps magnitudes at 0x4000 bits (0x2001 bytes with the optional sign byte), emits a four-byte big-endian length, and copies the magnitude. When the highest value bit would otherwise set the sign bit it prepends a zero byte; otherwise it memmoves the data down so the caller sees a tightly packed blob. Successful runs report the exact number of bytes written back through `*pOutSize` so callers can concatenate multiple serialisations safely.",
     "inline": [
@@ -211,7 +238,6 @@
       }
     ]
   },
-
   "chacha_decrypt": {
     "plate": "Validates caller buffers and imported EVP symbols, allocates a temporary EVP_CIPHER_CTX, runs the ChaCha20 decrypt pipeline (Init -> Update -> Final), enforces that the accumulated plaintext never exceeds the input length, and tears the context down on every path. Only a full set of successful EVP calls returns TRUE.",
     "inline": [
@@ -364,7 +390,6 @@
       }
     ]
   },
-
   "dsa_key_hash": {
     "plate": "Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with bignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized BIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.",
     "inline": [
@@ -1896,7 +1921,6 @@
       }
     ]
   },
-
   "rsa_key_hash": {
     "plate": "Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into a ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the 0x100a-byte scratch cancels the fingerprint.",
     "inline": [
@@ -2136,7 +2160,7 @@
     ]
   },
   "secret_data_get_decrypted": {
-    "plate": "Unwraps the 0x39-byte `ctx->secret_data` blob using two ChaCha passes routed through the resolver’s EVP imports. First it zeroes the\nstack copies of the seed/IV buffers, patches the baked-in `key_buf` header, and decrypts a 0x30-byte seed chunk with the static\nkey/IV stored beside the function. That seed is treated as the runtime ChaCha key for a second decrypt that finally emits the\nplaintext secret into the caller buffer, proving no portable crypto ships with the implant.",
+    "plate": "Unwraps the 0x39-byte `ctx->secret_data` blob using two ChaCha passes routed through the resolver\u2019s EVP imports. First it zeroes the\nstack copies of the seed/IV buffers, patches the baked-in `key_buf` header, and decrypts a 0x30-byte seed chunk with the static\nkey/IV stored beside the function. That seed is treated as the runtime ChaCha key for a second decrypt that finally emits the\nplaintext secret into the caller buffer, proving no portable crypto ships with the implant.",
     "inline": [
       {
         "match": "wipe_cursor = seed_key_buf.encrypted_seed + 0x20;",
@@ -2152,7 +2176,6 @@
       }
     ]
   },
-
   "sha256": {
     "plate": "Thin wrapper around EVP_Digest/Evp_sha256: it rejects NULL buffers, zero lengths, or output buffers smaller than 32 bytes, looks up OpenSSL's SHA-256 descriptor, and hashes the payload through EVP_Digest.",
     "inline": [

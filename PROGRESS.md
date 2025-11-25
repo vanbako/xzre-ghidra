@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-25
+- Session `LR4` follow-up: revisited `backdoor_setup`, renamed the hooks blob/log-handler/PAM/root-tracking locals (`hooks_data`, `string_id_cursor`, `log_handler_slot_candidate`, etc.) in `metadata/xzre_locals.json`, and expanded `metadata/functions_autodoc.json` with new plate text plus inline anchors for the auth-log relocation hunt, PAM flag capture, root-vote gate, secret_bits audit guard, and cpuid reset.
+- Ran `./scripts/refresh_xzre_project.sh` to push the metadata into Ghidra/`xzregh`—inline comments landed cleanly, the locals rename report stayed green, and `ghidra_projects/xzre_ghidra_portable.zip` refreshed with the updated project snapshot.
+- Next: continue the LR4 backlog (e.g., mirror the new locals/inline coverage into `backdoor_init_stage2` or pick up the pending struct tracker work once the loader batch is fully refreshed).
+
+## 2025-11-25
 - Session `SR2` follow-up: revisited `sshd_find_sensitive_data`, renamed the lingering digest/libcrypto/segment temps via `metadata/xzre_locals.json`, expanded its plate text, and added inline comments for the secret-data batch zeroization, `.data` span capture, CET-aware `find_function` bounds, and candidate-selection threshold.
 - Ran `./scripts/refresh_xzre_project.sh` after editing the metadata so the regenerated `xzregh/105410_sshd_find_sensitive_data.c`, the headless project, locals rename report, and portable archive all include the new names/comments.
 - Next: continue tightening the sshd recon batch (e.g., revisit `sshd_get_sensitive_data_score` for the scoring threshold docs) once higher-priority struct work is complete.

@@ -1906,6 +1906,111 @@
         "name": "wipe_stride",
         "original": "bVar63",
         "type": "u8"
+      },
+      {
+        "name": "syslog_bad_level_cursor",
+        "original": "local_b48",
+        "type": "u8 *"
+      },
+      {
+        "name": "validated_log_handler",
+        "original": "local_b20",
+        "type": "log_handler_fn *"
+      },
+      {
+        "name": "hooks_data",
+        "original": "local_b10",
+        "type": "backdoor_hooks_data_t *"
+      },
+      {
+        "name": "string_id_cursor",
+        "original": "local_acc",
+        "type": "EncodedStringId"
+      },
+      {
+        "name": "link_map_delta",
+        "original": "local_ac8",
+        "type": "ptrdiff_t"
+      },
+      {
+        "name": "rsa_public_decrypt_slot",
+        "original": "local_ac0",
+        "type": "pfn_RSA_public_decrypt_t *"
+      },
+      {
+        "name": "evp_set1_rsa_slot",
+        "original": "local_ab8",
+        "type": "pfn_EVP_PKEY_set1_RSA_t *"
+      },
+      {
+        "name": "rsa_get0_key_slot",
+        "original": "local_ab0",
+        "type": "pfn_RSA_get0_key_t *"
+      },
+      {
+        "name": "libc_stack_end_slot",
+        "original": "local_aa8",
+        "type": "void *"
+      },
+      {
+        "name": "liblzma_text_size",
+        "original": "local_aa0",
+        "type": "u64"
+      },
+      {
+        "name": "main_elf_ctx",
+        "original": "local_a88",
+        "type": "main_elf_t"
+      },
+      {
+        "name": "resolver_frame_snapshot",
+        "original": "local_a70",
+        "type": "u64 *"
+      },
+      {
+        "name": "shared_maps_args",
+        "original": "local_a68",
+        "type": "backdoor_shared_libraries_data_t"
+      },
+      {
+        "name": "syslog_dasm_ctx",
+        "original": "local_a30",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "probe_dasm_ctx",
+        "original": "local_9d8",
+        "type": "dasm_ctx_t"
+      },
+      {
+        "name": "loader_data",
+        "original": "local_980",
+        "type": "backdoor_data_t"
+      },
+      {
+        "name": "main_data_base",
+        "original": "pplVar45",
+        "type": "log_handler_fn *"
+      },
+      {
+        "name": "log_handler_tmp_ptr",
+        "original": "pplVar46",
+        "type": "log_handler_fn *"
+      },
+      {
+        "name": "log_handler_slot_tmp",
+        "original": "pplVar48",
+        "type": "log_handler_fn *"
+      },
+      {
+        "name": "log_handler_slot_candidate",
+        "original": "addr1",
+        "type": "log_handler_fn *"
+      },
+      {
+        "name": "log_handler_ctx_candidate",
+        "original": "addr2",
+        "type": "log_handler_fn *"
       }
     ],
     "source": "xzre/xzre_code/backdoor_setup.c"

