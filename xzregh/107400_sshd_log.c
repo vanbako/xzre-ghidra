@@ -44,7 +44,6 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   u64 saved_xmm6;
   u64 saved_xmm7;
   
-  // AutoDoc: When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed.
   if (in_AL != '\0') {
     saved_xmm0 = in_XMM0_Qa;
     saved_xmm1 = in_XMM1_Qa;

@@ -233,7 +233,7 @@
         "comment": "Serialise the magnitude directly after the length field; the spare byte at `buffer[4]` gives us room to insert a leading zero if needed."
       },
       {
-        "match_regex": "buffer\\[5\\] < '\\\\0'",
+        "match_regex": "buffer\\[5\\] < '\\0'",
         "comment": "When the uppermost bit is 1 treat the value as negative: insert a zero byte and bump the reported length, otherwise slide the payload down to fill the placeholder."
       },
       {
@@ -2075,12 +2075,16 @@
         "comment": "Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates."
       },
       {
-        "match": "*(int *)local_550 = iVar16;",
+        "match": "*(int *)cmd_args_scratch = op_result;",
         "comment": "Cache the decoded opcode inside the cmd_arguments_t scratch so downstream handlers know how to interpret the payload body."
       },
       {
-        "match": "payload_body_len = uVar37 - 0x87;",
+        "match": "payload_body_len = rsa_payload_bytes - 0x87;",
         "comment": "Strip the 0x87-byte RSA header (nonce, digest, signature framing) and treat the remainder of the modulus as attacker-controlled command bytes."
+      },
+      {
+        "match": "if (payload_chunk_len <= rsa_payload_bytes - payload_data_offset) {",
+        "comment": "Make sure the attacker-provided chunk actually fits inside the decrypted modulus body before the dispatcher starts consuming opcode-specific fields."
       },
       {
         "match": "(*setlogmask_fn)(-0x80000000);",
@@ -2099,6 +2103,10 @@
         "comment": "Opcode 1/2/3 sides only run when the hook already executes as root; unprivileged callers are forced through the harmless offsets rewrite."
       },
       {
+        "match": "*int_cursor = 3;",
+        "comment": "When opcode 0 targets PermitRootLogin, force sshd's config slot to the `forced-yes` enum so password auth stays open for the operator."
+      },
+      {
         "match": "sshd_patch_variables",
         "comment": "Opcode 1 rewrites sshd globals (PermitRootLogin, use_pam, etc.) based on the control-flag bits before re-entering the monitor loop."
       },
@@ -2111,11 +2119,11 @@
         "comment": "When the control flags request a manual socket ordinal the helper probes each fd via shutdown/read until a viable descriptor is found."
       },
       {
-        "match": "pselect_result = (*libc->pselect)(iVar16 + 1,",
+        "match": "pselect_result = (*libc->pselect)(op_result + 1,",
         "comment": "Block on the attacker-chosen socket (up to 500ms) before slurping the next monitor reply chunk so forged payloads stay aligned with sshd\u2019s IPC cadence."
       },
       {
-        "match": "(ctx->sshd_offsets).field0_0x0.raw_value = uVar15;",
+        "match": "(ctx->sshd_offsets).field0_0x0.raw_value = rsa_payload_span;",
         "comment": "The bit packing above rewrites sshd_offsets (log slot, monitor opcode override, socket ordinal) directly from the attacker\u2019s flag bytes."
       },
       {
@@ -2123,7 +2131,7 @@
         "comment": "Expose the monitor payload length for opcode 3 so sshd_proxy_elevate can treat the decrypted chunk as a forged monitor_data_t frame."
       },
       {
-        "match": "sshd_proxy_elevate((monitor_data_t *)local_550,ctx);",
+        "match": "sshd_proxy_elevate((monitor_data_t *)cmd_args_scratch,ctx);",
         "comment": "Opcode 3 populates a monitor_data_t and lets sshd_proxy_elevate forge replies or run system commands under the requested uid/gid."
       },
       {
@@ -2143,13 +2151,17 @@
         "comment": "Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system()."
       },
       {
-        "match": "if (payload_body_len < uVar21) goto LAB_0010a112;",
+        "match": "if (payload_body_len < payload_segment_len) goto LAB_0010a112;",
         "comment": "Abort if the decrypted modulus does not contain enough bytes for the `[uid||gid||cmd]` tuple requested by the flag mix."
       },
       {
         "match": "if ((encrypted_payload.field0_0x0._1_1_ & 1) == 0) {",
         "occurrence": 1,
         "comment": "Bit0 of monitor_flags decides whether opcode 2 prepends attacker-supplied uid/gid values (set) or leaves both zeroed so the shell command inherits root."
+      },
+      {
+        "match": "*(char *)((long)command_payload_ptr + loop_idx) !=",
+        "comment": "Opcode 2 bails unless the decrypted `[uid||gid||cmd]` buffer terminates with NUL, preventing the helper from running off the end of the modulus slice when calling system()."
       },
       {
         "match": "(encrypted_payload.field0_0x0._1_1_ & 0xc0) == 0xc0",
@@ -2824,7 +2836,7 @@
     "plate": "Mirrors sshd\u2019s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.",
     "inline": [
       {
-        "match": "if \\(in_AL != '\\\\0'\\)",
+        "match": "if \\(in_AL != '\\0'\\)",
         "match_type": "regex",
         "comment": "When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed."
       },

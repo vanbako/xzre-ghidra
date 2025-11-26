@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-27
+- Session `CC3` revisit: focused on `run_backdoor_commands`, renamed the remaining `uVar*/bVar*/local_*` scratch (opcode field packers, payload-span counters, nonce/timespec/cmd_args buffers) via `metadata/xzre_locals.json`, added fresh inline anchors for the modulus-chunk clamp, PermitRootLogin override, and opcode-2 NUL terminator gate inside `metadata/functions_autodoc.json`, updated `docs/FUNCTION_PROGRESS.md`, and reran `./scripts/refresh_xzre_project.sh` so `xzregh/1094A0` plus the headless project/portable archive mirror the new names/comments without rename-report noise.
+- Next: finish sweeping the CC3 batch by giving the RSA hook wrappers (`hook_RSA_public_decrypt`, `_EVP_PKEY_set1_RSA`) the same locals/inline treatment or pivot to the struct tracker (`sshd_payload_ctx_t`) once the dispatcher stabilizes.
+
 ## 2025-11-26
 - Session `SR5` revisit: tightened `decrypt_payload_message` by renaming the ciphertext cursor/buffer append temps via `metadata/xzre_locals.json`, added inline anchors for the state-3 short-circuit, header copy, length/buffer clamps, and ChaCha double-pass commentary in `metadata/functions_autodoc.json`, and reran `./scripts/refresh_xzre_project.sh` until the inline injector stayed green (rename report clean, portable archive refreshed).
 - Next: carry the same locals/inline treatment into `extract_payload_message`/`mm_answer_keyallowed_hook` so the payload staging pipeline is consistently documented.
