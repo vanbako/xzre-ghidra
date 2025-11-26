@@ -2315,19 +2315,19 @@
         "type": "backdoor_payload_hdr_t"
       },
       {
-        "name": "output",
+        "name": "secret_data_seed",
         "type": "u8[57]"
       },
       {
-        "name": "header_size",
+        "name": "payload_header_span",
         "type": "const size_t"
       },
       {
-        "name": "body_length",
+        "name": "body_length_stub",
         "type": "u16"
       },
       {
-        "name": "payload_key_seed",
+        "name": "payload_keystream_seed",
         "type": "u8 *"
       }
     ],
@@ -2337,39 +2337,44 @@
         "replacement": "*(u64 *)&hdr.field0_0x0"
       },
       {
-        "name": "payload_data_ptr",
+        "name": "payload_buffer_cursor",
         "original": "puVar2",
         "type": "u8 *"
       },
       {
-        "name": "decrypt_ok",
+        "name": "decrypt_success",
         "original": "BVar3",
         "type": "BOOL"
       },
       {
-        "name": "copy_idx",
+        "name": "body_copy_idx",
         "original": "uVar4",
         "type": "ulong"
       },
       {
-        "name": "clear_idx",
+        "name": "stack_wipe_rounds",
         "original": "lVar5",
         "type": "long"
       },
       {
-        "name": "body_len",
+        "name": "plaintext_body_len",
         "original": "uVar6",
         "type": "size_t"
       },
       {
-        "name": "payload_offset",
+        "name": "buffered_payload_bytes",
         "original": "uVar1",
         "type": "u64"
       },
       {
-        "name": "body_length_cursor",
+        "name": "ciphertext_cursor",
         "original": "puVar7",
         "type": "u16 *"
+      },
+      {
+        "name": "stack_padding_byte",
+        "original": "uStack_69",
+        "type": "u8"
       }
     ],
     "source": "xzre/xzre_code/decrypt_payload_message.c"
