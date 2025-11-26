@@ -233,7 +233,7 @@
         "comment": "Serialise the magnitude directly after the length field; the spare byte at `buffer[4]` gives us room to insert a leading zero if needed."
       },
       {
-        "match_regex": "buffer\\[5\\] < '\\0'",
+        "match": "if ((char)buffer[5] < '\\0') {",
         "comment": "When the uppermost bit is 1 treat the value as negative: insert a zero byte and bump the reported length, otherwise slide the payload down to fill the placeholder."
       },
       {
@@ -2836,8 +2836,7 @@
     "plate": "Mirrors sshd\u2019s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.",
     "inline": [
       {
-        "match": "if \\(in_AL != '\\0'\\)",
-        "match_type": "regex",
+        "match": "if (in_AL != '\\0') {",
         "comment": "When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed."
       },
       {

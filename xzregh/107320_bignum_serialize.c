@@ -29,6 +29,7 @@ BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,importe
       // AutoDoc: Serialise the magnitude directly after the length field; the spare byte at `buffer[4]` gives us room to insert a leading zero if needed.
       written_bytes = (*funcs->BN_bn2bin)(bn,buffer + 5);
       if ((long)written_bytes == value_len_bytes) {
+        // AutoDoc: When the uppermost bit is 1 treat the value as negative: insert a zero byte and bump the reported length, otherwise slide the payload down to fill the placeholder.
         if ((char)buffer[5] < '\0') {
           value_len_bytes = value_len_bytes + 1;
           bit_length_bits = bit_length_bits + 1;
