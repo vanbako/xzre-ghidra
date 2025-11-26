@@ -72,7 +72,7 @@
     ]
   },
   "backdoor_init_stage2": {
-    "plate": "Runs inside the hijacked cpuid resolver. It allocates temporary `backdoor_shared_globals_t`,\n`backdoor_hooks_ctx_t`, and `backdoor_setup_params_t` blocks, repeatedly calls `init_hooks_ctx()` until the shared globals are\navailable, and then hands the bundle to `backdoor_setup`. If setup fails after the retries it zeros the GOT bookkeeping and\ndefers to the genuine cpuid implementation so liblzma still satisfies glibc\u2019s contract.",
+    "plate": "Runs inside the hijacked cpuid resolver. It carves stack `backdoor_shared_globals_t`,\n`backdoor_hooks_ctx_t`, and `backdoor_setup_params_t` blobs, wipes them, seeds the shared-globals struct with the monitor hooks\nplus EVP/RSA trampolines, and primes the dummy check state with `lzma_check_init()` so the params are ready for\n`backdoor_setup`. It keeps calling `init_hooks_ctx()` until the helper stops returning 0x65, copying the seeded shared globals\ninto each retry context. Once the block exists it stores the pointers into the params and hands control to `backdoor_setup`.\nExhausting the retries zeros the GOT bookkeeping and issues genuine CPUID leaf 0/1 so glibc\u2019s resolver can keep running before\nreturning FALSE.",
     "inline": [
       {
         "match": "for (wipe_idx = 0x22; wipe_idx != 0; wipe_idx = wipe_idx + -1) {",
@@ -85,16 +85,32 @@
         "comment": "Apply the same zeroing pass to `backdoor_setup_params_t`; it will later carry pointers handed to `backdoor_setup()`."
       },
       {
-        "match": "hooks_init_status = init_hooks_ctx(&local_128);",
+        "match": "seed_shared_globals.authpassword_hook_entry = mm_answer_authpassword_hook;",
+        "comment": "Seed the transient shared-globals block with the monitor hooks and RSA/EVP trampolines so the first successful setup can publish them."
+      },
+      {
+        "match": "lzma_check_init(&setup_params_block.dummy_check_state,LZMA_CHECK_NONE);",
+        "comment": "Prime the dummy `lzma_check_state` buffer because `backdoor_setup` expects this struct to hold a valid check context."
+      },
+      {
+        "match": "hooks_init_status = init_hooks_ctx(&bootstrap_hooks_ctx);",
         "comment": "Prime the hooks context once before entering the retry loop so we can immediately call `backdoor_setup` if shared globals are ready."
       },
       {
-        "match": "stage2_success = backdoor_setup(&local_a0);",
+        "match": "bootstrap_hooks_ctx.shared_globals_ptr = shared_globals_ptr;",
+        "comment": "Copy the seeded shared-globals pointer into the retry context so every subsequent `init_hooks_ctx()` call sees the provisional block."
+      },
+      {
+        "match": "stage2_success = backdoor_setup(&setup_params_block);",
         "comment": "Hand the fully-populated params to `backdoor_setup`; success means the hooks installed and we never fall back to real CPUID."
       },
       {
         "match": "ctx->cpuid_random_symbol_addr = (void *)0x1;",
         "comment": "If we burned through the retries, zero the GOT bookkeeping and defer to glibc\u2019s cpuid resolver so execution can continue safely."
+      },
+      {
+        "match": "max_leaf_info = (int *)cpuid_basic_info(0);",
+        "comment": "Issue real CPUID leaves 0/1 to refresh the cached register snapshot before returning FALSE."
       }
     ]
   },

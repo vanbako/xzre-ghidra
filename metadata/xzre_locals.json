@@ -1473,18 +1473,36 @@
     "locals": [
       {
         "name": "shared_globals",
+        "original": "local_140",
         "type": "backdoor_shared_globals_t"
       },
       {
         "name": "hooks_ctx",
+        "original": "local_128",
         "type": "backdoor_hooks_ctx_t"
       },
       {
         "name": "setup_params",
+        "original": "local_a0",
         "type": "backdoor_setup_params_t"
       }
     ],
     "register_temps": [
+      {
+        "name": "seed_shared_globals",
+        "original": "local_140",
+        "type": "backdoor_shared_globals_t"
+      },
+      {
+        "name": "bootstrap_hooks_ctx",
+        "original": "local_128",
+        "type": "backdoor_hooks_ctx_t"
+      },
+      {
+        "name": "setup_params_block",
+        "original": "local_a0",
+        "type": "backdoor_setup_params_t"
+      },
       {
         "name": "hooks_init_status",
         "original": "iVar6",
@@ -1503,6 +1521,16 @@
       {
         "name": "hooks_ctx_cursor",
         "original": "pbVar10",
+        "type": "backdoor_hooks_ctx_t *"
+      },
+      {
+        "name": "hooks_ctx_retry_cursor",
+        "original": "extraout_RDX",
+        "type": "backdoor_hooks_ctx_t *"
+      },
+      {
+        "name": "hooks_ctx_retry_next",
+        "original": "extraout_RDX_00",
         "type": "backdoor_hooks_ctx_t *"
       },
       {

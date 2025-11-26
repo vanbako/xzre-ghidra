@@ -2,6 +2,12 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-11-26
+- Session `LR4` touch-up: renamed the stack scratch structs in `backdoor_init_stage2` (`seed_shared_globals`, `bootstrap_hooks_ctx`, `setup_params_block`) via `metadata/xzre_locals.json`, refreshed the inline AutoDoc match strings to the new identifiers, and reran the pipeline so `xzregh/106F30_backdoor_init_stage2.c` carries the meaningful names (inline warnings cleared, rename report still green).
+- Session `LR4` revisit: deepened the `backdoor_init_stage2` pass by enriching its AutoDoc entry (shared-globals seeding, `lzma_check_init()` bootstrap, cpuid leaf 0/1 fallback), renaming the lingering `extraout_*` register temps to `hooks_ctx_retry_*`, and threading fresh inline anchors through the shared-globals copy, dummy check init, and cpuid fallback sequences inside `metadata/functions_autodoc.json` / `metadata/xzre_locals.json`.
+- Ran `./scripts/refresh_xzre_project.sh` once the metadata settled; the regenerated `xzregh/106F30_backdoor_init_stage2.c`, locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all reflect the new names/comments, and `docs/FUNCTION_PROGRESS.md` now tracks the second review.
+- Next: keep chipping away at the LR4 backlog (e.g., revisit `backdoor_init` or pivot to the struct tracker once the loader hooks stay fully annotated).
+
 ## 2025-11-25
 - Session `CC3` revisit: tightened `run_backdoor_commands` by renaming the stack payload buffer/hostkey locals (`payload_plaintext_size`, `payload_plaintext`, `hostkey_idx`, `pselect_result`, `bytes_read`) and adding inline anchors for the PAM disable bit, system-exec opcode, monitor kill switch, and continuation chunk streaming path.
 - Ran `./scripts/refresh_xzre_project.sh` twice to land the metadata (first pass flushed out a stale inline match; second pass was clean after updating the substring) so `xzregh/1094A0_run_backdoor_commands.c`, the locals rename report, and `ghidra_projects/xzre_ghidra_portable.zip` all carry the new comments/names.
