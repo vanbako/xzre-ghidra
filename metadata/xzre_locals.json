@@ -6258,6 +6258,56 @@
         "name": "bytes_read",
         "original": "sVar23",
         "type": "ssize_t"
+      },
+      {
+        "name": "control_flags",
+        "original": "uVar14",
+        "type": "u8"
+      },
+      {
+        "name": "command_opcode",
+        "original": "uVar28",
+        "type": "ulong"
+      },
+      {
+        "name": "payload_chunk_len",
+        "original": "uVar27",
+        "type": "ulong"
+      },
+      {
+        "name": "payload_data_offset",
+        "original": "uVar38",
+        "type": "ulong"
+      },
+      {
+        "name": "caller_uid",
+        "original": "uVar19",
+        "type": "uid_t"
+      },
+      {
+        "name": "command_payload_ptr",
+        "original": "puVar1",
+        "type": "uid_t *"
+      },
+      {
+        "name": "get_modulus_bitlen",
+        "original": "ppVar4",
+        "type": "pfn_BN_num_bits_t"
+      },
+      {
+        "name": "stack_wipe_cursor",
+        "original": "ppBVar30",
+        "type": "BIGNUM **"
+      },
+      {
+        "name": "fdset_wipe_cursor",
+        "original": "pfVar31",
+        "type": "fd_set *"
+      },
+      {
+        "name": "header_copy_cursor",
+        "original": "puVar33",
+        "type": "uint *"
       }
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"
