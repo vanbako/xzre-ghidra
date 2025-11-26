@@ -1743,11 +1743,11 @@
       },
       {
         "original": "local_a90._4_4_",
-        "replacement": "*(uint *)((u8 *)&local_a90 + 4)"
+        "replacement": "*(uint *)((u8 *)&literal_scan_slot + 4)"
       },
       {
         "original": "local_a98._4_4_",
-        "replacement": "*(uint *)((u8 *)&local_a98 + 4)"
+        "replacement": "*(uint *)((u8 *)&literal_probe_slot + 4)"
       },
       {
         "original": "local_a30.prefix._13_1_",
@@ -1983,6 +1983,16 @@
       {
         "name": "liblzma_text_size",
         "original": "local_aa0",
+        "type": "u64"
+      },
+      {
+        "name": "literal_probe_slot",
+        "original": "local_a98",
+        "type": "u64"
+      },
+      {
+        "name": "literal_scan_slot",
+        "original": "local_a90",
         "type": "u64"
       },
       {
