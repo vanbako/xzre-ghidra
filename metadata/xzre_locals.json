@@ -6049,23 +6049,23 @@
         "type": "run_backdoor_commands_data_t"
       },
       {
-        "name": "num_n_bits",
+        "name": "rsa_modulus_bits",
         "type": "int"
       },
       {
-        "name": "num_n_bytes",
+        "name": "rsa_modulus_bytes",
         "type": "int"
       },
       {
-        "name": "rsa_n_length",
+        "name": "monitor_payload_size_le",
         "type": "int"
       },
       {
-        "name": "payload_plaintext_size",
+        "name": "payload_body_len",
         "type": "u64"
       },
       {
-        "name": "hostkey_hash_offset",
+        "name": "socket_probe_header",
         "type": "int"
       },
       {
@@ -6081,16 +6081,20 @@
         "type": "int"
       },
       {
-        "name": "data_s1",
-        "type": "int"
+        "name": "payload_body_offset",
+        "type": "ulong"
+      },
+      {
+        "name": "decrypted_payload",
+        "type": "backdoor_payload_t"
       },
       {
         "name": "data_s2",
         "type": "int"
       },
       {
-        "name": "payload_size",
-        "type": "int"
+        "name": "encrypted_payload",
+        "type": "key_payload_t"
       },
       {
         "name": "data_ptr",
@@ -6145,12 +6149,16 @@
         "type": "u32"
       },
       {
-        "name": "tgt_uid",
-        "type": "uid_t"
+        "name": "rsa_modulus_bn",
+        "type": "BIGNUM *"
       },
       {
-        "name": "tgt_gid",
-        "type": "uid_t"
+        "name": "rsa_exponent_bn",
+        "type": "BIGNUM *"
+      },
+      {
+        "name": "hostkey_index",
+        "type": "long"
       }
     ],
     "register_temps": [
@@ -6171,20 +6179,16 @@
         "replacement": "*(u8 *)&body_offset"
       },
       {
-        "original": "hostkey_hash_offset._0_1_",
-        "replacement": "*(u8 *)&hostkey_hash_offset"
+        "original": "socket_probe_header._0_1_",
+        "replacement": "*(u8 *)&socket_probe_header"
       },
       {
         "original": "size._0_1_",
         "replacement": "*(u8 *)&size"
       },
       {
-        "original": "rsa_n_length._0_2_",
-        "replacement": "*(u16 *)&rsa_n_length"
-      },
-      {
-        "original": "signature._0_4_",
-        "replacement": "*(uint *)&signature"
+        "original": "monitor_payload_size_le._0_2_",
+        "replacement": "*(u16 *)&monitor_payload_size_le"
       },
       {
         "original": "local_590._1_7_",
@@ -6192,98 +6196,68 @@
       },
       {
         "name": "imports",
-        "original": "piVar1",
+        "original": "piVar2",
         "type": "imported_funcs_t *"
       },
       {
         "name": "get_rsa_components",
-        "original": "ppVar2",
+        "original": "ppVar3",
         "type": "pfn_RSA_get0_key_t"
       },
       {
-        "name": "bn_num_bits",
-        "original": "ppVar3",
-        "type": "pfn_BN_num_bits_t"
-      },
-      {
         "name": "libc",
-        "original": "plVar4",
+        "original": "plVar5",
         "type": "libc_imports_t *"
       },
       {
         "name": "secrets",
-        "original": "psVar5",
+        "original": "psVar6",
         "type": "sensitive_data *"
       },
       {
         "name": "host_keys",
-        "original": "ppsVar6",
+        "original": "ppsVar7",
         "type": "sshkey **"
       },
       {
-        "name": "payload_cursor",
-        "original": "puVar7",
+        "name": "payload_buffer_cursor",
+        "original": "puVar8",
         "type": "u8 *"
       },
       {
         "name": "setlogmask_fn",
-        "original": "ppVar8",
+        "original": "ppVar9",
         "type": "pfn_setlogmask_t"
       },
       {
         "name": "sshd_ctx",
-        "original": "psVar9",
+        "original": "psVar10",
         "type": "sshd_ctx_t *"
       },
       {
         "name": "use_pam_ptr",
-        "original": "puVar10",
+        "original": "puVar11",
         "type": "uint *"
       },
       {
-        "name": "exit_fn",
-        "original": "ppVar12",
-        "type": "pfn_exit_t"
-      },
-      {
         "name": "keyallowed_slot",
-        "original": "ppsVar11",
+        "original": "ppsVar12",
         "type": "sshd_monitor_func_t *"
       },
       {
-        "name": "control_flags",
-        "original": "bVar13",
-        "type": "byte"
-      },
-      {
-        "name": "cmd_opcode",
-        "original": "uVar27",
-        "type": "monitor_cmd_type_t"
-      },
-      {
-        "name": "payload_body_offset",
-        "original": "uVar36",
-        "type": "ulong"
-      },
-      {
-        "name": "payload_plaintext",
-        "original": "local_2e0",
-        "type": "u8 *"
+        "name": "exit_fn",
+        "original": "ppVar13",
+        "type": "pfn_exit_t"
       },
       {
         "name": "pselect_result",
-        "original": "iVar19",
+        "original": "iVar20",
         "type": "int"
       },
       {
         "name": "bytes_read",
-        "original": "sVar22",
+        "original": "sVar23",
         "type": "ssize_t"
-      },
-      {
-        "name": "hostkey_idx",
-        "original": "lVar34",
-        "type": "long"
       }
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"
