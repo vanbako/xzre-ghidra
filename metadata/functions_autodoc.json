@@ -1289,7 +1289,7 @@
         "comment": "Same idea for libc\u2019s `getuid`; both stubs are freed on every exit path."
       },
       {
-        "match": "if (pattern_state == 0) {",
+        "match": "if (pattern_state == AUDIT_PAT_EXPECT_LEA) {",
         "comment": "State 0 looks for the LEA that materialises `link_map::l_name` + displacement."
       },
       {
@@ -1297,11 +1297,11 @@
         "comment": "Only advance once the LEA recomputes the expected displacement and the register filter allows it."
       },
       {
-        "match": "else if (pattern_state == 1) {",
+        "match": "else if (pattern_state == AUDIT_PAT_EXPECT_MOV) {",
         "comment": "State 1 waits for the MOV that copies the pointer into a trackable register."
       },
       {
-        "match": "else if (pattern_state == 2) {",
+        "match": "else if (pattern_state == AUDIT_PAT_EXPECT_TEST) {",
         "comment": "State 2 requires a TEST/BT against the same register before we evaluate the mask."
       },
       {

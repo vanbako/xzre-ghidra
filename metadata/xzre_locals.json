@@ -4323,7 +4323,7 @@
       {
         "name": "pattern_state",
         "original": "iVar16",
-        "type": "int"
+        "type": "audit_pattern_state_t"
       },
       {
         "name": "bit_test_register",
@@ -4333,6 +4333,30 @@
       {
         "original": "*(undefined1 *)((long)search_ctx->output_register + 2)",
         "replacement": "*(u8 *)((long)search_ctx->output_register + 2)"
+      },
+      {
+        "original": "pattern_state = 0;",
+        "replacement": "pattern_state = AUDIT_PAT_EXPECT_LEA;"
+      },
+      {
+        "original": "pattern_state = 1;",
+        "replacement": "pattern_state = AUDIT_PAT_EXPECT_MOV;"
+      },
+      {
+        "original": "pattern_state = 2;",
+        "replacement": "pattern_state = AUDIT_PAT_EXPECT_TEST;"
+      },
+      {
+        "original": "if (pattern_state == 0)",
+        "replacement": "if (pattern_state == AUDIT_PAT_EXPECT_LEA)"
+      },
+      {
+        "original": "else if (pattern_state == 1)",
+        "replacement": "else if (pattern_state == AUDIT_PAT_EXPECT_MOV)"
+      },
+      {
+        "original": "else if (pattern_state == 2)",
+        "replacement": "else if (pattern_state == AUDIT_PAT_EXPECT_TEST)"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"

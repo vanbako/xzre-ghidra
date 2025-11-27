@@ -1685,6 +1685,12 @@ typedef struct __attribute__((packed)) fake_lzma_allocator {
  lzma_allocator allocator;
 } fake_lzma_allocator_t;
 
+typedef enum {
+ AUDIT_PAT_EXPECT_LEA = 0, /* First state: wait for the LEA that materialises link_map::l_name plus the pointer displacement. */
+ AUDIT_PAT_EXPECT_MOV = 1, /* Second state: verify the MOV copies the LEA result into the tracked register. */
+ AUDIT_PAT_EXPECT_TEST = 2 /* Final state: require a TEST/BT against the tracked register before consuming the mask. */
+} audit_pattern_state_t;
+
 /*
  * Shared context for the instruction-search helpers; tracks the scan range, the byte pattern we expect, the output register captures, and provides access to hook/import state during complex searches.
  */

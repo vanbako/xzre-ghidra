@@ -3,6 +3,11 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `ENUM_audit_pattern_state`: defined the `audit_pattern_state_t` enum inside `metadata/xzre_types.json`, retagged the `pattern_state` register temp in `metadata/xzre_locals.json`, and ran `./scripts/refresh_xzre_project.sh` so `xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c` now declares `audit_pattern_state_t pattern_state` and the generated `xzregh/xzre_types.h` exports the new LEA/MOV/TEST state constants; also struck the backlog entry in `docs/ENUM_ENUMERATION_BACKLOG.md` after verifying the Ghidra export/portable archive.
+- Follow-up: added literal replacements so the decomp now prints `AUDIT_PAT_EXPECT_*` instead of raw integers (assignments + comparisons), refreshed `metadata/functions_autodoc.json` inline matches, and reran the pipeline to confirm the updated names land cleanly in `xzregh/104AE0*.c` plus the portable archive.
+- Next: tee up the next enum/struct backlog item (or continue expanding the loader structs) now that the audit scanner FSM is represented in metadata.
+
+## 2025-11-27
 - Session `ENUM_monitor_reqtype`: mirrored OpenSSH’s `monitor_reqtype` enum into `metadata/xzre_types.json` (plus the `_t` typedef), retagged `sshd_ctx_t`’s authpassword/keyallowed opcode fields, the `sshd_patch_variables` prototype, and the `op_result` local in `metadata/xzre_locals.json`, then ran `./scripts/refresh_xzre_project.sh` so `ghidra_scripts/xzre_types_import_preprocessed.h`, `xzregh/xzre_types.h`, `xzregh/107D50/108EA0/1094A0*.c`, and the portable archive now show the `MONITOR_REQ_*` names instead of raw ints; cleared the backlog entry afterwards.
 - Next: move on to the next backlog item (`audit_pattern_state_t`) so the audit scanner stops juggling anonymous integers for its FSM.
 
