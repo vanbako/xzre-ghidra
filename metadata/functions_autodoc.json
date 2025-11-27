@@ -2464,6 +2464,10 @@
       {
         "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (*(u32 *)&insn_ctx.opcode_window[3] == 0x17f)) &&",
         "comment": "The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register."
+      },
+      {
+        "match": "for (; clear_idx != 0; clear_idx = clear_idx + -1) {",
+        "comment": "Zero the disassembler context before scanning so every entry stub starts from a clean slate."
       }
     ]
   },
@@ -2489,6 +2493,10 @@
       {
         "match": "decode_ok = find_call_instruction",
         "comment": "Verify that the mm_request_send call immediately follows; if it does, the captured address becomes the monitor slot."
+      },
+      {
+        "match": "for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {",
+        "comment": "Reset the MOV/LEA decoder state ahead of each hunt so stale prefixes never taint the tracked register."
       }
     ]
   },
@@ -2681,6 +2689,14 @@
       {
         "match": "else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {",
         "comment": "Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register."
+      },
+      {
+        "match": "zero_ctx_cursor = &string_scan_ctx;",
+        "comment": "Clear the primary decoder context before walking the KRB5CCNAME references so the register tracker starts with zeroed state."
+      },
+      {
+        "match": "zero_ctx_cursor = &store_scan_ctx;",
+        "comment": "Reuse the same wipe when scanning the follow-on MOV/LEA window so every `.bss` candidate is decoded with fresh state."
       }
     ]
   },
@@ -2706,6 +2722,14 @@
       {
         "match": "if (((void *)store_hits[clear_idx] == (void *)(store_hits[hit_scan_idx] + -8)) &&",
         "comment": "Look for three slots spaced eight bytes apart; that stride matches the struct layout (base, base+8, base+0x10)."
+      },
+      {
+        "match": "hit_cursor = store_hits;",
+        "comment": "Zero the recorded store list before watching for `.bss` writes so only fresh candidates feed the ptr/ptr+8/ptr+0x10 heuristic."
+      },
+      {
+        "match": "zero_ctx_cursor = &store_probe_ctx;",
+        "comment": "Wipe the MOV/LEA decoder context prior to every post-call scan so register tracking stays reliable."
       }
     ]
   },
@@ -2766,6 +2790,10 @@
         "match": "hit_found = find_instruction_with_mem_operand",
         "occurrence": 3,
         "comment": "A second access to the +0x10 field within the remaining code bumps the score by another point."
+      },
+      {
+        "match": "ctx_cursor = &do_child_start;",
+        "comment": "Reset the shared decoder scratch before hunting for additional `sensitive_data + 0x10` touches."
       }
     ]
   },

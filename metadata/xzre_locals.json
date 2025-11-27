@@ -6906,6 +6906,10 @@
         "name": "insn_ctx",
         "original": "local_80",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_main.c"
@@ -6983,6 +6987,10 @@
         "name": "zero_ctx_cursor",
         "original": "pdVar8",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "*(undefined4 *)&zero_ctx_cursor->instruction",
+        "replacement": "*(u32 *)&zero_ctx_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"
@@ -7396,6 +7404,10 @@
         "name": "zero_ctx_cursor",
         "original": "pdVar9",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "*(undefined4 *)&zero_ctx_cursor->instruction",
+        "replacement": "*(u32 *)&zero_ctx_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c"
@@ -7472,6 +7484,14 @@
         "name": "store_probe_ctx",
         "original": "local_100",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "*(undefined4 *)&zero_ctx_cursor->instruction",
+        "replacement": "*(u32 *)&zero_ctx_cursor->instruction"
+      },
+      {
+        "original": "*(undefined4 *)hit_cursor",
+        "replacement": "*(u32 *)hit_cursor"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c"
@@ -7558,6 +7578,10 @@
         "name": "score",
         "original": "uVar4",
         "type": "uint"
+      },
+      {
+        "original": "*(undefined4 *)ctx_cursor",
+        "replacement": "*(u32 *)ctx_cursor"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_do_child.c"

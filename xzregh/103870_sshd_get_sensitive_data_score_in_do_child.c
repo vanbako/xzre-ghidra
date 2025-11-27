@@ -35,9 +35,10 @@ int sshd_get_sensitive_data_score_in_do_child
     // AutoDoc: Reuse the same scanner to hunt for accesses to `sensitive_data + 0x10`; the first hit collects +1.
     hit_found = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     score = (uint)(hit_found != FALSE);
+    // AutoDoc: Reset the shared decoder scratch before hunting for additional `sensitive_data + 0x10` touches.
     ctx_cursor = &do_child_start;
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *(undefined4 *)ctx_cursor = 0;
+      *(u32 *)ctx_cursor = 0;
       ctx_cursor = (u8 **)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);
     }
     hit_found = find_instruction_with_mem_operand

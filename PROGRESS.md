@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `SR1` revisit: swept `sshd_find_main`, `_find_monitor_field_addr_in_function`, `_get_sensitive_data_address_via_krb5ccname`, `_via_xcalloc`, and `_score_in_do_child` to eliminate the lingering `undefined[0-9]` wipes. Added `register_temps` replacements so every decoder zeroing loop now emits typed `u32` stores, documented each reset with new inline comment anchors, bumped the FUNCTION_PROGRESS review counts, and reran `./scripts/refresh_xzre_project.sh` so `xzregh/102550/102FF0/103340/103680/103870*.c`, the locals rename report, and the portable archive all mirror the cleaned-up metadata.
+- Next: continue the sshd recon backlog by repeating the `undefined*` scrub + inline pass on the SR2 batch (score aggregator/monitor struct helpers) before moving on to the more complex SR3 socket/log routines.
+
+## 2025-11-27
 - Session `EL_mem_cleanup`: revisited `elf_parse` to kill the lingering `undefined[0-9]` vector temps—introduced named 128-bit scratch buffers for the PLT/RELA divisor math, rewrote the wipe loop to emit typed `u32` stores, added inline anchors for the PT_GNU_RELRO uniqueness guard and the `.gnu.version_d` drop logic, refreshed `metadata/xzre_locals.json`, `metadata/functions_autodoc.json`, and `docs/FUNCTION_PROGRESS.md`, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/1013D0_elf_parse.c`, the locals rename report, and the portable archive all reflect the typed scratchpads without postprocess warnings.
 - Next: keep scanning the remaining `elf_mem` helpers for any other `undefined*` leftovers (especially the RELRO/data segment walkers) before pivoting back to the sshd recon backlog.
 
