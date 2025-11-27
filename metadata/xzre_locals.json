@@ -6145,6 +6145,14 @@
         "name": "fingerprint_stream",
         "original": "local_1042",
         "type": "u8[0x100a]"
+      },
+      {
+        "original": "*(undefined1 *)scratch_wipe_cursor = FALSE;",
+        "replacement": "*scratch_wipe_cursor = FALSE;"
+      },
+      {
+        "original": "scratch_wipe_cursor = (BOOL *)((long)scratch_wipe_cursor + 1);",
+        "replacement": "scratch_wipe_cursor = scratch_wipe_cursor + 1;"
       }
     ],
     "source": "xzre/xzre_code/rsa_key_hash.c"
@@ -6607,6 +6615,10 @@
         "name": "decoder_ctx",
         "original": "local_90",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_wipe_cursor->instruction = 0;",
+        "replacement": "*(u32 *)&ctx_wipe_cursor->instruction = 0;"
       }
     ],
     "source": "xzre/xzre_code/secret_data_append_from_code.c"
@@ -6686,6 +6698,10 @@
         "name": "append_ok",
         "original": "BVar2",
         "type": "BOOL"
+      },
+      {
+        "original": "*(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
+        "replacement": "*(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;"
       }
     ],
     "source": "xzre/xzre_code/secret_data_append_singleton.c"
@@ -6716,6 +6732,10 @@
         "name": "wipe_cursor",
         "original": "puVar3",
         "type": "u8 *"
+      },
+      {
+        "original": "*(undefined4 *)wipe_cursor = 0;",
+        "replacement": "*(u32 *)wipe_cursor = 0;"
       },
       {
         "name": "seed_iv",
@@ -8481,6 +8501,10 @@
         "name": "wipe_cursor",
         "original": "puVar9",
         "type": "u8 *"
+      },
+      {
+        "original": "wipe_cursor = (undefined4 *)((long)wipe_cursor + 1);",
+        "replacement": "wipe_cursor = wipe_cursor + 1;"
       },
       {
         "name": "ecdsa_key",

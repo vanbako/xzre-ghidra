@@ -34,10 +34,11 @@ BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)
     // AutoDoc: Scrub the stack copy of the seed/IV trailer before reusing it as the ChaCha input/output buffer.
     wipe_cursor = seed_key_buf.encrypted_seed + 0x20;
     for (wipe_rounds = 0xc; wipe_rounds != 0; wipe_rounds = wipe_rounds + -1) {
-      *(undefined4 *)wipe_cursor = 0;
+      *(u32 *)wipe_cursor = 0;
       wipe_cursor = (u8 *)((long)wipe_cursor + 4);
     }
     wipe_cursor = seed_block;
+    // AutoDoc: Zero the 0x70-byte seed_block staging buffer four bytes at a time before reusing it as ChaCha output.
     for (wipe_rounds = 0x1c; wipe_rounds != 0; wipe_rounds = wipe_rounds + -1) {
       wipe_cursor[0] = '\0';
       wipe_cursor[1] = '\0';

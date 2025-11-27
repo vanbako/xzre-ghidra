@@ -28,7 +28,7 @@ BOOL secret_data_append_from_code
   ctx_wipe_cursor = &decoder_ctx;
   // AutoDoc: Blank the decoder context so each pass starts with predictable instruction/size windows.
   for (wipe_index = 0x16; wipe_index != 0; wipe_index = wipe_index + -1) {
-    *(undefined4 *)&ctx_wipe_cursor->instruction = 0;
+    *(u32 *)&ctx_wipe_cursor->instruction = 0;
     ctx_wipe_cursor = (dasm_ctx_t *)((long)&ctx_wipe_cursor->instruction + 4);
   }
   cursor_work[0] = shift_cursor;

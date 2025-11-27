@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `CC6`: scrubbed the lingering `undefined[0-9]` wipes in `rsa_key_hash`, `verify_signature`, `secret_data_get_decrypted`, `secret_data_append_from_code`, and `secret_data_append_singleton` by adding the requisite `register_temps` replacements plus new inline anchors for the digest/seed/shift guards, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/*`, the headless project, the locals rename report, and the portable archive all reflect the typed rewrites with no injector warnings.
+- Next: tackle the remaining crypto_cmd holdouts (especially `run_backdoor_commands` and the continuation helpers) to finish purging `undefined*` stores before pivoting back to the struct tracker.
+
+## 2025-11-27
 - Session `LR7`: scrubbed the loader batch for lingering `undefined*` locals by retagging the search-context wipes and register scratchpads in `find_link_map_l_audit_any_plt`, `_bitmask`, `find_dl_naudit`, `validate_log_handler_pointers`, `backdoor_init`, and `backdoor_init_stage2`. Added new inline anchors for the search-context zeroing, decoder reset, resolver-frame stash, and CPUID fallback capture inside `metadata/functions_autodoc.json`, renamed the cpuid relocation pointer plus the register temps in `metadata/xzre_locals.json`, and reran `./scripts/refresh_xzre_project.sh` (x3 while chasing the inline substring) so `xzregh/104EE0/104AE0/104370/102B10/10A794/106F30.c`, the rename report, and the portable archive now emit typed `u32` stores instead of raw `undefined` casts.
 - Next: keep marching through the remaining loader_rt helpers (e.g., the giant `backdoor_setup` zeroing loops and GOT repair routines) so no `undefined*` wipes remain before pivoting to the struct tracker for the loader structs.
 

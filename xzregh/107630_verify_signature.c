@@ -66,9 +66,10 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     *(u64 *)serialized_key = 0;
     serialized_key_pad = 0;
     wipe_cursor = digest_scratch;
+    // AutoDoc: Zero the digest scratch buffer so no stale bytes survive from the previous ECDSA fingerprint.
     for (loop_idx = 0x79; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(BOOL *)wipe_cursor = signed_data_size < tbs_len;
-      wipe_cursor = (undefined4 *)((long)wipe_cursor + 1);
+      wipe_cursor = wipe_cursor + 1;
     }
     if (ecdsa_key == (EC_KEY *)0x0) {
       return FALSE;
@@ -121,6 +122,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     ed25519_pub = sshkey->ed25519_pk;
     serialized_key_pad = 0;
     wipe_cursor = digest_scratch;
+    // AutoDoc: Reset the Ed25519 tag padding before copying the 32-byte public key into the serialized buffer.
     for (loop_idx = 5; loop_idx != 0; loop_idx = loop_idx + -1) {
       *wipe_cursor = 0;
       wipe_cursor = wipe_cursor + 1;
