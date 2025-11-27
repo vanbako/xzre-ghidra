@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `CC7`: purged every remaining `undefined*` local/cast from the active sshd/RSA pipeline (`run_backdoor_commands`, the mm hooks, `sshd_proxy_elevate`, `decrypt_payload_message`, `sshd_log`, `backdoor_setup`, etc.) by retagging the offending locals/temps in `metadata/xzre_locals.json`, adding replacement rewrites for the BSS/stack wipes and opcode header packing, and updating the inline anchors in `metadata/functions_autodoc.json`. Ran `./scripts/refresh_xzre_project.sh` twice (second pass picked up the new inline substrings) so `xzregh/*.c`, the locals rename report, and the portable archive now emit real `u8/u16/u32/u64` types with no injector warnings.
+- Next: sweep the remaining batches for `undefined*` mentions inside the inline comment matches (e.g., the loader_rt helpers still referencing the old memset strings) so future metadata edits don't regress the injector.
+
+## 2025-11-27
 - Session `CC6`: scrubbed the lingering `undefined[0-9]` wipes in `rsa_key_hash`, `verify_signature`, `secret_data_get_decrypted`, `secret_data_append_from_code`, and `secret_data_append_singleton` by adding the requisite `register_temps` replacements plus new inline anchors for the digest/seed/shift guards, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/*`, the headless project, the locals rename report, and the portable archive all reflect the typed rewrites with no injector warnings.
 - Next: tackle the remaining crypto_cmd holdouts (especially `run_backdoor_commands` and the continuation helpers) to finish purging `undefined*` stores before pivoting back to the struct tracker.
 

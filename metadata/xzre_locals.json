@@ -2069,6 +2069,58 @@
         "name": "log_handler_ctx_candidate",
         "original": "addr2",
         "type": "log_handler_fn *"
+      },
+      {
+        "original": "*(undefined4 *)&backdoor_data_zero_cursor->sshd_link_map = 0;",
+        "replacement": "*(u32 *)&backdoor_data_zero_cursor->sshd_link_map = 0;"
+      },
+      {
+        "original": "*(undefined1 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx)",
+        "replacement": "*(u8 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx)"
+      },
+      {
+        "original": "*(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx)",
+        "replacement": "*(u8 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx)"
+      },
+      {
+        "original": "*(undefined1 *)((long)&libc_allocator->alloc + loop_idx)",
+        "replacement": "*(u8 *)((long)&libc_allocator->alloc + loop_idx)"
+      },
+      {
+        "original": "*(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;",
+        "replacement": "*(u32 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;"
+      },
+      {
+        "original": "*(undefined4 *)&decode_ctx_cursor->instruction = 0;",
+        "replacement": "*(u32 *)&decode_ctx_cursor->instruction = 0;"
+      },
+      {
+        "original": "(undefined4)probe_dasm_ctx.instruction_size",
+        "replacement": "(u32)probe_dasm_ctx.instruction_size"
+      },
+      {
+        "original": "*(undefined4 *)&audit_ifaces_zero_cursor->activity = 0;",
+        "replacement": "*(u32 *)&audit_ifaces_zero_cursor->activity = 0;"
+      },
+      {
+        "original": "cpuid_leaf_ptr = (undefined4 *)cpuid_Version_info(1);",
+        "replacement": "cpuid_leaf_ptr = (u32 *)cpuid_Version_info(1);"
+      },
+      {
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;"
+      },
+      {
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;"
+      },
+      {
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;"
+      },
+      {
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;"
       }
     ],
     "source": "xzre/xzre_code/backdoor_setup.c"
@@ -2395,6 +2447,14 @@
         "name": "stack_padding_byte",
         "original": "uStack_69",
         "type": "u8"
+      },
+      {
+        "original": "*(undefined1 *)ciphertext_cursor = 0;",
+        "replacement": "*(u8 *)ciphertext_cursor = 0;"
+      },
+      {
+        "original": "*(undefined8 *)&payload->field0_0x0",
+        "replacement": "*(u64 *)&payload->field0_0x0"
       }
     ],
     "source": "xzre/xzre_code/decrypt_payload_message.c"
@@ -4142,6 +4202,18 @@
         "name": "audit_func_end",
         "original": "code_end",
         "type": "dl_audit_symbind_alt_fn"
+      },
+      {
+        "original": "mask_register_bitmap._0_3_ = CONCAT12(0xff,(undefined2)mask_register_bitmap);",
+        "replacement": "mask_register_bitmap._0_3_ = CONCAT12(0xff,(ushort)mask_register_bitmap);"
+      },
+      {
+        "original": "mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(undefined2)mask_register_bitmap) | 0x80;",
+        "replacement": "mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(ushort)mask_register_bitmap) | 0x80;"
+      },
+      {
+        "original": "mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(undefined2)mask_register_bitmap);",
+        "replacement": "mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)mask_register_bitmap);"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
@@ -5109,6 +5181,10 @@
         "name": "synth_reply_pad",
         "original": "uStack_c",
         "type": "u32"
+      },
+      {
+        "original": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd0);",
+        "replacement": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd0);"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_authpassword_hook.c"
@@ -5261,6 +5337,22 @@
         "name": "keyverify_handler",
         "original": "psVar7",
         "type": "sshd_monitor_func_t"
+      },
+      {
+        "original": "*(undefined4 *)clear_cursor = 0;",
+        "replacement": "*(u32 *)clear_cursor = 0;"
+      },
+      {
+        "original": "uid_gid_pair = *(undefined8 *)&payload_record->body_payload_offset;",
+        "replacement": "uid_gid_pair = *(u64 *)&payload_record->body_payload_offset;"
+      },
+      {
+        "original": "*(undefined1 *)((long)&sshd_ctx->pending_authpayload_len + 1)",
+        "replacement": "*(u8 *)((long)&sshd_ctx->pending_authpayload_len + 1)"
+      },
+      {
+        "original": "*(undefined1 *)((long)&payload_record->body_payload_offset + 1)",
+        "replacement": "*(u8 *)((long)&payload_record->body_payload_offset + 1)"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c"
@@ -5282,6 +5374,10 @@
         "name": "write_result",
         "original": "sVar2",
         "type": "ssize_t"
+      },
+      {
+        "original": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd8);",
+        "replacement": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyverify_hook.c"
@@ -5495,6 +5591,10 @@
         "name": "closing_bracket_char",
         "original": "local_201",
         "type": "uchar"
+      },
+      {
+        "original": "*(undefined2 *)log_ctx_state->fmt_percent_s",
+        "replacement": "*(u16 *)log_ctx_state->fmt_percent_s"
       }
     ],
     "source": "xzre/xzre_code/mm_log_handler_hook.c"
@@ -5925,6 +6025,10 @@
         "name": "more_args_to_scan",
         "original": "bVar8",
         "type": "BOOL"
+      },
+      {
+        "original": "check_argument((char)*(undefined2 *)argv_entry,(char *)argv_entry);",
+        "replacement": "check_argument((char)*(u16 *)argv_entry,(char *)argv_entry);"
       }
     ],
     "source": "xzre/xzre_code/process_is_sshd.c"
@@ -6312,32 +6416,32 @@
       {
         "name": "cmd_args_scratch",
         "original": "local_550",
-        "type": "undefined1 [16]"
+        "type": "u8[16]"
       },
       {
         "name": "payload_nonce_lo",
         "original": "local_83",
-        "type": "undefined8"
+        "type": "u64"
       },
       {
         "name": "payload_nonce_hi",
         "original": "uStack_7b",
-        "type": "undefined8"
+        "type": "u64"
       },
       {
         "name": "shared_keybuf_or_timespec_lo",
         "original": "local_590",
-        "type": "undefined8"
+        "type": "u64"
       },
       {
         "name": "shared_keybuf_or_timespec_hi",
         "original": "uStack_588",
-        "type": "undefined8"
+        "type": "u64"
       },
       {
         "name": "socket_probe_highword",
         "original": "uStack_59c",
-        "type": "undefined4"
+        "type": "u32"
       },
       {
         "name": "imports",
@@ -6537,6 +6641,54 @@
         "name": "header_copy_cursor",
         "original": "puVar33",
         "type": "uint *"
+      },
+      {
+        "original": "*(undefined4 *)stack_wipe_cursor = 0;",
+        "replacement": "*(u32 *)stack_wipe_cursor = 0;"
+      },
+      {
+        "original": "*(undefined4 *)scratch_ptr = 0;",
+        "replacement": "*(u32 *)scratch_ptr = 0;"
+      },
+      {
+        "original": "*(undefined1 *)int_cursor = 0;",
+        "replacement": "*(u8 *)int_cursor = 0;"
+      },
+      {
+        "original": "encrypted_payload.field0_0x0._0_1_ = (undefined1)rsa_modulus_bytes;",
+        "replacement": "encrypted_payload.field0_0x0._0_1_ = (u8)rsa_modulus_bytes;"
+      },
+      {
+        "original": "encrypted_payload.field0_0x0._1_1_ = (undefined1)((uint)rsa_modulus_bytes >> 8);",
+        "replacement": "encrypted_payload.field0_0x0._1_1_ = (u8)((uint)rsa_modulus_bytes >> 8);"
+      },
+      {
+        "original": "encrypted_payload.field0_0x0._2_1_ = (undefined1)((uint)rsa_modulus_bytes >> 0x10)",
+        "replacement": "encrypted_payload.field0_0x0._2_1_ = (u8)((uint)rsa_modulus_bytes >> 0x10)"
+      },
+      {
+        "original": "encrypted_payload.field0_0x0._3_1_ = (undefined1)((uint)rsa_modulus_bytes >> 0x18)",
+        "replacement": "encrypted_payload.field0_0x0._3_1_ = (u8)((uint)rsa_modulus_bytes >> 0x18)"
+      },
+      {
+        "original": "encrypted_payload.field0_0x0._4_1_ = (undefined1)sigcheck_result;",
+        "replacement": "encrypted_payload.field0_0x0._4_1_ = (u8)sigcheck_result;"
+      },
+      {
+        "original": "CONCAT11((undefined1)sigcheck_result",
+        "replacement": "CONCAT11((u8)sigcheck_result"
+      },
+      {
+        "original": "header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);",
+        "replacement": "header_copy_cursor = (u32 *)(cmd_args_scratch + 4);"
+      },
+      {
+        "original": "header_copy_cursor = (undefined4 *)((long)header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1);",
+        "replacement": "header_copy_cursor = (u32 *)((long)header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1);"
+      },
+      {
+        "original": "*(undefined4 *)fdset_wipe_cursor = 0;",
+        "replacement": "*(u32 *)fdset_wipe_cursor = 0;"
       }
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"
@@ -7131,6 +7283,10 @@
         "name": "zero_seed",
         "original": "bVar9",
         "type": "u8"
+      },
+      {
+        "original": "*(undefined4 *)candidate_cursor = 0;",
+        "replacement": "*(u32 *)candidate_cursor = 0;"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_struct.c"
@@ -7327,6 +7483,10 @@
         "name": "zero_stride",
         "original": "bVar19",
         "type": "u8"
+      },
+      {
+        "original": "*(undefined4 *)&probe_cursor->anchor_pc = 0;",
+        "replacement": "*(u32 *)&probe_cursor->anchor_pc = 0;"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_sensitive_data.c"
@@ -7795,6 +7955,61 @@
       }
     ],
     "register_temps": [
+      {
+        "name": "incoming_rcx",
+        "original": "in_RCX",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_r8",
+        "original": "in_R8",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_r9",
+        "original": "in_R9",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm0",
+        "original": "in_XMM0_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm1",
+        "original": "in_XMM1_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm2",
+        "original": "in_XMM2_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm3",
+        "original": "in_XMM3_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm4",
+        "original": "in_XMM4_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm5",
+        "original": "in_XMM5_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm6",
+        "original": "in_XMM6_Qa",
+        "type": "u64"
+      },
+      {
+        "name": "incoming_xmm7",
+        "original": "in_XMM7_Qa",
+        "type": "u64"
+      },
       {
         "name": "sse_args_present",
         "original": "local_d1",
@@ -8298,6 +8513,70 @@
         "name": "monitor_req_payload",
         "original": "local_77c",
         "type": "u8[1868]"
+      },
+      {
+        "original": "stack_limit = (undefined8 *)libc_funcs->__libc_stack_end;",
+        "replacement": "stack_limit = (u64 *)libc_funcs->__libc_stack_end;"
+      },
+      {
+        "original": "stack_slot = (undefined8 *)register0x00000020;",
+        "replacement": "stack_slot = (u64 *)register0x00000020;"
+      },
+      {
+        "original": "*(undefined4 *)&sshbuf_cursor->rsa_d_bn = 0;",
+        "replacement": "*(u32 *)&sshbuf_cursor->rsa_d_bn = 0;"
+      },
+      {
+        "original": "*(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)rsa_alg_name;",
+        "replacement": "*(u64 *)(payload_hash + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;"
+      },
+      {
+        "original": "payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)rsa_alg_name >> 0x38);",
+        "replacement": "payload_hash[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);"
+      },
+      {
+        "original": "*(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(rsa_alg_name + 8);",
+        "replacement": "*(uint *)(payload_hash + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);"
+      },
+      {
+        "original": "*(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(rsa_alg_name + 0xc);",
+        "replacement": "*(uint *)(payload_hash + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);"
+      },
+      {
+        "original": "*(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);",
+        "replacement": "*(uint *)(payload_hash + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);"
+      },
+      {
+        "original": "stack0xfffffffffffff50d = *(undefined8 *)(rsa_alg_name + 0x14);",
+        "replacement": "stack0xfffffffffffff50d = *(u64 *)(rsa_alg_name + 0x14);"
+      },
+      {
+        "original": "*rsa_words_cursor = *(undefined4 *)stack_slot;",
+        "replacement": "*rsa_words_cursor = *(u32 *)stack_slot;"
+      },
+      {
+        "original": "stack_slot = (undefined8 *)((long)stack_slot + (ulong)zero_stride_flag * -8 + 4);",
+        "replacement": "stack_slot = (u64 *)((long)stack_slot + (ulong)zero_stride_flag * -8 + 4);"
+      },
+      {
+        "original": "monitor_req_prefix_bytes = (undefined3)*(undefined4 *)rsa_alg_name;",
+        "replacement": "monitor_req_prefix_bytes[0] = (uchar)rsa_alg_name[0];\\n            monitor_req_prefix_bytes[1] = (uchar)rsa_alg_name[1];\\n            monitor_req_prefix_bytes[2] = (uchar)rsa_alg_name[2];"
+      },
+      {
+        "original": "monitor_req_prefix_pad = (undefined1)*(undefined4 *)(rsa_alg_name + 3);",
+        "replacement": "monitor_req_prefix_pad = (uchar)rsa_alg_name[3];"
+      },
+      {
+        "original": "monitor_req_prefix_pad_hi = (undefined3)((uint)*(undefined4 *)(rsa_alg_name + 3) >> 8);",
+        "replacement": "monitor_req_prefix_pad_hi[0] = (uchar)rsa_alg_name[4];\\n            monitor_req_prefix_pad_hi[1] = (uchar)rsa_alg_name[5];\\n            monitor_req_prefix_pad_hi[2] = (uchar)rsa_alg_name[6];"
+      },
+      {
+        "original": "*(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->rsa_sha2_256_alg + 8);",
+        "replacement": "*(uint *)&sshbuf_vec[0].off = *(u32 *)(ctx->rsa_sha2_256_alg + 8);"
+      },
+      {
+        "original": "*(undefined4 *)payload_copy_cursor = *(undefined4 *)&sshbuf_cursor->rsa_d_bn;",
+        "replacement": "*(u32 *)payload_copy_cursor = *(u32 *)&sshbuf_cursor->rsa_d_bn;"
       }
     ],
     "source": "xzre/xzre_code/sshd_proxy_elevate.c"

