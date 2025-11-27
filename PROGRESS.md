@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `ENUM_monitor_reqtype`: mirrored OpenSSH’s `monitor_reqtype` enum into `metadata/xzre_types.json` (plus the `_t` typedef), retagged `sshd_ctx_t`’s authpassword/keyallowed opcode fields, the `sshd_patch_variables` prototype, and the `op_result` local in `metadata/xzre_locals.json`, then ran `./scripts/refresh_xzre_project.sh` so `ghidra_scripts/xzre_types_import_preprocessed.h`, `xzregh/xzre_types.h`, `xzregh/107D50/108EA0/1094A0*.c`, and the portable archive now show the `MONITOR_REQ_*` names instead of raw ints; cleared the backlog entry afterwards.
+- Next: move on to the next backlog item (`audit_pattern_state_t`) so the audit scanner stops juggling anonymous integers for its FSM.
+
+## 2025-11-27
 - Session `ENUM_payload_command_type`: defined the attacker payload command enum in `metadata/xzre_types.json` (plus the `payload_command_type_t` typedef), retagged `sshd_payload_ctx_t::command_type`, and updated `metadata/xzre_locals.json` so `mm_answer_keyallowed_hook` now names the `payload_type` temp and rewrites the opcode branches to use `PAYLOAD_COMMAND_*` constants. Reran `./scripts/refresh_xzre_project.sh` until the rename/replacement warnings cleared; `xzregh/108EA0_mm_answer_keyallowed_hook.c`, `xzregh/xzre_types.h`, `ghidra_scripts/xzre_types_import_preprocessed.h`, and the portable archive all show the symbolic enum.
 - Next: continue down `docs/ENUM_ENUMERATION_BACKLOG.md` (likely `monitor_reqtype_t`) so the monitor structs/hooks stop comparing raw request IDs.
 

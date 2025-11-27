@@ -1827,7 +1827,7 @@
         "comment": "Type 1 payloads stash an authpassword body for later\u2014record the length/pointer so the authpassword hook can emit it on demand."
       },
       {
-        "match": "state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);",
+        "match": "state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,MONITOR_REQ_MODULI,ctx);",
         "comment": "As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won\u2019t trip sshd\u2019s guards."
       },
       {

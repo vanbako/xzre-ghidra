@@ -976,6 +976,67 @@ typedef struct sshbuf sshbuf;
 
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
 
+typedef enum monitor_reqtype {
+ /* Mirror of OpenSSH monitor IPC opcodes (even = request, odd = answer). */
+ MONITOR_REQ_MODULI = 0,
+ MONITOR_ANS_MODULI = 1,
+ MONITOR_REQ_FREE = 2,
+ MONITOR_REQ_AUTHSERV = 4,
+ MONITOR_REQ_SIGN = 6,
+ MONITOR_ANS_SIGN = 7,
+ MONITOR_REQ_PWNAM = 8,
+ MONITOR_ANS_PWNAM = 9,
+ MONITOR_REQ_AUTH2_READ_BANNER = 10,
+ MONITOR_ANS_AUTH2_READ_BANNER = 11,
+ MONITOR_REQ_AUTHPASSWORD = 12,
+ MONITOR_ANS_AUTHPASSWORD = 13,
+ MONITOR_REQ_BSDAUTHQUERY = 14,
+ MONITOR_ANS_BSDAUTHQUERY = 15,
+ MONITOR_REQ_BSDAUTHRESPOND = 16,
+ MONITOR_ANS_BSDAUTHRESPOND = 17,
+ MONITOR_REQ_KEYALLOWED = 22,
+ MONITOR_ANS_KEYALLOWED = 23,
+ MONITOR_REQ_KEYVERIFY = 24,
+ MONITOR_ANS_KEYVERIFY = 25,
+ MONITOR_REQ_KEYEXPORT = 26,
+ MONITOR_REQ_PTY = 28,
+ MONITOR_ANS_PTY = 29,
+ MONITOR_REQ_PTYCLEANUP = 30,
+ MONITOR_REQ_SESSKEY = 32,
+ MONITOR_ANS_SESSKEY = 33,
+ MONITOR_REQ_SESSID = 34,
+ MONITOR_REQ_RSAKEYALLOWED = 36,
+ MONITOR_ANS_RSAKEYALLOWED = 37,
+ MONITOR_REQ_RSACHALLENGE = 38,
+ MONITOR_ANS_RSACHALLENGE = 39,
+ MONITOR_REQ_RSARESPONSE = 40,
+ MONITOR_ANS_RSARESPONSE = 41,
+ MONITOR_REQ_GSSSETUP = 42,
+ MONITOR_ANS_GSSSETUP = 43,
+ MONITOR_REQ_GSSSTEP = 44,
+ MONITOR_ANS_GSSSTEP = 45,
+ MONITOR_REQ_GSSUSEROK = 46,
+ MONITOR_ANS_GSSUSEROK = 47,
+ MONITOR_REQ_GSSCHECKMIC = 48,
+ MONITOR_ANS_GSSCHECKMIC = 49,
+ MONITOR_REQ_TERM = 50,
+ MONITOR_REQ_PAM_START = 100,
+ MONITOR_REQ_PAM_ACCOUNT = 102,
+ MONITOR_ANS_PAM_ACCOUNT = 103,
+ MONITOR_REQ_PAM_INIT_CTX = 104,
+ MONITOR_ANS_PAM_INIT_CTX = 105,
+ MONITOR_REQ_PAM_QUERY = 106,
+ MONITOR_ANS_PAM_QUERY = 107,
+ MONITOR_REQ_PAM_RESPOND = 108,
+ MONITOR_ANS_PAM_RESPOND = 109,
+ MONITOR_REQ_PAM_FREE_CTX = 110,
+ MONITOR_ANS_PAM_FREE_CTX = 111,
+ MONITOR_REQ_AUDIT_EVENT = 112,
+ MONITOR_REQ_AUDIT_COMMAND = 113,
+} monitor_reqtype;
+
+typedef enum monitor_reqtype monitor_reqtype_t;
+
 typedef enum payload_command_type {
  PAYLOAD_COMMAND_STASH_AUTHPASSWORD = 0x1, /* Queue an mm_answer_authpassword payload for later use. */
  PAYLOAD_COMMAND_KEYVERIFY_REPLY = 0x2, /* Carry a canned mm_answer_keyverify payload that the hook writes back. */
@@ -1010,12 +1071,12 @@ typedef struct __attribute__((packed)) sshd_ctx {
  sshd_monitor_func_t *mm_answer_authpassword_start; /* Original mm_answer_authpassword() start in sshd. */
  void *mm_answer_authpassword_end; /* Original mm_answer_authpassword() end address (scan bound). */
  sshd_monitor_func_t *mm_answer_authpassword_slot; /* Pointer to monitor_dispatch[authpassword] slot. */
- int monitor_reqtype_authpassword; /* MONITOR_REQ_* code used for authpassword replies. */
+ monitor_reqtype_t monitor_reqtype_authpassword; /* MONITOR_REQ_* code used for authpassword replies. */
  u8 authpassword_padding[4];
  sshd_monitor_func_t *mm_answer_keyallowed_start; /* Original mm_answer_keyallowed() start in sshd. */
  void *mm_answer_keyallowed_end; /* Original mm_answer_keyallowed() end address (scan bound). */
  sshd_monitor_func_t *mm_answer_keyallowed_slot; /* Pointer to monitor_dispatch[keyallowed] slot. */
- u32 mm_answer_keyallowed_reqtype; /* MONITOR_REQ_* code used for keyallowed requests. */
+ monitor_reqtype_t mm_answer_keyallowed_reqtype; /* MONITOR_REQ_* code used for keyallowed requests. */
  u8 keyallowed_padding[4];
  sshd_monitor_func_t *mm_answer_keyverify_start; /* Original mm_answer_keyverify() start in sshd. */
  void *mm_answer_keyverify_end; /* Original mm_answer_keyverify() end address (scan bound). */
@@ -2015,7 +2076,7 @@ extern BOOL sshd_patch_variables(
  BOOL skip_root_patch,
  BOOL disable_pam,
  BOOL replace_monitor_reqtype,
- int monitor_reqtype,
+ monitor_reqtype_t monitor_reqtype,
  global_context_t *global_ctx
 );
 

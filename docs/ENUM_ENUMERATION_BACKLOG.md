@@ -16,10 +16,8 @@ Working queue for enums we want represented in `metadata/xzre_types.json`. Updat
 ### ~~`payload_command_type_t`~~
 - **Done 2025-11-27:** Added a `payload_command_type` enum (with a `payload_command_type_t` typedef) so `sshd_payload_ctx_t::command_type` and the `payload_type` temp in `mm_answer_keyallowed_hook` now use symbolic states. Updated `metadata/xzre_locals.json` so the state-machine comparisons render as `PAYLOAD_COMMAND_*` names after the refresh.
 
-### `monitor_reqtype_t`
-- **Where:** `xzregh/107D50_sshd_patch_variables.c:16-69`, `xzregh/1094A0_run_backdoor_commands.c:443-455`, and `sshd_ctx_t` fields at `xzregh/xzre_types.h:1005`/`:1010`.
-- **Why:** These variables always carry OpenSSH `MONITOR_REQ_*` opcodes. Importing the upstream enum (or mirroring it locally) avoids the hand-rolled `+1` offsets and clarifies when we’re overriding dispatch table slots.
-- **Steps:** Add a typedef (wrapping `enum monitor_reqtype` from `third_party/include/openssh/monitor.h` or inlining the needed constants), switch the `sshd_ctx_t` members and function parameters to the new type, update locals metadata, then refresh to ensure the monitor hooks show the named constants.
+### ~~`monitor_reqtype_t`~~
+- **Done 2025-11-27:** Mirrored OpenSSH’s monitor request enum into the metadata, retagged the `sshd_ctx_t` fields, `sshd_patch_variables` signature, and the `op_result` local in `run_backdoor_commands` to `monitor_reqtype_t`, then ran the refresh so the exported sources show `MONITOR_REQ_*` names instead of raw ints.
 
 ### `audit_pattern_state_t`
 - **Where:** `xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c:34-177` (`pattern_state` variable inside the LEA/MOV/TEST scanner).
