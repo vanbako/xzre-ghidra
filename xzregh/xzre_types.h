@@ -976,13 +976,21 @@ typedef struct sshbuf sshbuf;
 
 typedef int (*sshd_monitor_func_t)(struct ssh *ssh, int sock, struct sshbuf *m);
 
+typedef enum payload_command_type {
+ PAYLOAD_COMMAND_STASH_AUTHPASSWORD = 0x1, /* Queue an mm_answer_authpassword payload for later use. */
+ PAYLOAD_COMMAND_KEYVERIFY_REPLY = 0x2, /* Carry a canned mm_answer_keyverify payload that the hook writes back. */
+ PAYLOAD_COMMAND_SYSTEM_EXEC = 0x3 /* Request privilege escalation and exec() via libc. */
+} payload_command_type;
+
+typedef u8 payload_command_type_t;
+
 /*
  * Decrypted command blob staged by `mm_answer_keyallowed`: starts with a length, 0x3a-byte signed header (ending in the payload type), a 0x72-byte Ed448 signature, and then the attacker-controlled body beginning at offset 0xae with a caller-supplied payload_data_offset.
  */
 typedef struct __attribute__((packed)) sshd_payload_ctx {
  u16 payload_total_size; /* Total decrypted payload length (header + trailer + body). */
  u8 signed_header_prefix[0x39]; /* First 0x39 bytes of header metadata that the Ed448 signature covers. */
- u8 command_type; /* 0x1 => stash mm_answer_authpassword payload, 0x2 => mm_answer_keyverify reply, 0x3 => system/elevate command. */
+ payload_command_type_t command_type; /* PAYLOAD_COMMAND_STASH_AUTHPASSWORD => stash authpayload, PAYLOAD_COMMAND_KEYVERIFY_REPLY => canned reply, PAYLOAD_COMMAND_SYSTEM_EXEC => system/elevate command. */
  u8 ed448_signature[0x72];
  u16 body_payload_offset; /* Offset into `payload_body` where the attacker-supplied command stream begins. */
  u8 payload_body[]; /* Decrypted body (begins at offset 0xae of the blob, includes padding + command bytes). */

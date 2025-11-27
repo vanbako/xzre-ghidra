@@ -5225,8 +5225,8 @@
       },
       {
         "name": "payload_type",
-        "original": "uVar1",
-        "type": "u8"
+        "original": "pVar1",
+        "type": "payload_command_type_t"
       },
       {
         "name": "payload_state",
@@ -5353,6 +5353,18 @@
       {
         "original": "*(undefined1 *)((long)&payload_record->body_payload_offset + 1)",
         "replacement": "*(u8 *)((long)&payload_record->body_payload_offset + 1)"
+      },
+      {
+        "original": "payload_type == '\u005cx02'",
+        "replacement": "payload_type == PAYLOAD_COMMAND_KEYVERIFY_REPLY"
+      },
+      {
+        "original": "payload_type == '\u005cx03'",
+        "replacement": "payload_type == PAYLOAD_COMMAND_SYSTEM_EXEC"
+      },
+      {
+        "original": "payload_type == '\u005cx01'",
+        "replacement": "payload_type == PAYLOAD_COMMAND_STASH_AUTHPASSWORD"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c"

@@ -13,10 +13,8 @@ Working queue for enums we want represented in `metadata/xzre_types.json`. Updat
 ### ~~`payload_stream_state_t`~~
 - **Done 2025-11-27:** Added `payload_stream_state_t` to `metadata/xzre_types.json`, updated `global_context_t.payload_state` plus the affected locals to use it, and reran the refresh pipeline so `check_backdoor_state`/`mm_answer_keyallowed_hook` now print the symbolic state names.
 
-### `payload_command_type_t`
-- **Where:** `xzregh/108EA0_mm_answer_keyallowed_hook.c:23` (`payload_type`), and `sshd_payload_ctx_t::command_type` (`xzregh/xzre_types.h:985`).
-- **Why:** Only values 1/2/3 are valid (authpayload stash, keyverify reply, system exec). An enum makes the handler branches self-documenting and opens the door for future validation helpers.
-- **Steps:** Define the enum near `sshd_payload_ctx_t` in `metadata/xzre_types.json`, update `command_type` plus the locals in `metadata/xzre_locals.json`, refresh, and confirm the exported C now shows the symbolic names.
+### ~~`payload_command_type_t`~~
+- **Done 2025-11-27:** Added a `payload_command_type` enum (with a `payload_command_type_t` typedef) so `sshd_payload_ctx_t::command_type` and the `payload_type` temp in `mm_answer_keyallowed_hook` now use symbolic states. Updated `metadata/xzre_locals.json` so the state-machine comparisons render as `PAYLOAD_COMMAND_*` names after the refresh.
 
 ### `monitor_reqtype_t`
 - **Where:** `xzregh/107D50_sshd_patch_variables.c:16-69`, `xzregh/1094A0_run_backdoor_commands.c:443-455`, and `sshd_ctx_t` fields at `xzregh/xzre_types.h:1005`/`:1010`.

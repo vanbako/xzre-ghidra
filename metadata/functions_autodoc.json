@@ -1814,16 +1814,16 @@
         "match": "decrypt_payload_message((key_payload_t *)payload_ctx,payload_chunk_size,ctx);",
         "comment": "Decrypt the framed chunk, append it into `ctx->payload_buffer`, and advance `payload_state` if enough bytes have arrived."
       },
-      {
-        "match": "if (payload_type == '\\x02') {",
+        {
+        "match": "if (payload_type == PAYLOAD_COMMAND_KEYVERIFY_REPLY) {",
         "comment": "Type 2 payloads carry a complete `mm_answer_keyverify` reply\u2014copy its length/buffer into `sshd_ctx` and write it back immediately."
       },
-      {
-        "match": "else if (payload_type == '\\x03') {",
+        {
+        "match": "else if (payload_type == PAYLOAD_COMMAND_SYSTEM_EXEC) {",
         "comment": "Type 3 payloads request privilege escalation: honor the supplied uid/gid pair and exec the decrypted body via libc\u2019s `system()`."
       },
-      {
-        "match": "else if (((payload_type == '\\x01') &&",
+        {
+        "match": "else if (((payload_type == PAYLOAD_COMMAND_STASH_AUTHPASSWORD) &&",
         "comment": "Type 1 payloads stash an authpassword body for later\u2014record the length/pointer so the authpassword hook can emit it on demand."
       },
       {

@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `ENUM_payload_command_type`: defined the attacker payload command enum in `metadata/xzre_types.json` (plus the `payload_command_type_t` typedef), retagged `sshd_payload_ctx_t::command_type`, and updated `metadata/xzre_locals.json` so `mm_answer_keyallowed_hook` now names the `payload_type` temp and rewrites the opcode branches to use `PAYLOAD_COMMAND_*` constants. Reran `./scripts/refresh_xzre_project.sh` until the rename/replacement warnings cleared; `xzregh/108EA0_mm_answer_keyallowed_hook.c`, `xzregh/xzre_types.h`, `ghidra_scripts/xzre_types_import_preprocessed.h`, and the portable archive all show the symbolic enum.
+- Next: continue down `docs/ENUM_ENUMERATION_BACKLOG.md` (likely `monitor_reqtype_t`) so the monitor structs/hooks stop comparing raw request IDs.
+
+## 2025-11-27
 - Session `ENUM_payload_state`: introduced the `payload_stream_state_t` enum in `metadata/xzre_types.json`, updated `global_context_t.payload_state` plus the associated register temps in `metadata/xzre_locals.json`, and ran `./scripts/refresh_xzre_project.sh` twice so the regenerated `xzregh/107EA0_check_backdoor_state.c`, `xzregh/108EA0_mm_answer_keyallowed_hook.c`, `xzregh/108D50_decrypt_payload_message.c`, and `xzregh/xzre_types.h` now show the symbolic state names (rename report stayed green, portable archive refreshed). Marked the backlog entry as complete once the export looked good.
 - Next: keep working down `docs/ENUM_ENUMERATION_BACKLOG.md` (likely `payload_command_type_t` or `monitor_reqtype_t`) so the remaining payload/monitor guards stop comparing raw integers.
 
