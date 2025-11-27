@@ -6347,7 +6347,11 @@
       {
         "name": "selected_hostkey_idx",
         "original": "_Var35",
-        "type": "_union_110"
+        "type": "sshd_hostkey_index_t"
+      },
+      {
+        "original": "(u32)selected_hostkey_idx",
+        "replacement": "selected_hostkey_idx.raw_value"
       },
       {
         "name": "hostkey_cursor",

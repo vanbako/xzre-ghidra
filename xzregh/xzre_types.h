@@ -1120,6 +1120,13 @@ typedef struct __attribute__((packed)) sshd_offsets {
 } sshd_offsets_t;
 
 /*
+ * Tiny wrapper around the zero-based host_pubkeys[] ordinal used while iterating sshd host keys; keeping it as a named struct stops Ghidra from emitting anonymous unions whenever we compare or store the raw index.
+ */
+typedef struct __attribute__((packed)) sshd_hostkey_index {
+ u32 raw_value; /* Zero-based index into `ctx->sshd_sensitive_data->host_pubkeys` for whichever key validated the Ed448 signature. */
+} sshd_hostkey_index_t;
+
+/*
  * Authoritative runtime state for the backdoor: resolved libc/libcrypto imports, sshd monitor/log metadata, code/data bounds for scans, payload streaming buffers/state, and the secret-data attestation flags so every hook can share consistent context.
  */
 typedef struct __attribute__((packed)) global_context {

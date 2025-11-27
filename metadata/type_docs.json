@@ -29,6 +29,7 @@
   "sshd_offsets_sshbuf_t": "Same idea as `sshd_offsets_kex_t` but for the sshbuf backing storage; stores the indices of the data pointer and size field we need to rewrite.",
   "sshd_offsets_fields_t": "Convenience wrapper that groups the individual offset unions for simultaneous propagation from the scanning routines into the runtime context.",
   "sshd_offsets_t": "32-bit union that packs the discovered offsets and exposes them both as structured fields and as a raw integer when we need atomic updates.",
+  "sshd_hostkey_index_t": "Tiny wrapper around the zero-based host_pubkeys[] ordinal used while iterating sshd host keys; keeping it as a named struct stops Ghidra from emitting anonymous unions whenever we compare or store the raw index.",
   "sshd_payload_ctx_t": "Decrypted command blob staged by `mm_answer_keyallowed`: starts with a length, 0x3a-byte signed header (ending in the payload type), a 0x72-byte Ed448 signature, and then the attacker-controlled body beginning at offset 0xae with a caller-supplied payload_data_offset.",
   "global_context_t": "Authoritative runtime state for the backdoor: resolved libc/libcrypto imports, sshd monitor/log metadata, code/data bounds for scans, payload streaming buffers/state, and the secret-data attestation flags so every hook can share consistent context.",
   "backdoor_shared_globals_t": "Tiny structure that stage-one drops into `.bss` so later stages can find the `global_context_t`, the active hooks, and the exported helper thunks without re-scanning memory.",

@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `CC3` cleanup: retired the lingering `_union_110` placeholder in `run_backdoor_commands` by defining `sshd_hostkey_index_t` (metadata/types doc + struct tracker), retagging the locals metadata, wiring in a literal rewrite so casts become `.raw_value`, and rerunning `./scripts/refresh_xzre_project.sh` + the register-temp pass so `xzregh/xzre_types.h`, `ghidra_scripts/xzre_types_import_preprocessed.h`, and `xzregh/1094A0_run_backdoor_commands.c` now expose the named struct without inline-match warnings (followed by a quick fix in `verify_signature` after reapplying the rewrites).
+- Next: sweep the other literal replacements in `metadata/xzre_locals.json` for idempotence (so ad-hoc register-temp passes stay safe) or continue marching through the CC3 backlog if no more anonymous unions pop up.
+
+## 2025-11-27
 - Session `CC3` revisit: focused on `run_backdoor_commands`, renamed the remaining `uVar*/bVar*/local_*` scratch (opcode field packers, payload-span counters, nonce/timespec/cmd_args buffers) via `metadata/xzre_locals.json`, added fresh inline anchors for the modulus-chunk clamp, PermitRootLogin override, and opcode-2 NUL terminator gate inside `metadata/functions_autodoc.json`, updated `docs/FUNCTION_PROGRESS.md`, and reran `./scripts/refresh_xzre_project.sh` so `xzregh/1094A0` plus the headless project/portable archive mirror the new names/comments without rename-report noise.
 - Next: finish sweeping the CC3 batch by giving the RSA hook wrappers (`hook_RSA_public_decrypt`, `_EVP_PKEY_set1_RSA`) the same locals/inline treatment or pivot to the struct tracker (`sshd_payload_ctx_t`) once the dispatcher stabilizes.
 
