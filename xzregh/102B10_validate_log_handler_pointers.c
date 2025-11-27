@@ -38,7 +38,7 @@ BOOL validate_log_handler_pointers
   
   scan_range_end = &lea_insn_ptr;
   for (slot_distance = 0x16; slot_distance != 0; slot_distance = slot_distance + -1) {
-    *(undefined4 *)scan_range_end = 0;
+    *(u32 *)scan_range_end = 0;
     scan_range_end = (u8 **)((long)scan_range_end + 4);
   }
   // AutoDoc: Reject identical or NULL slots up front—the handler and ctx pointers must be distinct globals.

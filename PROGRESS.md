@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `LR7`: scrubbed the loader batch for lingering `undefined*` locals by retagging the search-context wipes and register scratchpads in `find_link_map_l_audit_any_plt`, `_bitmask`, `find_dl_naudit`, `validate_log_handler_pointers`, `backdoor_init`, and `backdoor_init_stage2`. Added new inline anchors for the search-context zeroing, decoder reset, resolver-frame stash, and CPUID fallback capture inside `metadata/functions_autodoc.json`, renamed the cpuid relocation pointer plus the register temps in `metadata/xzre_locals.json`, and reran `./scripts/refresh_xzre_project.sh` (x3 while chasing the inline substring) so `xzregh/104EE0/104AE0/104370/102B10/10A794/106F30.c`, the rename report, and the portable archive now emit typed `u32` stores instead of raw `undefined` casts.
+- Next: keep marching through the remaining loader_rt helpers (e.g., the giant `backdoor_setup` zeroing loops and GOT repair routines) so no `undefined*` wipes remain before pivoting to the struct tracker for the loader structs.
+
+## 2025-11-27
 - Session `SR1` revisit: swept `sshd_find_main`, `_find_monitor_field_addr_in_function`, `_get_sensitive_data_address_via_krb5ccname`, `_via_xcalloc`, and `_score_in_do_child` to eliminate the lingering `undefined[0-9]` wipes. Added `register_temps` replacements so every decoder zeroing loop now emits typed `u32` stores, documented each reset with new inline comment anchors, bumped the FUNCTION_PROGRESS review counts, and reran `./scripts/refresh_xzre_project.sh` so `xzregh/102550/102FF0/103340/103680/103870*.c`, the locals rename report, and the portable archive all mirror the cleaned-up metadata.
 - Next: continue the sshd recon backlog by repeating the `undefined*` scrub + inline pass on the SR2 batch (score aggregator/monitor struct helpers) before moving on to the more complex SR3 socket/log routines.
 

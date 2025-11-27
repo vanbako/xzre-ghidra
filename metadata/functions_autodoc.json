@@ -62,7 +62,11 @@
         "comment": "Normalise the resolver context so we know the GOT base, cpuid slot, and relocation constants before patching anything."
       },
       {
-        "match": "cpuid_got_slot = (long *)((long)tls_got_base + *(long *)(cpuid_patch_consts + 8));",
+        "match": "state->resolver_frame = (u64 *)(state->got_ctx).cpuid_got_slot;",
+        "comment": "Stash the resolver frame pointer so stage two can restore the cpuid GOT slot once it finishes patching."
+      },
+      {
+        "match": "cpuid_got_slot = (long *)((long)tls_got_base + *(long *)(cpuid_reloc_consts + 8));",
         "comment": "Use the baked-in relocation deltas to compute the cpuid GOT slot we need to hijack."
       },
       {
@@ -111,6 +115,10 @@
       {
         "match": "max_leaf_info = (int *)cpuid_basic_info(0);",
         "comment": "Issue real CPUID leaves 0/1 to refresh the cached register snapshot before returning FALSE."
+      },
+      {
+        "match": "cpuid_info = (u32 *)cpuid_Version_info(1);",
+        "comment": "Capture the leaf-1 register snapshot so the fallback path can repopulate `ctx->got_ctx` without re-running stage two."
       }
     ]
   },
@@ -1078,6 +1086,10 @@
     "plate": "Cross-correlates the `GLRO(dl_naudit)` literal with the `_rtld_global_ro` slot that holds `_dl_naudit` so stage two can toggle ld.so\u2019s audit bookkeeping.\nThe helper resolves the needed `DSA_get0_*` helpers plus `EVP_MD_CTX_free` via the fake allocator, looks up `rtld_global_ro`, and scans backward from the literal reference until it finds the MOV that loads a pointer inside that struct. It re-validates the absolute address inside `_dl_audit_symbind_alt`, insists the MOV uses the 32-bit path, and only records the slot when both `_dl_naudit` and `_dl_audit` are still zero\u2014otherwise it frees every temporary stub and reports failure.",
     "inline": [
       {
+        "match": "ctx_zero_cursor = &insn_ctx;",
+        "comment": "Clear the decoder context before walking `_dl_audit_symbind_alt` so prefix state never leaks between candidates."
+      },
+      {
         "match": "glro_lookup_string = elf_find_string(dynamic_linker_elf,&glro_naudit_string_id,(void *)0x0);",
         "comment": "Treat the GLRO literal as the anchor; once we find the string we can search `.text` for its lone reference."
       },
@@ -1246,6 +1258,10 @@
       {
         "match": "if ((lea_operand_disp < (ulong)libname_offset) && (lea_operand_disp != (u8 *)0x0)) {",
         "comment": "Only chase LEAs whose displacement matches the expected `link_map::l_name` offset; everything else is noise."
+      },
+      {
+        "match": "for (wipe_idx = 0x10; wipe_idx != 0; wipe_idx = wipe_idx + -1) {",
+        "comment": "Zero the `instruction_search_ctx_t` before seeding offsets so the bitmask helper inherits a clean cursor."
       },
       {
         "match": "if (((int)(mask_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {",

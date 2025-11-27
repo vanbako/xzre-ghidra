@@ -58,9 +58,10 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
           imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
           imported_funcs->DSA_get0_pqg = (pfn_DSA_get0_pqg_t)(libcrypto_ehdr->e_ident + dsa_get0_pqg_value);
         }
+        // AutoDoc: Clear the decoder context before walking `_dl_audit_symbind_alt` so prefix state never leaks between candidates.
         ctx_zero_cursor = &insn_ctx;
         for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-          *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+          *(u32 *)&ctx_zero_cursor->instruction = 0;
           ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_seed * -8 + 4);
         }
         rtld_global_ro_base = dynamic_linker_elf->elfbase->e_ident + rtld_global_ro_sym->st_value;

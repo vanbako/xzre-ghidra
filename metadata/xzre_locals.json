@@ -1452,9 +1452,9 @@
         "type": "long"
       },
       {
-        "name": "cpuid_patch_consts",
+        "name": "cpuid_reloc_consts",
         "original": "puVar2",
-        "type": "undefined *"
+        "type": "const backdoor_cpuid_reloc_consts_t *"
       },
       {
         "name": "tls_got_base",
@@ -1546,7 +1546,7 @@
       {
         "name": "cpuid_info",
         "original": "puVar2",
-        "type": "undefined4 *"
+        "type": "u32 *"
       },
       {
         "name": "cpuid_ebx",
@@ -1567,6 +1567,26 @@
         "name": "wipe_idx",
         "original": "lVar8",
         "type": "long"
+      },
+      {
+        "original": "*(undefined4 *)&(ctx->got_ctx).tls_got_entry",
+        "replacement": "*(u32 *)&(ctx->got_ctx).tls_got_entry"
+      },
+      {
+        "original": "*(undefined4 *)&(ctx->got_ctx).cpuid_got_slot",
+        "replacement": "*(u32 *)&(ctx->got_ctx).cpuid_got_slot"
+      },
+      {
+        "original": "*(undefined4 *)&(ctx->got_ctx).cpuid_slot_index",
+        "replacement": "*(u32 *)&(ctx->got_ctx).cpuid_slot_index"
+      },
+      {
+        "original": "*(undefined4 *)&(ctx->got_ctx).got_base_offset",
+        "replacement": "*(u32 *)&(ctx->got_ctx).got_base_offset"
+      },
+      {
+        "original": "cpuid_info = (undefined4 *)cpuid_Version_info(1);",
+        "replacement": "cpuid_info = (u32 *)cpuid_Version_info(1);"
       }
     ],
     "source": "xzre/xzre_code/backdoor_init_stage2.c"
@@ -3757,6 +3777,10 @@
         "type": "dasm_ctx_t *"
       },
       {
+        "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
+      },
+      {
         "name": "mov_scan_cursor",
         "original": "code_start_00",
         "type": "u8 *"
@@ -4078,14 +4102,26 @@
         "type": "dasm_ctx_t *"
       },
       {
+        "original": "*(undefined4 *)&insn_ctx_wipe_cursor->instruction",
+        "replacement": "*(u32 *)&insn_ctx_wipe_cursor->instruction"
+      },
+      {
         "name": "search_ctx_wipe_cursor",
         "original": "piVar11",
         "type": "instruction_search_ctx_t *"
       },
       {
-        "name": "offset_wipe_cursor",
+        "name": "search_ctx_zero_cursor",
         "original": "puVar12",
-        "type": "undefined4 *"
+        "type": "u32 *"
+      },
+      {
+        "original": "*(undefined4 *)&search_ctx_wipe_cursor->start_addr",
+        "replacement": "*(u32 *)&search_ctx_wipe_cursor->start_addr"
+      },
+      {
+        "original": "search_ctx_zero_cursor = (undefined4 *)((long)&search_ctx.offset_to_match + 4);",
+        "replacement": "search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);"
       },
       {
         "name": "wipe_stride",
@@ -4209,6 +4245,10 @@
         "type": "dasm_ctx_t *"
       },
       {
+        "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
+      },
+      {
         "name": "pattern_state",
         "original": "iVar16",
         "type": "int"
@@ -4217,6 +4257,10 @@
         "name": "bit_test_register",
         "original": "bVar17",
         "type": "u8"
+      },
+      {
+        "original": "*(undefined1 *)((long)search_ctx->output_register + 2)",
+        "replacement": "*(u8 *)((long)search_ctx->output_register + 2)"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -8344,6 +8388,10 @@
         "name": "scan_range_end",
         "original": "ppuVar4",
         "type": "u8 **"
+      },
+      {
+        "original": "*(undefined4 *)scan_range_end",
+        "replacement": "*(u32 *)scan_range_end"
       }
     ],
     "source": "xzre/xzre_code/validate_log_handler_pointers.c"

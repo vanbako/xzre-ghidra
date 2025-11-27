@@ -32,7 +32,7 @@ BOOL find_link_map_l_audit_any_plt
   u8 *lea_operand_disp;
   dasm_ctx_t *insn_ctx_wipe_cursor;
   instruction_search_ctx_t *search_ctx_wipe_cursor;
-  undefined4 *offset_wipe_cursor;
+  u32 *search_ctx_zero_cursor;
   uchar mask_reg_index;
   dl_audit_symbind_alt_fn audit_func_end;
   u8 wipe_stride;
@@ -48,7 +48,7 @@ BOOL find_link_map_l_audit_any_plt
     // AutoDoc: Reset the decoder arena before scanning `_dl_audit_symbind_alt` so no stale prefix flags leak into the LEA detector.
     insn_ctx_wipe_cursor = &insn_ctx;
     for (wipe_idx = 0x16; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
-      *(undefined4 *)&insn_ctx_wipe_cursor->instruction = 0;
+      *(u32 *)&insn_ctx_wipe_cursor->instruction = 0;
       insn_ctx_wipe_cursor = (dasm_ctx_t *)((long)insn_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
     }
     mask_register_bitmap = 0;
@@ -112,28 +112,29 @@ BOOL find_link_map_l_audit_any_plt
           // AutoDoc: Only chase LEAs whose displacement matches the expected `link_map::l_name` offset; everything else is noise.
           if ((lea_operand_disp < (ulong)libname_offset) && (lea_operand_disp != (u8 *)0x0)) {
             search_ctx_wipe_cursor = &search_ctx;
+            // AutoDoc: Zero the `instruction_search_ctx_t` before seeding offsets so the bitmask helper inherits a clean cursor.
             for (wipe_idx = 0x10; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
-              *(undefined4 *)&search_ctx_wipe_cursor->start_addr = 0;
+              *(u32 *)&search_ctx_wipe_cursor->start_addr = 0;
               search_ctx_wipe_cursor = (instruction_search_ctx_t *)((long)search_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
             }
             // AutoDoc: Whichever register we see first becomes `output_register_to_match`; the companion bitmap is treated as the AND-mask source so they stay paired.
             if (((int)(mask_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {
               if (((int)(output_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) goto LAB_00104fd8;
               output_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)output_register_bitmap);
-              offset_wipe_cursor = (undefined4 *)((long)&search_ctx.offset_to_match + 4);
+              search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
-                *offset_wipe_cursor = 0;
-                offset_wipe_cursor = offset_wipe_cursor + (ulong)wipe_stride * -2 + 1;
+                *search_ctx_zero_cursor = 0;
+                search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
               }
               search_ctx.output_register_to_match = &output_register_bitmap;
               search_ctx.output_register = (u8 *)&mask_register_bitmap;
             }
             else {
               mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(undefined2)mask_register_bitmap);
-              offset_wipe_cursor = (undefined4 *)((long)&search_ctx.offset_to_match + 4);
+              search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
-                *offset_wipe_cursor = 0;
-                offset_wipe_cursor = offset_wipe_cursor + (ulong)wipe_stride * -2 + 1;
+                *search_ctx_zero_cursor = 0;
+                search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
               }
               search_ctx.output_register_to_match = &mask_register_bitmap;
               search_ctx.output_register = (u8 *)&output_register_bitmap;

@@ -22,7 +22,7 @@ BOOL backdoor_init_stage2
 
 {
   int *max_leaf_info;
-  undefined4 *cpuid_info;
+  u32 *cpuid_info;
   u32 cpuid_ebx;
   u32 cpuid_ecx;
   u32 cpuid_edx;
@@ -91,14 +91,15 @@ BOOL backdoor_init_stage2
   // AutoDoc: Issue real CPUID leaves 0/1 to refresh the cached register snapshot before returning FALSE.
   max_leaf_info = (int *)cpuid_basic_info(0);
   if (*max_leaf_info != 0) {
-    cpuid_info = (undefined4 *)cpuid_Version_info(1);
+    // AutoDoc: Capture the leaf-1 register snapshot so the fallback path can repopulate `ctx->got_ctx` without re-running stage two.
+    cpuid_info = (u32 *)cpuid_Version_info(1);
     cpuid_ebx = cpuid_info[1];
     cpuid_ecx = cpuid_info[2];
     cpuid_edx = cpuid_info[3];
-    *(undefined4 *)&(ctx->got_ctx).tls_got_entry = *cpuid_info;
-    *(undefined4 *)&(ctx->got_ctx).cpuid_got_slot = cpuid_ebx;
-    *(undefined4 *)&(ctx->got_ctx).cpuid_slot_index = cpuid_edx;
-    *(undefined4 *)&(ctx->got_ctx).got_base_offset = cpuid_ecx;
+    *(u32 *)&(ctx->got_ctx).tls_got_entry = *cpuid_info;
+    *(u32 *)&(ctx->got_ctx).cpuid_got_slot = cpuid_ebx;
+    *(u32 *)&(ctx->got_ctx).cpuid_slot_index = cpuid_edx;
+    *(u32 *)&(ctx->got_ctx).got_base_offset = cpuid_ecx;
   }
   return FALSE;
 }
