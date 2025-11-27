@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `ENUM_payload_state`: introduced the `payload_stream_state_t` enum in `metadata/xzre_types.json`, updated `global_context_t.payload_state` plus the associated register temps in `metadata/xzre_locals.json`, and ran `./scripts/refresh_xzre_project.sh` twice so the regenerated `xzregh/107EA0_check_backdoor_state.c`, `xzregh/108EA0_mm_answer_keyallowed_hook.c`, `xzregh/108D50_decrypt_payload_message.c`, and `xzregh/xzre_types.h` now show the symbolic state names (rename report stayed green, portable archive refreshed). Marked the backlog entry as complete once the export looked good.
+- Next: keep working down `docs/ENUM_ENUMERATION_BACKLOG.md` (likely `payload_command_type_t` or `monitor_reqtype_t`) so the remaining payload/monitor guards stop comparing raw integers.
+
+## 2025-11-27
 - Session `CC7`: purged every remaining `undefined*` local/cast from the active sshd/RSA pipeline (`run_backdoor_commands`, the mm hooks, `sshd_proxy_elevate`, `decrypt_payload_message`, `sshd_log`, `backdoor_setup`, etc.) by retagging the offending locals/temps in `metadata/xzre_locals.json`, adding replacement rewrites for the BSS/stack wipes and opcode header packing, and updating the inline anchors in `metadata/functions_autodoc.json`. Ran `./scripts/refresh_xzre_project.sh` twice (second pass picked up the new inline substrings) so `xzregh/*.c`, the locals rename report, and the portable archive now emit real `u8/u16/u32/u64` types with no injector warnings.
 - Next: sweep the remaining batches for `undefined*` mentions inside the inline comment matches (e.g., the loader_rt helpers still referencing the old memset strings) so future metadata edits don't regress the injector.
 

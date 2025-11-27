@@ -351,7 +351,7 @@
     ]
   },
   "check_backdoor_state": {
-    "plate": "Enforces the payload assembly state machine kept in `global_context_t`: states 1 and 2 require a populated\n`sshd_payload_ctx`, at least 0xae bytes buffered, and a sane body_length lifted from the decrypted header (including\nroom for the 0x60-byte trailer). State 0 insists that the staging buffer stays smaller than 0xae bytes, while state 3/4\naccept only those literal values. Any mismatch resets `payload_state` to 0xffffffff so the caller knows to discard\npartially buffered data.",
+    "plate": "Enforces the payload assembly state machine kept in `global_context_t`: states 1 and 2 require a populated\n`sshd_payload_ctx`, at least 0xae bytes buffered, and a sane body_length lifted from the decrypted header (including\nroom for the 0x60-byte trailer). State 0 insists that the staging buffer stays smaller than 0xae bytes, while state 3/4\naccept only those literal values. Any mismatch resets `payload_state` to PAYLOAD_STREAM_POISONED so the caller knows to discard\npartially buffered data.",
     "inline": [
       {
         "match": "if (((ctx->payload_ctx != (sshd_payload_ctx_t *)0x0) && (0xad < ctx->payload_bytes_buffered))",
@@ -363,11 +363,11 @@
         "comment": "State 0 is just a guardrail\u2014once the staging buffer hits 0xae bytes the caller must graduate into state 1."
       },
       {
-        "match": "state_in_expected_range = payload_state == 3;",
+        "match": "state_in_expected_range = payload_state == PAYLOAD_STREAM_COMMAND_READY;",
         "comment": "States 3 and 4 are literal sentinels; any other value immediately fails the check."
       },
       {
-        "match": "ctx->payload_state = 0xffffffff;",
+        "match": "ctx->payload_state = PAYLOAD_STREAM_POISONED;",
         "comment": "Any violation poisons the state machine so callers drop the partially buffered ciphertext and restart."
       }
     ]
@@ -420,10 +420,10 @@
     ]
   },
   "decrypt_payload_message": {
-    "plate": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_buffer`,\nit copies the plaintext body into the staging buffer, bumps `payload_bytes_buffered`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.",
+    "plate": "Decrypts a ChaCha-wrapped `key_payload_t` chunk using the attacker-provided key material returned by\n`secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_buffer`,\nit copies the plaintext body into the staging buffer, bumps `payload_bytes_buffered`, and then replays the decryption a\nsecond time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short\ndecrypts, exhausted buffer) forces `payload_state` back to PAYLOAD_STREAM_POISONED so future packets start from a clean slate.",
     "inline": [
       {
-        "match": "if (ctx->payload_state == 3) {",
+        "match": "if (ctx->payload_state == PAYLOAD_STREAM_COMMAND_READY) {",
         "comment": "State 3 marks that sshd already consumed the payload buffer, so redundant decrypt requests short-circuit immediately."
       },
       {
@@ -461,7 +461,7 @@
         "comment": "Re-run the decrypt so ChaCha\u2019s keystream pointer stays aligned with sshd\u2019s original consumer."
       },
       {
-        "match": "ctx->payload_state = 0xffffffff;",
+        "match": "ctx->payload_state = PAYLOAD_STREAM_POISONED;",
         "comment": "Any validation failure poisons the state machine so the caller restarts the stream from scratch."
       }
     ]

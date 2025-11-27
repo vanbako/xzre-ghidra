@@ -2311,8 +2311,8 @@
       },
       {
         "name": "payload_state",
-        "original": "uVar1",
-        "type": "u32"
+        "original": "pVar1",
+        "type": "payload_stream_state_t"
       },
       {
         "name": "payload_total_length",
@@ -5230,8 +5230,8 @@
       },
       {
         "name": "payload_state",
-        "original": "uVar2",
-        "type": "u32"
+        "original": "pVar2",
+        "type": "payload_stream_state_t"
       },
       {
         "name": "libc_imports_ref",

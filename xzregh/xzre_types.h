@@ -1126,6 +1126,15 @@ typedef struct __attribute__((packed)) sshd_hostkey_index {
  u32 raw_value; /* Zero-based index into `ctx->sshd_sensitive_data->host_pubkeys` for whichever key validated the Ed448 signature. */
 } sshd_hostkey_index_t;
 
+typedef enum {
+ PAYLOAD_STREAM_EXPECT_HEADER = 0, /* State zero: staging buffer must stay below 0xae bytes until the signed header decrypts and the Ed448 check succeeds. */
+ PAYLOAD_STREAM_BUFFERING_BODY = 1, /* Header verified; continue appending ChaCha-decrypted body chunks until the advertised payload_total_size is satisfied. */
+ PAYLOAD_STREAM_BUFFERING_TRAILER = 2, /* Reserved continuation stage (treated equivalently to state 1 by check_backdoor_state for older payload builders). */
+ PAYLOAD_STREAM_COMMAND_READY = 3, /* Entire signed payload assembled and verified; mm_answer_keyallowed may now interpret the decrypted command. */
+ PAYLOAD_STREAM_DISPATCHED = 4, /* Command handlers already consumed the payload—new chunks are ignored until the buffer resets. */
+ PAYLOAD_STREAM_POISONED = 0xffffffff /* Fatal validation error; callers must discard any staged ciphertext and restart at state zero. */
+} payload_stream_state_t;
+
 /*
  * Authoritative runtime state for the backdoor: resolved libc/libcrypto imports, sshd monitor/log metadata, code/data bounds for scans, payload streaming buffers/state, and the secret-data attestation flags so every hook can share consistent context.
  */
@@ -1160,7 +1169,7 @@ typedef struct __attribute__((packed)) global_context {
  u8 *payload_buffer; /* Pointer to the shared payload scratch (hooks_data->signed_data). */
  sshd_payload_ctx_t *payload_ctx; /* Parsed payload header/context produced by keyallowed hook. */
  u32 sshd_host_pubkey_idx; /* Hostkey slot that verified the Ed448 signature. */
- u32 payload_state; /* Streaming state machine enforced by check_backdoor_state. */
+ payload_stream_state_t payload_state; /* Streaming state machine enforced by check_backdoor_state. */
  u8 encrypted_secret_data[57]; /* ChaCha-encrypted secret blob; decrypted by secret_data_get_decrypted. */
  u8 shift_operation_flags[31]; /* Per-operation guard bits so secret_data_append_* runs each attestation once. */
  u32 secret_bits_filled; /* Total bits shifted into the secret_data buffer so far. */
