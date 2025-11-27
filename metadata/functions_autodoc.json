@@ -798,6 +798,11 @@
         "comment": "Clear the cached `elf_info_t` with a fixed-count wipe so partially parsed state never leaks across runs."
       },
       {
+        "match": "if (elf_info->gnurelro_present != FALSE) {",
+        "match_type": "wildcard",
+        "comment": "Reject binaries that declare more than one PT_GNU_RELRO span; overlapping RELRO metadata would be suspicious."
+      },
+      {
         "match": "range_valid = elf_contains_vaddr(elf_info,vaddr,phnum,4);",
         "match_type": "wildcard",
         "comment": "Reject the ELF immediately if the PT_DYNAMIC payload does not live entirely inside readable memory."
@@ -811,6 +816,11 @@
         "match": "if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||",
         "match_type": "wildcard",
         "comment": "Every relocation/metadata pointer gets revalidated before harvesting the GNU hash bucket/chain tables."
+      },
+      {
+        "match": "if (elf_info->verdef != (Elf64_Verdef *)0x0) {",
+        "match_type": "wildcard",
+        "comment": "Keep the `.gnu.version_d` pointer only when its size metadata also survived validation; otherwise drop the stale handle."
       }
     ]
   },

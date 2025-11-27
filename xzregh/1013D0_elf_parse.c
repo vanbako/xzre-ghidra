@@ -24,8 +24,8 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   Elf64_Rela *rela_relocs_ptr;
   Elf64_Relr *relr_relocs_ptr;
   char *strtab_base;
-  undefined1 auVar9 [16];
-  undefined1 auVar10 [16];
+  u64 pltrel_count_dividend[2];
+  u64 rela_count_dividend[2];
   byte bind_now_flag;
   BOOL verdef_present;
   BOOL range_valid;
@@ -68,7 +68,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
     info_wipe_cursor = &elf_info->load_base_vaddr;
     // AutoDoc: Clear the cached `elf_info_t` with a fixed-count wipe so partially parsed state never leaks across runs.
     for (dynamic_phdr_idx = 0x3e; dynamic_phdr_idx != 0; dynamic_phdr_idx = dynamic_phdr_idx + -1) {
-      *(undefined4 *)info_wipe_cursor = 0;
+      *(u32 *)info_wipe_cursor = 0;
       info_wipe_cursor = (u64 *)((long)info_wipe_cursor + 4);
     }
     elf_info->elfbase = ehdr;
@@ -91,6 +91,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       else {
         range_valid = is_gnu_relro(p_type,0xa0000000);
         if (range_valid != FALSE) {
+          // AutoDoc: Reject binaries that declare more than one PT_GNU_RELRO span; overlapping RELRO metadata would be suspicious.
           if (elf_info->gnurelro_present != FALSE) {
             return FALSE;
           }
@@ -204,9 +205,9 @@ switchD_0010157d_caseD_18:
             return FALSE;
           }
           *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 1;
-          *(u64 *)(auVar9 + 8) = 0;
-          *(u64 *)auVar9 = pltrel_table_size;
-          elf_info->plt_reloc_count = SUB164(auVar9 / ZEXT816(0x18),0);
+          pltrel_count_dividend[1] = 0;
+          pltrel_count_dividend[0] = pltrel_table_size;
+          elf_info->plt_reloc_count = SUB164(pltrel_count_dividend / ZEXT816(0x18),0);
         }
         rela_relocs_ptr = elf_info->rela_relocs;
         if (rela_relocs_ptr != (Elf64_Rela *)0x0) {
@@ -214,9 +215,9 @@ switchD_0010157d_caseD_18:
             return FALSE;
           }
           *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 2;
-          *(u64 *)(auVar10 + 8) = 0;
-          *(u64 *)auVar10 = rela_table_size;
-          elf_info->rela_reloc_count = SUB164(auVar10 / ZEXT816(0x18),0);
+          rela_count_dividend[1] = 0;
+          rela_count_dividend[0] = rela_table_size;
+          elf_info->rela_reloc_count = SUB164(rela_count_dividend / ZEXT816(0x18),0);
         }
         relr_relocs_ptr = elf_info->relr_relocs;
         if (relr_relocs_ptr != (Elf64_Relr *)0x0) {
@@ -226,6 +227,7 @@ switchD_0010157d_caseD_18:
           *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 4;
           elf_info->relr_reloc_count = (u32)(relr_table_size >> 3);
         }
+        // AutoDoc: Keep the `.gnu.version_d` pointer only when its size metadata also survived validation; otherwise drop the stale handle.
         if (elf_info->verdef != (Elf64_Verdef *)0x0) {
           if (verdef_present) {
             *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 8;

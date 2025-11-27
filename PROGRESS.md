@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `EL_mem_cleanup`: revisited `elf_parse` to kill the lingering `undefined[0-9]` vector temps—introduced named 128-bit scratch buffers for the PLT/RELA divisor math, rewrote the wipe loop to emit typed `u32` stores, added inline anchors for the PT_GNU_RELRO uniqueness guard and the `.gnu.version_d` drop logic, refreshed `metadata/xzre_locals.json`, `metadata/functions_autodoc.json`, and `docs/FUNCTION_PROGRESS.md`, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/1013D0_elf_parse.c`, the locals rename report, and the portable archive all reflect the typed scratchpads without postprocess warnings.
+- Next: keep scanning the remaining `elf_mem` helpers for any other `undefined*` leftovers (especially the RELRO/data segment walkers) before pivoting back to the sshd recon backlog.
+
+## 2025-11-27
 - Session `OP_cleanup`: scrubbed every `opco_patt` decoder helper that still emitted `undefined[0-9]` casts by adding `register_temps` replacements for the scratch ctx wipes/opcode window stores, rewrote the operand-size override mask inside `x86_dasm`, and dropped a fresh inline comment on the `.text` sweep in `elf_find_string_references`. Updated `metadata/functions_autodoc.json`, `metadata/xzre_locals.json`, and the FUNCTION_PROGRESS table, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/*`, the Ghidra project, portable archive, and locals rename report all reflect the typed rewrites.
 - Next: finish the remaining OP4 bookkeeping (`elf_find_function_pointer`, `elf_find_string_reference`) or pivot to the next batch once the opco scanners stay clean.
 

@@ -3199,20 +3199,34 @@
         "type": "BOOL"
       },
       {
-        "original": "auVar9._0_8_",
-        "replacement": "*(u64 *)auVar9"
+        "name": "pltrel_count_dividend",
+        "original": "auVar9",
+        "type": "u64[2]"
       },
       {
-        "original": "auVar9._8_8_",
-        "replacement": "*(u64 *)(auVar9 + 8)"
+        "name": "rela_count_dividend",
+        "original": "auVar10",
+        "type": "u64[2]"
       },
       {
-        "original": "auVar10._0_8_",
-        "replacement": "*(u64 *)auVar10"
+        "original": "pltrel_count_dividend._0_8_",
+        "replacement": "pltrel_count_dividend[0]"
       },
       {
-        "original": "auVar10._8_8_",
-        "replacement": "*(u64 *)(auVar10 + 8)"
+        "original": "pltrel_count_dividend._8_8_",
+        "replacement": "pltrel_count_dividend[1]"
+      },
+      {
+        "original": "rela_count_dividend._0_8_",
+        "replacement": "rela_count_dividend[0]"
+      },
+      {
+        "original": "rela_count_dividend._8_8_",
+        "replacement": "rela_count_dividend[1]"
+      },
+      {
+        "original": "*(undefined4 *)info_wipe_cursor",
+        "replacement": "*(u32 *)info_wipe_cursor"
       },
       {
         "name": "range_valid",
