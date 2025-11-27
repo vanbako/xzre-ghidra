@@ -23,7 +23,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
     ctx_zero_cursor = &prologue_ctx;
     // AutoDoc: Zero a scratch decoder context so we can peek at the opcode without mutating caller state.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+      *(u32 *)&ctx_zero_cursor->instruction = 0;
       ctx_zero_cursor = (dasm_ctx_t *)((long)&ctx_zero_cursor->instruction + 4);
     }
     decoded = x86_dasm(&prologue_ctx,code_start,code_end);

@@ -50,7 +50,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   ctx_zero_cursor = ctx;
   // AutoDoc: Clear every field in the decoder context so prefixes/immediates never leak between attempts.
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-    *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+    *(u32 *)&ctx_zero_cursor->instruction = 0;
     ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
   }
   predicate_ok = code_start < code_end;
@@ -60,7 +60,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
     if (!predicate_ok) {
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-        *(undefined4 *)&ctx->instruction = 0;
+        *(u32 *)&ctx->instruction = 0;
         ctx = (dasm_ctx_t *)((long)ctx + (ulong)ctx_zero_stride * -8 + 4);
       }
       return FALSE;
@@ -70,7 +70,7 @@ LAB_00100aa5:
       if (current_byte < 0x2e) {
         if (current_byte == 0xf) {
         // AutoDoc: 0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).
-          *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
+          *(u32 *)(ctx->opcode_window + 3) = 0xf;
           cursor = cursor + 1;
 LAB_001001c9:
           if (code_end <= cursor) goto LAB_00100aa5;
@@ -95,7 +95,7 @@ LAB_001001c9:
             if (cursor + 1 < code_end) {
               prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
-                *(undefined4 *)prefix_zero_cursor = 0;
+                *(u32 *)prefix_zero_cursor = 0;
                 prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
               }
               ctx->instruction = code_start;
@@ -431,8 +431,8 @@ LAB_00100680:
           current_byte = *cursor;
           if (imm_field != 1) {
             opcode_ptr = cursor + 1;
-            if (((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==
-                (undefined1  [16])0x66000000000004) {
+            if ((((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {
+            // AutoDoc: When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.
               if (imm_field == 2) {
                 ctx->imm_size = 4;
               }
@@ -483,7 +483,7 @@ LAB_00100191:
           current_byte = *cursor;
           opcode_class_offset = (ulong)current_byte;
           if (current_byte == 0xf) {
-            *(undefined4 *)(ctx->opcode_window + 3) = 0xf;
+            *(u32 *)(ctx->opcode_window + 3) = 0xf;
             opcode_ptr = cursor;
 LAB_001001c5:
             cursor = opcode_ptr + 1;
@@ -556,7 +556,7 @@ LAB_00100344:
                 ctx->imm_size = 8;
                 (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
                 ctx->mov_imm_reg_index = opcode_index;
-                *(undefined4 *)(ctx->opcode_window + 3) = 0xb8;
+                *(u32 *)(ctx->opcode_window + 3) = 0xb8;
               }
               goto LAB_0010067d;
             }

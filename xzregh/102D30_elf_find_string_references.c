@@ -45,8 +45,9 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
     entry_cursor = (string_references_t *)&entry_cursor->chdir_home_error;
   } while (string_id_seed != 0xe8);
   scratch_ctx = &scanner_ctx;
+  // AutoDoc: Zero the scratch decoder before scanning `.text` so each pointer hunt starts from a clean state.
   for (entry_offset = 0x16; entry_offset != 0; entry_offset = entry_offset + -1) {
-    *(undefined4 *)&scratch_ctx->instruction = 0;
+    *(u32 *)&scratch_ctx->instruction = 0;
     scratch_ctx = (dasm_ctx_t *)((long)&scratch_ctx->instruction + 4);
   }
   code_segment_size[0] = 0;

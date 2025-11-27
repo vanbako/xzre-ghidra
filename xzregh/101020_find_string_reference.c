@@ -24,7 +24,7 @@ u8 * find_string_reference(u8 *code_start,u8 *code_end,char *str)
   ctx_clear_cursor = &scratch_ctx;
   // AutoDoc: Reset the scratch decoder before handing it to the LEA searcher.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    *(u32 *)&ctx_clear_cursor->instruction = 0;
     ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
   lea_found = find_lea_instruction_with_mem_operand(code_start,code_end,&scratch_ctx,str);

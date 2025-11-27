@@ -25,7 +25,7 @@ BOOL find_mov_instruction
   ctx_clear_cursor = &scratch_ctx;
   // AutoDoc: Keep the decoder context pristine so predicates only see the current instruction.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    *(u32 *)&ctx_clear_cursor->instruction = 0;
     ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {

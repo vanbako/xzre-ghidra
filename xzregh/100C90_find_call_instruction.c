@@ -26,7 +26,7 @@ BOOL find_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,dasm_ctx_
     ctx_zero_cursor = &scratch_ctx;
     // AutoDoc: Scratch decoders get wiped between attempts so prefixes/immediates never leak.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
-      *(undefined4 *)&ctx_zero_cursor->instruction = 0;
+      *(u32 *)&ctx_zero_cursor->instruction = 0;
       ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + ((ulong)ctx_zero_stride * -2 + 1) * 4);
     }
     if (dctx == (dasm_ctx_t *)0x0) {

@@ -652,6 +652,11 @@
         "comment": "Pre-seed every slot with the encoded literal it should track before the heavy scans begin."
       },
       {
+        "match": "for (entry_offset = 0x16; entry_offset != 0; entry_offset = entry_offset + -1)",
+        "match_type": "wildcard",
+        "comment": "Zero the scratch decoder before scanning `.text` so each pointer hunt starts from a clean state."
+      },
+      {
         "match": "xref_instruction = find_string_reference(",
         "match_type": "wildcard",
         "comment": "Record the first LEA/MOV that materialises each literal so the later range tightening has an anchor."
@@ -3073,6 +3078,11 @@
         "match": "if (((*->prefix).decoded.lock_rep_byte == 0xf3) && (* == 0x1e)) {",
         "match_type": "wildcard",
         "comment": "Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.",
+        "placement": "after"
+      },
+      {
+        "match": "if ((((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {",
+        "comment": "When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.",
         "placement": "after"
       }
     ]

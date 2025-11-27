@@ -28,7 +28,7 @@ void * find_addr_referenced_in_mov_instruction
   ctx_clear_cursor = &scratch_ctx;
   // AutoDoc: Reset the scratch decoder we hand to `find_instruction_with_mem_operand_ex`.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-    *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+    *(u32 *)&ctx_clear_cursor->instruction = 0;
     ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
   }
   // AutoDoc: Fetch the cached `[func_start, func_end)` range associated with this string ID.

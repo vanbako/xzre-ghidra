@@ -29,7 +29,7 @@ BOOL find_lea_instruction_with_mem_operand
     ctx_clear_cursor = &scratch_ctx;
     // AutoDoc: Zero the scratch decoder so we only evaluate the LEA we just decoded.
     for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
-      *(undefined4 *)&ctx_clear_cursor->instruction = 0;
+      *(u32 *)&ctx_clear_cursor->instruction = 0;
       ctx_clear_cursor = (dasm_ctx_t *)((long)ctx_clear_cursor + ((ulong)ctx_stride_sign * -2 + 1) * 4);
     }
     if (dctx == (dasm_ctx_t *)0x0) {

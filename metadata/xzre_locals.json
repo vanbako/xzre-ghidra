@@ -2821,6 +2821,10 @@
       {
         "original": "scanner_ctx._40_4_",
         "replacement": "*(u32 *)&scanner_ctx.opcode_window[3]"
+      },
+      {
+        "original": "*(undefined4 *)&scratch_ctx->instruction",
+        "replacement": "*(u32 *)&scratch_ctx->instruction"
       }
     ],
     "source": "xzre/xzre_code/elf_find_string_references.c"
@@ -3496,6 +3500,10 @@
         "name": "ctx_clear_cursor",
         "original": "pdVar3",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
@@ -3537,6 +3545,10 @@
         "name": "func_cursor",
         "original": "code_start",
         "type": "u8 *"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
@@ -3568,6 +3580,10 @@
         "name": "ctx_zero_stride",
         "original": "bVar4",
         "type": "byte"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_call_instruction.c"
@@ -3836,6 +3852,10 @@
         "name": "ctx_zero_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_function_prologue.c"
@@ -3878,6 +3898,10 @@
         "name": "ctx_stride_selector",
         "original": "bVar4",
         "type": "byte"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c"
@@ -3913,6 +3937,10 @@
         "name": "ctx_stride_sign",
         "original": "bVar4",
         "type": "byte"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_lea_instruction.c"
@@ -3944,6 +3972,10 @@
         "name": "ctx_stride_sign",
         "original": "bVar4",
         "type": "byte"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_lea_instruction_with_mem_operand.c"
@@ -4308,6 +4340,10 @@
         "name": "is_expected_opcode",
         "original": "bVar4",
         "type": "BOOL"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_mov_instruction.c"
@@ -4344,6 +4380,10 @@
         "name": "is_expected_opcode",
         "original": "bVar5",
         "type": "BOOL"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_mov_lea_instruction.c"
@@ -4391,6 +4431,10 @@
         "name": "ctx_clear_cursor",
         "original": "pdVar4",
         "type": "dasm_ctx_t *"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
       }
     ],
     "source": "xzre/xzre_code/find_string_reference.c"
@@ -8526,6 +8570,26 @@
         "name": "ctx_zero_stride",
         "original": "bVar26",
         "type": "byte"
+      },
+      {
+        "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
+        "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
+      },
+      {
+        "original": "*(undefined4 *)&ctx->instruction",
+        "replacement": "*(u32 *)&ctx->instruction"
+      },
+      {
+        "original": "*(undefined4 *)(ctx->opcode_window + 3)",
+        "replacement": "*(u32 *)(ctx->opcode_window + 3)"
+      },
+      {
+        "original": "*(undefined4 *)prefix_zero_cursor",
+        "replacement": "*(u32 *)prefix_zero_cursor"
+      },
+      {
+        "original": "((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==\n                (undefined1  [16])0x66000000000004",
+        "replacement": "(((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)"
       }
     ],
     "source": "xzre/xzre_code/x86_dasm.c"

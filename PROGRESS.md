@@ -3,6 +3,10 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-11-27
+- Session `OP_cleanup`: scrubbed every `opco_patt` decoder helper that still emitted `undefined[0-9]` casts by adding `register_temps` replacements for the scratch ctx wipes/opcode window stores, rewrote the operand-size override mask inside `x86_dasm`, and dropped a fresh inline comment on the `.text` sweep in `elf_find_string_references`. Updated `metadata/functions_autodoc.json`, `metadata/xzre_locals.json`, and the FUNCTION_PROGRESS table, then reran `./scripts/refresh_xzre_project.sh` so `xzregh/*`, the Ghidra project, portable archive, and locals rename report all reflect the typed rewrites.
+- Next: finish the remaining OP4 bookkeeping (`elf_find_function_pointer`, `elf_find_string_reference`) or pivot to the next batch once the opco scanners stay clean.
+
+## 2025-11-27
 - Session `CC3` cleanup: retired the lingering `_union_110` placeholder in `run_backdoor_commands` by defining `sshd_hostkey_index_t` (metadata/types doc + struct tracker), retagging the locals metadata, wiring in a literal rewrite so casts become `.raw_value`, and rerunning `./scripts/refresh_xzre_project.sh` + the register-temp pass so `xzregh/xzre_types.h`, `ghidra_scripts/xzre_types_import_preprocessed.h`, and `xzregh/1094A0_run_backdoor_commands.c` now expose the named struct without inline-match warnings (followed by a quick fix in `verify_signature` after reapplying the rewrites).
 - Next: sweep the other literal replacements in `metadata/xzre_locals.json` for idempotence (so ad-hoc register-temp passes stay safe) or continue marching through the CC3 backlog if no more anonymous unions pop up.
 
@@ -686,3 +690,4 @@ Document notable steps taken while building out the Ghidra analysis environment 
 
 ## Update Template
 - `YYYY-MM-DD`: <What changed?> — <Why it was done?> — <Next action if applicable>
+# Progress Log
