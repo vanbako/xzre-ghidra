@@ -11,6 +11,7 @@
  * continues as if the original routine ran; malformed inputs fall back to libc’s `exit(0)` so the monitor never stays
  * half-patched.
  */
+
 #include "xzre_types.h"
 
 int mm_answer_authpassword_hook(ssh *ssh,int sock,sshbuf *m)

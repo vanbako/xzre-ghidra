@@ -25,7 +25,7 @@
   "imported_funcs_t": "All non-libc function pointers the payload needs (RSA/EVP/BN helpers, chacha decrypt, etc.) plus access to the owning `libc_imports_t` so callers can reach both sets via one pointer.",
   "sshd_ctx_t": "Snapshot of the sshd monitor state that tracks where each `mm_answer_*` handler lives, whether it has already been hooked, and which request IDs correspond to the sensitive operations we intercept.",
   "sshd_log_ctx_t": "Tracks the validated log_handler/log_handler_ctx slots, saved originals, syslog mask toggle, and the rodata/sshlogv pointers needed to rewrite sshd log lines safely.",
-  "sshd_offsets_kex_t": "Compressed description of where the interesting fields live inside `struct kex` (qword index plus byte offset) so we can adjust to layout shifts between builds.",
+  "sshd_offsets_kex_t": "Compressed description of the monitor→kex layout used by sshd_get_sshbuf: kex_sshbuf_qword_index selects the qword inside `struct kex` that is treated as a candidate `sshbuf *`, while monitor_pkex_table_dword_index selects the dword slot inside `struct monitor` that points at the active `kex **` pointer.",
   "sshd_offsets_sshbuf_t": "Same idea as `sshd_offsets_kex_t` but for the sshbuf backing storage; stores the indices of the data pointer and size field we need to rewrite.",
   "sshd_offsets_fields_t": "Convenience wrapper that groups the individual offset unions for simultaneous propagation from the scanning routines into the runtime context.",
   "sshd_offsets_t": "32-bit union that packs the discovered offsets and exposes them both as structured fields and as a raw integer when we need atomic updates.",

@@ -10,6 +10,7 @@
  * interpreted as the CPU-advertised maximum leaf; only when the requested leaf is <= that bound does it forward the request to the
  * real `_cpuid_gcc()` implementation and report success.
  */
+
 #include "xzre_types.h"
 
 uint _get_cpuid_modified(uint leaf,uint *eax,uint *ebx,uint *ecx,uint *edx,u64 *caller_frame)

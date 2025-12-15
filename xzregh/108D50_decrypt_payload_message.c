@@ -11,6 +11,7 @@
  * second time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short
  * decrypts, exhausted buffer) forces `payload_state` back to PAYLOAD_STREAM_POISONED so future packets start from a clean slate.
  */
+
 #include "xzre_types.h"
 
 BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_context_t *ctx)

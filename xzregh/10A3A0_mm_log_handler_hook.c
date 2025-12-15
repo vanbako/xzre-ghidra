@@ -15,6 +15,7 @@
  * rewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's
  * original mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.
  */
+
 #include "xzre_types.h"
 
 void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)

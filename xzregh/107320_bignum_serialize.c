@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Normalises a BIGNUM into the `[len||value]` framing used by the fingerprinting helpers. It refuses NULL inputs, requires at least six bytes of scratch space, caps magnitudes at 0x4000 bits (0x2001 bytes with the optional sign byte), emits a four-byte big-endian length, and copies the magnitude. When the highest value bit would otherwise set the sign bit it prepends a zero byte; otherwise it memmoves the data down so the caller sees a tightly packed blob. Successful runs report the exact number of bytes written back through `*pOutSize` so callers can concatenate multiple serialisations safely.
  */
+
 #include "xzre_types.h"
 
 BOOL bignum_serialize(u8 *buffer,u64 bufferSize,u64 *pOutSize,BIGNUM *bn,imported_funcs_t *funcs)

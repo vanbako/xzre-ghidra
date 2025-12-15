@@ -10,6 +10,7 @@
  * the thunk it copies the register tuple back into the caller-provided buffers, preserving GCC’s `[EAX, EBX, EDX, ECX]` ordering so
  * callers never need inline assembly.
  */
+
 #include "xzre_types.h"
 
 void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)

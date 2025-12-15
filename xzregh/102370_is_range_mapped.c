@@ -7,6 +7,7 @@
 /*
  * AutoDoc: User-space range probe that avoids `mincore(2)`. The helper rejects zero-length requests and addresses below 0x01000000, then requires `ctx->libc_imports` to expose `pselect` plus `__errno_location`. Starting from the page-aligned base it repeatedly points `pselect`'s `sigmask` argument at the address being tested while passing NULL fd sets; the kernel copies the `sigset_t`, so an unmapped byte causes `EFAULT`. The cursor advances in 0x200-byte steps until it covers `[addr, addr+length)`, clearing errno and returning FALSE on the first fault. Successful sweeps report TRUE so callers know the buffer is safe to dereference.
  */
+
 #include "xzre_types.h"
 
 BOOL is_range_mapped(u8 *addr,u64 length,global_context_t *ctx)

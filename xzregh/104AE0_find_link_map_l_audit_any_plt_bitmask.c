@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Decodes `_dl_audit_symbind_alt` looking for the LEA/MOV/TEST sequence that manipulates `link_map::l_audit_any_plt`. It resolves the libcrypto/libc helper stubs via the fake allocator, runs a three-state scanner (LEA that materialises the displacement, MOV that copies the pointer, and TEST/BT that inspects the flag byte), and when the mask is a single bit it records both the absolute slot and mask inside `hooks->ldso_ctx`. A non-zero bit or a missing pattern flags `search_ctx->result` and aborts the install path.
  */
+
 #include "xzre_types.h"
 
 BOOL find_link_map_l_audit_any_plt_bitmask

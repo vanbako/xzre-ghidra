@@ -10,6 +10,7 @@
  * socket, restores the saved dispatch slot, and reports success; missing metadata or a failed write triggers libc’s
  * `exit(0)` so sshd never continues with a partially installed hook.
  */
+
 #include "xzre_types.h"
 
 int mm_answer_keyverify_hook(ssh *ssh,int sock,sshbuf *m)

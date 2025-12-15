@@ -8,6 +8,7 @@
  * AutoDoc: Write-side twin of `fd_read`. It demands working `write`/`__errno_location` imports, retries short-term EINTR failures, and
  * falls back to -1 if the kernel reports 0 bytes or any other error before the requested `count` is flushed.
  */
+
 #include "xzre_types.h"
 
 ssize_t fd_write(int fd,void *buffer,size_t count,libc_imports_t *funcs)

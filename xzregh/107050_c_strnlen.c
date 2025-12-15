@@ -8,6 +8,7 @@
  * AutoDoc: Bounded strlen variant used on attacker-controlled buffers. It counts until it has inspected `max_len` bytes or hits a NUL,
  * returning `max_len` unchanged when the string is unterminated so callers can treat that as a failure.
  */
+
 #include "xzre_types.h"
 
 ssize_t c_strnlen(char *str,size_t max_len)

@@ -10,6 +10,7 @@
  * limits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were
  * emitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.
  */
+
 #include "xzre_types.h"
 
 BOOL secret_data_append_singleton

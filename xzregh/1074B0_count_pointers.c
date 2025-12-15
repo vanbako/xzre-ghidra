@@ -10,6 +10,7 @@
  * avoid chasing attacker-sized allocations. The loop stops at the first NULL or the allocation boundary, then reports how many slots
  * were populated so the sensitive-data heuristics can reason about argv/envp-style arrays.
  */
+
 #include "xzre_types.h"
 
 BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)

@@ -1144,14 +1144,14 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
 } sshd_log_ctx_t;
 
 /*
- * Compressed description of where the interesting fields live inside `struct kex` (qword index plus byte offset) so we can adjust to layout shifts between builds.
+ * Compressed description of the monitor→kex layout used by sshd_get_sshbuf: kex_sshbuf_qword_index selects the qword inside `struct kex` that is treated as a candidate `sshbuf *`, while monitor_pkex_table_dword_index selects the dword slot inside `struct monitor` that points at the active `kex **` pointer.
  */
 typedef union __attribute__((packed)) sshd_offsets_kex {
  struct __attribute__((packed)) {
-  u8 kex_qword_index;
-  u8 pkex_offset;
- };
- u16 value;
+  sbyte kex_sshbuf_qword_index; /* Qword index inside `struct kex` holding the candidate `sshbuf *`; -1 triggers brute-force scanning. */
+  sbyte monitor_pkex_table_dword_index; /* Dword index inside `struct monitor` for the `kex **` slot; -1 uses monitor->pkex_table. */
+ } bytes;
+ u16 raw_value;
 } sshd_offsets_kex_t;
 
 /*
@@ -1159,10 +1159,10 @@ typedef union __attribute__((packed)) sshd_offsets_kex {
  */
 typedef union __attribute__((packed)) sshd_offsets_sshbuf {
  struct __attribute__((packed)) {
-  u8 sshbuf_data_qword_index;
-  u8 sshbuf_size_qword_index;
- };
- u16 value;
+  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */
+  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */
+ } bytes;
+ u16 raw_value;
 } sshd_offsets_sshbuf_t;
 
 /*
@@ -1176,16 +1176,15 @@ typedef struct __attribute__((packed)) sshd_offsets_fields {
 /*
  * 32-bit union that packs the discovered offsets and exposes them both as structured fields and as a raw integer when we need atomic updates.
  */
-typedef struct __attribute__((packed)) sshd_offsets {
- union {
-  struct {
-   union {
-    sshd_offsets_fields_t fields;
-    u32 value;
-   };
-  };
-  u32 raw_value;
- };
+typedef union __attribute__((packed)) sshd_offsets {
+ sshd_offsets_fields_t fields; /* Structured view: {kex, sshbuf} sub-unions. */
+ struct __attribute__((packed)) {
+  sbyte kex_sshbuf_qword_index; /* Qword index inside `struct kex` holding the candidate `sshbuf *`; -1 triggers brute-force scanning. */
+  sbyte monitor_pkex_table_dword_index; /* Dword index inside `struct monitor` for the `kex **` slot; -1 uses monitor->pkex_table. */
+  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */
+  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */
+ } bytes;
+ u32 raw_value; /* Little-endian packed bytes: {kex_sshbuf_qword_index, monitor_pkex_table_dword_index, sshbuf_data_qword_index, sshbuf_size_qword_index}. */
 } sshd_offsets_t;
 
 /*

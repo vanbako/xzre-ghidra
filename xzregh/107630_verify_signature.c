@@ -11,6 +11,7 @@
  * 32-byte key. Once the fingerprint lands in the blob the helper instantiates an Ed448 `EVP_PKEY` from the baked public key and
  * runs `EVP_DigestVerify` over the `[0, tbs_len)` bytes; only a clean verify lets callers keep processing the monitor command.
  */
+
 #include "xzre_types.h"
 
 BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u64 signed_data_size,

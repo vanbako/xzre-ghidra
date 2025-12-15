@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Extends `elf_contains_vaddr` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (forcing PF_R) so `[vaddr, vaddr+size)` is known to live inside a readable PT_LOAD. When `p_flags` is non-zero and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.
  */
+
 #include "xzre_types.h"
 
 BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)

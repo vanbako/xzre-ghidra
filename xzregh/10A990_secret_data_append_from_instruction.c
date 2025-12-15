@@ -10,6 +10,7 @@
  * plus the masked opcode table, and otherwise maps the cursor into `global_ctx->secret_data` before ORing the bit. The cursor is
  * incremented regardless of whether a bit was set so the caller stays in sync.
  */
+
 #include "xzre_types.h"
 
 BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx,secret_data_shift_cursor_t *cursor)

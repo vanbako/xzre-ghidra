@@ -9,6 +9,7 @@
  * It zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.
  * Opcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.
  */
+
 #include "xzre_types.h"
 
 BOOL find_mov_lea_instruction

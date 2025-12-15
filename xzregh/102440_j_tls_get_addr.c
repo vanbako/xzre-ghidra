@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Thin trampoline that jumps straight into glibc's `__tls_get_addr`. Stage two keeps both exports (the trapping stub and this wrapper) alive so relocations can point at the trap until the loader patches GOT entries to the legit resolver via `j_tls_get_addr`.
  */
+
 #include "xzre_types.h"
 
 void * j_tls_get_addr(tls_index *ti)

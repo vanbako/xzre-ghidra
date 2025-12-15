@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Locates and caches the first PF_R PT_LOAD segment that begins strictly after the executable code. The helper logs a `secret_data_append_from_call_site` breadcrumb, returns the cached `rodata_segment_start/size` when they already exist, and otherwise asks `elf_get_code_segment` for the `[text_start, text_end)` window. It then iterates every program header, converts each PF_R-only mapping into a runtime pointer, page-aligns `[segment_start, segment_end)`, and tracks the lowest candidate whose aligned base sits at or beyond `text_end`. The winning base/size are recorded inside `elf_info_t` and handed back via `pSize` so later string scans and RELRO checks can reuse the same rodata window.
  */
+
 #include "xzre_types.h"
 
 void * elf_get_rodata_segment(elf_info_t *elf_info,u64 *pSize)

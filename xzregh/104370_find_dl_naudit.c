@@ -8,6 +8,7 @@
  * AutoDoc: Cross-correlates the `GLRO(dl_naudit)` literal with the `_rtld_global_ro` slot that holds `_dl_naudit` so stage two can toggle ld.so’s audit bookkeeping.
  * The helper resolves the needed `DSA_get0_*` helpers plus `EVP_MD_CTX_free` via the fake allocator, looks up `rtld_global_ro`, and scans backward from the literal reference until it finds the MOV that loads a pointer inside that struct. It re-validates the absolute address inside `_dl_audit_symbind_alt`, insists the MOV uses the 32-bit path, and only records the slot when both `_dl_naudit` and `_dl_audit` are still zero—otherwise it frees every temporary stub and reports failure.
  */
+
 #include "xzre_types.h"
 
 BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,

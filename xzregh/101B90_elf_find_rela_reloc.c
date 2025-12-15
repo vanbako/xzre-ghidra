@@ -15,6 +15,7 @@
  * Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was
  * provided, stores the position it stopped at.
  */
+
 #include "xzre_types.h"
 
 Elf64_Rela *

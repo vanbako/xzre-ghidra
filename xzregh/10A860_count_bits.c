@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Wegner-style popcount loop over a 64-bit mask. The trie walker and the secret-data helpers use it to turn bitmap nodes into child indexes without storing per-node counts.
  */
+
 #include "xzre_types.h"
 
 u32 count_bits(u64 x)

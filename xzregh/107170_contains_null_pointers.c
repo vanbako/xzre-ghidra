@@ -8,6 +8,7 @@
  * AutoDoc: Linear probe used before invoking crypto helpers. It walks an array of pointers until it reaches `num_pointers` entries or
  * finds a NULL slot; the helper returns TRUE the moment it spots a NULL so callers can abort when any import failed to resolve.
  */
+
 #include "xzre_types.h"
 
 BOOL contains_null_pointers(void **pointers,uint num_pointers)

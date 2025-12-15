@@ -11,6 +11,7 @@
  * accept only those literal values. Any mismatch resets `payload_state` to PAYLOAD_STREAM_POISONED so the caller knows to discard
  * partially buffered data.
  */
+
 #include "xzre_types.h"
 
 BOOL check_backdoor_state(global_context_t *ctx)

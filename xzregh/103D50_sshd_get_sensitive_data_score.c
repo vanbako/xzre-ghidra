@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Combines the per-function heuristics by doubling the `demote_sensitive_data` and `main()` scores, adding them together, and finally tacking on the `do_child` result. Only candidates that reach eight or more points are surfaced to the rest of the implant; weaker hits are ignored even if one heuristic thought they were promising.
  */
+
 #include "xzre_types.h"
 
 int sshd_get_sensitive_data_score(void *sensitive_data,elf_info_t *elf,string_references_t *refs)

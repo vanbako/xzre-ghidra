@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Disassembles a monitor helper, finds a MOV/LEA that pulls from sshd's `.data/.bss`, and then spends the next ~0x40 bytes tracking that register through copies until it lands in RDI and flows into `mm_request_send`. When every predicate fires the referenced `.bss` address is returned as the monitor struct field (sendfd/recvfd/sshbuf pointer, etc.).
  */
+
 #include "xzre_types.h"
 
 BOOL sshd_find_monitor_field_addr_in_function

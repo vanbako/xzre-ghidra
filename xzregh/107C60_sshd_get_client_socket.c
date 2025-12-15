@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Prefers sshd’s monitor struct when it has already been located: the helper validates that the pointer is still mapped, selects `child_to_monitor_fd` or `monitor_to_child_fd` based on the requested direction, and probes the descriptor with a zero-length `read()` (retrying on EINTR but rejecting EBADF). If the monitor is missing or the fd is dead it falls back to `sshd_get_usable_socket` and hands back the Nth idle descriptor instead.
  */
+
 #include "xzre_types.h"
 
 BOOL sshd_get_client_socket

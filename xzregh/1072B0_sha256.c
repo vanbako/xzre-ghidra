@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Thin wrapper around EVP_Digest/Evp_sha256: it rejects NULL buffers, zero lengths, or output buffers smaller than 32 bytes, looks up OpenSSL's SHA-256 descriptor, and hashes the payload through EVP_Digest.
  */
+
 #include "xzre_types.h"
 
 BOOL sha256(void *data,size_t count,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)

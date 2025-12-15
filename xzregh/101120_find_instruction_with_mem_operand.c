@@ -9,6 +9,7 @@
  * It prefers LEA results (via `find_lea_instruction_with_mem_operand`) so RIP-relative references never touch memory, and only falls back to the MOV-load predicate (`find_instruction_with_mem_operand_ex` with opcode `0x10b`) once the LEA attempt fails.
  * TRUE means `dctx` is still positioned on the instruction that materialised `mem_address`.
  */
+
 #include "xzre_types.h"
 
 BOOL find_instruction_with_mem_operand

@@ -14,6 +14,7 @@
  * genuine `mm_answer_keyallowed`; any failure resets `payload_state` (or even exits sshd) so no partially decrypted data
  * is reused.
  */
+
 #include "xzre_types.h"
 
 int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)

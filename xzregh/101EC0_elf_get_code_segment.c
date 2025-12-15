@@ -10,6 +10,7 @@
  * aligns the `[start, end)` window, and records both the base and span in `elf_info_t`. Subsequent calls reuse the
  * cached `text_segment_start/size` so the expensive scan only happens once.
  */
+
 #include "xzre_types.h"
 
 void * elf_get_code_segment(elf_info_t *elf_info,u64 *pSize)

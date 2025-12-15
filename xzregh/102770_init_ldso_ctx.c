@@ -10,6 +10,7 @@
  * so the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with
  * the original ld.so state.
  */
+
 #include "xzre_types.h"
 
 void init_ldso_ctx(ldso_ctx_t *ldso_ctx)

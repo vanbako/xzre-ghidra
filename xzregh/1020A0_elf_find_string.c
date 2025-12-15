@@ -9,6 +9,7 @@
  *
  * The return value is the pointer where the literal begins, making it easy to resume subsequent scans or correlate the literal with code references.
  */
+
 #include "xzre_types.h"
 
 char * elf_find_string(elf_info_t *elf_info,EncodedStringId *stringId_inOut,void *rodata_start_ptr)

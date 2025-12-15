@@ -13,6 +13,7 @@
  * Exhausting the retries zeros the GOT bookkeeping and issues genuine CPUID leaf 0/1 so glibc’s resolver can keep running before
  * returning FALSE.
  */
+
 #include "xzre_types.h"
 
 BOOL backdoor_init_stage2

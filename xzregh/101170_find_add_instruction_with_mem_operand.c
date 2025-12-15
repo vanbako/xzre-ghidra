@@ -9,6 +9,7 @@
  * It wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.
  * If `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.
  */
+
 #include "xzre_types.h"
 
 BOOL find_add_instruction_with_mem_operand

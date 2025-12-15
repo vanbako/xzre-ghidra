@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Uses the cached string reference for `do_child`, awards one point if it ever touches the candidate pointer, and then probes for one or two references to offset +0x10. The second half of the struct buys up to two additional points, yielding a 0–3 score that feeds the aggregate heuristic.
  */
+
 #include "xzre_types.h"
 
 int sshd_get_sensitive_data_score_in_do_child

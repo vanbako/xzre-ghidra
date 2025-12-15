@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Parses the saved ld.so headers inside `main_elf_t`, resolves the versioned `__libc_stack_end` symbol, and confirms the captured runtime is sshd before publishing the pointer for later stages. Successful runs hand later hooks a stable way to reach argv/envp via `main_elf->__libc_stack_end`.
  */
+
 #include "xzre_types.h"
 
 BOOL main_elf_parse(main_elf_t *main_elf)

@@ -9,6 +9,7 @@
  * It seeds each slot with its fixed `EncodedStringId`, scrapes `.rodata` with `elf_find_string`, and latches the first LEA that materialises every literal via `find_string_reference`.
  * The routine then decodes `.text` start-to-finish with `x86_dasm`, shrinking each `[func_start, func_end)` around CALLs, PLT/JMPs, and RIP-relative LEAs that hit the recorded xrefs, and finally folds in RELA/RELR relocation hits plus code-segment bounds so the resulting ranges are trustworthy and always executable.
  */
+
 #include "xzre_types.h"
 
 BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)

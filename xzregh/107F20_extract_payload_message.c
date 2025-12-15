@@ -11,6 +11,7 @@
  * directly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly
  * how many bytes to peel off.
  */
+
 #include "xzre_types.h"
 
 BOOL extract_payload_message

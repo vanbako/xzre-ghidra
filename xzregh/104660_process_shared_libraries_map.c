@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Walks `_r_debug->r_map`, hashes each SONAME to an `EncodedStringId`, and refuses duplicate or malformed entries. Once sshd, libcrypto, ld.so, libsystemd, liblzma, and libc are all accounted for it parses the binaries in turn: sshd’s PLT yields the RSA hook slots, libcrypto/libc descriptors are primed for later import walks, liblzma’s writable PT_LOAD is recorded so the embedded `backdoor_hooks_data_t` blob can be accessed, and libc’s import table is populated via `resolve_libc_imports`.
  */
+
 #include "xzre_types.h"
 
 BOOL process_shared_libraries_map(link_map *r_map,backdoor_shared_libraries_data_t *data)

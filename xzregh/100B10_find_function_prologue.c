@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Recognises CET-style prologues. In `FIND_ENDBR64` mode it zeroes a scratch `dasm_ctx_t`, asks `x86_dasm` to decode at `code_start`, requires the normalised opcode to be ENDBR64, and only succeeds if the ENDBR padding ends on a 16-byte boundary (optionally returning the instruction immediately after the pad through `output`). Legacy mode skips the decoder and reuses `is_endbr64_instruction` with the simple mask; when it hits it reports the exact byte it just tested so callers can keep walking until they find the landing pad they need.
  */
+
 #include "xzre_types.h"
 
 BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType find_mode)

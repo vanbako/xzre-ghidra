@@ -10,6 +10,7 @@
  * key/IV stored beside the function. That seed is treated as the runtime ChaCha key for a second decrypt that finally emits the
  * plaintext secret into the caller buffer, proving no portable crypto ships with the implant.
  */
+
 #include "xzre_types.h"
 
 BOOL secret_data_get_decrypted(u8 *output,global_context_t *ctx)

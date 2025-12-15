@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Brute-force walks file descriptors 0–63, calling `shutdown(fd, 0x7fffffff)` on each one and interpreting the expected `EINVAL`/`ENOTCONN` errors as proof the descriptor is open (but idle). Every qualifying fd increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd’s sockets even if the monitor struct was never recovered.
  */
+
 #include "xzre_types.h"
 
 BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)

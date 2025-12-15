@@ -9,6 +9,7 @@
  * non-zero), and then turn the symbol value into a process address by adding it to `elf_info->elfbase`. Returning NULL indicates
  * either the symbol does not exist or it represents an import/resolver stub that lacks a concrete address.
  */
+
 #include "xzre_types.h"
 
 void * elf_symbol_get_addr(elf_info_t *elf_info,EncodedStringId encoded_string_id)

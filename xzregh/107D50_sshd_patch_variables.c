@@ -10,6 +10,7 @@
  * dispatch table entry with the attacker's authpassword hook. When `monitor_reqtype` isn't explicitly supplied it is
  * derived from the original dispatch table so the forged replies stay in lock-step with sshd's state machine.
  */
+
 #include "xzre_types.h"
 
 BOOL sshd_patch_variables

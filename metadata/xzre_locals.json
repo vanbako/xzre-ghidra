@@ -6376,8 +6376,8 @@
         "type": "sshd_offsets_t"
       },
       {
-        "name": "tmp",
-        "type": "sshd_offsets_t"
+        "name": "selected_hostkey_idx",
+        "type": "sshd_hostkey_index_t"
       },
       {
         "name": "extra_data",
@@ -6592,27 +6592,18 @@
         "type": "byte"
       },
       {
-        "name": "selected_hostkey_idx",
-        "original": "_Var35",
-        "type": "sshd_hostkey_index_t"
-      },
-      {
-        "original": "(u32)selected_hostkey_idx",
-        "replacement": "selected_hostkey_idx.raw_value"
-      },
-      {
         "name": "hostkey_cursor",
-        "original": "lVar36",
+        "original": "lVar35",
         "type": "long"
       },
       {
-        "name": "rsa_payload_bytes",
+        "name": "payload_data_offset",
         "original": "uVar37",
         "type": "ulong"
       },
       {
         "name": "continuation_stride_flag",
-        "original": "bVar39",
+        "original": "bVar38",
         "type": "byte"
       },
       {
@@ -6641,8 +6632,8 @@
         "type": "ulong"
       },
       {
-        "name": "payload_data_offset",
-        "original": "uVar38",
+        "name": "rsa_payload_bytes",
+        "original": "uVar36",
         "type": "ulong"
       },
       {
@@ -6702,6 +6693,18 @@
       {
         "original": "*(undefined4 *)fdset_wipe_cursor = 0;",
         "replacement": "*(u32 *)fdset_wipe_cursor = 0;"
+      },
+      {
+        "original": "rsa_payload_span = (uint)hostkey_cursor;",
+        "replacement": "selected_hostkey_idx.raw_value = (u32)hostkey_cursor;"
+      },
+      {
+        "original": "if (offsets.raw_value <= rsa_payload_span) goto LAB_0010a112;",
+        "replacement": "if (offsets.raw_value <= selected_hostkey_idx.raw_value) goto LAB_0010a112;"
+      },
+      {
+        "original": "ctx->sshd_host_pubkey_idx = rsa_payload_span;",
+        "replacement": "ctx->sshd_host_pubkey_idx = selected_hostkey_idx.raw_value;"
       }
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"
@@ -6973,12 +6976,12 @@
       {
         "name": "size_slot_index",
         "original": "bVar1",
-        "type": "byte"
+        "type": "sbyte"
       },
       {
         "name": "data_slot_index",
         "original": "bVar2",
-        "type": "byte"
+        "type": "sbyte"
       },
       {
         "name": "probe_ok",
@@ -7869,17 +7872,17 @@
       {
         "name": "pkex_slot_index",
         "original": "cVar2",
-        "type": "char"
+        "type": "sbyte"
       },
       {
         "name": "size_index",
         "original": "bVar3",
-        "type": "byte"
+        "type": "sbyte"
       },
       {
         "name": "data_index",
         "original": "bVar4",
-        "type": "byte"
+        "type": "sbyte"
       },
       {
         "name": "monitor_ptr",

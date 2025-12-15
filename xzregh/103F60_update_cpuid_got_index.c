@@ -8,6 +8,7 @@
  * AutoDoc: Copies the relocation constant baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That index identifies the cpuid
  * IFUNC slot within liblzma’s GOT, letting later hooks patch the right entry without rescanning the PLT after relocations.
  */
+
 #include "xzre_types.h"
 
 void update_cpuid_got_index(elf_entry_ctx_t *ctx)

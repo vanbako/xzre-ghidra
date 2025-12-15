@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Loader workhorse that performs every runtime retrofit. After confirming the resolver-frame/cpuid GOT distance it zeroes a stack `backdoor_data_t`, parses `_r_debug` with `main_elf_parse` + `process_shared_libraries`, snaps the active liblzma allocator, and repopulates the hooks blob/shared globals from liblzma. It refreshes sshd string references, dissects the mm_request/mm_answer ranges to locate the auth-log format, PAM flag, and PermitRootLogin toggles, runs the sensitive-data + monitor heuristics, and harvests the sshlogv handlers from `syslog_bad_level`. Once libc/libcrypto imports and the secret-data telemetry hit their expected counts it streams every hook/trampoline pointer into `secret_data`, flips the `_dl_audit` bitmasks, installs the symbind trampoline, and restores the liblzma allocator; failures reset the ld.so ctx and zero the cpuid GOT bookkeeping so glibc's resolver can keep running untouched.
  */
+
 #include "xzre_types.h"
 
 BOOL backdoor_setup(backdoor_setup_params_t *params)

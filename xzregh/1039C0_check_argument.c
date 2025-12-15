@@ -7,6 +7,7 @@
 /*
  * AutoDoc: Slides a two-byte window across dash-prefixed argv entries and reports the first position whose bytes contain lowercase `d`. `process_is_sshd` treats that non-NULL pointer as proof sshd was launched with `-d`/`--debug`, so the loader stays away from debug-mode daemons. Control bytes, tabs, and `=` terminate the walk early and force a NULL return so only clean switches reach the matcher.
  */
+
 #include "xzre_types.h"
 
 char * check_argument(char arg_first_char,char *arg_name)

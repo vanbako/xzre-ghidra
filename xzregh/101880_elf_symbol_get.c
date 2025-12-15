@@ -14,6 +14,7 @@
  * linked `Elf64_Verdef` list, and compares the version string id. Returning NULL means the symbol/version was missing, the module
  * never exposed the GNU hash + version tables, or one of the string/relocation pointers failed validation mid-walk.
  */
+
 #include "xzre_types.h"
 
 Elf64_Sym *
