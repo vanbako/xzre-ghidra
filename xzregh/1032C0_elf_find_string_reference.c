@@ -8,7 +8,6 @@
  * AutoDoc: Single-slot helper for the string catalogue. It emits a secret-data breadcrumb, then repeatedly calls `elf_find_string` (resuming from the last rodata pointer) until the requested `encoded_string_id` is encountered.
  * Each discovery is checked with `find_string_reference` inside `[code_start, code_end)`, and the first instruction that materialises the literal is returned so later passes can clamp function ranges around it. Telemetry failures or missing xrefs return NULL.
  */
-
 #include "xzre_types.h"
 
 u8 * elf_find_string_reference

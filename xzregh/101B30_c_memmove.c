@@ -10,7 +10,6 @@
  * a forward copy loop. Either way the original `dest` pointer is returned so callers can chain copies just like they would with
  * the libc version.
  */
-
 #include "xzre_types.h"
 
 void * c_memmove(char *dest,char *src,size_t cnt)

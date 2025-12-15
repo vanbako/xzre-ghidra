@@ -9,7 +9,6 @@
  * consults this block at runtime, so the function simply wires the exported function pointers into the struct and returns success
  * once the pointer checks pass.
  */
-
 #include "xzre_types.h"
 
 int init_shared_globals(backdoor_shared_globals_t *shared_globals)

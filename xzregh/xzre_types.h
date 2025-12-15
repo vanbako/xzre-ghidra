@@ -1466,15 +1466,10 @@ typedef struct __attribute__((packed)) secret_data_item {
 /*
  * First 16 bytes of every encrypted payload chunk. The stride/index/bias triple stays in plaintext so decrypt_payload_message can reuse it as the ChaCha nonce, and run_backdoor_commands collapses it into monitor_data.cmd_type via (stride * index + bias) before committing to the payload.
  */
-typedef struct __attribute__((packed)) key_payload_hdr {
- union {
-  u8 bytes[16];
-  struct __attribute__((packed)) {
-   u32 cmd_type_stride; /* Low 32 bits of the ChaCha nonce; multiplied with cmd_type_index before cmd_type_bias is applied. */
-   u32 cmd_type_index; /* High 32 bits of the ChaCha nonce; second multiplicand in the cmd_type calculation. */
-   int64_t cmd_type_bias; /* Signed bias added to the product; also forms the top half of the 16-byte nonce. */
-  };
- };
+typedef struct __attribute__((packed)) backdoor_payload_hdr {
+ u32 cmd_type_stride; /* Low 32 bits of the ChaCha nonce; multiplied with cmd_type_index before cmd_type_bias is applied. */
+ u32 cmd_type_index; /* High 32 bits of the ChaCha nonce; second multiplicand in the cmd_type calculation. */
+ int64_t cmd_type_bias; /* Signed bias added to the product; also forms the top half of the 16-byte nonce. */
 } backdoor_payload_hdr_t;
 
 /*
@@ -1521,15 +1516,23 @@ typedef struct __attribute__((packed)) backdoor_payload {
  * Outer frame for each streamed chunk: ChaCha ciphertext that carries the plaintext header + length prefix + body, giving decrypt_payload_message enough structure to stage the decrypted command bytes.
  */
 typedef struct __attribute__((packed)) key_payload {
- union {
-  u8 raw[0]; /* ChaCha ciphertext as delivered via the RSA modulus stream (header + length + body). */
-  struct __attribute__((packed)) {
-   backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by decrypt_payload_message. */
-   u16 encrypted_body_length; /* Little-endian body length in ciphertext; decrypted to learn how many bytes to copy. */
-   u8 encrypted_body[0]; /* Variable-length ciphertext immediately following the length field. */
-  };
- };
+ backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by decrypt_payload_message. */
+ u16 encrypted_body_length; /* Little-endian body length in ciphertext; decrypted to learn how many bytes to copy. */
+ u8 encrypted_body[1]; /* Variable-length ciphertext immediately following the length field. */
 } key_payload_t;
+
+/*
+ * Stack scratch wrapper used by run_backdoor_commands: a 5-byte cmd_arguments_t prefix followed by the key_payload_t ciphertext chunk copied from the RSA modulus stream.
+ */
+typedef union __attribute__((packed)) key_payload_cmd_frame {
+ u8 bytes[0x21d]; /* Raw view: 5-byte cmd_flags prefix + modulus ciphertext chunk (max 0x218 bytes). */
+ struct __attribute__((packed)) {
+  cmd_arguments_t cmd_flags; /* Scratch copy of the decrypted cmd flag bytes (control/monitor/request flags + payload_hint) staged before the ciphertext for easy access. */
+  u8 header_bytes[16]; /* Plaintext payload header reused as the ChaCha nonce; see backdoor_payload_hdr_t for decoded {stride,index,bias}. */
+  u16 encrypted_body_length; /* Little-endian body length in ciphertext; becomes valid plaintext after the first ChaCha pass. */
+  u8 encrypted_body[0x206]; /* Ciphertext body bytes (max derived from run_backdoor_commands() modulus bounds: 0x218 - 0x10 - 2). */
+ } fields;
+} key_payload_cmd_frame_t;
 
 /*
  * Interpretation of the first byte of the `cmd_arguments_t` block (packet sizing hints, PAM disablement, socket index encoding, etc.).

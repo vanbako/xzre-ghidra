@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Pulls the p/q/g parameters and public key (y) out of the DSA handle via DSA_get0_pqg/DSA_get0_pub_key, serialises each with bignum_serialize into a 0x628-byte scratch buffer, and hashes the concatenation with sha256. Any missing pointer, oversized BIGNUM, or serialization failure aborts immediately so only genuine DSA host keys feed the fingerprint.
  */
-
 #include "xzre_types.h"
 
 BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)

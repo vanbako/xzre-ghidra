@@ -9,7 +9,6 @@
  * After logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.
  * If `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.
  */
-
 #include "xzre_types.h"
 
 BOOL find_lea_instruction_with_mem_operand

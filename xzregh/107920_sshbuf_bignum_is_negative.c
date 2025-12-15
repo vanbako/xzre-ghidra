@@ -9,7 +9,6 @@
  * finds a byte with the sign bit set and tags the buffer as a "negative" modulus candidate. Any buffer that never trips the MSB
  * probe (or sits outside the size window) is rejected.
  */
-
 #include "xzre_types.h"
 
 BOOL sshbuf_bignum_is_negative(sshbuf *buf)

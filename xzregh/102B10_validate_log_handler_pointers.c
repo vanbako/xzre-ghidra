@@ -11,7 +11,6 @@
  * searches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept
  * the pair as the genuine log-handler slots.
  */
-
 #include "xzre_types.h"
 
 BOOL validate_log_handler_pointers

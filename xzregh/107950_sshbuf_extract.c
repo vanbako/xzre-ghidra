@@ -9,7 +9,6 @@
  * indices mean the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally checks the
  * referenced buffer is mapped before returning the pointer/length pair.
  */
-
 #include "xzre_types.h"
 
 BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *p_sshbuf_size)

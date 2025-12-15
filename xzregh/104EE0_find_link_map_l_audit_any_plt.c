@@ -11,7 +11,6 @@
  * the populated search context to the helper. A hit stores both the displacement and mask in `hooks->ldso_ctx`; a miss either
  * means `_dl_audit_symbind_alt` never emitted the pattern or the bitmask was already latched.
  */
-
 #include "xzre_types.h"
 
 BOOL find_link_map_l_audit_any_plt

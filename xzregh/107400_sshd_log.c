@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Mirrors sshd’s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.
  */
-
 #include "xzre_types.h"
 
 void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)

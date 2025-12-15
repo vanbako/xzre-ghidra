@@ -9,7 +9,6 @@
  * It emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.
  * Either `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.
  */
-
 #include "xzre_types.h"
 
 BOOL find_lea_instruction(u8 *code_start,u8 *code_end,u64 displacement)

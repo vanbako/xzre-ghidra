@@ -12,7 +12,6 @@
  * slot range and resume the walk mid-stream. NULL means the module had no RELR entries, none targeted the requested
  * address, or the decoded pointer failed validation.
  */
-
 #include "xzre_types.h"
 
 Elf64_Relr * elf_find_relr_reloc(elf_info_t *elf_info,EncodedStringId encoded_string_id)

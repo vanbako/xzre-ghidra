@@ -10,7 +10,6 @@
  * arrive at the GOT slot. When the stub still references the baked 0x2600 index, the helper trusts the computed address, caches it
  * in `ctx->got_ctx.tls_got_entry`, and returns the PLT pointer so follow-up code can repoint the cpuid IFUNC slot.
  */
-
 #include "xzre_types.h"
 
 void * update_got_address(elf_entry_ctx_t *entry_ctx)

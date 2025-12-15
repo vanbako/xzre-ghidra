@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Validates caller buffers and imported EVP symbols, allocates a temporary EVP_CIPHER_CTX, runs the ChaCha20 decrypt pipeline (Init -> Update -> Final), enforces that the accumulated plaintext never exceeds the input length, and tears the context down on every path. Only a full set of successful EVP calls returns TRUE.
  */
-
 #include "xzre_types.h"
 
 BOOL chacha_decrypt(u8 *in,int inl,u8 *key,u8 *iv,u8 *out,imported_funcs_t *funcs)

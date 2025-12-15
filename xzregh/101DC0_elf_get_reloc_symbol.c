@@ -12,7 +12,6 @@
  * entries in place. Every lookup is gated by `secret_data_append_from_address` so relocation edits only happen while
  * the secret-data recorder is active.
  */
-
 #include "xzre_types.h"
 
 void * elf_get_reloc_symbol

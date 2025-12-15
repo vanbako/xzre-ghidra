@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Resolves `_r_debug` out of ld.so, verifies `r_state > 0`, and then feeds a stack-resident copy of `backdoor_shared_libraries_data_t` into `process_shared_libraries_map`. On success the filled-in handles, PLT slots, and libc import table are copied back to the caller so later stages never have to touch `_r_debug` again.
  */
-
 #include "xzre_types.h"
 
 BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)

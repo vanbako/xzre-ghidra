@@ -11,7 +11,6 @@
  * globals are published. Once the shared block exists it simply returns 0, signalling that the structure now inherits every
  * pointer from the shared globals.
  */
-
 #include "xzre_types.h"
 
 int init_hooks_ctx(backdoor_hooks_ctx_t *ctx)

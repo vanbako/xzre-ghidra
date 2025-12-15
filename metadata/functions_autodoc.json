@@ -427,11 +427,11 @@
         "comment": "State 3 marks that sshd already consumed the payload buffer, so redundant decrypt requests short-circuit immediately."
       },
       {
-        "match": "*(u64 *)&hdr.field0_0x0 = *(u64 *)&payload->field0_0x0;",
+        "match": "hdr.cmd_type_stride = (payload->header).cmd_type_stride;",
         "comment": "Stage the plaintext stride/index/bias header locally so ChaCha reuses the exact nonce sshd derived from the modulus chunk."
       },
       {
-        "match": "ciphertext_cursor = &(payload->field0_0x0).field1.encrypted_body_length;",
+        "match": "ciphertext_cursor = &payload->encrypted_body_length;",
         "comment": "Point the decrypt cursor at the 2-byte length + ciphertext payload so the first ChaCha pass exposes the plaintext size in place."
       },
       {
@@ -2094,7 +2094,7 @@
         "comment": "Unwrap the ChaCha key/nonce from secret_data and decrypt the modulus bytes into the temporary payload buffer."
       },
       {
-        "match": "encrypted_payload.field0_0x0._13_8_, 3 < command_opcode",
+        "match": "3 < command_opcode)) goto LAB_0010a11a;",
         "comment": "Collapse the plaintext header\u2019s stride/index/bias triple into one of the four monitor opcodes; any product outside the 0\u20133 window aborts the dispatch."
       },
       {
@@ -2186,7 +2186,7 @@
         "comment": "Abort if the decrypted modulus does not contain enough bytes for the `[uid||gid||cmd]` tuple requested by the flag mix."
       },
       {
-        "match": "if ((encrypted_payload.field0_0x0._1_1_ & 1) == 0) {",
+        "match": "if ((encrypted_payload_bytes[1] & 1) == 0) {",
         "occurrence": 1,
         "comment": "Bit0 of monitor_flags decides whether opcode 2 prepends attacker-supplied uid/gid values (set) or leaves both zeroed so the shell command inherits root."
       },
@@ -2195,7 +2195,7 @@
         "comment": "Opcode 2 bails unless the decrypted `[uid||gid||cmd]` buffer terminates with NUL, preventing the helper from running off the end of the modulus slice when calling system()."
       },
       {
-        "match": "(encrypted_payload.field0_0x0._1_1_ & 0xc0) == 0xc0",
+        "match": "(encrypted_payload_bytes[1] & 0xc0) == 0xc0",
         "comment": "When the monitor flags carry the 0xC0 pattern the dispatcher sleeps for five seconds and exits sshd immediately, giving the operator a clean kill-switch path."
       },
       {

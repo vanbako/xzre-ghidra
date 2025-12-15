@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Locates and caches the writable PT_LOAD that carries `.data` and `.bss`. Repeat callers reuse `data_segment_start/size` (or, when `get_alignment` is TRUE, the cached padding between the live data and the next page) so the expensive scan runs only once. On a cold call the helper walks every PT_LOAD with PF_W|PF_R, validates `p_memsz >= p_filesz`, converts the virtual range into a runtime pointer, page-aligns `[start,end)`, and retains the candidate whose aligned end sits highest in memory. The winner's file-backed end, zero-filled tail, and page-rounded padding are stored in `elf_info_t` and returned through `pSize` so later hooks can either reach `.data` or carve out the staging padding for `backdoor_hooks_data_t`.
  */
-
 #include "xzre_types.h"
 
 void * elf_get_data_segment(elf_info_t *elf_info,u64 *pSize,BOOL get_alignment)

@@ -10,7 +10,6 @@
  * bits through `secret_data_append_from_instruction`. Returning FALSE means the code range ran out before the requested number of
  * instructions were found.
  */
-
 #include "xzre_types.h"
 
 BOOL secret_data_append_from_code

@@ -12,7 +12,6 @@
  * mode. In filter mode it verifies that the `%s`, `"Connection closed by"`, and `"(preauth)"` strings are available before
  * dropping `mm_log_handler_hook` into place.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)

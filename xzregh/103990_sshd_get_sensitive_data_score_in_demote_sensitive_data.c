@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand touches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.
  */
-
 #include "xzre_types.h"
 
 int sshd_get_sensitive_data_score_in_demote_sensitive_data

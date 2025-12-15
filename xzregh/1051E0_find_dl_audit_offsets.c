@@ -12,7 +12,6 @@
  * `l_audit_any_plt`, and finally seeds `hooks->ldso_ctx.libcrypto_l_name` with libcrypto’s basename so the forged `link_map`
  * looks legitimate. Any failure unwinds the temporary imports and aborts the audit-hook install.
  */
-
 #include "xzre_types.h"
 
 BOOL find_dl_audit_offsets

@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Bootstraps the entire sensitive-data pipeline: it first emits log breadcrumbs for `sshd_proxy_elevate` and both socket helpers, zeroes the scratch batch, and re-roots the fake lzma allocator at libcrypto so every subsequent `lzma_alloc` call resolves EVP entry points (`EVP_Digest*`, `EVP_chacha20`, etc.) after verifying the `EVP_sm*` family still exists. It walks sshd's PT_LOAD spans to capture `.text`/`.data`, discovers the live `sshd_main` pointer, records whether the entry begins with ENDBR64, and extends the scan window through the trailing padding so both heuristics share the same bounds. The xcalloc and KRB5CCNAME passes then duke it out: each recovered pointer is scored via `sshd_get_sensitive_data_score`, the ctx publishes whichever candidate reaches >=8, and any failure tears down the temporary EVP handles before returning FALSE.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_find_sensitive_data

@@ -9,7 +9,6 @@
  * Every GOT helper subtracts this anchor when converting the baked relocation constants back into runtime addresses, so the helper
  * keeps the base in sync after IFUNC code mutates the resolver stack.
  */
-
 #include "xzre_types.h"
 
 void update_got_offset(elf_entry_ctx_t *ctx)

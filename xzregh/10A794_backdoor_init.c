@@ -10,7 +10,6 @@
  * with the attacker’s resolver, issues the genuine cpuid to keep glibc happy, and finally restores the original target so future
  * cpuid calls enter the newly installed hook path.
  */
-
 #include "xzre_types.h"
 
 void * backdoor_init(elf_entry_ctx_t *state,u64 *caller_frame)

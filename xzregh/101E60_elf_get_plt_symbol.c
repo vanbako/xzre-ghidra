@@ -10,7 +10,6 @@
  * returns the GOT/PLT entry that will be rewritten during hook installation. NULL indicates the table was absent or
  * the symbol never appeared in it.
  */
-
 #include "xzre_types.h"
 
 void * elf_get_plt_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id)

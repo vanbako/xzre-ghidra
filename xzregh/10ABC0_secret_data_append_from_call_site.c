@@ -9,7 +9,6 @@
  * `unaff_retaddr` pseudo-variable into the code pointer slot, forces a NULL `call_site` so the singleton walks from the next CALL,
  * and lets callers OR in a bypass flag when the attestation failure should not abort the enclosing logic.
  */
-
 #include "xzre_types.h"
 
 BOOL secret_data_append_from_call_site

@@ -13,7 +13,6 @@
  * `hooks->ldso_ctx.libcrypto_l_name`, and the helper insists that `_dl_audit_preinit` and `_dl_audit_symbind_alt` each issue an
  * LEA that applies the same delta before finalizing the import list.
  */
-
 #include "xzre_types.h"
 
 BOOL find_link_map_l_name

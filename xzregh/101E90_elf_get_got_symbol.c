@@ -9,7 +9,6 @@
  * `elf_get_reloc_symbol` with relocation type 6 (R_X86_64_GLOB_DAT) to retrieve the writable GOT slot for the
  * requested import. Failure means the module never imported the symbol through a standard GOT relocation.
  */
-
 #include "xzre_types.h"
 
 void * elf_get_got_symbol(elf_info_t *elf_info,EncodedStringId encoded_string_id)

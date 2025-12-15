@@ -10,7 +10,6 @@
  * the cpuid GOT slot while glibc still thinks it is selecting an implementation. Every invocation ultimately calls `_cpuid_gcc()` and
  * returns EAX so liblzma’s resolver contract stays intact.
  */
-
 #include "xzre_types.h"
 
 uint backdoor_entry(uint cpuid_request,u64 *caller_frame)

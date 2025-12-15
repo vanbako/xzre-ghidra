@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Grabs the exponent and modulus via RSA_get0_key, serialises the exponent first and the modulus second with bignum_serialize into a ~4 KiB stack buffer, and runs sha256 over the exact number of bytes produced. Any missing component or overflow of the 0x100a-byte scratch cancels the fingerprint.
  */
-
 #include "xzre_types.h"
 
 BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)

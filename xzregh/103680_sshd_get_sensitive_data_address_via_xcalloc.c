@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Consults the cached string references to find sshd's zero-initialisation `xcalloc` call, watches the next handful of instructions for `.bss` stores of the return value, and records up to sixteen unique destinations. Whenever it sees three pointers separated by eight bytes (ptr/ptr+8/ptr+0x10) it treats the lowest slot as the `sensitive_data` base.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_get_sensitive_data_address_via_xcalloc

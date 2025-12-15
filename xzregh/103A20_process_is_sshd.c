@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Walks the argc/argv/envp layout straight off the caller's stack pointer and only returns TRUE when the snapshot looks exactly like sshd. It first proves stack_end still lives below this frame, sits within 0x2000 bytes, reports 1-32 arguments, and points argv[0] at stack memory that hashes to `/usr/sbin/sshd`. Every remaining argv pointer must stay inside that 0x4000-byte window and avoid `check_argument`'s debug filter. After verifying that argv is NULL-terminated it promotes the walk to envp, requiring stack-resident strings to share the same range while off-stack strings must fall completely inside sshd's writable `.data/.bss` padding window. Any NULL env entry before the sentinel or a non-zero encoded ID aborts the probe.
  */
-
 #include "xzre_types.h"
 
 BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)

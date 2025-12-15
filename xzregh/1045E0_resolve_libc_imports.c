@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Treats the runtime libc `link_map` as another ELF image: run `elf_parse`, point the fake allocator at `libc_info`, and resolve `read` plus `__errno_location` through the bootstrap trampolines. Only when both slots land does the helper declare `libc_imports_t` ready so later socket helpers can avoid touching libc’s PLT.
  */
-
 #include "xzre_types.h"
 
 BOOL resolve_libc_imports(link_map *libc,elf_info_t *libc_info,libc_imports_t *imports)

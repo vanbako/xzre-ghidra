@@ -11,7 +11,6 @@
  * and looks up a two-word node entry whose flags either return the encoded ID or supply signed deltas that descend to the next bitmap row.
  * Missing bits or non-printable characters immediately bail with ID 0.
  */
-
 #include "xzre_types.h"
 
 EncodedStringId get_string_id(char *string_begin,char *string_end)

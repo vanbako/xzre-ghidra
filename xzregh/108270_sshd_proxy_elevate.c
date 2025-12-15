@@ -13,7 +13,6 @@
  * whichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,
  * "wait" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)

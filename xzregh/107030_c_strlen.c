@@ -9,7 +9,6 @@
  * short-circuits when the first byte is NUL, and otherwise increments a counter until it encounters `\0`, returning the byte count
  * as a signed size.
  */
-
 #include "xzre_types.h"
 
 ssize_t c_strlen(char *str)

@@ -18,7 +18,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_shared_libraries_data_t` | 1 | Backdoor order #2 – renamed PLT slot/hooks_data pointers and documented their purpose (2025-11-19). |
 | `backdoor_hooks_data_t` | 1 | Backdoor order #3 – annotated ldso/global/import/log/payload blocks + signed blob tail (2025-11-19). |
 | `backdoor_hooks_ctx_t` | 1 | Backdoor order #4 – renamed ctx scratch/slot fields, documented symbind/RSA/mm hook pointers, noted the reserved log/monitor placeholders (2025-11-19). |
-| `backdoor_payload_hdr_t` | 1 | Backdoor review order #5 – renamed stride/index/bias fields + doc’d ChaCha/cmd-type usage (2025-11-19). |
+| `backdoor_payload_hdr_t` | 2 | Backdoor review order #5 – flattened header layout so decomp prefers `cmd_type_*` fields (2025-12-15). |
 | `backdoor_payload_body_t` | 1 | Backdoor review order #6 – renamed the signature/args/data slots to `ed448_signature`/`cmd_flags`/`monitor_payload`, documented the Ed448 coverage and 0x87 payload offset (2025-11-19). |
 | `backdoor_payload_t` | 1 | Backdoor review order #7 – renamed the raw bytes view, documented the parsed header/body union, and noted why the hooks need both representations (2025-11-19). |
 | `backdoor_setup_params_t` | 1 | Backdoor review order #8 – renamed the scratch/pointer fields, documented the dummy lzma state plus entry ctx usage (2025-11-19). |
@@ -59,7 +59,8 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `kex` | 0 |  |
 | `key_buf` | 1 | Broke the opaque `words[]` blob into `seed_key`/`seed_iv`/`encrypted_seed`/`payload_iv`, documenting how the first ChaCha pass unwraps the runtime key and the second reuses it with a fixed IV (2025-11-21). |
 | `key_ctx_t` | 1 | Payload/Crypto pass – renamed the modulus/exponent/args/payload scratch to describe the ChaCha + Ed448 reuse, annotated the hostkey digest slot and nonce/IV snapshots, and documented the secret_data linkage (2025-11-21). |
-| `key_payload_t` | 1 | Backdoor review order #7.2 – renamed the flat buffer/length/body view, documented the ChaCha ciphertext framing, and tied it back to decrypt_payload_message (2025-11-19). |
+| `key_payload_t` | 2 | Backdoor review order #7.2 – retagged the ChaCha frame as `{header, encrypted_body_length, encrypted_body[]}` and refreshed locals/inline anchors so decrypt_payload_message exports clean field accesses (2025-12-15). |
+| `key_payload_cmd_frame_t` | 1 | Added a documented scratch overlay (cmd flag bytes + modulus ciphertext) to keep RSA-path payload parsing readable (2025-12-15). |
 | `La_i86_regs` | 0 |  |
 | `La_i86_retval` | 0 |  |
 | `La_x32_regs` | 0 |  |

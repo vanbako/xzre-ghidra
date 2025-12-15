@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-15
+- Session `STRUCT_key_payload_t`: revisited the ChaCha payload framing by flattening `backdoor_payload_hdr_t` and `key_payload_t` in `metadata/xzre_types.json`, introducing the `key_payload_cmd_frame_t` scratch overlay for the RSA modulus staging path, and updating `metadata/xzre_locals.json`/`metadata/functions_autodoc.json` so `xzregh/108D50_decrypt_payload_message.c` and the relevant `run_backdoor_commands` blocks export with readable field/byte accesses and refreshed inline comments. Ran `./scripts/refresh_xzre_project.sh` and re-applied inline anchors; portable archive regenerated at `ghidra_projects/xzre_ghidra_portable.zip`.
+- Next: tackle `sshd_offsets_t` from `docs/STRUCT_BACKLOG.md` so the payload dispatch path stops relying on raw byte indexing for monitor/kex/sshbuf offsets.
+
 ## 2025-11-27
 - Session `ENUM_audit_pattern_state`: defined the `audit_pattern_state_t` enum inside `metadata/xzre_types.json`, retagged the `pattern_state` register temp in `metadata/xzre_locals.json`, and ran `./scripts/refresh_xzre_project.sh` so `xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c` now declares `audit_pattern_state_t pattern_state` and the generated `xzregh/xzre_types.h` exports the new LEA/MOV/TEST state constants; also struck the backlog entry in `docs/ENUM_ENUMERATION_BACKLOG.md` after verifying the Ghidra export/portable archive.
 - Follow-up: added literal replacements so the decomp now prints `AUDIT_PAT_EXPECT_*` instead of raw integers (assignments + comparisons), refreshed `metadata/functions_autodoc.json` inline matches, and reran the pipeline to confirm the updated names land cleanly in `xzregh/104AE0*.c` plus the portable archive.

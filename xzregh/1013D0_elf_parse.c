@@ -9,7 +9,6 @@
  *
  * It enforces invariants such as "only one PT_GNU_RELRO segment", derives the number of dynamic entries, honours BIND_NOW/RELR/versym toggles, and refuses to trust any header that leaves the module boundaries.
  */
-
 #include "xzre_types.h"
 
 BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)

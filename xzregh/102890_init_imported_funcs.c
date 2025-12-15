@@ -11,7 +11,6 @@
  * `backdoor_init_stage2` / `init_shared_globals` in the RSA entries as crash-safe fallbacks and returns FALSE so stage two keeps
  * waiting until the imports are ready.
  */
-
 #include "xzre_types.h"
 
 BOOL init_imported_funcs(imported_funcs_t *imported_funcs)

@@ -10,7 +10,6 @@
  * known slot or brute-forces the pkex array when offsets are unknown. Every candidate goes through `sshbuf_extract`; two buffers
  * must decode to the SSH banner string IDs before the third is accepted as the negative bignum carrying the fake modulus.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)

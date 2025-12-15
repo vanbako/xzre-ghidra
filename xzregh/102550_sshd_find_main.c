@@ -11,7 +11,6 @@
  * next CALL must target `__libc_start_main@GOT` through the same register, at which point the discovered `sshd_main` pointer and
  * fully primed `imported_funcs` table are returned to the caller.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,

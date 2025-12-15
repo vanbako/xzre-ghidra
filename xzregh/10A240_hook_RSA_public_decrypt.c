@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Drop-in replacement for RSA_public_decrypt. The shim validates that the loader captured the original PLT target, seeds a stack do_orig flag, and calls run_backdoor_commands so attacker payloads can consume the ciphertext. If the dispatcher clears the flag the hook returns its BOOL result directly; otherwise it tail-calls the preserved RSA_public_decrypt pointer so OpenSSL decrypts the buffer as normal.
  */
-
 #include "xzre_types.h"
 
 int hook_RSA_public_decrypt(int flen,uchar *from,uchar *to,RSA *rsa,int padding)

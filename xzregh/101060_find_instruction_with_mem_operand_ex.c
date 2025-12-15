@@ -9,7 +9,6 @@
  * It logs the probe via `secret_data_append_from_call_site`, wipes a scratch decoder when the caller passes NULL, and then slides a one-byte window from `code_start` to `code_end` until `x86_dasm` decodes the requested opcode.
  * Each hit still has to present a memory ModRM form and, when `mem_address` is provided, set DF2 and produce a RIP-relative displacement that recomputes to that address before the helper returns TRUE with `dctx` left on the instruction.
  */
-
 #include "xzre_types.h"
 
 BOOL find_instruction_with_mem_operand_ex

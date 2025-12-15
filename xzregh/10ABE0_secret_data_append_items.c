@@ -10,7 +10,6 @@
  * Each callback receives a 1-based array index alongside the cursor/operation/code tuple, and any failure terminates the walk so
  * callers can bail out without partially populating the log.
  */
-
 #include "xzre_types.h"
 
 BOOL secret_data_append_items

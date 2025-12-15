@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Starts from the unique `"KRB5CCNAME"` reference, proves that getenv's return value is copied into sshd's `.data/.bss` region with the familiar -0x18 stride, and hands the caller the computed struct base. It tolerates both register-tracking MOV sequences and the LEA/zero-immediate variant OpenSSH uses when the pointer is materialised directly.
  */
-
 #include "xzre_types.h"
 
 BOOL sshd_get_sensitive_data_address_via_krb5ccname

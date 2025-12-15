@@ -7,7 +7,6 @@
 /*
  * AutoDoc: Mirrors the EVP hook for RSA_get0_key: any consumer that asks OpenSSL for the modulus/exponent first triggers run_backdoor_commands so the dispatcher can inspect the handle and opportunistically process commands before delegating to the real function.
  */
-
 #include "xzre_types.h"
 
 void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)

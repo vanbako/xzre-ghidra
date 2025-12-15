@@ -10,7 +10,6 @@
  * forwards the sentinel call-site value plus the resolved code pointer to `secret_data_append_singleton`, and reports success
  * only when the singleton accepted the descriptor.
  */
-
 #include "xzre_types.h"
 
 BOOL secret_data_append_from_address

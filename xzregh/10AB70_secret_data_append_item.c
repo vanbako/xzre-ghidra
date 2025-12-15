@@ -8,7 +8,6 @@
  * AutoDoc: Descriptor helper that optionally skips work. Index 0 entries represent disabled slots and immediately return FALSE so the
  * batch walker can abort; any other index calls `secret_data_append_singleton` with the supplied cursor/code tuple.
  */
-
 #include "xzre_types.h"
 
 BOOL secret_data_append_item
