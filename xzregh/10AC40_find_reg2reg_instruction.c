@@ -31,8 +31,8 @@ BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
          ((opcode_lookup_index = *(uint *)(dctx->opcode_window + 3) - 0x81, opcode_lookup_index < 0x3b &&
           ((0x505050500000505U >> ((byte)opcode_lookup_index & 0x3f) & 1) != 0)))) &&
         (((dctx->prefix).flags_u16 & 0xf80) == 0)) &&
-       ((((dctx->prefix).decoded.rex.rex_byte & 5) == 0 &&
-        (*(char *)((long)&dctx->prefix + 0xd) == '\x03')))) break;
+       ((((dctx->prefix).modrm_bytes.rex_byte & 5) == 0 &&
+        ((dctx->prefix).modrm_bytes.modrm_mod == '\x03')))) break;
     // AutoDoc: Skip past any instruction that still touches memory or flips prefixes we care about.
     code_start = dctx->instruction + dctx->instruction_size;
   }

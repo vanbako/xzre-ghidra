@@ -1770,22 +1770,6 @@
         "replacement": "*(uint *)((u8 *)&literal_probe_slot + 4)"
       },
       {
-        "original": "local_a30.prefix._13_1_",
-        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "local_a30.prefix._14_1_",
-        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_a30.prefix._15_1_",
-        "replacement": "local_a30.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
-        "original": "local_9d8.prefix._14_1_",
-        "replacement": "local_9d8.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
         "name": "search_image",
         "original": "peVar31",
         "type": "elf_info_t *"
@@ -2034,6 +2018,10 @@
         "name": "syslog_dasm_ctx",
         "original": "local_a30",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "syslog_dasm_ctx.prefix._14_1_",
+        "replacement": "syslog_dasm_ctx.prefix.modrm_bytes.modrm_reg"
       },
       {
         "name": "probe_dasm_ctx",
@@ -7154,18 +7142,6 @@
         "replacement": "*(u32 *)&local_80.opcode_window[3]"
       },
       {
-        "original": "local_80.prefix._0_4_",
-        "replacement": "local_80.prefix.flags_u16"
-      },
-      {
-        "original": "local_80.prefix._14_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "local_80.prefix._15_1_",
-        "replacement": "local_80.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
         "name": "monitor_field_addr",
         "original": "puVar3",
         "type": "u8 *"
@@ -7586,24 +7562,8 @@
         "replacement": "*(u32 *)&string_scan_ctx.opcode_window[3]"
       },
       {
-        "original": "string_scan_ctx.prefix._13_1_",
-        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_mod"
-      },
-      {
-        "original": "string_scan_ctx.prefix._14_1_",
-        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
-      },
-      {
-        "original": "string_scan_ctx.prefix._15_1_",
-        "replacement": "string_scan_ctx.prefix.decoded.modrm.breakdown.modrm_rm"
-      },
-      {
         "original": "store_scan_ctx._40_4_",
         "replacement": "*(u32 *)&store_scan_ctx.opcode_window[3]"
-      },
-      {
-        "original": "store_scan_ctx.prefix._14_1_",
-        "replacement": "store_scan_ctx.prefix.decoded.modrm.breakdown.modrm_reg"
       },
       {
         "name": "dest_reg",

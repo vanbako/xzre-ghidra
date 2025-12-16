@@ -44,7 +44,7 @@ BOOL find_mov_lea_instruction
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
     // AutoDoc: Only accept true memory operands plus the caller-requested width (unless we are hunting stores).
-       (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+       (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       decoded_opcode = *(int *)(dctx->opcode_window + 3);
       if (decoded_opcode == 0x10d) {

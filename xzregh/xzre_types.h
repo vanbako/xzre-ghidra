@@ -720,6 +720,24 @@ typedef struct __attribute__((packed)) {
 typedef union __attribute__((packed)) {
  x86_prefix_fields_t decoded;
  u16 flags_u16;
+ u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */
+ struct __attribute__((packed)) {
+  u8 flags;
+  u8 flags2;
+  u8 prefix_padding[2];
+  u8 lock_rep_byte;
+  u8 seg_byte;
+  u8 osize_byte;
+  u8 asize_byte;
+  u8 vex_byte;
+  u8 vex_byte2;
+  u8 vex_byte3;
+  u8 rex_byte; /* Raw REX prefix byte when present. */
+  u8 modrm_byte; /* Raw ModRM byte. */
+  u8 modrm_mod; /* ModRM[7:6] (addressing mode). */
+  u8 modrm_reg; /* ModRM[5:3] (register/opcode extension). */
+  u8 modrm_rm; /* ModRM[2:0] (register/memory operand selector). */
+ } modrm_bytes;
 } x86_prefix_state_t;
 
 /*

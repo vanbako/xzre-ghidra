@@ -604,14 +604,15 @@ LAB_001065af:
           syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
         if ((*(u32 *)&syslog_dasm_ctx.opcode_window[3] & 0xfffffffd) == 0xb1) {
-          if (syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_mod != '\x03') goto LAB_00106735;
+          if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
           if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
               scratch_reg_index = 0;
 LAB_001067cf:
-              mov_dst_reg = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_rm;
+              mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm;
               if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-                mov_dst_reg = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_rm | ((byte)syslog_dasm_ctx.prefix.decoded.rex & 1) << 3;
+                mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm |
+                         (syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
               }
               goto LAB_001067ed;
             }
@@ -619,9 +620,9 @@ LAB_001067cf:
           }
           else {
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
-              scratch_reg_index = syslog_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+              scratch_reg_index = syslog_dasm_ctx.prefix.modrm_bytes.modrm_reg;
               if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-                scratch_reg_index = scratch_reg_index | (char)syslog_dasm_ctx.prefix.decoded.rex * '\x02' & 8U;
+                scratch_reg_index = scratch_reg_index | syslog_dasm_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
               }
               goto LAB_001067cf;
             }
@@ -629,7 +630,8 @@ LAB_001067cf:
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
             scratch_reg_index = syslog_dasm_ctx.mov_imm_reg_index;
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-              scratch_reg_index = syslog_dasm_ctx.mov_imm_reg_index | ((byte)syslog_dasm_ctx.prefix.decoded.rex & 1) << 3;
+              scratch_reg_index = syslog_dasm_ctx.mov_imm_reg_index |
+                       (syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
             }
             mov_dst_reg = 0;
 LAB_001067ed:
@@ -660,14 +662,14 @@ LAB_001067fb:
                 if (((probe_dasm_ctx.prefix.flags_u16 & 0x1000) != 0) &&
                    (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0))
                 {
-                  scratch_reg_index = (char)probe_dasm_ctx.prefix.decoded.rex << 3;
+                  scratch_reg_index = probe_dasm_ctx.prefix.modrm_bytes.rex_byte << 3;
                   goto LAB_001068e4;
                 }
               }
               else {
-                mov_src_reg = probe_dasm_ctx.prefix.decoded.modrm.breakdown.modrm_reg;
+                mov_src_reg = probe_dasm_ctx.prefix.modrm_bytes.modrm_reg;
                 if ((probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-                  scratch_reg_index = (char)probe_dasm_ctx.prefix.decoded.rex * '\x02';
+                  scratch_reg_index = probe_dasm_ctx.prefix.modrm_bytes.rex_byte * '\x02';
 LAB_001068e4:
                   mov_src_reg = mov_src_reg | scratch_reg_index & 8;
                 }

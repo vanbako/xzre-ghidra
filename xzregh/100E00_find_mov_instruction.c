@@ -43,7 +43,7 @@ BOOL find_mov_instruction
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
     // AutoDoc: Enforce the memory↔register ModRM form and the caller-requested operand width.
-       (((((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+       (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {
         is_expected_opcode = *(int *)(dctx->opcode_window + 3) == 0x109;

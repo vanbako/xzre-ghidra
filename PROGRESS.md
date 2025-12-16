@@ -2,6 +2,10 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-16
+- Session `STRUCT_dasm_ctx_t.prefix`: expanded `x86_prefix_state_t` in `metadata/xzre_types.json` with `flags_u32` + a byte-level `modrm_bytes` overlay (REX/ModRM breakdown) and cleaned up `metadata/xzre_locals.json` now that the prefix `_N_M_` slices are gone. Ran `./scripts/refresh_xzre_project.sh` and verified the exported scanners (`xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c`, `xzregh/104EE0_find_link_map_l_audit_any_plt.c`, `xzregh/103680_sshd_get_sensitive_data_address_via_xcalloc.c`) now read `prefix.flags_u32`/`prefix.modrm_bytes.*` instead of `prefix._0_4_`/`prefix._14_1_` etc; portable archive regenerated at `ghidra_projects/xzre_ghidra_portable.zip`.
+- Next: tackle the instruction-search bitmap/ctx overlays in `docs/STRUCT_BACKLOG.md` so the audit matcher stops mutating `_0_3_`/`_0_4_` byte slices.
+
 ## 2025-12-15
 - Session `STRUCT_sshd_offsets_t`: mapped the four-byte packed offset cache (`kex_sshbuf_qword_index`, `monitor_pkex_table_dword_index`, `sshbuf_data_qword_index`, `sshbuf_size_qword_index`) and updated `metadata/xzre_types.json`/`metadata/type_docs.json` so `sshd_offsets_t` exports as a named union (`fields`/`bytes`/`raw_value`) with signed indices. Updated `metadata/xzre_locals.json` + `metadata/functions_autodoc.json` so `xzregh/107950_sshbuf_extract.c`, `xzregh/107A20_sshd_get_sshbuf.c`, and the opcode-0 offsets rewrite in `xzregh/1094A0_run_backdoor_commands.c` now export with direct member access (no `field0_0x0` pointer arithmetic) and refreshed inline AutoDoc anchors. Ran `./scripts/refresh_xzre_project.sh` and re-applied inline comments; portable archive regenerated at `ghidra_projects/xzre_ghidra_portable.zip`.
 - Next: tackle the `dasm_ctx_t.prefix` overlays from `docs/STRUCT_BACKLOG.md` so the instruction scanners stop relying on raw `_N_M_`/prefix byte slices.

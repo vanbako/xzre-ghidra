@@ -40,7 +40,7 @@ BOOL find_lea_instruction_with_mem_operand
       decoded = x86_dasm(dctx,code_start,code_end);
       if ((((decoded != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x10d)) &&
       // AutoDoc: Optional RIP target comparison lets callers lock onto a single absolute pointer.
-          (((dctx->prefix).decoded.rex.rex_byte & 0x48) == 0x48)) &&
+          (((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48)) &&
          ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000 &&
           ((mem_address == (void *)0x0 ||
            (dctx->instruction + dctx->mem_disp + dctx->instruction_size == (u8 *)mem_address)))))) {
