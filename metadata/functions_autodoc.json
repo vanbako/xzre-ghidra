@@ -1264,7 +1264,7 @@
         "comment": "Zero the `instruction_search_ctx_t` before seeding offsets so the bitmask helper inherits a clean cursor."
       },
       {
-        "match": "if (((int)(mask_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {",
+        "match": "if (((int)(mask_register_bitmap.raw_value & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {",
         "comment": "Whichever register we see first becomes `output_register_to_match`; the companion bitmap is treated as the AND-mask source so they stay paired."
       },
       {
@@ -1293,7 +1293,7 @@
         "comment": "State 0 looks for the LEA that materialises `link_map::l_name` + displacement."
       },
       {
-        "match": "if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == computed_slot_ptr) &&",
+        "match": "if (((u8 *)(ulong)(search_ctx->offset_to_match).dwords.offset == computed_slot_ptr) &&",
         "comment": "Only advance once the LEA recomputes the expected displacement and the register filter allows it."
       },
       {

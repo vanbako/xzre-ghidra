@@ -4079,12 +4079,12 @@
       {
         "name": "mask_register_bitmap",
         "original": "local_c8",
-        "type": "u32"
+        "type": "instruction_register_bitmap_t"
       },
       {
         "name": "output_register_bitmap",
         "original": "local_c4",
-        "type": "u32"
+        "type": "instruction_register_bitmap_t"
       },
       {
         "name": "libc_imports",
@@ -4092,9 +4092,9 @@
         "type": "libc_imports_t *"
       },
       {
-        "name": "mask_filter_snapshot",
-        "original": "uVar2",
-        "type": "u32"
+        "name": "output_register_snapshot",
+        "original": "iVar2",
+        "type": "instruction_register_bitmap_t"
       },
       {
         "name": "telemetry_ok",
@@ -4160,10 +4160,6 @@
         "replacement": "*(u32 *)&search_ctx_wipe_cursor->start_addr"
       },
       {
-        "original": "search_ctx_zero_cursor = (undefined4 *)((long)&search_ctx.offset_to_match + 4);",
-        "replacement": "search_ctx_zero_cursor = (u32 *)((long)&search_ctx.offset_to_match + 4);"
-      },
-      {
         "name": "wipe_stride",
         "original": "bVar14",
         "type": "u8"
@@ -4182,19 +4178,8 @@
         "name": "audit_func_end",
         "original": "code_end",
         "type": "dl_audit_symbind_alt_fn"
-      },
-      {
-        "original": "mask_register_bitmap._0_3_ = CONCAT12(0xff,(undefined2)mask_register_bitmap);",
-        "replacement": "mask_register_bitmap._0_3_ = CONCAT12(0xff,(ushort)mask_register_bitmap);"
-      },
-      {
-        "original": "mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(undefined2)mask_register_bitmap) | 0x80;",
-        "replacement": "mask_register_bitmap = CONCAT22(mask_register_bitmap._2_2_,(ushort)mask_register_bitmap) | 0x80;"
-      },
-      {
-        "original": "mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(undefined2)mask_register_bitmap);",
-        "replacement": "mask_register_bitmap._0_3_ = CONCAT12(l_name_reg_index,(ushort)mask_register_bitmap);"
       }
+      
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
   },
@@ -4218,8 +4203,8 @@
       },
       {
         "name": "register_filter",
-        "original": "puVar3",
-        "type": "u32 *"
+        "original": "piVar3",
+        "type": "instruction_register_bitmap_t *"
       },
       {
         "name": "hook_table",
@@ -4309,10 +4294,6 @@
         "name": "bit_test_register",
         "original": "bVar17",
         "type": "u8"
-      },
-      {
-        "original": "*(undefined1 *)((long)search_ctx->output_register + 2)",
-        "replacement": "*(u8 *)((long)search_ctx->output_register + 2)"
       },
       {
         "original": "pattern_state = 0;",

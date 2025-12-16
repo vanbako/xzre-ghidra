@@ -1711,6 +1711,23 @@ typedef enum {
  AUDIT_PAT_EXPECT_TEST = 2 /* Final state: require a TEST/BT against the tracked register before consuming the mask. */
 } audit_pattern_state_t;
 
+typedef union __attribute__((packed)) instruction_register_bitmap {
+ struct __attribute__((packed)) {
+  u16 allowed_regs; /* 16-bit mask over x86 GPR encodings (bit N -> reg N). */
+  u8 reg_index; /* Captured register index (0-15) or 0xFF when unset. */
+  u8 reserved; /* Padding/reserved byte; currently unused by the scanners. */
+ } fields;
+ u32 raw_value; /* Raw view for shifts and byte-level updates. */
+} instruction_register_bitmap_t;
+
+typedef union __attribute__((packed)) instruction_search_offset {
+ struct __attribute__((packed)) {
+  u32 offset; /* 32-bit LEA displacement / field offset the scan expects. */
+  u32 reserved; /* High dword; unused (keeps the ctx layout stable). */
+ } dwords;
+ u64 raw_value; /* Raw 64-bit view for zeroing/copying. */
+} instruction_search_offset_t;
+
 /*
  * Shared context for the instruction-search helpers; tracks the scan range, the byte pattern we expect, the output register captures, and provides access to hook/import state during complex searches.
  */
@@ -1718,9 +1735,9 @@ typedef struct __attribute__((packed)) instruction_search_ctx
 {
  u8 *start_addr;
  u8 *end_addr;
- u8 *offset_to_match;
- u32 *output_register_to_match;
- u8 *output_register;
+ instruction_search_offset_t offset_to_match;
+ instruction_register_bitmap_t *output_register_to_match;
+ instruction_register_bitmap_t *output_register;
  BOOL result;
  u8 search_padding[4];
  backdoor_hooks_data_t *hooks;
