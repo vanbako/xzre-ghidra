@@ -24,7 +24,7 @@ BOOL find_function_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType
     // AutoDoc: Zero a scratch decoder context so we can peek at the opcode without mutating caller state.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(u32 *)&ctx_zero_cursor->instruction = 0;
-      ctx_zero_cursor = (dasm_ctx_t *)((long)&ctx_zero_cursor->instruction + 4);
+      ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
     }
     decoded = x86_dasm(&prologue_ctx,code_start,code_end);
     prologue_found = FALSE;

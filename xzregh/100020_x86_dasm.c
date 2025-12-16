@@ -14,7 +14,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
   u8 *flags2_ptr;
-  byte bVar2;
+  byte cursor_byte;
   byte modrm_byte;
   ushort imm16_word;
   byte tmp_byte;
@@ -50,7 +50,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   // AutoDoc: Clear every field in the decoder context so prefixes/immediates never leak between attempts.
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)&ctx_zero_cursor->instruction = 0;
-    ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
+    ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
   }
   predicate_ok = code_start < code_end;
   cursor = code_start;
@@ -60,7 +60,7 @@ BOOL x86_dasm(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(u32 *)&ctx->instruction = 0;
-        ctx = (dasm_ctx_t *)((long)ctx + (ulong)ctx_zero_stride * -8 + 4);
+        ctx = (dasm_ctx_t *)((u8 *)ctx + 4);
       }
       return FALSE;
     }
@@ -95,7 +95,7 @@ LAB_001001c9:
               prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
                 prefix_zero_cursor->flags_u32 = 0;
-                prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);
+                prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
@@ -147,10 +147,11 @@ LAB_001008c5:
             (ctx->prefix).decoded.flags = current_byte | 0x40;
             tmp_byte = *cursor;
             (ctx->prefix).modrm_bytes.modrm_byte = tmp_byte;
+            // AutoDoc: Decode ModRM (MOD/REG/RM) and set DF2 flags so later displacement/SIB/immediate parsing knows what to consume.
             tmp_byte = tmp_byte >> 6;
             (ctx->prefix).modrm_bytes.modrm_mod = tmp_byte;
-            bVar2 = *cursor;
-            (ctx->prefix).modrm_bytes.modrm_reg = (byte)((int)(uint)bVar2 >> 3) & 7;
+            cursor_byte = *cursor;
+            (ctx->prefix).modrm_bytes.modrm_reg = (byte)((int)(uint)cursor_byte >> 3) & 7;
             modrm_byte = *cursor;
             (ctx->prefix).modrm_bytes.modrm_rm = modrm_byte & 7;
             if (tmp_byte == 3) {
@@ -173,7 +174,7 @@ LAB_0010092e:
               *flags2_ptr = *flags2_ptr | 3;
             }
             opcode = *(uint *)(ctx->opcode_window + 3);
-            if ((opcode - 0xf6 < 2) && (((int)(uint)bVar2 >> 3 & 7U) != 0)) {
+            if ((opcode - 0xf6 < 2) && (((int)(uint)cursor_byte >> 3 & 7U) != 0)) {
               flags2_ptr = &(ctx->prefix).decoded.flags2;
               *flags2_ptr = *flags2_ptr & 0xf7;
               ctx->imm_size = 0;
@@ -284,10 +285,11 @@ LAB_001004e1:
             return FALSE;
           }
           *(uint *)(ctx->opcode_window + 3) = (uint)current_byte;
-          bVar2 = *cursor;
+          cursor_byte = *cursor;
           opcode_ptr = cursor + 1;
           (ctx->prefix).decoded.flags = tmp_byte | 0x10;
-          (ctx->prefix).decoded.vex_byte = bVar2;
+          (ctx->prefix).decoded.vex_byte = cursor_byte;
+          // AutoDoc: VEX prefix: capture the 0xC4/0xC5 header, synthesize REX bits/opcode-map selectors, and advance past the prefix bytes before decoding the opcode.
           if (code_end <= opcode_ptr) goto LAB_00100aa5;
           tmp_byte = cursor[1];
           (ctx->prefix).modrm_bytes.rex_byte = '@';
@@ -296,19 +298,19 @@ LAB_001004e1:
           *(uint *)(ctx->opcode_window + 3) = opcode;
           current_byte = ((char)cursor[1] >> 7 & 0xfcU) + 0x44;
           (ctx->prefix).modrm_bytes.rex_byte = current_byte;
-          if (bVar2 == 0xc5) goto LAB_001001c5;
-          if (bVar2 != 0xc4) {
+          if (cursor_byte == 0xc5) goto LAB_001001c5;
+          if (cursor_byte != 0xc4) {
             return FALSE;
           }
-          bVar2 = cursor[1];
-          if ((bVar2 & 0x40) == 0) {
+          cursor_byte = cursor[1];
+          if ((cursor_byte & 0x40) == 0) {
             (ctx->prefix).modrm_bytes.rex_byte = current_byte | 2;
           }
           if ((cursor[1] & 0x20) == 0) {
             flags2_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
             *flags2_ptr = *flags2_ptr | 1;
           }
-          if (2 < (byte)((bVar2 & 0x1f) - 1)) {
+          if (2 < (byte)((cursor_byte & 0x1f) - 1)) {
             return FALSE;
           }
           if (code_end <= cursor + 2) goto LAB_00100aa5;
