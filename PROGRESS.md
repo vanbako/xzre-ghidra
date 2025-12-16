@@ -3,6 +3,7 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-12-16
+- Fixed fallout from the `dasm_ctx_t.prefix` overlay pass by re-aligning `x86_dasm` register-temp renames in `metadata/xzre_locals.json` (restored `opcode_ptr`, `opcode_high_bits`, `opcode_class_mask/entry`, `ctx_zero_stride`, `range_hits_upper_bound`, `modrm_byte`, etc.) and reran `./scripts/refresh_xzre_project.sh` to confirm `xzregh/100020_x86_dasm.c` exports cleanly again (rename report: `ghidra_scripts/generated/locals_rename_report.txt`).
 - Session `STRUCT_dasm_ctx_t.prefix`: expanded `x86_prefix_state_t` in `metadata/xzre_types.json` with `flags_u32` + a byte-level `modrm_bytes` overlay (REX/ModRM breakdown) and cleaned up `metadata/xzre_locals.json` now that the prefix `_N_M_` slices are gone. Ran `./scripts/refresh_xzre_project.sh` and verified the exported scanners (`xzregh/104AE0_find_link_map_l_audit_any_plt_bitmask.c`, `xzregh/104EE0_find_link_map_l_audit_any_plt.c`, `xzregh/103680_sshd_get_sensitive_data_address_via_xcalloc.c`) now read `prefix.flags_u32`/`prefix.modrm_bytes.*` instead of `prefix._0_4_`/`prefix._14_1_` etc; portable archive regenerated at `ghidra_projects/xzre_ghidra_portable.zip`.
 - Next: tackle the instruction-search bitmap/ctx overlays in `docs/STRUCT_BACKLOG.md` so the audit matcher stops mutating `_0_3_`/`_0_4_` byte slices.
 

@@ -8807,64 +8807,29 @@
         "type": "ulong[4]"
       },
       {
-        "name": "rex_prefix",
-        "original": "pxVar1",
-        "type": "x86_rex_prefix_t *"
+        "name": "ctx_zero_stride",
+        "original": "bVar25",
+        "type": "byte"
       },
       {
-        "name": "flags2_ptr",
-        "original": "puVar2",
-        "type": "u8 *"
-      },
-      {
-        "name": "telemetry_ok",
-        "original": "BVar7",
+        "name": "range_hits_upper_bound",
+        "original": "bVar24",
         "type": "BOOL"
       },
       {
-        "name": "derived_opcode",
-        "original": "iVar8",
-        "type": "int"
-      },
-      {
-        "name": "imm_field",
-        "original": "uVar9",
-        "type": "u64"
-      },
-      {
-        "name": "opcode_index",
-        "original": "sVar10",
-        "type": "sbyte"
-      },
-      {
-        "name": "opcode",
-        "original": "uVar11",
-        "type": "uint"
-      },
-      {
-        "name": "opcode_high_bits",
-        "original": "uVar12",
-        "type": "uint"
-      },
-      {
-        "name": "cursor",
+        "name": "opcode_ptr",
         "original": "pbVar14",
         "type": "u8 *"
       },
       {
-        "name": "opcode_ptr",
-        "original": "pbVar15",
-        "type": "u8 *"
-      },
-      {
-        "name": "current_byte",
-        "original": "bVar16",
-        "type": "byte"
-      },
-      {
-        "name": "normalized_opcode",
-        "original": "uVar17",
+        "name": "opcode_high_bits",
+        "original": "uVar11",
         "type": "uint"
+      },
+      {
+        "name": "opcode_class_mask",
+        "original": "uVar17",
+        "type": "ulong"
       },
       {
         "name": "opcode_class_entry",
@@ -8872,29 +8837,39 @@
         "type": "ulong"
       },
       {
-        "name": "imm_size_hint",
-        "original": "uVar19",
-        "type": "ulong"
-      },
-      {
-        "name": "imm_cursor",
-        "original": "pbVar20",
+        "name": "flags2_ptr",
+        "original": "puVar1",
         "type": "u8 *"
       },
       {
-        "name": "tmp_byte",
-        "original": "bVar6",
-        "type": "byte"
+        "name": "telemetry_ok",
+        "original": "BVar6",
+        "type": "BOOL"
       },
       {
-        "name": "ctx_zero_cursor",
-        "original": "pdVar21",
-        "type": "dasm_ctx_t *"
+        "name": "derived_opcode",
+        "original": "iVar7",
+        "type": "int"
       },
       {
-        "name": "prefix_zero_cursor",
-        "original": "pxVar23",
-        "type": "x86_prefix_state_t *"
+        "name": "imm_field",
+        "original": "uVar8",
+        "type": "u64"
+      },
+      {
+        "name": "opcode_index",
+        "original": "sVar9",
+        "type": "sbyte"
+      },
+      {
+        "name": "opcode",
+        "original": "uVar10",
+        "type": "uint"
+      },
+      {
+        "name": "cursor",
+        "original": "pbVar13",
+        "type": "u8 *"
       },
       {
         "name": "modrm_byte",
@@ -8902,39 +8877,54 @@
         "type": "byte"
       },
       {
-        "name": "modrm_rm_bits",
-        "original": "bVar4",
+        "name": "current_byte",
+        "original": "bVar15",
         "type": "byte"
       },
       {
+        "name": "normalized_opcode",
+        "original": "uVar16",
+        "type": "uint"
+      },
+      {
+        "name": "imm_cursor",
+        "original": "pbVar19",
+        "type": "u8 *"
+      },
+      {
+        "name": "tmp_byte",
+        "original": "bVar5",
+        "type": "byte"
+      },
+      {
+        "name": "ctx_zero_cursor",
+        "original": "pdVar20",
+        "type": "dasm_ctx_t *"
+      },
+      {
+        "name": "opcode_class_offset",
+        "original": "uVar21",
+        "type": "ulong"
+      },
+      {
+        "name": "prefix_zero_cursor",
+        "original": "pxVar22",
+        "type": "x86_prefix_state_t *"
+      },
+      {
+        "name": "predicate_ok",
+        "original": "bVar23",
+        "type": "BOOL"
+      },
+      {
         "name": "imm16_word",
-        "original": "uVar5",
+        "original": "uVar4",
         "type": "ushort"
       },
       {
         "name": "clear_idx",
-        "original": "lVar13",
+        "original": "lVar12",
         "type": "long"
-      },
-      {
-        "name": "opcode_class_offset",
-        "original": "uVar22",
-        "type": "ulong"
-      },
-      {
-        "name": "predicate_ok",
-        "original": "bVar24",
-        "type": "BOOL"
-      },
-      {
-        "name": "range_hits_upper_bound",
-        "original": "bVar25",
-        "type": "BOOL"
-      },
-      {
-        "name": "ctx_zero_stride",
-        "original": "bVar26",
-        "type": "byte"
       },
       {
         "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
@@ -8947,10 +8937,6 @@
       {
         "original": "*(undefined4 *)(ctx->opcode_window + 3)",
         "replacement": "*(u32 *)(ctx->opcode_window + 3)"
-      },
-      {
-        "original": "*(undefined4 *)prefix_zero_cursor",
-        "replacement": "*(u32 *)prefix_zero_cursor"
       },
       {
         "original": "((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==\n                (undefined1  [16])0x66000000000004",
