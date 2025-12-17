@@ -967,7 +967,7 @@
     ]
   },
   "find_add_instruction_with_mem_operand": {
-    "plate": "ADD predicate for register-to-memory increments.\nIt wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.\nIf `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.",
+    "plate": "GRP1-imm8 predicate for RIP-relative memory updates.\nIt wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and looks for normalised opcode `0x103` (raw `0x83`, the GRP1 imm8 family where ModRM.reg selects ADD/OR/ADC/SBB/AND/SUB/XOR/CMP) paired with the RIP-relative disp32 ModRM form (`mod=0`, `rm=5`).\nIf `mem_address` is set it also requires `DF2_MEM_DISP` and that `instruction + instruction_size + mem_disp` equals the requested pointer before returning TRUE.",
     "inline": [
       {
         "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
@@ -977,18 +977,18 @@
       {
         "match": "if ((((add_found != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&",
         "match_type": "wildcard",
-        "comment": "Only accept opcode 0x103 (ADD r/m64,r64) when it actually targets memory."
+        "comment": "Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory."
       },
       {
         "match": "((mem_address == (void *)0x0 ||",
         "match_type": "wildcard",
-        "comment": "Optionally demand DF2 plus the RIP-relative displacement that lands on the requested pointer.",
+        "comment": "Optionally demand `DF2_MEM_DISP` plus the RIP-relative displacement that lands on the requested pointer.",
         "placement": "after"
       }
     ]
   },
   "find_addr_referenced_in_mov_instruction": {
-    "plate": "Given a `StringXrefId`, this helper looks up the owning function span and walks it for MOV-load references.\nIt repeatedly calls `find_instruction_with_mem_operand_ex` (opcode 0x10b), ignores 64-bit/REX.W MOVs, and either recomputes the absolute address (handling RIP-relative displacements) or bails out if the candidate lacked DF2 and the caller never supplied a range.\nThe first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.",
+    "plate": "Given a `StringXrefId`, this helper looks up the owning function span and walks it for MOV-load references.\nIt repeatedly calls `find_instruction_with_mem_operand_ex` (opcode `X86_OPCODE_MOV_LOAD` / 0x10b), ignores 64-bit/REX.W MOVs, and recomputes the absolute address for RIP-relative disp32 operands (ModRM `mod=0`, `rm=5`) as `instruction + instruction_size + mem_disp`.\nThe first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.",
     "inline": [
       {
         "match": "for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1)",
@@ -1001,7 +1001,7 @@
         "comment": "Fetch the cached `[func_start, func_end)` range associated with this string ID."
       },
       {
-        "match": "if (((byte)scratch_ctx.prefix.decoded.rex & 0x48) != 0x48)",
+        "match": "if ((scratch_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48)",
         "match_type": "wildcard",
         "comment": "Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.",
         "placement": "after"
@@ -1009,13 +1009,13 @@
       {
         "match": "if ((scratch_ctx.prefix.decoded.flags2 & 1) == 0)",
         "match_type": "wildcard",
-        "comment": "Without DF2 there is no displacement to recompute, so abort unless the caller insisted on a range.",
+        "comment": "Without `DF2_MEM_DISP` there is no displacement to recompute, so abort unless the caller insisted on a range.",
         "placement": "after"
       },
       {
         "match": "if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)",
         "match_type": "wildcard",
-        "comment": "RIP-relative ModRM forms need the extra `instruction + instruction_size` correction.",
+        "comment": "RIP-relative disp32 (ModRM `mod=0`, `rm=5`) needs the extra `instruction + instruction_size` correction.",
         "placement": "after"
       },
       {
@@ -1102,7 +1102,7 @@
         "comment": "Walk up to 0x80 bytes before the literal to catch the MOV that copies `_dl_naudit` out of `rtld_global_ro`."
       },
       {
-        "match": "if (((((byte)insn_ctx.prefix.decoded.rex & 0x48) != 0x48) && (rtld_global_ro_base < candidate_slot_ptr)) &&",
+        "match": "if ((((insn_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48) && (rtld_global_ro_base < candidate_slot_ptr)) &&",
         "comment": "Reject 64-bit MOVs and only accept pointers that actually fall within the `rtld_global_ro` symbol.",
         "placement": "before"
       },
@@ -1154,7 +1154,7 @@
     ]
   },
   "find_instruction_with_mem_operand": {
-    "plate": "Two-stage absolute-pointer predicate shared by the recon helpers.\nIt prefers LEA results (via `find_lea_instruction_with_mem_operand`) so RIP-relative references never touch memory, and only falls back to the MOV-load predicate (`find_instruction_with_mem_operand_ex` with opcode `0x10b`) once the LEA attempt fails.\nTRUE means `dctx` is still positioned on the instruction that materialised `mem_address`.",
+    "plate": "Two-stage absolute-pointer predicate shared by the recon helpers.\nIt prefers LEA results (via `find_lea_instruction_with_mem_operand`) so RIP-relative references never touch memory, and only falls back to the MOV-load predicate (`find_instruction_with_mem_operand_ex` with opcode `X86_OPCODE_MOV_LOAD` / `0x10b`) once the LEA attempt fails.\nTRUE means `dctx` is still positioned on the instruction that materialised `mem_address`.",
     "inline": [
       {
         "match": "match_found = find_instruction_with_mem_operand_ex(*",
@@ -1164,7 +1164,7 @@
     ]
   },
   "find_instruction_with_mem_operand_ex": {
-    "plate": "Generic predicate used by the pointer scanners to match one opcode that actually touches memory.\nIt logs the probe via `secret_data_append_from_call_site`, wipes a scratch decoder when the caller passes NULL, and then slides a one-byte window from `code_start` to `code_end` until `x86_dasm` decodes the requested opcode.\nEach hit still has to present a memory ModRM form and, when `mem_address` is provided, set DF2 and produce a RIP-relative displacement that recomputes to that address before the helper returns TRUE with `dctx` left on the instruction.",
+    "plate": "Generic predicate used by the pointer scanners to match one opcode that actually touches memory.\nIt logs the probe via `secret_data_append_from_call_site`, wipes a scratch decoder when the caller passes NULL, and then slides a one-byte window from `code_start` to `code_end` until `x86_dasm` decodes the requested opcode.\nCandidates must use the RIP-relative disp32 ModRM form (`mod=0`, `rm=5`). When `mem_address` is provided the helper also requires `flags2` to carry `DF2_MEM_DISP` and that `instruction + instruction_size + mem_disp` equals the requested pointer before returning TRUE with `dctx` left on the hit instruction.",
     "inline": [
       {
         "match": "search_ok = secret_data_append_from_call_site(*",
@@ -1184,12 +1184,12 @@
       {
         "match": "if ((((search_ok != FALSE) && (*(int *)(dctx->opcode_window + 3) == opcode)) &&",
         "match_type": "wildcard",
-        "comment": "Require the decoded opcode plus a memory ModRM form before considering the DF2/RIP tests."
+        "comment": "Require the decoded opcode plus the RIP-relative disp32 form (ModRM `mod=0`, `rm=5`) before considering the displacement recompute."
       },
       {
         "match": "((mem_address == (void *)0x0 ||",
         "match_type": "wildcard",
-        "comment": "When the caller provides a target pointer, insist DF2 is set and the RIP-relative recomputation lands exactly on it.",
+        "comment": "When the caller provides a target pointer, insist `DF2_MEM_DISP` is set and the RIP-relative recomputation (`instruction + size + disp32`) lands exactly on it.",
         "placement": "after"
       }
     ]

@@ -6,7 +6,7 @@
 
 /*
  * AutoDoc: Given a `StringXrefId`, this helper looks up the owning function span and walks it for MOV-load references.
- * It repeatedly calls `find_instruction_with_mem_operand_ex` (opcode 0x10b), ignores 64-bit/REX.W MOVs, and either recomputes the absolute address (handling RIP-relative displacements) or bails out if the candidate lacked DF2 and the caller never supplied a range.
+ * It repeatedly calls `find_instruction_with_mem_operand_ex` (opcode `X86_OPCODE_MOV_LOAD` / 0x10b), ignores 64-bit/REX.W MOVs, and recomputes the absolute address for RIP-relative disp32 operands (ModRM `mod=0`, `rm=5`) as `instruction + instruction_size + mem_disp`.
  * The first pointer that lands inside `[mem_range_start, mem_range_end)` is returned; everything else yields NULL.
  */
 
@@ -29,7 +29,7 @@ void * find_addr_referenced_in_mov_instruction
   // AutoDoc: Reset the scratch decoder we hand to `find_instruction_with_mem_operand_ex`.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
     *(u32 *)&ctx_clear_cursor->instruction = 0;
-    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
+    ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);
   }
   // AutoDoc: Fetch the cached `[func_start, func_end)` range associated with this string ID.
   func_cursor = (u8 *)(&refs->xcalloc_zero_size)[id].func_start;
@@ -42,8 +42,9 @@ void * find_addr_referenced_in_mov_instruction
       }
       else {
         if ((scratch_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48) {
+        // AutoDoc: Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.
           if ((scratch_ctx.prefix.decoded.flags2 & 1) == 0) {
-          // AutoDoc: Without DF2 there is no displacement to recompute, so abort unless the caller insisted on a range.
+          // AutoDoc: Without `DF2_MEM_DISP` there is no displacement to recompute, so abort unless the caller insisted on a range.
             if (mem_range_start == (void *)0x0) {
               return (u8 *)0x0;
             }
@@ -51,7 +52,7 @@ void * find_addr_referenced_in_mov_instruction
           else {
             candidate_addr = (u8 *)scratch_ctx.mem_disp;
             if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
-            // AutoDoc: RIP-relative ModRM forms need the extra `instruction + instruction_size` correction.
+            // AutoDoc: RIP-relative disp32 (ModRM `mod=0`, `rm=5`) needs the extra `instruction + instruction_size` correction.
               candidate_addr = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
                        scratch_ctx.instruction_size;
             }

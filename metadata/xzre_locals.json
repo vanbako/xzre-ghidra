@@ -3578,6 +3578,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);",
+        "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
@@ -3623,6 +3627,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);",
+        "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
@@ -3981,13 +3989,17 @@
         "type": "dasm_ctx_t *"
       },
       {
-        "name": "ctx_stride_selector",
+        "name": "ctx_stride_sign",
         "original": "bVar4",
         "type": "byte"
       },
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)ctx_clear_cursor + ((ulong)ctx_stride_sign * -2 + 1) * 4);",
+        "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c"
@@ -4558,6 +4570,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);",
+        "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/find_string_reference.c"

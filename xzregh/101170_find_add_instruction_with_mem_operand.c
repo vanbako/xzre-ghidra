@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: ADD predicate for register-to-memory increments.
- * It wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and insists the instruction stream produces opcode `0x103` with a memory ModRM form.
- * If `mem_address` is set it also requires DF2 plus a RIP-relative displacement that recomputes to that pointer before returning TRUE.
+ * AutoDoc: GRP1-imm8 predicate for RIP-relative memory updates.
+ * It wipes a scratch decoder whenever `dctx` is NULL, advances by a single byte on failed decodes, and looks for normalised opcode `0x103` (raw `0x83`, the GRP1 imm8 family where ModRM.reg selects ADD/OR/ADC/SBB/AND/SUB/XOR/CMP) paired with the RIP-relative disp32 ModRM form (`mod=0`, `rm=5`).
+ * If `mem_address` is set it also requires `DF2_MEM_DISP` and that `instruction + instruction_size + mem_disp` equals the requested pointer before returning TRUE.
  */
 
 #include "xzre_types.h"
@@ -25,7 +25,7 @@ BOOL find_add_instruction_with_mem_operand
   // AutoDoc: Keep the scratch decoder clean so each scan starts from a known state.
   for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
     *(u32 *)&ctx_clear_cursor->instruction = 0;
-    ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);
+    ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);
   }
   if (dctx == (dasm_ctx_t *)0x0) {
     dctx = &scratch_ctx;
@@ -35,11 +35,11 @@ BOOL find_add_instruction_with_mem_operand
       return FALSE;
     }
     add_found = x86_dasm(dctx,code_start,code_end);
-    // AutoDoc: Only accept opcode 0x103 (ADD r/m64,r64) when it actually targets memory.
+    // AutoDoc: Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory.
     if ((((add_found != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&
         (((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000)) &&
        ((mem_address == (void *)0x0 ||
-       // AutoDoc: Optionally demand DF2 plus the RIP-relative displacement that lands on the requested pointer.
+       // AutoDoc: Optionally demand `DF2_MEM_DISP` plus the RIP-relative displacement that lands on the requested pointer.
         ((((dctx->prefix).decoded.flags2 & 1) != 0 &&
          ((u8 *)mem_address == dctx->instruction + dctx->instruction_size + dctx->mem_disp))))))
     break;
