@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Brute-force walks file descriptors 0–63, calling `shutdown(fd, 0x7fffffff)` on each one and interpreting the expected `EINVAL`/`ENOTCONN` errors as proof the descriptor is open (but idle). Every qualifying fd increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd’s sockets even if the monitor struct was never recovered.
+ * AutoDoc: Brute-force walks file descriptors 0–63 and probes each with `shutdown(fd, 0x7fffffff)` (an intentionally invalid `how` value). `EINVAL` (invalid `how`) or `ENOTCONN` are treated as evidence the descriptor is a socket without mutating its state. Each match increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd’s sockets even if the monitor struct was never recovered.
  */
 
 #include "xzre_types.h"
@@ -29,7 +29,7 @@ BOOL sshd_get_usable_socket(int *pSock,int socket_index,libc_imports_t *imports)
       fake_errno = 0;
       if ((imports->shutdown != (pfn_shutdown_t)0x0) &&
          (imports->__errno_location != (pfn___errno_location_t)0x0)) {
-        // AutoDoc: Probe each descriptor with an invalid `how` value so active sockets report `EINVAL`/`ENOTCONN`.
+        // AutoDoc: Probe each descriptor with an intentionally invalid `how` value; sockets return `EINVAL` (or `ENOTCONN`) without needing a real shutdown.
         shutdown_status = (*imports->shutdown)(sockfd,0x7fffffff);
         if (shutdown_status < 0) {
           // AutoDoc: Sample errno after failures so we can distinguish usable sockets from closed descriptors.

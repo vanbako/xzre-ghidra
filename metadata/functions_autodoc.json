@@ -1992,6 +1992,10 @@
         "comment": "Switch to envp processing only after confirming argv was NULL-terminated."
       },
       {
+        "match": "env_cursor = (char **)(stack_end + arg_index * 8 + 8);",
+        "comment": "Start envp scanning at envp[0], immediately after the argv NULL sentinel."
+      },
+      {
         "match": "argv_entry = (u8 *)*env_cursor;",
         "comment": "envp is expected to be densely packed; seeing a NULL entry before the sentinel signals a tampered layout and aborts the walk."
       },
@@ -2915,12 +2919,12 @@
     ]
   },
   "sshd_get_usable_socket": {
-    "plate": "Brute-force walks file descriptors 0\u201363, calling `shutdown(fd, 0x7fffffff)` on each one and interpreting the expected `EINVAL`/`ENOTCONN` errors as proof the descriptor is open (but idle). Every qualifying fd increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd\u2019s sockets even if the monitor struct was never recovered.",
+    "plate": "Brute-force walks file descriptors 0\u201363 and probes each with `shutdown(fd, 0x7fffffff)` (an intentionally invalid `how` value). `EINVAL` (invalid `how`) or `ENOTCONN` are treated as evidence the descriptor is a socket without mutating its state. Each match increments a counter, and once it reaches `socket_index` the helper returns that fd so callers can recycle sshd\u2019s sockets even if the monitor struct was never recovered.",
     "inline": [
       {
         "match": "shutdown_status = \\(\\*imports->shutdown\\)\\(sockfd,0x7fffffff\\);",
         "match_type": "regex",
-        "comment": "Probe each descriptor with an invalid `how` value so active sockets report `EINVAL`/`ENOTCONN`."
+        "comment": "Probe each descriptor with an intentionally invalid `how` value; sockets return `EINVAL` (or `ENOTCONN`) without needing a real shutdown."
       },
       {
         "match": "errno_ptr = \\(\\*imports->__errno_location\\)\\(\\);",
@@ -2939,11 +2943,11 @@
     ]
   },
   "sshd_log": {
-    "plate": "Mirrors sshd\u2019s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.",
+    "plate": "Mirrors sshd\u2019s `sshlogv(file, func, line, showfunc, level, suffix, fmt, va_list)` calling convention. It uses the SysV varargs `AL` byte (count of XMM register arguments) to decide whether to spill the incoming XMM regs, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and calls the resolved `sshlogv` pointer stored in the logging context with empty file/func strings so higher-level hooks can format log lines exactly the way sshd expects.",
     "inline": [
       {
-        "match": "if (in_AL != '\\0') {",
-        "comment": "When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed."
+        "match": "if (xmm_vararg_count != '\\0') {",
+        "comment": "SysV ABI: the varargs caller sets `AL` to the number of XMM-register arguments; spill XMM0\u2013XMM7 when non-zero so the rebuilt va_list can reference them."
       },
       {
         "match": "va_list_state = &stack0x00000008;",
@@ -2952,7 +2956,7 @@
       {
         "match": "\\(\\*\\(code \\*\\)log_ctx->sshlogv_impl\\)",
         "match_type": "regex",
-        "comment": "Tail-call sshd\u2019s real sshlogv() implementation so our wrapper stays transparent."
+        "comment": "Call sshd\u2019s real sshlogv(file=\"\", func=\"\", line=0, showfunc=0, level, suffix=NULL, fmt, va_list) so hooks emit log lines through OpenSSH\u2019s own formatter."
       }
     ]
   },

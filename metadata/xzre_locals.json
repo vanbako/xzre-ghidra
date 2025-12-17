@@ -6082,6 +6082,10 @@
       {
         "original": "check_argument((char)*(undefined2 *)argv_entry,(char *)argv_entry);",
         "replacement": "check_argument((char)*(u16 *)argv_entry,(char *)argv_entry);"
+      },
+      {
+        "original": "env_cursor = (ulong *)(stack_end + arg_index * 8 + 8);",
+        "replacement": "env_cursor = (char **)(stack_end + arg_index * 8 + 8);"
       }
     ],
     "source": "xzre/xzre_code/process_is_sshd.c"
@@ -8017,6 +8021,11 @@
     ],
     "register_temps": [
       {
+        "name": "xmm_vararg_count",
+        "original": "in_AL",
+        "type": "u8"
+      },
+      {
         "name": "incoming_rcx",
         "original": "in_RCX",
         "type": "u64"
@@ -8072,9 +8081,9 @@
         "type": "u64"
       },
       {
-        "name": "sse_args_present",
+        "name": "empty_cstring_nul",
         "original": "local_d1",
-        "type": "BOOL"
+        "type": "char"
       },
       {
         "name": "va_gp_offset",

