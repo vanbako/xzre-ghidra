@@ -502,10 +502,10 @@
     ]
   },
   "elf_contains_vaddr_impl": {
-    "plate": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire interval is proven resident.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.",
+    "plate": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. It computes `range_limit = vaddr + size` (using `min(vaddr, range_limit)` as a wraparound guard), page-aligns the interval, walks each loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire span is proven resident.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.",
     "inline": [
       {
-        "match": "segment_page_floor = (Elf64_Ehdr *)(segment_runtime_start & 0xfffffffffffff000);",
+        "match": "segment_page_floor = *(segment_runtime_start & 0xfffffffffffff000);",
         "match_type": "wildcard",
         "comment": "Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages."
       },
@@ -829,6 +829,47 @@
         "match": "if (elf_info->verdef != (Elf64_Verdef *)0x0) {",
         "match_type": "wildcard",
         "comment": "Keep the `.gnu.version_d` pointer only when its size metadata also survived validation; otherwise drop the stale handle."
+      },
+      {
+        "match": "case 2:",
+        "comment": "DT_PLTRELSZ: record the byte size of the PLT relocation table so we can later derive `plt_reloc_count`."
+      },
+      {
+        "match": "case 0x17:",
+        "comment": "DT_JMPREL: address of the PLT relocation table (Elf64_Rela entries for R_X86_64_JUMP_SLOT)."
+      },
+      {
+        "match": "case 0x23:",
+        "comment": "DT_RELRSZ: byte size of the packed RELR relocation stream; required before accepting a DT_RELR pointer."
+      },
+      {
+        "match": "case 0x24:",
+        "comment": "DT_RELR: base address of the packed RELR relocation stream (bitmap/literal entries for R_X86_64_RELATIVE)."
+      },
+      {
+        "match": "if (dynamic_phdr_idx == 0x6ffffef5) {",
+        "match_type": "wildcard",
+        "comment": "DT_GNU_HASH: remember the GNU hash header pointer so bucket/chain tables can be derived after relocation pointers are validated."
+      },
+      {
+        "match": "else if (dynamic_phdr_idx == 0x6ffffff0) {",
+        "match_type": "wildcard",
+        "comment": "DT_VERSYM: enables `.gnu.version` lookups; set the feature bit and store the versym pointer."
+      },
+      {
+        "match": "if (dynamic_phdr_idx == 0x6ffffffc) {",
+        "match_type": "wildcard",
+        "comment": "DT_VERDEF: pointer to `.gnu.version_d` (kept only when DT_VERDEFNUM/size validation succeeds)."
+      },
+      {
+        "match": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;",
+        "match_type": "wildcard",
+        "comment": "Treat DT_BIND_NOW/DT_FLAGS(DF_BIND_NOW)/DT_FLAGS_1(DF_1_NOW) as a single \"bind now\" feature bit for later helpers."
+      },
+      {
+        "match": "dyn_entry_fields = dyn_entry_fields + 2;",
+        "match_type": "wildcard",
+        "comment": "`dyn_entry_fields` points at `d_un`, so advancing by 2 words steps to the next 16-byte `Elf64_Dyn` entry."
       }
     ]
   },

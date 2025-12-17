@@ -128,6 +128,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
           if (dynamic_phdr_idx < 0x25) {
             if (dynamic_phdr_idx < 0x17) {
               switch(dynamic_phdr_idx) {
+              // AutoDoc: DT_PLTRELSZ: record the byte size of the PLT relocation table so we can later derive `plt_reloc_count`.
               case 2:
                 pltrel_table_size = dyn_entry_fields->d_val;
                 break;
@@ -146,6 +147,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
             }
             else {
               switch(dynamic_phdr_idx) {
+              // AutoDoc: DT_JMPREL: address of the PLT relocation table (Elf64_Rela entries for R_X86_64_JUMP_SLOT).
               case 0x17:
                 elf_info->plt_relocs = (Elf64_Rela *)*(Elf64_Xword *)dyn_entry_fields;
                 break;
@@ -154,9 +156,11 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
               case 0x1e:
                 bind_now_flag = *(byte *)dyn_entry_fields & 8;
                 goto LAB_00101650;
+              // AutoDoc: DT_RELRSZ: byte size of the packed RELR relocation stream; required before accepting a DT_RELR pointer.
               case 0x23:
                 relr_table_size = dyn_entry_fields->d_val;
                 break;
+              // AutoDoc: DT_RELR: base address of the packed RELR relocation stream (bitmap/literal entries for R_X86_64_RELATIVE).
               case 0x24:
                 elf_info->relr_relocs = (Elf64_Relr *)*(Elf64_Xword *)dyn_entry_fields;
               }
@@ -167,6 +171,7 @@ BOOL elf_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
 LAB_00101650:
             if (bind_now_flag != 0) {
 switchD_0010157d_caseD_18:
+              // AutoDoc: Treat DT_BIND_NOW/DT_FLAGS(DF_BIND_NOW)/DT_FLAGS_1(DF_1_NOW) as a single "bind now" feature bit for later helpers.
               *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;
             }
           }
@@ -175,10 +180,12 @@ switchD_0010157d_caseD_18:
               if (0x6ffffefa < dynamic_phdr_idx) {
                 return FALSE;
               }
+              // AutoDoc: DT_GNU_HASH: remember the GNU hash header pointer so bucket/chain tables can be derived after relocation pointers are validated.
               if (dynamic_phdr_idx == 0x6ffffef5) {
                 gnu_hash_header_words = (uint *)dyn_entry_fields->d_val;
               }
             }
+            // AutoDoc: DT_VERSYM: enables `.gnu.version` lookups; set the feature bit and store the versym pointer.
             else if (dynamic_phdr_idx == 0x6ffffff0) {
               versym_value.d_val = *(Elf64_Xword *)dyn_entry_fields;
               *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x10;
@@ -193,10 +200,12 @@ switchD_0010157d_caseD_18:
             if (dynamic_phdr_idx == 0x7fffffff) {
               return FALSE;
             }
+            // AutoDoc: DT_VERDEF: pointer to `.gnu.version_d` (kept only when DT_VERDEFNUM/size validation succeeds).
             if (dynamic_phdr_idx == 0x6ffffffc) {
               elf_info->verdef = (Elf64_Verdef *)*(Elf64_Xword *)dyn_entry_fields;
             }
           }
+          // AutoDoc: `dyn_entry_fields` points at `d_un`, so advancing by 2 words steps to the next 16-byte `Elf64_Dyn` entry.
           dyn_entry_fields = dyn_entry_fields + 2;
         }
         plt_relocs_ptr = elf_info->plt_relocs;

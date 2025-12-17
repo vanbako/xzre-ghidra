@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. The helper page-aligns both ends of the interval, walks every loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire interval is proven resident.
+ * AutoDoc: Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. It computes `range_limit = vaddr + size` (using `min(vaddr, range_limit)` as a wraparound guard), page-aligns the interval, walks each loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire span is proven resident.
  *
  * It refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.
  */
@@ -26,7 +26,7 @@ BOOL elf_contains_vaddr_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_fla
   
 LAB_00101254:
   recursion_depth = recursion_depth + 1;
-  range_limit = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);
+  range_limit = (u8 *)vaddr + size;
   if (size == 0) {
 LAB_0010138e:
     range_fits = TRUE;
@@ -34,7 +34,7 @@ LAB_0010138e:
   else {
     segment_page_floor = range_limit;
     if (vaddr <= range_limit) {
-      segment_page_floor = (Elf64_Ehdr *)vaddr;
+      segment_page_floor = (u8 *)vaddr;
     }
     if ((elf_info->elfbase <= segment_page_floor) && (recursion_depth != 0x3ea)) {
       phdr_idx = 0;
@@ -43,11 +43,11 @@ LAB_0010138e:
         load_segment = elf_info->phdrs + phdr_idx;
         if ((load_segment->p_type == 1) && ((load_segment->p_flags & p_flags) == p_flags)) {
           segment_runtime_start = (long)elf_info->elfbase + (load_segment->p_vaddr - elf_info->load_base_vaddr);
-          segment_page_ceil = (Elf64_Ehdr *)(load_segment->p_memsz + segment_runtime_start);
+          segment_page_ceil = (u8 *)(segment_runtime_start + load_segment->p_memsz);
           // AutoDoc: Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages.
-          segment_page_floor = (Elf64_Ehdr *)(segment_runtime_start & 0xfffffffffffff000);
+          segment_page_floor = (u8 *)(segment_runtime_start & 0xfffffffffffff000);
           if (((ulong)segment_page_ceil & 0xfff) != 0) {
-            segment_page_ceil = (Elf64_Ehdr *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);
+            segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);
           }
           if ((vaddr >= segment_page_floor) && (range_limit <= segment_page_ceil)) goto LAB_0010138e;
           if ((range_limit > segment_page_ceil) || (segment_page_floor <= vaddr)) {
@@ -59,14 +59,14 @@ LAB_0010138e:
                   return FALSE;
                 }
                 range_fits = elf_contains_vaddr_impl
-                                  (elf_info,segment_page_ceil->e_ident + 1,(long)range_limit + (-1 - (long)segment_page_ceil),
+                                  (elf_info,segment_page_ceil + 1,(long)range_limit + (-1 - (long)segment_page_ceil),
                                    p_flags);
                 return (uint)(range_fits != FALSE);
               }
             }
             // AutoDoc: Otherwise advance `vaddr` past the current segment and continue checking the remaining bytes.
             else if (segment_page_ceil < range_limit) {
-              vaddr = segment_page_ceil->e_ident + 1;
+              vaddr = segment_page_ceil + 1;
               size = (long)range_limit - (long)vaddr;
               goto LAB_00101254;
             }

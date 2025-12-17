@@ -2558,6 +2558,30 @@
         "name": "range_fits",
         "original": "BVar2",
         "type": "BOOL"
+      },
+      {
+        "original": "range_limit = (Elf64_Ehdr *)(((Elf64_Ehdr *)vaddr)->e_ident + size);",
+        "replacement": "range_limit = (u8 *)vaddr + size;"
+      },
+      {
+        "original": "segment_page_floor = (Elf64_Ehdr *)vaddr;",
+        "replacement": "segment_page_floor = (u8 *)vaddr;"
+      },
+      {
+        "original": "segment_page_ceil = (Elf64_Ehdr *)(load_segment->p_memsz + segment_runtime_start);",
+        "replacement": "segment_page_ceil = (u8 *)(segment_runtime_start + load_segment->p_memsz);"
+      },
+      {
+        "original": "segment_page_floor = (Elf64_Ehdr *)(segment_runtime_start & 0xfffffffffffff000);",
+        "replacement": "segment_page_floor = (u8 *)(segment_runtime_start & 0xfffffffffffff000);"
+      },
+      {
+        "original": "segment_page_ceil = (Elf64_Ehdr *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);",
+        "replacement": "segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);"
+      },
+      {
+        "original": "segment_page_ceil->e_ident + 1",
+        "replacement": "segment_page_ceil + 1"
       }
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_impl.c"
