@@ -39,7 +39,7 @@ int sshd_get_sensitive_data_score_in_do_child
     ctx_cursor = &do_child_start;
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(u32 *)ctx_cursor = 0;
-      ctx_cursor = (u8 **)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);
+      ctx_cursor = (u8 **)((u8 *)ctx_cursor + 4);
     }
     hit_found = find_instruction_with_mem_operand
                       (code_start,code_end,(dasm_ctx_t *)&do_child_start,

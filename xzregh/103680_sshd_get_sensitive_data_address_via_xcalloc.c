@@ -43,13 +43,13 @@ BOOL sshd_get_sensitive_data_address_via_xcalloc
   hit_cursor = store_hits;
   for (clear_idx = 0x20; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)hit_cursor = 0;
-    hit_cursor = (long *)((long)hit_cursor + 4);
+    hit_cursor = (u8 **)((u8 *)hit_cursor + 4);
   }
   // AutoDoc: Wipe the MOV/LEA decoder context prior to every post-call scan so register tracking stays reliable.
   zero_ctx_cursor = &store_probe_ctx;
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)&zero_ctx_cursor->instruction = 0;
-    zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);
+    zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);
   }
 LAB_001036eb:
   do {
@@ -97,7 +97,7 @@ LAB_00103782:
   if ((data_start <= store_operand_ptr) && (store_operand_ptr < data_end)) {
     hit_index = (ulong)hit_count;
     hit_count = hit_count + 1;
-    store_hits[hit_index] = (long)store_operand_ptr;
+    store_hits[hit_index] = store_operand_ptr;
     if (0xf < hit_count) {
 LAB_00103802:
       clear_idx = 0;

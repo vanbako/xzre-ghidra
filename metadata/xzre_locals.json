@@ -7167,6 +7167,22 @@
       {
         "original": "*(undefined4 *)&ctx_cursor->instruction",
         "replacement": "*(u32 *)&ctx_cursor->instruction"
+      },
+      {
+        "original": "ctx_cursor = (dasm_ctx_t *)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);",
+        "replacement": "ctx_cursor = (dasm_ctx_t *)((u8 *)ctx_cursor + 4);"
+      },
+      {
+        "original": "sshd->elfbase->e_ident + sshd->elfbase->e_entry",
+        "replacement": "(u8 *)sshd->elfbase + sshd->elfbase->e_entry"
+      },
+      {
+        "original": "libcrypto_ehdr->e_ident + symbol_value",
+        "replacement": "(u8 *)libcrypto_ehdr + symbol_value"
+      },
+      {
+        "original": "libcrypto->elfbase->e_ident + symbol_entry->st_value",
+        "replacement": "(u8 *)libcrypto->elfbase + symbol_entry->st_value"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_main.c"
@@ -7236,6 +7252,10 @@
       {
         "original": "*(undefined4 *)&zero_ctx_cursor->instruction",
         "replacement": "*(u32 *)&zero_ctx_cursor->instruction"
+      },
+      {
+        "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);",
+        "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"
@@ -7645,6 +7665,14 @@
       {
         "original": "*(undefined4 *)&zero_ctx_cursor->instruction",
         "replacement": "*(u32 *)&zero_ctx_cursor->instruction"
+      },
+      {
+        "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);",
+        "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
+      },
+      {
+        "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);",
+        "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c"
@@ -7729,6 +7757,18 @@
       {
         "original": "*(undefined4 *)hit_cursor",
         "replacement": "*(u32 *)hit_cursor"
+      },
+      {
+        "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);",
+        "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
+      },
+      {
+        "original": "hit_cursor = (long *)((long)hit_cursor + 4);",
+        "replacement": "hit_cursor = (u8 **)((u8 *)hit_cursor + 4);"
+      },
+      {
+        "original": "store_hits[hit_index] = (long)store_operand_ptr;",
+        "replacement": "store_hits[hit_index] = store_operand_ptr;"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c"
@@ -7819,6 +7859,10 @@
       {
         "original": "*(undefined4 *)ctx_cursor",
         "replacement": "*(u32 *)ctx_cursor"
+      },
+      {
+        "original": "ctx_cursor = (u8 **)((long)ctx_cursor + (ulong)zero_seed * -8 + 4);",
+        "replacement": "ctx_cursor = (u8 **)((u8 *)ctx_cursor + 4);"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_do_child.c"
