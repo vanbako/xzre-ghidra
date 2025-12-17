@@ -26,7 +26,7 @@ void * elf_symbol_get_addr(elf_info_t *elf_info,EncodedStringId encoded_string_i
     }
     else {
       // AutoDoc: Add the symbol value to the module base to obtain its process address.
-      sym_entry = (Elf64_Sym *)(elf_info->elfbase->e_ident + sym_entry->st_value);
+      sym_entry = (Elf64_Sym *)((u8 *)elf_info->elfbase + sym_entry->st_value);
     }
   }
   return sym_entry;

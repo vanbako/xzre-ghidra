@@ -33,7 +33,8 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   void **range_cursor;
   u8 *decode_cursor;
   EncodedStringId string_id_cursor;
-  u64 code_segment_size [2];
+  u64 code_segment_size;
+  ulong local_88;
   dasm_ctx_t scanner_ctx;
   
   string_id_seed = STR_xcalloc_zero_size;
@@ -50,12 +51,12 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
     *(u32 *)&scratch_ctx->instruction = 0;
     scratch_ctx = (dasm_ctx_t *)((long)&scratch_ctx->instruction + 4);
   }
-  code_segment_size[0] = 0;
-  code_segment_size[1] = 0;
-  slot_lower_bound = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_size);
+  code_segment_size = 0;
+  local_88 = 0;
+  slot_lower_bound = (dasm_ctx_t *)elf_get_code_segment(elf_info,&code_segment_size);
   scratch_ctx = &scanner_ctx;
-  if ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0])) {
-    text_segment_end = (u8 *)slot_lower_bound + code_segment_size[0];
+  if ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size)) {
+    text_segment_end = (u8 *)slot_lower_bound + code_segment_size;
     string_cursor = (char *)0x0;
     while( TRUE ) {
       string_id_cursor = 0;
@@ -137,7 +138,8 @@ LAB_00102f31:
       goto LAB_00102e64;
     }
     // AutoDoc: Sweep the relocation tables too so GOT/PLT slots that touch the literal keep the enclosing range in view.
-    while (rela_slot = elf_find_rela_reloc(elf_info,0,(u8 *)slot_lower_bound), range_slot = range_cursor,
+    while (rela_slot = elf_find_rela_reloc(elf_info,(void *)0x0,(u8 *)slot_lower_bound,
+                                         (u8 *)text_segment_end,&local_88), range_slot = range_cursor,
           rela_slot != (Elf64_Rela *)0x0) {
       do {
         slot_reloc = (Elf64_Rela *)range_slot[2];
@@ -175,6 +177,6 @@ LAB_00102fad:
       range_cursor = range_cursor + 4;
     } while (range_cursor != range_table_end);
   }
-  return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0]));
+  return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size));
 }
 

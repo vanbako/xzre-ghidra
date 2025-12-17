@@ -29,7 +29,7 @@ BOOL elf_find_function_pointer
   *pOutCodeStart = xref_func_start;
   *pOutCodeEnd = (&xrefs->xcalloc_zero_size)[xref_id].func_end;
   // AutoDoc: Prefer RELA so we match the explicit addend/GOT slot before bothering with the packed RELR table.
-  rela_match = elf_find_rela_reloc(elf_info,(EncodedStringId)*pOutCodeStart,(u8 *)0x0);
+  rela_match = elf_find_rela_reloc(elf_info,*pOutCodeStart,(u8 *)0x0,(u8 *)0x0,(ulong *)0x0);
   *pOutFptrAddr = rela_match;
   if (rela_match == (Elf64_Rela *)0x0) {
     // AutoDoc: RELR fallback covers PIE builds where the GOT slot only appears inside the bitmap run.

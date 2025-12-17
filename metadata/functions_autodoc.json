@@ -567,7 +567,7 @@
     ]
   },
   "elf_find_rela_reloc": {
-    "plate": "Searches the RELA relocation array for an entry tied to a given code pointer. When `encoded_string_id` is non-zero it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is zero the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nCallers can optionally supply `[low, high]` bounds (third argument + RCX) and a resume cursor (R8). Those extra registers force the\nreturned address to fall inside a desired window and allow the next invocation to continue scanning without starting over.\nFailing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a cursor pointer was\nprovided, stores the position it stopped at.",
+    "plate": "Searches the RELA relocation array for an entry tied to a given code/data pointer. When `target_addr` is non-NULL it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is NULL the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nCallers can optionally supply `[slot_lower_bound, slot_upper_bound]` bounds plus a `resume_index_ptr`. The bounds force the\nreturned address to fall inside a desired window and the resume cursor allows the next invocation to continue scanning without\nstarting over. Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a\ncursor pointer was provided, stores the position it stopped at.",
     "inline": [
       {
         "match": "if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {",
@@ -906,7 +906,7 @@
         "comment": "Undefined or import-only records never produce a concrete address, so bail out immediately."
       },
       {
-        "match": "sym_entry = (Elf64_Sym *)(elf_info->elfbase->e_ident + sym_entry->st_value);",
+        "match": "*sym_entry = (Elf64_Sym *)((u8 *)elf_info->elfbase + sym_entry->st_value);*",
         "match_type": "wildcard",
         "comment": "Add the symbol value to the module base to obtain its process address."
       }

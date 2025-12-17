@@ -2637,21 +2637,6 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "slot_upper_bound",
-        "original": "in_RCX",
-        "type": "u8 *"
-      },
-      {
-        "name": "resume_index_ptr",
-        "original": "in_R8",
-        "type": "ulong *"
-      },
-      {
-        "name": "target_addr_high",
-        "original": "in_register_00000034",
-        "type": "u32"
-      },
-      {
         "name": "elfbase",
         "original": "pEVar1",
         "type": "Elf64_Ehdr *"
@@ -2665,6 +2650,10 @@
         "name": "rela_index",
         "original": "uVar3",
         "type": "ulong"
+      },
+      {
+        "original": "elfbase->e_ident",
+        "replacement": "(u8 *)elfbase"
       }
     ],
     "source": "xzre/xzre_code/elf_find_rela_reloc.c"
@@ -2889,7 +2878,7 @@
       },
       {
         "name": "text_segment_end",
-        "original": "code_end",
+        "original": "slot_upper_bound",
         "type": "u8 *"
       },
       {
@@ -2911,8 +2900,8 @@
         "replacement": "*(u32 *)&scratch_ctx->instruction"
       },
       {
-        "original": "text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size[0] - 0x25));",
-        "replacement": "text_segment_end = (u8 *)slot_lower_bound + code_segment_size[0];"
+        "original": "text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size - 0x25));",
+        "replacement": "text_segment_end = (u8 *)slot_lower_bound + code_segment_size;"
       },
       {
         "original": "decode_cursor = (dasm_ctx_t *)((long)&decode_cursor->instruction + 1);",
@@ -2936,7 +2925,7 @@
       },
       {
         "original": "return (BOOL)scratch_ctx;",
-        "replacement": "return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0]));"
+        "replacement": "return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size));"
       }
     ],
     "source": "xzre/xzre_code/elf_find_string_references.c"
@@ -3446,6 +3435,10 @@
         "name": "sym_entry",
         "original": "pEVar1",
         "type": "Elf64_Sym *"
+      },
+      {
+        "original": "elf_info->elfbase->e_ident",
+        "replacement": "(u8 *)elf_info->elfbase"
       }
     ],
     "source": "xzre/xzre_code/elf_symbol_get_addr.c"
