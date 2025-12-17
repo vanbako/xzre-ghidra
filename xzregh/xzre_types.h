@@ -1872,7 +1872,10 @@ extern Elf64_Rela *elf_find_rela_reloc(
 
 extern Elf64_Relr *elf_find_relr_reloc(
  elf_info_t *elf_info,
- EncodedStringId encoded_string_id);
+ void *target_addr,
+ u8 *slot_lower_bound,
+ u8 *slot_upper_bound,
+ ulong *resume_index_ptr);
 
 extern BOOL elf_find_function_pointer(
  StringXrefId xref_id,

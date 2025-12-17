@@ -605,7 +605,7 @@
         "comment": "Bitmap entries expand into 63 consecutive slots\u2014each set bit hands back another 8-byte pointer."
       },
       {
-        "match": "if ((*(Elf64_Relr *)relr_slot_ptr == target_offset) &&",
+        "match": "if ((*(Elf64_Relr *)relr_slot_ptr == (long)target_addr - (long)elfbase) &&",
         "match_type": "wildcard",
         "comment": "Only return matches that land inside the optional `[slot_lower_bound, slot_upper_bound]` window."
       }
@@ -771,7 +771,7 @@
         "comment": "Filter on the relocation type and insist the associated symbol is an unresolved import before hashing the name."
       },
       {
-        "match": "return elf_info->elfbase->e_ident + relocs->r_offset;",
+        "match": "return (u8 *)elf_info->elfbase + relocs->r_offset;",
         "match_type": "wildcard",
         "comment": "Hand the caller the writable relocation slot (module base + `r_offset`) once a match is found."
       }

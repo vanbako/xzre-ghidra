@@ -35,7 +35,7 @@ void * elf_get_reloc_symbol
          (sym_name_id = get_string_id(elf_info->dynstr + elf_info->dynsym[relocs->r_info >> 0x20].st_name,
                                 (char *)0x0), sym_name_id == encoded_string_id)) {
         // AutoDoc: Hand the caller the writable relocation slot (module base + `r_offset`) once a match is found.
-        return elf_info->elfbase->e_ident + relocs->r_offset;
+        return (u8 *)elf_info->elfbase + relocs->r_offset;
       }
       relocs = relocs + 1;
     }

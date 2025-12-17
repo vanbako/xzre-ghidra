@@ -1911,7 +1911,7 @@
       "names": [
         "elf_find_relr_reloc"
       ],
-      "code": "extern Elf64_Relr *elf_find_relr_reloc(\n elf_info_t *elf_info,\n EncodedStringId encoded_string_id);"
+      "code": "extern Elf64_Relr *elf_find_relr_reloc(\n elf_info_t *elf_info,\n void *target_addr,\n u8 *slot_lower_bound,\n u8 *slot_upper_bound,\n ulong *resume_index_ptr);"
     },
     {
       "kind": "declaration",

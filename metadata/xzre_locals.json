@@ -2662,26 +2662,6 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "slot_lower_bound",
-        "original": "in_RDX",
-        "type": "u8 *"
-      },
-      {
-        "name": "slot_upper_bound",
-        "original": "in_RCX",
-        "type": "u8 *"
-      },
-      {
-        "name": "resume_index_ptr",
-        "original": "in_R8",
-        "type": "ulong *"
-      },
-      {
-        "name": "target_addr_high",
-        "original": "in_register_00000034",
-        "type": "u32"
-      },
-      {
         "name": "relr_count",
         "original": "uVar1",
         "type": "uint"
@@ -2712,14 +2692,13 @@
         "type": "long"
       },
       {
-        "name": "target_offset",
-        "original": "EVar6",
-        "type": "u64"
+        "name": "relr_entry",
+        "original": "uVar6",
+        "type": "ulong"
       },
       {
-        "name": "relr_entry",
-        "original": "uVar7",
-        "type": "ulong"
+        "original": "elfbase->e_ident",
+        "replacement": "(u8 *)elfbase"
       }
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"
@@ -3059,6 +3038,10 @@
         "name": "reloc_index",
         "original": "uVar3",
         "type": "ulong"
+      },
+      {
+        "original": "elf_info->elfbase->e_ident",
+        "replacement": "(u8 *)elf_info->elfbase"
       }
     ],
     "source": "xzre/xzre_code/elf_get_reloc_symbol.c"

@@ -33,7 +33,7 @@ BOOL elf_find_function_pointer
   *pOutFptrAddr = rela_match;
   if (rela_match == (Elf64_Rela *)0x0) {
     // AutoDoc: RELR fallback covers PIE builds where the GOT slot only appears inside the bitmap run.
-    relr_match = elf_find_relr_reloc(elf_info,(EncodedStringId)*pOutCodeStart);
+    relr_match = elf_find_relr_reloc(elf_info,*pOutCodeStart,(u8 *)0x0,(u8 *)0x0,(ulong *)0x0);
     *pOutFptrAddr = relr_match;
     if (relr_match == (Elf64_Relr *)0x0) {
       return FALSE;

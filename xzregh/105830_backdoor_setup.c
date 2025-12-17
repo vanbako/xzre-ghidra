@@ -454,7 +454,9 @@ LAB_00105951:
                 if (mem_address == (Elf64_Rela *)0x0) {
                   probe_dasm_ctx.instruction = (u8 *)0x0;
                   relr_retry_flag = TRUE;
-                  mem_address = (Elf64_Rela *)elf_find_relr_reloc(search_image,(EncodedStringId)string_cursor);
+                  mem_address = (Elf64_Rela *)
+                                elf_find_relr_reloc(search_image,string_cursor,(u8 *)0x0,(u8 *)0x0,
+                                                    (ulong *)&probe_dasm_ctx);
                 }
                 while (mem_address != (Elf64_Rela *)0x0) {
                   do {
@@ -493,7 +495,9 @@ LAB_00105951:
                   } while (mem_address != (Elf64_Rela *)0x0);
                   probe_dasm_ctx.instruction = (u8 *)0x0;
 LAB_001063c8:
-                  mem_address = (Elf64_Rela *)elf_find_relr_reloc(search_image,(EncodedStringId)string_cursor);
+                  mem_address = (Elf64_Rela *)
+                                elf_find_relr_reloc(search_image,string_cursor,(u8 *)0x0,(u8 *)0x0,
+                                                    (ulong *)&probe_dasm_ctx);
                   relr_retry_flag = TRUE;
                 }
                 string_cursor = string_cursor + 8;
