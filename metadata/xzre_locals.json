@@ -8725,7 +8725,7 @@
       },
       {
         "name": "lea_insn_size",
-        "type": "u8 *"
+        "type": "u64"
       },
       {
         "name": "lea_mem_disp_bytes",

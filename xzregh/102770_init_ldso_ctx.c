@@ -5,10 +5,10 @@
 
 
 /*
- * AutoDoc: Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets
- * the copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`
- * so the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with
- * the original ld.so state.
+ * AutoDoc: Restores ld.so audit state after a failed hook install: it writes the saved auditstate bindflags back to libcrypto/sshd, resets
+ * libcrypto’s `link_map::l_name` pointer away from the forged basename buffer, clears the `l_audit_any_plt` bit with the recovered
+ * mask, and zeros `_dl_naudit`/`_dl_audit` so the dynamic linker no longer believes an audit module is registered. Stage two calls
+ * it on failure paths so sshd resumes with the original loader state.
  */
 
 #include "xzre_types.h"
@@ -25,7 +25,7 @@ void init_ldso_ctx(ldso_ctx_t *ldso_ctx)
       // AutoDoc: Reapply the saved libcrypto bindflags so ld.so’s audit hooks see their original mask.
       *libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_old_value;
       if (ldso_ctx->libcrypto_l_name != (char **)0x0) {
-        // AutoDoc: Undo the byte we NUL’d inside `l_name` while the hooks were active.
+        // AutoDoc: Restore the libcrypto `l_name` pointer away from the temporary basename buffer (it points back at the auditstate slot we borrowed as a safe address).
         *ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_slot;
       }
     }

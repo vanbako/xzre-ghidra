@@ -1708,7 +1708,7 @@
     ]
   },
   "init_ldso_ctx": {
-    "plate": "Restores every ld.so flag the implant may have touched: it writes the saved auditstate bindflags back to libcrypto/sshd, unsets\nthe copied `l_name` byte, clears the `l_audit_any_plt` bit with the mask recovered earlier, and zeros `_dl_naudit`/`_dl_audit`\nso the dynamic linker no longer believes an audit module is registered. Stage two calls it on failure paths so sshd resumes with\nthe original ld.so state.",
+    "plate": "Restores ld.so audit state after a failed hook install: it writes the saved auditstate bindflags back to libcrypto/sshd, resets\nlibcrypto\u2019s `link_map::l_name` pointer away from the forged basename buffer, clears the `l_audit_any_plt` bit with the recovered\nmask, and zeros `_dl_naudit`/`_dl_audit` so the dynamic linker no longer believes an audit module is registered. Stage two calls\nit on failure paths so sshd resumes with the original loader state.",
     "inline": [
       {
         "match": "*libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_old_value;",
@@ -1716,7 +1716,7 @@
       },
       {
         "match": "*ldso_ctx->libcrypto_l_name = (char *)libcrypto_bindflags_slot;",
-        "comment": "Undo the byte we NUL\u2019d inside `l_name` while the hooks were active."
+        "comment": "Restore the libcrypto `l_name` pointer away from the temporary basename buffer (it points back at the auditstate slot we borrowed as a safe address)."
       },
       {
         "match": "*ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;",
@@ -3111,6 +3111,10 @@
   "validate_log_handler_pointers": {
     "plate": "Given two candidate addresses for sshd\u2019s `log_handler`/`log_handler_ctx` globals, it replays the code sequence that writes them.\nThe helper enforces that the pointers are distinct and within 0x10 bytes of one another, walks the cached string-reference\nentries to find the LEA that materialises the handler struct, bounds the routine via `x86_dasm`/`find_function`, and then\nsearches for MOV [mem],reg instructions touching each address. Only when both stores appear inside that function does it accept\nthe pair as the genuine log-handler slots.",
     "inline": [
+      {
+        "match": "for (slot_distance = 0x16;",
+        "comment": "Zero the on-stack x86 decode scratch (dasm_ctx + spill slots) before scanning so stale bytes can\u2019t spoof opcode signatures."
+      },
       {
         "match": "if ((addr1 != addr2 && addr1 != (void *)0x0) && (addr2 != (void *)0x0)) {",
         "comment": "Reject identical or NULL slots up front\u2014the handler and ctx pointers must be distinct globals."

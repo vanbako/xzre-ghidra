@@ -34,9 +34,10 @@ BOOL validate_log_handler_pointers
   u8 *lea_insn_ptr;
   u8 *lea_rel32_disp;
   u32 lea_opcode_signature;
-  u8 *lea_insn_size;
+  u64 lea_insn_size;
   
   scan_range_end = &lea_insn_ptr;
+  // AutoDoc: Zero the on-stack x86 decode scratch (dasm_ctx + spill slots) before scanning so stale bytes can’t spoof opcode signatures.
   for (slot_distance = 0x16; slot_distance != 0; slot_distance = slot_distance + -1) {
     *(u32 *)scan_range_end = 0;
     scan_range_end = (u8 **)((long)scan_range_end + 4);
@@ -61,7 +62,7 @@ BOOL validate_log_handler_pointers
                          (u8 *)scan_range_end);
         if ((match_success != FALSE) && (lea_opcode_signature == 0x168)) {
           bounded_func_range = (u8 **)0x0;
-          scan_range_start = lea_rel32_disp + (long)lea_insn_size + (long)lea_insn_ptr;
+          scan_range_start = lea_rel32_disp + lea_insn_size + (long)lea_insn_ptr;
           // AutoDoc: Once the LEA decodes cleanly, bound the owning routine so the MOV scan stays inside that function.
           find_function(scan_range_start,(void **)0x0,&bounded_func_range,(u8 *)search_base,code_end,
                         global->uses_endbr64);
