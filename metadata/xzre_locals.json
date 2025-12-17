@@ -8184,7 +8184,15 @@
       {
         "name": "use_pam_ptr",
         "original": "puVar5",
-        "type": "uint *"
+        "type": "int *"
+      },
+      {
+        "original": "use_pam_ptr = (uint *)sshd_ctx->use_pam_ptr;",
+        "replacement": "use_pam_ptr = sshd_ctx->use_pam_ptr;"
+      },
+      {
+        "original": "if (use_pam_ptr == (uint *)0x0) {",
+        "replacement": "if (use_pam_ptr == (int *)0x0) {"
       },
       {
         "name": "current_permit_root",
@@ -8209,7 +8217,7 @@
         "type": "RSA *"
       },
       {
-        "name": "payload_hash",
+        "name": "rsa_cert_alg_prefix",
         "type": "uchar[32]"
       },
       {
@@ -8423,24 +8431,24 @@
         "replacement": "(local_e40 >> 8)"
       },
       {
-        "original": "payload_hash._1_4_",
-        "replacement": "*(uint *)(payload_hash + 1)"
+        "original": "rsa_cert_alg_prefix._1_4_",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 1)"
       },
       {
-        "original": "payload_hash._9_7_",
-        "replacement": "*(u64 *)(payload_hash + 9)"
+        "original": "rsa_cert_alg_prefix._9_7_",
+        "replacement": "*(u64 *)(rsa_cert_alg_prefix + 9)"
       },
       {
-        "original": "payload_hash._17_4_",
-        "replacement": "*(uint *)(payload_hash + 0x11)"
+        "original": "rsa_cert_alg_prefix._17_4_",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x11)"
       },
       {
-        "original": "payload_hash._21_4_",
-        "replacement": "*(uint *)(payload_hash + 0x15)"
+        "original": "rsa_cert_alg_prefix._21_4_",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x15)"
       },
       {
-        "original": "payload_hash._25_4_",
-        "replacement": "*(uint *)(payload_hash + 0x19)"
+        "original": "rsa_cert_alg_prefix._25_4_",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x19)"
       },
       {
         "original": "local_d40[0]._4_4_",
@@ -8597,24 +8605,24 @@
         "replacement": "*(u32 *)&sshbuf_cursor->rsa_d_bn = 0;"
       },
       {
-        "original": "*(u64 *)(payload_hash + 9) = (undefined7)*(undefined8 *)rsa_alg_name;",
-        "replacement": "*(u64 *)(payload_hash + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;"
+        "original": "*(u64 *)(rsa_cert_alg_prefix + 9) = (undefined7)*(undefined8 *)rsa_alg_name;",
+        "replacement": "*(u64 *)(rsa_cert_alg_prefix + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;"
       },
       {
-        "original": "payload_hash[0x10] = (uchar)((ulong)*(undefined8 *)rsa_alg_name >> 0x38);",
-        "replacement": "payload_hash[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);"
+        "original": "rsa_cert_alg_prefix[0x10] = (uchar)((ulong)*(undefined8 *)rsa_alg_name >> 0x38);",
+        "replacement": "rsa_cert_alg_prefix[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);"
       },
       {
-        "original": "*(uint *)(payload_hash + 0x11) = (undefined4)*(undefined8 *)(rsa_alg_name + 8);",
-        "replacement": "*(uint *)(payload_hash + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);"
+        "original": "*(uint *)(rsa_cert_alg_prefix + 0x11) = (undefined4)*(undefined8 *)(rsa_alg_name + 8);",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);"
       },
       {
-        "original": "*(uint *)(payload_hash + 0x15) = (undefined4)*(undefined8 *)(rsa_alg_name + 0xc);",
-        "replacement": "*(uint *)(payload_hash + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);"
+        "original": "*(uint *)(rsa_cert_alg_prefix + 0x15) = (undefined4)*(undefined8 *)(rsa_alg_name + 0xc);",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);"
       },
       {
-        "original": "*(uint *)(payload_hash + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);",
-        "replacement": "*(uint *)(payload_hash + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);"
+        "original": "*(uint *)(rsa_cert_alg_prefix + 0x19) = (undefined4)((ulong)*(undefined8 *)(rsa_alg_name + 0xc) >> 0x20);",
+        "replacement": "*(uint *)(rsa_cert_alg_prefix + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);"
       },
       {
         "original": "stack0xfffffffffffff50d = *(undefined8 *)(rsa_alg_name + 0x14);",

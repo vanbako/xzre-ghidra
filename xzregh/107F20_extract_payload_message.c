@@ -5,11 +5,11 @@
 
 
 /*
- * AutoDoc: Searches an sshbuf blob for either `"ssh-rsa-cert-v01@openssh.com"` or `"rsa-sha2-256"`, using the surrounding length
- * fields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at
- * 0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point
- * directly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly
- * how many bytes to peel off.
+ * AutoDoc: Scans `sshbuf->d` for a 7-byte prefix match against the `"ssh-rsa-cert-v01@openssh.com"` / `"rsa-sha2-256"` markers, then
+ * uses the surrounding big-endian length fields to walk the serialized key blob. It validates every intermediate length
+ * (capping them at 0x10000), requires that the modulus mpint reaches the record tail (so the parse stays aligned), strips a
+ * leading 0x00 sign byte when present, and rewrites `sshbuf->d` to point directly at that modulus blob. The extracted length
+ * is returned via `out_payload_size` so the decryptor knows exactly how many bytes to peel off.
  */
 
 #include "xzre_types.h"
@@ -114,9 +114,11 @@ LAB_00107fd1:
         return FALSE;
       }
       modulus_cursor = field_cursor + 1;
+      // AutoDoc: Require the modulus mpint to extend to the end of the enclosing record; otherwise reject the candidate parse.
       if ((uint *)((ulong)field_length + (long)modulus_cursor) <= record_end_ptr) {
         return FALSE;
       }
+      // AutoDoc: mpint encoding: skip the leading 0x00 sign byte (used when the high bit would make the value negative) and decrement the length.
       if ((char)field_cursor[1] == '\0') {
         modulus_cursor = (uint *)((long)field_cursor + 5);
         field_length = field_length - 1;

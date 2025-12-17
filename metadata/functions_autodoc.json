@@ -913,7 +913,7 @@
     ]
   },
   "extract_payload_message": {
-    "plate": "Searches an sshbuf blob for either `\"ssh-rsa-cert-v01@openssh.com\"` or `\"rsa-sha2-256\"`, using the surrounding length\nfields (all big-endian) to walk the serialized key structure. It validates every intermediate length (capping them at\n0x10000), ensures the proposed modulus chunk fits within the caller-provided buffer, and rewrites `sshbuf->d` to point\ndirectly at that modulus blob. The extracted length is returned via `out_payload_size` so the decryptor knows exactly\nhow many bytes to peel off.",
+    "plate": "Scans `sshbuf->d` for a 7-byte prefix match against the `\"ssh-rsa-cert-v01@openssh.com\"` / `\"rsa-sha2-256\"` markers, then\nuses the surrounding big-endian length fields to walk the serialized key blob. It validates every intermediate length\n(capping them at 0x10000), requires that the modulus mpint reaches the record tail (so the parse stays aligned), strips a\nleading 0x00 sign byte when present, and rewrites `sshbuf->d` to point directly at that modulus blob. The extracted length\nis returned via `out_payload_size` so the decryptor knows exactly how many bytes to peel off.",
     "inline": [
       {
         "match": "if (CARRY8((ulong)sshbuf_start,sshbuf_size)) {",
@@ -930,6 +930,14 @@
       {
         "match": "cursor_offset = c_strnlen((char *)alg_match_cursor,window_size);",
         "comment": "Treat the algorithm string as bounded input so we never read past the declared record tail."
+      },
+      {
+        "match": "if ((uint *)((ulong)field_length + (long)modulus_cursor) <= record_end_ptr) {",
+        "comment": "Require the modulus mpint to extend to the end of the enclosing record; otherwise reject the candidate parse."
+      },
+      {
+        "match": "if ((char)field_cursor[1] == '\\0') {",
+        "comment": "mpint encoding: skip the leading 0x00 sign byte (used when the high bit would make the value negative) and decrement the length."
       },
       {
         "match": "sshbuf_data->d = (u8 *)modulus_cursor;",
@@ -2987,7 +2995,7 @@
     ]
   },
   "sshd_proxy_elevate": {
-    "plate": "Implements the privileged half of the monitor command channel. It sanity-checks every pointer/import vector, enforces that\nKEYALLOWED support is present before privileged commands run, and toggles sshd's PermitRootLogin/PAM globals according\nto the request flags. For PROXY_EXCHANGE control frames lacking both monitor-flag bits it walks the stack for the staged\nChaCha header, verifies the SHA-256 digest, unwraps the secret-data key/nonce, and decrypts the pending payload in place.\nIt then clears the monitor frame buffers, serialises the attacker's modulus/exponent, signs the request, and streams it over\nwhichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,\n\"wait\" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.",
+    "plate": "Implements the privileged half of the monitor command channel. It sanity-checks every pointer/import vector, enforces that\nKEYALLOWED support is present before privileged commands run, and toggles sshd's PermitRootLogin/PAM globals according\nto the request flags. For PROXY_EXCHANGE control frames lacking both monitor-flag bits it walks the stack for the staged\nChaCha header, verifies the SHA-256 digest, unwraps the secret-data key/nonce, and decrypts the pending payload in place.\nIt then clears the monitor frame buffers, serialises the attacker's public exponent/modulus, signs the request, and streams it over\nwhichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,\n\"wait\" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.",
     "inline": [
       {
         "match": "if (sshd_ctx->have_mm_answer_keyallowed == FALSE) {",
@@ -3016,7 +3024,7 @@
       },
       {
         "match": "success = bignum_serialize(monitor_req_payload + payload_remaining,payload_room,&serialized_chunk_len,rsa_components[digest_idx],imports);",
-        "comment": "Serialise the attacker's exponent and modulus into the monitor frame so sshd sees a well-formed RSA keypair."
+        "comment": "Serialize `args->rsa_e` (public exponent) and `args->rsa_n` (modulus) into the forged key blob so sshd sees a well-formed RSA keypair."
       },
       {
         "match": "status = (*ctx->imported_funcs->RSA_set0_key)(rsa_ctx,rsa_n_bn,rsa_e_bn,rsa_d_bn);",

