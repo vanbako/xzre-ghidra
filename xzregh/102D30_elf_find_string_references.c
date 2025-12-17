@@ -28,7 +28,7 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   Elf64_Rela *rela_slot;
   dasm_ctx_t *scratch_ctx;
   u64 entry_offset;
-  string_item_t *entry_cursor;
+  string_references_t *entry_cursor;
   u8 *text_segment_end;
   void **range_cursor;
   u8 *decode_cursor;
@@ -55,7 +55,7 @@ BOOL elf_find_string_references(elf_info_t *elf_info,string_references_t *refs)
   slot_lower_bound = (dasm_ctx_t *)elf_get_code_segment(elf_info,code_segment_size);
   scratch_ctx = &scanner_ctx;
   if ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0])) {
-    text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size[0] - 0x25));
+    text_segment_end = (u8 *)slot_lower_bound + code_segment_size[0];
     string_cursor = (char *)0x0;
     while( TRUE ) {
       string_id_cursor = 0;
@@ -98,25 +98,22 @@ LAB_00102e64:
     if (decode_cursor < text_segment_end) {
       // AutoDoc: Walk the entire text range with the decoder, tightening function bounds whenever a CALL/JMP/LEA targets our xrefs.
       insn_decoded = x86_dasm(scratch_ctx,(u8 *)decode_cursor,(u8 *)text_segment_end);
-      decode_cursor = (dasm_ctx_t *)((long)&decode_cursor->instruction + 1);
+      decode_cursor = decode_cursor + 1;
       if (insn_decoded != FALSE) {
-        decode_cursor = (dasm_ctx_t *)
-                  ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));
+        decode_cursor = scanner_ctx.instruction + scanner_ctx.instruction_size;
         if (*(u32 *)&scanner_ctx.opcode_window[3] == 0x168) {
           if (scanner_ctx.imm_signed == 0) goto LAB_00102e64;
-          candidate_addr = (dasm_ctx_t *)
-                   ((u8 *)((long)scanner_ctx.instruction + 0x25) +
-                   scanner_ctx.imm_signed + scanner_ctx.instruction_size + -0x25);
+          candidate_addr = decode_cursor + scanner_ctx.imm_signed;
 LAB_00102ee5:
           if (candidate_addr == (dasm_ctx_t *)0x0) goto LAB_00102e64;
         }
         else {
-          candidate_addr = (dasm_ctx_t *)scanner_ctx.instruction;
+          candidate_addr = scanner_ctx.instruction;
           if (*(u32 *)&scanner_ctx.opcode_window[3] == 0xa5fe) goto LAB_00102ee5;
           if (((*(u32 *)&scanner_ctx.opcode_window[3] != 0x10d) || ((scanner_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48)
               ) || (((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))
           goto LAB_00102e64;
-          candidate_addr = (dasm_ctx_t *)(decode_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));
+          candidate_addr = decode_cursor + scanner_ctx.mem_disp;
         }
         if ((slot_lower_bound <= candidate_addr) && (range_slot = range_cursor, candidate_addr <= text_segment_end)) {
           do {
@@ -178,6 +175,6 @@ LAB_00102fad:
       range_cursor = range_cursor + 4;
     } while (range_cursor != range_table_end);
   }
-  return (BOOL)scratch_ctx;
+  return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0]));
 }
 

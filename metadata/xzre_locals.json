@@ -2861,7 +2861,7 @@
       {
         "name": "entry_cursor",
         "original": "psVar13",
-        "type": "string_item_t *"
+        "type": "string_references_t *"
       },
       {
         "name": "text_segment_end",
@@ -2885,6 +2885,34 @@
       {
         "original": "*(undefined4 *)&scratch_ctx->instruction",
         "replacement": "*(u32 *)&scratch_ctx->instruction"
+      },
+      {
+        "original": "text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size[0] - 0x25));",
+        "replacement": "text_segment_end = (u8 *)slot_lower_bound + code_segment_size[0];"
+      },
+      {
+        "original": "decode_cursor = (dasm_ctx_t *)((long)&decode_cursor->instruction + 1);",
+        "replacement": "decode_cursor = decode_cursor + 1;"
+      },
+      {
+        "original": "decode_cursor = (dasm_ctx_t *)\n                  ((u8 *)((long)scanner_ctx.instruction + 0x25) + (scanner_ctx.instruction_size - 0x25));",
+        "replacement": "decode_cursor = scanner_ctx.instruction + scanner_ctx.instruction_size;"
+      },
+      {
+        "original": "candidate_addr = (dasm_ctx_t *)\n                   ((u8 *)((long)scanner_ctx.instruction + 0x25) +\n                   scanner_ctx.imm_signed + scanner_ctx.instruction_size + -0x25);",
+        "replacement": "candidate_addr = decode_cursor + scanner_ctx.imm_signed;"
+      },
+      {
+        "original": "candidate_addr = (dasm_ctx_t *)scanner_ctx.instruction;",
+        "replacement": "candidate_addr = scanner_ctx.instruction;"
+      },
+      {
+        "original": "candidate_addr = (dasm_ctx_t *)(decode_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));",
+        "replacement": "candidate_addr = decode_cursor + scanner_ctx.mem_disp;"
+      },
+      {
+        "original": "return (BOOL)scratch_ctx;",
+        "replacement": "return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size[0]));"
       }
     ],
     "source": "xzre/xzre_code/elf_find_string_references.c"
