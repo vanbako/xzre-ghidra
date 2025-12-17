@@ -460,7 +460,7 @@ LAB_00105951:
                 }
                 while (mem_address != (Elf64_Rela *)0x0) {
                   do {
-                    probe_success = elf_contains_vaddr_relro(search_image,(u64)mem_address,8,1);
+                    probe_success = elf_contains_vaddr_relro(search_image,(u64)mem_address,8,TRUE);
                     if ((probe_success != FALSE) &&
                        (probe_success = find_instruction_with_mem_operand_ex
                                            ((u8 *)authprobe_func_start,authprobe_func_end,(dasm_ctx_t *)0x0,0x109,

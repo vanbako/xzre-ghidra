@@ -522,17 +522,17 @@
     ]
   },
   "elf_contains_vaddr_relro": {
-    "plate": "Extends `elf_contains_vaddr` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (forcing PF_R) so `[vaddr, vaddr+size)` is known to live inside a readable PT_LOAD. When `p_flags` is non-zero and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.",
+    "plate": "Extends `elf_contains_vaddr` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (requiring PF_W) so `[vaddr, vaddr+size)` is known to live inside the writable PT_LOAD span that normally backs the GOT/.data. When `require_relro` is TRUE and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.",
     "inline": [
       {
         "match": "range_is_protected = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);",
         "match_type": "wildcard",
-        "comment": "Leverage the generic helper to ensure the range already lives inside a readable PT_LOAD segment."
+        "comment": "Leverage the generic helper to ensure the range already lives inside a PF_W PT_LOAD segment (the RW data/GOT mapping)."
       },
       {
-        "match": "if (((range_is_protected != FALSE) && (range_is_protected = TRUE, p_flags != 0)) && (elf_info->gnurelro_present != FALSE)) {",
+        "match": "if (((range_is_protected != FALSE) && (range_is_protected = TRUE,",
         "match_type": "wildcard",
-        "comment": "`p_flags` acts as a caller-supplied \"must be RELRO\" bit\u2014only then do we enforce the PT_GNU_RELRO bounds."
+        "comment": "`require_relro` acts as a caller-supplied \"must be RELRO\" bit\u2014only then do we enforce the PT_GNU_RELRO bounds."
       },
       {
         "match": "if ((relro_window_end <= vaddr) || (range_is_protected = FALSE, vaddr < relro_window_start)) {",

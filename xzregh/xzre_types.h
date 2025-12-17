@@ -1828,7 +1828,7 @@ extern BOOL elf_contains_vaddr(elf_info_t *elf_info, void *vaddr, u64 size, u32 
 
 extern BOOL elf_contains_vaddr_impl(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
 
-extern BOOL elf_contains_vaddr_relro(elf_info_t *elf_info, u64 vaddr, u64 size, u32 p_flags);
+extern BOOL elf_contains_vaddr_relro(elf_info_t *elf_info, u64 vaddr, u64 size, BOOL require_relro);
 
 extern BOOL elf_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 

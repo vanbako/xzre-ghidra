@@ -1,26 +1,27 @@
 // /home/kali/xzre-ghidra/xzregh/1022D0_elf_contains_vaddr_relro.c
 // Function: elf_contains_vaddr_relro @ 0x1022D0
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall elf_contains_vaddr_relro(elf_info_t * elf_info, u64 vaddr, u64 size, u32 p_flags)
+// Prototype: BOOL __stdcall elf_contains_vaddr_relro(elf_info_t * elf_info, u64 vaddr, u64 size, BOOL require_relro)
 
 
 /*
- * AutoDoc: Extends `elf_contains_vaddr` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (forcing PF_R) so `[vaddr, vaddr+size)` is known to live inside a readable PT_LOAD. When `p_flags` is non-zero and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.
+ * AutoDoc: Extends `elf_contains_vaddr` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (requiring PF_W) so `[vaddr, vaddr+size)` is known to live inside the writable PT_LOAD span that normally backs the GOT/.data. When `require_relro` is TRUE and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.
  */
 
 #include "xzre_types.h"
 
-BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,u32 p_flags)
+BOOL elf_contains_vaddr_relro(elf_info_t *elf_info,u64 vaddr,u64 size,BOOL require_relro)
 
 {
   BOOL range_is_protected;
   ulong relro_window_end;
   ulong relro_window_start;
   
-  // AutoDoc: Leverage the generic helper to ensure the range already lives inside a readable PT_LOAD segment.
+  // AutoDoc: Leverage the generic helper to ensure the range already lives inside a PF_W PT_LOAD segment (the RW data/GOT mapping).
   range_is_protected = elf_contains_vaddr(elf_info,(void *)vaddr,size,2);
-  // AutoDoc: `p_flags` acts as a caller-supplied "must be RELRO" bit—only then do we enforce the PT_GNU_RELRO bounds.
-  if (((range_is_protected != FALSE) && (range_is_protected = TRUE, p_flags != 0)) && (elf_info->gnurelro_present != FALSE)) {
+  // AutoDoc: `require_relro` acts as a caller-supplied "must be RELRO" bit—only then do we enforce the PT_GNU_RELRO bounds.
+  if (((range_is_protected != FALSE) && (range_is_protected = TRUE, require_relro != FALSE)) &&
+     (elf_info->gnurelro_present != FALSE)) {
     relro_window_start = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->load_base_vaddr);
     relro_window_end = elf_info->gnurelro_memsize + relro_window_start;
     relro_window_start = relro_window_start & 0xfffffffffffff000;

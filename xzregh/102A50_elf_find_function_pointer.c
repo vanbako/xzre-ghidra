@@ -40,7 +40,7 @@ BOOL elf_find_function_pointer
     }
   }
   // AutoDoc: Only hand back slots inside GNU_RELRO; anything outside hardened memory is rejected.
-  slot_valid = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,1);
+  slot_valid = elf_contains_vaddr_relro(elf_info,(long)*pOutFptrAddr - 8,0x10,TRUE);
   if (slot_valid == FALSE) {
     return FALSE;
   }
