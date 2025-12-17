@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the `cpuid_random_symbol` anchor, copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.
+ * AutoDoc: Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the relocation-safe cpuid anchor (`_Lrc_read_destroy`), copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.
  */
 
 #include "xzre_types.h"
@@ -13,7 +13,7 @@
 void init_elf_entry_ctx(elf_entry_ctx_t *ctx)
 
 {
-  // AutoDoc: Record the benign cpuid resolver's address so GOT math has a stable anchor.
+  // AutoDoc: Record the relocation-safe anchor symbol so GOT math has a stable base pointer.
   ctx->cpuid_random_symbol_addr = &_Lrc_read_destroy;
   // AutoDoc: Lift the resolver's saved return address (slot 3) as the GOT slot that will be patched.
   (ctx->got_ctx).cpuid_got_slot = (void *)ctx->resolver_frame[3];

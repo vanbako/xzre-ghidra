@@ -1496,7 +1496,7 @@
     ]
   },
   "get_elf_functions_address": {
-    "plate": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives near `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer math lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the loader a stable way to reach its helper vtable.",
+    "plate": "Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel `fake_lzma_allocator_offset` (stored next to `elf_functions_offset` in `.data`) and advance 12 struct slots (~0x160 bytes) to arrive at the live table. The convoluted pointer math lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the loader a stable way to reach its helper vtable.",
     "inline": [
       {
         "match": "table_cursor = (elf_functions_t *)fake_lzma_allocator_offset;",
@@ -1641,11 +1641,11 @@
     ]
   },
   "init_elf_entry_ctx": {
-    "plate": "Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the `cpuid_random_symbol` anchor, copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.",
+    "plate": "Primes an `elf_entry_ctx_t` before the IFUNC resolvers run. It latches the relocation-safe cpuid anchor (`_Lrc_read_destroy`), copies the resolver's saved return address out of `ctx->resolver_frame[3]` as the cpuid GOT slot, replays `update_got_offset`/`update_cpuid_got_index`, and clears `tls_got_entry` so the later GOT patch re-resolves the TLS entry before grafting in the malicious cpuid stub.",
     "inline": [
       {
         "match": "ctx->cpuid_random_symbol_addr = &_Lrc_read_destroy;",
-        "comment": "Record the benign cpuid resolver's address so GOT math has a stable anchor."
+        "comment": "Record the relocation-safe anchor symbol so GOT math has a stable base pointer."
       },
       {
         "match": "(ctx->got_ctx).cpuid_got_slot = (void *)ctx->resolver_frame[3];",
@@ -1810,7 +1810,7 @@
         "comment": "Resolve the versioned `__libc_stack_end` symbol from the interpreter image."
       },
       {
-        "match": "libc_stack_end_ptr = elf->elfbase->e_ident + libc_stack_end_sym->st_value;",
+        "match": "libc_stack_end_ptr = (void **)((u8 *)elf->elfbase + libc_stack_end_sym->st_value);",
         "comment": "Convert the symbol's st_value into a pointer inside ld.so's ELF image (double indirection)."
       },
       {

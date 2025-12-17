@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel (`elf_functions_offset` lives near `fake_lzma_allocator_offset` in `.data`) and advance 12 struct slots to arrive at the live table. The convoluted pointer math lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the loader a stable way to reach its helper vtable.
+ * AutoDoc: Same pattern for the `elf_functions_t` dispatch table: start from the relocation-safe sentinel `fake_lzma_allocator_offset` (stored next to `elf_functions_offset` in `.data`) and advance 12 struct slots (~0x160 bytes) to arrive at the live table. The convoluted pointer math lets the object carry offsets instead of absolute addresses, which keeps the relocation surface tiny while still giving the loader a stable way to reach its helper vtable.
  */
 
 #include "xzre_types.h"

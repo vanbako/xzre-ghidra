@@ -5068,6 +5068,10 @@
         "name": "libc_stack_end_ptr",
         "original": "puVar3",
         "type": "void **"
+      },
+      {
+        "original": "libc_stack_end_ptr = elf->elfbase->e_ident + libc_stack_end_sym->st_value;",
+        "replacement": "libc_stack_end_ptr = (void **)((u8 *)elf->elfbase + libc_stack_end_sym->st_value);"
       }
     ],
     "source": "xzre/xzre_code/main_elf_parse.c"
