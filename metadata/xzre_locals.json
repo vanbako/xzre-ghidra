@@ -7536,6 +7536,10 @@
       {
         "original": "*(undefined4 *)&probe_cursor->anchor_pc = 0;",
         "replacement": "*(u32 *)&probe_cursor->anchor_pc = 0;"
+      },
+      {
+        "original": "funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(libcrypto_header->e_ident + digest_verify_addr);",
+        "replacement": "funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)((u8 *)libcrypto_header + digest_verify_addr);"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_sensitive_data.c"
@@ -7880,17 +7884,17 @@
     ],
     "register_temps": [
       {
-        "name": "base_hit",
+        "name": "host_keys_hit",
         "original": "BVar1",
         "type": "BOOL"
       },
       {
-        "name": "offset10_hit",
+        "name": "host_certificates_hit",
         "original": "BVar2",
         "type": "BOOL"
       },
       {
-        "name": "offset8_hit",
+        "name": "host_pubkeys_hit",
         "original": "BVar3",
         "type": "BOOL"
       },

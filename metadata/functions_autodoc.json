@@ -2564,7 +2564,7 @@
     ]
   },
   "sshd_find_monitor_struct": {
-    "plate": "Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths, etc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned BSS address is tallied, and once a value shows up at least five times the routine records it in `ctx->struct_monitor_ptr_address` so later hooks can dereference monitor->monitor_to_child_fd/child_to_monitor_fd directly. The helper also emits a `secret_data_append_from_call_site` breadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.",
+    "plate": "Instruments the ten monitor-side helpers referenced in `string_refs` (allocation, channel handling, recv/send paths, etc.) by calling `sshd_find_monitor_field_addr_in_function` for each one. Every returned `.data/.bss` slot is tallied, and once a value shows up at least five times the routine records it in `ctx->monitor_struct_slot` (`monitor **`) so later hooks can dereference the live `monitor *` and access `monitor_to_child_fd`/`child_to_monitor_fd`. The helper also emits a `secret_data_append_from_call_site` breadcrumb so the secret-data mirroring code knows when monitor discovery succeeded.",
     "inline": [
       {
         "match": "secret_append_ok = secret_data_append_from_call_site((secret_data_shift_cursor_t)0xda,0x14,0xf,FALSE);",
@@ -2592,7 +2592,7 @@
       },
       {
         "match": "          sshd_find_monitor_field_addr_in_function",
-        "comment": "Ask the helper to look for MOV [mem],reg stores and cache whatever monitor struct pointer those routines touch.",
+        "comment": "Ask the helper to look for MOV [mem],reg stores and cache the candidate `.bss` slot feeding `mm_request_send`.",
         "placement": "after"
       },
       {
@@ -2818,7 +2818,7 @@
     ]
   },
   "sshd_get_sensitive_data_score_in_demote_sensitive_data": {
-    "plate": "Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand touches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.",
+    "plate": "Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as it materialises the candidate `sensitive_data` address (the `host_keys` slot at offset 0). That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.",
     "inline": [
       {
         "match": "code_start = (u8 *)(refs->demote_sensitive_data).func_start;",
@@ -2826,7 +2826,7 @@
       },
       {
         "match": "demote_hit = find_instruction_with_mem_operand",
-        "comment": "Walk the routine until a MOV/LEA mentions the candidate struct pointer; that hit is worth the full three points."
+        "comment": "Walk the routine until a MOV/LEA materialises `&sensitive_data->host_keys` (the struct base); that hit is worth the full three points."
       },
       {
         "match": "score = 3;",
@@ -2861,27 +2861,27 @@
     ]
   },
   "sshd_get_sensitive_data_score_in_main": {
-    "plate": "Looks inside the cached `main()` range and searches for memory references to the struct at offsets 0, +8, and +0x10. It gives +1 when the base is accessed, +1 when +0x10 is touched, and subtracts one when +8 never shows up, producing a signed score between -1 and +3. The result is doubled later so the decision logic favours pointers that the main daemon manipulates frequently.",
+    "plate": "Scans the cached `main()` range for absolute references to `sensitive_data->host_keys`, `sensitive_data->host_pubkeys`, and `sensitive_data->host_certificates` (+0/+8/+0x10). The return value is the number of fields referenced (0-3) and is doubled later in the aggregate score.",
     "inline": [
       {
         "match": "code_start = (u8 *)(refs->list_hostkey_types).func_start;",
-        "comment": "Reuse the `list_hostkey_types` string reference to bound sshd\u2019s `main()` implementation before scanning."
+        "comment": "Reuse the `list_hostkey_types` string reference to bound sshd's `main()` implementation before scanning."
       },
       {
-        "match": "base_hit = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);",
-        "comment": "Award the first point when any instruction in `main()` touches the candidate struct base."
+        "match": "host_keys_hit = find_instruction_with_mem_operand(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);",
+        "comment": "Count a hit when `main()` materialises `&sensitive_data->host_keys` (the struct base)."
       },
       {
-        "match": "offset10_hit = find_instruction_with_mem_operand",
-        "comment": "Look for a second access at offset +0x10; most true positives tick that bookkeeping field at least once."
+        "match": "host_certificates_hit = find_instruction_with_mem_operand",
+        "comment": "Count a hit when `main()` materialises `&sensitive_data->host_certificates` (+0x10)."
       },
       {
-        "match": "offset8_hit = find_instruction_with_mem_operand",
-        "comment": "Track whether the +8 slot ever gets referenced so we can penalise pointers that never resemble the real layout."
+        "match": "host_pubkeys_hit = find_instruction_with_mem_operand",
+        "comment": "Count a hit when `main()` materialises `&sensitive_data->host_pubkeys` (+8)."
       },
       {
-        "match": "score = (((uint)(base_hit != FALSE) - (uint)(offset10_hit == FALSE)) + 2) - (uint)(offset8_hit == FALSE);",
-        "comment": "Collapse the three booleans into the signed -1\u2026+3 score that later feeds the aggregate heuristic."
+        "match": "score = (((uint)(host_keys_hit != FALSE) - (uint)(host_certificates_hit == FALSE)) + 2) - (uint)(host_pubkeys_hit == FALSE);",
+        "comment": "Sum the three boolean hits into the 0-3 score that later feeds the aggregate heuristic."
       }
     ]
   },

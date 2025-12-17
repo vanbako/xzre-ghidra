@@ -5,7 +5,7 @@
 
 
 /*
- * AutoDoc: Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as any memory operand touches the candidate pointer. That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.
+ * AutoDoc: Disassembles the string-identified `demote_sensitive_data` helper and returns three points as soon as it materialises the candidate `sensitive_data` address (the `host_keys` slot at offset 0). That helper is tightly coupled to the real struct, so even a single hit is treated as strong evidence in the aggregate score.
  */
 
 #include "xzre_types.h"
@@ -22,7 +22,7 @@ int sshd_get_sensitive_data_score_in_demote_sensitive_data
   // AutoDoc: Leverage the cached string reference so we only run the scan when `demote_sensitive_data` was actually located.
   code_start = (u8 *)(refs->demote_sensitive_data).func_start;
   if (code_start != (u8 *)0x0) {
-    // AutoDoc: Walk the routine until a MOV/LEA mentions the candidate struct pointer; that hit is worth the full three points.
+    // AutoDoc: Walk the routine until a MOV/LEA materialises `&sensitive_data->host_keys` (the struct base); that hit is worth the full three points.
     demote_hit = find_instruction_with_mem_operand
                       (code_start,(u8 *)(refs->demote_sensitive_data).func_end,(dasm_ctx_t *)0x0,
                        sensitive_data);

