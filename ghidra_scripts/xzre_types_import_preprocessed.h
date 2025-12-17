@@ -328,15 +328,15 @@ typedef struct {
 } lzma_check_state;
 
 /*
- * Literal opcode values consumed by the lightweight disassembler so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder.
+ * Normalized opcode values stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder. For one-byte opcodes `x86_dasm` stores `raw_opcode + 0x80` (subtract 0x80 to recover the architectural opcode byte).
  */
 enum X86_OPCODE {
- X86_OPCODE_LEA = 0x8D,
- X86_OPCODE_CALL = 0xE8,
- X86_OPCODE_CMP = 0x3B,
- X86_OPCODE_MOV = 0x89,
- X86_OPCODE_MOV_LOAD = 0x8B,
- X86_OPCODE_MOV_STORE = 0x8C
+ X86_OPCODE_LEA = 0x10D,
+ X86_OPCODE_CALL = 0x168,
+ X86_OPCODE_CMP = 0xBB,
+ X86_OPCODE_MOV = 0x109,
+ X86_OPCODE_MOV_LOAD = 0x10B,
+ X86_OPCODE_MOV_STORE = 0x109
 };
 
 /*

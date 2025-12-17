@@ -1195,7 +1195,7 @@
     ]
   },
   "find_lea_instruction": {
-    "plate": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nIt emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
+    "plate": "Telemetry-backed search for LEA instructions that materialise a specific displacement.\nAfter logging the call site via `secret_data_append_from_call_site` it clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), then decodes forward one byte at a time until it sees LEA (`0x10d`, i.e. raw `0x8d` after the decoder\u2019s +0x80 normalization) with DF2 indicating a disp32 operand.\nEither `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.",
     "inline": [
       {
         "match": "* = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x7c,5,6,FALSE);",
@@ -1222,7 +1222,7 @@
     ]
   },
   "find_lea_instruction_with_mem_operand": {
-    "plate": "LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.\nAfter logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.\nIf `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.",
+    "plate": "LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.\nAfter logging the call site via `secret_data_append_from_call_site` it clears a stack fallback decoder (`ctx_clear_idx` / `ctx_clear_cursor`) and uses it when `dctx` is NULL, then decodes forward one byte at a time until it sees a REX.W LEA (`0x10d`, raw `0x8d`) with a RIP-relative disp32 ModRM form (`mod=0`, `rm=5`).\nIf `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.",
     "inline": [
       {
         "match": "* = secret_data_append_from_call_site((secret_data_shift_cursor_t)0x1c8,0,0x1e,FALSE);",
@@ -1238,7 +1238,7 @@
       {
         "match": "* = x86_dasm(*,*,*);",
         "match_type": "wildcard",
-        "comment": "Keep decoding until we see a 64-bit LEA that genuinely targets memory."
+        "comment": "Keep decoding until we see a 64-bit RIP-relative LEA (REX.W + disp32) that materialises a pointer."
       },
       {
         "match_regex": "if .*\\(\\*\\(int \\*\\)\\([^)]*opcode_window \\+ 3\\) == 0x10d\\)",
@@ -1376,7 +1376,7 @@
     ]
   },
   "find_mov_instruction": {
-    "plate": "MOV-only variant of the pointer scan.\nIf `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.\nSuccessful decodes advance by `instruction_size` and must show a memory\u2194register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
+    "plate": "MOV-only variant of the pointer scan.\nIt clears the stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and uses it when `dctx` is NULL, then advances by one byte on decode failure or by `instruction_size` on success.\nMatches require the RIP-relative ModRM form (`mod=0`, `rm=5`) plus MOV load/store (`0x10b`/`0x109`, i.e. raw `0x8b`/`0x89` after the decoder\u2019s +0x80 normalization); loads also require the decoded REX.W presence to match `is_64bit_operand` (stores skip the width check). On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.",
     "inline": [
       {
         "match": "for (* = 0x16; * != 0; * = * + -1)",
@@ -1391,13 +1391,13 @@
       {
         "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
         "match_type": "wildcard",
-        "comment": "Enforce the memory\u2194register ModRM form and the caller-requested operand width.",
+        "comment": "Require RIP-relative disp32 (ModRM `mod=0`, `rm=5`) and the caller-requested operand width.",
         "placement": "after"
       }
     ]
   },
   "find_mov_lea_instruction": {
-    "plate": "Hybrid MOV/LEA predicate that underpins the pointer scanners.\nIt zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.\nOpcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.",
+    "plate": "Hybrid MOV/LEA predicate that underpins the pointer scanners.\nIt clears the stack fallback decoder (via `ctx_clear_idx` / `ctx_clear_cursor`) and uses it when `dctx` is NULL, then marches forward either by one byte (decode failure) or by `instruction_size` (success).\nMatches require the RIP-relative ModRM form (`mod=0`, `rm=5`) plus either LEA (`0x10d`, raw `0x8d`) or the MOV opcode selected by `load_flag` (`0x10b` load / `0x109` store; raw `0x8b`/`0x89` after the decoder\u2019s +0x80 normalization). Loads enforce REX.W presence to match `is_64bit_operand`; stores skip the width check. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.",
     "inline": [
       {
         "match": "for (* = 0x16; * != 0; * = * + -1)",
@@ -1412,13 +1412,13 @@
       {
         "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
         "match_type": "wildcard",
-        "comment": "Only accept true memory operands plus the caller-requested width (unless we are hunting stores).",
+        "comment": "Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).",
         "placement": "after"
       }
     ]
   },
   "find_reg2reg_instruction": {
-    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only transfer.\nIt rejects every decode that carries lock/rep prefixes, sets REX.W/B, or uses a ModRM mode other than 3, and then checks whether the opcode is either MOV reg\u2194reg or one of the arithmetic-immediate opcodes addressed via `opcode_lookup_index = opcode - 0x81` (the precomputed bitmask tracks the admissible subset).\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
+    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.\nCandidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & 0x05`). The opcode gate then accepts MOV reg\u2194reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
     "inline": [
       {
         "match_regex": "if \\([^=]+== \\(dasm_ctx_t \\*\\)0x0\\) \\{",
@@ -1429,7 +1429,7 @@
       {
         "match_regex": "if .*\\(\\*\\(uint \\*\\)\\([^)]*opcode_window \\+ 3\\) & 0xfffffffd\\) == 0x109",
         "match_type": "regex",
-        "comment": "Accept MOV reg\u2194reg or whitelisted arithmetic immediates with no prefixes and ModRM mode 3."
+        "comment": "Accept MOV reg\u2194reg or whitelisted ALU reg\u2194reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3."
       },
       {
         "match": "* = *->instruction + *->instruction_size;",

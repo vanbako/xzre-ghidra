@@ -6,7 +6,7 @@
 
 /*
  * AutoDoc: Telemetry-backed search for LEA instructions that materialise a specific displacement.
- * It emits `secret_data_append_from_call_site`, clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), and then decodes forward one byte at a time until it sees opcode `0x10d` with DF2 reporting a plain displacement operand.
+ * After logging the call site via `secret_data_append_from_call_site` it clears the stack-resident decoder via the `ctx_clear_idx` / `ctx_clear_cursor` loop (the odd `ctx_stride_sign` artefact simply keeps the stride positive), then decodes forward one byte at a time until it sees LEA (`0x10d`, i.e. raw `0x8d` after the decoder’s +0x80 normalization) with DF2 indicating a disp32 operand.
  * Either `displacement` or its negated twin qualifies, letting mirrored scans succeed, and the populated `lea_ctx` is left in place so callers can immediately interrogate the operands.
  */
 

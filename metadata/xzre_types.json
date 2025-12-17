@@ -707,7 +707,7 @@
       "names": [
         "X86_OPCODE"
       ],
-      "code": "enum X86_OPCODE {\n X86_OPCODE_LEA = 0x8D,\n X86_OPCODE_CALL = 0xE8,\n X86_OPCODE_CMP = 0x3B,\n X86_OPCODE_MOV = 0x89,\n X86_OPCODE_MOV_LOAD = 0x8B,\n X86_OPCODE_MOV_STORE = 0x8C\n};"
+      "code": "enum X86_OPCODE {\n X86_OPCODE_LEA = 0x10D,\n X86_OPCODE_CALL = 0x168,\n X86_OPCODE_CMP = 0xBB,\n X86_OPCODE_MOV = 0x109,\n X86_OPCODE_MOV_LOAD = 0x10B,\n X86_OPCODE_MOV_STORE = 0x109\n};"
     },
     {
       "kind": "enum",

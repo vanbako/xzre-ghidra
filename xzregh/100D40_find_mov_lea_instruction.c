@@ -6,8 +6,8 @@
 
 /*
  * AutoDoc: Hybrid MOV/LEA predicate that underpins the pointer scanners.
- * It zeroes the fallback decoder (again via `ctx_clear_idx` / `ctx_clear_cursor`) whenever the caller passes NULL, marches forward either by one byte (decode failure) or by `instruction_size` (success), and insists the ModRM form exposes a memory operand.
- * Opcode `0x10d` (LEA) always qualifies, otherwise it requires the MOV opcode that matches `load_flag` (`0x10b` for loads, `0x109` for stores) and enforces that REX.W matches `is_64bit_operand` unless the caller is searching for stores. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.
+ * It clears the stack fallback decoder (via `ctx_clear_idx` / `ctx_clear_cursor`) and uses it when `dctx` is NULL, then marches forward either by one byte (decode failure) or by `instruction_size` (success).
+ * Matches require the RIP-relative ModRM form (`mod=0`, `rm=5`) plus either LEA (`0x10d`, raw `0x8d`) or the MOV opcode selected by `load_flag` (`0x10b` load / `0x109` store; raw `0x8b`/`0x89` after the decoder’s +0x80 normalization). Loads enforce REX.W presence to match `is_64bit_operand`; stores skip the width check. Returning TRUE leaves `dctx` describing the matching instruction for downstream helpers.
  */
 
 #include "xzre_types.h"
@@ -43,7 +43,7 @@ BOOL find_mov_lea_instruction
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
-    // AutoDoc: Only accept true memory operands plus the caller-requested width (unless we are hunting stores).
+    // AutoDoc: Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       decoded_opcode = *(int *)(dctx->opcode_window + 3);

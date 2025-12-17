@@ -1,6 +1,6 @@
 {
   "lzma_check": "Subset of liblzma integrity-check identifiers the implant cares about when faking encoder state so we only accept payloads signed with CRC32/CRC64/SHA256.",
-  "X86_OPCODE": "Literal opcode values consumed by the lightweight disassembler so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder.",
+  "X86_OPCODE": "Normalized opcode values stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder. For one-byte opcodes `x86_dasm` stores `raw_opcode + 0x80` (subtract 0x80 to recover the architectural opcode byte).",
   "X86_REG": "Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).",
   "InstructionFlags": "Bitmask describing which optional instruction prefixes (LOCK/REP, segment overrides, operand/address-size hints, VEX, REX and ModRM) were observed while decoding an x86 instruction.",
   "InstructionFlags2": "Secondary flag set emitted by the decoder that captures which addressing features (displacement, immediates, 64-bit immediates) are present for the current instruction.",

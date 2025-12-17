@@ -6,8 +6,8 @@
 
 /*
  * AutoDoc: MOV-only variant of the pointer scan.
- * If `dctx` is NULL it wipes the on-stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and decodes into that temporary, retrying from the next byte when a decode fails.
- * Successful decodes advance by `instruction_size` and must show a memory↔register ModRM form plus opcode `0x10b` (load) or `0x109` (store) per `load_flag`; loads also require the decoded REX.W bit to match `is_64bit_operand`. On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.
+ * It clears the stack `scratch_ctx` with the `ctx_clear_idx` / `ctx_clear_cursor` walkers and uses it when `dctx` is NULL, then advances by one byte on decode failure or by `instruction_size` on success.
+ * Matches require the RIP-relative ModRM form (`mod=0`, `rm=5`) plus MOV load/store (`0x10b`/`0x109`, i.e. raw `0x8b`/`0x89` after the decoder’s +0x80 normalization); loads also require the decoded REX.W presence to match `is_64bit_operand` (stores skip the width check). On success the populated decoder is left on the MOV so pointer-tracking helpers can read the operands immediately.
  */
 
 #include "xzre_types.h"
@@ -42,7 +42,7 @@ BOOL find_mov_instruction
       code_start = code_start + 1;
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
-    // AutoDoc: Enforce the memory↔register ModRM form and the caller-requested operand width.
+    // AutoDoc: Require RIP-relative disp32 (ModRM `mod=0`, `rm=5`) and the caller-requested operand width.
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {

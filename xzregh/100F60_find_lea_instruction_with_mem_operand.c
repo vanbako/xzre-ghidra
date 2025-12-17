@@ -6,7 +6,7 @@
 
 /*
  * AutoDoc: LEA finder that insists the instruction truly references memory and, optionally, a concrete absolute address.
- * After logging the call site via `secret_data_append_from_call_site` it zeroes the fallback decoder with the `ctx_clear_idx` / `ctx_clear_cursor` pair when the caller passed NULL, then decodes forward one byte at a time until it sees opcode `0x10d`, REX.W set, and a ModRM mode that touches memory.
+ * After logging the call site via `secret_data_append_from_call_site` it clears a stack fallback decoder (`ctx_clear_idx` / `ctx_clear_cursor`) and uses it when `dctx` is NULL, then decodes forward one byte at a time until it sees a REX.W LEA (`0x10d`, raw `0x8d`) with a RIP-relative disp32 ModRM form (`mod=0`, `rm=5`).
  * If `mem_address` is non-null it recomputes the RIP-relative target (`instruction + instruction_size + mem_disp`) and only succeeds on an exact match; otherwise any qualifying LEA returns TRUE with `dctx` still on the instruction.
  */
 
@@ -36,7 +36,7 @@ BOOL find_lea_instruction_with_mem_operand
       dctx = &scratch_ctx;
     }
     for (; code_start < code_end; code_start = code_start + 1) {
-      // AutoDoc: Keep decoding until we see a 64-bit LEA that genuinely targets memory.
+      // AutoDoc: Keep decoding until we see a 64-bit RIP-relative LEA (REX.W + disp32) that materialises a pointer.
       decoded = x86_dasm(dctx,code_start,code_end);
       if ((((decoded != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x10d)) &&
       // AutoDoc: Optional RIP target comparison lets callers lock onto a single absolute pointer.

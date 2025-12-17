@@ -5,8 +5,8 @@
 
 
 /*
- * AutoDoc: Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only transfer.
- * It rejects every decode that carries lock/rep prefixes, sets REX.W/B, or uses a ModRM mode other than 3, and then checks whether the opcode is either MOV reg↔reg or one of the arithmetic-immediate opcodes addressed via `opcode_lookup_index = opcode - 0x81` (the precomputed bitmask tracks the admissible subset).
+ * AutoDoc: Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.
+ * Candidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & 0x05`). The opcode gate then accepts MOV reg↔reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.
  * Decode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.
  */
 
@@ -26,7 +26,7 @@ BOOL find_reg2reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
     if ((code_end <= code_start) || (decoded = x86_dasm(dctx,code_start,code_end), decoded == FALSE)) {
       return FALSE;
     }
-    // AutoDoc: Accept MOV reg↔reg or whitelisted arithmetic immediates with no prefixes and ModRM mode 3.
+    // AutoDoc: Accept MOV reg↔reg or whitelisted ALU reg↔reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3.
     if (((((*(uint *)(dctx->opcode_window + 3) & 0xfffffffd) == 0x109) ||
          ((opcode_lookup_index = *(uint *)(dctx->opcode_window + 3) - 0x81, opcode_lookup_index < 0x3b &&
           ((0x505050500000505U >> ((byte)opcode_lookup_index & 0x3f) & 1) != 0)))) &&
