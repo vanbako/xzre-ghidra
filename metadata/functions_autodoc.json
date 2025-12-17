@@ -1832,7 +1832,7 @@
     ]
   },
   "mm_answer_authpassword_hook": {
-    "plate": "Short-circuits `MONITOR_REQ_AUTHPASSWORD`: validates the ssh/monitor arguments, replays the payload-provided reply when\n`pending_authpayload_len/pending_authpayload` are set, or synthesizes the four-word success packet (request ID + root flag)\nwhen no payload chunk is queued. The reply is emitted via `fd_write()` and the saved dispatch entry is restored so sshd\ncontinues as if the original routine ran; malformed inputs fall back to libc\u2019s `exit(0)` so the monitor never stays\nhalf-patched.",
+    "plate": "Short-circuits `MONITOR_REQ_AUTHPASSWORD`: validates the ssh/monitor arguments, replays the payload-provided reply when\n`pending_authpayload_len/pending_authpayload` are set, or synthesizes a minimal success frame on the stack when no body is queued\n(big-endian length word, cached monitor answer reqtype, 1-byte TRUE auth result, plus an optional 32-bit root_allowed dword).\nThe reply is emitted via `fd_write()` and the saved dispatch entry is restored so sshd continues as if the original routine ran;\nmalformed inputs fall back to libc\u2019s `exit(0)` so the monitor never stays half-patched.",
     "inline": [
       {
         "match": "if ((m == (sshbuf *)0x0 || sock < 0) || (ssh == (ssh *)0x0)) {",
@@ -1840,7 +1840,7 @@
       },
       {
         "match": "if ((*(ushort *)(sshd_ctx + 0x90) == 0) ||",
-        "comment": "When no payload queued an authpassword body, build the canned success packet locally using the cached request ID and PermitRootLogin tweak."
+        "comment": "When no payload queued an authpassword body, synthesize the minimal reply frame: monitor reqtype + auth_ok byte (+ optional root_allowed dword)."
       },
       {
         "match": "fd_write(sock,reply_buf,reply_len,libc_imports);",
@@ -1927,7 +1927,7 @@
       },
       {
         "match": "if ((log_ctx_state->saved_log_handler != (log_handler_fn)0x0) &&",
-        "comment": "Do not intercept logs unless setup captured both the handler and ctx pointers; otherwise keep sshd's slot untouched."
+        "comment": "Treat a saved handler without a saved context value as an incomplete log-hook install and bail out immediately."
       },
       {
         "match": "if (string_id == STR_Connection_closed_by) break;",

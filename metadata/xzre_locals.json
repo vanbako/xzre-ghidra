@@ -5204,22 +5204,22 @@
         "type": "void *"
       },
       {
-        "name": "synth_reply_word0",
+        "name": "reply_frame_len_be",
         "original": "local_15",
         "type": "uint"
       },
       {
-        "name": "synth_reply_word1",
+        "name": "reply_reqtype",
         "original": "uStack_11",
         "type": "uint"
       },
       {
-        "name": "synth_reply_flag",
+        "name": "auth_ok",
         "original": "uStack_d",
         "type": "u8"
       },
       {
-        "name": "synth_reply_pad",
+        "name": "root_allowed",
         "original": "uStack_c",
         "type": "u32"
       },
@@ -5233,7 +5233,7 @@
   "mm_answer_keyallowed_hook": {
     "locals": [
       {
-        "name": "global_ctx",
+        "name": "global_ctx_ptr",
         "type": "global_context_t *"
       },
       {

