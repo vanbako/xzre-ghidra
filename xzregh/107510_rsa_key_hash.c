@@ -23,8 +23,8 @@ BOOL rsa_key_hash(RSA *rsa,u8 *mdBuf,u64 mdBufSize,imported_funcs_t *funcs)
   u8 fingerprint_stream[0x100a];
   BOOL result;
   
-  scratch_wipe_cursor = &result;
-  // AutoDoc: Pre-wipe the 0x100a-byte scratch arena so no stack garbage contaminates the serialized fingerprint.
+  scratch_wipe_cursor = fingerprint_stream + 0x10;
+  // AutoDoc: Pre-wipe the 0x100a-byte scratch arena. The loop clears the aligned tail and the explicit `fingerprint_stream[0..0xf]` stores below clear the head so no stack garbage contaminates the serialized fingerprint.
   for (scratch_wipe_count = 0xffa; scratch_wipe_count != 0; scratch_wipe_count = scratch_wipe_count + -1) {
     *scratch_wipe_cursor = FALSE;
     scratch_wipe_cursor = scratch_wipe_cursor + 1;

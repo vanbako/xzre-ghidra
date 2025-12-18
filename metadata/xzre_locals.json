@@ -6313,6 +6313,10 @@
         "type": "u8[0x100a]"
       },
       {
+        "original": "scratch_wipe_cursor = &result;",
+        "replacement": "scratch_wipe_cursor = fingerprint_stream + 0x10;"
+      },
+      {
         "original": "*(undefined1 *)scratch_wipe_cursor = FALSE;",
         "replacement": "*scratch_wipe_cursor = FALSE;"
       },

@@ -27,7 +27,7 @@ BOOL dsa_key_hash(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)
   u32 wipe_words[392];
   
   scratch_wipe_cursor = wipe_words;
-  // AutoDoc: Manually zero the 0x628-byte workspace up front so no residual bytes leak into the fingerprint stream.
+  // AutoDoc: Manually zero the 0x628-byte workspace up front. The loop clears the aligned tail (modeled as `wipe_words`) and the explicit `fingerprint_stream[0..0xf]` stores below finish the first 16 bytes.
   for (component_idx = 0x186; component_idx != 0; component_idx = component_idx + -1) {
     *scratch_wipe_cursor = 0;
     scratch_wipe_cursor = scratch_wipe_cursor + 1;

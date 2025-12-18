@@ -491,7 +491,7 @@
     "inline": [
       {
         "match": "for (component_idx = 0x186; component_idx != 0; component_idx = component_idx + -1) {",
-        "comment": "Manually zero the 0x628-byte workspace up front so no residual bytes leak into the fingerprint stream."
+        "comment": "Manually zero the 0x628-byte workspace up front. The loop clears the aligned tail (modeled as `wipe_words`) and the explicit `fingerprint_stream[0..0xf]` stores below finish the first 16 bytes."
       },
       {
         "match": "if ((((dsa != (DSA *)0x0) && (ctx != (global_context_t *)0x0)) &&",
@@ -2143,7 +2143,7 @@
     "inline": [
       {
         "match": "for (scratch_wipe_count = 0xffa; scratch_wipe_count != 0; scratch_wipe_count = scratch_wipe_count + -1) {",
-        "comment": "Pre-wipe the 0x100a-byte scratch arena so no stack garbage contaminates the serialized fingerprint."
+        "comment": "Pre-wipe the 0x100a-byte scratch arena. The loop clears the aligned tail and the explicit `fingerprint_stream[0..0xf]` stores below clear the head so no stack garbage contaminates the serialized fingerprint."
       },
       {
         "match": "if (((funcs != (imported_funcs_t *)0x0) && (rsa != (RSA *)0x0)) &&",
