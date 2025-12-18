@@ -5,9 +5,8 @@
 
 
 /*
- * AutoDoc: Copies `_Llzma_block_buffer_decode_0` (another relocation-safe symbol embedded beside the fake function table) into `ctx->got_ctx.got_base_offset`.
- * Every GOT helper subtracts this anchor when converting the baked relocation constants back into runtime addresses, so the helper
- * keeps the base in sync after IFUNC code mutates the resolver stack.
+ * AutoDoc: Refreshes `ctx->got_ctx.got_base_offset` with the relocation-safe constant that turns the `cpuid_random_symbol` anchor into a `.got.plt` base pointer
+ * (`got_base = cpuid_random_symbol_addr - got_base_offset`). Stage one calls this before patching so later GOT math subtracts the same baseline.
  */
 
 #include "xzre_types.h"
@@ -15,7 +14,7 @@
 void update_got_offset(elf_entry_ctx_t *ctx)
 
 {
-  // AutoDoc: Re-anchor the GOT math to `_Llzma_block_buffer_decode_0` so later helpers subtract the same baseline.
+  // AutoDoc: Refresh the `.got.plt` baseline constant used when deriving the GOT base from the cpuid anchor.
   (ctx->got_ctx).got_base_offset = _Llzma_block_buffer_decode_0;
   return;
 }

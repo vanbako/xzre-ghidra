@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the relocation constants that stand in for the fake `__tls_get_addr`
- * symbol embedded in liblzma. The helper writes the sentinel GOT index (0x2600) into the context, mirrors `elf_functions_offset` into both
- * its return value and the GOT base, and hands those numbers to `update_got_address`, which replays the PLT stub to find the concrete GOT entry.
+ * AutoDoc: Seeds the GOT/TLS bookkeeping used by `update_got_address`. It writes the 0x2600 opcode tag (0x25ff+1, matching the `ff 25` PLT jmp word) into
+ * `ctx->got_ctx.tls_got_entry`, mirrors the relocation-safe `elf_functions_offset` into both its return value and `ctx->got_ctx.got_base_offset`, and leaves the
+ * context ready for PLT parsing.
  */
 
 #include "xzre_types.h"
@@ -17,7 +17,7 @@ ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx)
 {
   ptrdiff_t seeded_offset;
   
-  // AutoDoc: Prime the GOT context with the baked 0x2600 index; later disassembly insists the PLT stub still references this slot before patching it.
+  // AutoDoc: Store the 0x25ff+1 opcode tag so `update_got_address` can verify the stub begins with `ff 25` before trusting the disp32.
   (ctx->got_ctx).tls_got_entry = (void *)0x2600;
   // AutoDoc: Return the relocation baseline published in the fake function table so callers and the context agree on the same offset.
   seeded_offset = elf_functions_offset;

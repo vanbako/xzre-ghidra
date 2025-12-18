@@ -1364,7 +1364,7 @@
     ]
   },
   "find_link_map_l_name": {
-    "plate": "Locates liblzma\u2019s live `link_map::l_name` byte and resolves the libc/libcrypto imports required for the audit-hook pivot. The helper\nruns every lookup through the fake liblzma allocator (logging the probe via `secret_data_append_from_address`) so it can safely\npull in `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`, and `BN_num_bits`. With `_dl_audit_preinit`\nvalidated inside ld.so, it walks the baked link_map snapshot until a candidate entry\u2019s RELRO tuple matches the runtime liblzma\nimage, then measures the displacement between the snapshot and runtime pointer. That delta populates both `*libname_offset` and\n`hooks->ldso_ctx.libcrypto_l_name`, and the helper insists that `_dl_audit_preinit` and `_dl_audit_symbind_alt` each issue an\nLEA that applies the same delta before finalizing the import list.",
+    "plate": "Resolves the libc/libcrypto imports needed for the ld.so audit-hook pivot and recovers the `link_map` offsets used to patch `l_name`.\nIt routes each lookup through the fake liblzma allocator (plus a `secret_data_append_from_address` breadcrumb) to resolve `exit`, `setlogmask`, `setresgid`,\n`setresuid`, `system`, `shutdown`, and libcrypto\u2019s `BN_num_bits`. To locate `l_name` it bounds-checks `_dl_audit_preinit`, scans liblzma\u2019s live `link_map`\nfor the stored GNU_RELRO vaddr+size tuple, and then searches the prefix fields for a self-relative pointer that lands just past that tuple (the inferred libname\nbuffer). The inferred buffer offset becomes `*libname_offset`, while the pointer-field\u2019s address yields the `l_name` slot offset that is reused to populate\n`hooks->ldso_ctx.libcrypto_l_name`. As a sanity check it requires both `_dl_audit_preinit` and `_dl_audit_symbind_alt` to reference the same offset via LEA\nbefore accepting the result.",
     "inline": [
       {
         "match": "status_ok = secret_data_append_from_address((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);",
@@ -1389,28 +1389,28 @@
       {
         "match": "if ((*(u64 *)snapshot_cursor != ldso_image->gnurelro_vaddr) ||",
         "match_type": "wildcard",
-        "comment": "Skip snapshot entries whose RELRO tuple doesn\u2019t match the running liblzma image."
+        "comment": "Scan the live liblzma `link_map` until the stored GNU_RELRO vaddr+size tuple surfaces; this anchors the tail layout for the running glibc build."
       },
       {
         "match": "for (snapshot_slot = data_handle->runtime_data->liblzma_link_map;",
-        "comment": "Walk the baked link_map array and pick the runtime pointer whose address range overlaps the cached struct."
+        "comment": "Search the `link_map` prefix for the smallest self-relative pointer that lands just past the RELRO tuple; treat it as the libname buffer pointer."
       },
       {
-        "match": "displacement = (long)best_runtime_map - (long)snapshot_cursor;",
-        "comment": "Measure how far the runtime `link_map` lives from the snapshot; this becomes `*libname_offset`."
+        "match": "displacement = (long)best_name_ptr - (long)snapshot_cursor;",
+        "comment": "Convert the inferred libname buffer pointer into an offset from the `link_map` base; this becomes `*libname_offset`."
       },
       {
-        "match": "libname_snapshot_offset = (int)snapshot_cursor - (int)best_snapshot_slot;",
-        "comment": "Reuse the same offset against the cached libcrypto map so both libraries\u2019 `l_name` slots are addressed consistently."
+        "match": "l_name_slot_offset = (int)snapshot_cursor - (int)best_name_ptr_slot;",
+        "comment": "Compute the offset of the `l_name` pointer slot so we can address it inside libcrypto\u2019s `link_map` as well."
       },
       {
         "match": "(hooks->ldso_ctx).libcrypto_l_name =",
         "match_type": "wildcard",
-        "comment": "Point the libcrypto `l_name` pointer at the runtime map so later hooks can mirror the forged basename there too."
+        "comment": "Cache the address of libcrypto\u2019s `l_name` slot so stage two can swap it to the forged basename buffer and restore it later."
       },
       {
         "match": "status_ok = find_lea_instruction(audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement)",
-        "comment": "Require `_dl_audit_preinit` to materialise the displacement via LEA before trusting the offset."
+        "comment": "Require `_dl_audit_preinit` to reference the inferred libname offset via LEA before trusting the layout."
       },
       {
         "match": "code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;",
@@ -1419,7 +1419,7 @@
       {
         "match": "status_ok = find_lea_instruction",
         "occurrence": 2,
-        "comment": "Mirror the LEA search inside `_dl_audit_symbind_alt` to ensure both audit paths agree on the displacement.",
+        "comment": "Mirror the LEA search inside `_dl_audit_symbind_alt` to ensure both audit paths agree on the inferred libname offset.",
         "placement": "before"
       }
     ]
@@ -1581,11 +1581,11 @@
     ]
   },
   "get_tls_get_addr_random_symbol_got_offset": {
-    "plate": "Seeds `ctx->got_ctx.tls_got_entry` and `ctx->got_ctx.got_base_offset` with the relocation constants that stand in for the fake `__tls_get_addr`\nsymbol embedded in liblzma. The helper writes the sentinel GOT index (0x2600) into the context, mirrors `elf_functions_offset` into both\nits return value and the GOT base, and hands those numbers to `update_got_address`, which replays the PLT stub to find the concrete GOT entry.",
+    "plate": "Seeds the GOT/TLS bookkeeping used by `update_got_address`. It writes the 0x2600 opcode tag (0x25ff+1, matching the `ff 25` PLT jmp word) into\n`ctx->got_ctx.tls_got_entry`, mirrors the relocation-safe `elf_functions_offset` into both its return value and `ctx->got_ctx.got_base_offset`, and leaves the\ncontext ready for PLT parsing.",
     "inline": [
       {
         "match": "(ctx->got_ctx).tls_got_entry = (void *)0x2600;",
-        "comment": "Prime the GOT context with the baked 0x2600 index; later disassembly insists the PLT stub still references this slot before patching it."
+        "comment": "Store the 0x25ff+1 opcode tag so `update_got_address` can verify the stub begins with `ff 25` before trusting the disp32."
       },
       {
         "match": "seeded_offset = elf_functions_offset;",
@@ -3053,20 +3053,20 @@
     ]
   },
   "update_cpuid_got_index": {
-    "plate": "Copies the relocation constant baked into `tls_get_addr_reloc_consts` into `ctx->got_ctx.cpuid_slot_index`. That index identifies the cpuid\nIFUNC slot within liblzma\u2019s GOT, letting later hooks patch the right entry without rescanning the PLT after relocations.",
+    "plate": "Copies the baked cpuid `.got.plt` slot index constant into `ctx->got_ctx.cpuid_slot_index`. That slot index identifies the cpuid\nIFUNC entry within liblzma\u2019s GOT so setup code can stride directly to it when overwriting the resolver.",
     "inline": [
       {
         "match": "(ctx->got_ctx).cpuid_slot_index = (u64)PTR_PTR_0010ca98;",
-        "comment": "Lift the precomputed cpuid GOT index out of the relocation table and cache it so GOT surgery happens at the correct slot."
+        "comment": "Cache the baked cpuid `.got.plt` index so later code patches the intended slot."
       }
     ]
   },
   "update_got_address": {
-    "plate": "Replays the relocated `__tls_get_addr` PLT stub to recover the live GOT pointer. Starting from the `_Lx86_coder_destroy` anchor plus the cached\n`got_base_offset`, it locates the stub, determines whether the long-jump encoding is in use, and applies the resulting disp32 to\narrive at the GOT slot. When the stub still references the baked 0x2600 index, the helper trusts the computed address, caches it\nin `ctx->got_ctx.tls_got_entry`, and returns the PLT pointer so follow-up code can repoint the cpuid IFUNC slot.",
+    "plate": "Parses the relocated `__tls_get_addr` PLT entry to recover liblzma\u2019s live `.got.plt` base. Starting from the `_Lx86_coder_destroy` anchor plus the cached\n`got_base_offset`, it locates the stub, skips optional CET `ENDBR64` and MPX `BND` prefixes, verifies the `jmpq *disp32(%rip)` opcode, and applies the\nresulting disp32 to compute the GOT base (the slot address minus the 0x18-byte reserved PLT header). The base pointer is cached in `ctx->got_ctx.tls_got_entry` so\nstage one can stride to the cpuid IFUNC slot without rescanning the PLT.",
     "inline": [
       {
         "match": "get_tls_get_addr_random_symbol_got_offset(entry_ctx);",
-        "comment": "Ensure the base offsets and sentinel GOT index are refreshed before touching the PLT stub."
+        "comment": "Ensure the base offsets and opcode tag are refreshed before touching the PLT stub."
       },
       {
         "match": "tls_get_addr_stub = (void *)((long)&_Lx86_coder_destroy +",
@@ -3077,34 +3077,34 @@
         "comment": "Zero the cpuid slot bookkeeping so the subsequent pass always re-detects the live GOT slot."
       },
       {
-        "match": "has_long_jump_prefix = (ulong)(*(char *)((long)tls_get_addr_stub + 1) == '\\x0f');",
-        "comment": "Check whether the stub begins with `0F` so we know if the JMP uses the long (5-byte) encoding."
+        "match": "has_endbr64_prefix = (ulong)(*(char *)((long)tls_get_addr_stub + 1) == '\\x0f');",
+        "comment": "Detect the 4-byte `endbr64` prologue so we know whether to skip it before checking the PLT opcode."
       },
       {
-        "match": "if (*(char *)((long)tls_get_addr_stub + has_long_jump_prefix * 4) == -0xe) {",
-        "comment": "Adjust the displacement when the stub inserts an extra short JMP (0xF2) before the real disp32."
+        "match": "if (*(char *)((long)tls_get_addr_stub + has_endbr64_prefix * 4) == -0xe) {",
+        "comment": "Skip the MPX `bnd` prefix (0xF2) when present so the opcode word check lands on `ff 25`."
       },
       {
-        "match": "if ((void *)(ulong)(*(ushort *)((long)tls_get_addr_stub + stub_disp_offset) + 1 & 0xffff) ==",
+        "match": "if ((void *)(ulong)(*(ushort *)((long)tls_get_addr_stub + jmp_opcode_offset) + 1 & 0xffff) ==",
         "match_type": "wildcard",
-        "comment": "Only trust the calculation when the stub still references the sentinel GOT index seeded earlier."
+        "comment": "Only trust the calculation when the opcode word matches `ff 25` (0x25ff+1), proving the PLT stub layout is intact."
       },
       {
-        "match": "resolved_tls_entry = (void *)((long)tls_get_addr_stub + stub_disp_offset + -0x12 + (ulong)*(uint *)((long)tls_get_addr_stub + stub_disp_offset + 2));",
-        "comment": "Apply the stub\u2019s disp32 to compute the absolute GOT pointer for `__tls_get_addr`."
+        "match": "gotplt_base = (void *)((long)tls_get_addr_stub + jmp_opcode_offset + -0x12 + (ulong)*(uint *)((long)tls_get_addr_stub + jmp_opcode_offset + 2));",
+        "comment": "Apply the stub\u2019s RIP-relative disp32 and subtract 0x18 (PLT-reserved GOT header) to recover the `.got.plt` base pointer."
       },
       {
-        "match": "(entry_ctx->got_ctx).tls_got_entry = resolved_tls_entry;",
-        "comment": "Cache the resolved GOT entry so the cpuid hook can overwrite it with the implant\u2019s resolver."
+        "match": "(entry_ctx->got_ctx).tls_got_entry = gotplt_base;",
+        "comment": "Cache the recovered `.got.plt` base so stage one can stride to the cpuid slot during GOT patching."
       }
     ]
   },
   "update_got_offset": {
-    "plate": "Copies `_Llzma_block_buffer_decode_0` (another relocation-safe symbol embedded beside the fake function table) into `ctx->got_ctx.got_base_offset`.\nEvery GOT helper subtracts this anchor when converting the baked relocation constants back into runtime addresses, so the helper\nkeeps the base in sync after IFUNC code mutates the resolver stack.",
+    "plate": "Refreshes `ctx->got_ctx.got_base_offset` with the relocation-safe constant that turns the `cpuid_random_symbol` anchor into a `.got.plt` base pointer\n(`got_base = cpuid_random_symbol_addr - got_base_offset`). Stage one calls this before patching so later GOT math subtracts the same baseline.",
     "inline": [
       {
         "match": "(ctx->got_ctx).got_base_offset = _Llzma_block_buffer_decode_0;",
-        "comment": "Re-anchor the GOT math to `_Llzma_block_buffer_decode_0` so later helpers subtract the same baseline."
+        "comment": "Refresh the `.got.plt` baseline constant used when deriving the GOT base from the cpuid anchor."
       }
     ]
   },

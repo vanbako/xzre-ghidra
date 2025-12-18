@@ -4379,7 +4379,7 @@
         "type": "link_map *"
       },
       {
-        "name": "runtime_upper_bound",
+        "name": "name_ptr_upper_bound",
         "original": "plVar17",
         "type": "link_map *"
       },
@@ -4389,17 +4389,17 @@
         "type": "link_map *"
       },
       {
-        "name": "best_runtime_map",
+        "name": "best_name_ptr",
         "original": "plVar15",
         "type": "link_map *"
       },
       {
-        "name": "best_snapshot_slot",
+        "name": "best_name_ptr_slot",
         "original": "plVar14",
         "type": "link_map *"
       },
       {
-        "name": "candidate_runtime_map",
+        "name": "candidate_name_ptr",
         "original": "plVar3",
         "type": "link_map *"
       },
@@ -4419,7 +4419,7 @@
         "type": "BOOL"
       },
       {
-        "name": "libname_snapshot_offset",
+        "name": "l_name_slot_offset",
         "original": "uVar5",
         "type": "ptrdiff_t"
       },
@@ -8672,17 +8672,17 @@
         "type": "void *"
       },
       {
-        "name": "has_long_jump_prefix",
+        "name": "has_endbr64_prefix",
         "original": "uVar2",
-        "type": "ulong"
+        "type": "BOOL"
       },
       {
-        "name": "stub_disp_offset",
+        "name": "jmp_opcode_offset",
         "original": "lVar3",
         "type": "long"
       },
       {
-        "name": "resolved_tls_entry",
+        "name": "gotplt_base",
         "original": "pvVar4",
         "type": "void *"
       }

