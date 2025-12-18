@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Batch driver for `secret_data_item_t` descriptors. It walks the array in order, stamping a monotonically increasing slot index
- * onto entries whose `ordinal` is still zero, and dispatches the provided appender for whichever descriptor already carries an ordinal.
- * Each callback receives a 1-based array index alongside the cursor/operation/code tuple, and any failure terminates the walk so
+ * AutoDoc: Batch driver for `secret_data_item_t` descriptors. It walks the array in order: entries with `ordinal == 0` are treated as dormant
+ * (the helper stamps them with the current `ordinal_cursor` and skips calling the appender), while non-zero ordinals are dispatched.
+ * Each callback receives the cursor/operation/bits tuple alongside a 1-based array index, and any failure terminates the walk so
  * callers can bail out without partially populating the log.
  */
 
@@ -31,11 +31,11 @@ BOOL secret_data_append_items
       if (items_count <= items_cursor) {
         return TRUE;
       }
-      // AutoDoc: Keep a 1-based ordinal for the callback; `secret_data_append_item` treats index 0 as “disabled descriptor”.
+      // AutoDoc: Keep a 1-based array index for the callback (useful as a stable per-descriptor id in logs).
       index = (int)items_cursor + 1;
       descriptor = items + items_cursor;
       items_cursor = (ulong)index;
-      // AutoDoc: Skip dormant entries by assigning the next slot number until we hit one that already has a published ordinal.
+      // AutoDoc: Break once we hit a non-zero `ordinal`; zero-ordinal entries are stamped with the current `ordinal_cursor` and skipped.
       if (descriptor->ordinal != 0) break;
       descriptor->ordinal = ordinal_cursor;
     }
@@ -44,7 +44,7 @@ BOOL secret_data_append_items
                         descriptor->operation_slot,descriptor->bits_to_shift,index,descriptor->anchor_pc);
     // AutoDoc: Abort the batch immediately so callers know the attestation set is incomplete.
     if (append_ok == FALSE) break;
-    // AutoDoc: Advance the slot so the next dormant entry we encounter gets a new ordinal.
+    // AutoDoc: Advance the cursor after each successful append; the updated value is used when stamping any later zero-ordinal entries.
     ordinal_cursor = ordinal_cursor + 1;
   }
   return FALSE;

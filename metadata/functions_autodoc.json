@@ -2297,15 +2297,15 @@
     ]
   },
   "secret_data_append_from_address": {
-    "plate": "Lets hooks fingerprint themselves without burning static code pointers. Callers pass either an explicit `addr` or the\nsentinel values NULL/1 when they want the helper to capture their own return address. The helper normalizes that pointer,\nforwards the sentinel call-site value plus the resolved code pointer to `secret_data_append_singleton`, and reports success\nonly when the singleton accepted the descriptor.",
+    "plate": "Wrapper around `secret_data_append_singleton` that supports two call styles. When `addr >= 2` it is treated as the explicit code address\nused to locate the containing function and scan from its entry. When `addr` is NULL/1 the helper instead uses the caller\u2019s return address\nas the code pointer; NULL enables the \u201cstart after next CALL\u201d mode and 1 disables it. Returns TRUE only when the singleton accepted\n(or already satisfied) the descriptor.",
     "inline": [
       {
         "match": "if (addr < (void *)0x2) {",
-        "comment": "Treat NULL/1 as \u201cuse the caller\u2019s RET\u201d so instrumentation sites can re-use the same helper without threading their own code pointer."
+        "comment": "Treat NULL/1 as \u201cuse the caller\u2019s RET\u201d for the code pointer; the literal NULL vs 1 value is still forwarded as the `call_site` sentinel."
       },
       {
         "match": "append_ok = secret_data_append_singleton((u8 *)addr,code_pointer,shift_cursor,shift_count,operation_index);",
-        "comment": "Forward both the sentinel call-site value and whichever code pointer we settled on into the singleton helper."
+        "comment": "Forward `addr` as the `call_site` sentinel (NULL enables start-from-call) plus whichever code pointer we settled on into the singleton helper."
       },
       {
         "match": "return (BOOL)(0 < (int)append_ok);",
@@ -2398,7 +2398,7 @@
     ]
   },
   "secret_data_append_items": {
-    "plate": "Batch driver for `secret_data_item_t` descriptors. It walks the array in order, stamping a monotonically increasing slot index\nonto entries whose `ordinal` is still zero, and dispatches the provided appender for whichever descriptor already carries an ordinal.\nEach callback receives a 1-based array index alongside the cursor/operation/code tuple, and any failure terminates the walk so\ncallers can bail out without partially populating the log.",
+    "plate": "Batch driver for `secret_data_item_t` descriptors. It walks the array in order: entries with `ordinal == 0` are treated as dormant\n(the helper stamps them with the current `ordinal_cursor` and skips calling the appender), while non-zero ordinals are dispatched.\nEach callback receives the cursor/operation/bits tuple alongside a 1-based array index, and any failure terminates the walk so\ncallers can bail out without partially populating the log.",
     "inline": [
       {
         "match": "if (items_count <= items_cursor) {",
@@ -2406,11 +2406,11 @@
       },
       {
         "match": "index = (int)items_cursor + 1;",
-        "comment": "Keep a 1-based ordinal for the callback; `secret_data_append_item` treats index 0 as \u201cdisabled descriptor\u201d."
+        "comment": "Keep a 1-based array index for the callback (useful as a stable per-descriptor id in logs)."
       },
       {
         "match": "if (descriptor->ordinal != 0) break;",
-        "comment": "Skip dormant entries by assigning the next slot number until we hit one that already has a published ordinal."
+        "comment": "Break once we hit a non-zero `ordinal`; zero-ordinal entries are stamped with the current `ordinal_cursor` and skipped."
       },
       {
         "match": "append_ok = (*appender)",
@@ -2422,7 +2422,7 @@
       },
       {
         "match": "ordinal_cursor = ordinal_cursor + 1;",
-        "comment": "Advance the slot so the next dormant entry we encounter gets a new ordinal."
+        "comment": "Advance the cursor after each successful append; the updated value is used when stamping any later zero-ordinal entries."
       }
     ]
   },
