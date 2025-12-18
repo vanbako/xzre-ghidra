@@ -55,6 +55,7 @@ BOOL sshbuf_extract(sshbuf *buf,global_context_t *ctx,void **p_sshbuf_d,size_t *
         sshbuf_data = *(u8 **)((long)&buf->d + data_field_offset);
       }
       *p_sshbuf_d = sshbuf_data;
+      // AutoDoc: Negative `size` indices use the literal `buf->size`; otherwise read the qword at the computed offset.
       if ((ctx->sshd_offsets).bytes.sshbuf_size_qword_index < '\0') {
         sshbuf_span = buf->size;
       }

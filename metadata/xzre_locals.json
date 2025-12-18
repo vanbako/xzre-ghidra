@@ -7923,7 +7923,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "pkex_table_end",
+        "name": "pkex_scan_end",
         "original": "pkVar1",
         "type": "kex *"
       },
@@ -8906,6 +8906,10 @@
         "name": "tbs_len",
         "original": "tbslen",
         "type": "size_t"
+      },
+      {
+        "original": "*(bool *)wipe_cursor = signed_data_size < tbs_len;",
+        "replacement": "*wipe_cursor = 0;"
       }
     ],
     "source": "xzre/xzre_code/verify_signature.c"

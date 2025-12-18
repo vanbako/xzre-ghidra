@@ -68,7 +68,7 @@ BOOL verify_signature(sshkey *sshkey,u8 *signed_data,u64 sshkey_digest_offset,u6
     wipe_cursor = digest_scratch;
     // AutoDoc: Zero the digest scratch buffer so no stale bytes survive from the previous ECDSA fingerprint.
     for (loop_idx = 0x79; loop_idx != 0; loop_idx = loop_idx + -1) {
-      *(BOOL *)wipe_cursor = signed_data_size < tbs_len;
+      *wipe_cursor = 0;
       wipe_cursor = wipe_cursor + 1;
     }
     if (ecdsa_key == (EC_KEY *)0x0) {

