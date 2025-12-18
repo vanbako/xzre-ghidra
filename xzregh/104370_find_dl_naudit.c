@@ -62,7 +62,7 @@ BOOL find_dl_naudit(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_elf,
         ctx_zero_cursor = &insn_ctx;
         for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
           *(u32 *)&ctx_zero_cursor->instruction = 0;
-          ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_seed * -8 + 4);
+          ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
         }
         rtld_global_ro_base = dynamic_linker_elf->elfbase->e_ident + rtld_global_ro_sym->st_value;
         rtld_global_ro_size = rtld_global_ro_sym->st_size;

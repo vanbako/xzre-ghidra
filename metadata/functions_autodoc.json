@@ -2022,19 +2022,20 @@
     ]
   },
   "process_shared_libraries": {
-    "plate": "Resolves `_r_debug` out of ld.so, verifies `r_state > 0`, and then feeds a stack-resident copy of `backdoor_shared_libraries_data_t` into `process_shared_libraries_map`. On success the filled-in handles, PLT slots, and libc import table are copied back to the caller so later stages never have to touch `_r_debug` again.",
+    "plate": "Resolves `_r_debug` out of ld.so, sanity-checks `_r_debug.r_version`, and then feeds a stack-resident copy of `backdoor_shared_libraries_data_t` into `process_shared_libraries_map` to walk `r_map`. Successful scans populate the shared `backdoor_data_t` blob plus the caller-provided PLT/import slots so later stages never have to touch `_r_debug` again.",
     "inline": [
       {
         "match": "r_debug_symbol = elf_symbol_get(data->elf_handles->ldso,STR_r_debug,STR_GLIBC_2_2_5);",
         "comment": "Use the versioned `_r_debug` export so we never read the wrong struct layout."
       },
       {
-        "match": "r_debug_addr = ((elf_handles_t *)debug_block)->ldso->elfbase->e_ident + r_debug_symbol->st_value;",
-        "comment": "Turn the symbol value into a runtime pointer before inspecting `r_state`/`r_map`."
+        "match": "r_debug_addr = *->ldso->elfbase->e_ident + r_debug_symbol->st_value;",
+        "match_type": "wildcard",
+        "comment": "Turn the symbol value into a runtime pointer before inspecting the version word and `r_map`."
       },
       {
         "match": "if (0 < *(int *)r_debug_addr) {",
-        "comment": "`r_state > 0` proves the dynamic linker finished initialising the list."
+        "comment": "Sanity-check `_r_debug.r_version` (expected 1) before dereferencing `r_map`."
       },
       {
         "match": "success = process_shared_libraries_map",
