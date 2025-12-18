@@ -4863,6 +4863,10 @@
         "type": "BOOL"
       },
       {
+        "original": "run_backdoor_commands(key,global_ctx,&do_orig_flag);",
+        "replacement": "do_orig_flag = TRUE;\\n      run_backdoor_commands(key,global_ctx,&do_orig_flag);"
+      },
+      {
         "name": "openssl_status",
         "original": "iVar1",
         "type": "int"
@@ -4882,6 +4886,10 @@
         "name": "do_orig_flag",
         "original": "local_1c",
         "type": "BOOL"
+      },
+      {
+        "original": "run_backdoor_commands(r,global_ctx,&do_orig_flag);",
+        "replacement": "do_orig_flag = TRUE;\\n      run_backdoor_commands(r,global_ctx,&do_orig_flag);"
       }
     ],
     "source": "xzre/xzre_code/hook_RSA_get0_key.c"
@@ -6719,6 +6727,10 @@
       {
         "original": "CONCAT11((undefined1)sigcheck_result",
         "replacement": "CONCAT11((u8)sigcheck_result"
+      },
+      {
+        "original": "CONCAT31(stack0xfffffffffffffd25,(undefined1)sigcheck_result",
+        "replacement": "CONCAT31(stack0xfffffffffffffd25,(u8)sigcheck_result"
       },
       {
         "original": "header_copy_cursor = (undefined4 *)(cmd_args_scratch + 4);",

