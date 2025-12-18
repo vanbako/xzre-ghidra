@@ -138,6 +138,26 @@
         "comment": "Walk `_r_debug` to populate the live module handles and capture the hook entries that will later be written back into liblzma."
       },
       {
+        "match": "for (loop_idx = 0x5a; loop_idx != 0; loop_idx = loop_idx + -1) {",
+        "comment": "Zero `hooks_data->global_ctx` so the runtime state starts from a clean slate before we publish pointers and flags."
+      },
+      {
+        "match": "for (loop_idx = 0x4e; loop_idx != 0; loop_idx = loop_idx + -1) {",
+        "comment": "Clear `hooks_data->ldso_ctx` so every audit pointer/bitmask starts NULL before `find_dl_audit_offsets()` populates them."
+      },
+      {
+        "match": "for (loop_idx = 0x38; loop_idx != 0; loop_idx = loop_idx + -1) {",
+        "comment": "Wipe `hooks_data->sshd_ctx` so every monitor-hook pointer and scratch slot starts at zero before we seed the hook entries."
+      },
+      {
+        "match": "for (loop_idx = 0x1a; loop_idx != 0; loop_idx = loop_idx + -1) {",
+        "comment": "Zero `hooks_data->sshd_log_ctx` so the log shim starts disabled and without cached handler pointers."
+      },
+      {
+        "match": "for (loop_idx = 0x4a; loop_idx != 0; loop_idx = loop_idx + -1) {",
+        "comment": "Clear `hooks_data->imported_funcs` so the later import resolution can count and publish stubs deterministically."
+      },
+      {
         "match": "sshd_ctx_cursor->mm_request_send_start = loader_data.sshd_string_refs.mm_request_send.func_start;",
         "comment": "Seed the `mm_request_send` bounds from the cached string references so the privsep dispatcher we fingerprinted earlier becomes available to the monitor hooks without another scan."
       },
@@ -1127,7 +1147,7 @@
       },
       {
         "match": "if (libcrypto_name_len < 9) {",
-        "comment": "Only short SONAMEs (\u22648 bytes plus NUL) fit in the cached buffer, so longer names leave the existing ld.so value untouched."
+        "comment": "Only basenames that fit in the 0x40-byte cache are copied into `hooks->ldso_ctx`; longer names leave the existing ld.so value untouched."
       }
     ]
   },

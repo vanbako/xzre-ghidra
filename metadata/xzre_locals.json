@@ -1940,6 +1940,10 @@
         "type": "u8"
       },
       {
+        "original": "(ulong)wipe_stride * -8 + 4",
+        "replacement": "4"
+      },
+      {
         "name": "syslog_bad_level_cursor",
         "original": "local_b48",
         "type": "u8 *"
@@ -3791,6 +3795,10 @@
         "type": "byte"
       },
       {
+        "original": "(ulong)wipe_stride * -8 + 4",
+        "replacement": "4"
+      },
+      {
         "name": "audit_symbol_size",
         "original": "size",
         "type": "u64"
@@ -4230,6 +4238,18 @@
         "name": "audit_func_end",
         "original": "code_end",
         "type": "dl_audit_symbind_alt_fn"
+      },
+      {
+        "original": "insn_ctx._40_4_",
+        "replacement": "*(u32 *)&insn_ctx.opcode_window[3]"
+      },
+      {
+        "original": "(ulong)wipe_stride * -8 + 4",
+        "replacement": "4"
+      },
+      {
+        "original": "(ulong)wipe_stride * -2 + 1",
+        "replacement": "1"
       }
       
     ],

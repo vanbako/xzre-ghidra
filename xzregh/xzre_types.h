@@ -1275,7 +1275,7 @@ typedef struct __attribute__((packed)) backdoor_shared_globals {
  * All of the state we steal from the dynamic loader when we patch the audit interfaces: pointers to `_dl_audit_symbind_alt`, link-map fields, cached audit bitmasks, and copies of the hooked GOT entries.
  */
 typedef struct __attribute__((packed)) ldso_ctx {
- u8 _unknown1459[0x40];
+ u8 libcrypto_basename_buf[0x40]; /* Scratch buffer holding libcrypto's basename; used while forging link_map::l_name for audit hooks. */
  u32 *libcrypto_auditstate_bindflags_ptr;
  u32 libcrypto_auditstate_bindflags_old_value;
  u8 _unknown1476[0x4];

