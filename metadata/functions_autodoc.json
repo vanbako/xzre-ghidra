@@ -400,7 +400,7 @@
         "comment": "Stop once we have checked the requested number of slots and report FALSE when no NULL pointers were seen."
       },
       {
-        "match": "} while (*candidate_slot != (void *)0x0);",
+        "match": "} while (*slot_ptr != (void *)0x0);",
         "comment": "Return TRUE the instant a NULL slot is encountered so callers can bail out before dereferencing it."
       }
     ]
@@ -989,24 +989,32 @@
     "plate": "Libc `read` wrapper with strict import validation. It refuses to run unless both `read` and `__errno_location` are present,\nloops on EINTR, and treats EOF/short reads as fatal so callers either receive -1 or know the entire `count` bytes were filled.",
     "inline": [
       {
+        "match": "if (count == 0) {",
+        "comment": "Zero-length reads short-circuit successfully without touching the import table."
+      },
+      {
         "match": "funcs->__errno_location == (pfn___errno_location_t)0x0",
         "comment": "Bail out unless the caller supplied valid `libc_imports_t` hooks and a non-negative fd."
       },
       {
-        "match": "chunk_size = (*funcs->read)(fd,buffer,bytes_left);",
+        "match": "bytes_read = (*funcs->read)(fd,buffer,bytes_remaining);",
         "comment": "Retry the read until it succeeds or an error other than EINTR surfaces."
       },
       {
-        "match": "if (*errno_value_ptr != 4) goto LAB_0010709e;",
+        "match": "if (*errno_ptr != 4) goto LAB_0010709e;",
         "comment": "Only EINTR (errno == 4) causes a retry; every other errno trips the failure path."
       },
       {
-        "match": "if (chunk_size == 0) goto LAB_0010709e;",
+        "match": "if (bytes_read == 0) goto LAB_0010709e;",
         "comment": "Treat EOF before `count` bytes have been read as a fatal short read."
       },
       {
-        "match": "buffer = (void *)((long)buffer + chunk_size);",
+        "match": "buffer = (void *)((long)buffer + bytes_read);",
         "comment": "Advance the moving buffer pointer and remaining byte counter after every successful chunk."
+      },
+      {
+        "match": "count = 0xffffffffffffffff;",
+        "comment": "All validation failures, EOF, and unrecoverable errno values collapse to -1."
       }
     ]
   },
@@ -1014,24 +1022,32 @@
     "plate": "Write-side twin of `fd_read`. It demands working `write`/`__errno_location` imports, retries short-term EINTR failures, and\nfalls back to -1 if the kernel reports 0 bytes or any other error before the requested `count` is flushed.",
     "inline": [
       {
+        "match": "if (count == 0) {",
+        "comment": "Zero-length writes short-circuit successfully without touching the import table."
+      },
+      {
         "match": "funcs->__errno_location == (pfn___errno_location_t)0x0",
         "comment": "Guard against bad descriptors, NULL buffers, or missing libc shims before attempting the write."
       },
       {
-        "match": "chunk_size = (*funcs->write)(fd,buffer,bytes_left);",
+        "match": "bytes_written = (*funcs->write)(fd,buffer,bytes_remaining);",
         "comment": "Issue blocking writes until the entire buffer is sent or an unrecoverable error appears."
       },
       {
-        "match": "if (*errno_value_ptr != 4) goto LAB_0010711f;",
+        "match": "if (*errno_ptr != 4) goto LAB_0010711f;",
         "comment": "Only EINTR causes a retry; any other errno aborts and returns -1."
       },
       {
-        "match": "if (chunk_size == 0) goto LAB_0010711f;",
+        "match": "if (bytes_written == 0) goto LAB_0010711f;",
         "comment": "A zero-byte write means the peer closed early, so propagate -1 to signal the failure."
       },
       {
-        "match": "buffer = (void *)((long)buffer + chunk_size);",
+        "match": "buffer = (void *)((long)buffer + bytes_written);",
         "comment": "Advance the source pointer and remaining byte count after every successful chunk."
+      },
+      {
+        "match": "count = 0xffffffffffffffff;",
+        "comment": "All validation failures, zero-byte writes, and unrecoverable errno values collapse to -1."
       }
     ]
   },

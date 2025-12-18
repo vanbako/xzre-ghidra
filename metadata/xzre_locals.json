@@ -2322,7 +2322,7 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "candidate_slot",
+        "name": "slot_ptr",
         "original": "ppvVar1",
         "type": "void **"
       },
@@ -3554,17 +3554,17 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "chunk_size",
+        "name": "bytes_read",
         "original": "sVar1",
         "type": "ssize_t"
       },
       {
-        "name": "errno_value_ptr",
+        "name": "errno_ptr",
         "original": "piVar2",
         "type": "int *"
       },
       {
-        "name": "bytes_left",
+        "name": "bytes_remaining",
         "original": "count_00",
         "type": "size_t"
       }
@@ -3575,17 +3575,17 @@
     "locals": [],
     "register_temps": [
       {
-        "name": "chunk_size",
+        "name": "bytes_written",
         "original": "sVar1",
         "type": "ssize_t"
       },
       {
-        "name": "errno_value_ptr",
+        "name": "errno_ptr",
         "original": "piVar2",
         "type": "int *"
       },
       {
-        "name": "bytes_left",
+        "name": "bytes_remaining",
         "original": "count_00",
         "type": "size_t"
       }

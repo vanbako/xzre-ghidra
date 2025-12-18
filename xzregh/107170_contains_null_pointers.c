@@ -14,7 +14,7 @@
 BOOL contains_null_pointers(void **pointers,uint num_pointers)
 
 {
-  void **candidate_slot;
+  void **slot_ptr;
   size_t slot_index;
   
   slot_index = 0;
@@ -23,10 +23,10 @@ BOOL contains_null_pointers(void **pointers,uint num_pointers)
     if (num_pointers <= (uint)slot_index) {
       return FALSE;
     }
-    candidate_slot = pointers + slot_index;
+    slot_ptr = pointers + slot_index;
     slot_index = slot_index + 1;
   // AutoDoc: Return TRUE the instant a NULL slot is encountered so callers can bail out before dereferencing it.
-  } while (*candidate_slot != (void *)0x0);
+  } while (*slot_ptr != (void *)0x0);
   return TRUE;
 }
 
