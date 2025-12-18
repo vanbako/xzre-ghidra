@@ -1,5 +1,13 @@
 # Applies local variable names and types extracted from the decompiled xzre
 # sources onto the active program.
+#
+# Locals mapping notes:
+# - Each entry in the per-function "locals" list may optionally provide:
+#     - "stack_offset": Explicit stack offset (int or string like "-0x40").
+#     - "force_stack": When true, clear any overlapping stack locals and force
+#       the named variable onto that exact stack location.
+#   This is useful for re-materializing stack-resident structs that Ghidra split
+#   into multiple field-sized locals during analysis.
 # @category xzre
 
 import json
@@ -81,6 +89,113 @@ def _load_mapping(default_path, args):
         raise RuntimeError("locals mapping not found at {}".format(mapping_path))
     with open(mapping_path, "r") as infile:
         return mapping_path, json.load(infile)
+
+
+def _is_string(value):
+    try:
+        return isinstance(value, basestring)
+    except NameError:
+        return isinstance(value, str)
+
+
+def _parse_stack_offset(value):
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    try:
+        if isinstance(value, (int, long)):
+            return int(value)
+    except NameError:
+        if isinstance(value, int):
+            return value
+    if _is_string(value):
+        try:
+            return int(value, 0)
+        except Exception:
+            return None
+    return None
+
+
+def _local_stack_offset(entry):
+    if not isinstance(entry, dict):
+        return None
+    for key in ("stack_offset", "stackOffset", "offset"):
+        if key in entry:
+            return _parse_stack_offset(entry.get(key))
+    return None
+
+
+def _local_force_stack(entry):
+    if not isinstance(entry, dict):
+        return False
+    for key in ("force_stack", "forceStack", "force"):
+        if entry.get(key):
+            return True
+    return False
+
+
+def _find_stack_variable_by_offset(stack_frame, target_offset):
+    if stack_frame is None or target_offset is None:
+        return None
+    try:
+        vars_iter = stack_frame.getStackVariables()
+    except Exception:
+        vars_iter = []
+    for var in vars_iter or []:
+        storage = None
+        try:
+            storage = var.getVariableStorage()
+        except Exception:
+            storage = None
+        if storage is None or not storage.hasStackStorage():
+            continue
+        try:
+            offset = storage.getStackOffset()
+        except Exception:
+            continue
+        if offset == target_offset:
+            return var
+    return None
+
+
+def _clear_unused_named_stack_locals(stack_frame, desired_name, keep_offset):
+    if stack_frame is None or not desired_name:
+        return
+    try:
+        locals_iter = stack_frame.getLocals()
+    except Exception:
+        locals_iter = []
+    for var in locals_iter or []:
+        try:
+            if var.getName() != desired_name:
+                continue
+        except Exception:
+            continue
+        storage = None
+        try:
+            storage = var.getVariableStorage()
+        except Exception:
+            storage = None
+        if storage is None or not storage.hasStackStorage():
+            continue
+        try:
+            offset = storage.getStackOffset()
+        except Exception:
+            continue
+        if keep_offset is not None and offset == keep_offset:
+            continue
+        first_use = None
+        try:
+            first_use = var.getFirstUseOffset()
+        except Exception:
+            first_use = None
+        if first_use is not None and first_use >= 0:
+            continue
+        try:
+            stack_frame.clearVariable(offset)
+        except Exception:
+            pass
 
 
 def _variable_score(var, target_dt):
@@ -343,33 +458,52 @@ def _apply_locals_to_function(func, locals_data, type_resolver):
             if var not in candidates:
                 candidates.append(var)
 
-    stack_offsets = set()
+    def _collect_candidates():
+        stack_offsets = set()
+        candidates = []
 
-    stack_vars = list(stack_frame.getStackVariables() or [])
-    other_locals = list(func.getLocalVariables() or [])
-    candidates = []
-    for var in stack_vars:
-        storage = var.getVariableStorage()
-        if storage is not None and storage.hasStackStorage():
+        try:
+            stack_vars = list(stack_frame.getStackVariables() or [])
+        except Exception:
+            stack_vars = []
+        try:
+            other_locals = list(func.getLocalVariables() or [])
+        except Exception:
+            other_locals = []
+
+        for var in stack_vars:
+            storage = None
             try:
-                stack_offsets.add(storage.getStackOffset())
+                storage = var.getVariableStorage()
             except Exception:
+                storage = None
+            if storage is not None and storage.hasStackStorage():
+                try:
+                    stack_offsets.add(storage.getStackOffset())
+                except Exception:
+                    continue
+                candidates.append(var)
                 continue
             candidates.append(var)
-            continue
-        candidates.append(var)
-    for var in other_locals:
-        if var in candidates:
-            continue
-        storage = var.getVariableStorage()
-        if storage is not None and storage.hasStackStorage():
+        for var in other_locals:
+            if var in candidates:
+                continue
+            storage = None
             try:
-                stack_offsets.add(storage.getStackOffset())
+                storage = var.getVariableStorage()
             except Exception:
+                storage = None
+            if storage is not None and storage.hasStackStorage():
+                try:
+                    stack_offsets.add(storage.getStackOffset())
+                except Exception:
+                    continue
+                candidates.append(var)
                 continue
             candidates.append(var)
-            continue
-        candidates.append(var)
+        return candidates, stack_offsets
+
+    candidates, stack_offsets = _collect_candidates()
 
     updated = 0
     skipped = 0
@@ -394,6 +528,98 @@ def _apply_locals_to_function(func, locals_data, type_resolver):
         dt = None
         if type_str:
             dt = type_resolver.parse(type_str)
+
+        desired_offset = _local_stack_offset(entry)
+        force_stack = _local_force_stack(entry)
+        if desired_offset is not None:
+            size = _data_type_length(dt)
+            if size is None or size <= 0:
+                size = 8
+            _ensure_frame_capacity(stack_frame, desired_offset, size, grows_negative)
+            if force_stack:
+                _clear_unused_named_stack_locals(stack_frame, name, desired_offset)
+                _clear_stack_conflicts(
+                    stack_frame, desired_offset, size, grows_negative, stack_offsets
+                )
+
+            target_var = _find_stack_variable_by_offset(stack_frame, desired_offset)
+            if target_var is None:
+                storage_dt = _ensure_data_type(dt, size)
+                try:
+                    target_var = stack_frame.createVariable(
+                        name,
+                        desired_offset,
+                        storage_dt,
+                        SourceType.USER_DEFINED,
+                    )
+                    stack_offsets.add(desired_offset)
+                except (DuplicateNameException, InvalidInputException, Exception, Throwable) as exc:
+                    printerr(
+                        "Failed to create forced stack local '{}' @ {} in {}: {}".format(
+                            name, desired_offset, func.getName(), exc
+                        )
+                    )
+                    skipped += 1
+                    candidates, stack_offsets = _collect_candidates()
+                    continue
+
+            if dt is not None:
+                for attempt in range(2):
+                    try:
+                        target_var.setDataType(dt, SourceType.USER_DEFINED)
+                        break
+                    except (Exception, Throwable) as exc:
+                        if attempt == 0 and force_stack:
+                            _clear_stack_conflicts(
+                                stack_frame,
+                                desired_offset,
+                                size,
+                                grows_negative,
+                                stack_offsets,
+                                keep_var=target_var,
+                            )
+                            target_var = _refresh_stack_variable(
+                                stack_frame, desired_offset, target_var
+                            )
+                            continue
+                        printerr(
+                            "Failed to set forced type '{}' on {}::{} @ {}: {}".format(
+                                type_str, func.getName(), target_var.getName(), desired_offset, exc
+                            )
+                        )
+                        break
+
+            try:
+                if not target_var.isValid():
+                    skipped += 1
+                    candidates, stack_offsets = _collect_candidates()
+                    continue
+            except Exception:
+                pass
+
+            _ensure_unique_local_name(name, target_var)
+            try:
+                target_var.setName(name, SourceType.USER_DEFINED)
+            except (Exception, Throwable) as exc:
+                printerr(
+                    "Failed to rename forced local {} to '{}' in {}: {}".format(
+                        target_var.getName(), name, func.getName(), exc
+                    )
+                )
+                skipped += 1
+                candidates, stack_offsets = _collect_candidates()
+                continue
+
+            try:
+                if target_var in candidates:
+                    candidates.remove(target_var)
+            except Exception:
+                pass
+
+            updated += 1
+            seen_names.add(name)
+            candidates, stack_offsets = _collect_candidates()
+            continue
 
         target_var = _choose_variable(candidates, dt)
         debug_func = func.getName()

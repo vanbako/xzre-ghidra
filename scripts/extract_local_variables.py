@@ -180,6 +180,44 @@ def extract_from_source(path: str) -> Dict[str, List[Dict[str, Any]]]:
     return functions
 
 
+def _merge_local_overrides(
+    existing_locals: Any, new_locals: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """
+    Preserve any per-local override keys (e.g. stack_offset/force_stack) that are
+    not emitted by Clang's AST dump.
+
+    The mapping is keyed by local-variable name. When a local with the same name
+    appears in both the existing and newly-extracted lists, any keys present in
+    the existing entry but absent from the new entry are copied over.
+    """
+    if not isinstance(existing_locals, list):
+        return new_locals
+
+    existing_by_name: Dict[str, Dict[str, Any]] = {}
+    for entry in existing_locals:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        if not name:
+            continue
+        existing_by_name[name] = entry
+
+    merged: List[Dict[str, Any]] = []
+    for entry in new_locals:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        existing = existing_by_name.get(name) if name else None
+        if isinstance(existing, dict):
+            for key, value in existing.items():
+                if key in entry:
+                    continue
+                entry[key] = value
+        merged.append(entry)
+    return merged
+
+
 def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract local variable metadata from xzre sources."
@@ -247,11 +285,13 @@ def main() -> None:
                 sys.stderr.write(
                     f"warning: duplicate definition for {func_name}; overwriting\n"
                 )
+            existing_entry = existing_data.get(func_name)
+            if isinstance(existing_entry, dict):
+                locals_list = _merge_local_overrides(existing_entry.get("locals"), locals_list)
             entry = OrderedDict(
                 source=rel_source,
                 locals=locals_list,
             )
-            existing_entry = existing_data.get(func_name)
             if isinstance(existing_entry, dict):
                 for key, value in existing_entry.items():
                     if key in entry:

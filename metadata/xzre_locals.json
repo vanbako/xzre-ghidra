@@ -6101,16 +6101,10 @@
   "process_shared_libraries": {
     "locals": [
       {
-        "name": "r_debug_sym",
-        "type": "Elf64_Sym *"
-      },
-      {
-        "name": "debug_block",
-        "type": "uchar *"
-      },
-      {
         "name": "tmp_state",
-        "type": "backdoor_shared_libraries_data_t"
+        "type": "backdoor_shared_libraries_data_t",
+        "stack_offset": "-0x40",
+        "force_stack": true
       }
     ],
     "register_temps": [
@@ -6128,67 +6122,6 @@
         "name": "r_debug_addr",
         "original": "puVar3",
         "type": "uchar *"
-      },
-      {
-        "name": "orig_RSA_public_decrypt_slot",
-        "original": "local_30",
-        "type": "void *"
-      },
-      {
-        "name": "orig_EVP_PKEY_set1_RSA_slot",
-        "original": "local_28",
-        "type": "void *"
-      },
-      {
-        "name": "orig_RSA_get0_key_slot",
-        "original": "local_20",
-        "type": "void *"
-      },
-      {
-        "name": "orig_hooks_data_slot",
-        "original": "local_18",
-        "type": "backdoor_hooks_data_t **"
-      },
-      {
-        "name": "orig_libc_imports",
-        "original": "local_10",
-        "type": "libc_imports_t *"
-      },
-      {
-        "original": "debug_block = (uchar *)data->elf_handles;",
-        "replacement": "tmp_state.elf_handles = data->elf_handles;"
-      },
-      {
-        "original": "r_debug_addr = ((elf_handles_t *)debug_block)->ldso->elfbase->e_ident + r_debug_symbol->st_value;",
-        "replacement": "r_debug_addr = tmp_state.elf_handles->ldso->elfbase->e_ident + r_debug_symbol->st_value;"
-      },
-      {
-        "original": "r_debug_sym = (Elf64_Sym *)data->shared_maps;",
-        "replacement": "tmp_state.shared_maps = data->shared_maps;"
-      },
-      {
-        "original": "orig_RSA_public_decrypt_slot = data->rsa_public_decrypt_slot;",
-        "replacement": "tmp_state.rsa_public_decrypt_slot = data->rsa_public_decrypt_slot;"
-      },
-      {
-        "original": "orig_EVP_PKEY_set1_RSA_slot = data->evp_set1_rsa_slot;",
-        "replacement": "tmp_state.evp_set1_rsa_slot = data->evp_set1_rsa_slot;"
-      },
-      {
-        "original": "orig_RSA_get0_key_slot = data->rsa_get0_key_slot;",
-        "replacement": "tmp_state.rsa_get0_key_slot = data->rsa_get0_key_slot;"
-      },
-      {
-        "original": "orig_hooks_data_slot = data->hooks_data_slot;",
-        "replacement": "tmp_state.hooks_data_slot = data->hooks_data_slot;"
-      },
-      {
-        "original": "orig_libc_imports = data->libc_imports;",
-        "replacement": "tmp_state.libc_imports = data->libc_imports;"
-      },
-      {
-        "original": "(backdoor_shared_libraries_data_t *)&r_debug_sym",
-        "replacement": "&tmp_state"
       }
     ],
     "source": "xzre/xzre_code/process_shared_libraries.c"
