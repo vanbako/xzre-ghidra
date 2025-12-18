@@ -16,10 +16,10 @@
 uint backdoor_entry(uint cpuid_request,u64 *caller_frame)
 
 {
-  u32 cpuid_ecx;
+  u32 cpuid_edx;
   u32 cpuid_eax;
   u32 cpuid_ebx;
-  u32 cpuid_edx;
+  u32 cpuid_ecx;
   elf_entry_ctx_t state;
   
   // AutoDoc: Only the second resolver invocation runs the heavyweight loader work; the first probe just increments the counter.
@@ -36,7 +36,7 @@ uint backdoor_entry(uint cpuid_request,u64 *caller_frame)
   }
   resolver_call_count = resolver_call_count + 1;
   // AutoDoc: Regardless of loader state we still execute the canonical cpuid dispatcher and return its EAX result to satisfy IFUNC callers.
-  _cpuid_gcc(cpuid_request,&cpuid_eax,&cpuid_ebx,&cpuid_edx,(uint *)&state);
+  _cpuid_gcc(cpuid_request,&cpuid_eax,&cpuid_ebx,&cpuid_ecx,&cpuid_edx);
   return cpuid_eax;
 }
 

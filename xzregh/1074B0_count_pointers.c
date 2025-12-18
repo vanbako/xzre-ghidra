@@ -35,7 +35,7 @@ BOOL count_pointers(void **ptrs,u64 *count_out,libc_imports_t *funcs)
       live_count = probe_index;
       // AutoDoc: Stop counting as soon as we see a NULL terminator; argv/envp arrays always use that sentinel.
       if (ptrs[probe_index] == (void *)0x0) break;
-      probe_index = (ulong)((int)probe_index + 1);
+      probe_index = probe_index + 1;
       // AutoDoc: If we hit the allocation boundary without seeing NULL, treat the whole buffer as populated.
       live_count = allocation_size >> 3;
     } while (probe_index < allocation_size >> 3);

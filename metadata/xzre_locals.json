@@ -1388,12 +1388,12 @@
         "type": "uint"
       },
       {
-        "name": "ecx_val",
+        "name": "leaf_edx",
         "original": "uVar3",
         "type": "uint"
       },
       {
-        "name": "edx_val",
+        "name": "leaf_ecx",
         "original": "uVar4",
         "type": "uint"
       }
@@ -1424,12 +1424,12 @@
         "type": "u32"
       },
       {
-        "name": "cpuid_edx",
+        "name": "cpuid_ecx",
         "original": "c",
         "type": "u32"
       },
       {
-        "name": "cpuid_ecx",
+        "name": "cpuid_edx",
         "original": "d",
         "type": "u32"
       }
@@ -1439,6 +1439,10 @@
         "name": "state",
         "original": "local_48",
         "type": "elf_entry_ctx_t"
+      },
+      {
+        "original": "(uint *)&state",
+        "replacement": "&cpuid_edx"
       }
     ],
     "source": "xzre/xzre_code/backdoor_entry.c"
@@ -2368,6 +2372,10 @@
         "name": "success",
         "original": "BVar1",
         "type": "BOOL"
+      },
+      {
+        "original": "probe_index = (ulong)((int)probe_index + 1);",
+        "replacement": "probe_index = probe_index + 1;"
       }
     ],
     "source": "xzre/xzre_code/count_pointers.c"

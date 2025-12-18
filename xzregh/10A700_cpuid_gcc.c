@@ -1,27 +1,26 @@
 // /home/kali/xzre-ghidra/xzregh/10A700_cpuid_gcc.c
 // Function: _cpuid_gcc @ 0x10A700
 // Calling convention: __stdcall
-// Prototype: void __stdcall _cpuid_gcc(uint level, uint * a, uint * b, uint * c, uint * d)
+// Prototype: void __stdcall _cpuid_gcc(uint level, uint * eax, uint * ebx, uint * ecx, uint * edx)
 
 
 /*
- * AutoDoc: GCC-style CPUID shim that mirrors glibc’s helper: it picks a dedicated thunk for every well-known leaf (basic IDs,
- * caches, topology, brand strings, etc.) and only falls back to the raw `cpuid()` stub when the table has no match. After executing
- * the thunk it copies the register tuple back into the caller-provided buffers, preserving GCC’s `[EAX, EBX, EDX, ECX]` ordering so
- * callers never need inline assembly.
+ * AutoDoc: Thin wrapper around the x86 `cpuid` instruction (GCC’s `__cpuid` contract). In the decompiler output Ghidra lifts CPUID into
+ * leaf-specific pseudo-functions (`cpuid_basic_info`, `cpuid_Version_info`, …) with a generic `cpuid(level)` fallback. The wrapper then
+ * copies the resulting register tuple into the caller-provided output pointers (EAX/EBX/ECX/EDX).
  */
 
 #include "xzre_types.h"
 
-void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
+void _cpuid_gcc(uint level,uint *eax,uint *ebx,uint *ecx,uint *edx)
 
 {
   uint *leaf_info;
   uint ebx_val;
-  uint ecx_val;
-  uint edx_val;
+  uint leaf_edx;
+  uint leaf_ecx;
   
-  // AutoDoc: Walk a straight if/else ladder of helpers so each canonical leaf (0, 1, cache descriptors, brand strings, etc.) has its own thunk.
+  // AutoDoc: Ghidra models `cpuid` as a leaf dispatch; the real binary executes the `cpuid` instruction with `EAX=level`.
   if (level == 0) {
     leaf_info = (uint *)cpuid_basic_info(0);
   }
@@ -71,17 +70,17 @@ void _cpuid_gcc(uint level,uint *a,uint *b,uint *c,uint *d)
     leaf_info = (uint *)cpuid_brand_part3_info(0x80000004);
   }
   else {
-    // AutoDoc: Anything outside the curated list falls back to the raw `cpuid()` stub so oddball leaves still work.
+    // AutoDoc: Fallback path for leaves not covered by the decompiler’s CPUID model.
     leaf_info = (uint *)cpuid(level);
   }
   ebx_val = leaf_info[1];
-  ecx_val = leaf_info[2];
-  edx_val = leaf_info[3];
-  *a = *leaf_info;
-  *b = ebx_val;
-  // AutoDoc: Match GCC’s ABI by returning `[EAX, EBX, EDX, ECX]`—note the deliberate swap compared to the hardware register order.
-  *c = edx_val;
-  *d = ecx_val;
+  leaf_edx = leaf_info[2];
+  leaf_ecx = leaf_info[3];
+  *eax = *leaf_info;
+  *ebx = ebx_val;
+  // AutoDoc: Ghidra’s CPUID pseudo-return packs `[EAX, EBX, EDX, ECX]`, so `leaf_info[2]` is EDX and `leaf_info[3]` is ECX when we populate the caller buffers.
+  *ecx = leaf_ecx;
+  *edx = leaf_edx;
   return;
 }
 

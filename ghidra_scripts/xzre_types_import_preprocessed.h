@@ -1981,7 +1981,7 @@ extern EncodedStringId get_string_id(const char *string_begin, const char *strin
 
 extern unsigned int _get_cpuid_modified(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
 
-extern void _cpuid_gcc(unsigned int level, unsigned int *a, unsigned int *b, unsigned int *c, unsigned int *d);
+extern void _cpuid_gcc(unsigned int level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
 
 extern int init_hooks_ctx(backdoor_hooks_ctx_t *ctx);
 
