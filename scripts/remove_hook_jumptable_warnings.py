@@ -13,16 +13,16 @@ from typing import Dict
 
 
 HOOK_COMMENTS: Dict[str, str] = {
-    "10A2D0_hook_EVP_PKEY_set1_RSA.c":
-        "Hook tail-call: after run_backdoor_commands() it jumps through orig_EVP_PKEY_set1_RSA, "
+    "10A2D0_evp_pkey_set1_rsa_backdoor_shim.c":
+        "Hook tail-call: after rsa_backdoor_command_dispatch() it jumps through orig_EVP_PKEY_set1_RSA, "
         "so the saved pointer call only looks like a jumptable.",
-    "10A240_hook_RSA_public_decrypt.c":
+    "10A240_rsa_public_decrypt_backdoor_shim.c":
         "Hook tail-call: once the dispatcher forwards to OpenSSL it jumps via "
         "orig_RSA_public_decrypt, not through a jumptable.",
-    "10A330_hook_RSA_get0_key.c":
+    "10A330_rsa_get0_key_backdoor_shim.c":
         "Hook tail-call: after inspecting the RSA handle it calls orig_RSA_get0_key directly, "
         "so the tail jump is intentional.",
-    "108EA0_mm_answer_keyallowed_hook.c":
+    "108EA0_mm_answer_keyallowed_payload_dispatch_hook.c":
         "Hook tail-call: after the payload state machine finishes it invokes "
         "orig_mm_answer_keyallowed through the saved pointer, so there is no jumptable.",
 }

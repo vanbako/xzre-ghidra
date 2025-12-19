@@ -15,7 +15,7 @@ except NameError:
 
 
 DATA_AUTODOC_SYMBOLS = {
-    "xzre_globals",
+    "backdoor_hooks_data_blob",
 }
 
 

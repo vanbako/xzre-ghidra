@@ -5,16 +5,16 @@ from ghidra.program.model.data import Pointer, TypeDef
 
 
 SAMPLE_FUNCTIONS = {
-    "find_function_prologue",
-    "run_backdoor_commands",
-    "sshd_proxy_elevate",
-    "hook_RSA_get0_key",
-    "backdoor_entry",
-    "hook_EVP_PKEY_set1_RSA",
-    "elf_find_rela_reloc",
-    "elf_find_relr_reloc",
-    "j_tls_get_addr",
-    "elf_contains_vaddr_impl",
+    "find_endbr_prologue",
+    "rsa_backdoor_command_dispatch",
+    "sshd_monitor_cmd_dispatch",
+    "rsa_get0_key_backdoor_shim",
+    "cpuid_ifunc_resolver_entry",
+    "evp_pkey_set1_rsa_backdoor_shim",
+    "elf_rela_find_relative_slot",
+    "elf_relr_find_relative_slot",
+    "tls_get_addr_trampoline",
+    "elf_vaddr_range_has_pflags_impl",
 }
 
 

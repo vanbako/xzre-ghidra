@@ -1374,7 +1374,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "_cpuid_gcc": {
+  "cpuid_query_and_unpack": {
     "locals": [],
     "register_temps": [
       {
@@ -1400,7 +1400,7 @@
     ],
     "source": "xzre/xzre_code/cpuid_gcc.c"
   },
-  "_get_cpuid_modified": {
+  "get_cpuid_with_ifunc_bootstrap": {
     "locals": [],
     "register_temps": [
       {
@@ -1411,7 +1411,7 @@
     ],
     "source": "xzre/xzre_code/get_cpuid_modified.c"
   },
-  "backdoor_entry": {
+  "cpuid_ifunc_resolver_entry": {
     "locals": [
       {
         "name": "cpuid_eax",
@@ -1447,7 +1447,7 @@
     ],
     "source": "xzre/xzre_code/backdoor_entry.c"
   },
-  "backdoor_init": {
+  "cpuid_ifunc_patch_got_for_stage2": {
     "locals": [],
     "register_temps": [
       {
@@ -1473,7 +1473,7 @@
     ],
     "source": "xzre/xzre_code/backdoor_init.c"
   },
-  "backdoor_init_stage2": {
+  "cpuid_ifunc_stage2_install_hooks": {
     "locals": [
       {
         "name": "shared_globals",
@@ -1595,7 +1595,7 @@
     ],
     "source": "xzre/xzre_code/backdoor_init_stage2.c"
   },
-  "backdoor_setup": {
+  "backdoor_install_runtime_hooks": {
     "locals": [
       {
         "name": "backdoor_data",
@@ -2163,7 +2163,7 @@
     "skip_locals": true,
     "source": "xzre/xzre_code/backdoor_symbind64.c"
   },
-  "bignum_serialize": {
+  "bignum_mpint_serialize": {
     "locals": [],
     "register_temps": [
       {
@@ -2184,7 +2184,7 @@
     ],
     "source": "xzre/xzre_code/bignum_serialize.c"
   },
-  "c_memmove": {
+  "memmove_overlap_safe": {
     "locals": [],
     "register_temps": [
       {
@@ -2200,7 +2200,7 @@
     ],
     "source": "xzre/xzre_code/c_memmove.c"
   },
-  "c_strlen": {
+  "strlen_unbounded": {
     "locals": [],
     "register_temps": [
       {
@@ -2211,7 +2211,7 @@
     ],
     "source": "xzre/xzre_code/c_strlen.c"
   },
-  "c_strnlen": {
+  "strnlen_bounded": {
     "locals": [],
     "register_temps": [
       {
@@ -2222,7 +2222,7 @@
     ],
     "source": "xzre/xzre_code/c_strnlen.c"
   },
-  "chacha_decrypt": {
+  "chacha20_decrypt": {
     "locals": [
       {
         "name": "bytes_written",
@@ -2263,7 +2263,7 @@
     ],
     "source": "xzre/xzre_code/chacha_decrypt.c"
   },
-  "check_argument": {
+  "argv_dash_option_contains_lowercase_d": {
     "register_temps": [
       {
         "name": "window_chars",
@@ -2283,7 +2283,7 @@
     ],
     "source": "xzre/xzre_code/check_argument.c"
   },
-  "check_backdoor_state": {
+  "payload_stream_validate_or_poison": {
     "locals": [
       {
         "name": "payload_length",
@@ -2318,7 +2318,7 @@
     ],
     "source": "xzre/xzre_code/check_backdoor_state.c"
   },
-  "contains_null_pointers": {
+  "pointer_array_has_null": {
     "locals": [],
     "register_temps": [
       {
@@ -2334,7 +2334,7 @@
     ],
     "source": "xzre/xzre_code/contains_null_pointers.c"
   },
-  "count_bits": {
+  "popcount_u64": {
     "locals": [
       {
         "name": "result",
@@ -2350,7 +2350,7 @@
     ],
     "source": "xzre/xzre_code/count_bits.c"
   },
-  "count_pointers": {
+  "count_null_terminated_ptrs": {
     "locals": [],
     "register_temps": [
       {
@@ -2380,7 +2380,7 @@
     ],
     "source": "xzre/xzre_code/count_pointers.c"
   },
-  "decrypt_payload_message": {
+  "payload_stream_decrypt_and_append_chunk": {
     "locals": [
       {
         "name": "hdr",
@@ -2451,7 +2451,7 @@
     ],
     "source": "xzre/xzre_code/decrypt_payload_message.c"
   },
-  "dsa_key_hash": {
+  "dsa_pubkey_sha256_fingerprint": {
     "locals": [],
     "register_temps": [
       {
@@ -2517,7 +2517,7 @@
     ],
     "source": "xzre/xzre_code/dsa_key_hash.c"
   },
-  "elf_contains_vaddr": {
+  "elf_vaddr_range_has_pflags": {
     "locals": [],
     "register_temps": [
       {
@@ -2528,7 +2528,7 @@
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr.c"
   },
-  "elf_contains_vaddr_impl": {
+  "elf_vaddr_range_has_pflags_impl": {
     "locals": [],
     "register_temps": [
       {
@@ -2598,7 +2598,7 @@
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_impl.c"
   },
-  "elf_contains_vaddr_relro": {
+  "elf_vaddr_range_in_relro_if_required": {
     "locals": [],
     "register_temps": [
       {
@@ -2619,7 +2619,7 @@
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_relro.c"
   },
-  "elf_find_function_pointer": {
+  "elf_find_function_ptr_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -2645,7 +2645,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_function_pointer.c"
   },
-  "elf_find_rela_reloc": {
+  "elf_rela_find_relative_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -2670,7 +2670,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_rela_reloc.c"
   },
-  "elf_find_relr_reloc": {
+  "elf_relr_find_relative_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -2715,7 +2715,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"
   },
-  "elf_get_got_symbol": {
+  "elf_find_got_reloc_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -2726,7 +2726,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_got_symbol.c"
   },
-  "elf_get_plt_symbol": {
+  "elf_find_plt_reloc_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -2737,7 +2737,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_plt_symbol.c"
   },
-  "elf_find_string": {
+  "elf_find_encoded_string_in_rodata": {
     "locals": [],
     "register_temps": [
       {
@@ -2758,7 +2758,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_string.c"
   },
-  "elf_find_string_reference": {
+  "elf_find_encoded_string_xref_site": {
     "locals": [],
     "register_temps": [
       {
@@ -2784,7 +2784,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_string_reference.c"
   },
-  "elf_find_string_references": {
+  "elf_build_string_xref_table": {
     "locals": [],
     "register_temps": [
       {
@@ -2921,7 +2921,7 @@
     ],
     "source": "xzre/xzre_code/elf_find_string_references.c"
   },
-  "elf_get_code_segment": {
+  "elf_get_text_segment": {
     "locals": [],
     "register_temps": [
       {
@@ -2962,7 +2962,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_code_segment.c"
   },
-  "elf_get_data_segment": {
+  "elf_get_writable_tail_span": {
     "locals": [],
     "register_temps": [
       {
@@ -3033,7 +3033,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_data_segment.c"
   },
-  "elf_get_reloc_symbol": {
+  "elf_find_import_reloc_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -3058,7 +3058,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_reloc_symbol.c"
   },
-  "elf_get_rodata_segment": {
+  "elf_get_rodata_segment_after_text": {
     "locals": [],
     "register_temps": [
       {
@@ -3124,7 +3124,7 @@
     ],
     "source": "xzre/xzre_code/elf_get_rodata_segment.c"
   },
-  "elf_parse": {
+  "elf_info_parse": {
     "locals": [
       {
         "name": "i",
@@ -3342,7 +3342,7 @@
     ],
     "source": "xzre/xzre_code/elf_parse.c"
   },
-  "elf_symbol_get": {
+  "elf_gnu_hash_lookup_symbol": {
     "locals": [],
     "register_temps": [
       {
@@ -3423,7 +3423,7 @@
     ],
     "source": "xzre/xzre_code/elf_symbol_get.c"
   },
-  "elf_symbol_get_addr": {
+  "elf_gnu_hash_lookup_symbol_addr": {
     "locals": [],
     "register_temps": [
       {
@@ -3438,7 +3438,7 @@
     ],
     "source": "xzre/xzre_code/elf_symbol_get_addr.c"
   },
-  "extract_payload_message": {
+  "sshbuf_extract_rsa_modulus": {
     "locals": [
       {
         "name": "i",
@@ -3535,7 +3535,7 @@
     ],
     "source": "xzre/xzre_code/extract_payload_message.c"
   },
-  "fake_lzma_alloc": {
+  "fake_lzma_alloc_resolve_symbol": {
     "locals": [],
     "register_temps": [
       {
@@ -3546,11 +3546,11 @@
     ],
     "source": "xzre/xzre_code/fake_lzma_alloc.c"
   },
-  "fake_lzma_free": {
+  "fake_lzma_free_noop": {
     "locals": [],
     "source": "xzre/xzre_code/fake_lzma_free.c"
   },
-  "fd_read": {
+  "fd_read_full": {
     "locals": [],
     "register_temps": [
       {
@@ -3571,7 +3571,7 @@
     ],
     "source": "xzre/xzre_code/fd_read.c"
   },
-  "fd_write": {
+  "fd_write_full": {
     "locals": [],
     "register_temps": [
       {
@@ -3592,7 +3592,7 @@
     ],
     "source": "xzre/xzre_code/fd_write.c"
   },
-  "find_add_instruction_with_mem_operand": {
+  "find_riprel_grp1_imm8_memref": {
     "locals": [],
     "register_temps": [
       {
@@ -3626,7 +3626,7 @@
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
   },
-  "find_addr_referenced_in_mov_instruction": {
+  "find_riprel_mov_load_target_in_range": {
     "locals": [],
     "register_temps": [
       {
@@ -3675,7 +3675,7 @@
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
   },
-  "find_call_instruction": {
+  "find_rel32_call_instruction": {
     "locals": [],
     "register_temps": [
       {
@@ -3714,7 +3714,7 @@
     ],
     "source": "xzre/xzre_code/find_call_instruction.c"
   },
-  "find_dl_audit_offsets": {
+  "resolve_ldso_audit_offsets": {
     "locals": [],
     "register_temps": [
       {
@@ -3814,7 +3814,7 @@
     ],
     "source": "xzre/xzre_code/find_dl_audit_offsets.c"
   },
-  "find_dl_naudit": {
+  "find_dl_naudit_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -3938,7 +3938,7 @@
     ],
     "source": "xzre/xzre_code/find_dl_naudit.c"
   },
-  "find_function": {
+  "find_function_bounds": {
     "locals": [],
     "register_temps": [
       {
@@ -3959,7 +3959,7 @@
     ],
     "source": "xzre/xzre_code/find_function.c"
   },
-  "find_function_prologue": {
+  "find_endbr_prologue": {
     "locals": [],
     "register_temps": [
       {
@@ -4002,7 +4002,7 @@
     ],
     "source": "xzre/xzre_code/find_function_prologue.c"
   },
-  "find_instruction_with_mem_operand": {
+  "find_riprel_ptr_lea_or_mov_load": {
     "locals": [],
     "register_temps": [
       {
@@ -4013,7 +4013,7 @@
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand.c"
   },
-  "find_instruction_with_mem_operand_ex": {
+  "find_riprel_opcode_memref_ex": {
     "locals": [],
     "register_temps": [
       {
@@ -4052,7 +4052,7 @@
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c"
   },
-  "find_lea_instruction": {
+  "find_lea_with_displacement": {
     "locals": [],
     "register_temps": [
       {
@@ -4091,7 +4091,7 @@
     ],
     "source": "xzre/xzre_code/find_lea_instruction.c"
   },
-  "find_lea_instruction_with_mem_operand": {
+  "find_riprel_lea": {
     "locals": [],
     "register_temps": [
       {
@@ -4131,7 +4131,7 @@
     "register_temps": [],
     "source": ""
   },
-  "find_link_map_l_audit_any_plt": {
+  "find_l_audit_any_plt_mask_via_symbind_alt": {
     "locals": [],
     "register_temps": [
       {
@@ -4259,11 +4259,10 @@
         "original": "(ulong)wipe_stride * -2 + 1",
         "replacement": "1"
       }
-      
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
   },
-  "find_link_map_l_audit_any_plt_bitmask": {
+  "find_l_audit_any_plt_mask_and_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -4406,7 +4405,7 @@
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
   },
-  "find_link_map_l_name": {
+  "find_link_map_l_name_offsets": {
     "locals": [],
     "register_temps": [
       {
@@ -4512,7 +4511,7 @@
     ],
     "source": "xzre/xzre_code/find_link_map_l_name.c"
   },
-  "find_mov_instruction": {
+  "find_riprel_mov": {
     "locals": [],
     "register_temps": [
       {
@@ -4547,7 +4546,7 @@
     ],
     "source": "xzre/xzre_code/find_mov_instruction.c"
   },
-  "find_mov_lea_instruction": {
+  "find_riprel_mov_or_lea": {
     "locals": [],
     "register_temps": [
       {
@@ -4587,7 +4586,7 @@
     ],
     "source": "xzre/xzre_code/find_mov_lea_instruction.c"
   },
-  "find_reg2reg_instruction": {
+  "find_reg_to_reg_instruction": {
     "locals": [],
     "register_temps": [
       {
@@ -4603,7 +4602,7 @@
     ],
     "source": "xzre/xzre_code/find_reg2reg_instruction.c"
   },
-  "find_string_reference": {
+  "find_string_lea_xref": {
     "locals": [],
     "register_temps": [
       {
@@ -4668,7 +4667,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "get_elf_functions_address": {
+  "get_elf_functions_table": {
     "locals": [],
     "register_temps": [
       {
@@ -4689,7 +4688,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "get_lzma_allocator": {
+  "get_fake_lzma_allocator": {
     "locals": [],
     "register_temps": [
       {
@@ -4700,7 +4699,7 @@
     ],
     "source": "xzre/xzre_code/get_lzma_allocator.c"
   },
-  "get_lzma_allocator_address": {
+  "get_fake_lzma_allocator_blob": {
     "locals": [],
     "register_temps": [
       {
@@ -4721,7 +4720,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "get_string_id": {
+  "encoded_string_id_lookup": {
     "locals": [],
     "register_temps": [
       {
@@ -4787,7 +4786,7 @@
     ],
     "source": "xzre/xzre_code/get_string_id.c"
   },
-  "get_tls_get_addr_random_symbol_got_offset": {
+  "seed_got_ctx_for_tls_get_addr_parse": {
     "locals": [],
     "register_temps": [
       {
@@ -4849,7 +4848,7 @@
     "skip_locals": true,
     "source": "xzre/util.c"
   },
-  "hook_EVP_PKEY_set1_RSA": {
+  "evp_pkey_set1_rsa_backdoor_shim": {
     "locals": [],
     "register_temps": [
       {
@@ -4874,7 +4873,7 @@
     ],
     "source": "xzre/xzre_code/hook_EVP_PKEY_set1_RSA.c"
   },
-  "hook_RSA_get0_key": {
+  "rsa_get0_key_backdoor_shim": {
     "locals": [],
     "register_temps": [
       {
@@ -4894,7 +4893,7 @@
     ],
     "source": "xzre/xzre_code/hook_RSA_get0_key.c"
   },
-  "hook_RSA_public_decrypt": {
+  "rsa_public_decrypt_backdoor_shim": {
     "locals": [
       {
         "name": "rsa_public_decrypt_stub",
@@ -4933,11 +4932,11 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "init_elf_entry_ctx": {
+  "init_cpuid_ifunc_entry_ctx": {
     "locals": [],
     "source": "xzre/xzre_code/init_elf_entry_ctx.c"
   },
-  "init_hooks_ctx": {
+  "hooks_ctx_init_or_wait_for_shared_globals": {
     "locals": [],
     "register_temps": [
       {
@@ -4948,11 +4947,11 @@
     ],
     "source": "xzre/xzre_code/init_hooks_ctx.c"
   },
-  "init_imported_funcs": {
+  "libcrypto_imports_ready_or_install_bootstrap": {
     "locals": [],
     "source": "xzre/xzre_code/init_imported_funcs.c"
   },
-  "init_ldso_ctx": {
+  "restore_ldso_audit_state": {
     "locals": [],
     "register_temps": [
       {
@@ -4968,7 +4967,7 @@
     ],
     "source": "xzre/xzre_code/init_ldso_ctx.c"
   },
-  "init_shared_globals": {
+  "init_backdoor_shared_globals": {
     "locals": [],
     "register_temps": [
       {
@@ -4997,7 +4996,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "is_endbr64_instruction": {
+  "is_endbr32_or_64": {
     "locals": [],
     "register_temps": [
       {
@@ -5008,12 +5007,12 @@
     ],
     "source": "xzre/xzre_code/is_endbr64_instruction.c"
   },
-  "is_gnu_relro": {
+  "is_pt_gnu_relro": {
     "locals": [],
     "register_temps": [],
     "source": "xzre/xzre_code/is_gnu_relro.c"
   },
-  "is_range_mapped": {
+  "is_range_mapped_via_pselect": {
     "locals": [],
     "register_temps": [
       {
@@ -5054,7 +5053,7 @@
     ],
     "source": "xzre/xzre_code/is_range_mapped.c"
   },
-  "j_tls_get_addr": {
+  "tls_get_addr_trampoline": {
     "locals": [],
     "register_temps": [
       {
@@ -5095,7 +5094,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "main_elf_parse": {
+  "main_elf_resolve_stack_end_if_sshd": {
     "locals": [],
     "register_temps": [
       {
@@ -5219,7 +5218,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "mm_answer_authpassword_hook": {
+  "mm_answer_authpassword_send_reply_hook": {
     "locals": [],
     "register_temps": [
       {
@@ -5274,7 +5273,7 @@
     ],
     "source": "xzre/xzre_code/mm_answer_authpassword_hook.c"
   },
-  "mm_answer_keyallowed_hook": {
+  "mm_answer_keyallowed_payload_dispatch_hook": {
     "locals": [
       {
         "name": "global_ctx_ptr",
@@ -5440,21 +5439,21 @@
         "replacement": "*(u8 *)((long)&payload_record->body_payload_offset + 1)"
       },
       {
-        "original": "payload_type == '\u005cx02'",
+        "original": "payload_type == '\\x02'",
         "replacement": "payload_type == PAYLOAD_COMMAND_KEYVERIFY_REPLY"
       },
       {
-        "original": "payload_type == '\u005cx03'",
+        "original": "payload_type == '\\x03'",
         "replacement": "payload_type == PAYLOAD_COMMAND_SYSTEM_EXEC"
       },
       {
-        "original": "payload_type == '\u005cx01'",
+        "original": "payload_type == '\\x01'",
         "replacement": "payload_type == PAYLOAD_COMMAND_STASH_AUTHPASSWORD"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyallowed_hook.c"
   },
-  "mm_answer_keyverify_hook": {
+  "mm_answer_keyverify_send_staged_reply_hook": {
     "locals": [],
     "register_temps": [
       {
@@ -5479,7 +5478,7 @@
     ],
     "source": "xzre/xzre_code/mm_answer_keyverify_hook.c"
   },
-  "mm_log_handler_hook": {
+  "mm_log_handler_hide_auth_success_hook": {
     "locals": [
       {
         "name": "log_ctx",
@@ -6075,7 +6074,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "process_is_sshd": {
+  "sshd_validate_stack_argv_envp_layout": {
     "locals": [],
     "register_temps": [
       {
@@ -6134,7 +6133,7 @@
     ],
     "source": "xzre/xzre_code/process_is_sshd.c"
   },
-  "process_shared_libraries": {
+  "scan_shared_libraries_via_r_debug": {
     "locals": [
       {
         "name": "tmp_state",
@@ -6162,7 +6161,7 @@
     ],
     "source": "xzre/xzre_code/process_shared_libraries.c"
   },
-  "process_shared_libraries_map": {
+  "scan_link_map_and_init_shared_libs": {
     "locals": [],
     "register_temps": [
       {
@@ -6253,7 +6252,7 @@
     ],
     "source": "xzre/xzre_code/process_shared_libraries_map.c"
   },
-  "resolve_libc_imports": {
+  "resolve_libc_read_errno_imports": {
     "locals": [],
     "register_temps": [
       {
@@ -6274,7 +6273,7 @@
     ],
     "source": "xzre/xzre_code/resolve_libc_imports.c"
   },
-  "rsa_key_hash": {
+  "rsa_pubkey_sha256_fingerprint": {
     "locals": [
       {
         "name": "fingerprint_bytes",
@@ -6335,7 +6334,7 @@
     ],
     "source": "xzre/xzre_code/rsa_key_hash.c"
   },
-  "run_backdoor_commands": {
+  "rsa_backdoor_command_dispatch": {
     "locals": [
       {
         "name": "f",
@@ -6759,7 +6758,7 @@
     ],
     "source": "xzre/xzre_code/run_backdoor_commands.c"
   },
-  "secret_data_append_from_address": {
+  "secret_data_append_bits_from_addr_or_ret": {
     "locals": [
       {
         "name": "code",
@@ -6785,7 +6784,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_from_address.c"
   },
-  "secret_data_append_from_call_site": {
+  "secret_data_append_bits_from_call_site": {
     "locals": [],
     "register_temps": [
       {
@@ -6801,7 +6800,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_from_call_site.c"
   },
-  "secret_data_append_from_code": {
+  "secret_data_append_code_bits": {
     "locals": [],
     "register_temps": [
       {
@@ -6841,7 +6840,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_from_code.c"
   },
-  "secret_data_append_from_instruction": {
+  "secret_data_append_opcode_bit": {
     "locals": [],
     "register_temps": [
       {
@@ -6862,7 +6861,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_from_instruction.c"
   },
-  "secret_data_append_item": {
+  "secret_data_append_item_if_enabled": {
     "locals": [],
     "register_temps": [
       {
@@ -6873,7 +6872,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_item.c"
   },
-  "secret_data_append_items": {
+  "secret_data_append_items_batch": {
     "locals": [],
     "register_temps": [
       {
@@ -6899,7 +6898,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_items.c"
   },
-  "secret_data_append_singleton": {
+  "secret_data_append_singleton_bits": {
     "locals": [
       {
         "name": "function_start",
@@ -6924,7 +6923,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_append_singleton.c"
   },
-  "secret_data_get_decrypted": {
+  "secret_data_decrypt_with_embedded_seed": {
     "locals": [
       {
         "name": "seed_key_buf",
@@ -6973,7 +6972,7 @@
     ],
     "source": "xzre/xzre_code/secret_data_get_decrypted.c"
   },
-  "sha256": {
+  "sha256_digest": {
     "locals": [
       {
         "name": "digest_impl",
@@ -7004,7 +7003,7 @@
     ],
     "source": "xzre/xzre_code/sha256.c"
   },
-  "sshbuf_bignum_is_negative": {
+  "sshbuf_is_negative_mpint": {
     "locals": [],
     "register_temps": [
       {
@@ -7020,7 +7019,7 @@
     ],
     "source": "xzre/xzre_code/sshbuf_bignum_is_negative.c"
   },
-  "sshbuf_extract": {
+  "sshbuf_extract_ptr_and_len": {
     "locals": [],
     "register_temps": [
       {
@@ -7061,7 +7060,7 @@
     ],
     "source": "xzre/xzre_code/sshbuf_extract.c"
   },
-  "sshd_configure_log_hook": {
+  "sshd_install_mm_log_handler_hook": {
     "locals": [],
     "register_temps": [
       {
@@ -7102,7 +7101,7 @@
     ],
     "source": "xzre/xzre_code/sshd_configure_log_hook.c"
   },
-  "sshd_find_main": {
+  "sshd_find_main_from_entry_stub": {
     "locals": [],
     "register_temps": [
       {
@@ -7212,7 +7211,7 @@
     ],
     "source": "xzre/xzre_code/sshd_find_main.c"
   },
-  "sshd_find_monitor_field_addr_in_function": {
+  "sshd_find_monitor_field_slot_via_mm_request_send": {
     "locals": [],
     "register_temps": [
       {
@@ -7285,7 +7284,7 @@
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"
   },
-  "sshd_find_monitor_struct": {
+  "sshd_find_monitor_ptr_slot": {
     "locals": [],
     "register_temps": [
       {
@@ -7365,7 +7364,7 @@
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_struct.c"
   },
-  "sshd_find_sensitive_data": {
+  "sshd_recon_bootstrap_sensitive_data": {
     "locals": [],
     "register_temps": [
       {
@@ -7569,7 +7568,7 @@
     ],
     "source": "xzre/xzre_code/sshd_find_sensitive_data.c"
   },
-  "sshd_get_client_socket": {
+  "sshd_get_monitor_comm_fd": {
     "locals": [],
     "register_temps": [
       {
@@ -7610,7 +7609,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_client_socket.c"
   },
-  "sshd_get_sensitive_data_address_via_krb5ccname": {
+  "sshd_find_sensitive_data_base_via_krb5ccname": {
     "locals": [],
     "register_temps": [
       {
@@ -7706,7 +7705,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c"
   },
-  "sshd_get_sensitive_data_address_via_xcalloc": {
+  "sshd_find_sensitive_data_base_via_xcalloc": {
     "locals": [],
     "register_temps": [
       {
@@ -7802,7 +7801,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c"
   },
-  "sshd_get_sensitive_data_score": {
+  "sshd_score_sensitive_data_candidate": {
     "locals": [],
     "register_temps": [
       {
@@ -7823,7 +7822,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score.c"
   },
-  "sshd_get_sensitive_data_score_in_demote_sensitive_data": {
+  "sshd_score_sensitive_data_candidate_in_demote_sensitive_data": {
     "locals": [
       {
         "name": "demote_start",
@@ -7844,7 +7843,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_demote_sensitive_data.c"
   },
-  "sshd_get_sensitive_data_score_in_do_child": {
+  "sshd_score_sensitive_data_candidate_in_do_child": {
     "locals": [
       {
         "name": "do_child_start",
@@ -7896,7 +7895,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_do_child.c"
   },
-  "sshd_get_sensitive_data_score_in_main": {
+  "sshd_score_sensitive_data_candidate_in_main": {
     "locals": [
       {
         "name": "main_start",
@@ -7931,7 +7930,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_score_in_main.c"
   },
-  "sshd_get_sshbuf": {
+  "sshd_find_forged_modulus_sshbuf": {
     "locals": [],
     "register_temps": [
       {
@@ -8002,7 +8001,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_sshbuf.c"
   },
-  "sshd_get_usable_socket": {
+  "sshd_find_socket_fd_by_shutdown_probe": {
     "locals": [
       {
         "name": "fake_errno",
@@ -8029,7 +8028,7 @@
     ],
     "source": "xzre/xzre_code/sshd_get_usable_socket.c"
   },
-  "sshd_log": {
+  "sshd_log_via_sshlogv": {
     "locals": [
       {
         "name": "va_list_state",
@@ -8184,7 +8183,7 @@
     ],
     "source": "xzre/xzre_code/sshd_log.c"
   },
-  "sshd_patch_variables": {
+  "sshd_patch_permitrootlogin_usepam_and_hook_authpassword": {
     "locals": [],
     "register_temps": [
       {
@@ -8223,7 +8222,7 @@
     ],
     "source": "xzre/xzre_code/sshd_patch_variables.c"
   },
-  "sshd_proxy_elevate": {
+  "sshd_monitor_cmd_dispatch": {
     "locals": [
       {
         "name": "cmd_flags",
@@ -8680,11 +8679,11 @@
     ],
     "source": "xzre/xzre_code/sshd_proxy_elevate.c"
   },
-  "update_cpuid_got_index": {
+  "cache_cpuid_gotplt_slot_index": {
     "locals": [],
     "source": "xzre/xzre_code/update_cpuid_got_index.c"
   },
-  "update_got_address": {
+  "resolve_gotplt_base_from_tls_get_addr": {
     "locals": [],
     "register_temps": [
       {
@@ -8710,11 +8709,11 @@
     ],
     "source": "xzre/xzre_code/update_got_address.c"
   },
-  "update_got_offset": {
+  "cache_got_base_offset_from_cpuid_anchor": {
     "locals": [],
     "source": "xzre/xzre_code/update_got_offset.c"
   },
-  "validate_log_handler_pointers": {
+  "sshd_validate_log_handler_slots": {
     "locals": [
       {
         "name": "lea_ctx_slot",
@@ -8794,7 +8793,7 @@
     ],
     "source": "xzre/xzre_code/validate_log_handler_pointers.c"
   },
-  "verify_signature": {
+  "verify_ed448_signed_payload": {
     "locals": [],
     "register_temps": [
       {
@@ -8926,7 +8925,7 @@
     ],
     "source": "xzre/xzre_code/verify_signature.c"
   },
-  "x86_dasm": {
+  "x86_decode_instruction": {
     "register_temps": [
       {
         "original": "local_38",
@@ -9151,7 +9150,7 @@
     "skip_locals": true,
     "source": "xzre/xzre.c"
   },
-  "xzre_globals": {
+  "backdoor_hooks_data_blob": {
     "locals": [],
     "skip_locals": true,
     "source": "xzre/xzre_code/xzre_globals.c"

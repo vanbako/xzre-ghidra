@@ -5,8 +5,8 @@ Track how many focused RE/documentation passes each struct has received. Increme
 ## Recommended Struct Review Order
 
 1. **Loader / Relocation Core** – Nail down the structs that drive GOT patching and loader context first so later analyses rest on solid ground: `elf_entry_ctx_t`, `got_ctx_t`, `backdoor_cpuid_reloc_consts_t`, `backdoor_tls_get_addr_reloc_consts_t`, `backdoor_data_t`, `backdoor_data_handle_t`, `backdoor_shared_libraries_data_t`, `elf_handles_t`, `elf_info_t`, `global_context_t`.
-2. **Hook Orchestration & Metadata** – Next document the structs that thread state between loader passes and liblzma-resident blobs: `backdoor_shared_globals_t`, `backdoor_hooks_ctx_t`, `backdoor_hooks_data_t`, `imported_funcs_t`, `string_references_t`, `string_item_t`, `backdoor_setup_params_t`.
-3. **SSHD / Monitor State** – Once the loader is clear, focus on sshd-facing structs so sensitive-data scans and hook trampolines can be reasoned about: `sshd_ctx_t`, `sshd_log_ctx_t`, `monitor`, `monitor_data_t`, `sshd_payload_ctx_t`, `run_backdoor_commands_data_t`, `secret_data_item_t`, `secret_data_shift_cursor_t`.
+2. **Hook Orchestration & Metadata** – Next document the structs that thread state between loader passes and liblzma-resident blobs: `backdoor_shared_globals_t`, `backdoor_hooks_ctx_t`, `backdoor_hooks_data_t`, `imported_funcs_t`, `string_references_t`, `string_item_t`, `backdoor_install_runtime_hooks_params_t`.
+3. **SSHD / Monitor State** – Once the loader is clear, focus on sshd-facing structs so sensitive-data scans and hook trampolines can be reasoned about: `sshd_ctx_t`, `sshd_log_via_sshlogv_ctx_t`, `monitor`, `monitor_data_t`, `sshd_payload_ctx_t`, `rsa_backdoor_command_dispatch_data_t`, `secret_data_item_t`, `secret_data_shift_cursor_t`.
 4. **Payload / Crypto Plumbing** – With runtime structures mapped, cover the payload buffers and key material used when executing attacker commands: `backdoor_payload_hdr_t`, `backdoor_payload_body_t`, `backdoor_payload_t`, `key_payload_t`, `key_ctx_t`, `cmd_arguments_t`, `key_buf`.
 5. **Third-Party Types** – Finally, align OpenSSH/OpenSSL/XZ imports with the reversed code so cross-references stay accurate: `sshbuf`, `sshkey`, `RSA`, `EVP_*`, `EC_*`, `kex`, `auditstate`, `audit_ifaces`, etc. These can be treated opportunistically once the bespoke structs are documented.
 
@@ -21,7 +21,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_payload_hdr_t` | 2 | Backdoor review order #5 – flattened header layout so decomp prefers `cmd_type_*` fields (2025-12-15). |
 | `backdoor_payload_body_t` | 1 | Backdoor review order #6 – renamed the signature/args/data slots to `ed448_signature`/`cmd_flags`/`monitor_payload`, documented the Ed448 coverage and 0x87 payload offset (2025-11-19). |
 | `backdoor_payload_t` | 1 | Backdoor review order #7 – renamed the raw bytes view, documented the parsed header/body union, and noted why the hooks need both representations (2025-11-19). |
-| `backdoor_setup_params_t` | 1 | Backdoor review order #8 – renamed the scratch/pointer fields, documented the dummy lzma state plus entry ctx usage (2025-11-19). |
+| `backdoor_install_runtime_hooks_params_t` | 1 | Backdoor review order #8 – renamed the scratch/pointer fields, documented the dummy lzma state plus entry ctx usage (2025-11-19). |
 | `backdoor_data_handle_t` | 1 | Backdoor review order #9 – renamed the pointers to `runtime_data`/`cached_elf_handles` and documented why helpers need both views (2025-11-19). |
 | `backdoor_data_t` | 1 | Backdoor review order #10 – renamed the link_map snapshots + allocator fields and documented the sshd string table + ELF handles (2025-11-19). |
 | `backdoor_tls_get_addr_reloc_consts_t` | 1 | Backdoor review order #11 – renamed the displacement slots (`plt_stub_offset_from_got_anchor` / `random_slot_offset_from_got_anchor`) and documented the anchors each delta targets (2025-11-19). |
@@ -57,11 +57,11 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `imported_funcs_t` | 1 | Orig/PLT slots + helper stubs fully annotated (2025-11-18) |
 | `instruction_register_bitmap_t` | 1 | Added the 4-byte `{allowed_regs, reg_index}` union used by the audit instruction matcher so exports stop relying on `_0_3_` slices (2025-12-16). |
 | `instruction_search_offset_t` | 1 | Added an 8-byte `{offset, reserved}` union for the match displacement so exports stop relying on `_0_4_` slices while preserving the ctx layout (2025-12-16). |
-| `instruction_search_ctx_t` | 1 | Audit scanner ctx pass – retagged `offset_to_match` + register bitmap pointers to the new helper types so `find_link_map_l_audit_any_plt*` exports named fields (2025-12-16). |
+| `instruction_search_ctx_t` | 1 | Audit scanner ctx pass – retagged `offset_to_match` + register bitmap pointers to the new helper types so `find_l_audit_any_plt_mask_via_symbind_alt*` exports named fields (2025-12-16). |
 | `kex` | 0 |  |
 | `key_buf` | 1 | Broke the opaque `words[]` blob into `seed_key`/`seed_iv`/`encrypted_seed`/`payload_iv`, documenting how the first ChaCha pass unwraps the runtime key and the second reuses it with a fixed IV (2025-11-21). |
 | `key_ctx_t` | 1 | Payload/Crypto pass – renamed the modulus/exponent/args/payload scratch to describe the ChaCha + Ed448 reuse, annotated the hostkey digest slot and nonce/IV snapshots, and documented the secret_data linkage (2025-11-21). |
-| `key_payload_t` | 2 | Backdoor review order #7.2 – retagged the ChaCha frame as `{header, encrypted_body_length, encrypted_body[]}` and refreshed locals/inline anchors so decrypt_payload_message exports clean field accesses (2025-12-15). |
+| `key_payload_t` | 2 | Backdoor review order #7.2 – retagged the ChaCha frame as `{header, encrypted_body_length, encrypted_body[]}` and refreshed locals/inline anchors so payload_stream_decrypt_and_append_chunk exports clean field accesses (2025-12-15). |
 | `key_payload_cmd_frame_t` | 1 | Added a documented scratch overlay (cmd flag bytes + modulus ciphertext) to keep RSA-path payload parsing readable (2025-12-15). |
 | `La_i86_regs` | 0 |  |
 | `La_i86_retval` | 0 |  |
@@ -74,12 +74,12 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `lookup_t` | 0 |  |
 | `lzma_allocator` | 0 |  |
 | `lzma_check_state` | 0 |  |
-| `lzma_sha256_state` | 0 |  |
+| `lzma_sha256_digest_state` | 0 |  |
 | `main_elf_t` | 0 |  |
 | `monitor` | 1 | Privsep struct review #1 – renamed the RPC/log fd fields to describe child↔monitor direction, clarified the pkex table pointer, and documented the monitor PID slot (2025-11-21). |
 | `monitor_data_t` | 1 | Privsep struct review #2 – documented cmd opcode usage, annotated the RSA/payload pointers, and renamed the padding slots to explain why the runtime_data union keeps them aligned (2025-11-21). |
 | `RSA` | 0 |  |
-| `run_backdoor_commands_data_t` | 1 | RSA dispatcher struct pass – renamed the payload sizing/do_orig/hostkey fields, documented the staging union (socket RX vs. Ed448 key data), and refreshed the metadata/export (2025-11-23). |
+| `rsa_backdoor_command_dispatch_data_t` | 1 | RSA dispatcher struct pass – renamed the payload sizing/do_orig/hostkey fields, documented the staging union (socket RX vs. Ed448 key data), and refreshed the metadata/export (2025-11-23). |
 | `secret_data_item_t` | 1 | Renamed entries to anchor_pc/bit_cursor/operation_slot/bits_to_shift/ordinal and annotated how each controls the secret-data attestation flow (2025-11-21). |
 | `secret_data_shift_cursor_t` | 1 | Renamed the union view to bit_position/signed_bit_position/intra_byte_bit/byte_offset and documented how it indexes global_ctx->secret_data (2025-11-21). |
 | `sensitive_data` | 0 |  |
@@ -87,9 +87,9 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `sshbuf` | 0 |  |
 | `sshd_hostkey_index_t` | 0 | Newly documented wrapper around the host_pubkeys[] ordinal so payload verification code stops referencing `_union_110`. |
 | `sshd_ctx_t` | 1 | Renamed the monitor hook entries/slots, keyed the staged keyverify/authpassword payload buffers, and documented the authfmt rodata probe + PAM/root globals (2025-11-20). |
-| `sshd_log_ctx_t` | 1 | Renamed the logging gate/syslog flags, clarified the handler/ctx slot pointers, and documented the sshlogv/log-fragment anchors used by the hook (2025-11-20). |
+| `sshd_log_via_sshlogv_ctx_t` | 1 | Renamed the logging gate/syslog flags, clarified the handler/ctx slot pointers, and documented the sshlogv/log-fragment anchors used by the hook (2025-11-20). |
 | `sshd_offsets_fields_t` | 1 | Packed offsets review – clarified the signed-byte ordering/meaning of the monitor+kex+sshbuf indices and refreshed the exports (2025-12-15). |
-| `sshd_offsets_t` | 1 | Packed offsets review – replaced the anonymous union with named {fields, bytes, raw_value} views so `sshd_get_sshbuf`/`sshbuf_extract` use real member names instead of `field0_0x0` arithmetic (2025-12-15). |
+| `sshd_offsets_t` | 1 | Packed offsets review – replaced the anonymous union with named {fields, bytes, raw_value} views so `sshd_find_forged_modulus_sshbuf`/`sshbuf_extract_ptr_and_len` use real member names instead of `field0_0x0` arithmetic (2025-12-15). |
 | `sshd_payload_ctx_t` | 1 | Payload layout documented (2025-11-18) |
 | `sshkey` | 0 |  |
 | `string_item_t` | 1 | Renamed the padding field and clarified how each entry captures the function bounds/xref for a decoded string (2025-11-20). |

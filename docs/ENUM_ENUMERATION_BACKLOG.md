@@ -11,13 +11,13 @@ Working queue for enums we want represented in `metadata/xzre_types.json`. Updat
 ## Candidates
 
 ### ~~`payload_stream_state_t`~~
-- **Done 2025-11-27:** Added `payload_stream_state_t` to `metadata/xzre_types.json`, updated `global_context_t.payload_state` plus the affected locals to use it, and reran the refresh pipeline so `check_backdoor_state`/`mm_answer_keyallowed_hook` now print the symbolic state names.
+- **Done 2025-11-27:** Added `payload_stream_state_t` to `metadata/xzre_types.json`, updated `global_context_t.payload_state` plus the affected locals to use it, and reran the refresh pipeline so `payload_stream_validate_or_poison`/`mm_answer_keyallowed_payload_dispatch_hook` now print the symbolic state names.
 
 ### ~~`payload_command_type_t`~~
-- **Done 2025-11-27:** Added a `payload_command_type` enum (with a `payload_command_type_t` typedef) so `sshd_payload_ctx_t::command_type` and the `payload_type` temp in `mm_answer_keyallowed_hook` now use symbolic states. Updated `metadata/xzre_locals.json` so the state-machine comparisons render as `PAYLOAD_COMMAND_*` names after the refresh.
+- **Done 2025-11-27:** Added a `payload_command_type` enum (with a `payload_command_type_t` typedef) so `sshd_payload_ctx_t::command_type` and the `payload_type` temp in `mm_answer_keyallowed_payload_dispatch_hook` now use symbolic states. Updated `metadata/xzre_locals.json` so the state-machine comparisons render as `PAYLOAD_COMMAND_*` names after the refresh.
 
 ### ~~`monitor_reqtype_t`~~
-- **Done 2025-11-27:** Mirrored OpenSSH’s monitor request enum into the metadata, retagged the `sshd_ctx_t` fields, `sshd_patch_variables` signature, and the `op_result` local in `run_backdoor_commands` to `monitor_reqtype_t`, then ran the refresh so the exported sources show `MONITOR_REQ_*` names instead of raw ints.
+- **Done 2025-11-27:** Mirrored OpenSSH’s monitor request enum into the metadata, retagged the `sshd_ctx_t` fields, `sshd_patch_permitrootlogin_usepam_and_hook_authpassword` signature, and the `op_result` local in `rsa_backdoor_command_dispatch` to `monitor_reqtype_t`, then ran the refresh so the exported sources show `MONITOR_REQ_*` names instead of raw ints.
 
 ### ~~`audit_pattern_state_t`~~
-- **Done 2025-11-27:** Added the three-state `audit_pattern_state_t` enum to `metadata/xzre_types.json`, retagged the `pattern_state` register temp in `metadata/xzre_locals.json`, and ran the refresh so `find_link_map_l_audit_any_plt_bitmask` now shows `audit_pattern_state_t pattern_state` instead of an untyped integer while exporting the new enum in `xzre_types.h`.
+- **Done 2025-11-27:** Added the three-state `audit_pattern_state_t` enum to `metadata/xzre_types.json`, retagged the `pattern_state` register temp in `metadata/xzre_locals.json`, and ran the refresh so `find_l_audit_any_plt_mask_and_slot` now shows `audit_pattern_state_t pattern_state` instead of an untyped integer while exporting the new enum in `xzre_types.h`.
