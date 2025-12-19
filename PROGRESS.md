@@ -2,6 +2,9 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-19
+- Session `RENAMES_APPLY_SCRIPT`: added `scripts/apply_backdoor_function_renames.py` to apply `metadata/backdoor_function_renames.json` across metadata (linker map, AutoDoc, locals, types, type docs) and update `.md`/`.py` sources while skipping pipeline outputs (`ghidra_scripts/generated`, `xzregh`, `ghidra_projects`, `xzre`). Next: run the script with `--dry-run`, apply the renames, and refresh via `./scripts/refresh_xzre_project.sh`.
+
 ## 2025-12-18
 - Session `RENAMES_MISC_RECHECK`: revisited the remaining identity renames and updated `metadata/backdoor_function_renames.json`: `_cpuid_gcc`→`cpuid_query_and_unpack`, `is_endbr64_instruction`→`is_endbr32_or_64`, `find_function_prologue`→`find_endbr_prologue`, `find_call_instruction`→`find_rel32_call_instruction`, `elf_get_rodata_segment`→`elf_get_rodata_segment_after_text`, and `init_elf_entry_ctx`→`init_cpuid_ifunc_entry_ctx`. Next: continue with any remaining batches or run a final identity/duplicate scan.
 - Session `RENAMES_CC5_RECHECK`: revisited the crypto_cmd CC5 batch helpers and tightened rename suggestions in `metadata/backdoor_function_renames.json`: `secret_data_append_from_address`→`secret_data_append_bits_from_addr_or_ret`, `secret_data_append_from_call_site`→`secret_data_append_bits_from_call_site`, and `secret_data_append_items`→`secret_data_append_items_batch`. Next: continue with any remaining batches or normalize naming length if desired.
