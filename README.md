@@ -8,6 +8,12 @@ Reference workspace for the headless Ghidra project that captures the `xzre` mal
 - Propagate every metadata change through the headless pipeline so `ghidra_projects/`, the portable archive, and the `xzregh/*.c` text dumps stay aligned.
 - Capture analyst decisions, helper scripts, and future work in `PROGRESS.md` to keep the hand-off friction low.
 
+## Responsible Use
+This repository is for reverse engineering and defensive understanding. Do not use it to build or operate malicious tooling.
+- Keep access restricted to vetted analysts and defenders.
+- Avoid publishing operational workflows, payloads, or code that would make misuse easier.
+- Focus any derived writeups on detection, mitigation, and incident response.
+
 ## Repository Tour
 | Path | Role |
 | --- | --- |

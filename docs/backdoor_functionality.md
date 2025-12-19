@@ -23,7 +23,7 @@ The loader is conservative: it collects GOT pointers, PLT indices, and string ID
 This path doubles as both gatekeeper and transport. The shims piggyback on legitimate RSA operations to smuggle encrypted commands, but they always verify that imports, payload buffers, and signature key material are live before acting. The ChaCha/Ed448 checks mean only an attacker with the private key can drive the dispatcher, and any parse error or missing prerequisite intentionally falls through to the host OpenSSL routine to keep sshd stable.
 
 ## Activation, Keys, and Attacker Actions
-- Private key: every command blob is signed with an attacker-held Ed448 private key; the implant only carries the raw Ed448 public key (stored inside the 57-byte `secret_data` buffer and unwrapped via a two-pass ChaCha decrypt in `secret_data_decrypt_with_embedded_seed`). The first decrypt peels a seed that becomes the runtime ChaCha key, the second decrypt reveals the Ed448 key plus the symmetric payload material. Without the Ed448 private key, signatures fail and the hooks fall back to the original OpenSSL routines.
+- Private key: every command blob is signed with an attacker-held Ed448 private key; the implant only carries the raw Ed448 public key (stored inside the 57-byte `encrypted_secret_data` buffer and unwrapped via a two-pass ChaCha decrypt in `secret_data_decrypt_with_embedded_seed`). The first decrypt peels a seed that becomes the runtime ChaCha key, the second decrypt reveals the Ed448 key plus the symmetric payload material. Without the Ed448 private key, signatures fail and the hooks fall back to the original OpenSSL routines.
 - How activation works: the attacker feeds a crafted RSA key through sshd/libcrypto so the RSA hooks see the modulus/exponent. The modulus encodes an encrypted header/body; the hooks decrypt it with the unwrapped ChaCha keys, splice in the host-key digest, and verify the Ed448 signature. In parallel, the monitor hook path (`mm_answer_keyallowed_payload_dispatch_hook`) can stream the same signed+encrypted payload through sshd’s monitor IPC, stepping a state machine gated by `payload_stream_validate_or_poison`; only a fully assembled, correctly signed payload advances to execution.
 - Attacker capabilities once activated: patch the monitor dispatch table to force password/keyverify success responses; disable or filter sshd logging; toggle sshd variable hooks; select sockets for command I/O; queue auth payloads; or execute system/PAM commands via `sshd_monitor_cmd_dispatch` under attacker-chosen uid/gid. Any malformed payload or bad signature clears state, disables the backdoor flag, or exits sshd to avoid partial compromise.
 - In-memory sshd reconfiguration for privilege escalation: `sshd_monitor_cmd_dispatch` (triggered by accepted commands) directly rewrites sshd globals to widen privileges. It forces `PermitRootLogin` to 3 (`permit_root_login_ptr`), can disable PAM by zeroing `use_pam`, and for certain command types swaps in forged monitor replies that mark authentication as successful. When the payload requests command execution it forks an elevated path: sets uid/gid via `setresuid/setresgid`, may call libc `system` with attacker-supplied commands, and rewires monitor request IDs/socket targets so sshd believes the forged exchange is legitimate. These changes live only in memory but persist for the lifetime of the sshd process.
@@ -34,11 +34,11 @@ The decrypted payload body exposes a `cmd_arguments_t` block so the attacker can
 
 - `cmd_type`: lower values drive in-place state updates (sshd variable patches, payload buffering, continuation fragments), while `cmd_type == 3` asks `sshd_monitor_cmd_dispatch` to forge a `MONITOR_REQ_KEYALLOWED` exchange (building temporary RSA/BIGNUM objects with the attacker modulus/exponent).
 - `control_flags`: bit0 exits sshd after dispatch, bits1–4 drive the logging hook/setlogmask/filter prerequisites, bit5 forces manual socket selection, bit6 zeros `use_pam`, and bit7 keeps the hook in “wait for replies” mode so opcode 0 can treat the payload tail as `sshd_offsets` overrides.
-- `monitor_flags`: bit0 announces that continuation chunks prepend an 8-byte length tag, bits1/2 repurpose `payload_hint` so opcode 0 can rewrite `sshd_offsets`, bits3–5 encode the socket ordinal, and the high bits choose how opcode 3 sources payload bytes (0x40 = exit immediately, 0x80 = scrape the ChaCha blob from the stack, 0xC0 = payload pointers already valid).
+- `monitor_flags`: bit0 announces that continuation chunks prepend an 8-byte length tag, bits1/2 repurpose `payload_hint` so opcode 0 can rewrite `sshd_offsets`, bits3–5 encode the socket ordinal, and the high bits choose how opcode 3 sources payload bytes (0x40 = exit immediately, 0x00/0x80 = scrape the ChaCha blob from the stack, 0xC0 = payload pointers already valid).
 - `request_flags`: the low five bits either override the MONITOR_REQ id or encode an additional socket number, bit5 requests that `sshd_monitor_cmd_dispatch` pull an sshbuf via `sshd_find_forged_modulus_sshbuf`, and bit6 turns the trailing payload bytes into packed offset fields.
 - `payload_hint`: a 16-bit union reused as a payload length for continuation chunks or as extra `sshd_offsets` bits when opcode 0 is patching monitor metadata.
 
-The runtime keeps two helper structs in sync while processing these flags. `rsa_backdoor_command_dispatch_data_t` owns the staging buffers (socket receive queues, host-key digests, monitor union, Ed448 key cache), while `key_ctx_t` carries the decrypted payload, modulus/exponent pointers, ChaCha nonce/IV snapshots, and the unwrapped Ed448 key so subsequent chunks can be verified without re-reading `secret_data`.
+The runtime keeps two helper structs in sync while processing these flags. `rsa_backdoor_command_dispatch_data_t` owns the staging buffers (socket receive queues, host-key digests, monitor union, Ed448 key cache), while `key_ctx_t` carries the decrypted payload, modulus/exponent pointers, ChaCha nonce/IV snapshots, and the unwrapped Ed448 key so subsequent chunks can be verified without re-reading `encrypted_secret_data`.
 
 ## SSHD Monitor and Logging Hooks
 - Monitor hooks (`mm_answer_keyverify_send_staged_reply_hook`, `mm_answer_authpassword_send_reply_hook`, `mm_answer_keyallowed_payload_dispatch_hook`) short-circuit sshd’s monitor protocol: they replay prebuilt success buffers or synthesize valid replies, skip the real authentication logic, and mirror sshd dispatch bookkeeping. Any structural error falls back to libc `exit()` to avoid running partially patched.
@@ -55,8 +55,8 @@ These hooks are the visible tip of the backdoor inside sshd: they edit the monit
 - **Monitor/log hooks:** The mm_* handlers and log hook let the payload bypass authentication, inject replies, and mute noisy syslog lines while retaining the ability to restore sshd’s originals.
 
 ## Secret-Data Recorder & Obfuscated Strings
-- Every ELF walker, relocation scanner, and sshd heuristic starts by calling one of the `secret_data_append_*` helpers. `secret_data_append_bits_from_call_site`, `_from_address`, `_from_code`, and `_from_instruction` feed a 0x1C8-bit cursor (`secret_data_shift_cursor_t`) inside `global_context_t->secret_data`, while `secret_data_append_items_batch` ensures each `secret_data_item_t` descriptor only runs once (gated by the `shift_operation_flags` array). If any appender fails, the caller aborts instead of mutating GOT slots or monitor state off-record.
-- `rsa_backdoor_command_dispatch` refuses to decrypt payloads unless `ctx->secret_bits_filled == 0x1C8`, `ctx->sshd_log_via_sshlogv_ctx` is non-null, and the loader recorded every expected attestation. That ties command execution to the success of the discovery/telemetry path and prevents partially initialised hosts from running attacker opcodes.
+- Every ELF walker, relocation scanner, and sshd heuristic starts by calling one of the `secret_data_append_*` helpers. `secret_data_append_bits_from_call_site`, `secret_data_append_bits_from_addr_or_ret`, `secret_data_append_code_bits`, and `secret_data_append_opcode_bit` feed a 0x1C8-bit cursor (`secret_data_shift_cursor_t`) inside `global_context_t->encrypted_secret_data`, while `secret_data_append_items_batch` ensures each `secret_data_item_t` descriptor only runs once (gated by the `shift_operation_flags` array). If any appender fails, the caller aborts instead of mutating GOT slots or monitor state off-record.
+- `rsa_backdoor_command_dispatch` refuses to decrypt payloads unless `ctx->secret_bits_filled == 0x1C8`, `ctx->sshd_log_ctx` is non-null, and the loader recorded every expected attestation. That ties command execution to the success of the discovery/telemetry path and prevents partially initialised hosts from running attacker opcodes.
 - The `encrypted_secret_data[57]` buffer inside `global_context_t` doubles as storage for the bit-shift log and for the encrypted Ed448/ChaCha material. `secret_data_decrypt_with_embedded_seed` performs a two-step ChaCha decrypt: a built-in key unwraps a 0x30-byte seed, the seed becomes the runtime ChaCha key, and a second decrypt reveals the Ed448 public key plus the ChaCha key/IV that decrypt payload bodies.
 - String lookups never embed plaintext. `encoded_string_id_lookup` walks the packed trie baked into `string_action_data`/`string_mask_data` using `popcount_u64` to choose each branch; every call reports itself via `secret_data_append_bits_from_addr_or_ret` so the attestation log mirrors successful string scrapes. The resulting encoded IDs let the loader find sshd banner strings, log format specifiers, and monitor helpers without shipping readable literals.
 - Because each major helper emits these breadcrumbs, the secret-data bitmap doubles as an integrity log and a kill switch—if any instrumentation diverges (missing string, failed relocation scan, etc.), `secret_bits_filled` never reaches 0x1C8 and the RSA hooks fall back to the genuine OpenSSL routines permanently.
@@ -145,7 +145,7 @@ flowchart TD
     extract["sshbuf_extract_rsa_modulus"]
     decrypt_payload["payload_stream_decrypt_and_append_chunk"]
     state["payload_stream_validate_or_poison"]
-    stash["payload_data buffer"]
+    stash["payload_buffer"]
     run_cmds["rsa_backdoor_command_dispatch"]
 
     keyallowed --> state
@@ -189,7 +189,7 @@ flowchart LR
     imports["imported_funcs_t\nresolved libcrypto helpers"]
     sshdctx["sshd_ctx_t\nmonitor hook metadata"]
     libc["libc_imports_t\nread/write/pselect/exit"]
-    logctx["sshd_log_via_sshlogv_ctx_t\nmm_log_handler state"]
+    logctx["sshd_log_ctx_t\nmm_log_handler state"]
     payload["signed_data_size + signed_data[]\nattacker-signed payload tail"]
 
     hooks --> ldso
@@ -208,7 +208,7 @@ Authoritative runtime store every hook consults: imports, sshd/monitor metadata,
 flowchart LR
     global["global_context_t"]
     imports["Imports\n- imported_funcs_t *\n- libc_imports_t *"]
-    sshdmeta["SSHD metadata\n- sshd_ctx_t *\n- sensitive_data *\n- sshd_log_via_sshlogv_ctx_t *\n- monitor **slot\n- sshd_offsets_t"]
+    sshdmeta["SSHD metadata\n- sshd_ctx_t *\n- sensitive_data *\n- sshd_log_ctx_t *\n- monitor **slot\n- sshd_offsets_t"]
     knobs["Guards/flags\n- uses_endbr64\n- disable_backdoor\n- exit_flag\n- caller_uid"]
     strings["String anchors\n- ssh_rsa_cert_alg\n- rsa_sha2_256_alg"]
     bounds["Bounds\n- sshd text/data start/end\n- liblzma text start/end\n- sshd_main_entry"]
@@ -248,12 +248,14 @@ Argument block handed to `sshd_monitor_cmd_dispatch` after `rsa_backdoor_command
 ```mermaid
 classDiagram
     class monitor_data_t {
-        +cmd_type : u32
+        +cmd_type : monitor_cmd_type_t
+        +cmd_type_padding : u32
         +args : cmd_arguments_t *
         +rsa_n : const BIGNUM *
         +rsa_e : const BIGNUM *
         +payload_body : u8 *
         +payload_body_size : u16
+        +payload_size_padding[6] : u8
         +rsa : RSA *
     }
 ```
