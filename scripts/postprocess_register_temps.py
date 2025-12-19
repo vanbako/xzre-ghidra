@@ -17,6 +17,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
+CALL_RENAME_MAP = {
+    "run_backdoor_commands": "rsa_backdoor_command_dispatch",
+    "check_argument": "argv_dash_option_contains_lowercase_d",
+}
+
+
 def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
     with metadata_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
@@ -70,8 +76,17 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
         if replacement is not None:
             literal_pattern = re.compile(re.escape(original))
             text, literal_count = literal_pattern.subn(replacement, text)
+            renamed_original = _rewrite_call_identifiers(original)
+            renamed_replacement = _rewrite_call_identifiers(replacement)
+            if literal_count == 0 and (
+                renamed_original != original or renamed_replacement != replacement
+            ):
+                literal_pattern = re.compile(re.escape(renamed_original))
+                text, literal_count = literal_pattern.subn(
+                    renamed_replacement, text
+                )
             if literal_count == 0:
-                if replacement in text:
+                if replacement in text or renamed_replacement in text:
                     continue
                 print(
                     f"[postprocess] warning: could not rewrite literal '{original}' "
@@ -138,6 +153,12 @@ def scrub_remaining_bool(text: str, file_path: Path) -> str:
         f"[postprocess] info: replaced remaining bare 'bool' tokens in {file_path}",
         file=sys.stderr,
     )
+    return text
+
+
+def _rewrite_call_identifiers(text: str) -> str:
+    for old, new in CALL_RENAME_MAP.items():
+        text = re.sub(rf"\b{re.escape(old)}\b", new, text)
     return text
 
 

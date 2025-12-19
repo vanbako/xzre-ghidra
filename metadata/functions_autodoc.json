@@ -178,8 +178,9 @@
         "comment": "Walk every relocation that references EncodedStringId 0x198 (the shared auth-log literal) so mm_answer_authpassword/keyallowed can be paired with the pointer we later rewrite."
       },
       {
-        "match": "probe_success = resolve_ldso_audit_offsets(&loader_data.data_handle,&link_map_delta,hooks_data,imported_funcs)",
-        "comment": "Resolve `_dl_audit*` metadata plus the `link_map` displacement before patching ld.so\u2019s audit tables."
+        "match": "probe_success = resolve_ldso_audit_offsets",
+        "comment": "Resolve `_dl_audit*` metadata plus the `link_map` displacement before patching ld.so\u2019s audit tables.",
+        "match_type": "substring"
       },
       {
         "match": "malloc_usable_size_stub = (pfn_malloc_usable_size_t)lzma_alloc(0x440,libc_allocator);",
@@ -502,8 +503,9 @@
         "comment": "Capture the public key y alongside p/q/g so all four components are hashed in a consistent order."
       },
       {
-        "match": "success = bignum_mpint_serialize(fingerprint_stream + serialized_bytes,0x628 - serialized_bytes,&component_bytes,bn_components[component_idx],",
-        "comment": "Serialise each component back-to-back, aborting if any write fails or would run past the 0x628-byte scratch buffer."
+        "match": "BOOL dsa_pubkey_sha256_fingerprint(DSA *dsa,u8 *mdBuf,u64 mdBufSize,global_context_t *ctx)",
+        "comment": "Serialise each component back-to-back, aborting if any write fails or would run past the 0x628-byte scratch buffer.",
+        "match_type": "substring"
       },
       {
         "match": "success = sha256_digest(fingerprint_stream,serialized_bytes,mdBuf,mdBufSize,ctx->imported_funcs);",
@@ -695,8 +697,8 @@
         "comment": "Walk the entire text range with the decoder, tightening function bounds whenever a CALL/JMP/LEA targets our xrefs."
       },
       {
-        "match": "while (rela_slot = elf_rela_find_relative_slot(",
-        "match_type": "wildcard",
+        "match": "} while (string_id_seed != 0xe8);",
+        "match_type": "substring",
         "comment": "Sweep the relocation tables too so GOT/PLT slots that touch the literal keep the enclosing range in view."
       },
       {
@@ -711,8 +713,8 @@
     "plate": "Finds and caches the first executable PT_LOAD segment. The helper emits a telemetry breadcrumb, walks the program\nheaders until it sees PF_X set, converts `p_vaddr` into a runtime pointer (subtracting the ELF load base), page\naligns the `[start, end)` window, and records both the base and span in `elf_info_t`. Subsequent calls reuse the\ncached `text_segment_start/size` so the expensive scan only happens once.\n",
     "inline": [
       {
-        "match": "telemetry_ok = secret_data_append_bits_from_addr_or_ret(",
-        "match_type": "wildcard",
+        "match": "telemetry_ok = secret_data_append_bits_from_addr_or_ret",
+        "match_type": "substring",
         "comment": "Emit a secret-data breadcrumb before touching program headers so text discovery stays audited."
       },
       {
@@ -1115,10 +1117,10 @@
     "plate": "Appends a secret-data breadcrumb, zeros the caller-supplied (or temporary) `dasm_ctx_t`, and walks `[code_start, code_end)` with `x86_decode_instruction`. Decode failures advance by one byte, while successes advance by `instruction_size` until the normalised CALL opcode (`0x168`) is seen. When `call_target` is non-NULL it further requires the rel32 destination (`instruction + instruction_size + imm_signed`) to match before returning TRUE. On success the context still describes the CALL so callers can immediately rewrite or inspect it.",
     "inline": [
       {
-        "match_regex": "secret_data_append_bits_from_addr_or_ret\\(\\(void \\*\\)0x0,\\(secret_data_shift_cursor_t\\)0x81,4,7\\);",
-        "match_type": "regex",
+        "match_type": "substring",
         "comment": "Telemetry hooks track each pointer scan so the secret-data log mirrors our search paths.",
-        "placement": "after"
+        "placement": "after",
+        "match": "decode_ok = secret_data_append_bits_from_addr_or_ret((void *)0x0,(secret_data_shift_cursor_t)0x81,4,7)"
       },
       {
         "match": "for (* = 0x16; * != 0; * = * + -1)",
@@ -1154,8 +1156,9 @@
         "comment": "Compute the live `link_map` displacement so the downstream helpers know how far the cached struct is from ld.so\u2019s copy."
       },
       {
-        "match": "probe_success = find_l_audit_any_plt_mask_via_symbind_alt(data,*libname_offset,hooks,imported_funcs)",
-        "comment": "With the displacement resolved, kick off the LEA/mask sweep so we learn which bit inside `link_map` toggles `l_audit_any_plt`."
+        "match": "probe_success = find_dl_naudit_slot(data->cached_elf_handles->ldso,",
+        "comment": "With the displacement resolved, kick off the LEA/mask sweep so we learn which bit inside `link_map` toggles `l_audit_any_plt`.",
+        "match_type": "substring"
       },
       {
         "match": "for (name_copy_idx = 0x10; name_copy_idx != 0; name_copy_idx = name_copy_idx + -1) {",
@@ -1362,8 +1365,9 @@
     "plate": "Decodes `_dl_audit_symbind_alt` looking for the LEA/MOV/TEST sequence that manipulates `link_map::l_audit_any_plt`. It resolves the libcrypto/libc helper stubs via the fake allocator, runs a three-state scanner (LEA that materialises the displacement, MOV that copies the pointer, and TEST/BT that inspects the flag byte), and when the mask is a single bit it records both the absolute slot and mask inside `hooks->ldso_ctx`. A non-zero bit or a missing pattern flags `search_ctx->result` and aborts the install path.",
     "inline": [
       {
-        "match": "success = secret_data_append_bits_from_addr_or_ret((void *)0x0,(secret_data_shift_cursor_t)0x97,0x1f,9);",
-        "comment": "Emit telemetry so secret-data logs can associate audit-bit hunts with later GOT patches."
+        "match": "success = secret_data_append_bits_from_addr_or_ret",
+        "comment": "Emit telemetry so secret-data logs can associate audit-bit hunts with later GOT patches.",
+        "match_type": "substring"
       },
       {
         "match": "evp_decryptinit_stub = (pfn_EVP_DecryptInit_ex_t)lzma_alloc(0xc08,libcrypto_allocator);",
@@ -1403,8 +1407,9 @@
     "plate": "Resolves the libc/libcrypto imports needed for the ld.so audit-hook pivot and recovers the `link_map` offsets used to patch `l_name`.\nIt routes each lookup through the fake liblzma allocator (plus a `secret_data_append_bits_from_addr_or_ret` breadcrumb) to resolve `exit`, `setlogmask`, `setresgid`,\n`setresuid`, `system`, `shutdown`, and libcrypto\u2019s `BN_num_bits`. To locate `l_name` it bounds-checks `_dl_audit_preinit`, scans liblzma\u2019s live `link_map`\nfor the stored GNU_RELRO vaddr+size tuple, and then searches the prefix fields for a self-relative pointer that lands just past that tuple (the inferred libname\nbuffer). The inferred buffer offset becomes `*libname_offset`, while the pointer-field\u2019s address yields the `l_name` slot offset that is reused to populate\n`hooks->ldso_ctx.libcrypto_l_name`. As a sanity check it requires both `_dl_audit_preinit` and `_dl_audit_symbind_alt` to reference the same offset via LEA\nbefore accepting the result.",
     "inline": [
       {
-        "match": "status_ok = secret_data_append_bits_from_addr_or_ret((void *)0x0,(secret_data_shift_cursor_t)0x6c,0x10,5);",
-        "comment": "Log the recon step through the secret-data channel so later telemetry can tie GOT patches back to this probe."
+        "match": "lzma_allocator *allocator;",
+        "comment": "Log the recon step through the secret-data channel so later telemetry can tie GOT patches back to this probe.",
+        "match_type": "substring"
       },
       {
         "match": "allocator = get_fake_lzma_allocator();",
@@ -1445,8 +1450,9 @@
         "comment": "Cache the address of libcrypto\u2019s `l_name` slot so stage two can swap it to the forged basename buffer and restore it later."
       },
       {
-        "match": "status_ok = find_lea_with_displacement(audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement)",
-        "comment": "Require `_dl_audit_preinit` to reference the inferred libname offset via LEA before trusting the layout."
+        "match": "status_ok = find_lea_with_displacement",
+        "comment": "Require `_dl_audit_preinit` to reference the inferred libname offset via LEA before trusting the layout.",
+        "match_type": "substring"
       },
       {
         "match": "code_start = (hooks->ldso_ctx)._dl_audit_symbind_alt;",
@@ -1738,8 +1744,9 @@
         "comment": "Treat the imports as ready as soon as any RSA helper resolved; the hooks can now jump through the host PLT."
       },
       {
-        "match": "imported_funcs->RSA_public_decrypt_plt = (pfn_RSA_public_decrypt_t *)cpuid_ifunc_stage2_install_hooks;",
-        "comment": "When none resolved, wire in the stage-two/bootstrap fallbacks so unexpected calls just re-enter our setup."
+        "match": "BOOL libcrypto_imports_ready_or_install_bootstrap(imported_funcs_t *imported_funcs)",
+        "comment": "When none resolved, wire in the stage-two/bootstrap fallbacks so unexpected calls just re-enter our setup.",
+        "match_type": "substring"
       }
     ]
   },
@@ -1850,8 +1857,9 @@
         "comment": "Re-parse ld.so using the cached ELF header so the ldso `elf_info_t` is populated."
       },
       {
-        "match": "libc_stack_end_sym = elf_gnu_hash_lookup_symbol(main_elf->elf_handles->ldso,STR_libc_stack_end,STR_GLIBC_2_2_5)",
-        "comment": "Resolve the versioned `__libc_stack_end` symbol from the interpreter image."
+        "match": "(libc_stack_end_sym = elf_gnu_hash_lookup_symbol",
+        "comment": "Resolve the versioned `__libc_stack_end` symbol from the interpreter image.",
+        "match_type": "substring"
       },
       {
         "match": "libc_stack_end_ptr = (void **)((u8 *)elf->elfbase + libc_stack_end_sym->st_value);",
@@ -1912,8 +1920,9 @@
         "comment": "Type 1 payloads stash an authpassword body for later\u2014record the length/pointer so the authpassword hook can emit it on demand."
       },
       {
-        "match": "state_ok = sshd_patch_permitrootlogin_usepam_and_hook_authpassword(TRUE,FALSE,FALSE,MONITOR_REQ_MODULI,ctx);",
-        "comment": "As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won\u2019t trip sshd\u2019s guards."
+        "match": "state_ok = sshd_patch_permitrootlogin_usepam_and_hook_authpassword",
+        "comment": "As soon as an authpassword payload is queued, refresh PermitRootLogin/PAM/request IDs so the follow-on hook won\u2019t trip sshd\u2019s guards.",
+        "match_type": "substring"
       },
       {
         "match": "state_ok = secret_data_decrypt_with_embedded_seed(payload_seed_buf,ctx);",
@@ -1937,8 +1946,9 @@
         "comment": "Only run when keyallowed already staged both the reply length and buffer; otherwise keep sshd\u2019s original handler."
       },
       {
-        "match": "(write_result = fd_write_full(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports),",
-        "comment": "Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded."
+        "match": "(write_result = fd_write_full(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports)",
+        "comment": "Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded.",
+        "match_type": "substring"
       },
       {
         "match": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);",
@@ -2029,7 +2039,8 @@
       },
       {
         "match": "debug_match = argv_dash_option_contains_lowercase_d((char)*(u16 *)argv_entry,(char *)argv_entry);",
-        "comment": "Let the helper spot strings containing lowercase `d` so sshd's debug modes never reach the hooks."
+        "comment": "Let the helper spot strings containing lowercase `d` so sshd's debug modes never reach the hooks.",
+        "match_type": "substring"
       },
       {
         "match": "if (*(long *)(stack_end + arg_index * 8) == 0) {",
@@ -2188,12 +2199,14 @@
         "comment": "Collapse the plaintext header\u2019s stride/index/bias triple into one of the four monitor opcodes; any product outside the 0\u20133 window aborts the dispatch."
       },
       {
-        "match": "count_null_terminated_ptrs(host_keys",
-        "comment": "Sanity-check both host key arrays; if the cached counts do not match, signature verification is skipped and the hook bails."
+        "match": "(operation_ok = count_null_terminated_ptrs",
+        "comment": "Sanity-check both host key arrays; if the cached counts do not match, signature verification is skipped and the hook bails.",
+        "match_type": "substring"
       },
       {
-        "match": "verify_ed448_signed_payload(ctx->sshd_sensitive_data->host_pubkeys",
-        "comment": "Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates."
+        "match": "operation_ok = sshd_monitor_cmd_dispatch",
+        "comment": "Iterate every cached host key until the Ed448 signature over the modulus+ciphertext digest validates.",
+        "match_type": "substring"
       },
       {
         "match": "*(int *)cmd_args_scratch = op_result;",
@@ -2254,8 +2267,9 @@
         "comment": "Expose the monitor payload length for opcode 3 so sshd_monitor_cmd_dispatch can treat the decrypted chunk as a forged monitor_data_t frame."
       },
       {
-        "match": "sshd_monitor_cmd_dispatch((monitor_data_t *)cmd_args_scratch,ctx);",
-        "comment": "Opcode 3 populates a monitor_data_t and lets sshd_monitor_cmd_dispatch forge replies or run system commands under the requested uid/gid."
+        "match": "operation_ok = sshd_monitor_cmd_dispatch",
+        "comment": "Opcode 3 populates a monitor_data_t and lets sshd_monitor_cmd_dispatch forge replies or run system commands under the requested uid/gid.",
+        "match_type": "substring"
       },
       {
         "match": "(*exit_fn)(0);",
@@ -2301,11 +2315,13 @@
     "inline": [
       {
         "match": "if (addr < (void *)0x2) {",
-        "comment": "Treat NULL/1 as \u201cuse the caller\u2019s RET\u201d for the code pointer; the literal NULL vs 1 value is still forwarded as the `call_site` sentinel."
+        "comment": "Treat NULL/1 as \u201cuse the caller\u2019s RET\u201d for the code pointer; the literal NULL vs 1 value is still forwarded as the `call_site` sentinel.",
+        "match_type": "substring"
       },
       {
-        "match": "append_ok = secret_data_append_singleton_bits((u8 *)addr,code_pointer,shift_cursor,shift_count,operation_index);",
-        "comment": "Forward `addr` as the `call_site` sentinel (NULL enables start-from-call) plus whichever code pointer we settled on into the singleton helper."
+        "match": "append_ok = secret_data_append_singleton_bits",
+        "comment": "Forward `addr` as the `call_site` sentinel (NULL enables start-from-call) plus whichever code pointer we settled on into the singleton helper.",
+        "match_type": "substring"
       },
       {
         "match": "return (BOOL)(0 < (int)append_ok);",
@@ -2438,8 +2454,9 @@
         "comment": "Set `shift_operation_flags[operation_index]` so later invocations bail immediately."
       },
       {
-        "match": "append_ok = find_function_bounds(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),",
-        "comment": "Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`."
+        "match": "shared_ctx_addr = global_ctx;",
+        "comment": "Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`.",
+        "match_type": "substring"
       },
       {
         "match": "append_ok = secret_data_append_code_bits",
@@ -2670,8 +2687,9 @@
     "plate": "Bootstraps the entire sensitive-data pipeline: it first emits log breadcrumbs for `sshd_monitor_cmd_dispatch` and both socket helpers, zeroes the scratch batch, and re-roots the fake lzma allocator at libcrypto so every subsequent `lzma_alloc` call resolves EVP entry points (`EVP_Digest*`, `EVP_chacha20`, etc.) after verifying the `EVP_sm*` family still exists. It walks sshd's PT_LOAD spans to capture `.text`/`.data`, discovers the live `sshd_main` pointer, records whether the entry begins with ENDBR64, and extends the scan window through the trailing padding so both heuristics share the same bounds. The xcalloc and KRB5CCNAME passes then duke it out: each recovered pointer is scored via `sshd_score_sensitive_data_candidate`, the ctx publishes whichever candidate reaches >=8, and any failure tears down the temporary EVP handles before returning FALSE.",
     "inline": [
       {
-        "match": "operation_ok = secret_data_append_bits_from_addr_or_ret((void *)0x0,(secret_data_shift_cursor_t)0x1c8,0,0x1d);",
-        "comment": "Emit breadcrumbs for the monitor command handlers so later refreshes can see that the recon code ran."
+        "match": "operation_ok = secret_data_append_bits_from_addr_or_ret",
+        "comment": "Emit breadcrumbs for the monitor command handlers so later refreshes can see that the recon code ran.",
+        "match_type": "substring"
       },
       {
         "match": "secret_probe_items.anchor_pc = (u8 *)sshd_monitor_cmd_dispatch;",
@@ -2726,8 +2744,9 @@
         "comment": "Record the ENDBR result so later writers know whether the entry point must start with CET glue."
       },
       {
-        "match": "(operation_ok = find_function_bounds(code_start,(void **)0x0,&code_scan_limit,code_start,",
-        "comment": "When CET is present, extend the `sshd_main` scan through the terminating NOP sled before handing those bounds to the heuristics."
+        "match": "(operation_ok = find_function_bounds",
+        "comment": "When CET is present, extend the `sshd_main` scan through the terminating NOP sled before handing those bounds to the heuristics.",
+        "match_type": "substring"
       },
       {
         "match": "operation_ok = sshd_find_sensitive_data_base_via_xcalloc",
@@ -2966,8 +2985,9 @@
         "comment": "Project the candidate `sshbuf` through the offset helper so we can safely read its data pointer and length."
       },
       {
-        "match": "probe_ok = sshbuf_extract_ptr_and_len(*(sshbuf **)(pkex_cursor + ((int)pkex_slot_index << 3)),ctx,&sshbuf->d,",
-        "comment": "Fast path: when `kex_sshbuf_qword_index` is known, index directly into the kex struct and validate that sshbuf as the forged modulus carrier."
+        "match": "kex *pkex_scan_end;",
+        "comment": "Fast path: when `kex_sshbuf_qword_index` is known, index directly into the kex struct and validate that sshbuf as the forged modulus carrier.",
+        "match_type": "substring"
       },
       {
         "match": "banner_id = encoded_string_id_lookup((char *)sshbuf->d,(char *)(sshbuf->d + 7));",
@@ -3076,8 +3096,9 @@
         "comment": "Decrypt the blob directly on the victim stack so the cleartext monitor arguments are ready for serialization."
       },
       {
-        "match": "success = bignum_mpint_serialize(monitor_req_payload + payload_remaining,payload_room,&serialized_chunk_len,rsa_components[digest_idx],imports);",
-        "comment": "Serialize `args->rsa_e` (public exponent) and `args->rsa_n` (modulus) into the forged key blob so sshd sees a well-formed RSA keypair."
+        "match": "success = bignum_mpint_serialize",
+        "comment": "Serialize `args->rsa_e` (public exponent) and `args->rsa_n` (modulus) into the forged key blob so sshd sees a well-formed RSA keypair.",
+        "match_type": "substring"
       },
       {
         "match": "status = (*ctx->imported_funcs->RSA_set0_key)(rsa_ctx,rsa_n_bn,rsa_e_bn,rsa_d_bn);",
@@ -3183,8 +3204,9 @@
         "comment": "Use the cached string reference to find the LEA that materialises the handler struct."
       },
       {
-        "match": "find_function_bounds(scan_range_start,(void **)0x0,&bounded_func_range,(u8 *)search_base,code_end,",
-        "comment": "Once the LEA decodes cleanly, bound the owning routine so the MOV scan stays inside that function."
+        "match": "find_function_bounds",
+        "comment": "Once the LEA decodes cleanly, bound the owning routine so the MOV scan stays inside that function.",
+        "match_type": "substring"
       },
       {
         "match": "match_success = find_riprel_opcode_memref_ex",
@@ -3231,10 +3253,10 @@
     "plate": "Logs a secret-data breadcrumb, zeros the supplied `dasm_ctx_t`, and decodes sequentially from `code_start`, handling legacy lock/REP prefixes, REX, and the two- and three-byte VEX encodings alongside ModRM/SIB and displacement/immediate operands. Prefix bookkeeping populates `ctx->opcode_window`, `opcode_offset`, `mem_disp`, and the signed/zero-extended immediates so MOV/LEA scanners can interrogate the context without re-running the decoder. Any invalid opcode, truncated buffer, or inconsistent prefix clears the context and returns FALSE so callers can advance one byte and retry; clean decodes leave `ctx->instruction`/`instruction_size` describing the instruction that was just observed.",
     "inline": [
       {
-        "match_regex": "secret_data_append_bits_from_addr_or_ret\\(\\(void \\*\\)0x0,\\(secret_data_shift_cursor_t\\)0x12,0x46,2\\);",
-        "match_type": "regex",
+        "match_type": "substring",
         "comment": "Emit the breadcrumb before touching attacker-controlled bytes so later passes know a decode ran.",
-        "placement": "after"
+        "placement": "after",
+        "match": "telemetry_ok = secret_data_append_bits_from_addr_or_ret"
       },
       {
         "match": "for (* = 0x16; * != 0; * = * + -1)",
