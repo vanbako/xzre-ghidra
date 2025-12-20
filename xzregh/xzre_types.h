@@ -1364,12 +1364,12 @@ typedef struct __attribute__((packed)) elf_handles {
 } elf_handles_t;
 
 /*
- * Lightweight bootstrap record containing the `elf_handles_t`, ld.so’s header, and a pointer to `__libc_stack_end`; used while pivoting into the loader context.
+ * Lightweight bootstrap record containing the `elf_handles_t`, the ld.so ELF header pointer, and an output slot for the resolved `__libc_stack_end` value; used while pivoting into the loader context.
  */
 typedef struct __attribute__((packed)) main_elf {
- elf_handles_t *elf_handles;
- Elf64_Ehdr *dynamic_linker_ehdr;
- void **__libc_stack_end;
+ elf_handles_t *elf_handles; /* Pointer to the parsed ELF handles used during bootstrap (sshd/ldso/libc/liblzma/libcrypto). */
+ Elf64_Ehdr *ldso_ehdr; /* ELF header for the dynamic linker mapping; used to re-parse ld.so when resolving __libc_stack_end. */
+ void **libc_stack_end_slot; /* Output slot that receives the resolved __libc_stack_end pointer for later argv/envp access. */
 } main_elf_t;
 
 /*

@@ -1428,7 +1428,7 @@
       "names": [
         "main_elf_t"
       ],
-      "code": "typedef struct __attribute__((packed)) main_elf {\n elf_handles_t *elf_handles;\n Elf64_Ehdr *dynamic_linker_ehdr;\n void **__libc_stack_end;\n} main_elf_t;"
+      "code": "typedef struct __attribute__((packed)) main_elf {\n elf_handles_t *elf_handles; /* Pointer to the parsed ELF handles used during bootstrap (sshd/ldso/libc/liblzma/libcrypto). */\n Elf64_Ehdr *ldso_ehdr; /* ELF header for the dynamic linker mapping; used to re-parse ld.so when resolving __libc_stack_end. */\n void **libc_stack_end_slot; /* Output slot that receives the resolved __libc_stack_end pointer for later argv/envp access. */\n} main_elf_t;"
     },
     {
       "kind": "struct",

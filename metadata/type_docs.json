@@ -38,7 +38,7 @@
   "backdoor_hooks_ctx_t": "Ephemeral orchestrator that stage one reuses while replaying the GOT patches: `hooks_data_slot_ptr` hands back liblzma\u2019s resident blob, the symbind/RSA/mm_* entries point at the trampolines we splice into sshd, and the scratch/placeholder slots keep the structure ABI stable between bootstrap attempts.",
   "backdoor_setup_params_t": "Argument bundle handed to `backdoor_install_runtime_hooks`: zeroed scratch + the shared-globals pointer, hook context, dummy lzma_check_state, and the active `elf_entry_ctx_t` describing the hijacked cpuid GOT slot.",
   "elf_handles_t": "Pointers to the parsed ELF descriptors for sshd, ld.so, libc, liblzma, and libcrypto so helpers can share metadata without re-parsing each image.",
-  "main_elf_t": "Lightweight bootstrap record containing the `elf_handles_t`, ld.so\u2019s header, and a pointer to `__libc_stack_end`; used while pivoting into the loader context.",
+  "main_elf_t": "Lightweight bootstrap record containing the `elf_handles_t`, the ld.so ELF header pointer, and an output slot for the resolved `__libc_stack_end` value; used while pivoting into the loader context.",
   "link_map": "Prefix of glibc's link_map used by loader helpers; only l_addr/l_name/l_ld/l_next/l_prev are modeled here.",
   "lookup_t": "Alias for `struct link_map *` used by ld.so audit hooks (e.g., `_dl_audit_symbind_alt`).",
   "backdoor_data_handle_t": "Pairs the monolithic `backdoor_data_t` blob with its `elf_handles_t` so loader helpers can take one argument yet still access both structures.",

@@ -56,4 +56,4 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/101880_elf_gnu_hash_lookup_symbol.c`, `xzregh/1024F0_get_elf_functions_table.c`, `xzregh/103CE0_main_elf_resolve_stack_end_if_sshd.c`.
 - **Why it matters:** These helpers still rely on raw pointer math; typing their small tables makes the loader/audit pass easier to follow.
 - **Reverse-engineering plan:** Identify the minimum fields used in each helper and define small, accurate structs in `metadata/xzre_types.json` (prefer minimal overlays over full ELF headers). Tag locals in `metadata/xzre_locals.json` as needed, then refresh.
-- **Status:** Open.
+- **Status (2025-12-20):** Completed – modeled `main_elf_t` (ldso_ehdr + libc_stack_end_slot output) and refreshed; with the other ELF helper types already complete, this entry is now closed.

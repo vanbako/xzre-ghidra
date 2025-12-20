@@ -1851,10 +1851,10 @@
     ]
   },
   "main_elf_resolve_stack_end_if_sshd": {
-    "plate": "Parses the saved ld.so headers inside `main_elf_t`, resolves the versioned `__libc_stack_end` symbol, and confirms the captured runtime is sshd before publishing the pointer for later stages. Successful runs hand later hooks a stable way to reach argv/envp via `main_elf->__libc_stack_end`.",
+    "plate": "Parses the saved ld.so headers inside `main_elf_t`, resolves the versioned `__libc_stack_end` symbol, and confirms the captured runtime is sshd before publishing the pointer for later stages. Successful runs hand later hooks a stable way to reach argv/envp via `main_elf->libc_stack_end_slot`.",
     "inline": [
       {
-        "match": "parse_ok = elf_info_parse(main_elf->dynamic_linker_ehdr,main_elf->elf_handles->ldso);",
+        "match": "parse_ok = elf_info_parse(main_elf->ldso_ehdr,main_elf->elf_handles->ldso);",
         "comment": "Re-parse ld.so using the cached ELF header so the ldso `elf_info_t` is populated."
       },
       {
@@ -1871,7 +1871,7 @@
         "comment": "Use `__libc_stack_end` to read sshd's argv/envp pointer and confirm the process really is sshd."
       },
       {
-        "match": "*main_elf->__libc_stack_end = *(void **)libc_stack_end_ptr;",
+        "match": "*main_elf->libc_stack_end_slot = *(void **)libc_stack_end_ptr;",
         "comment": "Publish the resolved pointer so later hooks can reach sshd's stack without redoing the ELF walk."
       }
     ]
