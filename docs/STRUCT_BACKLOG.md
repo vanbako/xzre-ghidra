@@ -44,7 +44,7 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c`, `xzregh/107920_sshbuf_is_negative_mpint.c`, `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
 - **Why it matters:** Many helpers compute data/size offsets by hand; modeling `sshbuf` will make pointer math and bounds checks readable.
 - **Reverse-engineering plan:** Use the OpenSSH headers in `third_party/include/openssh` to define only the fields used by these helpers (data pointer, size, max_size, offset). Keep the definition minimal and validate the export via `./scripts/refresh_xzre_project.sh`.
-- **Status:** Open.
+- **Status (2025-12-20):** `elf_functions_t` complete – documented the slot layout and repurposed helper pointers; `lookup_t` and `main_elf_t` remain open.
 
 ### `sshkey` minimal view
 - **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, plus any host key tables inside `sensitive_data`.

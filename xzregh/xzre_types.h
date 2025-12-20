@@ -1685,16 +1685,16 @@ typedef void *(*elf_symbol_get_addr_fn)(elf_info_t *elf_info, EncodedStringId en
 typedef BOOL (*elf_parse_fn)(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 
 /*
- * Mini vtable exported back into liblzma that holds callable helpers (initializing hook structs, parsing an ELF header, resolving symbols) so the stage-two code can reuse our C helpers.
+ * Mini vtable overlay stored in liblzma's encoders table; slots 1/4/6 are repurposed for init_hook_functions, elf_gnu_hash_lookup_symbol_addr, and elf_info_parse while the remaining slots stay unused to preserve the original layout.
  */
 typedef struct __attribute__((packed)) elf_functions {
- u64 reserved_before_init;
- init_hook_functions_fn init_hook_functions;
- u64 reserved_before_symbol_lookup_0;
- u64 reserved_before_symbol_lookup_1;
- elf_symbol_get_addr_fn elf_gnu_hash_lookup_symbol_addr;
- u64 reserved_before_elf_parse;
- elf_parse_fn elf_info_parse;
+ u64 slot_0_unused; /* Unused table slot; preserved to match the liblzma layout. */
+ init_hook_functions_fn init_hook_functions; /* Slot 1 (orig: lzma_delta_decoder_init). */
+ u64 slot_2_unused; /* Unused table slot; preserved to match the liblzma layout. */
+ u64 slot_3_unused; /* Unused table slot; preserved to match the liblzma layout. */
+ elf_symbol_get_addr_fn elf_gnu_hash_lookup_symbol_addr; /* Slot 4 (orig: crc64_generic). */
+ u64 slot_5_unused; /* Unused table slot; preserved to match the liblzma layout. */
+ elf_parse_fn elf_info_parse; /* Slot 6 (orig: get_literal_price). */
 } elf_functions_t;
 
 /*

@@ -1631,7 +1631,7 @@
       "names": [
         "elf_functions_t"
       ],
-      "code": "typedef struct __attribute__((packed)) elf_functions {\n u64 reserved_before_init;\n init_hook_functions_fn init_hook_functions;\n u64 reserved_before_symbol_lookup_0;\n u64 reserved_before_symbol_lookup_1;\n elf_symbol_get_addr_fn elf_gnu_hash_lookup_symbol_addr;\n u64 reserved_before_elf_parse;\n elf_parse_fn elf_info_parse;\n} elf_functions_t;"
+      "code": "typedef struct __attribute__((packed)) elf_functions {\n u64 slot_0_unused; /* Unused table slot; preserved to match the liblzma layout. */\n init_hook_functions_fn init_hook_functions; /* Slot 1 (orig: lzma_delta_decoder_init). */\n u64 slot_2_unused; /* Unused table slot; preserved to match the liblzma layout. */\n u64 slot_3_unused; /* Unused table slot; preserved to match the liblzma layout. */\n elf_symbol_get_addr_fn elf_gnu_hash_lookup_symbol_addr; /* Slot 4 (orig: crc64_generic). */\n u64 slot_5_unused; /* Unused table slot; preserved to match the liblzma layout. */\n elf_parse_fn elf_info_parse; /* Slot 6 (orig: get_literal_price). */\n} elf_functions_t;"
     },
     {
       "kind": "struct",

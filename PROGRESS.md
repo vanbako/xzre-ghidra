@@ -3,6 +3,7 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-12-20
+- Session `STRUCT_elf_functions_t`: documented the 7-slot `elf_functions_t` layout (repurposed helper pointers + unused slots), updated `metadata/type_docs.json` plus struct tracking docs, then reran `./scripts/refresh_xzre_project.sh` (portable archive updated). Rationale: make the ELF helper vtable layout explicit. Next: tackle `lookup_t` or `main_elf_t`.
 - Session `STRUCT_gnu_hash_table_t`: modeled `gnu_hash_table_t` (header + bloom filter layout) and updated locals so `elf_info_parse` exports named GNU hash fields plus bucket/chain math, then reran `./scripts/refresh_xzre_project.sh` (portable archive updated). Rationale: make GNU hash parsing readable and layout-accurate. Next: finish the remaining ELF helper types (`elf_functions_t`, `lookup_t`, `main_elf_t`).
 
 ## 2025-12-19

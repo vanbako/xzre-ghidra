@@ -60,7 +60,7 @@
   "run_backdoor_commands_data_t": "Full stack frame for `rsa_backdoor_command_dispatch`: tracks payload body/cipher sizing, the RSA hook\u2019s do_orig flag, host key iteration counters, the staging union (socket receive buffers vs. staged Ed448 key material), plus the runtime monitor_data_t scratch and embedded `key_ctx_t` reused across commands.",
   "backdoor_cpuid_reloc_consts_t": "Constant offsets harvested from liblzma that describe where the cpuid GOT slot and stage-two trampoline live so the hook can update them without rescanning instructions.",
   "backdoor_tls_get_addr_reloc_consts_t": "Similar relocation constants for the `__tls_get_addr` thunk so we can locate the PLT stub and randomized GOT slot at runtime.",
-  "elf_functions_t": "Mini vtable exported back into liblzma that holds callable helpers (initializing hook structs, parsing an ELF header, resolving symbols) so the stage-two code can reuse our C helpers.",
+  "elf_functions_t": "Mini vtable overlay stored in liblzma's encoders table; slots 1/4/6 are repurposed for init_hook_functions, elf_gnu_hash_lookup_symbol_addr, and elf_info_parse while the remaining slots stay unused to preserve the original layout.",
   "fake_lzma_allocator_t": "Dummy `lzma_allocator` instance that mimics the original callback table; used when the implant needs to satisfy allocation requests without delegating to libc.",
   "instruction_search_ctx_t": "Shared context for the instruction-search helpers; tracks the scan range, the byte pattern we expect, the output register captures, and provides access to hook/import state during complex searches.",
   "tls_index": "Standard glibc TLS index pair (module + offset) used when calling the loader\u2019s `__tls_get_addr` trampoline from within the implant."
