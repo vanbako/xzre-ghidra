@@ -43,9 +43,9 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
   uint phdr_index;
   Elf64_Xword relr_table_size;
   Elf64_Xword rela_table_size;
-  uint *gnu_hash_header_words;
+  gnu_hash_table_t *gnu_hash_header;
   u32 *hash_chain;
-  gnu_hash_table_t *hash_buckets;
+  u32 *hash_buckets;
   u64 *hash_bloom;
   BOOL have_verdef_num;
   u64 d_relrsz;
@@ -118,7 +118,7 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
         relr_table_size = 0xffffffffffffffff;
         rela_table_size = 0xffffffffffffffff;
         pltrel_table_size = 0xffffffffffffffff;
-        gnu_hash_header_words = (uint *)0x0;
+        gnu_hash_header = (gnu_hash_table_t *)0x0;
         for (dyn_entry_index = 0; dyn_entry_capacity != dyn_entry_index; dyn_entry_index = dyn_entry_index + 1) {
           dynamic_phdr_idx = ((Elf64_Dyn *)(dyn_entry_fields + -1))->d_tag;
           if (dynamic_phdr_idx == 0) {
@@ -182,7 +182,7 @@ switchD_0010157d_caseD_18:
               }
               // AutoDoc: DT_GNU_HASH: remember the GNU hash header pointer so bucket/chain tables can be derived after relocation pointers are validated.
               if (dynamic_phdr_idx == 0x6ffffef5) {
-                gnu_hash_header_words = (uint *)dyn_entry_fields->d_val;
+                gnu_hash_header = (gnu_hash_table_t *)dyn_entry_fields->d_val;
               }
             }
             // AutoDoc: DT_VERSYM: enables `.gnu.version` lookups; set the feature bit and store the versym pointer.
@@ -246,7 +246,7 @@ switchD_0010157d_caseD_18:
           }
         }
         strtab_base = (Elf64_Ehdr *)elf_info->dynstr;
-        if (((strtab_base != (Elf64_Ehdr *)0x0) && (gnu_hash_header_words != (uint *)0x0)) &&
+        if (((strtab_base != (Elf64_Ehdr *)0x0) && (gnu_hash_header != (gnu_hash_table_t *)0x0)) &&
            (elf_info->dynsym != (Elf64_Sym *)0x0)) {
           // AutoDoc: Convert relative pointers (PIE layout) into process addresses before recording them in `elf_info_t`.
           if (strtab_base <= ehdr) {
@@ -264,7 +264,7 @@ switchD_0010157d_caseD_18:
             if (elf_info->versym != (Elf64_Versym *)0x0) {
               elf_info->versym = (Elf64_Versym *)((long)elf_info->versym + (long)ehdr);
             }
-            gnu_hash_header_words = (uint *)((long)gnu_hash_header_words + (long)ehdr);
+            gnu_hash_header = (gnu_hash_table_t *)((long)gnu_hash_header + (long)ehdr);
           }
           strtab_base = (Elf64_Ehdr *)elf_info->verdef;
           if ((strtab_base != (Elf64_Ehdr *)0x0) && (strtab_base < ehdr)) {
@@ -284,17 +284,17 @@ switchD_0010157d_caseD_18:
               (range_valid = elf_vaddr_range_has_pflags
                                   (elf_info,elf_info->verdef,elf_info->verdef_count * 0x14,4),
               range_valid != FALSE)))) {
-            phdr_index = *gnu_hash_header_words;
+            phdr_index = gnu_hash_header->nbuckets;
             elf_info->gnu_hash_nbuckets = phdr_index;
-            gnu_hash_bloom_size = gnu_hash_header_words[2];
-            gnu_hash_symbias = gnu_hash_header_words[1];
+            gnu_hash_bloom_size = gnu_hash_header->bloom_size;
+            gnu_hash_symbias = gnu_hash_header->symoffset;
             elf_info->gnu_hash_last_bloom = gnu_hash_bloom_size - 1;
-            gnu_hash_bloom_shift = gnu_hash_header_words[3];
-            elf_info->gnu_hash_bloom = (u64 *)(gnu_hash_header_words + 4);
-            gnu_hash_header_words = (uint *)((long)(gnu_hash_header_words + 4) + (ulong)(gnu_hash_bloom_size * 2) * 4);
+            gnu_hash_bloom_shift = gnu_hash_header->bloom_shift;
+            elf_info->gnu_hash_bloom = gnu_hash_header->bloom;
+            hash_buckets = (u32 *)(gnu_hash_header->bloom + gnu_hash_bloom_size);
             elf_info->gnu_hash_bloom_shift = gnu_hash_bloom_shift;
-            elf_info->gnu_hash_buckets = gnu_hash_header_words;
-            elf_info->gnu_hash_chain = gnu_hash_header_words + ((ulong)phdr_index - (ulong)gnu_hash_symbias);
+            elf_info->gnu_hash_buckets = hash_buckets;
+            elf_info->gnu_hash_chain = hash_buckets + ((ulong)phdr_index - (ulong)gnu_hash_symbias);
             return TRUE;
           }
         }

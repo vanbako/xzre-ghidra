@@ -224,11 +224,11 @@ typedef struct link_map {
 } link_map;
 
 typedef struct gnu_hash_table {
- uint32_t nbuckets;
- uint32_t symoffset;
- uint32_t bloom_size;
- uint32_t bloom_shift;
- uint64_t bloom[];
+ uint32_t nbuckets; /* Bucket count in the GNU hash table. */
+ uint32_t symoffset; /* Index of the first symbol in the chain table (symbias). */
+ uint32_t bloom_size; /* Number of 64-bit words in the bloom filter. */
+ uint32_t bloom_shift; /* Bloom filter right-shift used during lookup. */
+ uint64_t bloom[]; /* Bloom filter words, followed by buckets[nbuckets] and chain[] entries. */
 } gnu_hash_table_t;
 
 struct La_i86_regs;

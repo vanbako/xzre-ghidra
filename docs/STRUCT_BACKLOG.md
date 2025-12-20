@@ -38,7 +38,7 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
 - **Why it matters:** This struct carries the host key arrays used for Ed448 verification and command dispatch; without field names the decomp still uses raw offsets.
 - **Reverse-engineering plan:** Map the host key arrays (`host_keys`, `host_pubkeys`, `host_certificates`) plus any counters or ancillary pointers surfaced by the recon/scoring helpers. Update `metadata/xzre_types.json` and any locals in `metadata/xzre_locals.json` so the exported C stops using `field0_0x0` arithmetic.
-- **Status:** Open.
+- **Status (2025-12-20):** Partially complete – `gnu_hash_table_t` now models the header + bloom layout and the `elf_info_parse` export uses named header fields + bucket/chain math; `elf_functions_t`, `lookup_t`, and `main_elf_t` remain open.
 
 ### `sshbuf` layout
 - **Where it shows up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c`, `xzregh/107920_sshbuf_is_negative_mpint.c`, `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.

@@ -2,6 +2,9 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-20
+- Session `STRUCT_gnu_hash_table_t`: modeled `gnu_hash_table_t` (header + bloom filter layout) and updated locals so `elf_info_parse` exports named GNU hash fields plus bucket/chain math, then reran `./scripts/refresh_xzre_project.sh` (portable archive updated). Rationale: make GNU hash parsing readable and layout-accurate. Next: finish the remaining ELF helper types (`elf_functions_t`, `lookup_t`, `main_elf_t`).
+
 ## 2025-12-19
 - Session `DOC_DEFENSE_NOTES_RESPONSIBLE_USE`: added a Responsible Use note to `docs/backdoor_defense_notes.md` to keep the defensive guidance aligned with the README guardrails. Rationale: consistency across docs. Next: keep the note updated if policy changes.
 - Session `README_RESPONSIBLE_USE`: added a Responsible Use section to `README.md` to set access and publication guardrails for defensive research. Rationale: reduce risk of operational misuse. Next: keep the guidance aligned with any new docs.

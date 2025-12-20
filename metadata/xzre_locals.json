@@ -3176,7 +3176,7 @@
       },
       {
         "name": "hash_buckets",
-        "type": "gnu_hash_table_t *"
+        "type": "u32 *"
       },
       {
         "name": "hash_chain",
@@ -3285,9 +3285,57 @@
         "type": "uint"
       },
       {
-        "name": "gnu_hash_header_words",
+        "name": "gnu_hash_header",
         "original": "puVar25",
-        "type": "uint *"
+        "type": "gnu_hash_table_t *"
+      },
+      {
+        "original": "phdr_index = *gnu_hash_header;",
+        "replacement": "phdr_index = gnu_hash_header->nbuckets;"
+      },
+      {
+        "original": "gnu_hash_header = (uint *)0x0;",
+        "replacement": "gnu_hash_header = (gnu_hash_table_t *)0x0;"
+      },
+      {
+        "original": "gnu_hash_header = (uint *)dyn_entry_fields->d_val;",
+        "replacement": "gnu_hash_header = (gnu_hash_table_t *)dyn_entry_fields->d_val;"
+      },
+      {
+        "original": "(gnu_hash_header != (uint *)0x0)",
+        "replacement": "(gnu_hash_header != (gnu_hash_table_t *)0x0)"
+      },
+      {
+        "original": "gnu_hash_header = (uint *)((long)gnu_hash_header + (long)ehdr);",
+        "replacement": "gnu_hash_header = (gnu_hash_table_t *)((long)gnu_hash_header + (long)ehdr);"
+      },
+      {
+        "original": "gnu_hash_bloom_size = gnu_hash_header[2];",
+        "replacement": "gnu_hash_bloom_size = gnu_hash_header->bloom_size;"
+      },
+      {
+        "original": "gnu_hash_symbias = gnu_hash_header[1];",
+        "replacement": "gnu_hash_symbias = gnu_hash_header->symoffset;"
+      },
+      {
+        "original": "gnu_hash_bloom_shift = gnu_hash_header[3];",
+        "replacement": "gnu_hash_bloom_shift = gnu_hash_header->bloom_shift;"
+      },
+      {
+        "original": "elf_info->gnu_hash_bloom = (u64 *)(gnu_hash_header + 4);",
+        "replacement": "elf_info->gnu_hash_bloom = gnu_hash_header->bloom;"
+      },
+      {
+        "original": "gnu_hash_header = (uint *)((long)(gnu_hash_header + 4) + (ulong)(gnu_hash_bloom_size * 2) * 4);",
+        "replacement": "hash_buckets = (u32 *)(gnu_hash_header->bloom + gnu_hash_bloom_size);"
+      },
+      {
+        "original": "elf_info->gnu_hash_buckets = gnu_hash_header;",
+        "replacement": "elf_info->gnu_hash_buckets = hash_buckets;"
+      },
+      {
+        "original": "elf_info->gnu_hash_chain = gnu_hash_header + ((ulong)phdr_index - (ulong)gnu_hash_symbias);",
+        "replacement": "elf_info->gnu_hash_chain = hash_buckets + ((ulong)phdr_index - (ulong)gnu_hash_symbias);"
       },
       {
         "name": "verdef_present",
