@@ -71,7 +71,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `La_x86_64_retval` | 0 |  |
 | `ldso_ctx_t` | 1 | Named `libcrypto_basename_buf` and documented how stage one uses it to forge `link_map::l_name` during the ld.so audit install (2025-12-18). |
 | `libc_imports_t` | 1 | Padding clarified and doc comments added (2025-11-18) |
-| `lookup_t` | 0 |  |
+| `lookup_t` | 1 | Modeled the glibc link_map prefix (l_addr/l_name/l_ld/l_next/l_prev) so link_map scans export named fields (2025-12-20). |
 | `lzma_allocator` | 0 |  |
 | `lzma_check_state` | 0 |  |
 | `lzma_sha256_digest_state` | 0 |  |

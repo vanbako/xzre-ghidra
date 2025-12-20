@@ -553,7 +553,7 @@
       "names": [
         "link_map"
       ],
-      "code": "typedef struct link_map {\n unsigned char _opaque;\n} link_map;"
+      "code": "typedef struct link_map {\n Elf64_Addr l_addr; /* Base load address; treated as the ELF header pointer in helpers. */\n char *l_name; /* NUL-terminated path/SONAME (empty for the main binary). */\n Elf64_Dyn *l_ld; /* Dynamic section pointer. */\n struct link_map *l_next; /* Next entry in r_debug->r_map. */\n struct link_map *l_prev; /* Previous entry in r_debug->r_map. */\n} link_map;"
     },
     {
       "kind": "struct",

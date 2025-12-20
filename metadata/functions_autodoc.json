@@ -1428,8 +1428,8 @@
         "comment": "Clamp the `_dl_audit_preinit` span to mapped ld.so pages so bogus symbol data cannot trick the search."
       },
       {
-        "match": "if ((*(u64 *)snapshot_cursor != ldso_image->gnurelro_vaddr) ||",
-        "match_type": "wildcard",
+        "match": "snapshot_cursor->l_addr != ldso_image->gnurelro_vaddr",
+        "match_type": "substring",
         "comment": "Scan the live liblzma `link_map` until the stored GNU_RELRO vaddr+size tuple surfaces; this anchors the tail layout for the running glibc build."
       },
       {
@@ -1437,7 +1437,8 @@
         "comment": "Search the `link_map` prefix for the smallest self-relative pointer that lands just past the RELRO tuple; treat it as the libname buffer pointer."
       },
       {
-        "match": "displacement = (long)best_name_ptr - (long)snapshot_cursor;",
+        "match": "displacement = (long)",
+        "match_type": "substring",
         "comment": "Convert the inferred libname buffer pointer into an offset from the `link_map` base; this becomes `*libname_offset`."
       },
       {
@@ -2094,40 +2095,47 @@
     "plate": "Walks `_r_debug->r_map`, hashes each SONAME to an `EncodedStringId`, and refuses duplicate or malformed entries. Once sshd, libcrypto, ld.so, libsystemd, liblzma, and libc are all accounted for it parses the binaries in turn: sshd\u2019s PLT yields the RSA hook slots, libcrypto/libc descriptors are primed for later import walks, liblzma\u2019s writable PT_LOAD is recorded so the embedded `backdoor_hooks_data_t` blob can be accessed, and libc\u2019s import table is populated via `resolve_libc_read_errno_imports`.",
     "inline": [
       {
-        "match": "rtld_global_sym = elf_gnu_hash_lookup_symbol(data->elf_handles->ldso,STR_rtld_global,0);",
+        "match": "elf_gnu_hash_lookup_symbol(data->elf_handles->ldso,STR_rtld_global,0)",
+        "match_type": "substring",
         "comment": "`rtld_global` guards any ld.so candidate we accept later in the walk."
       },
       {
-        "match": "if (*(ulong *)(r_map + 0x18) == 0) {",
+        "match": "if (r_map->l_next == (link_map *)0x0) {",
         "comment": "End-of-list checks insist every required module was seen before we bail out."
       },
       {
-        "match": "soname_id = encoded_string_id_lookup(basename_ptr,soname_cursor);",
+        "match": "encoded_string_id_lookup(basename_ptr,soname_cursor)",
+        "match_type": "substring",
         "comment": "Collapse the SONAME into an enum so the classifier can switch over IDs instead of strings."
       },
       {
-        "match": "if (soname_id == STR_liblzma_so) {",
+        "match": "== STR_liblzma_so",
+        "match_type": "substring",
         "comment": "liblzma needs extra scrutiny (address sanity + `l_next`) before we trust the entry."
       },
       {
-        "match": "if (*(Elf64_Dyn **)(r_map + 0x10) != *->dynamic_segment) {",
-        "match_type": "wildcard",
+        "match": "r_map->l_ld != elf_handle->dynamic_segment",
+        "match_type": "substring",
         "comment": "For ld.so entries verify the cached dynamic segment matches the runtime `l_info[DT_*]` pointer."
       },
       {
-        "match": "plt_slot = (ulong *)elf_find_plt_reloc_slot(elf_handle,STR_RSA_public_decrypt);",
+        "match": "elf_find_plt_reloc_slot(elf_handle,STR_RSA_public_decrypt)",
+        "match_type": "substring",
         "comment": "Record sshd\u2019s RSA PLT slots so the hook installer knows exactly which GOT entries to patch."
       },
       {
-        "match": "liblzma_data_segment = elf_get_writable_tail_span(elf_handle,&liblzma_data_segment_size,TRUE)",
+        "match": "elf_get_writable_tail_span(elf_handle,&liblzma_data_segment_size,TRUE)",
+        "match_type": "substring",
         "comment": "Cache liblzma\u2019s writable PT_LOAD and make sure the hooks blob plus scratch space fit inside it."
       },
       {
-        "match": "*(u64 *)((long)liblzma_data_segment + 0x590) = liblzma_data_segment_size - 0x598;",
+        "match": "0x590) = liblzma_data_segment_size - 0x598;",
+        "match_type": "substring",
         "comment": "Publish how much writable padding remains after the hooks blob so later stages can borrow it."
       },
       {
-        "match": "success = resolve_libc_read_errno_imports",
+        "match": "= resolve_libc_read_errno_imports",
+        "match_type": "substring",
         "comment": "Once libc\u2019s `link_map` is parsed, immediately resolve the `read`/`__errno_location` trampolines."
       }
     ]
@@ -2136,7 +2144,8 @@
     "plate": "Treats the runtime libc `link_map` as another ELF image: run `elf_info_parse`, point the fake allocator at `libc_info`, and resolve `read` plus `__errno_location` through the bootstrap trampolines. Only when both slots land does the helper declare `libc_imports_t` ready so later socket helpers can avoid touching libc\u2019s PLT.",
     "inline": [
       {
-        "match": "success = elf_info_parse(*(Elf64_Ehdr **)libc,libc_info);",
+        "match": "elf_info_parse((Elf64_Ehdr *)libc->l_addr,libc_info)",
+        "match_type": "substring",
         "comment": "Sanity-check the live libc mapping before we start allocating trampolines."
       },
       {

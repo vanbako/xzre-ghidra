@@ -1621,17 +1621,17 @@
     "register_temps": [
       {
         "name": "string_id",
-        "original": "EVar25",
+        "original": "EVar24",
         "type": "EncodedStringId"
       },
       {
         "name": "probe_success",
-        "original": "BVar26",
+        "original": "BVar25",
         "type": "BOOL"
       },
       {
         "name": "resolved_count_ptr",
-        "original": "puVar1",
+        "original": "puVar48",
         "type": "u32 *"
       },
       {
@@ -1641,12 +1641,12 @@
       },
       {
         "name": "audit_ifaces_slot_ptr",
-        "original": "paVar2",
+        "original": "paVar1",
         "type": "audit_ifaces *"
       },
       {
         "name": "elf_handles",
-        "original": "peVar3",
+        "original": "peVar2",
         "type": "elf_handles_t *"
       },
       {
@@ -1656,67 +1656,67 @@
       },
       {
         "name": "resolver_frame_addr",
-        "original": "puVar7",
+        "original": "puVar5",
         "type": "u64 *"
       },
       {
         "name": "hooks_ctx_ptr",
-        "original": "pbVar8",
+        "original": "pbVar7",
         "type": "backdoor_hooks_ctx_t *"
       },
       {
         "name": "hooks_data_slot",
-        "original": "ppbVar9",
+        "original": "ppbVar8",
         "type": "backdoor_hooks_data_t **"
       },
       {
         "name": "signed_payload_size",
-        "original": "uVar10",
+        "original": "uVar9",
         "type": "u64"
       },
       {
         "name": "rsa_get0_key_hook_ptr",
-        "original": "ppVar11",
+        "original": "ppVar10",
         "type": "pfn_RSA_get0_key_t"
       },
       {
         "name": "evp_set1_rsa_hook_ptr",
-        "original": "ppVar12",
+        "original": "ppVar11",
         "type": "pfn_EVP_PKEY_set1_RSA_t"
       },
       {
         "name": "keyverify_hook_entry",
-        "original": "psVar13",
+        "original": "psVar12",
         "type": "sshd_monitor_func_t"
       },
       {
         "name": "sym_resolver",
-        "original": "peVar14",
+        "original": "peVar13",
         "type": "elf_symbol_get_addr_fn"
       },
       {
         "name": "symbol_rva",
-        "original": "EVar15",
+        "original": "EVar14",
         "type": "Elf64_Addr"
       },
       {
         "name": "symbol_module_ehdr",
-        "original": "pEVar16",
+        "original": "pEVar15",
         "type": "Elf64_Ehdr *"
       },
       {
         "name": "live_sshd_ctx",
-        "original": "psVar17",
+        "original": "psVar16",
         "type": "sshd_ctx_t *"
       },
       {
         "name": "audit_slot_byte",
-        "original": "pbVar18",
+        "original": "pbVar17",
         "type": "byte *"
       },
       {
         "name": "cpuid_leaf_ptr",
-        "original": "puVar19",
+        "original": "puVar18",
         "type": "u32 *"
       },
       {
@@ -1731,7 +1731,7 @@
       },
       {
         "name": "cpuid_edx",
-        "original": "uVar22",
+        "original": "uVar19",
         "type": "u32"
       },
       {
@@ -1741,7 +1741,7 @@
       },
       {
         "name": "rsa_sign_symbol",
-        "original": "pEVar42",
+        "original": "pEVar41",
         "type": "Elf64_Sym *"
       },
       {
@@ -1775,77 +1775,77 @@
       },
       {
         "name": "search_image",
-        "original": "peVar31",
+        "original": "peVar30",
         "type": "elf_info_t *"
       },
       {
         "name": "evp_md_ctx_new_alloc",
-        "original": "ppVar32",
+        "original": "ppVar31",
         "type": "pfn_EVP_MD_CTX_new_t"
       },
       {
         "name": "malloc_usable_size_stub",
-        "original": "ppVar29",
+        "original": "ppVar28",
         "type": "pfn_malloc_usable_size_t"
       },
       {
         "name": "libc_allocator",
-        "original": "plVar28",
+        "original": "plVar27",
         "type": "lzma_allocator *"
       },
       {
         "name": "libcrypto_allocator",
-        "original": "plVar30",
+        "original": "plVar29",
         "type": "lzma_allocator *"
       },
       {
         "name": "elf_functions_table",
-        "original": "peVar34",
+        "original": "peVar33",
         "type": "elf_functions_t *"
       },
       {
         "name": "bn_free_stub",
-        "original": "ppVar35",
+        "original": "ppVar34",
         "type": "pfn_BN_free_t"
       },
       {
         "name": "bn_bn2bin_stub",
-        "original": "ppVar38",
+        "original": "ppVar37",
         "type": "pfn_BN_bn2bin_t"
       },
       {
-        "name": "bn_dup_symbol",
-        "original": "pEVar39",
+        "name": "libcrypto_symbol",
+        "original": "pEVar38",
         "type": "Elf64_Sym *"
       },
       {
         "name": "rsa_free_symbol",
-        "original": "pEVar40",
+        "original": "pEVar39",
         "type": "Elf64_Sym *"
       },
       {
         "name": "rsa_set0_key_stub",
-        "original": "ppVar41",
+        "original": "ppVar40",
         "type": "pfn_RSA_set0_key_t"
       },
       {
         "name": "bn_bin2bn_symbol",
-        "original": "pEVar36",
+        "original": "pEVar35",
         "type": "Elf64_Sym *"
       },
       {
         "name": "string_cursor",
-        "original": "pcVar37",
+        "original": "pcVar36",
         "type": "char *"
       },
       {
         "name": "authprobe_func_end",
-        "original": "puVar43",
+        "original": "puVar42",
         "type": "u8 *"
       },
       {
         "name": "auth_log_reloc",
-        "original": "piVar44",
+        "original": "piVar43",
         "type": "int *"
       },
       {
@@ -1890,32 +1890,32 @@
       },
       {
         "name": "text_segment",
-        "original": "pvVar27",
+        "original": "pvVar26",
         "type": "void *"
       },
       {
         "name": "data_segment",
-        "original": "pvVar33",
+        "original": "pvVar32",
         "type": "void *"
       },
       {
         "name": "log_literal_slot",
-        "original": "uVar4",
+        "original": "uVar3",
         "type": "uint"
       },
       {
         "name": "auditstate_snapshot",
-        "original": "uVar5",
+        "original": "uVar4",
         "type": "u32"
       },
       {
         "name": "scratch_reg_index",
-        "original": "bVar24",
+        "original": "bVar22",
         "type": "u8"
       },
       {
         "name": "loop_idx",
-        "original": "lVar47",
+        "original": "lVar46",
         "type": "long"
       },
       {
@@ -2048,12 +2048,12 @@
       },
       {
         "name": "log_handler_tmp_ptr",
-        "original": "pplVar46",
+        "original": "pplVar44",
         "type": "log_handler_fn *"
       },
       {
         "name": "log_handler_slot_tmp",
-        "original": "pplVar48",
+        "original": "pplVar47",
         "type": "log_handler_fn *"
       },
       {
@@ -4375,8 +4375,8 @@
       },
       {
         "name": "audit_flag_slot",
-        "original": "plVar10",
-        "type": "link_map *"
+        "original": "pbVar10",
+        "type": "u8 *"
       },
       {
         "name": "decoded_pointer_register",
@@ -4463,8 +4463,8 @@
       },
       {
         "name": "name_ptr_upper_bound",
-        "original": "plVar17",
-        "type": "link_map *"
+        "original": "pplVar17",
+        "type": "link_map **"
       },
       {
         "name": "snapshot_slot",
@@ -4473,8 +4473,8 @@
       },
       {
         "name": "best_name_ptr",
-        "original": "plVar15",
-        "type": "link_map *"
+        "original": "pplVar15",
+        "type": "link_map **"
       },
       {
         "name": "best_name_ptr_slot",
@@ -4483,8 +4483,8 @@
       },
       {
         "name": "candidate_name_ptr",
-        "original": "plVar3",
-        "type": "link_map *"
+        "original": "pplVar3",
+        "type": "link_map **"
       },
       {
         "name": "libc_imports",
@@ -6233,18 +6233,13 @@
         "type": "void **"
       },
       {
-        "name": "rtld_global_base",
-        "original": "puVar12",
-        "type": "uchar *"
-      },
-      {
         "name": "plt_slot",
-        "original": "puVar13",
+        "original": "puVar12",
         "type": "ulong *"
       },
       {
         "name": "liblzma_data_segment",
-        "original": "pvVar14",
+        "original": "pvVar13",
         "type": "void *"
       },
       {
@@ -6254,32 +6249,32 @@
       },
       {
         "name": "link_map_cursor",
-        "original": "plVar6",
+        "original": "plVar11",
         "type": "link_map *"
       },
       {
         "name": "maps_state",
-        "original": "pbVar7",
+        "original": "pbVar6",
         "type": "backdoor_data_t *"
       },
       {
         "name": "hooks_data_slot",
-        "original": "ppbVar8",
+        "original": "ppbVar7",
         "type": "backdoor_hooks_data_t **"
       },
       {
         "name": "soname_id",
-        "original": "EVar9",
+        "original": "EVar8",
         "type": "EncodedStringId"
       },
       {
         "name": "success",
-        "original": "BVar10",
+        "original": "BVar9",
         "type": "BOOL"
       },
       {
         "name": "rtld_global_sym",
-        "original": "pEVar11",
+        "original": "pEVar10",
         "type": "Elf64_Sym *"
       },
       {

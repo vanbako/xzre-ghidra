@@ -215,10 +215,20 @@ struct auditstate
    unsigned int bindflags;
 };
 
+/*
+ * Alias for `struct link_map *` used by ld.so audit hooks (e.g., `_dl_audit_symbind_alt`).
+ */
 typedef struct link_map *lookup_t;
 
+/*
+ * Prefix of glibc's link_map used by loader helpers; only l_addr/l_name/l_ld/l_next/l_prev are modeled here.
+ */
 typedef struct link_map {
- unsigned char _opaque;
+ Elf64_Addr l_addr; /* Base load address; treated as the ELF header pointer in helpers. */
+ char *l_name; /* NUL-terminated path/SONAME (empty for the main binary). */
+ Elf64_Dyn *l_ld; /* Dynamic section pointer. */
+ struct link_map *l_next; /* Next entry in r_debug->r_map. */
+ struct link_map *l_prev; /* Previous entry in r_debug->r_map. */
 } link_map;
 
 typedef struct gnu_hash_table {

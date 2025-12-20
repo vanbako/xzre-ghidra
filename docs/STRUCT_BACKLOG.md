@@ -38,19 +38,19 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
 - **Why it matters:** This struct carries the host key arrays used for Ed448 verification and command dispatch; without field names the decomp still uses raw offsets.
 - **Reverse-engineering plan:** Map the host key arrays (`host_keys`, `host_pubkeys`, `host_certificates`) plus any counters or ancillary pointers surfaced by the recon/scoring helpers. Update `metadata/xzre_types.json` and any locals in `metadata/xzre_locals.json` so the exported C stops using `field0_0x0` arithmetic.
-- **Status (2025-12-20):** Partially complete – `gnu_hash_table_t` now models the header + bloom layout and the `elf_info_parse` export uses named header fields + bucket/chain math; `elf_functions_t`, `lookup_t`, and `main_elf_t` remain open.
+- **Status (2025-12-20):** Partially complete – `gnu_hash_table_t` now models the header + bloom layout and the `elf_info_parse` export uses named header fields + bucket/chain math; `elf_functions_t` and `lookup_t` are complete; `main_elf_t` remains open.
 
 ### `sshbuf` layout
 - **Where it shows up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c`, `xzregh/107920_sshbuf_is_negative_mpint.c`, `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
 - **Why it matters:** Many helpers compute data/size offsets by hand; modeling `sshbuf` will make pointer math and bounds checks readable.
 - **Reverse-engineering plan:** Use the OpenSSH headers in `third_party/include/openssh` to define only the fields used by these helpers (data pointer, size, max_size, offset). Keep the definition minimal and validate the export via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-20):** `elf_functions_t` complete – documented the slot layout and repurposed helper pointers; `lookup_t` and `main_elf_t` remain open.
+- **Status (2025-12-20):** `elf_functions_t` complete – documented the slot layout and repurposed helper pointers; `lookup_t` complete (link_map prefix fields); `main_elf_t` remains open.
 
 ### `sshkey` minimal view
 - **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, plus any host key tables inside `sensitive_data`.
 - **Why it matters:** The Ed448 verification path and RSA hooks dereference key material; a minimal `sshkey` layout helps explain the digest/signature flow.
 - **Reverse-engineering plan:** Import the OpenSSH `sshkey` layout from `third_party/include/openssh`, then trim to the fields referenced in decomp (key type + RSA/Ed25519 pointers). Update metadata so the code uses named members instead of offsets.
-- **Status:** Open.
+- **Status (2025-12-20):** `lookup_t` complete – modeled the link_map prefix fields (l_addr/l_name/l_ld/l_next/l_prev) so the loader helpers export named fields; `main_elf_t` remains open.
 
 ### ELF helper types (`gnu_hash_table_t`, `elf_functions_t`, `lookup_t`, `main_elf_t`)
 - **Where it shows up:** `xzregh/101880_elf_gnu_hash_lookup_symbol.c`, `xzregh/1024F0_get_elf_functions_table.c`, `xzregh/103CE0_main_elf_resolve_stack_end_if_sshd.c`.

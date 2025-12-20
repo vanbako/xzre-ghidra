@@ -20,7 +20,7 @@ BOOL resolve_libc_read_errno_imports(link_map *libc,elf_info_t *libc_info,libc_i
   
   allocator = get_fake_lzma_allocator();
   // AutoDoc: Sanity-check the live libc mapping before we start allocating trampolines.
-  success = elf_info_parse(*(Elf64_Ehdr **)libc,libc_info);
+  success = elf_info_parse((Elf64_Ehdr *)libc->l_addr,libc_info);
   if (success != FALSE) {
     allocator->opaque = libc_info;
     // AutoDoc: The fake allocator doubles as a symbol resolver, so each size constant maps to a libc import.
