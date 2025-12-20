@@ -7667,8 +7667,8 @@
       },
       {
         "name": "data_cursor",
-        "original": "puVar7",
-        "type": "u8 *"
+        "original": "psVar7",
+        "type": "sensitive_data *"
       },
       {
         "name": "store_scan_cursor",

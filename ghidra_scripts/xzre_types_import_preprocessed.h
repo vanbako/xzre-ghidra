@@ -624,13 +624,19 @@ struct monitor {
  */
 typedef struct monitor monitor;
 
+/*
+ * sshd's sensitive key table: arrays of private host keys, public host keys, and host certificates plus the `have_ssh2_key` flag.
+ */
 struct sensitive_data {
- struct sshkey **host_keys;
- struct sshkey **host_pubkeys;
- struct sshkey **host_certificates;
- int have_ssh2_key;
+ struct sshkey **host_keys; /* All private host keys (NULL-terminated array). */
+ struct sshkey **host_pubkeys; /* All public host keys (NULL-terminated array). */
+ struct sshkey **host_certificates; /* All public host certificates (NULL-terminated array). */
+ int have_ssh2_key; /* Non-zero once an SSH2 host key is loaded. */
 };
 
+/*
+ * sshd's sensitive key table: arrays of private host keys, public host keys, and host certificates plus the `have_ssh2_key` flag.
+ */
 typedef struct sensitive_data sensitive_data;
 
 struct sshkey {
@@ -2061,33 +2067,33 @@ extern BOOL sshd_find_sensitive_data_base_via_xcalloc(
  u8 *code_start,
  u8 *code_end,
  string_references_t *string_refs,
- void **sensitive_data_out);
+ sensitive_data **sensitive_data_out);
 
 extern BOOL sshd_find_sensitive_data_base_via_krb5ccname(
  u8 *data_start,
  u8 *data_end,
  u8 *code_start,
  u8 *code_end,
- void **sensitive_data_out,
+ sensitive_data **sensitive_data_out,
  elf_info_t *elf);
 
 extern int sshd_score_sensitive_data_candidate_in_demote_sensitive_data(
- void *sensitive_data,
+ sensitive_data *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
 extern int sshd_score_sensitive_data_candidate_in_main(
- void *sensitive_data,
+ sensitive_data *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
 extern int sshd_score_sensitive_data_candidate_in_do_child(
- void *sensitive_data,
+ sensitive_data *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 
 extern int sshd_score_sensitive_data_candidate(
- void *sensitive_data,
+ sensitive_data *sensitive_data,
  elf_info_t *elf,
  string_references_t *refs);
 

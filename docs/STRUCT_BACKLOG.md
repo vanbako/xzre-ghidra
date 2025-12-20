@@ -10,12 +10,6 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 
 ## Candidates
 
-### `sensitive_data` host key table
-- **Where it shows up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
-- **Why it matters:** This struct carries the host key arrays used for Ed448 verification and command dispatch; without field names the decomp still uses raw offsets.
-- **Reverse-engineering plan:** Map the host key arrays (`host_keys`, `host_pubkeys`, `host_certificates`) plus any counters or ancillary pointers surfaced by the recon/scoring helpers. Update `metadata/xzre_types.json` and any locals in `metadata/xzre_locals.json` so the exported C stops using `field0_0x0` arithmetic.
-- **Status (2025-12-20):** Pending – `sensitive_data` still needs a typed layout in `metadata/xzre_types.json` so the host key tables export as named fields.
-
 ### `sshbuf` layout
 - **Where it shows up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c`, `xzregh/107920_sshbuf_is_negative_mpint.c`, `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
 - **Why it matters:** Many helpers compute data/size offsets by hand; modeling `sshbuf` will make pointer math and bounds checks readable.

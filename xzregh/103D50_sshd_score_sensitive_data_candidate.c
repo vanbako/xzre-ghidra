@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103D50_sshd_score_sensitive_data_candidate.c
 // Function: sshd_score_sensitive_data_candidate @ 0x103D50
 // Calling convention: __stdcall
-// Prototype: int __stdcall sshd_score_sensitive_data_candidate(void * sensitive_data, elf_info_t * elf, string_references_t * refs)
+// Prototype: int __stdcall sshd_score_sensitive_data_candidate(sensitive_data * sensitive_data, elf_info_t * elf, string_references_t * refs)
 
 
 /*
@@ -11,14 +11,14 @@
 #include "xzre_types.h"
 
 int sshd_score_sensitive_data_candidate
-              (void *sensitive_data,elf_info_t *elf,string_references_t *refs)
+              (sensitive_data *sensitive_data,elf_info_t *elf,string_references_t *refs)
 
 {
   int score_demote;
   int score_main;
   int score_do_child;
   
-  if (sensitive_data != (void *)0x0) {
+  if (sensitive_data != (sensitive_data *)0x0) {
     // AutoDoc: Pull the high-confidence score from `demote_sensitive_data` first — those three points get doubled later.
     score_demote = sshd_score_sensitive_data_candidate_in_demote_sensitive_data(sensitive_data,elf,refs);
     // AutoDoc: Fold in the `main()`-specific heuristic so candidates the daemon manipulates frequently accrue bonus weight.

@@ -826,7 +826,7 @@
       "names": [
         "sensitive_data"
       ],
-      "code": "struct sensitive_data {\n struct sshkey **host_keys;\n struct sshkey **host_pubkeys;\n struct sshkey **host_certificates;\n int have_ssh2_key;\n};"
+      "code": "struct sensitive_data {\n struct sshkey **host_keys; /* All private host keys (NULL-terminated array). */\n struct sshkey **host_pubkeys; /* All public host keys (NULL-terminated array). */\n struct sshkey **host_certificates; /* All public host certificates (NULL-terminated array). */\n int have_ssh2_key; /* Non-zero once an SSH2 host key is loaded. */\n};"
     },
     {
       "kind": "typedef",
@@ -2261,42 +2261,42 @@
       "names": [
         "sshd_find_sensitive_data_base_via_xcalloc"
       ],
-      "code": "extern BOOL sshd_find_sensitive_data_base_via_xcalloc(\n u8 *data_start,\n u8 *data_end,\n u8 *code_start,\n u8 *code_end,\n string_references_t *string_refs,\n void **sensitive_data_out);"
+      "code": "extern BOOL sshd_find_sensitive_data_base_via_xcalloc(\n u8 *data_start,\n u8 *data_end,\n u8 *code_start,\n u8 *code_end,\n string_references_t *string_refs,\n sensitive_data **sensitive_data_out);"
     },
     {
       "kind": "declaration",
       "names": [
         "sshd_find_sensitive_data_base_via_krb5ccname"
       ],
-      "code": "extern BOOL sshd_find_sensitive_data_base_via_krb5ccname(\n u8 *data_start,\n u8 *data_end,\n u8 *code_start,\n u8 *code_end,\n void **sensitive_data_out,\n elf_info_t *elf);"
+      "code": "extern BOOL sshd_find_sensitive_data_base_via_krb5ccname(\n u8 *data_start,\n u8 *data_end,\n u8 *code_start,\n u8 *code_end,\n sensitive_data **sensitive_data_out,\n elf_info_t *elf);"
     },
     {
       "kind": "declaration",
       "names": [
         "sshd_score_sensitive_data_candidate_in_demote_sensitive_data"
       ],
-      "code": "extern int sshd_score_sensitive_data_candidate_in_demote_sensitive_data(\n void *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
+      "code": "extern int sshd_score_sensitive_data_candidate_in_demote_sensitive_data(\n sensitive_data *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
     },
     {
       "kind": "declaration",
       "names": [
         "sshd_score_sensitive_data_candidate_in_main"
       ],
-      "code": "extern int sshd_score_sensitive_data_candidate_in_main(\n void *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
+      "code": "extern int sshd_score_sensitive_data_candidate_in_main(\n sensitive_data *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
     },
     {
       "kind": "declaration",
       "names": [
         "sshd_score_sensitive_data_candidate_in_do_child"
       ],
-      "code": "extern int sshd_score_sensitive_data_candidate_in_do_child(\n void *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
+      "code": "extern int sshd_score_sensitive_data_candidate_in_do_child(\n sensitive_data *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
     },
     {
       "kind": "declaration",
       "names": [
         "sshd_score_sensitive_data_candidate"
       ],
-      "code": "extern int sshd_score_sensitive_data_candidate(\n void *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
+      "code": "extern int sshd_score_sensitive_data_candidate(\n sensitive_data *sensitive_data,\n elf_info_t *elf,\n string_references_t *refs);"
     },
     {
       "kind": "declaration",

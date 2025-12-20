@@ -2827,7 +2827,7 @@
         "comment": "The following RIP-relative add reconstructs the absolute `.bss` pointer that getenv's return register is being stored into."
       },
       {
-        "match": "data_cursor = candidate_store + -0x18;",
+        "match_regex": "candidate_store \\+ -0x18\\);",
         "comment": "Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address."
       },
       {
@@ -2864,7 +2864,7 @@
         "comment": "Convert the RIP-relative store into an absolute `.bss` pointer before recording it."
       },
       {
-        "match": "if (((void *)store_hits[clear_idx] == (void *)(store_hits[hit_scan_idx] + -8)) &&",
+        "match_regex": "store_hits\\[clear_idx\\].*store_hits\\[hit_scan_idx\\] \\+ -8",
         "comment": "Look for three slots spaced eight bytes apart; that stride matches the struct layout (base, base+8, base+0x10)."
       },
       {
