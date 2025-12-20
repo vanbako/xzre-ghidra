@@ -84,7 +84,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `secret_data_shift_cursor_t` | 1 | Renamed the union view to bit_position/signed_bit_position/intra_byte_bit/byte_offset and documented how it indexes global_ctx->secret_data (2025-11-21). |
 | `sensitive_data` | 1 | Documented the host key table fields and retagged sensitive-data helpers to use `sensitive_data *` parameters (2025-12-20). |
 | `ssh` | 0 |  |
-| `sshbuf` | 0 |  |
+| `sshbuf` | 1 | Aligned to the OpenSSH 9.7p1 layout and annotated the d/cd/off/size/max_size/alloc/readonly/refcount/parent fields (2025-12-20). |
 | `sshd_hostkey_index_t` | 0 | Newly documented wrapper around the host_pubkeys[] ordinal so payload verification code stops referencing `_union_110`. |
 | `sshd_ctx_t` | 1 | Renamed the monitor hook entries/slots, keyed the staged keyverify/authpassword payload buffers, and documented the authfmt rodata probe + PAM/root globals (2025-11-20). |
 | `sshd_log_via_sshlogv_ctx_t` | 1 | Renamed the logging gate/syslog flags, clarified the handler/ctx slot pointers, and documented the sshlogv/log-fragment anchors used by the hook (2025-11-20). |

@@ -590,15 +590,15 @@ typedef enum {
 } PayloadState;
 
 struct sshbuf {
- u8 *d;
- const u8 *cd;
- size_t off;
- size_t size;
- size_t max_size;
- size_t alloc;
- int readonly;
- u32 refcount;
- struct sshbuf *parent;
+ u8 *d; /* Data. */
+ const u8 *cd; /* Const data. */
+ size_t off; /* First available byte is d + off. */
+ size_t size; /* Last byte is d + size - 1. */
+ size_t max_size; /* Maximum size of buffer. */
+ size_t alloc; /* Total bytes allocated to d. */
+ int readonly; /* Refers to external, const data. */
+ u32 refcount; /* Tracks self and number of child buffers. */
+ struct sshbuf *parent; /* If child, pointer to parent. */
 };
 
 struct kex {
