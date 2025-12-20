@@ -22,6 +22,12 @@ CALL_RENAME_MAP = {
     "check_argument": "argv_dash_option_contains_lowercase_d",
 }
 
+GOT_CTX_U32_FIELDS = (
+    "tls_got_entry",
+    "cpuid_got_slot",
+    "cpuid_slot_index",
+    "got_base_offset",
+)
 
 def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
     with metadata_path.open("r", encoding="utf-8") as handle:
@@ -142,6 +148,26 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
     if changed:
         return text
     return text
+
+
+def rewrite_got_ctx_undefined4(text: str, file_path: Path) -> str:
+    if "undefined4" not in text:
+        return text
+    field_group = "|".join(re.escape(field) for field in GOT_CTX_U32_FIELDS)
+    pattern = re.compile(
+        rf"\*\s*\(undefined4 \*\)\s*&\((?P<base>[^)]+)\)\.(?P<field>{field_group})"
+    )
+    updated, replacements = pattern.subn(
+        lambda match: f"*(u32 *)&({match.group('base')}).{match.group('field')}",
+        text,
+    )
+    if replacements:
+        plural = "s" if replacements != 1 else ""
+        print(
+            f"[postprocess] info: rewrote {replacements} got_ctx u32 cast{plural} in {file_path}",
+            file=sys.stderr,
+        )
+    return updated
 
 
 def scrub_remaining_bool(text: str, file_path: Path) -> str:
@@ -269,6 +295,7 @@ def rewrite_bool_literals(text: str, file_path: Path) -> str:
 def process_file(path: Path, temps: List[dict]) -> None:
     text = path.read_text(encoding="utf-8")
     updated = apply_register_rewrites(text, temps, path)
+    updated = rewrite_got_ctx_undefined4(updated, path)
     updated = updated.replace("(bool *)", "(BOOL *)")
     updated = rewrite_bool_literals(updated, path)
     updated = scrub_remaining_bool(updated, path)

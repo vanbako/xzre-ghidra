@@ -941,9 +941,9 @@ LAB_00105a81:
     cpuid_ebx = cpuid_leaf_ptr[2];
     cpuid_ecx = cpuid_leaf_ptr[3];
     *(u32 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_edx;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_ecx;
-    *(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_edx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_ecx;
+    *(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;
   }
   return FALSE;
 }

@@ -2107,16 +2107,16 @@
         "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).tls_got_entry = *cpuid_leaf_ptr;"
       },
       {
-        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;",
-        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_ebx;"
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_edx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_got_slot = cpuid_edx;"
       },
       {
-        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;",
-        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_edx;"
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_ecx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).cpuid_slot_index = cpuid_ecx;"
       },
       {
-        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;",
-        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ecx;"
+        "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;",
+        "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;"
       }
     ],
     "source": "xzre/xzre_code/backdoor_setup.c"

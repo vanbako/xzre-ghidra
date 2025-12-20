@@ -642,7 +642,7 @@ struct sensitive_data {
 typedef struct sensitive_data sensitive_data;
 
 struct sshkey {
- int type;
+ int type; /* OpenSSH key type enum (KEY_*). */
  int flags;
  RSA *rsa;
  DSA *dsa;
@@ -650,20 +650,7 @@ struct sshkey {
  EC_KEY *ecdsa;
  u8 *ed25519_sk;
  u8 *ed25519_pk;
- char *xmss_name;
- char *xmss_filename;
- void *xmss_state;
- u8 *xmss_sk;
- u8 *xmss_pk;
- char sk_application;
- u8 sk_flags;
- struct sshbuf *sk_key_handle;
- struct sshbuf *sk_reserved;
- struct sshkey_cert *cert;
- u8 *shielded_private;
- size_t shielded_len;
- u8 *shield_prekey;
- size_t shield_prekey_len;
+ /* Tail fields omitted; minimal view for xzre. */
 };
 
 typedef struct sshkey sshkey;

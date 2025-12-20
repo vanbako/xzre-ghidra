@@ -20,4 +20,4 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, plus any host key tables inside `sensitive_data`.
 - **Why it matters:** The Ed448 verification path and RSA hooks dereference key material; a minimal `sshkey` layout helps explain the digest/signature flow.
 - **Reverse-engineering plan:** Import the OpenSSH `sshkey` layout from `third_party/include/openssh`, then trim to the fields referenced in decomp (key type + RSA/Ed25519 pointers). Update metadata so the code uses named members instead of offsets.
-- **Status (2025-12-20):** Pending – `sshkey` still needs a minimal layout in `metadata/xzre_types.json` to avoid raw offset dereferences.
+- **Status (2025-12-20):** Done – trimmed `sshkey` to the minimal prefix (type/flags/RSA/DSA/ECDSA/Ed25519) in `metadata/xzre_types.json` so decomp uses named fields.

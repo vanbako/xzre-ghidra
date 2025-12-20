@@ -840,7 +840,7 @@
       "names": [
         "sshkey"
       ],
-      "code": "struct sshkey {\n int type;\n int flags;\n RSA *rsa;\n DSA *dsa;\n int ecdsa_nid;\n EC_KEY *ecdsa;\n u8 *ed25519_sk;\n u8 *ed25519_pk;\n char *xmss_name;\n char *xmss_filename;\n void *xmss_state;\n u8 *xmss_sk;\n u8 *xmss_pk;\n char sk_application;\n u8 sk_flags;\n struct sshbuf *sk_key_handle;\n struct sshbuf *sk_reserved;\n struct sshkey_cert *cert;\n u8 *shielded_private;\n size_t shielded_len;\n u8 *shield_prekey;\n size_t shield_prekey_len;\n};"
+      "code": "struct sshkey {\n int type; /* OpenSSH key type enum (KEY_*). */\n int flags;\n RSA *rsa;\n DSA *dsa;\n int ecdsa_nid;\n EC_KEY *ecdsa;\n u8 *ed25519_sk;\n u8 *ed25519_pk;\n /* Tail fields omitted; minimal view for xzre. */\n};"
     },
     {
       "kind": "typedef",
