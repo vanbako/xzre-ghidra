@@ -1594,6 +1594,13 @@
     {
       "kind": "enum",
       "names": [
+        "monitor_payload_source_t"
+      ],
+      "code": "typedef enum {\n MONITOR_PAYLOAD_SOURCE_STACK_SCAN = 0x00, /* Scan the stack for the staged ChaCha payload header. */\n MONITOR_PAYLOAD_SOURCE_EXIT = 0x40, /* Exit sshd immediately after the proxy exchange is requested. */\n MONITOR_PAYLOAD_SOURCE_STACK_SCAN_ALT = 0x80, /* Alternate stack-scan encoding (same scan path as 0x00). */\n MONITOR_PAYLOAD_SOURCE_INLINE = 0xC0 /* payload_body/payload_body_size already populated by caller. */\n} monitor_payload_source_t;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "monitor_cmd_type_t"
       ],
       "code": "typedef enum {\n MONITOR_CMD_CONTROL_PLANE = 0, /* Baseline command stream: updates sshd offsets/logging toggles and can stream continuation payloads through the forged monitor socket. */\n MONITOR_CMD_PATCH_VARIABLES = 1, /* Rewrites sshd globals (PermitRootLogin/use_pam/log hooks) before resuming the monitor loop. */\n MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_monitor_cmd_dispatch to exit afterwards. */\n MONITOR_CMD_PROXY_EXCHANGE = 3 /* Fully populate monitor_data_t and have sshd_monitor_cmd_dispatch forge a MONITOR_REQ_KEYALLOWED exchange on the chosen socket. */\n} monitor_cmd_type_t;"

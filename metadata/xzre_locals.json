@@ -8611,6 +8611,14 @@
         "type": "byte"
       },
       {
+        "original": "monitor_flag_mask != 0xc0",
+        "replacement": "monitor_flag_mask != MONITOR_PAYLOAD_SOURCE_INLINE"
+      },
+      {
+        "original": "monitor_flag_mask == 0x40",
+        "replacement": "monitor_flag_mask == MONITOR_PAYLOAD_SOURCE_EXIT"
+      },
+      {
         "name": "stack_slot",
         "original": "puVar22",
         "type": "u64 *"

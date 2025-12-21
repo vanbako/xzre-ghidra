@@ -32,7 +32,7 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Where it shows up:** `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`monitor_flags & 0xc0` with values 0x00/0x40/0x80/0xc0).
 - **Why it matters:** The high bits select how cmd_type 3 sources payloads; a named enum clarifies the control flow and avoids ambiguous bit masks.
 - **Reverse-engineering plan:** Add a small enum for the payload source mode (e.g., `monitor_payload_source_t`), then replace the bit-mask comparisons with named values; refresh.
-- **Status (2025-12-21):** Open – identified the high-bit mode selector.
+- **Status (2025-12-21):** Done – added `monitor_payload_source_t`, rewrote the monitor flag comparisons in `sshd_monitor_cmd_dispatch`, and refreshed exports.
 
 ## Completed
 

