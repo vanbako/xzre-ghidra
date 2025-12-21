@@ -10,7 +10,23 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 
 ## Candidates
 
-- None queued right now.
+### ELF program header types (PT_*)
+- **Where it shows up:** `xzregh/1013D0_elf_info_parse.c` (`p_type == 1/2` plus PT_GNU_RELRO checks) and `xzregh/1013B0_is_pt_gnu_relro.c` (obfuscated PT_GNU_RELRO test).
+- **Why it matters:** Naming PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO makes the ELF parser easier to read and keeps segment-type checks consistent.
+- **Reverse-engineering plan:** Add an enum (e.g., `ElfProgramHeaderType`) with PT_LOAD=1, PT_DYNAMIC=2, PT_GNU_RELRO=0x6474e552; rewrite the comparisons via locals replacements; refresh.
+- **Status (2025-12-21):** Open – candidate identified.
+
+### ELF relocation types (R_X86_64_*)
+- **Where it shows up:** `xzregh/101E60_elf_find_plt_reloc_slot.c` (reloc type 7), `xzregh/101E90_elf_find_got_reloc_slot.c` (reloc type 6), and `xzregh/101B90_elf_rela_find_relative_slot.c` (`r_info == 8`).
+- **Why it matters:** Naming R_X86_64_JUMP_SLOT/GLOB_DAT/RELATIVE clarifies the loader’s relocation handling and avoids magic constants.
+- **Reverse-engineering plan:** Add an enum (e.g., `x86_64_reloc_type_t`) for the observed relocation IDs and replace literals in the helpers; refresh.
+- **Status (2025-12-21):** Open – candidate identified.
+
+### OpenSSH sshkey type IDs (KEY_*)
+- **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c` (`sshkey->type` compared against 0/1/2/3 for RSA/DSA/ECDSA/ED25519).
+- **Why it matters:** Naming KEY_* values makes key-type branching explicit and aligns with upstream OpenSSH headers.
+- **Reverse-engineering plan:** Add an enum (e.g., `sshkey_type_t`) and retype `sshkey.type`/comparisons to use it; refresh.
+- **Status (2025-12-21):** Open – candidate identified.
 
 ## Completed
 
