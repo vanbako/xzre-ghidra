@@ -14,7 +14,7 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Where it shows up:** `xzregh/1013D0_elf_info_parse.c` (switch/cases for 2, 5, 6, 7, 8, 0x17, 0x18, 0x1e, 0x23, 0x24; plus comparisons for 0x6ffffef5, 0x6ffffff0, 0x6ffffffb, 0x6ffffffc, 0x6ffffffd, 0x7fffffff).
 - **Why it matters:** These are canonical DT_* tags; naming them makes the ELF parser readable and keeps tag lookups consistent across helpers.
 - **Reverse-engineering plan:** Add an enum (e.g., `ElfDynamicTag`) with the DT_* and GNU/OS-specific tags used here; replace literals in `elf_info_parse` via locals rewrites; refresh.
-- **Status (2025-12-21):** Open – identified the dynamic tag literals.
+- **Status (2025-12-21):** Done – added `ElfDynamicTag`, rewrote the tag literals in `elf_info_parse`, and refreshed exports.
 
 ### CPUID leaf IDs
 - **Where it shows up:** `xzregh/10A700_cpuid_query_and_unpack.c` (leaf values 0..10, 0xb, 0xd, 0xf, 0x80000002–0x80000004).

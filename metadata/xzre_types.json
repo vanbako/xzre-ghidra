@@ -747,6 +747,20 @@
     {
       "kind": "enum",
       "names": [
+        "ElfDynamicTag"
+      ],
+      "code": "typedef enum {\n DT_NULL = 0,\n DT_PLTRELSZ = 2,\n DT_STRTAB = 5,\n DT_SYMTAB = 6,\n DT_RELA = 7,\n DT_RELASZ = 8,\n DT_JMPREL = 0x17,\n DT_BIND_NOW = 0x18,\n DT_FLAGS = 0x1e,\n DT_RELRSZ = 0x23,\n DT_RELR = 0x24,\n DT_GNU_HASH = 0x6ffffef5,\n DT_CONFIG = 0x6ffffefa,\n DT_PLTPAD = 0x6ffffefd,\n DT_VERSYM = 0x6ffffff0,\n DT_FLAGS_1 = 0x6ffffffb,\n DT_VERDEF = 0x6ffffffc,\n DT_VERDEFNUM = 0x6ffffffd,\n DT_HIPROC = 0x7fffffff\n} ElfDynamicTag;"
+    },
+    {
+      "kind": "union",
+      "names": [
+        "ElfDynamicTagOrIndex"
+      ],
+      "code": "typedef union {\n long phdr_index;\n ElfDynamicTag tag;\n} ElfDynamicTagOrIndex;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ModRm_Mod"
       ],
       "code": "typedef enum {\n MRM_I_REG,\n MRM_I_DISP1,\n MRM_I_DISP4,\n MRM_D_REG\n} ModRm_Mod;"

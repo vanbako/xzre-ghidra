@@ -419,6 +419,33 @@ typedef enum {
  X_ELF_NOW = 0x20
 } ElfFlags;
 
+typedef enum {
+ DT_NULL = 0,
+ DT_PLTRELSZ = 2,
+ DT_STRTAB = 5,
+ DT_SYMTAB = 6,
+ DT_RELA = 7,
+ DT_RELASZ = 8,
+ DT_JMPREL = 0x17,
+ DT_BIND_NOW = 0x18,
+ DT_FLAGS = 0x1e,
+ DT_RELRSZ = 0x23,
+ DT_RELR = 0x24,
+ DT_GNU_HASH = 0x6ffffef5,
+ DT_CONFIG = 0x6ffffefa,
+ DT_PLTPAD = 0x6ffffefd,
+ DT_VERSYM = 0x6ffffff0,
+ DT_FLAGS_1 = 0x6ffffffb,
+ DT_VERDEF = 0x6ffffffc,
+ DT_VERDEFNUM = 0x6ffffffd,
+ DT_HIPROC = 0x7fffffff
+} ElfDynamicTag;
+
+typedef union {
+ long phdr_index;
+ ElfDynamicTag tag;
+} ElfDynamicTagOrIndex;
+
 /*
  * Categorization of the ModRM byte modes that the instruction search helpers check when scanning for register or displacement based operands.
  */
