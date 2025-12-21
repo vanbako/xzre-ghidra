@@ -887,6 +887,13 @@
     {
       "kind": "enum",
       "names": [
+        "dasm_modrm_signature"
+      ],
+      "code": "enum dasm_modrm_signature {\n XZ_MODRM_RIPREL_DISP32_MASK = 0xFF00FF00,\n XZ_MODRM_RIPREL_DISP32 = 0x05000000\n};"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "dasm_opcode_window_map"
       ],
       "code": "enum dasm_opcode_window_map {\n XZ_OPCODE_WINDOW_ONE_BYTE = 0x00000000,\n XZ_OPCODE_WINDOW_TWO_BYTE = 0x00000F00,\n XZ_OPCODE_WINDOW_THREE_BYTE_0F38 = 0x000F3800,\n XZ_OPCODE_WINDOW_THREE_BYTE_0F3A = 0x000F3A00\n};"

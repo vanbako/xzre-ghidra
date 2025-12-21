@@ -109,7 +109,7 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
         }
         if ((insn_ctx.prefix.flags_u32 & 0x100) != 0) {
           lea_operand_disp = (u8 *)insn_ctx.mem_disp;
-          if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+          if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
             lea_operand_disp = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);
           }
           // AutoDoc: Only chase LEAs whose displacement matches the expected `link_map::l_name` offset; everything else is noise.

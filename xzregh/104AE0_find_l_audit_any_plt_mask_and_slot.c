@@ -114,7 +114,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
           computed_slot_ptr = (u8 *)0x0;
           if (((insn_ctx.prefix.flags_u32 & 0x100) != 0) &&
              (computed_slot_ptr = (u8 *)insn_ctx.mem_disp,
-             ((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+             ((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
             computed_slot_ptr = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);
           }
           // AutoDoc: Only advance once the LEA recomputes the expected displacement and the register filter allows it.

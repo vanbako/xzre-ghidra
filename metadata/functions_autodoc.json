@@ -1100,7 +1100,7 @@
         "placement": "after"
       },
       {
-        "match": "if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)",
+        "match": "if (((uint)scratch_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)",
         "match_type": "wildcard",
         "comment": "RIP-relative disp32 (ModRM `mod=0`, `rm=5`) needs the extra `instruction + instruction_size` correction.",
         "placement": "after"
@@ -1481,7 +1481,7 @@
         "comment": "Retry at the next byte boundary when the decoder chokes on garbage."
       },
       {
-        "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match": "if ((((*->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&",
         "match_type": "wildcard",
         "comment": "Require RIP-relative disp32 (ModRM `mod=0`, `rm=5`) and the caller-requested operand width.",
         "placement": "after"
@@ -1502,7 +1502,7 @@
         "comment": "Failed decodes advance byte-by-byte until the next valid opcode appears."
       },
       {
-        "match": "if ((((*->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "match": "if ((((*->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&",
         "match_type": "wildcard",
         "comment": "Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).",
         "placement": "after"

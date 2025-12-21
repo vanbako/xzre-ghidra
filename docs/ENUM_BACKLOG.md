@@ -26,7 +26,7 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Where it shows up:** `xzregh/100D40_find_riprel_mov_or_lea.c`, `xzregh/100E00_find_riprel_mov.c`, `xzregh/100F60_find_riprel_lea.c`, `xzregh/101060_find_riprel_opcode_memref_ex.c`, `xzregh/102C60_find_riprel_mov_load_target_in_range.c`, `xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c` (mask checks against `0x5000000` and related patterns).
 - **Why it matters:** These constants encode specific ModRM patterns (RIP-relative disp32); naming them avoids repeated magic masks across the opcode scanners.
 - **Reverse-engineering plan:** Define a small enum or constant set for ModRM signature checks (e.g., `XZ_MODRM_RIPREL_DISP32`), then update the repeated `& 0xff00ff00 == 0x5000000` checks via locals rewrites; refresh.
-- **Status (2025-12-21):** Open – repeated ModRM signature literal observed.
+- **Status (2025-12-21):** Done – added `dasm_modrm_signature` constants, rewrote ModRM mask checks via locals, refreshed exports.
 
 ### Monitor payload source mode (cmd_type 3)
 - **Where it shows up:** `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`monitor_flags & 0xc0` with values 0x00/0x40/0x80/0xc0).

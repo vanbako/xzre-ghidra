@@ -163,7 +163,7 @@ LAB_001008c5:
             (ctx->prefix).modrm_bytes.modrm_rm = modrm_byte & 7;
             if (tmp_byte == 3) {
 LAB_00100902:
-              if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {
+              if (((ctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
 LAB_0010092e:
                 flags2_ptr = &(ctx->prefix).decoded.flags2;
                 *flags2_ptr = *flags2_ptr | 1;

@@ -41,7 +41,7 @@ BOOL find_riprel_mov(u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load
       // AutoDoc: Retry at the next byte boundary when the decoder chokes on garbage.
       code_start = code_start + 1;
     }
-    if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
+    if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&
     // AutoDoc: Require RIP-relative disp32 (ModRM `mod=0`, `rm=5`) and the caller-requested operand width.
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {

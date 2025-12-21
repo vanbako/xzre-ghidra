@@ -741,6 +741,11 @@ enum dasm_modrm_mask {
  XZ_MODRM_RAW = 0x000000FF
 };
 
+enum dasm_modrm_signature {
+ XZ_MODRM_RIPREL_DISP32_MASK = 0xFF00FF00,
+ XZ_MODRM_RIPREL_DISP32 = 0x05000000
+};
+
 /*
  * Opcode-map prefixes stored in `dasm_ctx_t::opcode_window_dword` before the +0x80 normalization (mask off the low opcode byte): no prefix for one-byte opcodes, 0x0F00 for two-byte opcodes, and 0x0F38/0x0F3A for the three-byte maps.
  */

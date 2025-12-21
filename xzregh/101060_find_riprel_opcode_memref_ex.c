@@ -40,7 +40,7 @@ BOOL find_riprel_opcode_memref_ex
       search_ok = x86_decode_instruction(dctx,code_start,code_end);
       // AutoDoc: Require the decoded opcode plus the RIP-relative disp32 form (ModRM `mod=0`, `rm=5`) before considering the displacement recompute.
       if ((((search_ok != FALSE) && ((dctx->opcode_window).opcode_window_dword == opcode)) &&
-          (((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000)) &&
+          (((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) &&
          ((mem_address == (void *)0x0 ||
          // AutoDoc: When the caller provides a target pointer, insist `DF2_MEM_DISP` is set and the RIP-relative recomputation (`instruction + size + disp32`) lands exactly on it.
           ((((dctx->prefix).decoded.flags2 & 1) != 0 &&

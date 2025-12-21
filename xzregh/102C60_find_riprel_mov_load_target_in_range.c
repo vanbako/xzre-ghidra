@@ -52,7 +52,7 @@ void * find_riprel_mov_load_target_in_range
           }
           else {
             candidate_addr = (u8 *)scratch_ctx.mem_disp;
-            if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+            if (((uint)scratch_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
             // AutoDoc: RIP-relative disp32 (ModRM `mod=0`, `rm=5`) needs the extra `instruction + instruction_size` correction.
               candidate_addr = (u8 *)(scratch_ctx.mem_disp + (long)scratch_ctx.instruction) +
                        scratch_ctx.instruction_size;

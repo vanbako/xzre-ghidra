@@ -100,7 +100,7 @@ LAB_0010346b:
               while (((store_scan_cursor < code_end && (probe_depth < 6)) &&
                      (decode_ok = x86_decode_instruction(&store_scan_ctx,store_scan_cursor,code_end), decode_ok != FALSE))) {
                 if (store_scan_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_STORE) {
-                  if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                  if (((uint)store_scan_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                     dest_reg = 0;
                     if ((store_scan_ctx.prefix.flags_u16 & 0x1040) != 0) {
                       if ((store_scan_ctx.prefix.flags_u16 & 0x40) == 0) {

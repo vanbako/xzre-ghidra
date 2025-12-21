@@ -2122,6 +2122,10 @@
       {
         "original": "*(undefined4 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;",
         "replacement": "*(u32 *)&(entry_ctx_ptr->got_ctx).got_base_offset = cpuid_ebx;"
+      },
+      {
+        "original": "if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/backdoor_setup.c"
@@ -2922,6 +2926,10 @@
       {
         "original": "return (BOOL)scratch_ctx;",
         "replacement": "return ((slot_lower_bound != (dasm_ctx_t *)0x0) && (0x10 < code_segment_size));"
+      },
+      {
+        "original": "(((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000))",
+        "replacement": "(((uint)scanner_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) != XZ_MODRM_RIPREL_DISP32))"
       }
     ],
     "source": "xzre/xzre_code/elf_find_string_references.c"
@@ -3779,6 +3787,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "(((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000))",
+        "replacement": "(((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
       }
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
@@ -3828,6 +3840,10 @@
       {
         "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);",
         "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
+      },
+      {
+        "original": "if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((uint)scratch_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
@@ -4095,6 +4111,10 @@
         "name": "insn_ctx",
         "original": "local_80",
         "type": "dasm_ctx_t"
+      },
+      {
+        "original": "if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/find_dl_naudit.c"
@@ -4213,6 +4233,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "(((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000))",
+        "replacement": "(((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
       }
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c"
@@ -4291,6 +4315,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000 &&",
+        "replacement": "((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32 &&"
       }
     ],
     "source": "xzre/xzre_code/find_lea_instruction_with_mem_operand.c"
@@ -4431,6 +4459,10 @@
       {
         "original": "(ulong)wipe_stride * -2 + 1",
         "replacement": "1"
+      },
+      {
+        "original": "if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
@@ -4578,6 +4610,10 @@
       {
         "original": "else if (pattern_state == 2)",
         "replacement": "else if (pattern_state == AUDIT_PAT_EXPECT_TEST)"
+      },
+      {
+        "original": "((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000))",
+        "replacement": "((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -4723,6 +4759,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "replacement": "if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&"
       }
     ],
     "source": "xzre/xzre_code/find_mov_instruction.c"
@@ -4767,6 +4807,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "if ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) &&",
+        "replacement": "if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&"
       }
     ],
     "source": "xzre/xzre_code/find_mov_lea_instruction.c"
@@ -7468,6 +7512,10 @@
       {
         "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)&zero_ctx_cursor->instruction + 4);",
         "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
+      },
+      {
+        "original": "((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {",
+        "replacement": "((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"
@@ -7889,6 +7937,10 @@
       {
         "original": "zero_ctx_cursor = (dasm_ctx_t *)((long)zero_ctx_cursor + (ulong)zero_seed * -8 + 4);",
         "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
+      },
+      {
+        "original": "if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((uint)store_scan_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c"
@@ -7985,6 +8037,10 @@
       {
         "original": "store_hits[hit_index] = (long)store_operand_ptr;",
         "replacement": "store_hits[hit_index] = store_operand_ptr;"
+      },
+      {
+        "original": "((uint)store_probe_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000))",
+        "replacement": "((uint)store_probe_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c"
@@ -9302,6 +9358,10 @@
       {
         "original": "((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==\n                (undefined1  [16])0x66000000000004",
         "replacement": "(((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)"
+      },
+      {
+        "original": "if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {",
+        "replacement": "if (((ctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
     ],
     "source": "xzre/xzre_code/x86_dasm.c"

@@ -90,7 +90,7 @@ LAB_00103782:
   }
   if (((store_probe_ctx.prefix.flags_u16 & 0x100) != 0) &&
      (store_operand_ptr = (u8 *)store_probe_ctx.mem_disp,
-     ((uint)store_probe_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {
+     ((uint)store_probe_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
     // AutoDoc: Convert the RIP-relative store into an absolute `.bss` pointer before recording it.
     store_operand_ptr = (u8 *)(store_probe_ctx.mem_disp + (long)store_probe_ctx.instruction) + store_probe_ctx.instruction_size;
   }

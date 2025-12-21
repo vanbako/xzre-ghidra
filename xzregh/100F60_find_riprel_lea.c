@@ -40,7 +40,7 @@ BOOL find_riprel_lea(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_addr
       if ((((decoded != FALSE) && ((dctx->opcode_window).opcode_window_dword == X86_OPCODE_1B_LEA)) &&
       // AutoDoc: Optional RIP target comparison lets callers lock onto a single absolute pointer.
           (((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48)) &&
-         ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000 &&
+         ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32 &&
           ((mem_address == (void *)0x0 ||
            (dctx->instruction + dctx->mem_disp + dctx->instruction_size == (u8 *)mem_address)))))) {
         return TRUE;

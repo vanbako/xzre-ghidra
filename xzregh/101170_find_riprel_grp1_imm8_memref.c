@@ -36,7 +36,7 @@ BOOL find_riprel_grp1_imm8_memref(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,v
     add_found = x86_decode_instruction(dctx,code_start,code_end);
     // AutoDoc: Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory.
     if ((((add_found != FALSE) && ((dctx->opcode_window).opcode_window_dword == X86_OPCODE_1B_GRP1_IMM8)
-         ) && (((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000)) &&
+         ) && (((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) &&
        ((mem_address == (void *)0x0 ||
        // AutoDoc: Optionally demand `DF2_MEM_DISP` plus the RIP-relative displacement that lands on the requested pointer.
         ((((dctx->prefix).decoded.flags2 & 1) != 0 &&

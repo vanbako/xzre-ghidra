@@ -697,7 +697,7 @@ LAB_001068e4:
             main_data_base = log_handler_ctx_candidate;
             if ((mov_dst_reg == mov_src_reg) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0)) {
               log_handler_slot_tmp = (log_handler_fn *)probe_dasm_ctx.mem_disp;
-              if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+              if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                 log_handler_slot_tmp = (log_handler_fn *)
                            ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
                            CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
@@ -801,7 +801,7 @@ LAB_00106b3c:
               if ((probe_dasm_ctx.imm_zeroextended == 0) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0))
               {
                 log_handler_ctx_candidate = (log_handler_fn *)probe_dasm_ctx.mem_disp;
-                if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
+                if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                   log_handler_ctx_candidate = (log_handler_fn *)
                           ((u8 *)(probe_dasm_ctx.mem_disp + (long)probe_dasm_ctx.instruction) +
                           CONCAT44(*(uint *)((u8 *)&probe_dasm_ctx.instruction_size + 4),
