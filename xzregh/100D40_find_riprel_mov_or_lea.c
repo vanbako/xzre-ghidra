@@ -16,7 +16,7 @@ BOOL find_riprel_mov_or_lea
                (u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load_flag,dasm_ctx_t *dctx)
 
 {
-  X86_OPCODE XVar1;
+  X86_OPCODE decoded_opcode;
   BOOL decoded;
   long ctx_clear_idx;
   dasm_ctx_t *ctx_clear_cursor;
@@ -46,15 +46,15 @@ BOOL find_riprel_mov_or_lea
     // AutoDoc: Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
-      XVar1 = (dctx->opcode_window).opcode_window_dword;
-      if (XVar1 == X86_OPCODE_1B_LEA) {
+      decoded_opcode = (dctx->opcode_window).opcode_window_dword;
+      if (decoded_opcode == X86_OPCODE_1B_LEA) {
         return TRUE;
       }
       if (load_flag == FALSE) {
-        is_expected_opcode = XVar1 == X86_OPCODE_1B_MOV_STORE;
+        is_expected_opcode = decoded_opcode == X86_OPCODE_1B_MOV_STORE;
       }
       else {
-        is_expected_opcode = XVar1 == X86_OPCODE_1B_MOV_LOAD;
+        is_expected_opcode = decoded_opcode == X86_OPCODE_1B_MOV_LOAD;
       }
       if (is_expected_opcode) {
         return TRUE;

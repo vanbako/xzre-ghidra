@@ -4632,8 +4632,8 @@
       },
       {
         "name": "decoded_opcode",
-        "original": "uVar1",
-        "type": "u32"
+        "original": "XVar1",
+        "type": "X86_OPCODE"
       },
       {
         "name": "decoded",
@@ -6934,8 +6934,8 @@
       },
       {
         "name": "decoded_opcode",
-        "original": "uVar3",
-        "type": "u32"
+        "original": "XVar3",
+        "type": "X86_OPCODE"
       },
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
@@ -9037,13 +9037,13 @@
       },
       {
         "name": "opcode_ptr",
-        "original": "pbVar16",
+        "original": "pbVar14",
         "type": "u8 *"
       },
       {
         "name": "opcode_high_bits",
-        "original": "uVar13",
-        "type": "uint"
+        "original": "XVar12",
+        "type": "X86_OPCODE"
       },
       {
         "name": "opcode_class_mask",
@@ -9082,18 +9082,18 @@
       },
       {
         "name": "imm_field",
-        "original": "uVar20",
+        "original": "uVar21",
         "type": "ulong"
       },
       {
         "name": "opcode_index",
-        "original": "sVar11",
+        "original": "sVar10",
         "type": "sbyte"
       },
       {
         "name": "opcode",
-        "original": "uVar10",
-        "type": "uint"
+        "original": "XVar11",
+        "type": "X86_OPCODE"
       },
       {
         "name": "cursor",
@@ -9107,17 +9107,17 @@
       },
       {
         "name": "current_byte",
-        "original": "bVar17",
+        "original": "bVar16",
         "type": "byte"
       },
       {
         "name": "normalized_opcode",
-        "original": "uVar12",
-        "type": "uint"
+        "original": "XVar17",
+        "type": "X86_OPCODE"
       },
       {
         "name": "imm_cursor",
-        "original": "pbVar21",
+        "original": "pbVar20",
         "type": "u8 *"
       },
       {
@@ -9147,7 +9147,7 @@
       },
       {
         "name": "clear_idx",
-        "original": "lVar14",
+        "original": "lVar13",
         "type": "long"
       },
       {

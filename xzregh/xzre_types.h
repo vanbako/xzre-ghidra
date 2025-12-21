@@ -342,7 +342,7 @@ typedef struct {
 /*
  * Normalized opcode tags stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can compare opcodes without re-running the decoder. One-byte opcodes are stored as `raw_opcode + 0x80`. Two- and three-byte opcodes keep their 0x0F/0x0F38/0x0F3A prefix bytes and still add 0x80 to the low opcode byte. ENDBR32/64 use the decoder's special tags (0xA5FC/0xA5FE).
  */
-enum X86_OPCODE {
+typedef enum X86_OPCODE {
  X86_OPCODE_1B_ADD_RM_R = 0x81,
  X86_OPCODE_1B_ADD_R_RM = 0x83,
  X86_OPCODE_1B_OR_RM_R = 0x89,
@@ -367,7 +367,7 @@ enum X86_OPCODE {
  X86_OPCODE_MOV = 0x109,
  X86_OPCODE_MOV_LOAD = 0x10B,
  X86_OPCODE_MOV_STORE = 0x109
-};
+} X86_OPCODE;
 
 /*
  * Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).
@@ -2210,10 +2210,10 @@ extern BOOL sshd_validate_log_handler_slots(
 /*
  * Direction selector the socket helpers use to know whether we should fetch the readable or writable monitor file descriptor.
  */
-enum SocketMode {
+typedef enum SocketMode {
  DIR_WRITE = 0,
  DIR_READ = 1
-};
+} SocketMode;
 
 extern BOOL sshd_get_monitor_comm_fd(
  global_context_t *ctx,
