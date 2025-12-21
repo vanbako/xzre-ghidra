@@ -9031,6 +9031,11 @@
         "type": "BOOL"
       },
       {
+        "name": "zero_stride_flag",
+        "original": "bVar27",
+        "type": "byte"
+      },
+      {
         "name": "opcode_ptr",
         "original": "pbVar16",
         "type": "u8 *"

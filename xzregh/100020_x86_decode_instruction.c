@@ -39,10 +39,10 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   x86_prefix_state_t *prefix_zero_cursor;
   byte ctx_zero_stride;
   BOOL range_hits_upper_bound;
-  byte bVar27;
+  byte zero_stride_flag;
   ulong opcode_class_masks [4];
   
-  bVar27 = 0;
+  zero_stride_flag = 0;
   telemetry_ok = secret_data_append_bits_from_addr_or_ret
   // AutoDoc: Emit the breadcrumb before touching attacker-controlled bytes so later passes know a decode ran.
                     ((void *)0x0,(secret_data_shift_cursor_t)0x12,0x46,2);
@@ -53,7 +53,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   // AutoDoc: Clear every field in the decoder context so prefixes/immediates never leak between attempts.
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)&ctx_zero_cursor->instruction = 0;
-    ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
+    ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)zero_stride_flag * -8 + 4);
   }
   ctx_zero_stride = code_start < code_end;
   cursor = code_start;
@@ -63,7 +63,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(u32 *)&ctx->instruction = 0;
-        ctx = (dasm_ctx_t *)((u8 *)ctx + 4);
+        ctx = (dasm_ctx_t *)((long)ctx + (ulong)zero_stride_flag * -8 + 4);
       }
       return FALSE;
     }
@@ -100,7 +100,7 @@ LAB_001001c9:
               prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
                 prefix_zero_cursor->flags_u32 = 0;
-                prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);
+                prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)zero_stride_flag * -8 + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;
