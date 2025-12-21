@@ -439,6 +439,25 @@ typedef enum {
  DT_HIPROC = 0x7fffffff
 } ElfDynamicTag;
 
+typedef enum cpuid_leaf {
+ CPUID_LEAF_BASIC_INFO = 0,
+ CPUID_LEAF_VERSION_INFO = 1,
+ CPUID_LEAF_CACHE_TLB_INFO = 2,
+ CPUID_LEAF_SERIAL_NUMBER = 3,
+ CPUID_LEAF_DETERMINISTIC_CACHE = 4,
+ CPUID_LEAF_MONITOR_MWAIT = 5,
+ CPUID_LEAF_THERMAL_POWER = 6,
+ CPUID_LEAF_EXTENDED_FEATURES = 7,
+ CPUID_LEAF_DIRECT_CACHE_ACCESS = 9,
+ CPUID_LEAF_ARCH_PERF_MONITORING = 10,
+ CPUID_LEAF_EXTENDED_TOPOLOGY = 0xb,
+ CPUID_LEAF_EXTENDED_STATE = 0xd,
+ CPUID_LEAF_QOS_MONITORING = 0xf,
+ CPUID_LEAF_BRAND_STRING_PART1 = 0x80000002,
+ CPUID_LEAF_BRAND_STRING_PART2 = 0x80000003,
+ CPUID_LEAF_BRAND_STRING_PART3 = 0x80000004
+} cpuid_leaf_t;
+
 /*
  * Categorization of the ModRM byte modes that the instruction search helpers check when scanning for register or displacement based operands.
  */
@@ -2046,9 +2065,9 @@ extern u32 popcount_u64(u64 x);
 
 extern EncodedStringId encoded_string_id_lookup(const char *string_begin, const char *string_end);
 
-extern unsigned int get_cpuid_with_ifunc_bootstrap(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
+extern unsigned int get_cpuid_with_ifunc_bootstrap(cpuid_leaf_t leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);
 
-extern void cpuid_query_and_unpack(unsigned int level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
+extern void cpuid_query_and_unpack(cpuid_leaf_t level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
 
 extern int hooks_ctx_init_or_wait_for_shared_globals(backdoor_hooks_ctx_t *ctx);
 

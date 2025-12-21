@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10A800_get_cpuid_with_ifunc_bootstrap.c
 // Function: get_cpuid_with_ifunc_bootstrap @ 0x10A800
 // Calling convention: __stdcall
-// Prototype: uint __stdcall get_cpuid_with_ifunc_bootstrap(uint leaf, uint * eax, uint * ebx, uint * ecx, uint * edx, u64 * caller_frame)
+// Prototype: uint __stdcall get_cpuid_with_ifunc_bootstrap(cpuid_leaf_t leaf, uint * eax, uint * ebx, uint * ecx, uint * edx, u64 * caller_frame)
 
 
 /*
@@ -14,22 +14,23 @@
 #include "xzre_types.h"
 
 uint get_cpuid_with_ifunc_bootstrap
-               (uint leaf,uint *eax,uint *ebx,uint *ecx,uint *edx,u64 *caller_frame)
+               (cpuid_leaf_t leaf,uint *eax,uint *ebx,uint *ecx,uint *edx,u64 *caller_frame)
 
 {
   uint max_leaf;
+  uint leaf_supported;
   
   // AutoDoc: Force the IFUNC resolver to run (and thus the loader to initialize) before satisfying any caller-supplied leaf.
   max_leaf = cpuid_ifunc_resolver_entry(leaf & 0x80000000,caller_frame);
   // AutoDoc: Reject callers that ask for leaves the CPU refused to advertise—glibc expects us to return FALSE instead of faulting.
-  if ((max_leaf == 0) || (max_leaf < leaf)) {
-    max_leaf = 0;
+  if ((max_leaf == CPUID_LEAF_BASIC_INFO) || ((uint)max_leaf < (uint)leaf)) {
+    leaf_supported = 0;
   }
   else {
     // AutoDoc: Defer to the shared dispatcher once we know the leaf is valid; the helper mirrors GCC’s register order.
     cpuid_query_and_unpack(leaf,eax,ebx,ecx,edx);
-    max_leaf = 1;
+    leaf_supported = 1;
   }
-  return max_leaf;
+  return leaf_supported;
 }
 

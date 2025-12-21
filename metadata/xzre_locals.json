@@ -1405,7 +1405,12 @@
     "register_temps": [
       {
         "name": "max_leaf",
-        "original": "uVar1",
+        "original": "cVar1",
+        "type": "uint"
+      },
+      {
+        "name": "leaf_supported",
+        "original": "uVar2",
         "type": "uint"
       }
     ],

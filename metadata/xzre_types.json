@@ -754,6 +754,13 @@
     {
       "kind": "enum",
       "names": [
+        "cpuid_leaf_t"
+      ],
+      "code": "typedef enum cpuid_leaf {\n CPUID_LEAF_BASIC_INFO = 0,\n CPUID_LEAF_VERSION_INFO = 1,\n CPUID_LEAF_CACHE_TLB_INFO = 2,\n CPUID_LEAF_SERIAL_NUMBER = 3,\n CPUID_LEAF_DETERMINISTIC_CACHE = 4,\n CPUID_LEAF_MONITOR_MWAIT = 5,\n CPUID_LEAF_THERMAL_POWER = 6,\n CPUID_LEAF_EXTENDED_FEATURES = 7,\n CPUID_LEAF_DIRECT_CACHE_ACCESS = 9,\n CPUID_LEAF_ARCH_PERF_MONITORING = 10,\n CPUID_LEAF_EXTENDED_TOPOLOGY = 0xb,\n CPUID_LEAF_EXTENDED_STATE = 0xd,\n CPUID_LEAF_QOS_MONITORING = 0xf,\n CPUID_LEAF_BRAND_STRING_PART1 = 0x80000002,\n CPUID_LEAF_BRAND_STRING_PART2 = 0x80000003,\n CPUID_LEAF_BRAND_STRING_PART3 = 0x80000004\n} cpuid_leaf_t;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ModRm_Mod"
       ],
       "code": "typedef enum {\n MRM_I_REG,\n MRM_I_DISP1,\n MRM_I_DISP4,\n MRM_D_REG\n} ModRm_Mod;"
@@ -2156,14 +2163,14 @@
       "names": [
         "get_cpuid_with_ifunc_bootstrap"
       ],
-      "code": "extern unsigned int get_cpuid_with_ifunc_bootstrap(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);"
+      "code": "extern unsigned int get_cpuid_with_ifunc_bootstrap(cpuid_leaf_t leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx, u64 *caller_frame);"
     },
     {
       "kind": "declaration",
       "names": [
         "cpuid_query_and_unpack"
       ],
-      "code": "extern void cpuid_query_and_unpack(unsigned int level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);"
+      "code": "extern void cpuid_query_and_unpack(cpuid_leaf_t level, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);"
     },
     {
       "kind": "declaration",

@@ -3,7 +3,7 @@
     "plate": "Thin wrapper around the x86 `cpuid` instruction (GCC\u2019s `__cpuid` contract). In the decompiler output Ghidra lifts CPUID into\nleaf-specific pseudo-functions (`cpuid_basic_info`, `cpuid_Version_info`, \u2026) with a generic `cpuid(level)` fallback. The wrapper then\ncopies the resulting register tuple into the caller-provided output pointers (EAX/EBX/ECX/EDX).",
     "inline": [
       {
-        "match": "if (level == 0) {",
+        "match": "if (level == CPUID_LEAF_BASIC_INFO) {",
         "comment": "Ghidra models `cpuid` as a leaf dispatch; the real binary executes the `cpuid` instruction with `EAX=level`."
       },
       {
@@ -24,7 +24,7 @@
         "comment": "Force the IFUNC resolver to run (and thus the loader to initialize) before satisfying any caller-supplied leaf."
       },
       {
-        "match": "if ((max_leaf == 0) || (max_leaf < leaf)) {",
+        "match": "max_leaf <",
         "comment": "Reject callers that ask for leaves the CPU refused to advertise\u2014glibc expects us to return FALSE instead of faulting."
       },
       {

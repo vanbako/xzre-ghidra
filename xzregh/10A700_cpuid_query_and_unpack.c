@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/10A700_cpuid_query_and_unpack.c
 // Function: cpuid_query_and_unpack @ 0x10A700
 // Calling convention: __stdcall
-// Prototype: void __stdcall cpuid_query_and_unpack(uint level, uint * eax, uint * ebx, uint * ecx, uint * edx)
+// Prototype: void __stdcall cpuid_query_and_unpack(cpuid_leaf_t level, uint * eax, uint * ebx, uint * ecx, uint * edx)
 
 
 /*
@@ -12,7 +12,7 @@
 
 #include "xzre_types.h"
 
-void cpuid_query_and_unpack(uint level,uint *eax,uint *ebx,uint *ecx,uint *edx)
+void cpuid_query_and_unpack(cpuid_leaf_t level,uint *eax,uint *ebx,uint *ecx,uint *edx)
 
 {
   uint *leaf_info;
@@ -21,52 +21,52 @@ void cpuid_query_and_unpack(uint level,uint *eax,uint *ebx,uint *ecx,uint *edx)
   uint leaf_ecx;
   
   // AutoDoc: Ghidra models `cpuid` as a leaf dispatch; the real binary executes the `cpuid` instruction with `EAX=level`.
-  if (level == 0) {
+  if (level == CPUID_LEAF_BASIC_INFO) {
     leaf_info = (uint *)cpuid_basic_info(0);
   }
-  else if (level == 1) {
+  else if (level == CPUID_LEAF_VERSION_INFO) {
     leaf_info = (uint *)cpuid_Version_info(1);
   }
-  else if (level == 2) {
+  else if (level == CPUID_LEAF_CACHE_TLB_INFO) {
     leaf_info = (uint *)cpuid_cache_tlb_info(2);
   }
-  else if (level == 3) {
+  else if (level == CPUID_LEAF_SERIAL_NUMBER) {
     leaf_info = (uint *)cpuid_serial_info(3);
   }
-  else if (level == 4) {
+  else if (level == CPUID_LEAF_DETERMINISTIC_CACHE) {
     leaf_info = (uint *)cpuid_Deterministic_Cache_Parameters_info(4);
   }
-  else if (level == 5) {
+  else if (level == CPUID_LEAF_MONITOR_MWAIT) {
     leaf_info = (uint *)cpuid_MONITOR_MWAIT_Features_info(5);
   }
-  else if (level == 6) {
+  else if (level == CPUID_LEAF_THERMAL_POWER) {
     leaf_info = (uint *)cpuid_Thermal_Power_Management_info(6);
   }
-  else if (level == 7) {
+  else if (level == CPUID_LEAF_EXTENDED_FEATURES) {
     leaf_info = (uint *)cpuid_Extended_Feature_Enumeration_info(7);
   }
-  else if (level == 9) {
+  else if (level == CPUID_LEAF_DIRECT_CACHE_ACCESS) {
     leaf_info = (uint *)cpuid_Direct_Cache_Access_info(9);
   }
-  else if (level == 10) {
+  else if (level == CPUID_LEAF_ARCH_PERF_MONITORING) {
     leaf_info = (uint *)cpuid_Architectural_Performance_Monitoring_info(10);
   }
-  else if (level == 0xb) {
+  else if (level == CPUID_LEAF_EXTENDED_TOPOLOGY) {
     leaf_info = (uint *)cpuid_Extended_Topology_info(0xb);
   }
-  else if (level == 0xd) {
+  else if (level == CPUID_LEAF_EXTENDED_STATE) {
     leaf_info = (uint *)cpuid_Processor_Extended_States_info(0xd);
   }
-  else if (level == 0xf) {
+  else if (level == CPUID_LEAF_QOS_MONITORING) {
     leaf_info = (uint *)cpuid_Quality_of_Service_info(0xf);
   }
-  else if (level == 0x80000002) {
+  else if (level == CPUID_LEAF_BRAND_STRING_PART1) {
     leaf_info = (uint *)cpuid_brand_part1_info(0x80000002);
   }
-  else if (level == 0x80000003) {
+  else if (level == CPUID_LEAF_BRAND_STRING_PART2) {
     leaf_info = (uint *)cpuid_brand_part2_info(0x80000003);
   }
-  else if (level == 0x80000004) {
+  else if (level == CPUID_LEAF_BRAND_STRING_PART3) {
     leaf_info = (uint *)cpuid_brand_part3_info(0x80000004);
   }
   else {

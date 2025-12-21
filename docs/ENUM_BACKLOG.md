@@ -20,7 +20,7 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Where it shows up:** `xzregh/10A700_cpuid_query_and_unpack.c` (leaf values 0..10, 0xb, 0xd, 0xf, 0x80000002–0x80000004).
 - **Why it matters:** These are well-defined CPUID leaves; an enum clarifies which pseudo-leaf helper is intended.
 - **Reverse-engineering plan:** Add a `cpuid_leaf_t` enum with the observed values; rewrite the leaf comparisons to use named constants; refresh.
-- **Status (2025-12-21):** Open – identified the leaf constants.
+- **Status (2025-12-21):** Done – added `cpuid_leaf_t`, retyped CPUID leaf parameters, and refreshed exports so comparisons use named constants.
 
 ### RIP-relative ModRM signature constants
 - **Where it shows up:** `xzregh/100D40_find_riprel_mov_or_lea.c`, `xzregh/100E00_find_riprel_mov.c`, `xzregh/100F60_find_riprel_lea.c`, `xzregh/101060_find_riprel_opcode_memref_ex.c`, `xzregh/102C60_find_riprel_mov_load_target_in_range.c`, `xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c` (mask checks against `0x5000000` and related patterns).
