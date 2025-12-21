@@ -741,6 +741,11 @@ typedef union __attribute__((packed)) {
  } modrm_bytes;
 } x86_prefix_state_t;
 
+typedef union __attribute__((packed)) {
+ u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
+ u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
+} dasm_opcode_window_t;
+
 /*
  * Hand-written x86 decoder used throughout the project to find instructions without shipping a full disassembler.
  * It records prefix bits, VEX/REX state, ModRM/SIB breakdowns, computed operands, and scratch fields so pattern searchers can share one structure.
@@ -754,7 +759,11 @@ typedef struct __attribute__((packed)) dasm_ctx {
  u8 sib_scale_bits; /* SIB scale component extracted from `sib_byte`. */
  u8 sib_index_bits; /* SIB index register (prior to applying REX.X). */
  u8 sib_base_bits; /* SIB base register (prior to applying REX.B). */
- u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
+ u8 opcode_window_prefix[3]; /* Leading bytes before the 32-bit opcode window. */
+ union __attribute__((packed)) {
+  u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
+  u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
+ };
  u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */
  u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */
  u64 imm_signed; /* Immediate value sign-extended to 64 bits. */

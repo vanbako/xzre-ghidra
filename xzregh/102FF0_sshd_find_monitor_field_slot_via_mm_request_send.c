@@ -85,7 +85,7 @@ LAB_00103110:
           }
           else {
             mov_search_cursor = insn_ctx.instruction + insn_ctx.instruction_size;
-            if (*(u32 *)&insn_ctx.opcode_window[3] == 0x109) {
+            if (insn_ctx.opcode_window_dword == 0x109) {
               rex_extension = insn_ctx.prefix.modrm_bytes.modrm_rm;
               if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
                 if ((insn_ctx.prefix.flags_u32 & 0x40) != 0) goto LAB_00103237;
@@ -111,7 +111,7 @@ LAB_00103237:
                 }
               }
             }
-            else if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10b) {
+            else if (insn_ctx.opcode_window_dword == 0x10b) {
               if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
                 if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
                   rex_extension = insn_ctx.mov_imm_reg_index;

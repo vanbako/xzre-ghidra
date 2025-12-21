@@ -14,7 +14,7 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (`insn_ctx._40_4_` comparisons).
 - **Why it matters:** The audit scanner still relies on raw `_40_4_` slices for opcode checks; adding a named alias keeps the pattern logic readable.
 - **Reverse-engineering plan:** Add a union/overlay in `dasm_ctx_t` for the opcode-window dword (e.g., `u32 opcode_window_dword` tied to `opcode_window[4]`), update locals to rewrite `insn_ctx._40_4_`, and validate via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-20):** Pending – `_40_4_` slice still appears in the audit helper.
+- **Status (2025-12-21):** Done – added the opcode-window dword overlay in `dasm_ctx_t`, rewired the audit helper to use it, refresh clean.
 
 ### `instruction_register_bitmap_t` high-word alias
 - **Where it shows up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (`mask_register_bitmap.raw_value._2_2_`).

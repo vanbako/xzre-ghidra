@@ -1062,7 +1062,7 @@
         "comment": "Keep the scratch decoder clean so each scan starts from a known state."
       },
       {
-        "match": "if ((((add_found != FALSE) && (*(int *)(dctx->opcode_window + 3) == 0x103)) &&",
+        "match": "if ((((add_found != FALSE) && (dctx->opcode_window_dword == 0x103)) &&",
         "match_type": "wildcard",
         "comment": "Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory."
       },
@@ -1229,7 +1229,7 @@
         "comment": "Zero a scratch decoder context so we can peek at the opcode without mutating caller state."
       },
       {
-        "match_regex": "if \\(\\(\\([^)]* != FALSE\\) && \\(\\*\\(u32 \\*\\)&[^.]+\\.opcode_window\\[3] == 3999\\)\\) &&",
+        "match_regex": "if \\(\\(\\([^)]* != FALSE\\) && \\([^)]*opcode_window_dword == 3999\\)\\) &&",
         "match_type": "regex",
         "comment": "Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.",
         "placement": "after"
@@ -1270,7 +1270,7 @@
         "comment": "Slide a single-byte window forward so failed decodes simply advance to the next offset."
       },
       {
-        "match": "if ((((search_ok != FALSE) && (*(int *)(dctx->opcode_window + 3) == opcode)) &&",
+        "match": "if ((((search_ok != FALSE) && (dctx->opcode_window_dword == opcode)) &&",
         "match_type": "wildcard",
         "comment": "Require the decoded opcode plus the RIP-relative disp32 form (ModRM `mod=0`, `rm=5`) before considering the displacement recompute."
       },
@@ -1302,7 +1302,7 @@
         "comment": "Decode byte-by-byte until a LEA with a bare displacement materialises."
       },
       {
-        "match_regex": "if .*\\(\\*\\(u32 \\*\\)&[^.]+\\.opcode_window\\[3] == 0x10d\\)",
+        "match_regex": "if .*opcode_window_dword == 0x10d\\)",
         "match_type": "regex",
         "comment": "Accept mirrored displacements so searches anchored at \u00b1delta both succeed.",
         "placement": "after"
@@ -1329,7 +1329,7 @@
         "comment": "Keep decoding until we see a 64-bit RIP-relative LEA (REX.W + disp32) that materialises a pointer."
       },
       {
-        "match_regex": "if .*\\(\\*\\(int \\*\\)\\([^)]*opcode_window \\+ 3\\) == 0x10d\\)",
+        "match_regex": "if .*opcode_window_dword == 0x10d\\)",
         "match_type": "regex",
         "comment": "Optional RIP target comparison lets callers lock onto a single absolute pointer.",
         "placement": "after"
@@ -1519,7 +1519,7 @@
         "placement": "after"
       },
       {
-        "match_regex": "if .*\\(\\*\\(uint \\*\\)\\([^)]*opcode_window \\+ 3\\) & 0xfffffffd\\) == 0x109",
+        "match_regex": "if .*opcode_window_dword & 0xfffffffd\\) == 0x109",
         "match_type": "regex",
         "comment": "Accept MOV reg\u2194reg or whitelisted ALU reg\u2194reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3."
       },
@@ -2381,7 +2381,7 @@
     ]
   },
   "secret_data_append_opcode_bit": {
-    "plate": "Writes a single attestation bit using the normalized opcode tag selected by `find_reg_to_reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, reads the normalized opcode from `dctx->opcode_window`, filters out MOV/CMP plus a small ALU opcode mask,\nand otherwise maps the cursor into `global_ctx->encrypted_secret_data` before ORing the bit. The cursor is incremented regardless of whether a bit was set\nso the caller stays in sync.",
+    "plate": "Writes a single attestation bit using the normalized opcode tag selected by `find_reg_to_reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, reads the normalized opcode from `dctx->opcode_window_dword`, filters out MOV/CMP plus a small ALU opcode mask,\nand otherwise maps the cursor into `global_ctx->encrypted_secret_data` before ORing the bit. The cursor is incremented regardless of whether a bit was set\nso the caller stays in sync.",
     "inline": [
       {
         "match": "bit_index = cursor->bit_position;",
@@ -2392,12 +2392,14 @@
         "comment": "Stop writing once the 0x1c8-bit budget is exhausted; callers still advance the cursor to keep later scans aligned."
       },
       {
-        "match": "decoded_opcode = *(int *)(dctx->opcode_window + 3);",
+        "match_regex": "\\b\\w+\\s*= dctx->opcode_window_dword;",
+        "match_type": "regex",
         "comment": "Grab the normalized opcode tag from the sliding window (`raw_opcode + 0x80` for one-byte opcodes)."
       },
       {
-        "match": "if (((decoded_opcode != 0x109) && (decoded_opcode != 0xbb)) &&",
-        "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83\u20130xb1 bit table so noisy instructions don\u2019t pollute the log."
+        "match_regex": "if \\(\\(\\([^)]* != 0x109\\) && \\([^)]* != 0xbb\\)\\) &&",
+        "match_type": "regex",
+        "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83-0xb1 bit table so noisy instructions don't pollute the log."
       },
       {
         "match": "*bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));",
@@ -2600,11 +2602,11 @@
         "comment": "Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed."
       },
       {
-        "match": "if (*(u32 *)&insn_ctx.opcode_window[3] == 0x10d) {",
+        "match": "if (insn_ctx.opcode_window_dword == 0x10d) {",
         "comment": "Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer."
       },
       {
-        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (*(u32 *)&insn_ctx.opcode_window[3] == 0x17f)) &&",
+        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (insn_ctx.opcode_window_dword == 0x17f))",
         "comment": "The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register."
       },
       {
@@ -2831,7 +2833,7 @@
         "comment": "Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address."
       },
       {
-        "match": "else if (*(u32 *)&string_scan_ctx.opcode_window[3] == 0x147) {",
+        "match": "else if (string_scan_ctx.opcode_window_dword == 0x147) {",
         "comment": "Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register."
       },
       {

@@ -559,10 +559,10 @@ LAB_001064b8:
       hooks = (backdoor_hooks_data_t *)0x0;
       do {
         scan_cursor = (u8 *)(&loader_data.sshd_string_refs.xcalloc_zero_size)
-                        [*(uint *)(probe_dasm_ctx.opcode_window + loop_idx * 4 + -0x25)].func_start;
+                        [*(uint *)(probe_dasm_ctx.opcode_window_prefix + loop_idx * 4 + -0x25)].func_start;
         if (scan_cursor != (u8 *)0x0) {
           authprobe_func_end = (u8 *)(&loader_data.sshd_string_refs.xcalloc_zero_size)
-                          [*(uint *)(probe_dasm_ctx.opcode_window + loop_idx * 4 + -0x25)].func_end;
+                          [*(uint *)(probe_dasm_ctx.opcode_window_prefix + loop_idx * 4 + -0x25)].func_end;
           auth_root_vote_count = auth_root_vote_count + 1;
           probe_success = find_riprel_ptr_lea_or_mov_load(scan_cursor,authprobe_func_end,(dasm_ctx_t *)0x0,auth_log_reloc);
           if ((probe_success != FALSE) ||
@@ -622,7 +622,7 @@ LAB_001065af:
           if (probe_success != FALSE) break;
           syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
-        if ((*(u32 *)&syslog_dasm_ctx.opcode_window[3] & 0xfffffffd) == 0xb1) {
+        if ((syslog_dasm_ctx.opcode_window_dword & 0xfffffffd) == 0xb1) {
           if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
           if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
@@ -773,7 +773,7 @@ LAB_00106b3c:
             }
           }
         }
-        else if ((((*(u32 *)&syslog_dasm_ctx.opcode_window[3] == 0x147) &&
+        else if ((((syslog_dasm_ctx.opcode_window_dword == 0x147) &&
                   ((uint)syslog_dasm_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
                  ((syslog_dasm_ctx.prefix.flags_u16 & 0x800) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
         {

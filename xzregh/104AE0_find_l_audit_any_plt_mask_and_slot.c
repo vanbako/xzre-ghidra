@@ -74,8 +74,9 @@ BOOL find_l_audit_any_plt_mask_and_slot
       }
       // AutoDoc: State 0 looks for the LEA that materialises `link_map::l_name` + displacement.
       if (pattern_state == AUDIT_PAT_EXPECT_LEA) {
-        if (((insn_ctx._40_4_ == 0x1036) && (((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140))
-           && ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)) {
+        if (((insn_ctx.opcode_window_dword == 0x1036) &&
+            (((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140)) &&
+           ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)) {
           decoded_pointer_register = 0;
           if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
             decoded_mask_register = 0;
@@ -127,7 +128,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
       }
       // AutoDoc: State 1 waits for the MOV that copies the pointer into a trackable register.
       else if (pattern_state == AUDIT_PAT_EXPECT_MOV) {
-        if ((insn_ctx._40_4_ & 0xfffffffd) == 0x89) {
+        if ((insn_ctx.opcode_window_dword & 0xfffffffd) == 0x89) {
           register_filter = search_ctx->output_register_to_match;
           decoded_pointer_register = insn_ctx.prefix.decoded.flags & 0x40;
           if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
@@ -175,19 +176,19 @@ LAB_00104da9:
           }
           pattern_state = AUDIT_PAT_EXPECT_TEST;
           bit_test_register = decoded_pointer_register;
-          if (insn_ctx._40_4_ != 0x89) {
+          if (insn_ctx.opcode_window_dword != 0x89) {
             bit_test_register = decoded_mask_register;
           }
         }
       }
       // AutoDoc: State 2 requires a TEST/BT against the same register before we evaluate the mask.
       else if (pattern_state == AUDIT_PAT_EXPECT_TEST) {
-        if (insn_ctx._40_4_ == 0x128) {
+        if (insn_ctx.opcode_window_dword == 0x128) {
           decoded_register = 0;
         }
         else {
-          if ((insn_ctx._40_4_ != 0x176) || (insn_ctx.prefix.modrm_bytes.modrm_reg != 0))
-          goto LAB_00104e97;
+          if ((insn_ctx.opcode_window_dword != 0x176) ||
+             (insn_ctx.prefix.modrm_bytes.modrm_reg != 0)) goto LAB_00104e97;
           decoded_register = 0;
           if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
             if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {

@@ -1750,8 +1750,8 @@
         "type": "sshd_log_ctx_t *"
       },
       {
-        "original": "local_a30._40_4_",
-        "replacement": "*(u32 *)&local_a30.opcode_window[3]"
+        "original": "local_a30.field9_0x28.opcode_window_dword",
+        "replacement": "local_a30.opcode_window_dword"
       },
       {
         "original": "local_9d8.instruction_size._0_4_",
@@ -2883,15 +2883,15 @@
         "type": "u8 *"
       },
       {
-        "original": "scanner_ctx._40_4_",
-        "replacement": "*(u32 *)&scanner_ctx.opcode_window[3]"
+        "original": "scanner_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "scanner_ctx.opcode_window_dword"
       },
       {
         "original": "*(undefined4 *)&scratch_ctx->instruction",
         "replacement": "*(u32 *)&scratch_ctx->instruction"
       },
       {
-        "original": "text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window + (code_segment_size - 0x25));",
+        "original": "text_segment_end = (dasm_ctx_t *)(slot_lower_bound->opcode_window_prefix + (code_segment_size - 0x25));",
         "replacement": "text_segment_end = (u8 *)slot_lower_bound + code_segment_size;"
       },
       {
@@ -2911,7 +2911,7 @@
         "replacement": "candidate_addr = scanner_ctx.instruction;"
       },
       {
-        "original": "candidate_addr = (dasm_ctx_t *)(decode_cursor->opcode_window + (scanner_ctx.mem_disp - 0x25));",
+        "original": "candidate_addr = (dasm_ctx_t *)(decode_cursor->opcode_window_prefix + (scanner_ctx.mem_disp - 0x25));",
         "replacement": "candidate_addr = decode_cursor + scanner_ctx.mem_disp;"
       },
       {
@@ -3670,6 +3670,10 @@
       {
         "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)&ctx_clear_cursor->instruction + 4);",
         "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
@@ -3758,6 +3762,10 @@
       {
         "original": "ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + ((ulong)ctx_zero_stride * -2 + 1) * 4);",
         "replacement": "ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_call_instruction.c"
@@ -4011,8 +4019,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "local_70._40_4_",
-        "replacement": "*(u32 *)&prologue_ctx.opcode_window[3]"
+        "original": "local_70.field9_0x28.opcode_window_dword",
+        "replacement": "local_70.opcode_window_dword"
       },
       {
         "original": "local_70",
@@ -4096,6 +4104,10 @@
       {
         "original": "ctx_clear_cursor = (dasm_ctx_t *)((long)ctx_clear_cursor + ((ulong)ctx_stride_sign * -2 + 1) * 4);",
         "replacement": "ctx_clear_cursor = (dasm_ctx_t *)((u8 *)ctx_clear_cursor + 4);"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_instruction_with_mem_operand_ex.c"
@@ -4109,8 +4121,8 @@
         "type": "dasm_ctx_t"
       },
       {
-        "original": "lea_ctx._40_4_",
-        "replacement": "*(u32 *)&lea_ctx.opcode_window[3]"
+        "original": "lea_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "lea_ctx.opcode_window_dword"
       },
       {
         "name": "decoded",
@@ -4170,6 +4182,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_lea_instruction_with_mem_operand.c"
@@ -4300,8 +4316,8 @@
         "replacement": "mask_register_bitmap.words.high_word"
       },
       {
-        "original": "insn_ctx._40_4_",
-        "replacement": "*(u32 *)&insn_ctx.opcode_window[3]"
+        "original": "insn_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "insn_ctx.opcode_window_dword"
       },
       {
         "original": "(ulong)wipe_stride * -8 + 4",
@@ -4415,6 +4431,10 @@
       {
         "original": "*(undefined4 *)&ctx_zero_cursor->instruction",
         "replacement": "*(u32 *)&ctx_zero_cursor->instruction"
+      },
+      {
+        "original": "insn_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "insn_ctx.opcode_window_dword"
       },
       {
         "name": "pattern_state",
@@ -4594,6 +4614,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_mov_instruction.c"
@@ -4608,8 +4632,8 @@
       },
       {
         "name": "decoded_opcode",
-        "original": "iVar1",
-        "type": "int"
+        "original": "uVar1",
+        "type": "u32"
       },
       {
         "name": "decoded",
@@ -4634,6 +4658,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_mov_lea_instruction.c"
@@ -4650,6 +4678,10 @@
         "name": "opcode_lookup_index",
         "original": "uVar2",
         "type": "uint"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/find_reg2reg_instruction.c"
@@ -6902,8 +6934,12 @@
       },
       {
         "name": "decoded_opcode",
-        "original": "iVar3",
-        "type": "int"
+        "original": "uVar3",
+        "type": "u32"
+      },
+      {
+        "original": "(dctx->field9_0x28).opcode_window_dword",
+        "replacement": "dctx->opcode_window_dword"
       }
     ],
     "source": "xzre/xzre_code/secret_data_append_from_instruction.c"
@@ -7152,8 +7188,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+        "original": "local_80.field9_0x28.opcode_window_dword",
+        "replacement": "local_80.opcode_window_dword"
       },
       {
         "name": "raw_pubkey_helper",
@@ -7262,8 +7298,8 @@
     "locals": [],
     "register_temps": [
       {
-        "original": "local_80._40_4_",
-        "replacement": "*(u32 *)&local_80.opcode_window[3]"
+        "original": "local_80.field9_0x28.opcode_window_dword",
+        "replacement": "local_80.opcode_window_dword"
       },
       {
         "name": "monitor_field_addr",
@@ -7690,12 +7726,12 @@
         "type": "dasm_ctx_t"
       },
       {
-        "original": "string_scan_ctx._40_4_",
-        "replacement": "*(u32 *)&string_scan_ctx.opcode_window[3]"
+        "original": "string_scan_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "string_scan_ctx.opcode_window_dword"
       },
       {
-        "original": "store_scan_ctx._40_4_",
-        "replacement": "*(u32 *)&store_scan_ctx.opcode_window[3]"
+        "original": "store_scan_ctx.field9_0x28.opcode_window_dword",
+        "replacement": "store_scan_ctx.opcode_window_dword"
       },
       {
         "name": "dest_reg",
@@ -8991,22 +9027,22 @@
       },
       {
         "name": "range_hits_upper_bound",
-        "original": "bVar24",
+        "original": "bVar26",
         "type": "BOOL"
       },
       {
         "name": "opcode_ptr",
-        "original": "pbVar14",
+        "original": "pbVar16",
         "type": "u8 *"
       },
       {
         "name": "opcode_high_bits",
-        "original": "uVar11",
+        "original": "uVar13",
         "type": "uint"
       },
       {
         "name": "opcode_class_mask",
-        "original": "uVar17",
+        "original": "uVar19",
         "type": "ulong"
       },
       {
@@ -9025,18 +9061,28 @@
         "type": "BOOL"
       },
       {
+        "name": "vex_prefix_window",
+        "original": "_Var7",
+        "type": "dasm_opcode_window_t"
+      },
+      {
+        "name": "opcode_window_seed",
+        "original": "_Var8",
+        "type": "dasm_opcode_window_t"
+      },
+      {
         "name": "derived_opcode",
-        "original": "iVar7",
-        "type": "int"
+        "original": "uVar9",
+        "type": "u32"
       },
       {
         "name": "imm_field",
-        "original": "uVar8",
-        "type": "u64"
+        "original": "uVar20",
+        "type": "ulong"
       },
       {
         "name": "opcode_index",
-        "original": "sVar9",
+        "original": "sVar11",
         "type": "sbyte"
       },
       {
@@ -9046,7 +9092,7 @@
       },
       {
         "name": "cursor",
-        "original": "pbVar13",
+        "original": "pbVar15",
         "type": "u8 *"
       },
       {
@@ -9056,17 +9102,17 @@
       },
       {
         "name": "current_byte",
-        "original": "bVar15",
+        "original": "bVar17",
         "type": "byte"
       },
       {
         "name": "normalized_opcode",
-        "original": "uVar16",
+        "original": "uVar12",
         "type": "uint"
       },
       {
         "name": "imm_cursor",
-        "original": "pbVar19",
+        "original": "pbVar21",
         "type": "u8 *"
       },
       {
@@ -9076,23 +9122,18 @@
       },
       {
         "name": "ctx_zero_cursor",
-        "original": "pdVar20",
+        "original": "pdVar22",
         "type": "dasm_ctx_t *"
       },
       {
         "name": "opcode_class_offset",
-        "original": "uVar21",
+        "original": "uVar23",
         "type": "ulong"
       },
       {
         "name": "prefix_zero_cursor",
-        "original": "pxVar22",
+        "original": "pxVar24",
         "type": "x86_prefix_state_t *"
-      },
-      {
-        "name": "predicate_ok",
-        "original": "bVar23",
-        "type": "BOOL"
       },
       {
         "name": "imm16_word",
@@ -9101,7 +9142,7 @@
       },
       {
         "name": "clear_idx",
-        "original": "lVar12",
+        "original": "lVar14",
         "type": "long"
       },
       {
@@ -9113,19 +9154,15 @@
         "replacement": "*(u32 *)&ctx->instruction"
       },
       {
-        "original": "*(undefined4 *)(ctx->opcode_window + 3)",
-        "replacement": "*(u32 *)(ctx->opcode_window + 3)"
-      },
-      {
-        "original": "ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);",
+        "original": "ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)bVar27 * -8 + 4);",
         "replacement": "ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);"
       },
       {
-        "original": "ctx = (dasm_ctx_t *)((long)ctx + (ulong)ctx_zero_stride * -8 + 4);",
+        "original": "ctx = (dasm_ctx_t *)((long)ctx + (ulong)bVar27 * -8 + 4);",
         "replacement": "ctx = (dasm_ctx_t *)((u8 *)ctx + 4);"
       },
       {
-        "original": "prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)ctx_zero_stride * -8 + 4);",
+        "original": "prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)bVar27 * -8 + 4);",
         "replacement": "prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);"
       },
       {
