@@ -10,14 +10,20 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 
 ## Candidates
 
+### `dasm_opcode_window_t` high-byte overlay
+- **Where it shows up:** `xzregh/100020_x86_decode_instruction.c` (`vex_prefix_window.opcode_window_dword._1_3_` and `opcode_window_seed.opcode_window_dword._1_3_`).
+- **Why it matters:** The decoder still emits raw `_1_3_` byte-slice writes; a named overlay keeps the opcode-window initialization readable.
+- **Reverse-engineering plan:** Add a byte-level overlay inside `dasm_opcode_window_t` (e.g., `{ u8 low_byte; u8 high_bytes[3]; }`) and update locals to rewrite `_1_3_` to the new field (or to `opcode_window[1..3]` if the decompiler cooperates), then validate via `./scripts/refresh_xzre_project.sh`.
+- **Status (2025-12-21):** Open – identified the remaining raw slice in the decoder.
+
+## Completed
+
 ### `dasm_ctx_t` opcode-window dword alias
-- **Where it shows up:** `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (`insn_ctx._40_4_` comparisons).
-- **Why it matters:** The audit scanner still relies on raw `_40_4_` slices for opcode checks; adding a named alias keeps the pattern logic readable.
-- **Reverse-engineering plan:** Add a union/overlay in `dasm_ctx_t` for the opcode-window dword (e.g., `u32 opcode_window_dword` tied to `opcode_window[4]`), update locals to rewrite `insn_ctx._40_4_`, and validate via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-21):** Done – added the opcode-window dword overlay in `dasm_ctx_t`, rewired the audit helper to use it, refresh clean.
+- **Where it showed up:** `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (`insn_ctx._40_4_` comparisons).
+- **Why it mattered:** The audit scanner still relied on raw `_40_4_` slices for opcode checks.
+- **Outcome (2025-12-21):** Done – added the opcode-window dword overlay in `dasm_ctx_t`, rewired the audit helper to use it, refresh clean.
 
 ### `instruction_register_bitmap_t` high-word alias
-- **Where it shows up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (`mask_register_bitmap.raw_value._2_2_`).
-- **Why it matters:** The register bitmap still uses a raw half-word slice; adding a named high-word view keeps the bitmap manipulation readable.
-- **Reverse-engineering plan:** Add a `u16 high_word`/`u16 high_bytes` overlay in `instruction_register_bitmap_t`, update locals to prefer the named field, and validate via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-21):** Done – added a high-word overlay for `instruction_register_bitmap_t` and rewired the raw slice in `find_l_audit_any_plt_mask_via_symbind_alt`, refresh clean.
+- **Where it showed up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (`mask_register_bitmap.raw_value._2_2_`).
+- **Why it mattered:** The register bitmap still used a raw half-word slice.
+- **Outcome (2025-12-21):** Done – added a high-word overlay for `instruction_register_bitmap_t` and rewired the raw slice in `find_l_audit_any_plt_mask_via_symbind_alt`, refresh clean.
