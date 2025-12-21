@@ -59,7 +59,8 @@ LAB_001036eb:
        decode_ok == FALSE)) goto LAB_00103802;
     code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
     // AutoDoc: Immediately scan the following bytes for a MOV [mem],reg instruction that stores the allocated pointer.
-    decode_ok = find_riprel_opcode_memref_ex(code_start,code_start + 0x20,&store_probe_ctx,0x109,(void *)0x0);
+    decode_ok = find_riprel_opcode_memref_ex
+                      (code_start,code_start + 0x20,&store_probe_ctx,X86_OPCODE_1B_MOV_STORE,(void *)0x0);
   } while (decode_ok == FALSE);
   if ((store_probe_ctx.prefix.flags_u16 & 0x1040) == 0) {
 LAB_00103788:

@@ -28,7 +28,7 @@ BOOL find_endbr_prologue(u8 *code_start,u8 *code_end,u8 **output,FuncFindType fi
     }
     decoded = x86_decode_instruction(&prologue_ctx,code_start,code_end);
     prologue_found = FALSE;
-    if (((decoded != FALSE) && (prologue_ctx.opcode_window.opcode_window_dword == 3999)) &&
+    if (((decoded != FALSE) && (prologue_ctx.opcode_window.opcode_window_dword == X86_OPCODE_2B_NOP)) &&
     // AutoDoc: Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.
        (((ulong)(prologue_ctx.instruction + prologue_ctx.instruction_size) & 0xf) == 0)) {
       if (output != (u8 **)0x0) {

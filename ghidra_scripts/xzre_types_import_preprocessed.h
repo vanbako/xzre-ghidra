@@ -338,9 +338,27 @@ typedef struct {
 } lzma_check_state;
 
 /*
- * Normalized opcode values stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can locate MOV/LEA/CALL sequences without pulling in a full decoder. For one-byte opcodes `x86_decode_instruction` stores `raw_opcode + 0x80` (subtract 0x80 to recover the architectural opcode byte).
+ * Normalized opcode tags stored in `dasm_ctx_t::opcode_window` so pattern-matching routines can compare opcodes without re-running the decoder. One-byte opcodes are stored as `raw_opcode + 0x80`. Two- and three-byte opcodes keep their 0x0F/0x0F38/0x0F3A prefix bytes and still add 0x80 to the low opcode byte. ENDBR32/64 use the decoder's special tags (0xA5FC/0xA5FE).
  */
 enum X86_OPCODE {
+ X86_OPCODE_1B_ADD_RM_R = 0x81,
+ X86_OPCODE_1B_ADD_R_RM = 0x83,
+ X86_OPCODE_1B_OR_RM_R = 0x89,
+ X86_OPCODE_1B_XOR_RM_R = 0xB1,
+ X86_OPCODE_1B_CMP_R_RM = 0xBB,
+ X86_OPCODE_1B_GRP1_IMM8 = 0x103,
+ X86_OPCODE_1B_MOV_STORE = 0x109,
+ X86_OPCODE_1B_MOV_LOAD = 0x10B,
+ X86_OPCODE_1B_LEA = 0x10D,
+ X86_OPCODE_1B_TEST_AL_IMM8 = 0x128,
+ X86_OPCODE_1B_MOV_RM_IMM32 = 0x147,
+ X86_OPCODE_1B_CALL_REL32 = 0x168,
+ X86_OPCODE_1B_GRP3_IMM8 = 0x176,
+ X86_OPCODE_1B_GRP5 = 0x17F,
+ X86_OPCODE_2B_NOP = 0x0F9F,
+ X86_OPCODE_2B_MOVZX_RM8 = 0x1036,
+ X86_OPCODE_CET_ENDBR32 = 0xA5FC,
+ X86_OPCODE_CET_ENDBR64 = 0xA5FE,
  X86_OPCODE_LEA = 0x10D,
  X86_OPCODE_CALL = 0x168,
  X86_OPCODE_CMP = 0xBB,
@@ -753,7 +771,7 @@ typedef union __attribute__((packed)) {
 
 typedef union __attribute__((packed)) {
  u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
- u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
+ X86_OPCODE opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
 } dasm_opcode_window_t;
 
 /*
@@ -1814,7 +1832,7 @@ extern BOOL find_riprel_opcode_memref_ex(
  u8 *code_start,
  u8 *code_end,
  dasm_ctx_t *dctx,
- int opcode,
+ X86_OPCODE opcode,
  void *mem_address
 );
 

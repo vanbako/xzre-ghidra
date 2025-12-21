@@ -707,7 +707,7 @@
       "names": [
         "X86_OPCODE"
       ],
-      "code": "enum X86_OPCODE {\n X86_OPCODE_LEA = 0x10D,\n X86_OPCODE_CALL = 0x168,\n X86_OPCODE_CMP = 0xBB,\n X86_OPCODE_MOV = 0x109,\n X86_OPCODE_MOV_LOAD = 0x10B,\n X86_OPCODE_MOV_STORE = 0x109\n};"
+      "code": "enum X86_OPCODE {\n X86_OPCODE_1B_ADD_RM_R = 0x81,\n X86_OPCODE_1B_ADD_R_RM = 0x83,\n X86_OPCODE_1B_OR_RM_R = 0x89,\n X86_OPCODE_1B_XOR_RM_R = 0xB1,\n X86_OPCODE_1B_CMP_R_RM = 0xBB,\n X86_OPCODE_1B_GRP1_IMM8 = 0x103,\n X86_OPCODE_1B_MOV_STORE = 0x109,\n X86_OPCODE_1B_MOV_LOAD = 0x10B,\n X86_OPCODE_1B_LEA = 0x10D,\n X86_OPCODE_1B_TEST_AL_IMM8 = 0x128,\n X86_OPCODE_1B_MOV_RM_IMM32 = 0x147,\n X86_OPCODE_1B_CALL_REL32 = 0x168,\n X86_OPCODE_1B_GRP3_IMM8 = 0x176,\n X86_OPCODE_1B_GRP5 = 0x17F,\n X86_OPCODE_2B_NOP = 0x0F9F,\n X86_OPCODE_2B_MOVZX_RM8 = 0x1036,\n X86_OPCODE_CET_ENDBR32 = 0xA5FC,\n X86_OPCODE_CET_ENDBR64 = 0xA5FE,\n X86_OPCODE_LEA = 0x10D,\n X86_OPCODE_CALL = 0x168,\n X86_OPCODE_CMP = 0xBB,\n X86_OPCODE_MOV = 0x109,\n X86_OPCODE_MOV_LOAD = 0x10B,\n X86_OPCODE_MOV_STORE = 0x109\n};"
     },
     {
       "kind": "enum",
@@ -910,7 +910,7 @@
       "names": [
         "dasm_opcode_window_t"
       ],
-      "code": "typedef union __attribute__((packed)) {\n u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */\n} dasm_opcode_window_t;"
+      "code": "typedef union __attribute__((packed)) {\n u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n X86_OPCODE opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */\n} dasm_opcode_window_t;"
     },
     {
       "kind": "struct",
@@ -1750,7 +1750,7 @@
       "names": [
         "find_riprel_opcode_memref_ex"
       ],
-      "code": "extern BOOL find_riprel_opcode_memref_ex(\n u8 *code_start,\n u8 *code_end,\n dasm_ctx_t *dctx,\n int opcode,\n void *mem_address\n);"
+      "code": "extern BOOL find_riprel_opcode_memref_ex(\n u8 *code_start,\n u8 *code_end,\n dasm_ctx_t *dctx,\n X86_OPCODE opcode,\n void *mem_address\n);"
     },
     {
       "kind": "declaration",

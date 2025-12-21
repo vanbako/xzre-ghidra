@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101060_find_riprel_opcode_memref_ex.c
 // Function: find_riprel_opcode_memref_ex @ 0x101060
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall find_riprel_opcode_memref_ex(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, int opcode, void * mem_address)
+// Prototype: BOOL __stdcall find_riprel_opcode_memref_ex(u8 * code_start, u8 * code_end, dasm_ctx_t * dctx, X86_OPCODE opcode, void * mem_address)
 
 
 /*
@@ -13,7 +13,7 @@
 #include "xzre_types.h"
 
 BOOL find_riprel_opcode_memref_ex
-               (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,int opcode,void *mem_address)
+               (u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,X86_OPCODE opcode,void *mem_address)
 
 {
   BOOL search_ok;

@@ -37,7 +37,7 @@ BOOL find_riprel_lea(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,void *mem_addr
     for (; code_start < code_end; code_start = code_start + 1) {
       // AutoDoc: Keep decoding until we see a 64-bit RIP-relative LEA (REX.W + disp32) that materialises a pointer.
       decoded = x86_decode_instruction(dctx,code_start,code_end);
-      if ((((decoded != FALSE) && ((dctx->opcode_window).opcode_window_dword == 0x10d)) &&
+      if ((((decoded != FALSE) && ((dctx->opcode_window).opcode_window_dword == X86_OPCODE_1B_LEA)) &&
       // AutoDoc: Optional RIP target comparison lets callers lock onto a single absolute pointer.
           (((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48)) &&
          ((((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000 &&

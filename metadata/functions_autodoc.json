@@ -1062,7 +1062,7 @@
         "comment": "Keep the scratch decoder clean so each scan starts from a known state."
       },
       {
-        "match": "if ((((add_found != FALSE) && ((dctx->opcode_window).opcode_window_dword == 0x103)) &&",
+        "match": "if ((((add_found != FALSE) && ((dctx->opcode_window).opcode_window_dword == X86_OPCODE_1B_GRP1_IMM8)",
         "match_type": "wildcard",
         "comment": "Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory."
       },
@@ -1229,7 +1229,7 @@
         "comment": "Zero a scratch decoder context so we can peek at the opcode without mutating caller state."
       },
       {
-        "match_regex": "if \\(\\(\\([^)]* != FALSE\\) && \\([^)]*opcode_window_dword == 3999\\)\\) &&",
+        "match_regex": "if \\(\\(\\([^)]* != FALSE\\) && \\([^)]*opcode_window_dword == X86_OPCODE_2B_NOP\\)\\) &&",
         "match_type": "regex",
         "comment": "Valid ENDBR pads must end on a 16-byte boundary; optionally hand the caller the next byte.",
         "placement": "after"
@@ -1245,7 +1245,7 @@
     "plate": "Two-stage absolute-pointer predicate shared by the recon helpers.\nIt prefers LEA results (via `find_riprel_lea`) so RIP-relative references never touch memory, and only falls back to the MOV-load predicate (`find_riprel_opcode_memref_ex` with opcode `X86_OPCODE_MOV_LOAD` / `0x10b`) once the LEA attempt fails.\nTRUE means `dctx` is still positioned on the instruction that materialised `mem_address`.",
     "inline": [
       {
-        "match": "match_found = find_riprel_opcode_memref_ex(*",
+        "match": "match_found = find_riprel_opcode_memref_ex",
         "match_type": "wildcard",
         "comment": "Fallback to MOV loads when the LEA scan cannot find the requested pointer."
       }
@@ -1302,7 +1302,7 @@
         "comment": "Decode byte-by-byte until a LEA with a bare displacement materialises."
       },
       {
-        "match_regex": "if .*opcode_window_dword == 0x10d\\)",
+        "match_regex": "if .*opcode_window_dword == X86_OPCODE_1B_LEA\\)",
         "match_type": "regex",
         "comment": "Accept mirrored displacements so searches anchored at \u00b1delta both succeed.",
         "placement": "after"
@@ -1329,7 +1329,7 @@
         "comment": "Keep decoding until we see a 64-bit RIP-relative LEA (REX.W + disp32) that materialises a pointer."
       },
       {
-        "match_regex": "if .*opcode_window_dword == 0x10d\\)",
+        "match_regex": "if .*opcode_window_dword == X86_OPCODE_1B_LEA\\)",
         "match_type": "regex",
         "comment": "Optional RIP target comparison lets callers lock onto a single absolute pointer.",
         "placement": "after"
@@ -1519,7 +1519,7 @@
         "placement": "after"
       },
       {
-        "match_regex": "if .*opcode_window_dword & 0xfffffffd\\) == 0x109",
+        "match_regex": "if .*opcode_window_dword & 0xfffffffd\\) == X86_OPCODE_1B_MOV_STORE",
         "match_type": "regex",
         "comment": "Accept MOV reg\u2194reg or whitelisted ALU reg\u2194reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3."
       },
@@ -2397,7 +2397,7 @@
         "comment": "Grab the normalized opcode tag from the sliding window (`raw_opcode + 0x80` for one-byte opcodes)."
       },
       {
-        "match_regex": "if \\(\\(\\([^)]* != 0x109\\) && \\([^)]* != 0xbb\\)\\) &&",
+        "match_regex": "if \\(\\(\\([^)]* != X86_OPCODE_1B_MOV_STORE\\) && \\([^)]* != X86_OPCODE_1B_CMP_R_RM\\)\\) &&",
         "match_type": "regex",
         "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83-0xb1 bit table so noisy instructions don't pollute the log."
       },
@@ -2602,11 +2602,11 @@
         "comment": "Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed."
       },
       {
-        "match": "if (insn_ctx.opcode_window.opcode_window_dword == 0x10d) {",
+        "match": "if (insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_LEA) {",
         "comment": "Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer."
       },
       {
-        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (insn_ctx.opcode_window.opcode_window_dword == 0x17f))",
+        "match": "(insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_GRP5)) &&",
         "comment": "The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register."
       },
       {
@@ -2833,7 +2833,7 @@
         "comment": "Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address."
       },
       {
-        "match": "else if (string_scan_ctx.opcode_window.opcode_window_dword == 0x147) {",
+        "match": "else if (string_scan_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_RM_IMM32) {",
         "comment": "Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register."
       },
       {

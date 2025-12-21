@@ -8804,7 +8804,7 @@
       },
       {
         "name": "lea_opcode_signature",
-        "type": "u32"
+        "type": "X86_OPCODE"
       },
       {
         "name": "slot_delta",

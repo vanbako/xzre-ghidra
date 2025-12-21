@@ -20,7 +20,8 @@ BOOL find_riprel_ptr_lea_or_mov_load(u8 *code_start,u8 *code_end,dasm_ctx_t *dct
   match_found = find_riprel_lea(code_start,code_end,dctx,mem_address);
   if (match_found == FALSE) {
     // AutoDoc: Fallback to MOV loads when the LEA scan cannot find the requested pointer.
-    match_found = find_riprel_opcode_memref_ex(code_start,code_end,dctx,0x10b,mem_address);
+    match_found = find_riprel_opcode_memref_ex
+                      (code_start,code_end,dctx,X86_OPCODE_1B_MOV_LOAD,mem_address);
     return match_found;
   }
   return TRUE;

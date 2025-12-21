@@ -36,7 +36,8 @@ void * find_riprel_mov_load_target_in_range
   if (func_cursor != (u8 *)0x0) {
     func_end = (u8 *)(&refs->xcalloc_zero_size)[id].func_end;
     while (func_cursor < func_end) {
-      mov_found = find_riprel_opcode_memref_ex(func_cursor,func_end,&scratch_ctx,0x10b,(void *)0x0);
+      mov_found = find_riprel_opcode_memref_ex
+                        (func_cursor,func_end,&scratch_ctx,X86_OPCODE_1B_MOV_LOAD,(void *)0x0);
       if (mov_found == FALSE) {
         func_cursor = func_cursor + 1;
       }
