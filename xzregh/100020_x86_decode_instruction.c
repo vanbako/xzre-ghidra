@@ -53,7 +53,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   // AutoDoc: Clear every field in the decoder context so prefixes/immediates never leak between attempts.
   for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
     *(u32 *)&ctx_zero_cursor->instruction = 0;
-    ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)zero_stride_flag * -8 + 4);
+    ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);
   }
   ctx_zero_stride = code_start < code_end;
   cursor = code_start;
@@ -63,7 +63,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 LAB_00100aa5:
       for (clear_idx = 0x16; clear_idx != 0; clear_idx = clear_idx + -1) {
         *(u32 *)&ctx->instruction = 0;
-        ctx = (dasm_ctx_t *)((long)ctx + (ulong)zero_stride_flag * -8 + 4);
+        ctx = (dasm_ctx_t *)((u8 *)ctx + 4);
       }
       return FALSE;
     }
@@ -100,7 +100,7 @@ LAB_001001c9:
               prefix_zero_cursor = &ctx->prefix;
               for (clear_idx = 0x12; clear_idx != 0; clear_idx = clear_idx + -1) {
                 prefix_zero_cursor->flags_u32 = 0;
-                prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)zero_stride_flag * -8 + 4);
+                prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);
               }
               ctx->instruction = code_start;
               ctx->instruction_size = 4;

@@ -9159,15 +9159,15 @@
         "replacement": "*(u32 *)&ctx->instruction"
       },
       {
-        "original": "ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)bVar27 * -8 + 4);",
+        "original": "ctx_zero_cursor = (dasm_ctx_t *)((long)ctx_zero_cursor + (ulong)zero_stride_flag * -8 + 4);",
         "replacement": "ctx_zero_cursor = (dasm_ctx_t *)((u8 *)ctx_zero_cursor + 4);"
       },
       {
-        "original": "ctx = (dasm_ctx_t *)((long)ctx + (ulong)bVar27 * -8 + 4);",
+        "original": "ctx = (dasm_ctx_t *)((long)ctx + (ulong)zero_stride_flag * -8 + 4);",
         "replacement": "ctx = (dasm_ctx_t *)((u8 *)ctx + 4);"
       },
       {
-        "original": "prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)bVar27 * -8 + 4);",
+        "original": "prefix_zero_cursor = (x86_prefix_state_t *)((long)prefix_zero_cursor + (ulong)zero_stride_flag * -8 + 4);",
         "replacement": "prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);"
       },
       {
