@@ -1062,7 +1062,7 @@
         "comment": "Keep the scratch decoder clean so each scan starts from a known state."
       },
       {
-        "match": "if ((((add_found != FALSE) && (dctx->opcode_window_dword == 0x103)) &&",
+        "match": "if ((((add_found != FALSE) && ((dctx->opcode_window).opcode_window_dword == 0x103)) &&",
         "match_type": "wildcard",
         "comment": "Only accept normalised opcode 0x103 (raw 0x83, GRP1 imm8) when it targets RIP-relative memory."
       },
@@ -1270,7 +1270,7 @@
         "comment": "Slide a single-byte window forward so failed decodes simply advance to the next offset."
       },
       {
-        "match": "if ((((search_ok != FALSE) && (dctx->opcode_window_dword == opcode)) &&",
+        "match": "if ((((search_ok != FALSE) && ((dctx->opcode_window).opcode_window_dword == opcode)) &&",
         "match_type": "wildcard",
         "comment": "Require the decoded opcode plus the RIP-relative disp32 form (ModRM `mod=0`, `rm=5`) before considering the displacement recompute."
       },
@@ -2381,7 +2381,7 @@
     ]
   },
   "secret_data_append_opcode_bit": {
-    "plate": "Writes a single attestation bit using the normalized opcode tag selected by `find_reg_to_reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, reads the normalized opcode from `dctx->opcode_window_dword`, filters out MOV/CMP plus a small ALU opcode mask,\nand otherwise maps the cursor into `global_ctx->encrypted_secret_data` before ORing the bit. The cursor is incremented regardless of whether a bit was set\nso the caller stays in sync.",
+    "plate": "Writes a single attestation bit using the normalized opcode tag selected by `find_reg_to_reg_instruction`. The helper enforces the 0x1c8-bit\nbudget tracked inside `secret_data_shift_cursor_t`, reads the normalized opcode from `dctx->opcode_window.opcode_window_dword`, filters out MOV/CMP plus a small ALU opcode mask,\nand otherwise maps the cursor into `global_ctx->encrypted_secret_data` before ORing the bit. The cursor is incremented regardless of whether a bit was set\nso the caller stays in sync.",
     "inline": [
       {
         "match": "bit_index = cursor->bit_position;",
@@ -2392,7 +2392,7 @@
         "comment": "Stop writing once the 0x1c8-bit budget is exhausted; callers still advance the cursor to keep later scans aligned."
       },
       {
-        "match_regex": "\\b\\w+\\s*= dctx->opcode_window_dword;",
+        "match_regex": "\\b\\w+\\s*= \\(dctx->opcode_window\\)\\.opcode_window_dword;",
         "match_type": "regex",
         "comment": "Grab the normalized opcode tag from the sliding window (`raw_opcode + 0x80` for one-byte opcodes)."
       },
@@ -2602,11 +2602,11 @@
         "comment": "Preload EVP_Digest before decoding so the import table is ready as soon as the entry point is confirmed."
       },
       {
-        "match": "if (insn_ctx.opcode_window_dword == 0x10d) {",
+        "match": "if (insn_ctx.opcode_window.opcode_window_dword == 0x10d) {",
         "comment": "Treat RIP-relative MOV/LEA instructions that resolve inside sshd's code segment as the prospective `sshd_main` pointer."
       },
       {
-        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (insn_ctx.opcode_window_dword == 0x17f))",
+        "match": "else if (((sshd_main_candidate != (u8 *)0x0) && (insn_ctx.opcode_window.opcode_window_dword == 0x17f))",
         "comment": "The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register."
       },
       {
@@ -2833,7 +2833,7 @@
         "comment": "Back up by 0x18 bytes to convert the field pointer into the `sensitive_data` base address."
       },
       {
-        "match": "else if (string_scan_ctx.opcode_window_dword == 0x147) {",
+        "match": "else if (string_scan_ctx.opcode_window.opcode_window_dword == 0x147) {",
         "comment": "Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register."
       },
       {

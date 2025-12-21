@@ -12,6 +12,7 @@
   "EncodedStringId": "Indexes into the deduplicated string table embedded in xzre\u2019s rodata dump; the values double as offsets into the `string_mask_data` array.",
   "PayloadState": "State machine for the payload download/decrypt workflow (only INITIAL is defined so far while the rest of the states are discovered dynamically).",
   "dasm_modrm_mask": "Convenience masks for projecting a decoded ModRM byte into its RM/REG/MOD fields or for retrieving the raw byte from the bit-packed representation.",
+  "dasm_opcode_window_map": "Opcode-map prefixes stored in `dasm_ctx_t::opcode_window_dword` before the +0x80 normalization (mask off the low opcode byte): no prefix for one-byte opcodes, 0x0F00 for two-byte opcodes, and 0x0F38/0x0F3A for the three-byte maps.",
   "LogLevel": "Mirror of sshd\u2019s syslog verbosity levels so the hook can translate its own severity decisions into whatever the daemon expects.",
   "CommandFlags1": "Interpretation of the first byte of the `cmd_arguments_t` block (packet sizing hints, PAM disablement, socket index encoding, etc.).",
   "CommandFlags2": "Second command flag byte which governs impersonation behaviour, monitor request overrides, auth bypass toggles, and which socket descriptor is referenced.",

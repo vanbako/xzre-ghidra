@@ -28,8 +28,8 @@ BOOL find_reg_to_reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
       return FALSE;
     }
     // AutoDoc: Accept MOV reg↔reg or whitelisted ALU reg↔reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3.
-    if (((((dctx->opcode_window_dword & 0xfffffffd) == 0x109) ||
-         ((opcode_lookup_index = dctx->opcode_window_dword - 0x81, opcode_lookup_index < 0x3b &&
+    if ((((((dctx->opcode_window).opcode_window_dword & 0xfffffffd) == 0x109) ||
+         ((opcode_lookup_index = (dctx->opcode_window).opcode_window_dword - 0x81, opcode_lookup_index < 0x3b &&
           ((0x505050500000505U >> ((byte)opcode_lookup_index & 0x3f) & 1) != 0)))) &&
         (((dctx->prefix).flags_u16 & 0xf80) == 0)) &&
        ((((dctx->prefix).modrm_bytes.rex_byte & 5) == 0 &&

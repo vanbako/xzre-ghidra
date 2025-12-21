@@ -41,7 +41,7 @@ BOOL find_rel32_call_instruction(u8 *code_start,u8 *code_end,u8 *call_target,das
         code_start = code_start + 1;
       }
       else {
-        if ((dctx->opcode_window_dword == 0x168) &&
+        if (((dctx->opcode_window).opcode_window_dword == 0x168) &&
            ((call_target == (u8 *)0x0 ||
             (dctx->instruction + dctx->instruction_size + dctx->imm_signed == call_target)))) {
           return TRUE;

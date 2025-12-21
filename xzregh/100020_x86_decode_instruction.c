@@ -74,15 +74,15 @@ LAB_00100aa5:
       if (current_byte < 0x2e) {
         if (current_byte == 0xf) {
         // AutoDoc: 0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).
-          (ctx->field9_0x28).opcode_window_dword = 0xf;
+          (ctx->opcode_window).opcode_window_dword = 0xf;
           cursor = cursor + 1;
 LAB_001001c9:
           if (code_end <= cursor) goto LAB_00100aa5;
-          normalized_opcode = (ctx->field9_0x28).opcode_window_dword << 8;
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          normalized_opcode = (ctx->opcode_window).opcode_window_dword << 8;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           current_byte = *cursor;
           normalized_opcode = current_byte | normalized_opcode;
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           tmp_byte = *cursor;
           if ((tmp_byte & 0xfd) == 0x38) {
             if (((ctx->prefix).decoded.flags & 0x10) != 0) {
@@ -106,7 +106,7 @@ LAB_001001c9:
               ctx->instruction_size = 4;
               derived_opcode = (cursor[1] == 0xfa) + 0xa5fc + (uint)(cursor[1] == 0xfa);
 LAB_001004f1:
-              (ctx->field9_0x28).opcode_window_dword = derived_opcode;
+              (ctx->opcode_window).opcode_window_dword = derived_opcode;
               return TRUE;
             }
             goto LAB_00100aa5;
@@ -178,7 +178,7 @@ LAB_0010092e:
               flags2_ptr = &(ctx->prefix).decoded.flags2;
               *flags2_ptr = *flags2_ptr | 3;
             }
-            normalized_opcode = (ctx->field9_0x28).opcode_window_dword;
+            normalized_opcode = (ctx->opcode_window).opcode_window_dword;
             if ((normalized_opcode - 0xf6 < 2) && (((int)(uint)cursor_byte >> 3 & 7U) != 0)) {
               flags2_ptr = &(ctx->prefix).decoded.flags2;
               *flags2_ptr = *flags2_ptr & 0xf7;
@@ -289,7 +289,7 @@ LAB_001004e1:
           if ((tmp_byte & 0x20) != 0) {
             return FALSE;
           }
-          ctx->field9_0x28 = vex_prefix_window;
+          ctx->opcode_window = vex_prefix_window;
           cursor_byte = *cursor;
           opcode_ptr = cursor + 1;
           (ctx->prefix).decoded.flags = tmp_byte | 0x10;
@@ -300,7 +300,7 @@ LAB_001004e1:
           (ctx->prefix).modrm_bytes.rex_byte = '@';
           normalized_opcode = (uint)current_byte << 8 | 0xf;
           (ctx->prefix).decoded.vex_byte2 = tmp_byte;
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           current_byte = ((char)cursor[1] >> 7 & 0xfcU) + 0x44;
           (ctx->prefix).modrm_bytes.rex_byte = current_byte;
           if (cursor_byte == 0xc5) goto LAB_001001c5;
@@ -327,7 +327,7 @@ LAB_001004e1:
             *flags2_ptr = *flags2_ptr | 8;
           }
           normalized_opcode = normalized_opcode << 8;
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           if (tmp_byte == 2) {
             normalized_opcode = normalized_opcode | 0x38;
           }
@@ -341,15 +341,15 @@ LAB_001004e1:
             }
             normalized_opcode = normalized_opcode | 0x3a;
           }
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           cursor = cursor + 3;
 LAB_001003fa:
           if (code_end <= cursor) goto LAB_00100aa5;
-          opcode_high_bits = (ctx->field9_0x28).opcode_window_dword << 8;
-          (ctx->field9_0x28).opcode_window_dword = opcode_high_bits;
+          opcode_high_bits = (ctx->opcode_window).opcode_window_dword << 8;
+          (ctx->opcode_window).opcode_window_dword = opcode_high_bits;
           current_byte = *cursor;
           normalized_opcode = current_byte | opcode_high_bits;
-          (ctx->field9_0x28).opcode_window_dword = normalized_opcode;
+          (ctx->opcode_window).opcode_window_dword = normalized_opcode;
           opcode_class_entry = normalized_opcode;
           if (((ctx->prefix).decoded.flags & 0x10) != 0) {
             opcode_class_entry = (uint)current_byte | opcode_high_bits & 0xffffff;
@@ -489,7 +489,7 @@ LAB_00100191:
           current_byte = *cursor;
           opcode_class_offset = (ulong)current_byte;
           if (current_byte == 0xf) {
-            (ctx->field9_0x28).opcode_window_dword = 0xf;
+            (ctx->opcode_window).opcode_window_dword = 0xf;
             opcode_ptr = cursor;
 LAB_001001c5:
             cursor = opcode_ptr + 1;
@@ -502,7 +502,7 @@ LAB_001001c5:
           if (((byte)(&dasm_onebyte_is_invalid)[current_byte >> 3] >> opcode_class_entry & 1) != 0) {
             return FALSE;
           }
-          ctx->field9_0x28 = opcode_window_seed;
+          ctx->opcode_window = opcode_window_seed;
           opcode_class_masks[0] = 0x3030303030303030;
           ctx->opcode_offset = (u8)((long)cursor - (long)code_start);
           opcode_class_masks[1] = 0xffff0fc000000000;
@@ -564,7 +564,7 @@ LAB_00100344:
                 ctx->imm_size = 8;
                 (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
                 ctx->mov_imm_reg_index = opcode_index;
-                (ctx->field9_0x28).opcode_window_dword = 0xb8;
+                (ctx->opcode_window).opcode_window_dword = 0xb8;
               }
               goto LAB_0010067d;
             }
@@ -609,7 +609,7 @@ LAB_001007e4:
         if (cursor == (byte *)0x0) {
           return FALSE;
         }
-        normalized_opcode = (ctx->field9_0x28).opcode_window_dword;
+        normalized_opcode = (ctx->opcode_window).opcode_window_dword;
 LAB_001004ee:
         derived_opcode = normalized_opcode + 0x80;
         goto LAB_001004f1;

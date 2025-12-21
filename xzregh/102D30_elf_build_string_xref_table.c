@@ -103,7 +103,7 @@ LAB_00102e64:
       decode_cursor = decode_cursor + 1;
       if (insn_decoded != FALSE) {
         decode_cursor = scanner_ctx.instruction + scanner_ctx.instruction_size;
-        if (scanner_ctx.opcode_window_dword == 0x168) {
+        if (scanner_ctx.opcode_window.opcode_window_dword == 0x168) {
           if (scanner_ctx.imm_signed == 0) goto LAB_00102e64;
           candidate_addr = decode_cursor + scanner_ctx.imm_signed;
 LAB_00102ee5:
@@ -111,8 +111,8 @@ LAB_00102ee5:
         }
         else {
           candidate_addr = scanner_ctx.instruction;
-          if (scanner_ctx.opcode_window_dword == 0xa5fe) goto LAB_00102ee5;
-          if (((scanner_ctx.opcode_window_dword != 0x10d) ||
+          if (scanner_ctx.opcode_window.opcode_window_dword == 0xa5fe) goto LAB_00102ee5;
+          if (((scanner_ctx.opcode_window.opcode_window_dword != 0x10d) ||
               ((scanner_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48)) ||
              (((uint)scanner_ctx.prefix.decoded.modrm & 0xff00ff00) != 0x5000000)) goto LAB_00102e64;
           candidate_addr = decode_cursor + scanner_ctx.mem_disp;

@@ -47,7 +47,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
         krb5_string_ref = krb5_string_ref + 1;
       }
       else {
-        if ((string_scan_ctx.opcode_window_dword & 0xfffffffd) == 0xb1) {
+        if ((string_scan_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == 0xb1) {
           if (string_scan_ctx.prefix.modrm_bytes.modrm_mod == '\x03') {
             if (((string_scan_ctx.prefix.flags_u16 & 0x20) == 0) ||
                ((string_scan_ctx.prefix.modrm_bytes.rex_byte & 8) == 0)) {
@@ -99,7 +99,7 @@ LAB_0010346b:
               probe_depth = 0;
               while (((store_scan_cursor < code_end && (probe_depth < 6)) &&
                      (decode_ok = x86_decode_instruction(&store_scan_ctx,store_scan_cursor,code_end), decode_ok != FALSE))) {
-                if (store_scan_ctx.opcode_window_dword == 0x109) {
+                if (store_scan_ctx.opcode_window.opcode_window_dword == 0x109) {
                   if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {
                     dest_reg = 0;
                     if ((store_scan_ctx.prefix.flags_u16 & 0x1040) != 0) {
@@ -135,7 +135,7 @@ LAB_00103553:
                     }
                   }
                 }
-                else if (store_scan_ctx.opcode_window_dword == 0xa5fe) break;
+                else if (store_scan_ctx.opcode_window.opcode_window_dword == 0xa5fe) break;
                 store_scan_cursor = store_scan_cursor + store_scan_ctx.instruction_size;
                 probe_depth = probe_depth + 1;
               }
@@ -143,7 +143,7 @@ LAB_00103553:
           }
         }
         // AutoDoc: Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register.
-        else if (string_scan_ctx.opcode_window_dword == 0x147) {
+        else if (string_scan_ctx.opcode_window.opcode_window_dword == 0x147) {
           if (((((string_scan_ctx.prefix.modrm_bytes.rex_byte & 8) == 0) &&
                ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
               ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.imm_zeroextended == 0)) {
@@ -160,7 +160,7 @@ LAB_0010365f:
             }
           }
         }
-        else if ((string_scan_ctx.opcode_window_dword == 0xa5fe) &&
+        else if ((string_scan_ctx.opcode_window.opcode_window_dword == 0xa5fe) &&
                 (code_start != string_scan_ctx.instruction)) {
           return FALSE;
         }

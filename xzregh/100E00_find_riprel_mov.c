@@ -46,10 +46,10 @@ BOOL find_riprel_mov(u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load
        (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {
-        is_expected_opcode = dctx->opcode_window_dword == 0x109;
+        is_expected_opcode = (dctx->opcode_window).opcode_window_dword == 0x109;
       }
       else {
-        is_expected_opcode = dctx->opcode_window_dword == 0x10b;
+        is_expected_opcode = (dctx->opcode_window).opcode_window_dword == 0x10b;
       }
       if (is_expected_opcode) {
         return TRUE;

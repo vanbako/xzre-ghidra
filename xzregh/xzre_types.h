@@ -684,6 +684,16 @@ enum dasm_modrm_mask {
  XZ_MODRM_RAW = 0x000000FF
 };
 
+/*
+ * Opcode-map prefixes stored in `dasm_ctx_t::opcode_window_dword` before the +0x80 normalization (mask off the low opcode byte): no prefix for one-byte opcodes, 0x0F00 for two-byte opcodes, and 0x0F38/0x0F3A for the three-byte maps.
+ */
+enum dasm_opcode_window_map {
+ XZ_OPCODE_WINDOW_ONE_BYTE = 0x00000000,
+ XZ_OPCODE_WINDOW_TWO_BYTE = 0x00000F00,
+ XZ_OPCODE_WINDOW_THREE_BYTE_0F38 = 0x000F3800,
+ XZ_OPCODE_WINDOW_THREE_BYTE_0F3A = 0x000F3A00
+};
+
 typedef union __attribute__((packed)) {
  struct __attribute__((packed)) {
   u8 B : 1;
@@ -762,10 +772,7 @@ typedef struct __attribute__((packed)) dasm_ctx {
  u8 sib_index_bits; /* SIB index register (prior to applying REX.X). */
  u8 sib_base_bits; /* SIB base register (prior to applying REX.B). */
  u8 opcode_window_prefix[3]; /* Leading bytes before the 32-bit opcode window. */
- union __attribute__((packed)) {
-  u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
-  u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
- };
+ dasm_opcode_window_t opcode_window; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
  u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */
  u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */
  u64 imm_signed; /* Immediate value sign-extended to 64 bits. */

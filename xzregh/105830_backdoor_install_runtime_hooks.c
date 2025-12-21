@@ -622,7 +622,7 @@ LAB_001065af:
           if (probe_success != FALSE) break;
           syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
-        if ((syslog_dasm_ctx.opcode_window_dword & 0xfffffffd) == 0xb1) {
+        if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == 0xb1) {
           if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
           if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
@@ -773,7 +773,7 @@ LAB_00106b3c:
             }
           }
         }
-        else if ((((syslog_dasm_ctx.opcode_window_dword == 0x147) &&
+        else if ((((syslog_dasm_ctx.opcode_window.opcode_window_dword == 0x147) &&
                   ((uint)syslog_dasm_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
                  ((syslog_dasm_ctx.prefix.flags_u16 & 0x800) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
         {

@@ -871,6 +871,13 @@
       "code": "enum dasm_modrm_mask {\n XZ_MODRM_RM = 0xFF000000,\n XZ_MODRM_REG = 0x00FF0000,\n XZ_MODRM_MOD = 0x0000FF00,\n XZ_MODRM_RAW = 0x000000FF\n};"
     },
     {
+      "kind": "enum",
+      "names": [
+        "dasm_opcode_window_map"
+      ],
+      "code": "enum dasm_opcode_window_map {\n XZ_OPCODE_WINDOW_ONE_BYTE = 0x00000000,\n XZ_OPCODE_WINDOW_TWO_BYTE = 0x00000F00,\n XZ_OPCODE_WINDOW_THREE_BYTE_0F38 = 0x000F3800,\n XZ_OPCODE_WINDOW_THREE_BYTE_0F3A = 0x000F3A00\n};"
+    },
+    {
       "kind": "typedef",
       "names": [
         "x86_rex_prefix_t"
@@ -910,7 +917,7 @@
       "names": [
         "dasm_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction; /* Base pointer to the decoded instruction so scanners can rescan or compute RIP-relative targets. */\n u64 instruction_size; /* Number of bytes consumed while decoding `instruction`. */\n x86_prefix_state_t prefix; /* Cached legacy-prefix/VEX/REX breakdown for this decode. */\n u8 mov_imm_reg_index; /* Lower 3 bits of the MOV r64, imm64 destination register (combine with REX.B when present). */\n u8 sib_byte; /* Raw SIB byte when the addressing mode uses one. */\n u8 sib_scale_bits; /* SIB scale component extracted from `sib_byte`. */\n u8 sib_index_bits; /* SIB index register (prior to applying REX.X). */\n u8 sib_base_bits; /* SIB base register (prior to applying REX.B). */\n u8 opcode_window_prefix[3]; /* Leading bytes before the 32-bit opcode window. */\n union __attribute__((packed)) {\n  u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n  u32 opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */\n };\n u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */\n u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */\n u64 imm_signed; /* Immediate value sign-extended to 64 bits. */\n u64 imm_zeroextended; /* Immediate value zero-extended to 64 bits. */\n u64 imm_size; /* Size in bytes of the decoded immediate (0 when the opcode lacks one). */\n u8 opcode_offset; /* Offset from `instruction` to the current opcode byte used during decoding. */\n u8 decoder_scratch[7]; /* Zeroed padding the decoder reuses as scratch state. */\n} dasm_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) dasm_ctx {\n u8* instruction; /* Base pointer to the decoded instruction so scanners can rescan or compute RIP-relative targets. */\n u64 instruction_size; /* Number of bytes consumed while decoding `instruction`. */\n x86_prefix_state_t prefix; /* Cached legacy-prefix/VEX/REX breakdown for this decode. */\n u8 mov_imm_reg_index; /* Lower 3 bits of the MOV r64, imm64 destination register (combine with REX.B when present). */\n u8 sib_byte; /* Raw SIB byte when the addressing mode uses one. */\n u8 sib_scale_bits; /* SIB scale component extracted from `sib_byte`. */\n u8 sib_index_bits; /* SIB index register (prior to applying REX.X). */\n u8 sib_base_bits; /* SIB base register (prior to applying REX.B). */\n u8 opcode_window_prefix[3]; /* Leading bytes before the 32-bit opcode window. */\n dasm_opcode_window_t opcode_window; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */\n u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */\n u64 imm_signed; /* Immediate value sign-extended to 64 bits. */\n u64 imm_zeroextended; /* Immediate value zero-extended to 64 bits. */\n u64 imm_size; /* Size in bytes of the decoded immediate (0 when the opcode lacks one). */\n u8 opcode_offset; /* Offset from `instruction` to the current opcode byte used during decoding. */\n u8 decoder_scratch[7]; /* Zeroed padding the decoder reuses as scratch state. */\n} dasm_ctx_t;"
     },
     {
       "kind": "struct",
