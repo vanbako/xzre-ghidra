@@ -30,6 +30,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `BN_CTX` | 0 |  |
 | `cmd_arguments_t` | 1 | Payload/Crypto review – renamed the three flag bytes to control/monitor/request flags, annotated their bit semantics (log hook, PAM, socket/payload sourcing), and documented how payload_hint doubles as a length vs. sshd_offsets overlay (2025-11-21). |
 | `dasm_ctx_t` | 4 | Renamed decoder fields and documented each slot (2025-11-19); added `x86_prefix_state_t` overlays (`flags_u32`, `modrm_bytes`) so scanners stop relying on raw prefix `_N_M_` slices (2025-12-16); added `opcode_window_dword` overlay to replace `_40_4_` opcode slices (2025-12-21); swapped the anonymous opcode-window union for a named `dasm_opcode_window_t` field and documented the opcode-window map prefixes (2025-12-21). |
+| `dasm_opcode_window_t` | 1 | Added the `window_bytes` overlay (`low_byte` + `high_bytes[3]`) so the decoder no longer emits `_1_3_` byte slices (2025-12-21). |
 | `DSA` | 0 |  |
 | `EC_GROUP` | 0 |  |
 | `EC_KEY` | 0 |  |

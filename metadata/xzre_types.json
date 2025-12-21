@@ -910,7 +910,7 @@
       "names": [
         "dasm_opcode_window_t"
       ],
-      "code": "typedef union __attribute__((packed)) {\n u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n X86_OPCODE opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */\n} dasm_opcode_window_t;"
+      "code": "typedef union __attribute__((packed)) {\n u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */\n struct {\n  u8 low_byte; /* opcode_window[0]. */\n  u8 high_bytes[3]; /* opcode_window[1..3]. */\n } window_bytes;\n X86_OPCODE opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */\n} dasm_opcode_window_t;"
     },
     {
       "kind": "struct",

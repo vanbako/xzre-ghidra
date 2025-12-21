@@ -9171,6 +9171,30 @@
         "replacement": "prefix_zero_cursor = (x86_prefix_state_t *)((u8 *)prefix_zero_cursor + 4);"
       },
       {
+        "original": "vex_prefix_window._1_1_ = '\\0';",
+        "replacement": "vex_prefix_window.window_bytes.high_bytes[0] = 0;"
+      },
+      {
+        "original": "vex_prefix_window._2_1_ = '\\0';",
+        "replacement": "vex_prefix_window.window_bytes.high_bytes[1] = 0;"
+      },
+      {
+        "original": "vex_prefix_window._3_1_ = '\\0';",
+        "replacement": "vex_prefix_window.window_bytes.high_bytes[2] = 0;"
+      },
+      {
+        "original": "opcode_window_seed._1_1_ = '\\0';",
+        "replacement": "opcode_window_seed.window_bytes.high_bytes[0] = 0;"
+      },
+      {
+        "original": "opcode_window_seed._2_1_ = '\\0';",
+        "replacement": "opcode_window_seed.window_bytes.high_bytes[1] = 0;"
+      },
+      {
+        "original": "opcode_window_seed._3_1_ = '\\0';",
+        "replacement": "opcode_window_seed.window_bytes.high_bytes[2] = 0;"
+      },
+      {
         "original": "((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==\n                (undefined1  [16])0x66000000000004",
         "replacement": "(((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)"
       }

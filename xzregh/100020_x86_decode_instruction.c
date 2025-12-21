@@ -68,7 +68,9 @@ LAB_00100aa5:
       return FALSE;
     }
     current_byte = *opcode_ptr;
-    vex_prefix_window.opcode_window_dword._1_3_ = 0;
+    vex_prefix_window.window_bytes.high_bytes[0] = 0;
+    vex_prefix_window.window_bytes.high_bytes[1] = 0;
+    vex_prefix_window.window_bytes.high_bytes[2] = 0;
     vex_prefix_window.opcode_window[0] = current_byte;
     if (current_byte < 0x68) {
       if (current_byte < 0x2e) {
@@ -496,7 +498,9 @@ LAB_001001c5:
             goto LAB_001001c9;
           }
           opcode = (X86_OPCODE)current_byte;
-          opcode_window_seed.opcode_window_dword._1_3_ = 0;
+          opcode_window_seed.window_bytes.high_bytes[0] = 0;
+          opcode_window_seed.window_bytes.high_bytes[1] = 0;
+          opcode_window_seed.window_bytes.high_bytes[2] = 0;
           opcode_window_seed.opcode_window[0] = current_byte;
           imm_field = current_byte & 7;
           if (((byte)(&dasm_onebyte_is_invalid)[current_byte >> 3] >> imm_field & 1) != 0) {

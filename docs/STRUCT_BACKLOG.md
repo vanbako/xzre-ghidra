@@ -10,13 +10,14 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 
 ## Candidates
 
-### `dasm_opcode_window_t` high-byte overlay
-- **Where it shows up:** `xzregh/100020_x86_decode_instruction.c` (`vex_prefix_window.opcode_window_dword._1_3_` and `opcode_window_seed.opcode_window_dword._1_3_`).
-- **Why it matters:** The decoder still emits raw `_1_3_` byte-slice writes; a named overlay keeps the opcode-window initialization readable.
-- **Reverse-engineering plan:** Add a byte-level overlay inside `dasm_opcode_window_t` (e.g., `{ u8 low_byte; u8 high_bytes[3]; }`) and update locals to rewrite `_1_3_` to the new field (or to `opcode_window[1..3]` if the decompiler cooperates), then validate via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-21):** Open – identified the remaining raw slice in the decoder.
+- None queued right now.
 
 ## Completed
+
+### `dasm_opcode_window_t` high-byte overlay
+- **Where it showed up:** `xzregh/100020_x86_decode_instruction.c` (`vex_prefix_window.opcode_window_dword._1_3_` and `opcode_window_seed.opcode_window_dword._1_3_`).
+- **Why it mattered:** The decoder emitted raw `_1_3_` byte-slice writes.
+- **Outcome (2025-12-21):** Done – added a byte-level overlay in `dasm_opcode_window_t` and rewired the decoder locals to use `window_bytes.high_bytes[]`, refresh clean.
 
 ### `dasm_ctx_t` opcode-window dword alias
 - **Where it showed up:** `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (`insn_ctx._40_4_` comparisons).

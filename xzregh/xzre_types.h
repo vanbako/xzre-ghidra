@@ -773,6 +773,10 @@ typedef union __attribute__((packed)) {
 
 typedef union __attribute__((packed)) {
  u8 opcode_window[4]; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
+ struct {
+  u8 low_byte; /* opcode_window[0]. */
+  u8 high_bytes[3]; /* opcode_window[1..3]. */
+ } window_bytes;
  X86_OPCODE opcode_window_dword; /* 32-bit view of the opcode window starting at opcode_window[0]. */
 } dasm_opcode_window_t;
 
