@@ -823,7 +823,7 @@
     "plate": "Initialises an `elf_info_t` from an in-memory ELF header: zeroes every field, records the lowest PT_LOAD virtual address, locates the PT_DYNAMIC segment, and caches pointers to the strtab, symtab, relocation tables (PLT, RELA, RELR), GNU hash buckets, version records, and GNU_RELRO metadata. Each derived pointer is validated with `elf_vaddr_range_has_pflags`, and the parser keeps feature bits synchronized so later helpers know which tables were present.\n\nIt enforces invariants such as \"only one PT_GNU_RELRO segment\", derives the number of dynamic entries, honours BIND_NOW/RELR/versym toggles, and refuses to trust any header that leaves the module boundaries.",
     "inline": [
       {
-        "match": "for (dynamic_phdr_idx.phdr_index = 0x3e; dynamic_phdr_idx.phdr_index != 0; dynamic_phdr_idx.phdr_index = dynamic_phdr_idx.phdr_index + -1)",
+        "match": "for (dynamic_phdr_idx = 0x3e; dynamic_phdr_idx != 0; dynamic_phdr_idx = dynamic_phdr_idx + -1)",
         "match_type": "wildcard",
         "comment": "Clear the cached `elf_info_t` with a fixed-count wipe so partially parsed state never leaks across runs."
       },
@@ -869,17 +869,17 @@
         "comment": "DT_RELR: base address of the packed RELR relocation stream (bitmap/literal entries for R_X86_64_RELATIVE)."
       },
       {
-        "match": "if (dynamic_phdr_idx.tag == DT_GNU_HASH) {",
+        "match": "if (dynamic_tag == DT_GNU_HASH) {",
         "match_type": "wildcard",
         "comment": "DT_GNU_HASH: remember the GNU hash header pointer so bucket/chain tables can be derived after relocation pointers are validated."
       },
       {
-        "match": "else if (dynamic_phdr_idx.tag == DT_VERSYM) {",
+        "match": "else if (dynamic_tag == DT_VERSYM) {",
         "match_type": "wildcard",
         "comment": "DT_VERSYM: enables `.gnu.version` lookups; set the feature bit and store the versym pointer."
       },
       {
-        "match": "if (dynamic_phdr_idx.tag == DT_VERDEF) {",
+        "match": "if (dynamic_tag == DT_VERDEF) {",
         "match_type": "wildcard",
         "comment": "DT_VERDEF: pointer to `.gnu.version_d` (kept only when DT_VERDEFNUM/size validation succeeds)."
       },

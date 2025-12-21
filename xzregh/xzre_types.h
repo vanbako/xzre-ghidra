@@ -441,11 +441,6 @@ typedef enum {
  DT_HIPROC = 0x7fffffff
 } ElfDynamicTag;
 
-typedef union {
- long phdr_index;
- ElfDynamicTag tag;
-} ElfDynamicTagOrIndex;
-
 /*
  * Categorization of the ModRM byte modes that the instruction search helpers check when scanning for register or displacement based operands.
  */

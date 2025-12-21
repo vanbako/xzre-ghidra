@@ -3212,7 +3212,7 @@
       {
         "name": "dynamic_phdr_idx",
         "original": "lVar17",
-        "type": "ElfDynamicTagOrIndex"
+        "type": "long"
       },
       {
         "name": "info_wipe_cursor",
@@ -3338,48 +3338,28 @@
         "replacement": "elf_info->gnu_hash_chain = hash_buckets + ((ulong)phdr_index - (ulong)gnu_hash_symbias);"
       },
       {
-        "original": "for (dynamic_phdr_idx = 0x3e; dynamic_phdr_idx != 0; dynamic_phdr_idx = dynamic_phdr_idx + -1)",
-        "replacement": "for (dynamic_phdr_idx.phdr_index = 0x3e; dynamic_phdr_idx.phdr_index != 0; dynamic_phdr_idx.phdr_index = dynamic_phdr_idx.phdr_index + -1)"
-      },
-      {
-        "original": "dynamic_phdr_idx = -1;",
-        "replacement": "dynamic_phdr_idx.phdr_index = -1;"
-      },
-      {
-        "original": "dynamic_phdr_idx = (long)(int)phdr_index;",
-        "replacement": "dynamic_phdr_idx.phdr_index = (long)(int)phdr_index;"
-      },
-      {
-        "original": "if ((lowest_load_vaddr != 0xffffffffffffffff) && ((int)dynamic_phdr_idx != -1)) {",
-        "replacement": "if ((lowest_load_vaddr != 0xffffffffffffffff) && ((int)dynamic_phdr_idx.phdr_index != -1)) {"
-      },
-      {
-        "original": "phnum = program_headers[dynamic_phdr_idx].p_memsz;",
-        "replacement": "phnum = program_headers[dynamic_phdr_idx.phdr_index].p_memsz;"
-      },
-      {
-        "original": "vaddr = (Elf64_Dyn *)((long)ehdr + (program_headers[dynamic_phdr_idx].p_vaddr - lowest_load_vaddr));",
-        "replacement": "vaddr = (Elf64_Dyn *)((long)ehdr + (program_headers[dynamic_phdr_idx.phdr_index].p_vaddr - lowest_load_vaddr));"
+        "original": "long dynamic_phdr_idx;",
+        "replacement": "long dynamic_phdr_idx;\n  ElfDynamicTag dynamic_tag;"
       },
       {
         "original": "dynamic_phdr_idx = ((Elf64_Dyn *)(dyn_entry_fields + -1))->d_tag;",
-        "replacement": "dynamic_phdr_idx.tag = ((Elf64_Dyn *)(dyn_entry_fields + -1))->d_tag;"
+        "replacement": "dynamic_tag = ((Elf64_Dyn *)(dyn_entry_fields + -1))->d_tag;"
       },
       {
         "original": "if (dynamic_phdr_idx == 0) {",
-        "replacement": "if (dynamic_phdr_idx.tag == DT_NULL) {"
+        "replacement": "if (dynamic_tag == DT_NULL) {"
       },
       {
         "original": "if (dynamic_phdr_idx < 0x25) {",
-        "replacement": "if (dynamic_phdr_idx.tag < 0x25) {"
+        "replacement": "if (dynamic_tag < 0x25) {"
       },
       {
         "original": "if (dynamic_phdr_idx < 0x17) {",
-        "replacement": "if (dynamic_phdr_idx.tag < 0x17) {"
+        "replacement": "if (dynamic_tag < 0x17) {"
       },
       {
         "original": "switch(dynamic_phdr_idx) {",
-        "replacement": "switch(dynamic_phdr_idx.tag) {"
+        "replacement": "switch(dynamic_tag) {"
       },
       {
         "original": "case 2:",
@@ -3423,39 +3403,39 @@
       },
       {
         "original": "dynamic_phdr_idx == 0x6ffffffb",
-        "replacement": "dynamic_phdr_idx.tag == DT_FLAGS_1"
+        "replacement": "dynamic_tag == DT_FLAGS_1"
       },
       {
         "original": "dynamic_phdr_idx < 0x6ffffffc",
-        "replacement": "dynamic_phdr_idx.tag < DT_VERDEF"
+        "replacement": "dynamic_tag < DT_VERDEF"
       },
       {
         "original": "dynamic_phdr_idx < 0x6ffffefd",
-        "replacement": "dynamic_phdr_idx.tag < DT_PLTPAD"
+        "replacement": "dynamic_tag < DT_PLTPAD"
       },
       {
         "original": "0x6ffffefa < dynamic_phdr_idx",
-        "replacement": "DT_CONFIG < dynamic_phdr_idx.tag"
+        "replacement": "DT_CONFIG < dynamic_tag"
       },
       {
         "original": "dynamic_phdr_idx == 0x6ffffef5",
-        "replacement": "dynamic_phdr_idx.tag == DT_GNU_HASH"
+        "replacement": "dynamic_tag == DT_GNU_HASH"
       },
       {
         "original": "dynamic_phdr_idx == 0x6ffffff0",
-        "replacement": "dynamic_phdr_idx.tag == DT_VERSYM"
+        "replacement": "dynamic_tag == DT_VERSYM"
       },
       {
         "original": "dynamic_phdr_idx == 0x6ffffffd",
-        "replacement": "dynamic_phdr_idx.tag == DT_VERDEFNUM"
+        "replacement": "dynamic_tag == DT_VERDEFNUM"
       },
       {
         "original": "dynamic_phdr_idx == 0x7fffffff",
-        "replacement": "dynamic_phdr_idx.tag == DT_HIPROC"
+        "replacement": "dynamic_tag == DT_HIPROC"
       },
       {
         "original": "dynamic_phdr_idx == 0x6ffffffc",
-        "replacement": "dynamic_phdr_idx.tag == DT_VERDEF"
+        "replacement": "dynamic_tag == DT_VERDEF"
       },
       {
         "name": "verdef_present",
