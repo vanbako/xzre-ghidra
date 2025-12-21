@@ -14,7 +14,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 CALL_RENAME_MAP = {
@@ -22,11 +22,33 @@ CALL_RENAME_MAP = {
     "check_argument": "argv_dash_option_contains_lowercase_d",
 }
 
-GOT_CTX_U32_FIELDS = (
-    "tls_got_entry",
-    "cpuid_got_slot",
-    "cpuid_slot_index",
-    "got_base_offset",
+STRUCT_CAST_RULES = (
+    {
+        "undefined": "undefined4",
+        "cast_to": "u32",
+        "base_patterns": (r"\bgot_ctx\b",),
+        "fields": (
+            "tls_got_entry",
+            "cpuid_got_slot",
+            "cpuid_slot_index",
+            "got_base_offset",
+        ),
+        "allow_base_only": False,
+    },
+    {
+        "undefined": "undefined4",
+        "cast_to": "u32",
+        "base_patterns": (r"\bsshd_offsets\b", r"\boffsets\b"),
+        "fields": ("raw_value",),
+        "allow_base_only": True,
+    },
+    {
+        "undefined": "undefined4",
+        "cast_to": "u32",
+        "base_patterns": (r"\bhostkey_idx\b", r"\bhostkey_index\b"),
+        "fields": ("raw_value",),
+        "allow_base_only": True,
+    },
 )
 
 def load_register_temps(metadata_path: Path) -> Dict[str, List[dict]]:
@@ -150,21 +172,47 @@ def apply_register_rewrites(text: str, temps: List[dict], file_path: Path) -> st
     return text
 
 
-def rewrite_got_ctx_undefined4(text: str, file_path: Path) -> str:
-    if "undefined4" not in text:
+def rewrite_struct_undefined_casts(text: str, file_path: Path) -> str:
+    if "undefined" not in text:
         return text
-    field_group = "|".join(re.escape(field) for field in GOT_CTX_U32_FIELDS)
+
     pattern = re.compile(
-        rf"\*\s*\(undefined4 \*\)\s*&\((?P<base>[^)]+)\)\.(?P<field>{field_group})"
+        r"\*\s*\((?P<undef>undefined\d+)\s*\*\)\s*&\((?P<base>[^)]+)\)"
+        r"(?:\.(?P<field>[A-Za-z_][A-Za-z0-9_]*))?"
     )
-    updated, replacements = pattern.subn(
-        lambda match: f"*(u32 *)&({match.group('base')}).{match.group('field')}",
-        text,
-    )
+    replacements = 0
+
+    def should_rewrite(undef: str, base: str, field: Optional[str]) -> Tuple[bool, str]:
+        for rule in STRUCT_CAST_RULES:
+            if undef != rule["undefined"]:
+                continue
+            if not any(re.search(pat, base) for pat in rule["base_patterns"]):
+                continue
+            if field is None and not rule["allow_base_only"]:
+                continue
+            if field is not None and field not in rule["fields"]:
+                continue
+            return True, rule["cast_to"]
+        return False, ""
+
+    def replacer(match: re.Match[str]) -> str:
+        nonlocal replacements
+        undef = match.group("undef")
+        base = match.group("base")
+        field = match.group("field")
+        ok, cast_to = should_rewrite(undef, base, field)
+        if not ok:
+            return match.group(0)
+        replacements += 1
+        if field is None:
+            return f"*({cast_to} *)&({base})"
+        return f"*({cast_to} *)&({base}).{field}"
+
+    updated = pattern.sub(replacer, text)
     if replacements:
         plural = "s" if replacements != 1 else ""
         print(
-            f"[postprocess] info: rewrote {replacements} got_ctx u32 cast{plural} in {file_path}",
+            f"[postprocess] info: rewrote {replacements} undefined cast{plural} in {file_path}",
             file=sys.stderr,
         )
     return updated
@@ -295,7 +343,7 @@ def rewrite_bool_literals(text: str, file_path: Path) -> str:
 def process_file(path: Path, temps: List[dict]) -> None:
     text = path.read_text(encoding="utf-8")
     updated = apply_register_rewrites(text, temps, path)
-    updated = rewrite_got_ctx_undefined4(updated, path)
+    updated = rewrite_struct_undefined_casts(updated, path)
     updated = updated.replace("(bool *)", "(BOOL *)")
     updated = rewrite_bool_literals(updated, path)
     updated = scrub_remaining_bool(updated, path)

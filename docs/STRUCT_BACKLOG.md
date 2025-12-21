@@ -10,14 +10,14 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 
 ## Candidates
 
-### `sshbuf` layout
-- **Where it shows up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c`, `xzregh/107920_sshbuf_is_negative_mpint.c`, `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c`, `xzregh/108EA0_mm_answer_keyallowed_payload_dispatch_hook.c`.
-- **Why it matters:** Many helpers compute data/size offsets by hand; modeling `sshbuf` will make pointer math and bounds checks readable.
-- **Reverse-engineering plan:** Use the OpenSSH headers in `third_party/include/openssh` to define only the fields used by these helpers (data pointer, size, max_size, offset). Keep the definition minimal and validate the export via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-20):** Done – aligned to the OpenSSH 9.7p1 layout (d/cd/off/size/max_size/alloc/readonly/refcount/parent) with field comments in `metadata/xzre_types.json`.
+### `dasm_ctx_t` opcode-window dword alias
+- **Where it shows up:** `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (`insn_ctx._40_4_` comparisons).
+- **Why it matters:** The audit scanner still relies on raw `_40_4_` slices for opcode checks; adding a named alias keeps the pattern logic readable.
+- **Reverse-engineering plan:** Add a union/overlay in `dasm_ctx_t` for the opcode-window dword (e.g., `u32 opcode_window_dword` tied to `opcode_window[4]`), update locals to rewrite `insn_ctx._40_4_`, and validate via `./scripts/refresh_xzre_project.sh`.
+- **Status (2025-12-20):** Pending – `_40_4_` slice still appears in the audit helper.
 
-### `sshkey` minimal view
-- **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`, plus any host key tables inside `sensitive_data`.
-- **Why it matters:** The Ed448 verification path and RSA hooks dereference key material; a minimal `sshkey` layout helps explain the digest/signature flow.
-- **Reverse-engineering plan:** Import the OpenSSH `sshkey` layout from `third_party/include/openssh`, then trim to the fields referenced in decomp (key type + RSA/Ed25519 pointers). Update metadata so the code uses named members instead of offsets.
-- **Status (2025-12-20):** Done – trimmed `sshkey` to the minimal prefix (type/flags/RSA/DSA/ECDSA/Ed25519) in `metadata/xzre_types.json` so decomp uses named fields.
+### `instruction_register_bitmap_t` high-word alias
+- **Where it shows up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (`mask_register_bitmap.raw_value._2_2_`).
+- **Why it matters:** The register bitmap still uses a raw half-word slice; adding a named high-word view keeps the bitmap manipulation readable.
+- **Reverse-engineering plan:** Add a `u16 high_word`/`u16 high_bytes` overlay in `instruction_register_bitmap_t`, update locals to prefer the named field, and validate via `./scripts/refresh_xzre_project.sh`.
+- **Status (2025-12-20):** Pending – `_2_2_` raw slice still appears in the scanner.

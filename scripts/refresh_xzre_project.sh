@@ -164,6 +164,9 @@ python3 "$ROOT_DIR/scripts/postprocess_register_temps.py" \
   --metadata "$LOCALS_SOURCE" \
   --xzregh-dir "$XZREGH_EXPORT_DIR"
 
+python3 "$ROOT_DIR/scripts/check_undefined_casts.py" \
+  --xzregh-dir "$XZREGH_EXPORT_DIR"
+
 RENAME_REPORT="$GENERATED_DIR/locals_rename_report.txt"
 python3 "$ROOT_DIR/scripts/check_locals_renames.py" --output "$RENAME_REPORT" || \
   echo "warning: locals rename verification reported issues. See $RENAME_REPORT." >&2
