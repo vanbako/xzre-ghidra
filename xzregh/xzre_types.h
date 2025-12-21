@@ -1720,6 +1720,10 @@ typedef union __attribute__((packed)) instruction_register_bitmap {
   u8 reg_index; /* Captured register index (0-15) or 0xFF when unset. */
   u8 reserved; /* Padding/reserved byte; currently unused by the scanners. */
  } fields;
+ struct __attribute__((packed)) {
+  u16 low_word; /* Low 16-bit mask (same as fields.allowed_regs). */
+  u16 high_word; /* High 16-bit view of {reg_index,reserved}. */
+ } words;
  u32 raw_value; /* Raw view for shifts and byte-level updates. */
 } instruction_register_bitmap_t;
 

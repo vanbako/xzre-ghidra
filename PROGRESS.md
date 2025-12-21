@@ -2,6 +2,9 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-21
+- Session `STRUCT_instruction_register_bitmap_t_high_word`: added a `words.high_word` overlay to `instruction_register_bitmap_t` in `metadata/xzre_types.json`, rewired the audit mask init to use it via `metadata/xzre_locals.json`, ran `./scripts/refresh_xzre_project.sh`, and updated the struct tracking docs. Rationale: replace the last `_2_2_` raw slice with a named halfword view. Next: tackle the remaining struct backlog item (`dasm_ctx_t` opcode-window alias) or start another queued struct pass.
+
 ## 2025-12-20
 - Session `DOC_STRUCT_BACKLOG_REFRESH`: removed completed `sshbuf`/`sshkey` backlog entries, scanned decomp for remaining struct slice artifacts, and queued new backlog items for `dasm_ctx_t` opcode-window aliasing and `instruction_register_bitmap_t` high-word overlays. Rationale: keep the struct queue focused on remaining raw-slice usage. Next: implement the two new struct/overlay fixes and refresh.
 - Session `REFRESH_undefined_check`: wired `scripts/check_undefined_casts.py` into `scripts/refresh_xzre_project.sh` so refresh fails on undefined casts, then reran `./scripts/refresh_xzre_project.sh` (clean undefined scan, portable archive updated). Rationale: enforce undefined-cast cleanup alongside locals renames. Next: keep extending the allowlist if new structs emit undefined casts.

@@ -20,4 +20,4 @@ Structs (and struct-like overlays) we still need to model cleanly in `metadata/x
 - **Where it shows up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (`mask_register_bitmap.raw_value._2_2_`).
 - **Why it matters:** The register bitmap still uses a raw half-word slice; adding a named high-word view keeps the bitmap manipulation readable.
 - **Reverse-engineering plan:** Add a `u16 high_word`/`u16 high_bytes` overlay in `instruction_register_bitmap_t`, update locals to prefer the named field, and validate via `./scripts/refresh_xzre_project.sh`.
-- **Status (2025-12-20):** Pending – `_2_2_` raw slice still appears in the scanner.
+- **Status (2025-12-21):** Done – added a high-word overlay for `instruction_register_bitmap_t` and rewired the raw slice in `find_l_audit_any_plt_mask_via_symbind_alt`, refresh clean.

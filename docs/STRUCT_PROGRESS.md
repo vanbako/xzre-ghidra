@@ -55,7 +55,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `gnu_hash_table_t` | 1 | Modeled GNU hash header/bloom layout and rewired `elf_info_parse` exports to use named fields + bucket/chain math (2025-12-20). |
 | `got_ctx_t` | 1 | Loader review #13 – renamed the GOT anchor/slot/index fields (`tls_got_entry`, `cpuid_got_slot`, `cpuid_slot_index`, `got_base_offset`) and documented how cpuid_random_symbol_addr is used to rebuild the GOT base (2025-11-20). |
 | `imported_funcs_t` | 1 | Orig/PLT slots + helper stubs fully annotated (2025-11-18) |
-| `instruction_register_bitmap_t` | 1 | Added the 4-byte `{allowed_regs, reg_index}` union used by the audit instruction matcher so exports stop relying on `_0_3_` slices (2025-12-16). |
+| `instruction_register_bitmap_t` | 2 | Added the 4-byte `{allowed_regs, reg_index}` union used by the audit instruction matcher so exports stop relying on `_0_3_` slices (2025-12-16); added a `high_word` overlay for the reg_index/reserved halfword so scanners stop using `_2_2_` slices (2025-12-21). |
 | `instruction_search_offset_t` | 1 | Added an 8-byte `{offset, reserved}` union for the match displacement so exports stop relying on `_0_4_` slices while preserving the ctx layout (2025-12-16). |
 | `instruction_search_ctx_t` | 1 | Audit scanner ctx pass – retagged `offset_to_match` + register bitmap pointers to the new helper types so `find_l_audit_any_plt_mask_via_symbind_alt*` exports named fields (2025-12-16). |
 | `kex` | 0 |  |
