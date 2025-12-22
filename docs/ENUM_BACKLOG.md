@@ -16,18 +16,17 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Reverse-engineering plan:** Add an enum (e.g., `x86_64_reloc_type_t`) for the observed relocation IDs and replace literals in the helpers; refresh.
 - **Status (2025-12-21):** Open – candidate identified.
 
-### OpenSSH sshkey type IDs (KEY_*)
-- **Where it shows up:** `xzregh/107630_verify_ed448_signed_payload.c` (`sshkey->type` compared against 0/1/2/3 for RSA/DSA/ECDSA/ED25519).
-- **Why it matters:** Naming KEY_* values makes key-type branching explicit and aligns with upstream OpenSSH headers.
-- **Reverse-engineering plan:** Add an enum (e.g., `sshkey_type_t`) and retype `sshkey.type`/comparisons to use it; refresh.
-- **Status (2025-12-21):** Open – candidate identified.
-
 ## Completed
 
 ### ELF program header types (PT_*)
 - **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`p_type == 1/2` plus PT_GNU_RELRO checks), `xzregh/1013B0_is_pt_gnu_relro.c` (obfuscated PT_GNU_RELRO test), and the PT_LOAD scans in `xzregh/101EC0_elf_get_text_segment.c`, `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101F70_elf_get_rodata_segment_after_text.c`, `xzregh/101240_elf_vaddr_range_has_pflags_impl.c`.
 - **Why it mattered:** Naming PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO makes the ELF parser easier to read and keeps segment-type checks consistent.
 - **Outcome (2025-12-22):** Done – added `ElfProgramHeaderType` with PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO, rewrote the program-header comparisons via locals replacements (including the obfuscated RELRO constant), and refreshed exports.
+
+### OpenSSH sshkey type IDs (KEY_*)
+- **Where it showed up:** `xzregh/107630_verify_ed448_signed_payload.c` (`sshkey->type` compared against 0/1/2/3 for RSA/DSA/ECDSA/ED25519).
+- **Why it mattered:** Naming KEY_* values makes key-type branching explicit and aligns with upstream OpenSSH headers.
+- **Outcome (2025-12-22):** Done – added `sshkey_type_t` (KEY_RSA/DSA/ECDSA/ED25519), retyped `sshkey.type` plus the local `status`, and refreshed exports.
 
 ### ELF dynamic tag IDs
 - **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (switch/cases for 2, 5, 6, 7, 8, 0x17, 0x18, 0x1e, 0x23, 0x24; plus comparisons for 0x6ffffef5, 0x6ffffff0, 0x6ffffffb, 0x6ffffffc, 0x6ffffffd, 0x7fffffff).

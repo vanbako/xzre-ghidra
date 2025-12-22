@@ -9113,22 +9113,22 @@
       },
       {
         "name": "imports",
-        "original": "piVar1",
+        "original": "piVar2",
         "type": "imported_funcs_t *"
       },
       {
         "name": "ed25519_pub",
-        "original": "puVar2",
+        "original": "puVar3",
         "type": "u8 *"
       },
       {
         "name": "success",
-        "original": "BVar3",
+        "original": "BVar4",
         "type": "BOOL"
       },
       {
         "name": "ec_point_len",
-        "original": "uVar4",
+        "original": "uVar5",
         "type": "uint"
       },
       {
@@ -9136,32 +9136,28 @@
         "replacement": "ec_point_len << 0x18;"
       },
       {
-        "original": "<< 0x18);",
-        "replacement": "<< 0x18;"
-      },
-      {
-        "name": "status",
-        "original": "iVar5",
-        "type": "int"
+        "name": "key_type",
+        "original": "sVar1",
+        "type": "sshkey_type_t"
       },
       {
         "name": "ec_point_bytes_written",
-        "original": "sVar6",
+        "original": "sVar7",
         "type": "size_t"
       },
       {
         "name": "serialized_key_len",
-        "original": "sVar8",
+        "original": "sVar9",
         "type": "size_t"
       },
       {
         "name": "loop_idx",
-        "original": "lVar7",
+        "original": "lVar8",
         "type": "long"
       },
       {
         "name": "wipe_cursor",
-        "original": "puVar9",
+        "original": "puVar10",
         "type": "u8 *"
       },
       {
@@ -9206,6 +9202,11 @@
       {
         "original": "*(bool *)wipe_cursor = signed_data_size < tbs_len;",
         "replacement": "*wipe_cursor = 0;"
+      },
+      {
+        "name": "status",
+        "original": "iVar6",
+        "type": "int"
       }
     ],
     "source": "xzre/xzre_code/verify_signature.c"

@@ -857,11 +857,18 @@
       "code": "typedef struct sensitive_data sensitive_data;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "sshkey_type_t"
+      ],
+      "code": "typedef enum {\n KEY_RSA = 0,\n KEY_DSA = 1,\n KEY_ECDSA = 2,\n KEY_ED25519 = 3\n} sshkey_type_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "sshkey"
       ],
-      "code": "struct sshkey {\n int type; /* OpenSSH key type enum (KEY_*). */\n int flags;\n RSA *rsa;\n DSA *dsa;\n int ecdsa_nid;\n EC_KEY *ecdsa;\n u8 *ed25519_sk;\n u8 *ed25519_pk;\n /* Tail fields omitted; minimal view for xzre. */\n};"
+      "code": "struct sshkey {\n sshkey_type_t type; /* OpenSSH key type enum (KEY_*). */\n int flags;\n RSA *rsa;\n DSA *dsa;\n int ecdsa_nid;\n EC_KEY *ecdsa;\n u8 *ed25519_sk;\n u8 *ed25519_pk;\n /* Tail fields omitted; minimal view for xzre. */\n};"
     },
     {
       "kind": "typedef",

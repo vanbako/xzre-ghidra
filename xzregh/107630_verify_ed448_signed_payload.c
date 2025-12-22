@@ -20,6 +20,7 @@ BOOL verify_ed448_signed_payload
 
 {
   size_t tbs_len;
+  sshkey_type_t key_type;
   imported_funcs_t *imports;
   EC_KEY *ecdsa_key;
   u8 *ed25519_pub;
@@ -61,8 +62,8 @@ BOOL verify_ed448_signed_payload
   if (imports == (imported_funcs_t *)0x0) {
     return FALSE;
   }
-  status = sshkey->type;
-  if (status == 2) {
+  key_type = sshkey->type;
+  if (key_type == KEY_ECDSA) {
     ecdsa_key = sshkey->ecdsa;
     *(u64 *)serialized_key = 0;
     serialized_key_pad = 0;
@@ -103,14 +104,14 @@ BOOL verify_ed448_signed_payload
     serialized_key_len = serialized_key_len + 4;
   }
   else {
-    if (status < 3) {
-      if (status == 0) {
+    if ((int)key_type < 3) {
+      if (key_type == KEY_RSA) {
         success = rsa_pubkey_sha256_fingerprint
                           (sshkey->rsa,signed_data + sshkey_digest_offset,
                            signed_data_size - sshkey_digest_offset,imports);
       }
       else {
-        if (status != 1) {
+        if (key_type != KEY_DSA) {
           return FALSE;
         }
         success = dsa_pubkey_sha256_fingerprint
@@ -119,7 +120,7 @@ BOOL verify_ed448_signed_payload
       }
       goto LAB_001076f8;
     }
-    if (status != 3) {
+    if (key_type != KEY_ED25519) {
       return FALSE;
     }
     ed25519_pub = sshkey->ed25519_pk;

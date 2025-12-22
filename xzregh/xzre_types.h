@@ -706,8 +706,15 @@ struct sensitive_data {
  */
 typedef struct sensitive_data sensitive_data;
 
+typedef enum {
+ KEY_RSA = 0,
+ KEY_DSA = 1,
+ KEY_ECDSA = 2,
+ KEY_ED25519 = 3
+} sshkey_type_t;
+
 struct sshkey {
- int type; /* OpenSSH key type enum (KEY_*). */
+ sshkey_type_t type; /* OpenSSH key type enum (KEY_*). */
  int flags;
  RSA *rsa;
  DSA *dsa;

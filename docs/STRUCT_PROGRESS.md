@@ -92,7 +92,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `sshd_offsets_fields_t` | 1 | Packed offsets review – clarified the signed-byte ordering/meaning of the monitor+kex+sshbuf indices and refreshed the exports (2025-12-15). |
 | `sshd_offsets_t` | 1 | Packed offsets review – replaced the anonymous union with named {fields, bytes, raw_value} views so `sshd_find_forged_modulus_sshbuf`/`sshbuf_extract_ptr_and_len` use real member names instead of `field0_0x0` arithmetic (2025-12-15). |
 | `sshd_payload_ctx_t` | 1 | Payload layout documented (2025-11-18) |
-| `sshkey` | 1 | Trimmed to the minimal OpenSSH prefix (type/flags/rsa/dsa/ecdsa/ed25519_pk) and dropped XMSS/FIDO/shielded tail fields (2025-12-20). |
+| `sshkey` | 2 | Trimmed to the minimal OpenSSH prefix (type/flags/rsa/dsa/ecdsa/ed25519_pk) and dropped XMSS/FIDO/shielded tail fields (2025-12-20); retyped `sshkey.type` to `sshkey_type_t` for KEY_* enums (2025-12-22). |
 | `string_item_t` | 1 | Renamed the padding field and clarified how each entry captures the function bounds/xref for a decoded string (2025-11-20). |
 | `string_references_t` | 1 | Broke out the 27 entries into named sshd/PAM/log anchors and annotated what each string reference is used to find (2025-11-20). |
 | `tls_index` | 0 |  |
