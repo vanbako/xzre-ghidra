@@ -36,7 +36,7 @@ BOOL find_lea_with_displacement(u8 *code_start,u8 *code_end,u64 displacement)
       decoded = x86_decode_instruction(&lea_ctx,code_start,code_end);
       if ((((decoded != FALSE) && (lea_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_LEA))
       // AutoDoc: Accept mirrored displacements so searches anchored at ±delta both succeed.
-          && ((lea_ctx.prefix.decoded.flags2 & 7) == 1)) &&
+          && ((lea_ctx.prefix.decoded.flags2 & DF2_FLAGS_MEM) == DF2_MEM_DISP)) &&
          ((lea_ctx.mem_disp == displacement || (lea_ctx.mem_disp == -displacement)))) {
         return TRUE;
       }

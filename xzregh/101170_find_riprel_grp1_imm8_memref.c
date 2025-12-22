@@ -39,7 +39,7 @@ BOOL find_riprel_grp1_imm8_memref(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx,v
          ) && (((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) &&
        ((mem_address == (void *)0x0 ||
        // AutoDoc: Optionally demand `DF2_MEM_DISP` plus the RIP-relative displacement that lands on the requested pointer.
-        ((((dctx->prefix).decoded.flags2 & 1) != 0 &&
+        ((((dctx->prefix).decoded.flags2 & DF2_MEM_DISP) != 0 &&
          ((u8 *)mem_address == dctx->instruction + dctx->instruction_size + dctx->mem_disp))))))
     break;
     code_start = code_start + 1;

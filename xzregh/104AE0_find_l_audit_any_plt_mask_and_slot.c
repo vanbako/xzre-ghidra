@@ -81,7 +81,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
           if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
             decoded_mask_register = 0;
             if (((insn_ctx.prefix.flags_u32 & 0x1040) != 0) &&
-               (decoded_mask_register = insn_ctx.prefix.decoded.flags2 & 0x10,
+               (decoded_mask_register = insn_ctx.prefix.decoded.flags2 & DF2_IMM64,
                (insn_ctx.prefix.flags_u32 & 0x1000) != 0)) {
               if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
                 decoded_pointer_register = 0;
@@ -192,7 +192,7 @@ LAB_00104da9:
           decoded_register = 0;
           if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
             if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
-              decoded_register = insn_ctx.prefix.decoded.flags2 & 0x10;
+              decoded_register = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
               if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
                  (decoded_register = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
                 decoded_register = insn_ctx.mov_imm_reg_index |

@@ -13,15 +13,16 @@
 BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  u8 *flags2_ptr;
-  byte cursor_byte;
+  u8 *rex_byte_ptr;
+  InstructionFlags2_t *flags2_ptr;
   byte modrm_byte;
+  byte cursor_byte;
   ushort imm16_word;
   byte tmp_byte;
   BOOL telemetry_ok;
   dasm_opcode_window_t vex_prefix_window;
   dasm_opcode_window_t opcode_window_seed;
-  u32 derived_opcode;
+  u64 derived_opcode;
   sbyte opcode_index;
   X86_OPCODE opcode;
   X86_OPCODE opcode_high_bits;
@@ -37,7 +38,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   dasm_ctx_t *ctx_zero_cursor;
   ulong opcode_class_offset;
   x86_prefix_state_t *prefix_zero_cursor;
-  byte ctx_zero_stride;
+  BOOL ctx_zero_stride;
   BOOL range_hits_upper_bound;
   byte zero_stride_flag;
   ulong opcode_class_masks [4];
@@ -122,7 +123,7 @@ LAB_001004f1:
             derived_opcode = 4;
 LAB_001004a7:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
-            *flags2_ptr = *flags2_ptr | 8;
+            *flags2_ptr = *flags2_ptr | DF2_IMM;
             ctx->imm_size = derived_opcode;
           }
           else {
@@ -142,7 +143,7 @@ LAB_001004a2:
           }
           cursor = opcode_ptr;
           if (((byte)(&dasm_twobyte_has_modrm)[normalized_opcode >> 3 & 0x1f] >> (normalized_opcode & 7) & 1) == 0) {
-            if (((ctx->prefix).decoded.flags2 & 8) != 0) goto LAB_0010067d;
+            if (((ctx->prefix).decoded.flags2 & DF2_IMM) != 0) goto LAB_0010067d;
             ctx->instruction = code_start;
             opcode_ptr = (byte *)(((long)opcode_ptr - (long)code_start) + 1);
           }
@@ -157,20 +158,20 @@ LAB_001008c5:
             // AutoDoc: Decode ModRM (MOD/REG/RM) and set DF2 flags so later displacement/SIB/immediate parsing knows what to consume.
             tmp_byte = tmp_byte >> 6;
             (ctx->prefix).modrm_bytes.modrm_mod = tmp_byte;
-            cursor_byte = *opcode_ptr;
-            (ctx->prefix).modrm_bytes.modrm_reg = (byte)((int)(uint)cursor_byte >> 3) & 7;
             modrm_byte = *opcode_ptr;
-            (ctx->prefix).modrm_bytes.modrm_rm = modrm_byte & 7;
+            (ctx->prefix).modrm_bytes.modrm_reg = (byte)((int)(uint)modrm_byte >> 3) & 7;
+            cursor_byte = *opcode_ptr;
+            (ctx->prefix).modrm_bytes.modrm_rm = cursor_byte & 7;
             if (tmp_byte == 3) {
 LAB_00100902:
               if (((ctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
 LAB_0010092e:
                 flags2_ptr = &(ctx->prefix).decoded.flags2;
-                *flags2_ptr = *flags2_ptr | 1;
+                *flags2_ptr = *flags2_ptr | DF2_MEM_DISP;
               }
             }
             else {
-              if ((modrm_byte & 7) == 4) {
+              if ((cursor_byte & 7) == 4) {
                 (ctx->prefix).decoded.flags = current_byte | (DF1_MODRM | DF1_SIB);
               }
               if (tmp_byte != 1) {
@@ -178,12 +179,12 @@ LAB_0010092e:
                 goto LAB_0010092e;
               }
               flags2_ptr = &(ctx->prefix).decoded.flags2;
-              *flags2_ptr = *flags2_ptr | 3;
+              *flags2_ptr = *flags2_ptr | (DF2_MEM_DISP | DF2_MEM_DISP8);
             }
             opcode = (ctx->opcode_window).opcode_window_dword;
-            if ((opcode - 0xf6 < 2) && (((int)(uint)cursor_byte >> 3 & 7U) != 0)) {
+            if ((opcode - 0xf6 < 2) && (((int)(uint)modrm_byte >> 3 & 7U) != 0)) {
               flags2_ptr = &(ctx->prefix).decoded.flags2;
-              *flags2_ptr = *flags2_ptr & 0xf7;
+              *flags2_ptr = *flags2_ptr & (u8)~DF2_IMM;
               ctx->imm_size = 0;
             }
             if (((ctx->prefix).decoded.flags & DF1_SIB) != 0) {
@@ -198,20 +199,20 @@ LAB_0010092e:
                 current_byte = (ctx->prefix).modrm_bytes.modrm_mod;
                 if ((current_byte & 0xfd) == 0) {
                   flags2_ptr = &(ctx->prefix).decoded.flags2;
-                  *flags2_ptr = *flags2_ptr | 1;
+                  *flags2_ptr = *flags2_ptr | DF2_MEM_DISP;
                 }
                 else if (current_byte == 1) {
                   flags2_ptr = &(ctx->prefix).decoded.flags2;
-                  *flags2_ptr = *flags2_ptr | 3;
+                  *flags2_ptr = *flags2_ptr | (DF2_MEM_DISP | DF2_MEM_DISP8);
                 }
               }
               current_byte = (ctx->prefix).decoded.flags2;
-              if ((current_byte & 2) == 0) {
-                if ((current_byte & 1) != 0) {
+              if ((current_byte & DF2_MEM_DISP8) == 0) {
+                if ((current_byte & DF2_MEM_DISP) != 0) {
                   cursor = cursor + 3;
                   goto LAB_0010073c;
                 }
-                if ((current_byte & 8) != 0) {
+                if ((current_byte & DF2_IMM) != 0) {
                   opcode_ptr = cursor + 3;
                   goto LAB_00100680;
                 }
@@ -227,13 +228,13 @@ LAB_001009ea:
             }
             else {
               current_byte = (ctx->prefix).decoded.flags2;
-              if ((current_byte & 2) != 0) {
+              if ((current_byte & DF2_MEM_DISP8) != 0) {
                 opcode_ptr = cursor + 2;
                 goto LAB_001009ea;
               }
-              if ((current_byte & 1) != 0) goto LAB_0010065f;
+              if ((current_byte & DF2_MEM_DISP) != 0) goto LAB_0010065f;
             }
-            if ((current_byte & 8) != 0) goto LAB_0010067d;
+            if ((current_byte & DF2_IMM) != 0) goto LAB_0010067d;
             ctx->instruction = code_start;
             opcode_ptr = opcode_ptr + (1 - (long)code_start);
           }
@@ -292,10 +293,10 @@ LAB_001004e1:
             return FALSE;
           }
           ctx->opcode_window = vex_prefix_window;
-          cursor_byte = *opcode_ptr;
+          modrm_byte = *opcode_ptr;
           cursor = opcode_ptr + 1;
           (ctx->prefix).decoded.flags = tmp_byte | DF1_VEX;
-          (ctx->prefix).decoded.vex_byte = cursor_byte;
+          (ctx->prefix).decoded.vex_byte = modrm_byte;
           // AutoDoc: VEX prefix: capture the 0xC4/0xC5 header, synthesize REX bits/opcode-map selectors, and advance past the prefix bytes before decoding the opcode.
           if (code_end <= cursor) goto LAB_00100aa5;
           tmp_byte = opcode_ptr[1];
@@ -305,19 +306,19 @@ LAB_001004e1:
           (ctx->opcode_window).opcode_window_dword = opcode;
           current_byte = ((char)opcode_ptr[1] >> 7 & 0xfcU) + 0x44;
           (ctx->prefix).modrm_bytes.rex_byte = current_byte;
-          if (cursor_byte == 0xc5) goto LAB_001001c5;
-          if (cursor_byte != 0xc4) {
+          if (modrm_byte == 0xc5) goto LAB_001001c5;
+          if (modrm_byte != 0xc4) {
             return FALSE;
           }
-          cursor_byte = opcode_ptr[1];
-          if ((cursor_byte & 0x40) == 0) {
+          modrm_byte = opcode_ptr[1];
+          if ((modrm_byte & 0x40) == 0) {
             (ctx->prefix).modrm_bytes.rex_byte = current_byte | 2;
           }
           if ((opcode_ptr[1] & 0x20) == 0) {
-            flags2_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
-            *flags2_ptr = *flags2_ptr | 1;
+            rex_byte_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
+            *rex_byte_ptr = *rex_byte_ptr | 1;
           }
-          if (2 < (byte)((cursor_byte & 0x1f) - 1)) {
+          if (2 < (byte)((modrm_byte & 0x1f) - 1)) {
             return FALSE;
           }
           if (code_end <= opcode_ptr + 2) goto LAB_00100aa5;
@@ -325,8 +326,8 @@ LAB_001004e1:
           tmp_byte = tmp_byte & 0x1f;
           (ctx->prefix).decoded.vex_byte3 = current_byte;
           if (-1 < (char)current_byte) {
-            flags2_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
-            *flags2_ptr = *flags2_ptr | 8;
+            rex_byte_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
+            *rex_byte_ptr = *rex_byte_ptr | 8;
           }
           opcode = opcode << 8;
           (ctx->opcode_window).opcode_window_dword = opcode;
@@ -380,7 +381,7 @@ LAB_001005bf:
               if (opcode_high_bits == 0x3a00) {
 LAB_0010063c:
                 flags2_ptr = &(ctx->prefix).decoded.flags2;
-                *flags2_ptr = *flags2_ptr | 8;
+                *flags2_ptr = *flags2_ptr | DF2_IMM;
                 ctx->imm_size = 1;
                 goto LAB_001008c5;
               }
@@ -426,7 +427,7 @@ LAB_00100604:
           current_byte = (&dasm_threebyte_has_modrm)[imm_field];
           ctx->opcode_offset = (u8)((long)opcode_ptr - (long)code_start);
           if ((current_byte >> (normalized_opcode & 7) & 1) != 0) goto LAB_001008c5;
-          if (((ctx->prefix).decoded.flags2 & 8) == 0) {
+          if (((ctx->prefix).decoded.flags2 & DF2_IMM) == 0) {
             ctx->instruction = code_start;
             opcode_ptr = (byte *)(((long)opcode_ptr - (long)code_start) + 1);
             goto LAB_001004e1;
@@ -471,8 +472,8 @@ LAB_00100680:
               imm_cursor = opcode_ptr + 7;
               if (code_end <= imm_cursor) goto LAB_00100aa5;
               derived_opcode = CONCAT17(opcode_ptr[7],
-                               CONCAT16(opcode_ptr[6],CONCAT15(opcode_ptr[5],CONCAT14(opcode_ptr[4],imm_field)))
-                              );
+                                CONCAT16(opcode_ptr[6],CONCAT15(opcode_ptr[5],CONCAT14(opcode_ptr[4],imm_field))
+                                        ));
               ctx->imm_zeroextended = derived_opcode;
             }
             ctx->imm_signed = derived_opcode;
@@ -553,7 +554,7 @@ LAB_001001c5:
             }
 LAB_00100344:
             flags2_ptr = &(ctx->prefix).decoded.flags2;
-            *flags2_ptr = *flags2_ptr | 8;
+            *flags2_ptr = *flags2_ptr | DF2_IMM;
             ctx->imm_size = opcode_class_mask;
           }
           opcode_index = (sbyte)imm_field;
@@ -566,7 +567,7 @@ LAB_00100344:
               if (((((ctx->prefix).decoded.flags & DF1_REX) != 0) &&
                   (((ctx->prefix).modrm_bytes.rex_byte & 8) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
                 ctx->imm_size = 8;
-                (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
+                (ctx->prefix).decoded.flags2 = tmp_byte | DF2_IMM64;
                 ctx->mov_imm_reg_index = opcode_index;
                 (ctx->opcode_window).opcode_window_dword = 0xb8;
               }
@@ -577,7 +578,7 @@ LAB_00100344:
             goto LAB_001004e1;
           }
           flags2_ptr = &(ctx->prefix).decoded.flags2;
-          *flags2_ptr = *flags2_ptr | 5;
+          *flags2_ptr = *flags2_ptr | (DF2_MEM_DISP | DF2_MEM_SEG_OFFS);
 LAB_0010065f:
           cursor = opcode_ptr + 1;
 LAB_0010073c:
@@ -588,8 +589,8 @@ LAB_0010073c:
           current_byte = (ctx->prefix).decoded.flags2;
           ctx->mem_disp =
                (long)CONCAT13(cursor[3],CONCAT12(cursor[2],CONCAT11(cursor[1],*cursor)));
-          if ((current_byte & 4) == 0) {
-            if ((current_byte & 8) != 0) {
+          if ((current_byte & DF2_MEM_SEG_OFFS) == 0) {
+            if ((current_byte & DF2_IMM) != 0) {
               opcode_ptr = cursor + 4;
               goto LAB_00100680;
             }
@@ -600,7 +601,7 @@ LAB_0010089f:
           else {
             if (((code_end <= cursor + 4) || (code_end <= cursor + 5)) ||
                ((code_end <= cursor + 6 || (code_end <= cursor + 7)))) goto LAB_00100aa5;
-            if ((current_byte & 8) != 0) {
+            if ((current_byte & DF2_IMM) != 0) {
               opcode_ptr = cursor + 8;
               goto LAB_00100680;
             }

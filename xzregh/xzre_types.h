@@ -409,6 +409,8 @@ typedef enum {
  DF2_IMM64 = 0x10
 } InstructionFlags2;
 
+typedef u8 InstructionFlags2_t; /* Storage for InstructionFlags2 (DF2_*) bitmask. */
+
 /*
  * Bitmask describing which relocation tables, version records, and hardening features were discovered while parsing an ELF image.
  */
@@ -802,7 +804,7 @@ typedef union __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
  InstructionFlags_t flags; /* InstructionFlags (DF1_*) prefix/decoder bits. */
- u8 flags2;
+ InstructionFlags2_t flags2; /* InstructionFlags2 (DF2_*) displacement/immediate bits. */
  u8 prefix_padding[2];
  u8 lock_rep_byte;
  u8 seg_byte;
@@ -821,7 +823,7 @@ typedef union __attribute__((packed)) {
  u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */
  struct __attribute__((packed)) {
   InstructionFlags_t flags;
-  u8 flags2;
+  InstructionFlags2_t flags2;
   u8 prefix_padding[2];
   u8 lock_rep_byte;
   u8 seg_byte;

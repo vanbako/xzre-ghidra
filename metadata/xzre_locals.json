@@ -2126,6 +2126,14 @@
       {
         "original": "if (((uint)probe_dasm_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "syslog_dasm_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "syslog_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64"
+      },
+      {
+        "original": "probe_dasm_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "probe_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64"
       }
     ],
     "source": "xzre/xzre_code/backdoor_setup.c"
@@ -3831,6 +3839,10 @@
       {
         "original": "(((dctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000))",
         "replacement": "(((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
+      },
+      {
+        "original": "(dctx->prefix).decoded.flags2 & 1",
+        "replacement": "(dctx->prefix).decoded.flags2 & DF2_MEM_DISP"
       }
     ],
     "source": "xzre/xzre_code/find_add_instruction_with_mem_operand.c"
@@ -3884,6 +3896,10 @@
       {
         "original": "if (((uint)scratch_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)scratch_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "          if ((scratch_ctx.prefix.decoded.flags2 & 1) == 0) {",
+        "replacement": "          if ((scratch_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) == 0) {"
       }
     ],
     "source": "xzre/xzre_code/find_addr_referenced_in_mov_instruction.c"
@@ -4155,6 +4171,10 @@
       {
         "original": "if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "            if ((insn_ctx.prefix.decoded.flags2 & 1) != 0) {",
+        "replacement": "            if ((insn_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) != 0) {"
       }
     ],
     "source": "xzre/xzre_code/find_dl_naudit.c"
@@ -4316,6 +4336,10 @@
       {
         "original": "*(undefined4 *)&ctx_clear_cursor->instruction",
         "replacement": "*(u32 *)&ctx_clear_cursor->instruction"
+      },
+      {
+        "original": "          && ((lea_ctx.prefix.decoded.flags2 & 7) == 1)) &&",
+        "replacement": "          && ((lea_ctx.prefix.decoded.flags2 & DF2_FLAGS_MEM) == DF2_MEM_DISP)) &&"
       }
     ],
     "source": "xzre/xzre_code/find_lea_instruction.c"
@@ -4507,6 +4531,10 @@
       {
         "original": "if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "insn_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "insn_ctx.prefix.decoded.flags2 & DF2_IMM64"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
@@ -4666,6 +4694,10 @@
       {
         "original": "((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000))",
         "replacement": "((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32))"
+      },
+      {
+        "original": "insn_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "insn_ctx.prefix.decoded.flags2 & DF2_IMM64"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -7496,6 +7528,10 @@
       {
         "original": "libcrypto->elfbase->e_ident + symbol_entry->st_value",
         "replacement": "(u8 *)libcrypto->elfbase + symbol_entry->st_value"
+      },
+      {
+        "original": "                   (((insn_ctx.prefix.decoded.flags2 & 1) != 0 &&",
+        "replacement": "                   (((insn_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) != 0 &&"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_main.c"
@@ -7573,6 +7609,10 @@
       {
         "original": "((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000)) {",
         "replacement": "((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {"
+      },
+      {
+        "original": "insn_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "insn_ctx.prefix.decoded.flags2 & DF2_IMM64"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"
@@ -8002,6 +8042,14 @@
       {
         "original": "if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)store_scan_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "string_scan_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "string_scan_ctx.prefix.decoded.flags2 & DF2_IMM64"
+      },
+      {
+        "original": "store_scan_ctx.prefix.decoded.flags2 & 0x10",
+        "replacement": "store_scan_ctx.prefix.decoded.flags2 & DF2_IMM64"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_krb5ccname.c"
@@ -9248,87 +9296,92 @@
       },
       {
         "name": "cursor_byte",
-        "original": "bVar2",
+        "original": "bVar4",
         "type": "byte"
       },
       {
         "name": "ctx_zero_stride",
-        "original": "bVar25",
-        "type": "byte"
-      },
-      {
-        "name": "range_hits_upper_bound",
         "original": "bVar26",
         "type": "BOOL"
       },
       {
-        "name": "zero_stride_flag",
+        "name": "range_hits_upper_bound",
         "original": "bVar27",
+        "type": "BOOL"
+      },
+      {
+        "name": "zero_stride_flag",
+        "original": "bVar28",
         "type": "byte"
       },
       {
         "name": "opcode_ptr",
-        "original": "pbVar14",
+        "original": "pbVar15",
         "type": "u8 *"
       },
       {
-        "name": "opcode_high_bits",
+        "name": "opcode",
         "original": "XVar12",
         "type": "X86_OPCODE"
       },
       {
-        "name": "opcode_class_mask",
+        "name": "opcode_high_bits",
+        "original": "XVar13",
+        "type": "X86_OPCODE"
+      },
+      {
+        "name": "opcode_class_entry",
         "original": "uVar19",
         "type": "ulong"
       },
       {
-        "name": "opcode_class_entry",
-        "original": "uVar18",
+        "name": "opcode_class_mask",
+        "original": "uVar20",
         "type": "ulong"
       },
       {
-        "name": "flags2_ptr",
+        "name": "rex_byte_ptr",
         "original": "puVar1",
         "type": "u8 *"
       },
       {
+        "name": "flags2_ptr",
+        "original": "pIVar2",
+        "type": "InstructionFlags2_t *"
+      },
+      {
         "name": "telemetry_ok",
-        "original": "BVar6",
+        "original": "BVar7",
         "type": "BOOL"
       },
       {
         "name": "vex_prefix_window",
-        "original": "dVar7",
-        "type": "dasm_opcode_window_t"
-      },
-      {
-        "name": "opcode_window_seed",
         "original": "dVar8",
         "type": "dasm_opcode_window_t"
       },
       {
+        "name": "opcode_window_seed",
+        "original": "dVar9",
+        "type": "dasm_opcode_window_t"
+      },
+      {
         "name": "derived_opcode",
-        "original": "uVar9",
-        "type": "u32"
+        "original": "uVar10",
+        "type": "u64"
       },
       {
         "name": "imm_field",
-        "original": "uVar21",
+        "original": "uVar22",
         "type": "ulong"
       },
       {
         "name": "opcode_index",
-        "original": "sVar10",
+        "original": "sVar11",
         "type": "sbyte"
       },
       {
-        "name": "opcode",
-        "original": "XVar11",
-        "type": "X86_OPCODE"
-      },
-      {
         "name": "cursor",
-        "original": "pbVar15",
+        "original": "pbVar16",
         "type": "u8 *"
       },
       {
@@ -9338,47 +9391,47 @@
       },
       {
         "name": "current_byte",
-        "original": "bVar16",
+        "original": "bVar17",
         "type": "byte"
       },
       {
         "name": "normalized_opcode",
-        "original": "XVar17",
+        "original": "XVar18",
         "type": "X86_OPCODE"
       },
       {
         "name": "imm_cursor",
-        "original": "pbVar20",
+        "original": "pbVar21",
         "type": "u8 *"
       },
       {
         "name": "tmp_byte",
-        "original": "bVar5",
+        "original": "bVar6",
         "type": "byte"
       },
       {
         "name": "ctx_zero_cursor",
-        "original": "pdVar22",
+        "original": "pdVar23",
         "type": "dasm_ctx_t *"
       },
       {
         "name": "opcode_class_offset",
-        "original": "uVar23",
+        "original": "uVar24",
         "type": "ulong"
       },
       {
         "name": "prefix_zero_cursor",
-        "original": "pxVar24",
+        "original": "pxVar25",
         "type": "x86_prefix_state_t *"
       },
       {
         "name": "imm16_word",
-        "original": "uVar4",
+        "original": "uVar5",
         "type": "ushort"
       },
       {
         "name": "clear_idx",
-        "original": "lVar13",
+        "original": "lVar14",
         "type": "long"
       },
       {
@@ -9488,6 +9541,66 @@
       {
         "original": "if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((ctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
+      },
+      {
+        "original": "*flags2_ptr = *flags2_ptr | 8;",
+        "replacement": "*flags2_ptr = *flags2_ptr | DF2_IMM;"
+      },
+      {
+        "original": "if (((ctx->prefix).decoded.flags2 & 8) != 0) goto LAB_0010067d;",
+        "replacement": "if (((ctx->prefix).decoded.flags2 & DF2_IMM) != 0) goto LAB_0010067d;"
+      },
+      {
+        "original": "*flags2_ptr = *flags2_ptr | 1;",
+        "replacement": "*flags2_ptr = *flags2_ptr | DF2_MEM_DISP;"
+      },
+      {
+        "original": "*flags2_ptr = *flags2_ptr | 3;",
+        "replacement": "*flags2_ptr = *flags2_ptr | (DF2_MEM_DISP | DF2_MEM_DISP8);"
+      },
+      {
+        "original": "*flags2_ptr = *flags2_ptr & 0xf7;",
+        "replacement": "*flags2_ptr = *flags2_ptr & (u8)~DF2_IMM;"
+      },
+      {
+        "original": "if ((current_byte & 2) == 0) {",
+        "replacement": "if ((current_byte & DF2_MEM_DISP8) == 0) {"
+      },
+      {
+        "original": "if ((current_byte & 1) != 0) {",
+        "replacement": "if ((current_byte & DF2_MEM_DISP) != 0) {"
+      },
+      {
+        "original": "if ((current_byte & 8) != 0) {",
+        "replacement": "if ((current_byte & DF2_IMM) != 0) {"
+      },
+      {
+        "original": "if ((current_byte & 2) != 0) {",
+        "replacement": "if ((current_byte & DF2_MEM_DISP8) != 0) {"
+      },
+      {
+        "original": "if ((current_byte & 1) != 0) goto LAB_0010065f;",
+        "replacement": "if ((current_byte & DF2_MEM_DISP) != 0) goto LAB_0010065f;"
+      },
+      {
+        "original": "if ((current_byte & 8) != 0) goto LAB_0010067d;",
+        "replacement": "if ((current_byte & DF2_IMM) != 0) goto LAB_0010067d;"
+      },
+      {
+        "original": "if (((ctx->prefix).decoded.flags2 & 8) == 0) {",
+        "replacement": "if (((ctx->prefix).decoded.flags2 & DF2_IMM) == 0) {"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags2 = tmp_byte | 0x10;",
+        "replacement": "(ctx->prefix).decoded.flags2 = tmp_byte | DF2_IMM64;"
+      },
+      {
+        "original": "*flags2_ptr = *flags2_ptr | 5;",
+        "replacement": "*flags2_ptr = *flags2_ptr | (DF2_MEM_DISP | DF2_MEM_SEG_OFFS);"
+      },
+      {
+        "original": "if ((current_byte & 4) == 0) {",
+        "replacement": "if ((current_byte & DF2_MEM_SEG_OFFS) == 0) {"
       }
     ],
     "source": "xzre/xzre_code/x86_dasm.c"

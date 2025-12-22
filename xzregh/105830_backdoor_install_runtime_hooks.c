@@ -646,7 +646,7 @@ LAB_001067cf:
               }
               goto LAB_001067cf;
             }
-            mov_dst_reg = syslog_dasm_ctx.prefix.decoded.flags2 & 0x10;
+            mov_dst_reg = syslog_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64;
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
             relr_retry_flag = syslog_dasm_ctx.mov_imm_reg_index;
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
@@ -677,7 +677,7 @@ LAB_001067fb:
             if (probe_success == FALSE) break;
             if ((probe_dasm_ctx.prefix.flags_u16 & 0x1040) != 0) {
               if ((probe_dasm_ctx.prefix.flags_u16 & 0x40) == 0) {
-                mov_src_reg = probe_dasm_ctx.prefix.decoded.flags2 & 0x10;
+                mov_src_reg = probe_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64;
                 if (((probe_dasm_ctx.prefix.flags_u16 & 0x1000) != 0) &&
                    (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0))
                 {

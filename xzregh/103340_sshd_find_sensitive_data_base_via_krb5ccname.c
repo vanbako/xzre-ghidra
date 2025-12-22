@@ -67,7 +67,7 @@ LAB_00103450:
               }
               else {
                 if ((string_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
-                  tracked_reg = string_scan_ctx.prefix.decoded.flags2 & 0x10;
+                  tracked_reg = string_scan_ctx.prefix.decoded.flags2 & DF2_IMM64;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_0010346b;
                   tracked_reg = string_scan_ctx.mov_imm_reg_index;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
@@ -104,7 +104,7 @@ LAB_0010346b:
                     dest_reg = 0;
                     if ((store_scan_ctx.prefix.flags_u16 & 0x1040) != 0) {
                       if ((store_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
-                        dest_reg = store_scan_ctx.prefix.decoded.flags2 & 0x10;
+                        dest_reg = store_scan_ctx.prefix.decoded.flags2 & DF2_IMM64;
                         if (((store_scan_ctx.prefix.flags_u16 & 0x1000) != 0) &&
                            (dest_reg = store_scan_ctx.mov_imm_reg_index,
                            (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {

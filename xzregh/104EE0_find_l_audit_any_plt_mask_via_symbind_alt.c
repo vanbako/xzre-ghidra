@@ -83,7 +83,7 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
         if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
           l_name_reg_index = 0;
           if ((((insn_ctx.prefix.flags_u32 & 0x1040) != 0) &&
-              (l_name_reg_index = insn_ctx.prefix.decoded.flags2 & 0x10,
+              (l_name_reg_index = insn_ctx.prefix.decoded.flags2 & DF2_IMM64,
               (insn_ctx.prefix.flags_u32 & 0x1000) != 0)) &&
              (l_name_reg_index = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
             l_name_reg_index = insn_ctx.mov_imm_reg_index | (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
