@@ -455,6 +455,15 @@ typedef enum {
 typedef u64 ElfFlags_t; /* Storage for ElfFlags (X_ELF_*) bitmask. */
 
 typedef enum {
+ ELF64_RELR_IS_BITMAP = 0x1
+} ElfRelrEntryFlags;
+
+typedef enum {
+ ELF64_RELR_BITMAP_SHIFT = 1,
+ ELF64_RELR_BITMAP_STRIDE_BYTES = 0x1f8
+} ElfRelrBitmapConstants;
+
+typedef enum {
  VERSYM_VERSION_MASK = 0x7fff,
  VERSYM_VERSION_VALID_MASK = 0x7ffe,
  VERSYM_HIDDEN = 0x8000

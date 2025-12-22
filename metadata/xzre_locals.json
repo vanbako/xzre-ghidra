@@ -2784,6 +2784,18 @@
       {
         "original": "(elf_info->feature_flags & 4)",
         "replacement": "(elf_info->feature_flags & X_ELF_RELR)"
+      },
+      {
+        "original": "(relr_entry & 1)",
+        "replacement": "(relr_entry & ELF64_RELR_IS_BITMAP)"
+      },
+      {
+        "original": "relr_entry >> 1",
+        "replacement": "relr_entry >> ELF64_RELR_BITMAP_SHIFT"
+      },
+      {
+        "original": "relr_stream_offset + 0x1f8",
+        "replacement": "relr_stream_offset + ELF64_RELR_BITMAP_STRIDE_BYTES"
       }
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"

@@ -43,7 +43,7 @@ elf_relr_find_relative_slot
         relr_slot_ptr = (u8 *)elfbase + relr_stream_offset;
         relr_entry = elf_info->relr_relocs[relr_index];
         // AutoDoc: Literal entries carry an absolute pointer; validate it and compare the stored addend once.
-        if ((relr_entry & 1) == 0) {
+        if ((relr_entry & ELF64_RELR_IS_BITMAP) == 0) {
           relr_slot_ptr = (u8 *)elfbase + relr_entry;
           addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,4);
           if (addr_ok == FALSE) {
@@ -64,8 +64,8 @@ LAB_00101d98:
         }
         else {
           // AutoDoc: Bitmap entries expand into 63 consecutive slots—each set bit hands back another 8-byte pointer.
-          while (relr_entry = relr_entry >> 1, relr_entry != 0) {
-            if ((relr_entry & 1) != 0) {
+          while (relr_entry = relr_entry >> ELF64_RELR_BITMAP_SHIFT, relr_entry != 0) {
+            if ((relr_entry & ELF64_RELR_IS_BITMAP) != 0) {
               addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,4);
               if (addr_ok == FALSE) {
                 return (Elf64_Relr *)0x0;
@@ -76,7 +76,7 @@ LAB_00101d98:
             }
             relr_slot_ptr = relr_slot_ptr + 8;
           }
-          relr_stream_offset = relr_stream_offset + 0x1f8;
+          relr_stream_offset = relr_stream_offset + ELF64_RELR_BITMAP_STRIDE_BYTES;
         }
       }
       if (resume_index_ptr != (ulong *)0x0) {

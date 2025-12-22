@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `Elf64_Relr` bitmap vs literal entry bit
-- **Where it showed up:** `xzregh/101C30_elf_relr_find_relative_slot.c` (`relr_entry & 1` selects bitmap vs literal entries; `relr_entry >> 1` iterates the bitmap bits).
-- **Why it mattered:** The LSB encodes RELR entry type (literal pointer vs 63-bit bitmap); naming the bit makes the packed-RELR walk easier to follow.
-- **Notes:** Consider constants like `ELF64_RELR_IS_BITMAP = 1` plus a named shift/stride (`bitmap_shift = 1`, `bitmap_stride = 0x1f8` for 63 slots).
-
 ### `Elf64_Rela::r_info` packed symbol/type fields
 - **Where it showed up:** `xzregh/101DC0_elf_find_import_reloc_slot.c` (`relocs->r_info & 0xffffffff` for type, `relocs->r_info >> 0x20` for symbol index).
 - **Why it mattered:** These are the standard ELF64_R_TYPE/ELF64_R_SYM bitfields; naming them removes the `0xffffffff`/shift literals.
@@ -41,6 +36,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
 
 ## Completed
+
+### `Elf64_Relr` bitmap vs literal entry bit
+- **Outcome (2025-12-22):** Added `ElfRelrEntryFlags`/`ElfRelrBitmapConstants` in `metadata/xzre_types.json`, rewrote the RELR entry type/shift/stride literals via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed `xzregh/101C30_elf_relr_find_relative_slot.c` uses `ELF64_RELR_IS_BITMAP`/`ELF64_RELR_BITMAP_*`.
 
 ### GNU hash chain end-of-chain bit
 - **Outcome (2025-12-22):** Added `GnuHashChainFlags` (`GNU_HASH_CHAIN_END`) in `metadata/xzre_types.json`, rewrote the chain-walk terminator via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed `xzregh/101880_elf_gnu_hash_lookup_symbol.c` uses `GNU_HASH_CHAIN_END`.

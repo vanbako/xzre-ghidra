@@ -617,12 +617,12 @@
         "comment": "RELR support is optional\u2014bail immediately when the module never published bitmap metadata."
       },
       {
-        "match": "if ((relr_entry & 1) == 0) {",
+        "match": "if ((relr_entry & ELF64_RELR_IS_BITMAP) == 0) {",
         "match_type": "wildcard",
         "comment": "Literal entries carry an absolute pointer; validate it and compare the stored addend once."
       },
       {
-        "match": "while (relr_entry = relr_entry >> 1, relr_entry != 0) {",
+        "match": "while (relr_entry = relr_entry >> ELF64_RELR_BITMAP_SHIFT, relr_entry != 0) {",
         "match_type": "wildcard",
         "comment": "Bitmap entries expand into 63 consecutive slots\u2014each set bit hands back another 8-byte pointer."
       },

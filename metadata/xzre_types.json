@@ -796,6 +796,20 @@
     {
       "kind": "enum",
       "names": [
+        "ElfRelrEntryFlags"
+      ],
+      "code": "typedef enum {\n ELF64_RELR_IS_BITMAP = 0x1\n} ElfRelrEntryFlags;"
+    },
+    {
+      "kind": "enum",
+      "names": [
+        "ElfRelrBitmapConstants"
+      ],
+      "code": "typedef enum {\n ELF64_RELR_BITMAP_SHIFT = 1,\n ELF64_RELR_BITMAP_STRIDE_BYTES = 0x1f8\n} ElfRelrBitmapConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ElfVersymFlags"
       ],
       "code": "typedef enum {\n VERSYM_VERSION_MASK = 0x7fff,\n VERSYM_VERSION_VALID_MASK = 0x7ffe,\n VERSYM_HIDDEN = 0x8000\n} ElfVersymFlags;"
