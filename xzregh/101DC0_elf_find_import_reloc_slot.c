@@ -31,10 +31,10 @@ void * elf_find_import_reloc_slot
   if (telemetry_ok != FALSE) {
     for (; reloc_index < num_relocs; reloc_index = reloc_index + 1) {
       // AutoDoc: Filter on the relocation type and insist the associated symbol is an unresolved import before hashing the name.
-      if ((((relocs->r_info & 0xffffffff) == reloc_type) &&
-          (elf_info->dynsym[relocs->r_info >> 0x20].st_shndx == 0)) &&
+      if ((((relocs->r_info & ELF64_R_TYPE_MASK) == reloc_type) &&
+          (elf_info->dynsym[relocs->r_info >> ELF64_R_SYM_SHIFT].st_shndx == 0)) &&
          (sym_name_id = encoded_string_id_lookup
-                            (elf_info->dynstr + elf_info->dynsym[relocs->r_info >> 0x20].st_name,
+                            (elf_info->dynstr + elf_info->dynsym[relocs->r_info >> ELF64_R_SYM_SHIFT].st_name,
                              (char *)0x0), sym_name_id == encoded_string_id)) {
         // AutoDoc: Hand the caller the writable relocation slot (module base + `r_offset`) once a match is found.
         return (u8 *)elf_info->elfbase + relocs->r_offset;

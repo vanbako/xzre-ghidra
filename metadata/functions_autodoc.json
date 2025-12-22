@@ -788,7 +788,7 @@
         "comment": "Relocation hunts stay tied to the secret-data log; skip the scan entirely when telemetry fails."
       },
       {
-        "match": "if ((((relocs->r_info & 0xffffffff) == reloc_type) &&",
+        "match": "if ((((relocs->r_info & ELF64_R_TYPE_MASK) == reloc_type) &&",
         "match_type": "wildcard",
         "comment": "Filter on the relocation type and insist the associated symbol is an unresolved import before hashing the name."
       },

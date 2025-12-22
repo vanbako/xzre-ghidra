@@ -3171,6 +3171,14 @@
       {
         "original": "elf_info->elfbase->e_ident",
         "replacement": "(u8 *)elf_info->elfbase"
+      },
+      {
+        "original": "(relocs->r_info & 0xffffffff)",
+        "replacement": "(relocs->r_info & ELF64_R_TYPE_MASK)"
+      },
+      {
+        "original": "relocs->r_info >> 0x20",
+        "replacement": "relocs->r_info >> ELF64_R_SYM_SHIFT"
       }
     ],
     "source": "xzre/xzre_code/elf_get_reloc_symbol.c"

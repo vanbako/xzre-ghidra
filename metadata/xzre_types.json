@@ -845,6 +845,13 @@
     {
       "kind": "enum",
       "names": [
+        "Elf64RelocInfoConstants"
+      ],
+      "code": "typedef enum {\n ELF64_R_TYPE_MASK = 0xffffffff,\n ELF64_R_SYM_SHIFT = 0x20\n} Elf64RelocInfoConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "x86_64_reloc_type_t"
       ],
       "code": "typedef enum {\n R_X86_64_GLOB_DAT = 6,\n R_X86_64_JUMP_SLOT = 7,\n R_X86_64_RELATIVE = 8\n} x86_64_reloc_type_t;"

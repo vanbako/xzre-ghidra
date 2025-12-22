@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `Elf64_Rela::r_info` packed symbol/type fields
-- **Where it showed up:** `xzregh/101DC0_elf_find_import_reloc_slot.c` (`relocs->r_info & 0xffffffff` for type, `relocs->r_info >> 0x20` for symbol index).
-- **Why it mattered:** These are the standard ELF64_R_TYPE/ELF64_R_SYM bitfields; naming them removes the `0xffffffff`/shift literals.
-- **Notes:** Define helpers or constants (`ELF64_R_TYPE_MASK = 0xffffffff`, `ELF64_R_SYM_SHIFT = 32`) and rewrite the accesses via locals metadata.
-
 ### `Elf64_Phdr::p_flags` PF_* segment-permission mask
 - **Where it showed up:** `xzregh/101240_elf_vaddr_range_has_pflags_impl.c` (`(p_flags & p_flags) == p_flags`), `xzregh/1013D0_elf_info_parse.c` (`elf_vaddr_range_has_pflags(..., 4)`), `xzregh/101EC0_elf_get_text_segment.c` (`p_flags & 1`), `xzregh/101F70_elf_get_rodata_segment_after_text.c` (`(p_flags & 7) == 4`), `xzregh/102150_elf_get_writable_tail_span.c` (`(p_flags & 7) == 6`), `xzregh/1022D0_elf_vaddr_range_in_relro_if_required.c` (`elf_vaddr_range_has_pflags(..., 2)`).
 - **Why it mattered:** The literals correspond to PF_X/PF_W/PF_R combinations; naming them would clarify segment-permission tests and avoid duplicated masks.
@@ -36,6 +31,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
 
 ## Completed
+
+### `Elf64_Rela::r_info` packed symbol/type fields
+- **Outcome (2025-12-22):** Added `Elf64RelocInfoConstants` (`ELF64_R_TYPE_MASK`, `ELF64_R_SYM_SHIFT`) in `metadata/xzre_types.json`, rewrote the `r_info` mask/shift uses via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed `xzregh/101DC0_elf_find_import_reloc_slot.c` uses the named constants.
 
 ### `Elf64_Relr` bitmap vs literal entry bit
 - **Outcome (2025-12-22):** Added `ElfRelrEntryFlags`/`ElfRelrBitmapConstants` in `metadata/xzre_types.json`, rewrote the RELR entry type/shift/stride literals via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed `xzregh/101C30_elf_relr_find_relative_slot.c` uses `ELF64_RELR_IS_BITMAP`/`ELF64_RELR_BITMAP_*`.

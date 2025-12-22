@@ -504,6 +504,11 @@ typedef enum {
 } ElfDynamicTag;
 
 typedef enum {
+ ELF64_R_TYPE_MASK = 0xffffffff,
+ ELF64_R_SYM_SHIFT = 0x20
+} Elf64RelocInfoConstants;
+
+typedef enum {
  R_X86_64_GLOB_DAT = 6,
  R_X86_64_JUMP_SLOT = 7,
  R_X86_64_RELATIVE = 8
