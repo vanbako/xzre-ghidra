@@ -94,7 +94,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
             }
           }
           else {
-            decoded_mask_register = insn_ctx.prefix.decoded.flags & 0x20;
+            decoded_mask_register = insn_ctx.prefix.decoded.flags & DF1_REX;
             if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm;
               if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
@@ -130,7 +130,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
       else if (pattern_state == AUDIT_PAT_EXPECT_MOV) {
         if ((insn_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_OR_RM_R) {
           register_filter = search_ctx->output_register_to_match;
-          decoded_pointer_register = insn_ctx.prefix.decoded.flags & 0x40;
+          decoded_pointer_register = insn_ctx.prefix.decoded.flags & DF1_MODRM;
           if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
             decoded_mask_register = 0;
             if ((insn_ctx.prefix.flags_u32 & 0x40) != 0) goto LAB_00104d83;

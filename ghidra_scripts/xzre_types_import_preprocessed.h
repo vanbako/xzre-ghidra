@@ -393,6 +393,8 @@ typedef enum {
  DF1_SIB = 0x80
 } InstructionFlags;
 
+typedef u8 InstructionFlags_t; /* Storage for InstructionFlags (DF1_*) bitmask. */
+
 /*
  * Secondary flag set emitted by the decoder that captures which addressing features (displacement, immediates, 64-bit immediates) are present for the current instruction.
  */
@@ -797,7 +799,7 @@ typedef union __attribute__((packed)) {
 } x86_modrm_info_t;
 
 typedef struct __attribute__((packed)) {
- u8 flags;
+ InstructionFlags_t flags; /* InstructionFlags (DF1_*) prefix/decoder bits. */
  u8 flags2;
  u8 prefix_padding[2];
  u8 lock_rep_byte;
@@ -816,7 +818,7 @@ typedef union __attribute__((packed)) {
  u16 flags_u16;
  u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */
  struct __attribute__((packed)) {
-  u8 flags;
+  InstructionFlags_t flags;
   u8 flags2;
   u8 prefix_padding[2];
   u8 lock_rep_byte;

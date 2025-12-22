@@ -3302,7 +3302,7 @@
         "placement": "after"
       },
       {
-        "match": "if ((((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {",
+        "match": "if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {",
         "comment": "When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.",
         "placement": "after"
       }

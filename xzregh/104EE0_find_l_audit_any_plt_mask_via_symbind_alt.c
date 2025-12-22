@@ -90,7 +90,7 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
           }
         }
         else {
-          l_name_reg_index = insn_ctx.prefix.decoded.flags & 0x20;
+          l_name_reg_index = insn_ctx.prefix.decoded.flags & DF1_REX;
           if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
             mask_reg_index = insn_ctx.prefix.modrm_bytes.modrm_rm;
             if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {

@@ -87,7 +87,7 @@ LAB_001001c9:
           (ctx->opcode_window).opcode_window_dword = opcode;
           tmp_byte = *opcode_ptr;
           if ((tmp_byte & 0xfd) == 0x38) {
-            if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+            if (((ctx->prefix).decoded.flags & DF1_VEX) != 0) {
               return FALSE;
             }
             opcode_ptr = opcode_ptr + 1;
@@ -115,7 +115,7 @@ LAB_001004f1:
           }
           ctx->opcode_offset = (u8)((long)opcode_ptr - (long)code_start);
           normalized_opcode = opcode;
-          if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+          if (((ctx->prefix).decoded.flags & DF1_VEX) != 0) {
             normalized_opcode = (uint)current_byte;
           }
           if ((normalized_opcode & 0xf0) == 0x80) {
@@ -151,7 +151,7 @@ LAB_001008c5:
             opcode_ptr = cursor + 1;
             if (code_end <= opcode_ptr) goto LAB_00100aa5;
             current_byte = (ctx->prefix).decoded.flags;
-            (ctx->prefix).decoded.flags = current_byte | 0x40;
+            (ctx->prefix).decoded.flags = current_byte | DF1_MODRM;
             tmp_byte = *opcode_ptr;
             (ctx->prefix).modrm_bytes.modrm_byte = tmp_byte;
             // AutoDoc: Decode ModRM (MOD/REG/RM) and set DF2 flags so later displacement/SIB/immediate parsing knows what to consume.
@@ -171,7 +171,7 @@ LAB_0010092e:
             }
             else {
               if ((modrm_byte & 7) == 4) {
-                (ctx->prefix).decoded.flags = current_byte | 0xc0;
+                (ctx->prefix).decoded.flags = current_byte | (DF1_MODRM | DF1_SIB);
               }
               if (tmp_byte != 1) {
                 if (tmp_byte != 2) goto LAB_00100902;
@@ -186,7 +186,7 @@ LAB_0010092e:
               *flags2_ptr = *flags2_ptr & 0xf7;
               ctx->imm_size = 0;
             }
-            if ((char)(ctx->prefix).decoded.flags < '\0') {
+            if (((ctx->prefix).decoded.flags & DF1_SIB) != 0) {
               if (code_end <= cursor + 2) goto LAB_00100aa5;
               current_byte = cursor[2];
               ctx->sib_byte = current_byte;
@@ -249,16 +249,16 @@ LAB_001004e1:
       else if ((0xc0000000010101U >> ((ulong)(current_byte - 0x2e) & 0x3f) & 1) == 0) {
         if (current_byte == 0x67) {
           current_byte = (ctx->prefix).decoded.flags;
-          if ((current_byte & 8) != 0) {
+          if ((current_byte & DF1_ASIZE) != 0) {
             return FALSE;
           }
-          (ctx->prefix).decoded.flags = current_byte | 8;
+          (ctx->prefix).decoded.flags = current_byte | DF1_ASIZE;
           (ctx->prefix).decoded.asize_byte = *opcode_ptr;
         }
         else {
           if (current_byte != 0x66) {
             if ((current_byte & 0xf0) == 0x40) {
-              (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 0x20;
+              (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | DF1_REX;
               current_byte = *opcode_ptr;
               opcode_ptr = opcode_ptr + 1;
               (ctx->prefix).modrm_bytes.rex_byte = current_byte;
@@ -266,21 +266,21 @@ LAB_001004e1:
             goto LAB_00100191;
           }
           current_byte = (ctx->prefix).decoded.flags;
-          if (((current_byte & 4) != 0) && ((ctx->prefix).decoded.osize_byte != 'f')) {
+          if (((current_byte & DF1_OSIZE) != 0) && ((ctx->prefix).decoded.osize_byte != 'f')) {
             return FALSE;
           }
-          if ((current_byte & 0x20) == 0) {
-            (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 4;
+          if ((current_byte & DF1_REX) == 0) {
+            (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | DF1_OSIZE;
             (ctx->prefix).decoded.osize_byte = *opcode_ptr;
           }
         }
         goto LAB_00100675;
       }
       current_byte = (ctx->prefix).decoded.flags;
-      if ((current_byte & 2) != 0) {
+      if ((current_byte & DF1_SEG) != 0) {
         return FALSE;
       }
-      (ctx->prefix).decoded.flags = current_byte | 2;
+      (ctx->prefix).decoded.flags = current_byte | DF1_SEG;
       (ctx->prefix).decoded.seg_byte = *opcode_ptr;
     }
     else {
@@ -288,13 +288,13 @@ LAB_001004e1:
         if (current_byte < 0xf1) {
           if (1 < (byte)(current_byte + 0x3c)) goto LAB_00100191;
           tmp_byte = (ctx->prefix).decoded.flags;
-          if ((tmp_byte & 0x20) != 0) {
+          if ((tmp_byte & DF1_REX) != 0) {
             return FALSE;
           }
           ctx->opcode_window = vex_prefix_window;
           cursor_byte = *opcode_ptr;
           cursor = opcode_ptr + 1;
-          (ctx->prefix).decoded.flags = tmp_byte | 0x10;
+          (ctx->prefix).decoded.flags = tmp_byte | DF1_VEX;
           (ctx->prefix).decoded.vex_byte = cursor_byte;
           // AutoDoc: VEX prefix: capture the 0xC4/0xC5 header, synthesize REX bits/opcode-map selectors, and advance past the prefix bytes before decoding the opcode.
           if (code_end <= cursor) goto LAB_00100aa5;
@@ -353,7 +353,7 @@ LAB_001003fa:
           opcode = current_byte | opcode_high_bits;
           (ctx->opcode_window).opcode_window_dword = opcode;
           normalized_opcode = opcode;
-          if (((ctx->prefix).decoded.flags & 0x10) != 0) {
+          if (((ctx->prefix).decoded.flags & DF1_VEX) != 0) {
             normalized_opcode = (uint)current_byte | opcode_high_bits & 0xffffff;
           }
           opcode_high_bits = normalized_opcode & 0xff00;
@@ -439,7 +439,7 @@ LAB_00100680:
           current_byte = *opcode_ptr;
           if (derived_opcode != 1) {
             cursor = opcode_ptr + 1;
-            if ((((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {
+            if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {
             // AutoDoc: When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.
               if (derived_opcode == 2) {
                 ctx->imm_size = 4;
@@ -563,7 +563,7 @@ LAB_00100344:
           if (3 < current_byte - 0xa0) {
             tmp_byte = (ctx->prefix).decoded.flags2;
             if ((tmp_byte & 8) != 0) {
-              if (((((ctx->prefix).decoded.flags & 0x20) != 0) &&
+              if (((((ctx->prefix).decoded.flags & DF1_REX) != 0) &&
                   (((ctx->prefix).modrm_bytes.rex_byte & 8) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
                 ctx->imm_size = 8;
                 (ctx->prefix).decoded.flags2 = tmp_byte | 0x10;
@@ -620,10 +620,10 @@ LAB_001004ee:
       }
 LAB_001000cf:
       current_byte = (ctx->prefix).decoded.flags;
-      if ((current_byte & 1) != 0) {
+      if ((current_byte & DF1_LOCK_REP) != 0) {
         return FALSE;
       }
-      (ctx->prefix).decoded.flags = current_byte | 1;
+      (ctx->prefix).decoded.flags = current_byte | DF1_LOCK_REP;
       (ctx->prefix).decoded.lock_rep_byte = *opcode_ptr;
     }
 LAB_00100675:

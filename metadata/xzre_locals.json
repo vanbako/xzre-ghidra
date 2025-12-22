@@ -4501,6 +4501,10 @@
         "replacement": "1"
       },
       {
+        "original": "l_name_reg_index = insn_ctx.prefix.decoded.flags & 0x20;",
+        "replacement": "l_name_reg_index = insn_ctx.prefix.decoded.flags & DF1_REX;"
+      },
+      {
         "original": "if (((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
@@ -4650,6 +4654,14 @@
       {
         "original": "else if (pattern_state == 2)",
         "replacement": "else if (pattern_state == AUDIT_PAT_EXPECT_TEST)"
+      },
+      {
+        "original": "decoded_mask_register = insn_ctx.prefix.decoded.flags & 0x20;",
+        "replacement": "decoded_mask_register = insn_ctx.prefix.decoded.flags & DF1_REX;"
+      },
+      {
+        "original": "decoded_pointer_register = insn_ctx.prefix.decoded.flags & 0x40;",
+        "replacement": "decoded_pointer_register = insn_ctx.prefix.decoded.flags & DF1_MODRM;"
       },
       {
         "original": "((uint)insn_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000))",
@@ -7984,6 +7996,10 @@
         "replacement": "zero_ctx_cursor = (dasm_ctx_t *)((u8 *)zero_ctx_cursor + 4);"
       },
       {
+        "original": "dest_reg = string_scan_ctx.prefix.decoded.flags & 0x40;",
+        "replacement": "dest_reg = string_scan_ctx.prefix.decoded.flags & DF1_MODRM;"
+      },
+      {
         "original": "if (((uint)store_scan_ctx.prefix.decoded.modrm & 0xff00ff00) == 0x5000000) {",
         "replacement": "if (((uint)store_scan_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {"
       }
@@ -9411,7 +9427,63 @@
       },
       {
         "original": "((undefined1  [16])ctx->prefix & (undefined1  [16])0xff000000000004) ==\n                (undefined1  [16])0x66000000000004",
-        "replacement": "(((ctx->prefix).decoded.flags & 4) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)"
+        "replacement": "(((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)"
+      },
+      {
+        "original": "if (((ctx->prefix).decoded.flags & 0x10) != 0) {",
+        "replacement": "if (((ctx->prefix).decoded.flags & DF1_VEX) != 0) {"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags = current_byte | 0x40;",
+        "replacement": "(ctx->prefix).decoded.flags = current_byte | DF1_MODRM;"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags = current_byte | 0xc0;",
+        "replacement": "(ctx->prefix).decoded.flags = current_byte | (DF1_MODRM | DF1_SIB);"
+      },
+      {
+        "original": "if ((char)(ctx->prefix).decoded.flags < '\\0') {",
+        "replacement": "if (((ctx->prefix).decoded.flags & DF1_SIB) != 0) {"
+      },
+      {
+        "original": "          current_byte = (ctx->prefix).decoded.flags;\n          if ((current_byte & 8) != 0) {\n            return FALSE;\n          }\n          (ctx->prefix).decoded.flags = current_byte | 8;\n          (ctx->prefix).decoded.asize_byte = *opcode_ptr;",
+        "replacement": "          current_byte = (ctx->prefix).decoded.flags;\n          if ((current_byte & DF1_ASIZE) != 0) {\n            return FALSE;\n          }\n          (ctx->prefix).decoded.flags = current_byte | DF1_ASIZE;\n          (ctx->prefix).decoded.asize_byte = *opcode_ptr;"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 0x20;",
+        "replacement": "(ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | DF1_REX;"
+      },
+      {
+        "original": "if (((current_byte & 4) != 0) && ((ctx->prefix).decoded.osize_byte != 'f')) {",
+        "replacement": "if (((current_byte & DF1_OSIZE) != 0) && ((ctx->prefix).decoded.osize_byte != 'f')) {"
+      },
+      {
+        "original": "if ((current_byte & 0x20) == 0) {",
+        "replacement": "if ((current_byte & DF1_REX) == 0) {"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | 4;",
+        "replacement": "(ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | DF1_OSIZE;"
+      },
+      {
+        "original": "      current_byte = (ctx->prefix).decoded.flags;\n      if ((current_byte & 2) != 0) {\n        return FALSE;\n      }\n      (ctx->prefix).decoded.flags = current_byte | 2;\n      (ctx->prefix).decoded.seg_byte = *opcode_ptr;",
+        "replacement": "      current_byte = (ctx->prefix).decoded.flags;\n      if ((current_byte & DF1_SEG) != 0) {\n        return FALSE;\n      }\n      (ctx->prefix).decoded.flags = current_byte | DF1_SEG;\n      (ctx->prefix).decoded.seg_byte = *opcode_ptr;"
+      },
+      {
+        "original": "if ((tmp_byte & 0x20) != 0) {",
+        "replacement": "if ((tmp_byte & DF1_REX) != 0) {"
+      },
+      {
+        "original": "(ctx->prefix).decoded.flags = tmp_byte | 0x10;",
+        "replacement": "(ctx->prefix).decoded.flags = tmp_byte | DF1_VEX;"
+      },
+      {
+        "original": "((ctx->prefix).decoded.flags & 0x20)",
+        "replacement": "((ctx->prefix).decoded.flags & DF1_REX)"
+      },
+      {
+        "original": "      current_byte = (ctx->prefix).decoded.flags;\n      if ((current_byte & 1) != 0) {\n        return FALSE;\n      }\n      (ctx->prefix).decoded.flags = current_byte | 1;\n      (ctx->prefix).decoded.lock_rep_byte = *opcode_ptr;",
+        "replacement": "      current_byte = (ctx->prefix).decoded.flags;\n      if ((current_byte & DF1_LOCK_REP) != 0) {\n        return FALSE;\n      }\n      (ctx->prefix).decoded.flags = current_byte | DF1_LOCK_REP;\n      (ctx->prefix).decoded.lock_rep_byte = *opcode_ptr;"
       },
       {
         "original": "if (((ctx->prefix).decoded.modrm.modrm_word & 0xff00ff00) == 0x5000000) {",
