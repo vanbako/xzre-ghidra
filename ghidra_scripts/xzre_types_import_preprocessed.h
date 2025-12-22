@@ -410,6 +410,27 @@ typedef enum {
 typedef u8 InstructionFlags2_t; /* Storage for InstructionFlags2 (DF2_*) bitmask. */
 
 typedef enum {
+ DF16_LOCK_REP = DF1_LOCK_REP,
+ DF16_SEG = DF1_SEG,
+ DF16_OSIZE = DF1_OSIZE,
+ DF16_ASIZE = DF1_ASIZE,
+ DF16_VEX = DF1_VEX,
+ DF16_REX = DF1_REX,
+ DF16_MODRM = DF1_MODRM,
+ DF16_SIB = DF1_SIB,
+ DF16_MEM_DISP = (DF2_MEM_DISP << 8),
+ DF16_MEM_DISP8 = (DF2_MEM_DISP8 << 8),
+ DF16_MEM_SEG_OFFS = (DF2_MEM_SEG_OFFS << 8),
+ DF16_FLAGS_MEM = (DF2_FLAGS_MEM << 8),
+ DF16_IMM = (DF2_IMM << 8),
+ DF16_IMM64 = (DF2_IMM64 << 8),
+ DF16_MODRM_IMM64_MASK = DF16_MODRM | DF16_IMM64,
+ DF16_SIB_DISP_IMM_MASK = DF16_SIB | DF16_FLAGS_MEM | DF16_IMM
+} InstructionFlags16;
+
+typedef u16 InstructionFlags16_t; /* Storage for InstructionFlags16 (DF16_*) combined DF1/DF2 bitmask. */
+
+typedef enum {
  REX_B = 0x1,
  REX_X = 0x2,
  REX_R = 0x4,
@@ -827,7 +848,7 @@ typedef struct __attribute__((packed)) {
 
 typedef union __attribute__((packed)) {
  x86_prefix_fields_t decoded;
- u16 flags_u16;
+ InstructionFlags16_t flags_u16; /* Packed view of {decoded.flags, decoded.flags2} for combined DF16_* checks. */
  u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */
  struct __attribute__((packed)) {
   InstructionFlags_t flags;

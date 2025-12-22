@@ -2136,6 +2136,30 @@
         "replacement": "probe_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64"
       },
       {
+        "original": "flags_u16 & 0x1040",
+        "replacement": "flags_u16 & DF16_MODRM_IMM64_MASK"
+      },
+      {
+        "original": "flags_u16 & 0x1000",
+        "replacement": "flags_u16 & DF16_IMM64"
+      },
+      {
+        "original": "flags_u16 & 0x800",
+        "replacement": "flags_u16 & DF16_IMM"
+      },
+      {
+        "original": "flags_u16 & 0x100",
+        "replacement": "flags_u16 & DF16_MEM_DISP"
+      },
+      {
+        "original": "flags_u16 & 0x40",
+        "replacement": "flags_u16 & DF16_MODRM"
+      },
+      {
+        "original": "flags_u16 & 0x20",
+        "replacement": "flags_u16 & DF16_REX"
+      },
+      {
         "original": "(syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & 1) << 3",
         "replacement": "((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3)"
       },
@@ -4983,6 +5007,10 @@
       {
         "original": "((dctx->prefix).modrm_bytes.rex_byte & 5)",
         "replacement": "((dctx->prefix).modrm_bytes.rex_byte & (REX_R | REX_B))"
+      },
+      {
+        "original": "flags_u16 & 0xf80",
+        "replacement": "flags_u16 & DF16_SIB_DISP_IMM_MASK"
       }
     ],
     "source": "xzre/xzre_code/find_reg2reg_instruction.c"
@@ -8144,6 +8172,30 @@
         "replacement": "store_scan_ctx.prefix.decoded.flags2 & DF2_IMM64"
       },
       {
+        "original": "flags_u16 & 0x1040",
+        "replacement": "flags_u16 & DF16_MODRM_IMM64_MASK"
+      },
+      {
+        "original": "flags_u16 & 0x1000",
+        "replacement": "flags_u16 & DF16_IMM64"
+      },
+      {
+        "original": "flags_u16 & 0x800",
+        "replacement": "flags_u16 & DF16_IMM"
+      },
+      {
+        "original": "flags_u16 & 0x100",
+        "replacement": "flags_u16 & DF16_MEM_DISP"
+      },
+      {
+        "original": "flags_u16 & 0x40",
+        "replacement": "flags_u16 & DF16_MODRM"
+      },
+      {
+        "original": "flags_u16 & 0x20",
+        "replacement": "flags_u16 & DF16_REX"
+      },
+      {
         "original": "string_scan_ctx.prefix.modrm_bytes.rex_byte & 8",
         "replacement": "string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W"
       },
@@ -8270,6 +8322,26 @@
       {
         "original": "store_probe_ctx.prefix.modrm_bytes.rex_byte << 3",
         "replacement": "(store_probe_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3"
+      },
+      {
+        "original": "flags_u16 & 0x1040",
+        "replacement": "flags_u16 & DF16_MODRM_IMM64_MASK"
+      },
+      {
+        "original": "flags_u16 & 0x1000",
+        "replacement": "flags_u16 & DF16_IMM64"
+      },
+      {
+        "original": "flags_u16 & 0x100",
+        "replacement": "flags_u16 & DF16_MEM_DISP"
+      },
+      {
+        "original": "flags_u16 & 0x40",
+        "replacement": "flags_u16 & DF16_MODRM"
+      },
+      {
+        "original": "flags_u16 & 0x20",
+        "replacement": "flags_u16 & DF16_REX"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sensitive_data_address_via_xcalloc.c"

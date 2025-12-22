@@ -1510,7 +1510,7 @@
     ]
   },
   "find_reg_to_reg_instruction": {
-    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.\nCandidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & (REX_R | REX_B)`). The opcode gate then accepts MOV reg\u2194reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
+    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.\nCandidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & DF16_SIB_DISP_IMM_MASK`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & (REX_R | REX_B)`). The opcode gate then accepts MOV reg\u2194reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
     "inline": [
       {
         "match_regex": "if \\([^=]+== \\(dasm_ctx_t \\*\\)0x0\\) \\{",

@@ -62,7 +62,7 @@ LAB_001036eb:
     decode_ok = find_riprel_opcode_memref_ex
                       (code_start,code_start + 0x20,&store_probe_ctx,X86_OPCODE_1B_MOV_STORE,(void *)0x0);
   } while (decode_ok == FALSE);
-  if ((store_probe_ctx.prefix.flags_u16 & 0x1040) == 0) {
+  if ((store_probe_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) == 0) {
 LAB_00103788:
     if (tracked_reg != 0) {
       code_start = store_probe_ctx.instruction + store_probe_ctx.instruction_size;
@@ -70,25 +70,25 @@ LAB_00103788:
     }
   }
   else {
-    if ((store_probe_ctx.prefix.flags_u16 & 0x40) != 0) {
+    if ((store_probe_ctx.prefix.flags_u16 & DF16_MODRM) != 0) {
       tracked_reg = store_probe_ctx.prefix.modrm_bytes.modrm_reg;
-      if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
+      if ((store_probe_ctx.prefix.flags_u16 & DF16_REX) != 0) {
         rex_extension = (store_probe_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_00103782:
         tracked_reg = tracked_reg | rex_extension & 8;
       }
       goto LAB_00103788;
     }
-    if ((store_probe_ctx.prefix.flags_u16 & 0x1000) != 0) {
+    if ((store_probe_ctx.prefix.flags_u16 & DF16_IMM64) != 0) {
       tracked_reg = store_probe_ctx.mov_imm_reg_index;
-      if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
+      if ((store_probe_ctx.prefix.flags_u16 & DF16_REX) != 0) {
         rex_extension = (store_probe_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;
     }
   }
-  if (((store_probe_ctx.prefix.flags_u16 & 0x100) != 0) &&
+  if (((store_probe_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0) &&
      (store_operand_ptr = (u8 *)store_probe_ctx.mem_disp,
      ((uint)store_probe_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
     // AutoDoc: Convert the RIP-relative store into an absolute `.bss` pointer before recording it.

