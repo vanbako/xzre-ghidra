@@ -2603,6 +2603,10 @@
       {
         "original": "segment_page_ceil->e_ident + 1",
         "replacement": "segment_page_ceil + 1"
+      },
+      {
+        "original": "if ((load_segment->p_type == 1) && ((load_segment->p_flags & p_flags) == p_flags)) {",
+        "replacement": "if ((load_segment->p_type == PT_LOAD) && ((load_segment->p_flags & p_flags) == p_flags)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_impl.c"
@@ -2971,6 +2975,10 @@
         "name": "code_segment_start",
         "original": "pvVar3",
         "type": "u8 *"
+      },
+      {
+        "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {",
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 1) != 0)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_code_segment.c"
@@ -3042,6 +3050,10 @@
         "name": "padding_length",
         "original": "uVar7",
         "type": "u64"
+      },
+      {
+        "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 6)) {",
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 6)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_data_segment.c"
@@ -3133,6 +3145,10 @@
         "name": "code_segment_size",
         "original": "local_20",
         "type": "u64"
+      },
+      {
+        "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {",
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 4)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_rodata_segment.c"
@@ -3349,6 +3365,18 @@
       {
         "original": "elf_info->gnu_hash_chain = gnu_hash_header + ((ulong)phdr_index - (ulong)gnu_hash_symbias);",
         "replacement": "elf_info->gnu_hash_chain = hash_buckets + ((ulong)phdr_index - (ulong)gnu_hash_symbias);"
+      },
+      {
+        "original": "Elf64_Word p_type;",
+        "replacement": "ElfProgramHeaderType p_type;"
+      },
+      {
+        "original": "if (p_type == 1) {",
+        "replacement": "if (p_type == PT_LOAD) {"
+      },
+      {
+        "original": "else if (p_type == 2) {",
+        "replacement": "else if (p_type == PT_DYNAMIC) {"
       },
       {
         "original": "long dynamic_phdr_idx;",
@@ -5242,7 +5270,12 @@
   },
   "is_pt_gnu_relro": {
     "locals": [],
-    "register_temps": [],
+    "register_temps": [
+      {
+        "original": "return (BOOL)(p_type + PT_LOAD + addend == 0x474e553);",
+        "replacement": "return (BOOL)(p_type + PT_LOAD + addend == (PT_GNU_RELRO + 0xa0000001));"
+      }
+    ],
     "source": "xzre/xzre_code/is_gnu_relro.c"
   },
   "is_range_mapped_via_pselect": {

@@ -15,7 +15,7 @@
 BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
 
 {
-  Elf64_Word p_type;
+  ElfProgramHeaderType p_type;
   uint gnu_hash_bloom_size;
   uint gnu_hash_symbias;
   uint gnu_hash_bloom_shift;
@@ -81,12 +81,12 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
     phdr_scan = program_headers;
     for (; phdr_index < (uint)phnum; phdr_index = phdr_index + 1) {
       p_type = phdr_scan->p_type;
-      if (p_type == 1) {
+      if (p_type == PT_LOAD) {
         if (phdr_scan->p_vaddr < lowest_load_vaddr) {
           lowest_load_vaddr = phdr_scan->p_vaddr;
         }
       }
-      else if (p_type == 2) {
+      else if (p_type == PT_DYNAMIC) {
         dynamic_phdr_idx = (long)(int)phdr_index;
       }
       else {

@@ -41,7 +41,7 @@ LAB_0010138e:
       do {
         if ((uint)(ushort)elf_info->phdr_count <= (uint)phdr_idx) break;
         load_segment = elf_info->phdrs + phdr_idx;
-        if ((load_segment->p_type == 1) && ((load_segment->p_flags & p_flags) == p_flags)) {
+        if ((load_segment->p_type == PT_LOAD) && ((load_segment->p_flags & p_flags) == p_flags)) {
           segment_runtime_start = (long)elf_info->elfbase + (load_segment->p_vaddr - elf_info->load_base_vaddr);
           segment_page_ceil = (u8 *)(segment_runtime_start + load_segment->p_memsz);
           // AutoDoc: Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages.

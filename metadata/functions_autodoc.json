@@ -723,7 +723,7 @@
         "comment": "Once the text range is cached, future callers reuse it instead of rescanning the headers."
       },
       {
-        "match": "if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {",
+        "match": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 1) != 0)) {",
         "match_type": "wildcard",
         "comment": "Pick the first executable PT_LOAD entry and align its `[start, end)` window to page boundaries."
       }
@@ -1811,7 +1811,7 @@
     "plate": "Obfuscated equality test for PT_GNU_RELRO. Instead of comparing `p_type` directly against `0x6474e552`, the code adds the caller supplied `addend` (always `0xa0000000`) plus 1 and checks for the wrapped constant, which makes the instruction stream look less like a straightforward RELRO probe in the object file.",
     "inline": [
       {
-        "match": "return (BOOL)(p_type + 1 + addend == 0x474e553);",
+        "match": "return (BOOL)(p_type + PT_LOAD + addend == (PT_GNU_RELRO + 0xa0000001));",
         "comment": "The arithmetic bakes the real magic (`0x6474e552`) into a wrapped constant so static scanners never see the literal."
       }
     ]

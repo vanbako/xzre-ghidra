@@ -420,6 +420,12 @@ typedef enum {
 } ElfFlags;
 
 typedef enum {
+ PT_LOAD = 1,
+ PT_DYNAMIC = 2,
+ PT_GNU_RELRO = 0x6474e552
+} ElfProgramHeaderType;
+
+typedef enum {
  DT_NULL = 0,
  DT_PLTRELSZ = 2,
  DT_STRTAB = 5,
@@ -1930,7 +1936,7 @@ extern BOOL elf_vaddr_range_in_relro_if_required(elf_info_t *elf_info, u64 vaddr
 
 extern BOOL elf_info_parse(Elf64_Ehdr *ehdr, elf_info_t *elf_info);
 
-extern BOOL is_pt_gnu_relro(Elf64_Word p_type, u32 addend);
+extern BOOL is_pt_gnu_relro(ElfProgramHeaderType p_type, u32 addend);
 
 extern BOOL main_elf_resolve_stack_end_if_sshd(main_elf_t *main_elf);
 

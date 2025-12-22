@@ -45,7 +45,7 @@ void * elf_get_rodata_segment_after_text(elf_info_t *elf_info,u64 *pSize)
       // AutoDoc: Look for PF_R-only PT_LOAD entries whose aligned base lands beyond `.text`, keeping the lowest such segment.
       for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
         phdr = elf_info->phdrs + phdr_index;
-        if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {
+        if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 4)) {
           segment_runtime_start = (long)ehdr + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_runtime_end = phdr->p_memsz + segment_runtime_start;
           segment_page_start = (void *)(segment_runtime_start & 0xfffffffffffff000);

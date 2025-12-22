@@ -10,12 +10,6 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 
 ## Candidates
 
-### ELF program header types (PT_*)
-- **Where it shows up:** `xzregh/1013D0_elf_info_parse.c` (`p_type == 1/2` plus PT_GNU_RELRO checks) and `xzregh/1013B0_is_pt_gnu_relro.c` (obfuscated PT_GNU_RELRO test).
-- **Why it matters:** Naming PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO makes the ELF parser easier to read and keeps segment-type checks consistent.
-- **Reverse-engineering plan:** Add an enum (e.g., `ElfProgramHeaderType`) with PT_LOAD=1, PT_DYNAMIC=2, PT_GNU_RELRO=0x6474e552; rewrite the comparisons via locals replacements; refresh.
-- **Status (2025-12-21):** Open – candidate identified.
-
 ### ELF relocation types (R_X86_64_*)
 - **Where it shows up:** `xzregh/101E60_elf_find_plt_reloc_slot.c` (reloc type 7), `xzregh/101E90_elf_find_got_reloc_slot.c` (reloc type 6), and `xzregh/101B90_elf_rela_find_relative_slot.c` (`r_info == 8`).
 - **Why it matters:** Naming R_X86_64_JUMP_SLOT/GLOB_DAT/RELATIVE clarifies the loader’s relocation handling and avoids magic constants.
@@ -29,6 +23,11 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 - **Status (2025-12-21):** Open – candidate identified.
 
 ## Completed
+
+### ELF program header types (PT_*)
+- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`p_type == 1/2` plus PT_GNU_RELRO checks), `xzregh/1013B0_is_pt_gnu_relro.c` (obfuscated PT_GNU_RELRO test), and the PT_LOAD scans in `xzregh/101EC0_elf_get_text_segment.c`, `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101F70_elf_get_rodata_segment_after_text.c`, `xzregh/101240_elf_vaddr_range_has_pflags_impl.c`.
+- **Why it mattered:** Naming PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO makes the ELF parser easier to read and keeps segment-type checks consistent.
+- **Outcome (2025-12-22):** Done – added `ElfProgramHeaderType` with PT_LOAD/PT_DYNAMIC/PT_GNU_RELRO, rewrote the program-header comparisons via locals replacements (including the obfuscated RELRO constant), and refreshed exports.
 
 ### ELF dynamic tag IDs
 - **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (switch/cases for 2, 5, 6, 7, 8, 0x17, 0x18, 0x1e, 0x23, 0x24; plus comparisons for 0x6ffffef5, 0x6ffffff0, 0x6ffffffb, 0x6ffffffc, 0x6ffffffd, 0x7fffffff).
