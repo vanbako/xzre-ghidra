@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `elf_info_t.feature_flags` optional-table bitmask
-- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (sets `| 1/2/4/8/0x10/0x20`), `xzregh/101E60_elf_find_plt_reloc_slot.c` (`feature_flags & 1`), `xzregh/101E90_elf_find_got_reloc_slot.c` (`& 2`), `xzregh/101C30_elf_relr_find_relative_slot.c` (`& 4`), `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`& 0x18`), `xzregh/104660_scan_link_map_and_init_shared_libs.c` (`& 0x20`).
-- **Why it mattered:** The mask encodes which optional ELF tables/behaviors are present (PLT/RELA/RELR/VERDEF/VERSYM/BIND_NOW); naming the bits would remove the magic constants and make feature gating obvious.
-- **Notes:** `xzregh/xzre_types.h` already documents the bit meanings; model a named flag enum (e.g., `ElfInfoFeatureFlags`) and retype `feature_flags` in metadata.
-
 ### `Elf64_Versym` version-index/hidden-bit masks
 - **Where it showed up:** `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`versym_index & 0x7ffe` gate before walking `.gnu.version_d`, `versym_index & 0x7fff` when matching the version index).
 - **Why it mattered:** These are canonical ELF versym masks (index vs. hidden bit). Naming them clarifies the "skip local/global (0/1)" check and the compare that ignores the hidden flag.
@@ -56,6 +51,11 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
 
 ## Completed
+
+### `elf_info_t.feature_flags` optional-table bitmask
+- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (sets `| 1/2/4/8/0x10/0x20`), `xzregh/101E60_elf_find_plt_reloc_slot.c` (`feature_flags & 1`), `xzregh/101E90_elf_find_got_reloc_slot.c` (`& 2`), `xzregh/101C30_elf_relr_find_relative_slot.c` (`& 4`), `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`& 0x18`), `xzregh/104660_scan_link_map_and_init_shared_libs.c` (`& 0x20`).
+- **Why it mattered:** The mask encodes which optional ELF tables/behaviors are present (PLT/RELA/RELR/VERDEF/VERSYM/BIND_NOW); naming the bits removes the magic constants and makes feature gating obvious.
+- **Outcome (2025-12-22):** Added `ElfFlags_t` storage, retyped `elf_info_t.feature_flags`, and refreshed via `./scripts/refresh_xzre_project.sh` so the decomp uses `X_ELF_*` names.
 
 ### `x86_prefix_state_t.flags_u16` combined prefix-state mask
 - **Where it showed up:** `xzregh/10AC40_find_reg_to_reg_instruction.c` (`(prefix.flags_u16 & 0xf80) == 0`).

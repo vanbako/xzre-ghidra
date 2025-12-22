@@ -3,6 +3,7 @@
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
 ## 2025-12-22
+- Session `FLAG_elf_info_feature_flags`: added `ElfFlags_t` storage, retyped `elf_info_t.feature_flags`, rewrote feature-flag literals via `metadata/xzre_locals.json` so decomp uses `X_ELF_*`, updated AutoDoc inline matches, refreshed via `./scripts/refresh_xzre_project.sh`, and marked the flag backlog entry complete (struct progress updated). Rationale: replace feature_flags magic bits with `X_ELF_*` names. Next: tackle the next flag backlog item (versym/gnu hash/RELR/ELF64_R_INFO/PF_*).
 - Session `DOC_FLAG_BACKLOG_EL6_SCAN`: scanned elf_mem EL6 helper; no new flag/bitmask candidates found. Rationale: confirm EL6 coverage for flag cleanup. Next: model the queued ELF flags in `metadata/xzre_types.json` and refresh.
 - Session `DOC_FLAG_BACKLOG_EL5_SCAN`: scanned elf_mem EL5 helpers; no new flag/bitmask candidates beyond existing backlog items. Rationale: confirm EL5 coverage for flag cleanup. Next: model the queued ELF flags in `metadata/xzre_types.json` and refresh.
 - Session `DOC_FLAG_BACKLOG_EL4_SCAN`: scanned elf_mem EL4 helpers; no new flag/bitmask candidates beyond the existing PF_* entry, but added the RELRO-range PF_W reference to `docs/FLAG_BACKLOG.md`. Rationale: confirm EL4 coverage and keep the PF_* entry complete. Next: model the queued ELF flags in `metadata/xzre_types.json` and refresh.

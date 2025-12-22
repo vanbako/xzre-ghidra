@@ -452,6 +452,8 @@ typedef enum {
  X_ELF_NOW = 0x20
 } ElfFlags;
 
+typedef u64 ElfFlags_t; /* Storage for ElfFlags (X_ELF_*) bitmask. */
+
 typedef enum {
  PT_LOAD = 1,
  PT_DYNAMIC = 2,
@@ -935,7 +937,7 @@ typedef struct __attribute__((packed)) elf_info {
  u64 data_segment_start; /* Start of the writable PT_LOAD segment (file-backed bytes). */
  u64 data_segment_size; /* Size of writable segment excluding alignment padding. */
  u64 data_segment_padding; /* Extra bytes between the file-backed end and the page boundary. */
- u64 feature_flags; /* Bitmask tracking optional tables (1=PLT,2=RELA,4=RELR,8=VERDEF,0x10=VERSYM,0x20=BIND_NOW). */
+ ElfFlags_t feature_flags; /* Bitmask tracking optional tables (X_ELF_PLTREL/RELA/RELR/VERDEF/VERSYM/NOW). */
  u32 gnu_hash_nbuckets; /* GNU hash header: bucket count. */
  u32 gnu_hash_last_bloom; /* GNU hash header: bloom filter size minus one. */
  u32 gnu_hash_bloom_shift; /* GNU hash header: shift count used by the bloom filter. */

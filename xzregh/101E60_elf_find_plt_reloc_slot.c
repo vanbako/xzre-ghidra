@@ -19,7 +19,7 @@ void * elf_find_plt_reloc_slot(elf_info_t *elf_info,EncodedStringId encoded_stri
   void *symbol_slot;
   
   // AutoDoc: Fast fail when the binary never exposed PLT relocation metadata.
-  if (((elf_info->feature_flags & 1) != 0) && (elf_info->plt_reloc_count != 0)) {
+  if (((elf_info->feature_flags & X_ELF_PLTREL) != 0) && (elf_info->plt_reloc_count != 0)) {
     // AutoDoc: Delegate to the generic helper with R_X86_64_JUMP_SLOT so we capture the PLT thunk.
     symbol_slot = elf_find_import_reloc_slot
                        (elf_info,elf_info->plt_relocs,elf_info->plt_reloc_count,R_X86_64_JUMP_SLOT,encoded_string_id)

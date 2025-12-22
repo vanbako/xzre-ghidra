@@ -2731,6 +2731,10 @@
       {
         "original": "if ((int)rela_cursor->r_info == 8) {",
         "replacement": "if ((int)rela_cursor->r_info == R_X86_64_RELATIVE) {"
+      },
+      {
+        "original": "((elf_info->feature_flags & 2) == 0)",
+        "replacement": "((elf_info->feature_flags & X_ELF_RELA) == 0)"
       }
     ],
     "source": "xzre/xzre_code/elf_find_rela_reloc.c"
@@ -2776,6 +2780,10 @@
       {
         "original": "elfbase->e_ident",
         "replacement": "(u8 *)elfbase"
+      },
+      {
+        "original": "(elf_info->feature_flags & 4)",
+        "replacement": "(elf_info->feature_flags & X_ELF_RELR)"
       }
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"
@@ -2791,6 +2799,10 @@
       {
         "original": "elf_info->rela_reloc_count,6,",
         "replacement": "elf_info->rela_reloc_count,R_X86_64_GLOB_DAT,"
+      },
+      {
+        "original": "(elf_info->feature_flags & 2)",
+        "replacement": "(elf_info->feature_flags & X_ELF_RELA)"
       }
     ],
     "source": "xzre/xzre_code/elf_get_got_symbol.c"
@@ -2806,6 +2818,10 @@
       {
         "original": "elf_info->plt_reloc_count,7,encoded_string_id",
         "replacement": "elf_info->plt_reloc_count,R_X86_64_JUMP_SLOT,encoded_string_id"
+      },
+      {
+        "original": "(elf_info->feature_flags & 1)",
+        "replacement": "(elf_info->feature_flags & X_ELF_PLTREL)"
       }
     ],
     "source": "xzre/xzre_code/elf_get_plt_symbol.c"
@@ -3591,6 +3607,30 @@
         "name": "versym_value",
         "original": "EVar4",
         "type": "Elf64_DynValue"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_NOW;"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x10;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_VERSYM;"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 1;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_PLTREL;"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 2;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_RELA;"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 4;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_RELR;"
+      },
+      {
+        "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 8;",
+        "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_VERDEF;"
       }
     ],
     "source": "xzre/xzre_code/elf_parse.c"
@@ -3672,6 +3712,10 @@
         "name": "verdef_iter",
         "original": "local_34",
         "type": "uint"
+      },
+      {
+        "original": "((elf_info->feature_flags & 0x18) == 0x18)",
+        "replacement": "((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM))"
       }
     ],
     "source": "xzre/xzre_code/elf_symbol_get.c"
@@ -6661,6 +6705,10 @@
         "name": "soname_cursor",
         "original": "string_end",
         "type": "char *"
+      },
+      {
+        "original": "(elf_handle->feature_flags & 0x20)",
+        "replacement": "(elf_handle->feature_flags & X_ELF_NOW)"
       }
     ],
     "source": "xzre/xzre_code/process_shared_libraries_map.c"

@@ -592,7 +592,7 @@
     "plate": "Searches the RELA relocation array for an entry tied to a given code/data pointer. When `target_addr` is non-NULL it is treated\nas an absolute address inside the module: the helper subtracts `elfbase` to match against `r_addend` and, on success, returns\nthe relocated slot at `r_offset`. When the argument is NULL the caller instead wants the raw addend pointer, so the helper\nimmediately returns `elfbase + r_addend`.\n\nCallers can optionally supply `[slot_lower_bound, slot_upper_bound]` bounds plus a `resume_index_ptr`. The bounds force the\nreturned address to fall inside a desired window and the resume cursor allows the next invocation to continue scanning without\nstarting over. Failing to find a match (or discovering that the module never exposed RELA relocations) yields NULL and, if a\ncursor pointer was provided, stores the position it stopped at.",
     "inline": [
       {
-        "match": "if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {",
+        "match": "if (((elf_info->feature_flags & X_ELF_RELA) == 0) || (elf_info->rela_reloc_count == 0)) {",
         "match_type": "wildcard",
         "comment": "Bail out immediately when the module never published RELA entries."
       },
@@ -612,7 +612,7 @@
     "plate": "Performs the same search as `elf_rela_find_relative_slot` but against the packed RELR bitmap stream. The helper requires\nRELR metadata (feature bit 4), rebuilds literal entries vs. bitmap runs into candidate pointers, validates each\npointer with `elf_vaddr_range_has_pflags`, and compares the dereferenced value against the requested absolute address.\nOptional `[slot_lower_bound, slot_upper_bound]` and `resume_index_ptr` parameters let callers clamp the acceptable\nslot range and resume the walk mid-stream. NULL means the module had no RELR entries, none targeted the requested\naddress, or the decoded pointer failed validation.\n",
     "inline": [
       {
-        "match": "if ((elf_info->feature_flags & 4) != 0) {",
+        "match": "if ((elf_info->feature_flags & X_ELF_RELR) != 0) {",
         "match_type": "wildcard",
         "comment": "RELR support is optional\u2014bail immediately when the module never published bitmap metadata."
       },
@@ -753,7 +753,7 @@
     "plate": "Mirrors `elf_find_plt_reloc_slot` but targets the main RELA table. It requires feature bit 2 (RELA metadata), then calls\n`elf_find_import_reloc_slot` with R_X86_64_GLOB_DAT to retrieve the writable GOT slot for the\nrequested import. Failure means the module never imported the symbol through a standard GOT relocation.\n",
     "inline": [
       {
-        "match": "if (((elf_info->feature_flags & 2) != 0) && (elf_info->rela_reloc_count != 0)) {",
+        "match": "if (((elf_info->feature_flags & X_ELF_RELA) != 0) && (elf_info->rela_reloc_count != 0)) {",
         "match_type": "wildcard",
         "comment": "Skip immediately when the RELA table was missing."
       },
@@ -768,7 +768,7 @@
     "plate": "Looks up the PLT thunk for a given symbol by delegating to `elf_find_import_reloc_slot` with\nR_X86_64_JUMP_SLOT. It first verifies that PLT relocations exist (feature bit 1 plus a non-zero count) and then\nreturns the GOT/PLT entry that will be rewritten during hook installation. NULL indicates the table was absent or\nthe symbol never appeared in it.\n",
     "inline": [
       {
-        "match": "if (((elf_info->feature_flags & 1) != 0) && (elf_info->plt_reloc_count != 0)) {",
+        "match": "if (((elf_info->feature_flags & X_ELF_PLTREL) != 0) && (elf_info->plt_reloc_count != 0)) {",
         "match_type": "wildcard",
         "comment": "Fast fail when the binary never exposed PLT relocation metadata."
       },
@@ -884,7 +884,7 @@
         "comment": "DT_VERDEF: pointer to `.gnu.version_d` (kept only when DT_VERDEFNUM/size validation succeeds)."
       },
       {
-        "match": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;",
+        "match": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_NOW;",
         "match_type": "wildcard",
         "comment": "Treat DT_BIND_NOW/DT_FLAGS(DF_BIND_NOW)/DT_FLAGS_1(DF_1_NOW) as a single \"bind now\" feature bit for later helpers."
       },
@@ -909,7 +909,7 @@
         "comment": "Skip undefined/imported symbols\u2014the resolver only accepts entries that already have a concrete value and section."
       },
       {
-        "match": "if (((elf_info->feature_flags & 0x18) == 0x18) && ((versym_index & 0x7ffe) != 0)) {",
+        "match": "if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & 0x7ffe) != 0)) {",
         "match_type": "wildcard",
         "comment": "When versioning metadata exists, walk `.gnu.version_d` to make sure the caller\u2019s requested version string also matches."
       }

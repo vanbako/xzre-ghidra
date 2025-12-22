@@ -29,7 +29,7 @@ elf_rela_find_relative_slot
   ulong rela_index;
   
   // AutoDoc: Bail out immediately when the module never published RELA entries.
-  if (((elf_info->feature_flags & 2) == 0) || (elf_info->rela_reloc_count == 0)) {
+  if (((elf_info->feature_flags & X_ELF_RELA) == 0) || (elf_info->rela_reloc_count == 0)) {
     return (Elf64_Rela *)0x0;
   }
   rela_index = 0;

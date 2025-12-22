@@ -40,7 +40,7 @@ elf_gnu_hash_lookup_symbol
   
   // AutoDoc: Emit a secret-data breadcrumb before touching the GNU hash tables so symbol hunts show up in the telemetry log.
   range_ok = secret_data_append_bits_from_call_site((secret_data_shift_cursor_t)0x58,0xf,3,FALSE);
-  if ((range_ok != FALSE) && ((sym_version == 0 || ((elf_info->feature_flags & 0x18) == 0x18)))) {
+  if ((range_ok != FALSE) && ((sym_version == 0 || ((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM))))) {
     for (bucket_idx = 0; bucket_idx < elf_info->gnu_hash_nbuckets; bucket_idx = bucket_idx + 1) {
       gnu_hash_table = elf_info->gnu_hash_buckets;
       range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + bucket_idx,4,4);
@@ -81,7 +81,7 @@ elf_gnu_hash_lookup_symbol
             }
             versym_index = *versym_entry;
             // AutoDoc: When versioning metadata exists, walk `.gnu.version_d` to make sure the caller’s requested version string also matches.
-            if (((elf_info->feature_flags & 0x18) == 0x18) && ((versym_index & 0x7ffe) != 0)) {
+            if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & 0x7ffe) != 0)) {
               verdef_entry = elf_info->verdef;
               verdef_iter = 0;
               do {

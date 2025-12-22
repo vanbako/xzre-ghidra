@@ -18,7 +18,7 @@ void * elf_find_got_reloc_slot(elf_info_t *elf_info,EncodedStringId encoded_stri
   void *symbol_slot;
   
   // AutoDoc: Skip immediately when the RELA table was missing.
-  if (((elf_info->feature_flags & 2) != 0) && (elf_info->rela_reloc_count != 0)) {
+  if (((elf_info->feature_flags & X_ELF_RELA) != 0) && (elf_info->rela_reloc_count != 0)) {
     // AutoDoc: Reuse the generic helper with R_X86_64_GLOB_DAT to land on the writable GOT slot.
     symbol_slot = elf_find_import_reloc_slot
                        (elf_info,elf_info->rela_relocs,elf_info->rela_reloc_count,R_X86_64_GLOB_DAT,

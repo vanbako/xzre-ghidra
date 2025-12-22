@@ -173,7 +173,7 @@ LAB_00101650:
             if (bind_now_flag != 0) {
 switchD_0010157d_caseD_18:
               // AutoDoc: Treat DT_BIND_NOW/DT_FLAGS(DF_BIND_NOW)/DT_FLAGS_1(DF_1_NOW) as a single "bind now" feature bit for later helpers.
-              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x20;
+              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_NOW;
             }
           }
           else if (dynamic_tag < DT_VERDEF) {
@@ -189,7 +189,7 @@ switchD_0010157d_caseD_18:
             // AutoDoc: DT_VERSYM: enables `.gnu.version` lookups; set the feature bit and store the versym pointer.
             else if (dynamic_tag == DT_VERSYM) {
               versym_value.d_val = *(Elf64_Xword *)dyn_entry_fields;
-              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 0x10;
+              *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_VERSYM;
               elf_info->versym = (Elf64_Versym *)versym_value;
             }
           }
@@ -214,7 +214,7 @@ switchD_0010157d_caseD_18:
           if (pltrel_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 1;
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_PLTREL;
           pltrel_count_dividend[1] = 0;
           pltrel_count_dividend[0] = pltrel_table_size;
           elf_info->plt_reloc_count = SUB164(pltrel_count_dividend / ZEXT816(0x18),0);
@@ -224,7 +224,7 @@ switchD_0010157d_caseD_18:
           if (rela_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 2;
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_RELA;
           rela_count_dividend[1] = 0;
           rela_count_dividend[0] = rela_table_size;
           elf_info->rela_reloc_count = SUB164(rela_count_dividend / ZEXT816(0x18),0);
@@ -234,13 +234,13 @@ switchD_0010157d_caseD_18:
           if (relr_table_size == 0xffffffffffffffff) {
             return FALSE;
           }
-          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 4;
+          *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_RELR;
           elf_info->relr_reloc_count = (u32)(relr_table_size >> 3);
         }
         // AutoDoc: Keep the `.gnu.version_d` pointer only when its size metadata also survived validation; otherwise drop the stale handle.
         if (elf_info->verdef != (Elf64_Verdef *)0x0) {
           if (verdef_present) {
-            *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 8;
+            *(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_VERDEF;
           }
           else {
             elf_info->verdef = (Elf64_Verdef *)0x0;

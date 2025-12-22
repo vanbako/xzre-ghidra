@@ -31,7 +31,7 @@ elf_relr_find_relative_slot
   
   elfbase = elf_info->elfbase;
   // AutoDoc: RELR support is optional—bail immediately when the module never published bitmap metadata.
-  if ((elf_info->feature_flags & 4) != 0) {
+  if ((elf_info->feature_flags & X_ELF_RELR) != 0) {
     relr_count = elf_info->relr_reloc_count;
     if ((target_addr != (void *)0x0) && (relr_count != 0)) {
       relr_index = 0;

