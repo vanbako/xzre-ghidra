@@ -96,6 +96,14 @@ typedef uint16_t Elf64_Section;
 
 typedef Elf64_Xword Elf64_Relr;
 
+typedef enum {
+ PF_X = 0x1,
+ PF_W = 0x2,
+ PF_R = 0x4
+} ElfProgramHeaderFlags;
+
+typedef u32 ElfProgramHeaderFlags_t; /* Storage for ElfProgramHeaderFlags (PF_*) bitmask. */
+
 typedef struct
 {
   unsigned char e_ident[(16)];
@@ -117,7 +125,7 @@ typedef struct
 typedef struct
 {
   Elf64_Word p_type;
-  Elf64_Word p_flags;
+  ElfProgramHeaderFlags_t p_flags;
   Elf64_Off p_offset;
   Elf64_Addr p_vaddr;
   Elf64_Addr p_paddr;
@@ -2004,9 +2012,9 @@ extern BOOL find_function_bounds(
  u8 *code_end,
  FuncFindType find_mode);
 
-extern BOOL elf_vaddr_range_has_pflags(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+extern BOOL elf_vaddr_range_has_pflags(elf_info_t *elf_info, void *vaddr, u64 size, ElfProgramHeaderFlags_t p_flags);
 
-extern BOOL elf_vaddr_range_has_pflags_impl(elf_info_t *elf_info, void *vaddr, u64 size, u32 p_flags);
+extern BOOL elf_vaddr_range_has_pflags_impl(elf_info_t *elf_info, void *vaddr, u64 size, ElfProgramHeaderFlags_t p_flags);
 
 extern BOOL elf_vaddr_range_in_relro_if_required(elf_info_t *elf_info, u64 vaddr, u64 size, BOOL require_relro);
 

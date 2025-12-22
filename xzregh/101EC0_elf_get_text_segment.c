@@ -35,7 +35,7 @@ void * elf_get_text_segment(elf_info_t *elf_info,u64 *pSize)
       for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
         phdr = elf_info->phdrs + phdr_index;
         // AutoDoc: Pick the first executable PT_LOAD entry and align its `[start, end)` window to page boundaries.
-        if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 1) != 0)) {
+        if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & PF_X) != 0)) {
           segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_end = phdr->p_memsz + segment_start;
           code_segment_start = (void *)(segment_start & 0xfffffffffffff000);

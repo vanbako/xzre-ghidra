@@ -50,7 +50,7 @@ void * elf_get_writable_tail_span(elf_info_t *elf_info,u64 *pSize,BOOL get_align
   // AutoDoc: Walk every PF_W|PF_R PT_LOAD, aligning `[start,end)` and tracking the segment whose aligned end extends the farthest.
   for (phdr_index = 0; (uint)phdr_index < (uint)(ushort)elf_info->phdr_count; phdr_index = phdr_index + 1) {
     phdr = elf_info->phdrs + phdr_index;
-    if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 6)) {
+    if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == (PF_R | PF_W))) {
       if (phdr->p_memsz < phdr->p_filesz) {
         return (void *)0x0;
       }

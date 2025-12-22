@@ -45,7 +45,7 @@ elf_relr_find_relative_slot
         // AutoDoc: Literal entries carry an absolute pointer; validate it and compare the stored addend once.
         if ((relr_entry & ELF64_RELR_IS_BITMAP) == 0) {
           relr_slot_ptr = (u8 *)elfbase + relr_entry;
-          addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,4);
+          addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,PF_R);
           if (addr_ok == FALSE) {
             return (Elf64_Relr *)0x0;
           }
@@ -66,7 +66,7 @@ LAB_00101d98:
           // AutoDoc: Bitmap entries expand into 63 consecutive slots—each set bit hands back another 8-byte pointer.
           while (relr_entry = relr_entry >> ELF64_RELR_BITMAP_SHIFT, relr_entry != 0) {
             if ((relr_entry & ELF64_RELR_IS_BITMAP) != 0) {
-              addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,4);
+              addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,PF_R);
               if (addr_ok == FALSE) {
                 return (Elf64_Relr *)0x0;
               }

@@ -81,7 +81,7 @@ BOOL resolve_ldso_audit_offsets
         audit_symbind_cursor = target_image->elfbase->e_ident + symbol_entry->st_value;
         (hooks->ldso_ctx)._dl_audit_symbind_alt__size = audit_symbol_size;
         (hooks->ldso_ctx)._dl_audit_symbind_alt = (dl_audit_symbind_alt_fn)audit_symbind_cursor;
-        probe_success = elf_vaddr_range_has_pflags(target_image,audit_symbind_cursor,audit_symbol_size,4);
+        probe_success = elf_vaddr_range_has_pflags(target_image,audit_symbind_cursor,audit_symbol_size,PF_R);
         if ((probe_success != FALSE) &&
            // AutoDoc: Compute the live `link_map` displacement so the downstream helpers know how far the cached struct is from ld.so’s copy.
            (probe_success = find_link_map_l_name_offsets(data,libname_offset,hooks,imported_funcs),

@@ -20,17 +20,15 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `Elf64_Phdr::p_flags` PF_* segment-permission mask
-- **Where it showed up:** `xzregh/101240_elf_vaddr_range_has_pflags_impl.c` (`(p_flags & p_flags) == p_flags`), `xzregh/1013D0_elf_info_parse.c` (`elf_vaddr_range_has_pflags(..., 4)`), `xzregh/101EC0_elf_get_text_segment.c` (`p_flags & 1`), `xzregh/101F70_elf_get_rodata_segment_after_text.c` (`(p_flags & 7) == 4`), `xzregh/102150_elf_get_writable_tail_span.c` (`(p_flags & 7) == 6`), `xzregh/1022D0_elf_vaddr_range_in_relro_if_required.c` (`elf_vaddr_range_has_pflags(..., 2)`).
-- **Why it mattered:** The literals correspond to PF_X/PF_W/PF_R combinations; naming them would clarify segment-permission tests and avoid duplicated masks.
-- **Notes:** Consider a bitmask enum (e.g., `ElfProgramHeaderFlags` with `PF_X=1`, `PF_W=2`, `PF_R=4`) plus locals rewrites for readability.
-
 ### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
 - **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`DT_FLAGS` uses `& 8`, `DT_FLAGS_1` uses `& 1` before setting `feature_flags |= 0x20`).
 - **Why it mattered:** These are standard `DF_BIND_NOW` and `DF_1_NOW` bits; naming them ties the gate to the ELF spec and avoids opaque literals.
 - **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
 
 ## Completed
+
+### `Elf64_Phdr::p_flags` PF_* segment-permission mask
+- **Outcome (2025-12-22):** Added `ElfProgramHeaderFlags`/`ElfProgramHeaderFlags_t` in `metadata/xzre_types.json`, retyped `Elf64_Phdr.p_flags` plus the `elf_vaddr_range_has_pflags` prototypes, rewrote PF_* mask literals in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified the exported `xzregh/*.c` uses `PF_*` names.
 
 ### `Elf64_Rela::r_info` packed symbol/type fields
 - **Outcome (2025-12-22):** Added `Elf64RelocInfoConstants` (`ELF64_R_TYPE_MASK`, `ELF64_R_SYM_SHIFT`) in `metadata/xzre_types.json`, rewrote the `r_info` mask/shift uses via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed `xzregh/101DC0_elf_find_import_reloc_slot.c` uses the named constants.

@@ -43,13 +43,13 @@ elf_gnu_hash_lookup_symbol
   if ((range_ok != FALSE) && ((sym_version == 0 || ((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM))))) {
     for (bucket_idx = 0; bucket_idx < elf_info->gnu_hash_nbuckets; bucket_idx = bucket_idx + 1) {
       gnu_hash_table = elf_info->gnu_hash_buckets;
-      range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + bucket_idx,4,4);
+      range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + bucket_idx,4,PF_R);
       if (range_ok == FALSE) {
         return (Elf64_Sym *)0x0;
       }
       dynstr_offset = gnu_hash_table[bucket_idx];
       gnu_hash_table = elf_info->gnu_hash_chain;
-      range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + dynstr_offset,8,4);
+      range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + dynstr_offset,8,PF_R);
       chain_cursor = gnu_hash_table + dynstr_offset;
       if (range_ok == FALSE) {
         return (Elf64_Sym *)0x0;
@@ -57,7 +57,7 @@ elf_gnu_hash_lookup_symbol
       do {
         chain_index = (long)chain_cursor - (long)elf_info->gnu_hash_chain >> 2 & 0xffffffff;
         sym_entry = elf_info->dynsym + chain_index;
-        range_ok = elf_vaddr_range_has_pflags(elf_info,sym_entry,0x18,4);
+        range_ok = elf_vaddr_range_has_pflags(elf_info,sym_entry,0x18,PF_R);
         if (range_ok == FALSE) {
           return (Elf64_Sym *)0x0;
         }
@@ -65,7 +65,7 @@ elf_gnu_hash_lookup_symbol
         if ((sym_entry->st_value != 0) && (sym_entry->st_shndx != 0)) {
           dynstr_offset = sym_entry->st_name;
           dynstr_base = elf_info->dynstr;
-          range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,4);
+          range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,PF_R);
           if (range_ok == FALSE) {
             return (Elf64_Sym *)0x0;
           }
@@ -75,7 +75,7 @@ elf_gnu_hash_lookup_symbol
               return sym_entry;
             }
             versym_entry = (ushort *)(chain_index * 2 + (long)elf_info->versym);
-            range_ok = elf_vaddr_range_has_pflags(elf_info,versym_entry,2,4);
+            range_ok = elf_vaddr_range_has_pflags(elf_info,versym_entry,2,PF_R);
             if (range_ok == FALSE) {
               return (Elf64_Sym *)0x0;
             }
@@ -86,15 +86,15 @@ elf_gnu_hash_lookup_symbol
               verdef_iter = 0;
               do {
                 if (((elf_info->verdef_count <= (ulong)verdef_iter) ||
-                    (range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_entry,0x14,4), range_ok == FALSE))
+                    (range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_entry,0x14,PF_R), range_ok == FALSE))
                    || ((short)*verdef_entry != 1)) break;
                 if ((versym_index & VERSYM_VERSION_MASK) == *(ushort *)((long)verdef_entry + 4)) {
                   verdef_aux_ptr = (uint *)((ulong)*(uint *)((long)verdef_entry + 0xc) + (long)verdef_entry);
-                  range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_aux_ptr,8,4);
+                  range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_aux_ptr,8,PF_R);
                   if (range_ok == FALSE) break;
                   dynstr_offset = *verdef_aux_ptr;
                   dynstr_base = elf_info->dynstr;
-                  range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,4);
+                  range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,PF_R);
                   if (range_ok == FALSE) break;
                   candidate_string_id = encoded_string_id_lookup(dynstr_base + dynstr_offset,(char *)0x0);
                   if (sym_version == candidate_string_id) {

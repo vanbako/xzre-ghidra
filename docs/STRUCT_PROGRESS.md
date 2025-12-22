@@ -37,7 +37,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `EC_POINT` | 0 |  |
 | `Elf64_Dyn` | 0 |  |
 | `Elf64_Ehdr` | 0 |  |
-| `Elf64_Phdr` | 0 |  |
+| `Elf64_Phdr` | 1 | Retyped `p_flags` as `ElfProgramHeaderFlags_t` (PF_R/PF_W/PF_X bitmask) to make segment permissions explicit (2025-12-22). |
 | `Elf64_Rela` | 0 |  |
 | `Elf64_Sym` | 0 |  |
 | `elf_entry_ctx_t` | 1 | Documented the cpuid relocation anchors (`cpuid_random_symbol_addr`, resolver frame/GOT slot reuse) and clarified the GOT bookkeeping role (2025-11-19). |

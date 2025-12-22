@@ -2676,6 +2676,10 @@
         "name": "relro_window_end",
         "original": "uVar2",
         "type": "ulong"
+      },
+      {
+        "original": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,2);",
+        "replacement": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,PF_W);"
       }
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_relro.c"
@@ -2796,6 +2800,10 @@
       {
         "original": "relr_stream_offset + 0x1f8",
         "replacement": "relr_stream_offset + ELF64_RELR_BITMAP_STRIDE_BYTES"
+      },
+      {
+        "original": "addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,4);",
+        "replacement": "addr_ok = elf_vaddr_range_has_pflags(elf_info,relr_slot_ptr,8,PF_R);"
       }
     ],
     "source": "xzre/xzre_code/elf_find_relr_reloc.c"
@@ -3070,7 +3078,7 @@
       },
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {",
-        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 1) != 0)) {"
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & PF_X) != 0)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_code_segment.c"
@@ -3145,7 +3153,7 @@
       },
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 6)) {",
-        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 6)) {"
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == (PF_R | PF_W))) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_data_segment.c"
@@ -3248,7 +3256,7 @@
       },
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {",
-        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 7) == 4)) {"
+        "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == PF_R)) {"
       }
     ],
     "source": "xzre/xzre_code/elf_get_rodata_segment.c"
@@ -3651,6 +3659,26 @@
       {
         "original": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | 8;",
         "replacement": "*(byte *)&elf_info->feature_flags = (byte)elf_info->feature_flags | X_ELF_VERDEF;"
+      },
+      {
+        "original": "range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,4);",
+        "replacement": "range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,PF_R);"
+      },
+      {
+        "original": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->plt_relocs,pltrel_table_size,4),",
+        "replacement": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->plt_relocs,pltrel_table_size,PF_R),"
+      },
+      {
+        "original": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->rela_relocs,rela_table_size,4),",
+        "replacement": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->rela_relocs,rela_table_size,PF_R),"
+      },
+      {
+        "original": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->relr_relocs,relr_table_size,4),",
+        "replacement": "(range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->relr_relocs,relr_table_size,PF_R),"
+      },
+      {
+        "original": "(elf_info,elf_info->verdef,elf_info->verdef_count * 0x14,4),",
+        "replacement": "(elf_info,elf_info->verdef,elf_info->verdef_count * 0x14,PF_R),"
       }
     ],
     "source": "xzre/xzre_code/elf_parse.c"
@@ -3748,6 +3776,34 @@
       {
         "original": "(versym_index & 0x7fff)",
         "replacement": "(versym_index & VERSYM_VERSION_MASK)"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + bucket_idx,4,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + bucket_idx,4,PF_R);"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + dynstr_offset,8,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,gnu_hash_table + dynstr_offset,8,PF_R);"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,sym_entry,0x18,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,sym_entry,0x18,PF_R);"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,dynstr_base + dynstr_offset,1,PF_R);"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,versym_entry,2,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,versym_entry,2,PF_R);"
+      },
+      {
+        "original": "(range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_entry,0x14,4), range_ok == FALSE))",
+        "replacement": "(range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_entry,0x14,PF_R), range_ok == FALSE))"
+      },
+      {
+        "original": "range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_aux_ptr,8,4);",
+        "replacement": "range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_aux_ptr,8,PF_R);"
       }
     ],
     "source": "xzre/xzre_code/elf_symbol_get.c"
@@ -4167,6 +4223,10 @@
         "name": "audit_symbol_size",
         "original": "size",
         "type": "u64"
+      },
+      {
+        "original": "probe_success = elf_vaddr_range_has_pflags(target_image,audit_symbind_cursor,audit_symbol_size,4);",
+        "replacement": "probe_success = elf_vaddr_range_has_pflags(target_image,audit_symbind_cursor,audit_symbol_size,PF_R);"
       }
     ],
     "source": "xzre/xzre_code/find_dl_audit_offsets.c"
@@ -4960,6 +5020,10 @@
         "name": "shutdown_fn",
         "original": "ppVar13",
         "type": "pfn_shutdown_t"
+      },
+      {
+        "original": "status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,4);",
+        "replacement": "status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,PF_R);"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_name.c"

@@ -84,7 +84,7 @@ BOOL find_link_map_l_name_offsets
       ldso_image = data_handle->cached_elf_handles->ldso;
       audit_sym_start = ldso_image->elfbase->e_ident + audit_preinit_symbol->st_value;
       // AutoDoc: Clamp the `_dl_audit_preinit` span to mapped ld.so pages so bogus symbol data cannot trick the search.
-      status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,4);
+      status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,PF_R);
       snapshot_slot = snapshot_cursor + 0x3c;
       if (status_ok != FALSE) {
 LAB_001041f0:

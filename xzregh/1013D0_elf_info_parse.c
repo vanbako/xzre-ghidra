@@ -112,7 +112,7 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
       dyn_entry_capacity = (int)(phnum >> 4);
       *(int *)&elf_info->dyn_entry_count = dyn_entry_capacity;
       // AutoDoc: Reject the ELF immediately if the PT_DYNAMIC payload does not live entirely inside readable memory.
-      range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,4);
+      range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,PF_R);
       if (range_valid != FALSE) {
         dyn_entry_fields = &vaddr->d_un;
         verdef_present = FALSE;
@@ -273,17 +273,17 @@ switchD_0010157d_caseD_18:
           }
           // AutoDoc: Every relocation/metadata pointer gets revalidated before harvesting the GNU hash bucket/chain tables.
           if (((((elf_info->plt_relocs == (Elf64_Rela *)0x0) ||
-                (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->plt_relocs,pltrel_table_size,4),
+                (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->plt_relocs,pltrel_table_size,PF_R),
                 range_valid != FALSE)) &&
                ((elf_info->rela_relocs == (Elf64_Rela *)0x0 ||
-                (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->rela_relocs,rela_table_size,4),
+                (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->rela_relocs,rela_table_size,PF_R),
                 range_valid != FALSE)))) &&
               ((elf_info->relr_relocs == (Elf64_Relr *)0x0 ||
-               (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->relr_relocs,relr_table_size,4),
+               (range_valid = elf_vaddr_range_has_pflags(elf_info,elf_info->relr_relocs,relr_table_size,PF_R),
                range_valid != FALSE)))) &&
              ((elf_info->verdef == (Elf64_Verdef *)0x0 ||
               (range_valid = elf_vaddr_range_has_pflags
-                                  (elf_info,elf_info->verdef,elf_info->verdef_count * 0x14,4),
+                                  (elf_info,elf_info->verdef,elf_info->verdef_count * 0x14,PF_R),
               range_valid != FALSE)))) {
             phdr_index = gnu_hash_header->nbuckets;
             elf_info->gnu_hash_nbuckets = phdr_index;

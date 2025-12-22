@@ -1,7 +1,7 @@
 // /home/kali/xzre-ghidra/xzregh/101240_elf_vaddr_range_has_pflags_impl.c
 // Function: elf_vaddr_range_has_pflags_impl @ 0x101240
 // Calling convention: __stdcall
-// Prototype: BOOL __stdcall elf_vaddr_range_has_pflags_impl(elf_info_t * elf_info, void * vaddr, u64 size, u32 p_flags)
+// Prototype: BOOL __stdcall elf_vaddr_range_has_pflags_impl(elf_info_t * elf_info, void * vaddr, u64 size, ElfProgramHeaderFlags_t p_flags)
 
 
 /*
@@ -12,7 +12,8 @@
 
 #include "xzre_types.h"
 
-BOOL elf_vaddr_range_has_pflags_impl(elf_info_t *elf_info,void *vaddr,u64 size,u32 p_flags)
+BOOL elf_vaddr_range_has_pflags_impl
+               (elf_info_t *elf_info,void *vaddr,u64 size,ElfProgramHeaderFlags_t p_flags)
 
 {
   u8 *range_limit;

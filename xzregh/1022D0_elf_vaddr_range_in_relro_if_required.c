@@ -19,7 +19,7 @@ BOOL elf_vaddr_range_in_relro_if_required
   ulong relro_window_start;
   
   // AutoDoc: Leverage the generic helper to ensure the range already lives inside a PF_W PT_LOAD segment (the RW data/GOT mapping).
-  range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,2);
+  range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,PF_W);
   // AutoDoc: `require_relro` acts as a caller-supplied "must be RELRO" bit—only then do we enforce the PT_GNU_RELRO bounds.
   if (((range_is_protected != FALSE) && (range_is_protected = TRUE, require_relro != FALSE)) &&
      (elf_info->gnurelro_present != FALSE)) {

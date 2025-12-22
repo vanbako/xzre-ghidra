@@ -547,7 +547,7 @@
     "plate": "Extends `elf_vaddr_range_has_pflags` with GNU_RELRO bounds checking. The helper first reuses the normal containment test (requiring PF_W) so `[vaddr, vaddr+size)` is known to live inside the writable PT_LOAD span that normally backs the GOT/.data. When `require_relro` is TRUE and the ELF exported PT_GNU_RELRO metadata it converts the RELRO segment into runtime pointers, page-aligns the window, and verifies the caller's span is fully enclosed. Requests outside the RELRO range (or binaries that never exposed RELRO) return FALSE so later hooks never mis-tag writable memory.",
     "inline": [
       {
-        "match": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,2);",
+        "match": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,PF_W);",
         "match_type": "wildcard",
         "comment": "Leverage the generic helper to ensure the range already lives inside a PF_W PT_LOAD segment (the RW data/GOT mapping)."
       },
@@ -723,7 +723,7 @@
         "comment": "Once the text range is cached, future callers reuse it instead of rescanning the headers."
       },
       {
-        "match": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & 1) != 0)) {",
+        "match": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & PF_X) != 0)) {",
         "match_type": "wildcard",
         "comment": "Pick the first executable PT_LOAD entry and align its `[start, end)` window to page boundaries."
       }
@@ -833,7 +833,7 @@
         "comment": "Reject binaries that declare more than one PT_GNU_RELRO span; overlapping RELRO metadata would be suspicious."
       },
       {
-        "match": "range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,4);",
+        "match": "range_valid = elf_vaddr_range_has_pflags(elf_info,vaddr,phnum,PF_R);",
         "match_type": "wildcard",
         "comment": "Reject the ELF immediately if the PT_DYNAMIC payload does not live entirely inside readable memory."
       },
@@ -1424,7 +1424,7 @@
         "comment": "Only proceed when ld.so exposes `_dl_audit_preinit`; its body contains the LEA we pattern-match later."
       },
       {
-        "match": "status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,4);",
+        "match": "status_ok = elf_vaddr_range_has_pflags(ldso_image,audit_sym_start,audit_preinit_symbol->st_size,PF_R);",
         "comment": "Clamp the `_dl_audit_preinit` span to mapped ld.so pages so bogus symbol data cannot trick the search."
       },
       {
