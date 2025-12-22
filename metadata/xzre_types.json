@@ -761,6 +761,13 @@
     {
       "kind": "enum",
       "names": [
+        "x86_64_reloc_type_t"
+      ],
+      "code": "typedef enum {\n R_X86_64_GLOB_DAT = 6,\n R_X86_64_JUMP_SLOT = 7,\n R_X86_64_RELATIVE = 8\n} x86_64_reloc_type_t;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "cpuid_leaf_t"
       ],
       "code": "typedef enum cpuid_leaf {\n CPUID_LEAF_BASIC_INFO = 0,\n CPUID_LEAF_VERSION_INFO = 1,\n CPUID_LEAF_CACHE_TLB_INFO = 2,\n CPUID_LEAF_SERIAL_NUMBER = 3,\n CPUID_LEAF_DETERMINISTIC_CACHE = 4,\n CPUID_LEAF_MONITOR_MWAIT = 5,\n CPUID_LEAF_THERMAL_POWER = 6,\n CPUID_LEAF_EXTENDED_FEATURES = 7,\n CPUID_LEAF_DIRECT_CACHE_ACCESS = 9,\n CPUID_LEAF_ARCH_PERF_MONITORING = 10,\n CPUID_LEAF_EXTENDED_TOPOLOGY = 0xb,\n CPUID_LEAF_EXTENDED_STATE = 0xd,\n CPUID_LEAF_QOS_MONITORING = 0xf,\n CPUID_LEAF_BRAND_STRING_PART1 = 0x80000002,\n CPUID_LEAF_BRAND_STRING_PART2 = 0x80000003,\n CPUID_LEAF_BRAND_STRING_PART3 = 0x80000004\n} cpuid_leaf_t;"

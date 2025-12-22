@@ -445,6 +445,12 @@ typedef enum {
  DT_HIPROC = 0x7fffffff
 } ElfDynamicTag;
 
+typedef enum {
+ R_X86_64_GLOB_DAT = 6,
+ R_X86_64_JUMP_SLOT = 7,
+ R_X86_64_RELATIVE = 8
+} x86_64_reloc_type_t;
+
 typedef enum cpuid_leaf {
  CPUID_LEAF_BASIC_INFO = 0,
  CPUID_LEAF_VERSION_INFO = 1,

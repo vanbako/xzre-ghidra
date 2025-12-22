@@ -10,13 +10,12 @@ Enum candidates we still need to model cleanly in `metadata/xzre_types.json`. Tr
 
 ## Candidates
 
-### ELF relocation types (R_X86_64_*)
-- **Where it shows up:** `xzregh/101E60_elf_find_plt_reloc_slot.c` (reloc type 7), `xzregh/101E90_elf_find_got_reloc_slot.c` (reloc type 6), and `xzregh/101B90_elf_rela_find_relative_slot.c` (`r_info == 8`).
-- **Why it matters:** Naming R_X86_64_JUMP_SLOT/GLOB_DAT/RELATIVE clarifies the loader’s relocation handling and avoids magic constants.
-- **Reverse-engineering plan:** Add an enum (e.g., `x86_64_reloc_type_t`) for the observed relocation IDs and replace literals in the helpers; refresh.
-- **Status (2025-12-21):** Open – candidate identified.
-
 ## Completed
+
+### ELF relocation types (R_X86_64_*)
+- **Where it showed up:** `xzregh/101E60_elf_find_plt_reloc_slot.c` (reloc type 7), `xzregh/101E90_elf_find_got_reloc_slot.c` (reloc type 6), and `xzregh/101B90_elf_rela_find_relative_slot.c` (`r_info == 8`).
+- **Why it mattered:** Naming R_X86_64_JUMP_SLOT/GLOB_DAT/RELATIVE clarifies the loader’s relocation handling and avoids magic constants.
+- **Outcome (2025-12-22):** Done – added `x86_64_reloc_type_t` with R_X86_64_GLOB_DAT/JUMP_SLOT/RELATIVE, rewrote relocation literals via locals replacements, and refreshed exports.
 
 ### ELF program header types (PT_*)
 - **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`p_type == 1/2` plus PT_GNU_RELRO checks), `xzregh/1013B0_is_pt_gnu_relro.c` (obfuscated PT_GNU_RELRO test), and the PT_LOAD scans in `xzregh/101EC0_elf_get_text_segment.c`, `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101F70_elf_get_rodata_segment_after_text.c`, `xzregh/101240_elf_vaddr_range_has_pflags_impl.c`.

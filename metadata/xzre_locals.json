@@ -2679,6 +2679,10 @@
       {
         "original": "elfbase->e_ident",
         "replacement": "(u8 *)elfbase"
+      },
+      {
+        "original": "if ((int)rela_cursor->r_info == 8) {",
+        "replacement": "if ((int)rela_cursor->r_info == R_X86_64_RELATIVE) {"
       }
     ],
     "source": "xzre/xzre_code/elf_find_rela_reloc.c"
@@ -2735,6 +2739,10 @@
         "name": "symbol_slot",
         "original": "pvVar1",
         "type": "void *"
+      },
+      {
+        "original": "elf_info->rela_reloc_count,6,",
+        "replacement": "elf_info->rela_reloc_count,R_X86_64_GLOB_DAT,"
       }
     ],
     "source": "xzre/xzre_code/elf_get_got_symbol.c"
@@ -2746,6 +2754,10 @@
         "name": "symbol_slot",
         "original": "pvVar1",
         "type": "void *"
+      },
+      {
+        "original": "elf_info->plt_reloc_count,7,encoded_string_id",
+        "replacement": "elf_info->plt_reloc_count,R_X86_64_JUMP_SLOT,encoded_string_id"
       }
     ],
     "source": "xzre/xzre_code/elf_get_plt_symbol.c"

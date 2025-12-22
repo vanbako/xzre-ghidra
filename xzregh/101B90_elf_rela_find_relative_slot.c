@@ -46,7 +46,7 @@ elf_rela_find_relative_slot
     }
     rela_cursor = elf_info->rela_relocs + rela_index;
     // AutoDoc: Only R_X86_64_RELATIVE entries are interesting here; everything else is ignored.
-    if ((int)rela_cursor->r_info == 8) {
+    if ((int)rela_cursor->r_info == R_X86_64_RELATIVE) {
       if (target_addr == (void *)0x0) {
         rela_cursor = (Elf64_Rela *)((u8 *)elfbase + rela_cursor->r_addend);
       }
