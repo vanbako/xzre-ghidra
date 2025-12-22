@@ -20,12 +20,10 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
-- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`DT_FLAGS` uses `& 8`, `DT_FLAGS_1` uses `& 1` before setting `feature_flags |= 0x20`).
-- **Why it mattered:** These are standard `DF_BIND_NOW` and `DF_1_NOW` bits; naming them ties the gate to the ELF spec and avoids opaque literals.
-- **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
-
 ## Completed
+
+### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
+- **Outcome (2025-12-22):** Added `ElfDynamicFlags`/`ElfDynamicFlags1` enums (`DF_BIND_NOW`, `DF_1_NOW`) in `metadata/xzre_types.json`, rewrote the bind-now bit tests in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/1013D0_elf_info_parse.c` uses the named DF_* constants.
 
 ### `Elf64_Phdr::p_flags` PF_* segment-permission mask
 - **Outcome (2025-12-22):** Added `ElfProgramHeaderFlags`/`ElfProgramHeaderFlags_t` in `metadata/xzre_types.json`, retyped `Elf64_Phdr.p_flags` plus the `elf_vaddr_range_has_pflags` prototypes, rewrote PF_* mask literals in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified the exported `xzregh/*.c` uses `PF_*` names.

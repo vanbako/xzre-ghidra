@@ -3543,6 +3543,10 @@
         "replacement": "case DT_FLAGS:"
       },
       {
+        "original": "bVar11 = *(byte *)dyn_entry_fields & 8;",
+        "replacement": "bVar11 = *(byte *)dyn_entry_fields & DF_BIND_NOW;"
+      },
+      {
         "original": "case 0x23:",
         "replacement": "case DT_RELRSZ:"
       },
@@ -3553,6 +3557,10 @@
       {
         "original": "dynamic_phdr_idx == 0x6ffffffb",
         "replacement": "dynamic_tag == DT_FLAGS_1"
+      },
+      {
+        "original": "bVar11 = *(byte *)dyn_entry_fields & 1;",
+        "replacement": "bVar11 = *(byte *)dyn_entry_fields & DF_1_NOW;"
       },
       {
         "original": "dynamic_phdr_idx < 0x6ffffffc",

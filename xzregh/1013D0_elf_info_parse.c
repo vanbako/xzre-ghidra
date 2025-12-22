@@ -155,7 +155,7 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
               case DT_BIND_NOW:
                 goto switchD_0010157d_caseD_18;
               case DT_FLAGS:
-                bind_now_flag = *(byte *)dyn_entry_fields & 8;
+                bind_now_flag = *(byte *)dyn_entry_fields & DF_BIND_NOW;
                 goto LAB_00101650;
               // AutoDoc: DT_RELRSZ: byte size of the packed RELR relocation stream; required before accepting a DT_RELR pointer.
               case DT_RELRSZ:
@@ -168,7 +168,7 @@ BOOL elf_info_parse(Elf64_Ehdr *ehdr,elf_info_t *elf_info)
             }
           }
           else if (dynamic_tag == DT_FLAGS_1) {
-            bind_now_flag = *(byte *)dyn_entry_fields & 1;
+            bind_now_flag = *(byte *)dyn_entry_fields & DF_1_NOW;
 LAB_00101650:
             if (bind_now_flag != 0) {
 switchD_0010157d_caseD_18:

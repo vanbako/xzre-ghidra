@@ -859,6 +859,20 @@
     {
       "kind": "enum",
       "names": [
+        "ElfDynamicFlags"
+      ],
+      "code": "typedef enum {\n DF_BIND_NOW = 0x8\n} ElfDynamicFlags;"
+    },
+    {
+      "kind": "enum",
+      "names": [
+        "ElfDynamicFlags1"
+      ],
+      "code": "typedef enum {\n DF_1_NOW = 0x1\n} ElfDynamicFlags1;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "Elf64RelocInfoConstants"
       ],
       "code": "typedef enum {\n ELF64_R_TYPE_MASK = 0xffffffff,\n ELF64_R_SYM_SHIFT = 0x20\n} Elf64RelocInfoConstants;"

@@ -512,6 +512,14 @@ typedef enum {
 } ElfDynamicTag;
 
 typedef enum {
+ DF_BIND_NOW = 0x8
+} ElfDynamicFlags;
+
+typedef enum {
+ DF_1_NOW = 0x1
+} ElfDynamicFlags1;
+
+typedef enum {
  ELF64_R_TYPE_MASK = 0xffffffff,
  ELF64_R_SYM_SHIFT = 0x20
 } Elf64RelocInfoConstants;
