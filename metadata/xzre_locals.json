@@ -3641,7 +3641,7 @@
       {
         "name": "versym_index",
         "original": "uVar1",
-        "type": "ushort"
+        "type": "ElfVersymFlags_t"
       },
       {
         "name": "dynstr_offset",
@@ -3714,8 +3714,20 @@
         "type": "uint"
       },
       {
+        "original": "((chain_hash_word & 1) == 0)",
+        "replacement": "((chain_hash_word & GNU_HASH_CHAIN_END) == 0)"
+      },
+      {
         "original": "((elf_info->feature_flags & 0x18) == 0x18)",
         "replacement": "((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM))"
+      },
+      {
+        "original": "((versym_index & 0x7ffe) != 0)",
+        "replacement": "((versym_index & VERSYM_VERSION_VALID_MASK) != 0)"
+      },
+      {
+        "original": "(versym_index & 0x7fff)",
+        "replacement": "(versym_index & VERSYM_VERSION_MASK)"
       }
     ],
     "source": "xzre/xzre_code/elf_symbol_get.c"

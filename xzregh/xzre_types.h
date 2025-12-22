@@ -457,6 +457,18 @@ typedef enum {
 typedef u64 ElfFlags_t; /* Storage for ElfFlags (X_ELF_*) bitmask. */
 
 typedef enum {
+ VERSYM_VERSION_MASK = 0x7fff,
+ VERSYM_VERSION_VALID_MASK = 0x7ffe,
+ VERSYM_HIDDEN = 0x8000
+} ElfVersymFlags;
+
+typedef u16 ElfVersymFlags_t; /* Storage for ElfVersymFlags (VERSYM_*) bitmask. */
+
+typedef enum {
+ GNU_HASH_CHAIN_END = 0x1
+} GnuHashChainFlags;
+
+typedef enum {
  PT_LOAD = 1,
  PT_DYNAMIC = 2,
  PT_GNU_RELRO = 0x6474e552

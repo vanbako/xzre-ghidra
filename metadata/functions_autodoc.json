@@ -909,7 +909,7 @@
         "comment": "Skip undefined/imported symbols\u2014the resolver only accepts entries that already have a concrete value and section."
       },
       {
-        "match": "if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & 0x7ffe) != 0)) {",
+        "match": "if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & VERSYM_VERSION_VALID_MASK) != 0)) {",
         "match_type": "wildcard",
         "comment": "When versioning metadata exists, walk `.gnu.version_d` to make sure the caller\u2019s requested version string also matches."
       }

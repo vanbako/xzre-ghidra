@@ -22,7 +22,7 @@ elf_gnu_hash_lookup_symbol
           (elf_info_t *elf_info,EncodedStringId encoded_string_id,EncodedStringId sym_version)
 
 {
-  ushort versym_index;
+  ElfVersymFlags_t versym_index;
   uint dynstr_offset;
   u32 *gnu_hash_table;
   char *dynstr_base;
@@ -81,14 +81,14 @@ elf_gnu_hash_lookup_symbol
             }
             versym_index = *versym_entry;
             // AutoDoc: When versioning metadata exists, walk `.gnu.version_d` to make sure the caller’s requested version string also matches.
-            if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & 0x7ffe) != 0)) {
+            if (((elf_info->feature_flags & (X_ELF_VERDEF | X_ELF_VERSYM)) == (X_ELF_VERDEF | X_ELF_VERSYM)) && ((versym_index & VERSYM_VERSION_VALID_MASK) != 0)) {
               verdef_entry = elf_info->verdef;
               verdef_iter = 0;
               do {
                 if (((elf_info->verdef_count <= (ulong)verdef_iter) ||
                     (range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_entry,0x14,4), range_ok == FALSE))
                    || ((short)*verdef_entry != 1)) break;
-                if ((versym_index & 0x7fff) == *(ushort *)((long)verdef_entry + 4)) {
+                if ((versym_index & VERSYM_VERSION_MASK) == *(ushort *)((long)verdef_entry + 4)) {
                   verdef_aux_ptr = (uint *)((ulong)*(uint *)((long)verdef_entry + 0xc) + (long)verdef_entry);
                   range_ok = elf_vaddr_range_has_pflags(elf_info,verdef_aux_ptr,8,4);
                   if (range_ok == FALSE) break;
@@ -110,7 +110,7 @@ elf_gnu_hash_lookup_symbol
         }
         chain_hash_word = *chain_cursor;
         chain_cursor = chain_cursor + 1;
-      } while ((chain_hash_word & 1) == 0);
+      } while ((chain_hash_word & GNU_HASH_CHAIN_END) == 0);
     }
   }
   return (Elf64_Sym *)0x0;

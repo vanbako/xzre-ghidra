@@ -796,6 +796,27 @@
     {
       "kind": "enum",
       "names": [
+        "ElfVersymFlags"
+      ],
+      "code": "typedef enum {\n VERSYM_VERSION_MASK = 0x7fff,\n VERSYM_VERSION_VALID_MASK = 0x7ffe,\n VERSYM_HIDDEN = 0x8000\n} ElfVersymFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "ElfVersymFlags_t"
+      ],
+      "code": "typedef u16 ElfVersymFlags_t; /* Storage for ElfVersymFlags (VERSYM_*) bitmask. */"
+    },
+    {
+      "kind": "enum",
+      "names": [
+        "GnuHashChainFlags"
+      ],
+      "code": "typedef enum {\n GNU_HASH_CHAIN_END = 0x1\n} GnuHashChainFlags;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ElfProgramHeaderType"
       ],
       "code": "typedef enum {\n PT_LOAD = 1,\n PT_DYNAMIC = 2,\n PT_GNU_RELRO = 0x6474e552\n} ElfProgramHeaderType;"
