@@ -632,7 +632,7 @@ LAB_001067cf:
               mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm;
               if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
                 mov_dst_reg = syslog_dasm_ctx.prefix.modrm_bytes.modrm_rm |
-                         (syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                         ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
               goto LAB_001067ed;
             }
@@ -642,7 +642,7 @@ LAB_001067cf:
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x40) != 0) {
               relr_retry_flag = syslog_dasm_ctx.prefix.modrm_bytes.modrm_reg;
               if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-                relr_retry_flag = relr_retry_flag | syslog_dasm_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                relr_retry_flag = relr_retry_flag | ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
               goto LAB_001067cf;
             }
@@ -651,7 +651,7 @@ LAB_001067cf:
             relr_retry_flag = syslog_dasm_ctx.mov_imm_reg_index;
             if ((syslog_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
               relr_retry_flag = syslog_dasm_ctx.mov_imm_reg_index |
-                       (syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                       ((syslog_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
             }
             mov_dst_reg = 0;
 LAB_001067ed:
@@ -681,14 +681,14 @@ LAB_001067fb:
                 if (((probe_dasm_ctx.prefix.flags_u16 & 0x1000) != 0) &&
                    (mov_src_reg = probe_dasm_ctx.mov_imm_reg_index, (probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0))
                 {
-                  relr_retry_flag = probe_dasm_ctx.prefix.modrm_bytes.rex_byte << 3;
+                  relr_retry_flag = (probe_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
                   goto LAB_001068e4;
                 }
               }
               else {
                 mov_src_reg = probe_dasm_ctx.prefix.modrm_bytes.modrm_reg;
                 if ((probe_dasm_ctx.prefix.flags_u16 & 0x20) != 0) {
-                  relr_retry_flag = probe_dasm_ctx.prefix.modrm_bytes.rex_byte * '\x02';
+                  relr_retry_flag = (probe_dasm_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_001068e4:
                   mov_src_reg = mov_src_reg | relr_retry_flag & 8;
                 }

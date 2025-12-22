@@ -1088,7 +1088,7 @@
         "comment": "Fetch the cached `[func_start, func_end)` range associated with this string ID."
       },
       {
-        "match": "if ((scratch_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48)",
+        "match": "if ((scratch_ctx.prefix.modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) != (REX_PREFIX | REX_W))",
         "match_type": "wildcard",
         "comment": "Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.",
         "placement": "after"
@@ -1190,7 +1190,7 @@
         "comment": "Walk up to 0x80 bytes before the literal to catch the MOV that copies `_dl_naudit` out of `rtld_global_ro`."
       },
       {
-        "match": "if ((((insn_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48) && (rtld_global_ro_base < candidate_slot_ptr)) &&",
+        "match": "if ((((insn_ctx.prefix.modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) != (REX_PREFIX | REX_W)) && (rtld_global_ro_base < candidate_slot_ptr)) &&",
         "comment": "Reject 64-bit MOVs and only accept pointers that actually fall within the `rtld_global_ro` symbol.",
         "placement": "before"
       },
@@ -1510,7 +1510,7 @@
     ]
   },
   "find_reg_to_reg_instruction": {
-    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.\nCandidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & 0x05`). The opcode gate then accepts MOV reg\u2194reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
+    "plate": "Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.\nCandidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & (REX_R | REX_B)`). The opcode gate then accepts MOV reg\u2194reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.\nDecode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.",
     "inline": [
       {
         "match_regex": "if \\([^=]+== \\(dasm_ctx_t \\*\\)0x0\\) \\{",

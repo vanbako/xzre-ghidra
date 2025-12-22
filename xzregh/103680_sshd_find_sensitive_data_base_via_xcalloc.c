@@ -73,7 +73,7 @@ LAB_00103788:
     if ((store_probe_ctx.prefix.flags_u16 & 0x40) != 0) {
       tracked_reg = store_probe_ctx.prefix.modrm_bytes.modrm_reg;
       if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
-        rex_extension = store_probe_ctx.prefix.modrm_bytes.rex_byte * '\x02';
+        rex_extension = (store_probe_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_00103782:
         tracked_reg = tracked_reg | rex_extension & 8;
       }
@@ -82,7 +82,7 @@ LAB_00103782:
     if ((store_probe_ctx.prefix.flags_u16 & 0x1000) != 0) {
       tracked_reg = store_probe_ctx.mov_imm_reg_index;
       if ((store_probe_ctx.prefix.flags_u16 & 0x20) != 0) {
-        rex_extension = store_probe_ctx.prefix.modrm_bytes.rex_byte << 3;
+        rex_extension = (store_probe_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
         goto LAB_00103782;
       }
       goto LAB_00103788;

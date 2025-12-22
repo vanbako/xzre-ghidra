@@ -44,7 +44,7 @@ BOOL find_riprel_mov_or_lea
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&
     // AutoDoc: Only accept RIP-relative disp32 (ModRM `mod=0`, `rm=5`) plus the caller-requested width (unless we are hunting stores).
-       (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+       (((((dctx->prefix).modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) == (REX_PREFIX | REX_W)) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       decoded_opcode = (dctx->opcode_window).opcode_window_dword;
       if (decoded_opcode == X86_OPCODE_1B_LEA) {

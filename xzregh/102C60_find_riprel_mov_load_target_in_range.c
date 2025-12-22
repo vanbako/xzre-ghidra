@@ -42,7 +42,7 @@ void * find_riprel_mov_load_target_in_range
         func_cursor = func_cursor + 1;
       }
       else {
-        if ((scratch_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48) {
+        if ((scratch_ctx.prefix.modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) != (REX_PREFIX | REX_W)) {
         // AutoDoc: Ignore MOVs that flip REX.W; the string tables we track always use 32-bit pointers.
           if ((scratch_ctx.prefix.decoded.flags2 & DF2_MEM_DISP) == 0) {
           // AutoDoc: Without `DF2_MEM_DISP` there is no displacement to recompute, so abort unless the caller insisted on a range.

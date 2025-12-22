@@ -13,7 +13,7 @@
 BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
 
 {
-  u8 *rex_byte_ptr;
+  RexPrefixFlags_t *rex_byte_ptr;
   InstructionFlags2_t *flags2_ptr;
   byte modrm_byte;
   byte cursor_byte;
@@ -300,7 +300,7 @@ LAB_001004e1:
           // AutoDoc: VEX prefix: capture the 0xC4/0xC5 header, synthesize REX bits/opcode-map selectors, and advance past the prefix bytes before decoding the opcode.
           if (code_end <= cursor) goto LAB_00100aa5;
           tmp_byte = opcode_ptr[1];
-          (ctx->prefix).modrm_bytes.rex_byte = '@';
+          (ctx->prefix).modrm_bytes.rex_byte = REX_PREFIX;
           opcode = (uint)current_byte << 8 | 0xf;
           (ctx->prefix).decoded.vex_byte2 = tmp_byte;
           (ctx->opcode_window).opcode_window_dword = opcode;
@@ -312,11 +312,11 @@ LAB_001004e1:
           }
           modrm_byte = opcode_ptr[1];
           if ((modrm_byte & 0x40) == 0) {
-            (ctx->prefix).modrm_bytes.rex_byte = current_byte | 2;
+            (ctx->prefix).modrm_bytes.rex_byte = current_byte | REX_X;
           }
           if ((opcode_ptr[1] & 0x20) == 0) {
             rex_byte_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
-            *rex_byte_ptr = *rex_byte_ptr | 1;
+            *rex_byte_ptr = *rex_byte_ptr | REX_B;
           }
           if (2 < (byte)((modrm_byte & 0x1f) - 1)) {
             return FALSE;
@@ -327,7 +327,7 @@ LAB_001004e1:
           (ctx->prefix).decoded.vex_byte3 = current_byte;
           if (-1 < (char)current_byte) {
             rex_byte_ptr = &(ctx->prefix).modrm_bytes.rex_byte;
-            *rex_byte_ptr = *rex_byte_ptr | 8;
+            *rex_byte_ptr = *rex_byte_ptr | REX_W;
           }
           opcode = opcode << 8;
           (ctx->opcode_window).opcode_window_dword = opcode;
@@ -565,7 +565,7 @@ LAB_00100344:
             tmp_byte = (ctx->prefix).decoded.flags2;
             if ((tmp_byte & 8) != 0) {
               if (((((ctx->prefix).decoded.flags & DF1_REX) != 0) &&
-                  (((ctx->prefix).modrm_bytes.rex_byte & 8) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
+                  (((ctx->prefix).modrm_bytes.rex_byte & REX_W) != 0)) && ((current_byte & 0xf8) == 0xb8)) {
                 ctx->imm_size = 8;
                 (ctx->prefix).decoded.flags2 = tmp_byte | DF2_IMM64;
                 ctx->mov_imm_reg_index = opcode_index;

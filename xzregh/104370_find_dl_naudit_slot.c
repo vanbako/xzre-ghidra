@@ -88,7 +88,7 @@ BOOL find_dl_naudit_slot(elf_info_t *dynamic_linker_elf,elf_info_t *libcrypto_el
                                   insn_ctx.instruction_size);
               }
               // AutoDoc: Reject 64-bit MOVs and only accept pointers that actually fall within the `rtld_global_ro` symbol.
-              if ((((insn_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48) && (rtld_global_ro_base < candidate_slot_ptr)) &&
+              if ((((insn_ctx.prefix.modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) != (REX_PREFIX | REX_W)) && (rtld_global_ro_base < candidate_slot_ptr)) &&
                  (candidate_slot_ptr + 1 <= rtld_global_ro_base + rtld_global_ro_size)) {
                 naudit_slot_ptr = candidate_slot_ptr;
               }

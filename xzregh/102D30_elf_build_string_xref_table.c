@@ -114,7 +114,7 @@ LAB_00102ee5:
           if (scanner_ctx.opcode_window.opcode_window_dword == X86_OPCODE_CET_ENDBR64)
           goto LAB_00102ee5;
           if (((scanner_ctx.opcode_window.opcode_window_dword != X86_OPCODE_1B_LEA) ||
-              ((scanner_ctx.prefix.modrm_bytes.rex_byte & 0x48) != 0x48)) ||
+              ((scanner_ctx.prefix.modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) != (REX_PREFIX | REX_W))) ||
              (((uint)scanner_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) != XZ_MODRM_RIPREL_DISP32)) goto LAB_00102e64;
           candidate_addr = decode_cursor + scanner_ctx.mem_disp;
         }

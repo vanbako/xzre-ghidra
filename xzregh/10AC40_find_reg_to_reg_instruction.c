@@ -6,7 +6,7 @@
 
 /*
  * AutoDoc: Requires a caller-supplied decoder context and walks forward one instruction at a time until it sees a register-only operation.
- * Candidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & 0x05`). The opcode gate then accepts MOV reg↔reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.
+ * Candidates must use ModRM mode 3, carry no SIB/displacement/immediate state (`prefix.flags_u16 & 0xf80`), and avoid extended registers by requiring `rex_byte` to have neither REX.R nor REX.B set (`rex_byte & (REX_R | REX_B)`). The opcode gate then accepts MOV reg↔reg (`0x109`/`0x10b`, raw `0x89`/`0x8b`) plus a small ALU whitelist (ADD/OR/ADC/SBB/SUB/XOR/CMP) indexed via `opcode_lookup_index = opcode - 0x81` and a bitmask.
  * Decode failures or reaching `code_end` return FALSE; success leaves `dctx` still pointing at the qualifying instruction so register-propagation helpers know the value never touched memory.
  */
 
@@ -32,7 +32,7 @@ BOOL find_reg_to_reg_instruction(u8 *code_start,u8 *code_end,dasm_ctx_t *dctx)
          ((opcode_lookup_index = (dctx->opcode_window).opcode_window_dword - X86_OPCODE_1B_ADD_RM_R, opcode_lookup_index < 0x3b
           && ((0x505050500000505U >> ((byte)opcode_lookup_index & 0x3f) & 1) != 0)))) &&
         (((dctx->prefix).flags_u16 & 0xf80) == 0)) &&
-       ((((dctx->prefix).modrm_bytes.rex_byte & 5) == 0 &&
+       ((((dctx->prefix).modrm_bytes.rex_byte & (REX_R | REX_B)) == 0 &&
         ((dctx->prefix).modrm_bytes.modrm_mod == '\x03')))) break;
     // AutoDoc: Skip past any instruction that still touches memory or flips prefixes we care about.
     code_start = dctx->instruction + dctx->instruction_size;

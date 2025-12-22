@@ -43,7 +43,7 @@ BOOL find_riprel_mov(u8 *code_start,u8 *code_end,BOOL is_64bit_operand,BOOL load
     }
     if ((((dctx->prefix).decoded.modrm.modrm_word & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) &&
     // AutoDoc: Require RIP-relative disp32 (ModRM `mod=0`, `rm=5`) and the caller-requested operand width.
-       (((((dctx->prefix).modrm_bytes.rex_byte & 0x48) == 0x48) == is_64bit_operand ||
+       (((((dctx->prefix).modrm_bytes.rex_byte & (REX_PREFIX | REX_W)) == (REX_PREFIX | REX_W)) == is_64bit_operand ||
         (load_flag == FALSE)))) {
       if (load_flag == FALSE) {
         is_expected_opcode = (dctx->opcode_window).opcode_window_dword == X86_OPCODE_1B_MOV_STORE;

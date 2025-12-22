@@ -50,7 +50,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
         if ((string_scan_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
           if (string_scan_ctx.prefix.modrm_bytes.modrm_mod == '\x03') {
             if (((string_scan_ctx.prefix.flags_u16 & 0x20) == 0) ||
-               ((string_scan_ctx.prefix.modrm_bytes.rex_byte & 8) == 0)) {
+               ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W) == 0)) {
               dest_reg = string_scan_ctx.prefix.decoded.flags & DF1_MODRM;
               if ((string_scan_ctx.prefix.flags_u16 & 0x1040) == 0) {
                 if ((string_scan_ctx.prefix.flags_u16 & 0x40) != 0) {
@@ -59,7 +59,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
                   if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
 LAB_00103450:
                     dest_reg = string_scan_ctx.prefix.modrm_bytes.modrm_rm |
-                            (string_scan_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                            ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                   }
                   goto LAB_0010345d;
                 }
@@ -72,7 +72,7 @@ LAB_00103450:
                   tracked_reg = string_scan_ctx.mov_imm_reg_index;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
                     tracked_reg = string_scan_ctx.mov_imm_reg_index |
-                             (string_scan_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                             ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                   }
                 }
                 else {
@@ -80,7 +80,7 @@ LAB_00103450:
                   dest_reg = string_scan_ctx.prefix.modrm_bytes.modrm_rm;
                   if ((string_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
                     tracked_reg = string_scan_ctx.prefix.modrm_bytes.modrm_reg |
-                             string_scan_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                             ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
                     goto LAB_00103450;
                   }
                 }
@@ -108,14 +108,14 @@ LAB_0010346b:
                         if (((store_scan_ctx.prefix.flags_u16 & 0x1000) != 0) &&
                            (dest_reg = store_scan_ctx.mov_imm_reg_index,
                            (store_scan_ctx.prefix.flags_u16 & 0x20) != 0)) {
-                          rex_extension = store_scan_ctx.prefix.modrm_bytes.rex_byte << 3;
+                          rex_extension = (store_scan_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
                           goto LAB_00103553;
                         }
                       }
                       else {
                         dest_reg = store_scan_ctx.prefix.modrm_bytes.modrm_reg;
                         if ((store_scan_ctx.prefix.flags_u16 & 0x20) != 0) {
-                          rex_extension = store_scan_ctx.prefix.modrm_bytes.rex_byte * '\x02';
+                          rex_extension = (store_scan_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_00103553:
                           dest_reg = dest_reg | rex_extension & 8;
                         }
@@ -145,7 +145,7 @@ LAB_00103553:
         }
         // AutoDoc: Fallback for the LEA/zero-immediate pattern that writes the struct pointer without first capturing getenv's return register.
         else if (string_scan_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_RM_IMM32) {
-          if (((((string_scan_ctx.prefix.modrm_bytes.rex_byte & 8) == 0) &&
+          if (((((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W) == 0) &&
                ((uint)string_scan_ctx.prefix.decoded.modrm >> 8 == 0x50000)) &&
               ((string_scan_ctx.prefix.flags_u16 & 0x800) != 0)) && (string_scan_ctx.imm_zeroextended == 0)) {
             store_scan_cursor = (u8 *)0x0;

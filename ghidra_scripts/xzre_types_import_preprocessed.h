@@ -409,6 +409,16 @@ typedef enum {
 
 typedef u8 InstructionFlags2_t; /* Storage for InstructionFlags2 (DF2_*) bitmask. */
 
+typedef enum {
+ REX_B = 0x1,
+ REX_X = 0x2,
+ REX_R = 0x4,
+ REX_W = 0x8,
+ REX_PREFIX = 0x40
+} RexPrefixFlags;
+
+typedef u8 RexPrefixFlags_t; /* Storage for REX prefix (REX_*) bitmask. */
+
 /*
  * Bitmask describing which relocation tables, version records, and hardening features were discovered while parsing an ELF image.
  */
@@ -787,7 +797,7 @@ typedef union __attribute__((packed)) {
   u8 W : 1;
   u8 BitPattern : 4;
  } bits;
- u8 rex_byte;
+ RexPrefixFlags_t rex_byte;
 } x86_rex_prefix_t;
 
 typedef union __attribute__((packed)) {
@@ -830,7 +840,7 @@ typedef union __attribute__((packed)) {
   u8 vex_byte;
   u8 vex_byte2;
   u8 vex_byte3;
-  u8 rex_byte; /* Raw REX prefix byte when present. */
+  RexPrefixFlags_t rex_byte; /* Raw REX prefix byte when present. */
   u8 modrm_byte; /* Raw ModRM byte. */
   u8 modrm_mod; /* ModRM[7:6] (addressing mode). */
   u8 modrm_reg; /* ModRM[5:3] (register/opcode extension). */

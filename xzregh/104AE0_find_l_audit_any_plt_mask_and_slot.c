@@ -88,7 +88,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
                 decoded_mask_register = insn_ctx.mov_imm_reg_index;
               }
               else {
-                decoded_mask_register = insn_ctx.mov_imm_reg_index | (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3
+                decoded_mask_register = insn_ctx.mov_imm_reg_index | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3)
                 ;
               }
             }
@@ -103,11 +103,11 @@ BOOL find_l_audit_any_plt_mask_and_slot
             }
             else {
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm |
-                       insn_ctx.prefix.modrm_bytes.rex_byte * '\b' & 8;
+                       ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               decoded_mask_register = 0;
               if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
                 decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg |
-                        insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                        ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
             }
           }
@@ -151,7 +151,7 @@ LAB_00104da0:
               }
               decoded_mask_register = insn_ctx.mov_imm_reg_index;
               if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
-                decoded_mask_register = insn_ctx.mov_imm_reg_index | (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3
+                decoded_mask_register = insn_ctx.mov_imm_reg_index | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3)
                 ;
               }
             }
@@ -159,13 +159,13 @@ LAB_00104da0:
               decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg;
               if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
                 decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg |
-                        insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                        ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
 LAB_00104d83:
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm;
               if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
                 decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm |
-                         (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                         ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
             }
             decoded_register = (register_filter->fields).reg_index;
@@ -196,13 +196,13 @@ LAB_00104da9:
               if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
                  (decoded_register = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
                 decoded_register = insn_ctx.mov_imm_reg_index |
-                         (insn_ctx.prefix.modrm_bytes.rex_byte & 1) << 3;
+                         ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
             }
             else {
               decoded_register = insn_ctx.prefix.decoded.flags & 0x20;
               if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
-                decoded_register = insn_ctx.prefix.modrm_bytes.rex_byte * '\x02' & 8;
+                decoded_register = ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
             }
           }

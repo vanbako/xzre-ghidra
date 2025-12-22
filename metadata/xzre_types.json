@@ -754,6 +754,20 @@
     {
       "kind": "enum",
       "names": [
+        "RexPrefixFlags"
+      ],
+      "code": "typedef enum {\n REX_B = 0x1,\n REX_X = 0x2,\n REX_R = 0x4,\n REX_W = 0x8,\n REX_PREFIX = 0x40\n} RexPrefixFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "RexPrefixFlags_t"
+      ],
+      "code": "typedef u8 RexPrefixFlags_t; /* Storage for REX prefix (REX_*) bitmask. */"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ElfFlags"
       ],
       "code": "typedef enum {\n X_ELF_PLTREL = 0x1,\n X_ELF_RELA = 0x2,\n X_ELF_RELR = 0x4,\n X_ELF_VERDEF = 0x8,\n X_ELF_VERSYM = 0x10,\n X_ELF_NOW = 0x20\n} ElfFlags;"
@@ -938,7 +952,7 @@
       "names": [
         "x86_rex_prefix_t"
       ],
-      "code": "typedef union __attribute__((packed)) {\n struct __attribute__((packed)) {\n  u8 B : 1;\n  u8 X : 1;\n  u8 R : 1;\n  u8 W : 1;\n  u8 BitPattern : 4;\n } bits;\n u8 rex_byte;\n} x86_rex_prefix_t;"
+      "code": "typedef union __attribute__((packed)) {\n struct __attribute__((packed)) {\n  u8 B : 1;\n  u8 X : 1;\n  u8 R : 1;\n  u8 W : 1;\n  u8 BitPattern : 4;\n } bits;\n RexPrefixFlags_t rex_byte;\n} x86_rex_prefix_t;"
     },
     {
       "kind": "typedef",
@@ -959,7 +973,7 @@
       "names": [
         "x86_prefix_state_t"
       ],
-      "code": "typedef union __attribute__((packed)) {\n x86_prefix_fields_t decoded;\n u16 flags_u16;\n u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */\n struct __attribute__((packed)) {\n  InstructionFlags_t flags;\n  InstructionFlags2_t flags2;\n  u8 prefix_padding[2];\n  u8 lock_rep_byte;\n  u8 seg_byte;\n  u8 osize_byte;\n  u8 asize_byte;\n  u8 vex_byte;\n  u8 vex_byte2;\n  u8 vex_byte3;\n  u8 rex_byte; /* Raw REX prefix byte when present. */\n  u8 modrm_byte; /* Raw ModRM byte. */\n  u8 modrm_mod; /* ModRM[7:6] (addressing mode). */\n  u8 modrm_reg; /* ModRM[5:3] (register/opcode extension). */\n  u8 modrm_rm; /* ModRM[2:0] (register/memory operand selector). */\n } modrm_bytes;\n} x86_prefix_state_t;"
+      "code": "typedef union __attribute__((packed)) {\n x86_prefix_fields_t decoded;\n u16 flags_u16;\n u32 flags_u32; /* Packed view of {decoded.flags, decoded.flags2, decoded.prefix_padding[2]} used by scanners for combined mask tests. */\n struct __attribute__((packed)) {\n  InstructionFlags_t flags;\n  InstructionFlags2_t flags2;\n  u8 prefix_padding[2];\n  u8 lock_rep_byte;\n  u8 seg_byte;\n  u8 osize_byte;\n  u8 asize_byte;\n  u8 vex_byte;\n  u8 vex_byte2;\n  u8 vex_byte3;\n  RexPrefixFlags_t rex_byte; /* Raw REX prefix byte when present. */\n  u8 modrm_byte; /* Raw ModRM byte. */\n  u8 modrm_mod; /* ModRM[7:6] (addressing mode). */\n  u8 modrm_reg; /* ModRM[5:3] (register/opcode extension). */\n  u8 modrm_rm; /* ModRM[2:0] (register/memory operand selector). */\n } modrm_bytes;\n} x86_prefix_state_t;"
     },
     {
       "kind": "typedef",
