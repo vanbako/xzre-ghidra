@@ -20,6 +20,41 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
+### `elf_info_t.feature_flags` optional-table bitmask
+- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (sets `| 1/2/4/8/0x10/0x20`), `xzregh/101E60_elf_find_plt_reloc_slot.c` (`feature_flags & 1`), `xzregh/101E90_elf_find_got_reloc_slot.c` (`& 2`), `xzregh/101C30_elf_relr_find_relative_slot.c` (`& 4`), `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`& 0x18`), `xzregh/104660_scan_link_map_and_init_shared_libs.c` (`& 0x20`).
+- **Why it mattered:** The mask encodes which optional ELF tables/behaviors are present (PLT/RELA/RELR/VERDEF/VERSYM/BIND_NOW); naming the bits would remove the magic constants and make feature gating obvious.
+- **Notes:** `xzregh/xzre_types.h` already documents the bit meanings; model a named flag enum (e.g., `ElfInfoFeatureFlags`) and retype `feature_flags` in metadata.
+
+### `Elf64_Versym` version-index/hidden-bit masks
+- **Where it showed up:** `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`versym_index & 0x7ffe` gate before walking `.gnu.version_d`, `versym_index & 0x7fff` when matching the version index).
+- **Why it mattered:** These are canonical ELF versym masks (index vs. hidden bit). Naming them clarifies the "skip local/global (0/1)" check and the compare that ignores the hidden flag.
+- **Notes:** Consider `VERSYM_VERSION_MASK = 0x7fff`, `VERSYM_HIDDEN = 0x8000`, and a helper mask/constant for the `>=2` gate (`0x7ffe`).
+
+### GNU hash chain end-of-chain bit
+- **Where it showed up:** `xzregh/101880_elf_gnu_hash_lookup_symbol.c` (`chain_hash_word & 1` terminates the bucket walk).
+- **Why it mattered:** The LSB marks the end of a GNU hash chain; naming it would make the bucket/chain walk logic more self-explanatory.
+- **Notes:** Define a constant like `GNU_HASH_CHAIN_END = 1` (or similar) to replace the magic literal in the chain loop.
+
+### `Elf64_Relr` bitmap vs literal entry bit
+- **Where it showed up:** `xzregh/101C30_elf_relr_find_relative_slot.c` (`relr_entry & 1` selects bitmap vs literal entries; `relr_entry >> 1` iterates the bitmap bits).
+- **Why it mattered:** The LSB encodes RELR entry type (literal pointer vs 63-bit bitmap); naming the bit makes the packed-RELR walk easier to follow.
+- **Notes:** Consider constants like `ELF64_RELR_IS_BITMAP = 1` plus a named shift/stride (`bitmap_shift = 1`, `bitmap_stride = 0x1f8` for 63 slots).
+
+### `Elf64_Rela::r_info` packed symbol/type fields
+- **Where it showed up:** `xzregh/101DC0_elf_find_import_reloc_slot.c` (`relocs->r_info & 0xffffffff` for type, `relocs->r_info >> 0x20` for symbol index).
+- **Why it mattered:** These are the standard ELF64_R_TYPE/ELF64_R_SYM bitfields; naming them removes the `0xffffffff`/shift literals.
+- **Notes:** Define helpers or constants (`ELF64_R_TYPE_MASK = 0xffffffff`, `ELF64_R_SYM_SHIFT = 32`) and rewrite the accesses via locals metadata.
+
+### `Elf64_Phdr::p_flags` PF_* segment-permission mask
+- **Where it showed up:** `xzregh/101240_elf_vaddr_range_has_pflags_impl.c` (`(p_flags & p_flags) == p_flags`), `xzregh/1013D0_elf_info_parse.c` (`elf_vaddr_range_has_pflags(..., 4)`), `xzregh/101EC0_elf_get_text_segment.c` (`p_flags & 1`), `xzregh/101F70_elf_get_rodata_segment_after_text.c` (`(p_flags & 7) == 4`), `xzregh/102150_elf_get_writable_tail_span.c` (`(p_flags & 7) == 6`), `xzregh/1022D0_elf_vaddr_range_in_relro_if_required.c` (`elf_vaddr_range_has_pflags(..., 2)`).
+- **Why it mattered:** The literals correspond to PF_X/PF_W/PF_R combinations; naming them would clarify segment-permission tests and avoid duplicated masks.
+- **Notes:** Consider a bitmask enum (e.g., `ElfProgramHeaderFlags` with `PF_X=1`, `PF_W=2`, `PF_R=4`) plus locals rewrites for readability.
+
+### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
+- **Where it showed up:** `xzregh/1013D0_elf_info_parse.c` (`DT_FLAGS` uses `& 8`, `DT_FLAGS_1` uses `& 1` before setting `feature_flags |= 0x20`).
+- **Why it mattered:** These are standard `DF_BIND_NOW` and `DF_1_NOW` bits; naming them ties the gate to the ELF spec and avoids opaque literals.
+- **Notes:** Model `DF_*` constants or `ElfDynamicFlags`/`ElfDynamicFlags1` enums and replace the bit tests in the parser.
+
 ## Completed
 
 ### `x86_prefix_state_t.flags_u16` combined prefix-state mask
