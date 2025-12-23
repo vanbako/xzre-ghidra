@@ -391,6 +391,10 @@ typedef enum {
  TRUE = 1
 } BOOL;
 
+typedef enum {
+ ASCII_CASEFOLD_MASK_HI = 0xDF00
+} AsciiCaseFoldMask;
+
 /*
  * Bitmask describing which optional instruction prefixes (LOCK/REP, segment overrides, operand/address-size hints, VEX, REX and ModRM) were observed while decoding an x86 instruction.
  */

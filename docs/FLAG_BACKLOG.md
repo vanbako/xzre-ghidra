@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### ASCII case-fold mask in SR3 argv dash scan
-- **Where it showed up:** `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` (`window_chars & 0xdf00` when filtering control bytes and non-letter pairs).
-- **Why it mattered:** The mask clears the ASCII lowercase bit to normalize both bytes in the 2-char window; naming it would clarify the early-abort conditions for `-d`/`--debug` detection.
-- **Notes:** `0xdf00` is `0xDF << 8` (clear bit 0x20 in the high byte). Neighboring literals `0x6400` (`'d'`), `0x0900` (TAB), and `0x3d00` (`'='`) are part of the same scan logic.
-
 ### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
 - **Where it showed up:** `xzregh/107DE0_sshd_install_mm_log_handler_hook.c` (`control_flags & 0x8` gate, `control_flags & 0x10` filter enable), `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`control_flags & 0x20` socket override, `control_flags & 0x40` PAM disable, `control_flags & 0x1` exit flag, sign-bit wait check via `(char)control_flags`).
 - **Why it mattered:** These are stable command-flag bits that already drive log hooking, socket selection, and exit/wait behavior; naming them would eliminate raw hex checks across SR4.
@@ -46,6 +41,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### ASCII case-fold mask in SR3 argv dash scan
+- **Outcome (2025-12-23):** Added `AsciiCaseFoldMask` (`ASCII_CASEFOLD_MASK_HI = 0xDF00`) to `metadata/xzre_types.json`, rewrote the `0xdf00` case-fold tests via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` now uses the named mask.
 
 ### Packed secret-data descriptor words in SR2 bootstrap
 - **Outcome (2025-12-23):** Retyped the stack batch as `secret_data_item_t[4]` via `metadata/xzre_locals.json` (with `force_stack`), refreshed the project, and confirmed the decomp now shows explicit `bit_cursor`/`operation_slot`/`bits_to_shift`/`ordinal` assignments in `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c` instead of packed u64 immediates.

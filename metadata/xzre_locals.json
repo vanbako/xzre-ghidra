@@ -2340,6 +2340,10 @@
         "name": "current_char_word",
         "original": "uVar3",
         "type": "u16"
+      },
+      {
+        "original": "0xdf00",
+        "replacement": "ASCII_CASEFOLD_MASK_HI"
       }
     ],
     "source": "xzre/xzre_code/check_argument.c"

@@ -361,7 +361,7 @@
         "comment": "Stop as soon as either byte in the window equals lowercase `d` and return that pointer."
       },
       {
-        "match": "if ((((window_chars & 0xdf00) == 0) ||",
+        "match": "if ((((window_chars & ASCII_CASEFOLD_MASK_HI) == 0) ||",
         "match_type": "wildcard",
         "comment": "Abort the scan when the pair contains control characters, TAB, or `=`\u2014those inputs fall through to NULL."
       },

@@ -747,6 +747,13 @@
     {
       "kind": "enum",
       "names": [
+        "AsciiCaseFoldMask"
+      ],
+      "code": "typedef enum {\n ASCII_CASEFOLD_MASK_HI = 0xDF00\n} AsciiCaseFoldMask;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "InstructionFlags"
       ],
       "code": "typedef enum {\n DF1_LOCK_REP = 1,\n DF1_SEG = 2,\n DF1_OSIZE = 4,\n DF1_ASIZE = 8,\n DF1_VEX = 0x10,\n DF1_REX = 0x20,\n DF1_MODRM = 0x40,\n DF1_SIB = 0x80\n} InstructionFlags;"

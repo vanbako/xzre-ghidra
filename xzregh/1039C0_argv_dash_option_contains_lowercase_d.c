@@ -27,8 +27,8 @@ char * argv_dash_option_contains_lowercase_d(char arg_first_char,char *arg_name)
       // AutoDoc: Stop as soon as either byte in the window equals lowercase `d` and return that pointer.
       if ((following_char_word == 0x6400) || (current_char_word == 0x6400)) break;
       // AutoDoc: Abort the scan when the pair contains control characters, TAB, or `=`—those inputs fall through to NULL.
-      if ((((window_chars & 0xdf00) == 0) ||
-          (((following_char_word == 0x900 || (following_char_word == 0x3d00)) || ((current_char_word & 0xdf00) == 0)))) ||
+      if ((((window_chars & ASCII_CASEFOLD_MASK_HI) == 0) ||
+          (((following_char_word == 0x900 || (following_char_word == 0x3d00)) || ((current_char_word & ASCII_CASEFOLD_MASK_HI) == 0)))) ||
          ((current_char_word == 0x3d00 || (current_char_word == 0x900)))) goto LAB_00103a17;
       // AutoDoc: Advance by one `ushort` (two more characters) before the next comparison.
       arg_name = (char *)((long)arg_name + 2);
