@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `cmd_arguments_t.monitor_flags`/`request_flags` low-bit fields in SR4 dispatcher
-- **Where it showed up:** `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`monitor_flags & 0x1` continuation gate, `monitor_flags >> 3 & 0xf` socket ordinal, `monitor_flags >> 1/>> 2` for alternate cmd types, `request_flags & 0x1f` socket id, `request_flags & 0x20` sshbuf/KEYALLOWED continuation).
-- **Why it mattered:** The low bits encode socket ordinals and continuation behavior, but the current shifts/masks are opaque; naming them would make the command routing rules explicit.
-- **Notes:** High bits (`0xC0`) already map to `monitor_payload_source_t`; this entry targets the remaining low-bit fields.
-
 ### Syslog mask constants in SR5 log hook
 - **Where it showed up:** `xzregh/10A3A0_mm_log_handler_hide_auth_success_hook.c` (`setlogmask(0xff)` while suppressing logs, `setlogmask(0x80000000)` when restoring).
 - **Why it mattered:** These are explicit log-mask values (all priorities vs. INT_MIN sentinel) that gate sshd’s syslog suppression; naming them would document the intended mask semantics.
@@ -39,6 +34,9 @@ backlogs so we avoid duplicating effort.
 
 ### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
 - **Outcome (2025-12-23):** Added `CmdControlFlags`/`CmdControlFlags_t` with `CMD_CTRL_*` constants in `metadata/xzre_types.json`, retyped `cmd_arguments_t.control_flags`, rewrote control-flag masks in `metadata/xzre_locals.json` (sshd_install_mm_log_handler_hook, sshd_monitor_cmd_dispatch, rsa_backdoor_command_dispatch), refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/107DE0_sshd_install_mm_log_handler_hook.c`, `xzregh/108270_sshd_monitor_cmd_dispatch.c`, and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now emit `CMD_CTRL_*` names.
+
+### `cmd_arguments_t.monitor_flags`/`request_flags` low-bit fields in SR4 dispatcher
+- **Outcome (2025-12-23):** Added `CmdMonitorFlags`/`CmdMonitorSocketFields`/`CmdRequestFlags` (plus storage typedefs) in `metadata/xzre_types.json`, retyped `cmd_arguments_t.monitor_flags`/`request_flags`, rewrote monitor/request mask shifts in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/108270_sshd_monitor_cmd_dispatch.c` now uses `CMD_MONITOR_*`/`CMD_REQUEST_*` names for continuation and socket selection.
 
 ### ASCII case-fold mask in SR3 argv dash scan
 - **Outcome (2025-12-23):** Added `AsciiCaseFoldMask` (`ASCII_CASEFOLD_MASK_HI = 0xDF00`) to `metadata/xzre_types.json`, rewrote the `0xdf00` case-fold tests via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` now uses the named mask.

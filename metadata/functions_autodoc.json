@@ -3112,7 +3112,7 @@
         "match_type": "substring"
       },
       {
-        "match": "status = (*ctx->imported_funcs->RSA_set0_key)(rsa_ctx,rsa_n_bn,rsa_e_bn,rsa_d_bn);",
+        "match": "status = (*ctx->imported_funcs->RSA_set0_key)(rsa_ctx,rsa_e_bn,rsa_n_bn,rsa_d_bn);",
         "comment": "Build a temporary RSA object from the supplied components in order to hash and sign the forged packet."
       },
       {
