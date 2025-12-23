@@ -1519,7 +1519,7 @@
         "placement": "after"
       },
       {
-        "match_regex": "if .*opcode_window_dword & 0xfffffffd\\) == X86_OPCODE_1B_MOV_STORE",
+        "match_regex": "if .*opcode_window_dword & X86_OPCODE_MASK_IGNORE_DIR\\) == X86_OPCODE_1B_MOV_STORE",
         "match_type": "regex",
         "comment": "Accept MOV reg\u2194reg or whitelisted ALU reg\u2194reg ops (ADD/OR/ADC/SBB/SUB/XOR/CMP) with no SIB/disp/imm and ModRM mode 3."
       },

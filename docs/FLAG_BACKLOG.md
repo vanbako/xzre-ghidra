@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `opcode_window_dword` direction-bit mask
-- **Where it showed up:** `xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c` (`opcode_window_dword & 0xfffffffd` when matching XOR reg/reg).
-- **Why it mattered:** The mask clears bit 1 to treat opcode direction variants as equivalent; a named mask would clarify intent and keep opcode comparisons consistent across scanners.
-- **Notes:** `0xfffffffd` is `~0x2` (direction bit for many 1-byte opcodes such as MOV/XOR). Consider an `X86_OPCODE_MASK_IGNORE_DIR` constant in `metadata/xzre_types.json`, then reuse it in the other opcode scanners that already apply the same mask.
-
 ### Packed secret-data descriptor words in SR2 bootstrap
 - **Where it showed up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c` (u64 immediates `0x1b000001c8`, `0x1a000001c3`, `0x19000001bd`, plus `0x100000000/0x100000005/0x100000006` adjacent to the `secret_data_append_items_batch` setup).
 - **Why it mattered:** These look like bitfield-packed `{operation_slot, bit_cursor}` and `{ordinal, bits_to_shift}` pairs for the 4-entry `secret_data_item_t` batch, but they surface as opaque 64-bit constants in the decomp.
@@ -56,6 +51,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### `opcode_window_dword` direction-bit mask
+- **Outcome (2025-12-23):** Added `X86_OPCODE_MASK_IGNORE_DIR` to `metadata/xzre_types.json`, rewrote the opcode-direction mask checks via `metadata/xzre_locals.json` (including the KRB5CCNAME scan, audit-flag scanner, reg↔reg opcode scan, and syslog hook probe), refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed the exports now show the named mask in `xzregh/*.c`.
 
 ### `x86_prefix_state_t.flags_u32` DF16 mask literals in SR1 monitor-field scan
 - **Outcome (2025-12-23):** Rewrote `flags_u32` DF16 mask literals in `metadata/xzre_locals.json` to use `DF16_*` names (covering the monitor-field scan plus the audit-flag scanners), refreshed via `./scripts/refresh_xzre_project.sh`, and verified the decomp now emits `DF16_*` masks in `xzregh/102FF0_sshd_find_monitor_field_slot_via_mm_request_send.c`, `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c`, and `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c`.

@@ -128,7 +128,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
       }
       // AutoDoc: State 1 waits for the MOV that copies the pointer into a trackable register.
       else if (pattern_state == AUDIT_PAT_EXPECT_MOV) {
-        if ((insn_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_OR_RM_R) {
+        if ((insn_ctx.opcode_window.opcode_window_dword & X86_OPCODE_MASK_IGNORE_DIR) == X86_OPCODE_1B_OR_RM_R) {
           register_filter = search_ctx->output_register_to_match;
           decoded_pointer_register = insn_ctx.prefix.decoded.flags & DF1_MODRM;
           if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) == 0) {

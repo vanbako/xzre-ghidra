@@ -726,6 +726,13 @@
     {
       "kind": "enum",
       "names": [
+        "X86OpcodeMask"
+      ],
+      "code": "typedef enum {\n X86_OPCODE_MASK_IGNORE_DIR = 0xFFFFFFFD\n} X86OpcodeMask;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "X86_REG"
       ],
       "code": "enum X86_REG {\n X86_REG_RBP = 5\n};"

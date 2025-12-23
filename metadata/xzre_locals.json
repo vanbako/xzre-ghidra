@@ -1759,6 +1759,10 @@
         "replacement": "local_a30.opcode_window.opcode_window_dword"
       },
       {
+        "original": "0xfffffffd",
+        "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
+      },
+      {
         "original": "local_9d8.instruction_size._0_4_",
         "replacement": "*(uint *)&local_9d8.instruction_size"
       },
@@ -4882,6 +4886,10 @@
         "replacement": "insn_ctx.opcode_window.opcode_window_dword"
       },
       {
+        "original": "0xfffffffd",
+        "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
+      },
+      {
         "name": "pattern_state",
         "original": "iVar16",
         "type": "audit_pattern_state_t"
@@ -5199,6 +5207,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "0xfffffffd",
+        "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
       },
       {
         "original": "((dctx->prefix).modrm_bytes.rex_byte & 5)",
@@ -8322,6 +8334,10 @@
       {
         "original": "store_scan_ctx.opcode_window.opcode_window_dword",
         "replacement": "store_scan_ctx.opcode_window.opcode_window_dword"
+      },
+      {
+        "original": "0xfffffffd",
+        "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
       },
       {
         "name": "dest_reg",

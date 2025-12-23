@@ -377,6 +377,10 @@ typedef enum X86_OPCODE {
  X86_OPCODE_MOV_STORE = 0x109
 } X86_OPCODE;
 
+typedef enum {
+ X86_OPCODE_MASK_IGNORE_DIR = 0xFFFFFFFD
+} X86OpcodeMask;
+
 /*
  * Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).
  */

@@ -623,7 +623,7 @@ LAB_001065af:
           if (probe_success != FALSE) break;
           syslog_bad_level_cursor = syslog_bad_level_cursor + 1;
         }
-        if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_XOR_RM_R) {
+        if ((syslog_dasm_ctx.opcode_window.opcode_window_dword & X86_OPCODE_MASK_IGNORE_DIR) == X86_OPCODE_1B_XOR_RM_R) {
           if (syslog_dasm_ctx.prefix.modrm_bytes.modrm_mod != '\x03') goto LAB_00106735;
           if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MODRM_IMM64_MASK) == 0) {
             if ((syslog_dasm_ctx.prefix.flags_u16 & DF16_MODRM) != 0) {
