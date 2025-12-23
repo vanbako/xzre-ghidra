@@ -75,15 +75,15 @@ BOOL find_l_audit_any_plt_mask_and_slot
       // AutoDoc: State 0 looks for the LEA that materialises `link_map::l_name` + displacement.
       if (pattern_state == AUDIT_PAT_EXPECT_LEA) {
         if (((insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_2B_MOVZX_RM8) &&
-            (((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140)) &&
+            (((ushort)insn_ctx.prefix.flags_u32 & (DF16_MEM_DISP | DF16_MODRM)) == (DF16_MEM_DISP | DF16_MODRM))) &&
            ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)) {
           decoded_pointer_register = 0;
-          if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
+          if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
             decoded_mask_register = 0;
-            if (((insn_ctx.prefix.flags_u32 & 0x1040) != 0) &&
+            if (((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) &&
                (decoded_mask_register = insn_ctx.prefix.decoded.flags2 & DF2_IMM64,
-               (insn_ctx.prefix.flags_u32 & 0x1000) != 0)) {
-              if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
+               (insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0)) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_REX) == 0) {
                 decoded_pointer_register = 0;
                 decoded_mask_register = insn_ctx.mov_imm_reg_index;
               }
@@ -95,9 +95,9 @@ BOOL find_l_audit_any_plt_mask_and_slot
           }
           else {
             decoded_mask_register = insn_ctx.prefix.decoded.flags & DF1_REX;
-            if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
+            if ((insn_ctx.prefix.flags_u32 & DF16_REX) == 0) {
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm;
-              if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
                 decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg;
               }
             }
@@ -105,14 +105,14 @@ BOOL find_l_audit_any_plt_mask_and_slot
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm |
                        ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               decoded_mask_register = 0;
-              if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
                 decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg |
                         ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
             }
           }
           computed_slot_ptr = (u8 *)0x0;
-          if (((insn_ctx.prefix.flags_u32 & 0x100) != 0) &&
+          if (((insn_ctx.prefix.flags_u32 & DF16_MEM_DISP) != 0) &&
              (computed_slot_ptr = (u8 *)insn_ctx.mem_disp,
              ((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
             computed_slot_ptr = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);
@@ -131,17 +131,17 @@ BOOL find_l_audit_any_plt_mask_and_slot
         if ((insn_ctx.opcode_window.opcode_window_dword & 0xfffffffd) == X86_OPCODE_1B_OR_RM_R) {
           register_filter = search_ctx->output_register_to_match;
           decoded_pointer_register = insn_ctx.prefix.decoded.flags & DF1_MODRM;
-          if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
+          if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) == 0) {
             decoded_mask_register = 0;
-            if ((insn_ctx.prefix.flags_u32 & 0x40) != 0) goto LAB_00104d83;
+            if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) != 0) goto LAB_00104d83;
             if ((register_filter->fields).reg_index != '\0') goto LAB_00104e97;
             decoded_register = 0;
 LAB_00104da0:
             if ((search_ctx->output_register->fields).reg_index != decoded_pointer_register) goto LAB_00104da9;
           }
           else {
-            if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
-              if ((insn_ctx.prefix.flags_u32 & 0x1000) == 0) {
+            if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_IMM64) == 0) {
                 if ((register_filter->fields).reg_index == '\0') {
                   decoded_mask_register = 0;
                   decoded_register = 0;
@@ -150,20 +150,20 @@ LAB_00104da0:
                 goto LAB_00104e97;
               }
               decoded_mask_register = insn_ctx.mov_imm_reg_index;
-              if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                 decoded_mask_register = insn_ctx.mov_imm_reg_index | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3)
                 ;
               }
             }
             else {
               decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg;
-              if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                 decoded_mask_register = insn_ctx.prefix.modrm_bytes.modrm_reg |
                         ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
 LAB_00104d83:
               decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm;
-              if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                 decoded_pointer_register = insn_ctx.prefix.modrm_bytes.modrm_rm |
                          ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
@@ -190,18 +190,18 @@ LAB_00104da9:
           if ((insn_ctx.opcode_window.opcode_window_dword != X86_OPCODE_1B_GRP3_IMM8) ||
              (insn_ctx.prefix.modrm_bytes.modrm_reg != 0)) goto LAB_00104e97;
           decoded_register = 0;
-          if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
-            if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
+          if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
+            if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
               decoded_register = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
-              if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
-                 (decoded_register = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
+              if (((insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0) &&
+                 (decoded_register = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & DF16_REX) != 0)) {
                 decoded_register = insn_ctx.mov_imm_reg_index |
                          ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
               }
             }
             else {
               decoded_register = insn_ctx.prefix.decoded.flags & 0x20;
-              if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                 decoded_register = ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
               }
             }

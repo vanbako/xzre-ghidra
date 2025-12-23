@@ -4747,6 +4747,30 @@
       {
         "original": "insn_ctx.prefix.modrm_bytes.rex_byte * '\\x02' & 8",
         "replacement": "((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1)"
+      },
+      {
+        "original": "((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140",
+        "replacement": "((ushort)insn_ctx.prefix.flags_u32 & (DF16_MEM_DISP | DF16_MODRM)) == (DF16_MEM_DISP | DF16_MODRM)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x100)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MEM_DISP)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1040)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x40)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1000)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_IMM64)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x20)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_REX)"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"
@@ -4922,6 +4946,30 @@
       {
         "original": "insn_ctx.prefix.modrm_bytes.rex_byte * '\\x02' & 8",
         "replacement": "((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1)"
+      },
+      {
+        "original": "((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140",
+        "replacement": "((ushort)insn_ctx.prefix.flags_u32 & (DF16_MEM_DISP | DF16_MODRM)) == (DF16_MEM_DISP | DF16_MODRM)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x100)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MEM_DISP)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1040)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x40)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1000)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_IMM64)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x20)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_REX)"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt_bitmask.c"
@@ -7885,6 +7933,26 @@
       {
         "original": "insn_ctx.prefix.modrm_bytes.rex_byte * '\\b' & 8",
         "replacement": "((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x100)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MEM_DISP)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1040)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x40)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_MODRM)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x1000)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_IMM64)"
+      },
+      {
+        "original": "insn_ctx.prefix.flags_u32 & 0x20)",
+        "replacement": "insn_ctx.prefix.flags_u32 & DF16_REX)"
       }
     ],
     "source": "xzre/xzre_code/sshd_find_monitor_field_addr_in_function.c"

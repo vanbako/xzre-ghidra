@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `x86_prefix_state_t.flags_u32` DF16 mask literals in SR1 monitor-field scan
-- **Where it showed up:** `xzregh/102FF0_sshd_find_monitor_field_slot_via_mm_request_send.c` (`flags_u32 & 0x100/0x1040/0x40/0x1000/0x20` while tracking MOV/LEA operands).
-- **Why it mattered:** These are DF16 prefix/immediate bits already defined for `flags_u16`, but the `flags_u32` view leaves magic hex masks in the decomp and hides which decoder features are being tested.
-- **Notes:** `0x100` = `DF16_MEM_DISP`, `0x1040` = `DF16_MODRM_IMM64_MASK`, `0x40` = `DF16_MODRM`, `0x1000` = `DF16_IMM64`, `0x20` = `DF16_REX`; consider retyping to `flags_u16` or adding a `flags_u32` alias that maps to `InstructionFlags16_t`.
-
 ### `opcode_window_dword` direction-bit mask
 - **Where it showed up:** `xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c` (`opcode_window_dword & 0xfffffffd` when matching XOR reg/reg).
 - **Why it mattered:** The mask clears bit 1 to treat opcode direction variants as equivalent; a named mask would clarify intent and keep opcode comparisons consistent across scanners.
@@ -61,6 +56,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### `x86_prefix_state_t.flags_u32` DF16 mask literals in SR1 monitor-field scan
+- **Outcome (2025-12-23):** Rewrote `flags_u32` DF16 mask literals in `metadata/xzre_locals.json` to use `DF16_*` names (covering the monitor-field scan plus the audit-flag scanners), refreshed via `./scripts/refresh_xzre_project.sh`, and verified the decomp now emits `DF16_*` masks in `xzregh/102FF0_sshd_find_monitor_field_slot_via_mm_request_send.c`, `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c`, and `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c`.
 
 ### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
 - **Outcome (2025-12-22):** Added `ElfDynamicFlags`/`ElfDynamicFlags1` enums (`DF_BIND_NOW`, `DF_1_NOW`) in `metadata/xzre_types.json`, rewrote the bind-now bit tests in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/1013D0_elf_info_parse.c` uses the named DF_* constants.

