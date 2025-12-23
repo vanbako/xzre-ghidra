@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
-- **Where it showed up:** `xzregh/107DE0_sshd_install_mm_log_handler_hook.c` (`control_flags & 0x8` gate, `control_flags & 0x10` filter enable), `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`control_flags & 0x20` socket override, `control_flags & 0x40` PAM disable, `control_flags & 0x1` exit flag, sign-bit wait check via `(char)control_flags`).
-- **Why it mattered:** These are stable command-flag bits that already drive log hooking, socket selection, and exit/wait behavior; naming them would eliminate raw hex checks across SR4.
-- **Notes:** Consider a `cmd_control_flags_t` enum/bitmask (or bitfield struct) so the decomp can use `CMD_CTRL_*` names instead of literals.
-
 ### `cmd_arguments_t.monitor_flags`/`request_flags` low-bit fields in SR4 dispatcher
 - **Where it showed up:** `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`monitor_flags & 0x1` continuation gate, `monitor_flags >> 3 & 0xf` socket ordinal, `monitor_flags >> 1/>> 2` for alternate cmd types, `request_flags & 0x1f` socket id, `request_flags & 0x20` sshbuf/KEYALLOWED continuation).
 - **Why it mattered:** The low bits encode socket ordinals and continuation behavior, but the current shifts/masks are opaque; naming them would make the command routing rules explicit.
@@ -41,6 +36,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
+- **Outcome (2025-12-23):** Added `CmdControlFlags`/`CmdControlFlags_t` with `CMD_CTRL_*` constants in `metadata/xzre_types.json`, retyped `cmd_arguments_t.control_flags`, rewrote control-flag masks in `metadata/xzre_locals.json` (sshd_install_mm_log_handler_hook, sshd_monitor_cmd_dispatch, rsa_backdoor_command_dispatch), refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/107DE0_sshd_install_mm_log_handler_hook.c`, `xzregh/108270_sshd_monitor_cmd_dispatch.c`, and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now emit `CMD_CTRL_*` names.
 
 ### ASCII case-fold mask in SR3 argv dash scan
 - **Outcome (2025-12-23):** Added `AsciiCaseFoldMask` (`ASCII_CASEFOLD_MASK_HI = 0xDF00`) to `metadata/xzre_types.json`, rewrote the `0xdf00` case-fold tests via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` now uses the named mask.

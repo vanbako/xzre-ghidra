@@ -2285,7 +2285,7 @@
         "comment": "Bit0 doubles as a kill switch: on fatal parse/signature errors the hook calls libc exit(0) instead of handing control back to OpenSSL."
       },
       {
-        "match": "if ((control_flags & 0x40) != 0) {",
+        "match": "if ((control_flags & CMD_CTRL_DISABLE_PAM) != 0) {",
         "comment": "Control-flag bit 6 disables PAM by zeroing sshd_ctx->use_pam_ptr whenever the caller wants password auth rejected regardless of sshd\u2019s config."
       },
       {
@@ -3116,7 +3116,7 @@
         "comment": "Build a temporary RSA object from the supplied components in order to hash and sign the forged packet."
       },
       {
-        "match": "if ((cmd_args->control_flags & 0x20) == 0) {",
+        "match": "if ((cmd_args->control_flags & CMD_CTRL_FORCE_SOCKET_PROBE) == 0) {",
         "comment": "Without an explicit socket override, call `sshd_get_monitor_comm_fd`; otherwise honour the encoded socket selector bits."
       },
       {

