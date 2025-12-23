@@ -20,6 +20,46 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
+### `x86_prefix_state_t.flags_u32` DF16 mask literals in SR1 monitor-field scan
+- **Where it showed up:** `xzregh/102FF0_sshd_find_monitor_field_slot_via_mm_request_send.c` (`flags_u32 & 0x100/0x1040/0x40/0x1000/0x20` while tracking MOV/LEA operands).
+- **Why it mattered:** These are DF16 prefix/immediate bits already defined for `flags_u16`, but the `flags_u32` view leaves magic hex masks in the decomp and hides which decoder features are being tested.
+- **Notes:** `0x100` = `DF16_MEM_DISP`, `0x1040` = `DF16_MODRM_IMM64_MASK`, `0x40` = `DF16_MODRM`, `0x1000` = `DF16_IMM64`, `0x20` = `DF16_REX`; consider retyping to `flags_u16` or adding a `flags_u32` alias that maps to `InstructionFlags16_t`.
+
+### `opcode_window_dword` direction-bit mask
+- **Where it showed up:** `xzregh/103340_sshd_find_sensitive_data_base_via_krb5ccname.c` (`opcode_window_dword & 0xfffffffd` when matching XOR reg/reg).
+- **Why it mattered:** The mask clears bit 1 to treat opcode direction variants as equivalent; a named mask would clarify intent and keep opcode comparisons consistent across scanners.
+- **Notes:** `0xfffffffd` is `~0x2` (direction bit for many 1-byte opcodes such as MOV/XOR). Consider an `X86_OPCODE_MASK_IGNORE_DIR` constant in `metadata/xzre_types.json`, then reuse it in the other opcode scanners that already apply the same mask.
+
+### Packed secret-data descriptor words in SR2 bootstrap
+- **Where it showed up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c` (u64 immediates `0x1b000001c8`, `0x1a000001c3`, `0x19000001bd`, plus `0x100000000/0x100000005/0x100000006` adjacent to the `secret_data_append_items_batch` setup).
+- **Why it mattered:** These look like bitfield-packed `{operation_slot, bit_cursor}` and `{ordinal, bits_to_shift}` pairs for the 4-entry `secret_data_item_t` batch, but they surface as opaque 64-bit constants in the decomp.
+- **Notes:** Likely a stack-typing artifact (array elements flattened into temps). Consider retyping the local as `secret_data_item_t[4]` or adding a helper union for `{bit_cursor, operation_slot}` / `{bits_to_shift, ordinal}` packing so the literals disappear.
+
+### ASCII case-fold mask in SR3 argv dash scan
+- **Where it showed up:** `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` (`window_chars & 0xdf00` when filtering control bytes and non-letter pairs).
+- **Why it mattered:** The mask clears the ASCII lowercase bit to normalize both bytes in the 2-char window; naming it would clarify the early-abort conditions for `-d`/`--debug` detection.
+- **Notes:** `0xdf00` is `0xDF << 8` (clear bit 0x20 in the high byte). Neighboring literals `0x6400` (`'d'`), `0x0900` (TAB), and `0x3d00` (`'='`) are part of the same scan logic.
+
+### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
+- **Where it showed up:** `xzregh/107DE0_sshd_install_mm_log_handler_hook.c` (`control_flags & 0x8` gate, `control_flags & 0x10` filter enable), `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`control_flags & 0x20` socket override, `control_flags & 0x40` PAM disable, `control_flags & 0x1` exit flag, sign-bit wait check via `(char)control_flags`).
+- **Why it mattered:** These are stable command-flag bits that already drive log hooking, socket selection, and exit/wait behavior; naming them would eliminate raw hex checks across SR4.
+- **Notes:** Consider a `cmd_control_flags_t` enum/bitmask (or bitfield struct) so the decomp can use `CMD_CTRL_*` names instead of literals.
+
+### `cmd_arguments_t.monitor_flags`/`request_flags` low-bit fields in SR4 dispatcher
+- **Where it showed up:** `xzregh/108270_sshd_monitor_cmd_dispatch.c` (`monitor_flags & 0x1` continuation gate, `monitor_flags >> 3 & 0xf` socket ordinal, `monitor_flags >> 1/>> 2` for alternate cmd types, `request_flags & 0x1f` socket id, `request_flags & 0x20` sshbuf/KEYALLOWED continuation).
+- **Why it mattered:** The low bits encode socket ordinals and continuation behavior, but the current shifts/masks are opaque; naming them would make the command routing rules explicit.
+- **Notes:** High bits (`0xC0`) already map to `monitor_payload_source_t`; this entry targets the remaining low-bit fields.
+
+### Syslog mask constants in SR5 log hook
+- **Where it showed up:** `xzregh/10A3A0_mm_log_handler_hide_auth_success_hook.c` (`setlogmask(0xff)` while suppressing logs, `setlogmask(0x80000000)` when restoring).
+- **Why it mattered:** These are explicit log-mask values (all priorities vs. INT_MIN sentinel) that gate sshd’s syslog suppression; naming them would document the intended mask semantics.
+- **Notes:** Consider defining `SYSLOG_MASK_ALL`/`SYSLOG_MASK_SILENCE` (or a small enum) to replace the raw literals.
+
+### Authpassword reply length bit packing in SR5
+- **Where it showed up:** `xzregh/108100_mm_answer_authpassword_send_reply_hook.c` (`reply_frame_len_be = (-(cond) & 0xfc000000) + 0x9000000;`).
+- **Why it mattered:** The mask toggles between two big-endian length prefixes (0x09 vs 0x05) depending on whether a `root_allowed` dword is included, but the arithmetic obscures that intent.
+- **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
+
 ## Completed
 
 ### `DT_FLAGS`/`DT_FLAGS_1` bind-now bits
