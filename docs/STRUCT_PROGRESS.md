@@ -81,7 +81,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `monitor_data_t` | 1 | Privsep struct review #2 – documented cmd opcode usage, annotated the RSA/payload pointers, and renamed the padding slots to explain why the runtime_data union keeps them aligned (2025-11-21). |
 | `RSA` | 0 |  |
 | `rsa_backdoor_command_dispatch_data_t` | 1 | RSA dispatcher struct pass – renamed the payload sizing/do_orig/hostkey fields, documented the staging union (socket RX vs. Ed448 key data), and refreshed the metadata/export (2025-11-23). |
-| `secret_data_item_t` | 1 | Renamed entries to anchor_pc/bit_cursor/operation_slot/bits_to_shift/ordinal and annotated how each controls the secret-data attestation flow (2025-11-21). |
+| `secret_data_item_t` | 2 | Renamed entries to anchor_pc/bit_cursor/operation_slot/bits_to_shift/ordinal and annotated how each controls the secret-data attestation flow (2025-11-21); retyped the SR2 bootstrap batch as `secret_data_item_t[4]` so packed words expand into per-field assignments (2025-12-23). |
 | `secret_data_shift_cursor_t` | 1 | Renamed the union view to bit_position/signed_bit_position/intra_byte_bit/byte_offset and documented how it indexes global_ctx->secret_data (2025-11-21). |
 | `sensitive_data` | 1 | Documented the host key table fields and retagged sensitive-data helpers to use `sensitive_data *` parameters (2025-12-20). |
 | `ssh` | 0 |  |

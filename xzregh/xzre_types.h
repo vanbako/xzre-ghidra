@@ -1658,6 +1658,13 @@ typedef union {
  };
 } secret_data_shift_cursor_t;
 
+typedef enum {
+ SECRET_PROBE_MONITOR_CMD_DISPATCH = 0, /* sshd_monitor_cmd_dispatch breadcrumb. */
+ SECRET_PROBE_RSA_BACKDOOR_DISPATCH = 1, /* rsa_backdoor_command_dispatch breadcrumb. */
+ SECRET_PROBE_SOCKET_SHUTDOWN_PROBE = 2, /* sshd_find_socket_fd_by_shutdown_probe breadcrumb. */
+ SECRET_PROBE_MONITOR_COMM_FD = 3 /* sshd_get_monitor_comm_fd breadcrumb. */
+} secret_probe_item_index_t;
+
 /*
  * Descriptor for a single secret-data attestation entry: anchor_pc identifies the helper, bit_cursor selects the target slot in the obfuscated stream, operation_slot gates once-only execution, bits_to_shift feeds the accounting counter, and ordinal tracks the batch-assigned slot.
  */

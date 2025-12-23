@@ -1662,6 +1662,13 @@
       "code": "typedef union {\n u32 bit_position; /* Absolute bit offset inside global_ctx->secret_data (0..0x1C7). */\n u32 index; /* Legacy alias for bit_position kept for existing helpers. */\n int signed_bit_position; /* Signed view for comparisons/subtractions during cursor arithmetic. */\n int signed_index; /* Legacy alias for signed_bit_position used by existing heuristics. */\n struct {\n  u32 intra_byte_bit : 3; /* Bit number within the current byte (bit_position & 7). */\n  u32 byte_offset : 29; /* Byte index inside the obfuscated log (bit_position >> 3). */\n };\n} secret_data_shift_cursor_t;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "secret_probe_item_index_t"
+      ],
+      "code": "typedef enum {\n SECRET_PROBE_MONITOR_CMD_DISPATCH = 0, /* sshd_monitor_cmd_dispatch breadcrumb. */\n SECRET_PROBE_RSA_BACKDOOR_DISPATCH = 1, /* rsa_backdoor_command_dispatch breadcrumb. */\n SECRET_PROBE_SOCKET_SHUTDOWN_PROBE = 2, /* sshd_find_socket_fd_by_shutdown_probe breadcrumb. */\n SECRET_PROBE_MONITOR_COMM_FD = 3 /* sshd_get_monitor_comm_fd breadcrumb. */\n} secret_probe_item_index_t;"
+    },
+    {
       "kind": "struct",
       "names": [
         "secret_data_item_t"

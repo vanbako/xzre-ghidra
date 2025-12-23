@@ -8050,7 +8050,14 @@
     "source": "xzre/xzre_code/sshd_find_monitor_struct.c"
   },
   "sshd_recon_bootstrap_sensitive_data": {
-    "locals": [],
+    "locals": [
+      {
+        "name": "secret_probe_items",
+        "type": "secret_data_item_t[4]",
+        "stack_offset": "-0x88",
+        "force_stack": true
+      }
+    ],
     "register_temps": [
       {
         "name": "digest_verify_addr",
@@ -8123,56 +8130,6 @@
         "type": "sensitive_data *"
       },
       {
-        "name": "secret_probe_items",
-        "original": "local_88",
-        "type": "secret_data_item_t"
-      },
-      {
-        "name": "run_backdoor_entry",
-        "original": "local_70",
-        "type": "code *"
-      },
-      {
-        "name": "run_backdoor_descriptor",
-        "original": "local_68",
-        "type": "u64"
-      },
-      {
-        "name": "usable_socket_descriptor",
-        "original": "local_60",
-        "type": "u64"
-      },
-      {
-        "name": "usable_socket_entry",
-        "original": "local_58",
-        "type": "code *"
-      },
-      {
-        "name": "usable_socket_opcode",
-        "original": "local_50",
-        "type": "u64"
-      },
-      {
-        "name": "client_socket_descriptor",
-        "original": "local_48",
-        "type": "u64"
-      },
-      {
-        "name": "client_socket_entry",
-        "original": "local_40",
-        "type": "code *"
-      },
-      {
-        "name": "client_socket_opcode",
-        "original": "local_38",
-        "type": "u64"
-      },
-      {
-        "name": "client_socket_flags",
-        "original": "local_30",
-        "type": "u64"
-      },
-      {
         "name": "operation_ok",
         "original": "BVar6",
         "type": "BOOL"
@@ -8241,6 +8198,22 @@
         "name": "zero_stride",
         "original": "bVar19",
         "type": "u8"
+      },
+      {
+        "original": "secret_probe_items[0].",
+        "replacement": "secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH]."
+      },
+      {
+        "original": "secret_probe_items[1].",
+        "replacement": "secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH]."
+      },
+      {
+        "original": "secret_probe_items[2].",
+        "replacement": "secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE]."
+      },
+      {
+        "original": "secret_probe_items[3].",
+        "replacement": "secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD]."
       },
       {
         "original": "*(undefined4 *)&probe_cursor->anchor_pc = 0;",

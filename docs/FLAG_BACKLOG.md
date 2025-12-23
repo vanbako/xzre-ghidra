@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### Packed secret-data descriptor words in SR2 bootstrap
-- **Where it showed up:** `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c` (u64 immediates `0x1b000001c8`, `0x1a000001c3`, `0x19000001bd`, plus `0x100000000/0x100000005/0x100000006` adjacent to the `secret_data_append_items_batch` setup).
-- **Why it mattered:** These look like bitfield-packed `{operation_slot, bit_cursor}` and `{ordinal, bits_to_shift}` pairs for the 4-entry `secret_data_item_t` batch, but they surface as opaque 64-bit constants in the decomp.
-- **Notes:** Likely a stack-typing artifact (array elements flattened into temps). Consider retyping the local as `secret_data_item_t[4]` or adding a helper union for `{bit_cursor, operation_slot}` / `{bits_to_shift, ordinal}` packing so the literals disappear.
-
 ### ASCII case-fold mask in SR3 argv dash scan
 - **Where it showed up:** `xzregh/1039C0_argv_dash_option_contains_lowercase_d.c` (`window_chars & 0xdf00` when filtering control bytes and non-letter pairs).
 - **Why it mattered:** The mask clears the ASCII lowercase bit to normalize both bytes in the 2-char window; naming it would clarify the early-abort conditions for `-d`/`--debug` detection.
@@ -51,6 +46,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### Packed secret-data descriptor words in SR2 bootstrap
+- **Outcome (2025-12-23):** Retyped the stack batch as `secret_data_item_t[4]` via `metadata/xzre_locals.json` (with `force_stack`), refreshed the project, and confirmed the decomp now shows explicit `bit_cursor`/`operation_slot`/`bits_to_shift`/`ordinal` assignments in `xzregh/105410_sshd_recon_bootstrap_sensitive_data.c` instead of packed u64 immediates.
 
 ### `opcode_window_dword` direction-bit mask
 - **Outcome (2025-12-23):** Added `X86_OPCODE_MASK_IGNORE_DIR` to `metadata/xzre_types.json`, rewrote the opcode-direction mask checks via `metadata/xzre_locals.json` (including the KRB5CCNAME scan, audit-flag scanner, reg↔reg opcode scan, and syslog hook probe), refreshed via `./scripts/refresh_xzre_project.sh`, and confirmed the exports now show the named mask in `xzregh/*.c`.

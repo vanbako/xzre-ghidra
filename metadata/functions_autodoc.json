@@ -2703,11 +2703,11 @@
         "match_type": "substring"
       },
       {
-        "match": "secret_probe_items.anchor_pc = (u8 *)sshd_monitor_cmd_dispatch;",
+        "match": "secret_probe_items[SECRET_PROBE_MONITOR_CMD_DISPATCH].anchor_pc = (u8 *)sshd_monitor_cmd_dispatch;",
         "comment": "Pre-populate a four-entry batch that records the proxy elevate helper plus the monitor socket discovery routines."
       },
       {
-        "match": "operation_ok = secret_data_append_items_batch(&secret_probe_items,4,secret_data_append_item_if_enabled);",
+        "match": "operation_ok = secret_data_append_items_batch(secret_probe_items,4,secret_data_append_item_if_enabled);",
         "comment": "Push all four breadcrumbs into the log in one shot; a failure here aborts before any ELF parsing happens."
       },
       {
