@@ -1962,7 +1962,7 @@
     ]
   },
   "mm_log_handler_hide_auth_success_hook": {
-    "plate": "Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses\nrequests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to\ncapture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal\n`\"Connection closed by ... (preauth)\"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, \"%s\", msg)` after forcing\nsyslog into mask `0xff` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook\nharvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,\nand rebuilds `\"Connection closed by ... (preauth)\"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both\nrewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's\noriginal mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.",
+    "plate": "Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses\nrequests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to\ncapture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal\n`\"Connection closed by ... (preauth)\"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, \"%s\", msg)` after forcing\nsyslog into mask `SYSLOG_MASK_ALL` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook\nharvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,\nand rebuilds `\"Connection closed by ... (preauth)\"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both\nrewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's\noriginal mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.",
     "inline": [
       {
         "match": "if (log_ctx_state->log_squelched == TRUE) {",
@@ -1995,7 +1995,7 @@
       {
         "match": "if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&",
         "match_type": "wildcard",
-        "comment": "Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line."
+        "comment": "Temporarily force `setlogmask(SYSLOG_MASK_ALL)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line."
       },
       {
         "match": "sshd_log_via_sshlogv(log_ctx_state,level,(char *)&prefix_chunk0,msg);",
@@ -2010,7 +2010,7 @@
         "comment": "Emit the forged disconnect message with the cached user/host fragments so sshd sees only the redacted string."
       },
       {
-        "match": "(**(code **)(libc_imports + 0x58))(0x80000000);",
+        "match": "(**(code **)(libc_imports + 0x58))(SYSLOG_MASK_SILENCE);",
         "comment": "Restore sshd's original syslog mask after the sanitized message has been emitted."
       }
     ]
@@ -2232,8 +2232,8 @@
         "comment": "Make sure the attacker-provided chunk actually fits inside the decrypted modulus body before the dispatcher starts consuming opcode-specific fields."
       },
       {
-        "match": "(*setlogmask_fn)(-0x80000000);",
-        "comment": "Control flag bit 2 requests `setlogmask(INT_MIN)` so syslog stops emitting anything before the hook swaps handlers."
+        "match": "(*setlogmask_fn)(SYSLOG_MASK_SILENCE);",
+        "comment": "Control flag bit 2 requests `setlogmask(SYSLOG_MASK_SILENCE)` so syslog stops emitting anything before the hook swaps handlers."
       },
       {
         "match": "sshd_install_mm_log_handler_hook",

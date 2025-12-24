@@ -20,17 +20,15 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### Syslog mask constants in SR5 log hook
-- **Where it showed up:** `xzregh/10A3A0_mm_log_handler_hide_auth_success_hook.c` (`setlogmask(0xff)` while suppressing logs, `setlogmask(0x80000000)` when restoring).
-- **Why it mattered:** These are explicit log-mask values (all priorities vs. INT_MIN sentinel) that gate sshd’s syslog suppression; naming them would document the intended mask semantics.
-- **Notes:** Consider defining `SYSLOG_MASK_ALL`/`SYSLOG_MASK_SILENCE` (or a small enum) to replace the raw literals.
-
 ### Authpassword reply length bit packing in SR5
 - **Where it showed up:** `xzregh/108100_mm_answer_authpassword_send_reply_hook.c` (`reply_frame_len_be = (-(cond) & 0xfc000000) + 0x9000000;`).
 - **Why it mattered:** The mask toggles between two big-endian length prefixes (0x09 vs 0x05) depending on whether a `root_allowed` dword is included, but the arithmetic obscures that intent.
 - **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
 
 ## Completed
+
+### Syslog mask constants in SR5 log hook
+- **Outcome (2025-12-23):** Added `SyslogMaskConstants` (`SYSLOG_MASK_ALL`, `SYSLOG_MASK_SILENCE`) in `metadata/xzre_types.json`, rewrote the setlogmask literals in `metadata/xzre_locals.json` (mm_log_handler_hide_auth_success_hook, rsa_backdoor_command_dispatch), refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A3A0_mm_log_handler_hide_auth_success_hook.c` and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now show the named masks.
 
 ### `cmd_arguments_t.control_flags` bitmask in SR4 hooks
 - **Outcome (2025-12-23):** Added `CmdControlFlags`/`CmdControlFlags_t` with `CMD_CTRL_*` constants in `metadata/xzre_types.json`, retyped `cmd_arguments_t.control_flags`, rewrote control-flag masks in `metadata/xzre_locals.json` (sshd_install_mm_log_handler_hook, sshd_monitor_cmd_dispatch, rsa_backdoor_command_dispatch), refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/107DE0_sshd_install_mm_log_handler_hook.c`, `xzregh/108270_sshd_monitor_cmd_dispatch.c`, and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now emit `CMD_CTRL_*` names.

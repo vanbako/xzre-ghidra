@@ -6214,6 +6214,14 @@
         "replacement": "(local_238 >> 16)"
       },
       {
+        "original": "(**(code **)(libc_imports + 0x58))(0xff);",
+        "replacement": "(**(code **)(libc_imports + 0x58))(SYSLOG_MASK_ALL);"
+      },
+      {
+        "original": "(**(code **)(libc_imports + 0x58))(0x80000000);",
+        "replacement": "(**(code **)(libc_imports + 0x58))(SYSLOG_MASK_SILENCE);"
+      },
+      {
         "name": "filtered_host_chunk0",
         "original": "local_438",
         "type": "u64"
@@ -7184,6 +7192,10 @@
         "name": "setlogmask_fn",
         "original": "ppVar9",
         "type": "pfn_setlogmask_t"
+      },
+      {
+        "original": "(*setlogmask_fn)(-0x80000000);",
+        "replacement": "(*setlogmask_fn)(SYSLOG_MASK_SILENCE);"
       },
       {
         "name": "sshd_ctx",
