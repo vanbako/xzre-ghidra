@@ -1496,6 +1496,13 @@
     {
       "kind": "enum",
       "names": [
+        "AuthpasswordReplyLenBeConstants"
+      ],
+      "code": "typedef enum {\n AUTHREPLY_LEN_BE_NO_ROOT = 0x05000000, /* Big-endian length prefix for authpassword replies without root_allowed dword. */\n AUTHREPLY_LEN_BE_WITH_ROOT = 0x09000000 /* Big-endian length prefix for authpassword replies with root_allowed dword. */\n} AuthpasswordReplyLenBeConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "LogLevel"
       ],
       "code": "typedef enum {\n SYSLOG_LEVEL_QUIET,\n SYSLOG_LEVEL_FATAL,\n SYSLOG_LEVEL_ERROR,\n SYSLOG_LEVEL_INFO,\n SYSLOG_LEVEL_VERBOSE,\n SYSLOG_LEVEL_DEBUG1,\n SYSLOG_LEVEL_DEBUG2,\n SYSLOG_LEVEL_DEBUG3,\n SYSLOG_LEVEL_NOT_SET = -1\n} LogLevel;"

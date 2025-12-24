@@ -1308,6 +1308,11 @@ typedef struct __attribute__((packed)) sshd_ctx {
  char *STR_publickey; /* "publickey" string in sshd rodata. */
 } sshd_ctx_t;
 
+typedef enum {
+ AUTHREPLY_LEN_BE_NO_ROOT = 0x05000000, /* Big-endian length prefix for authpassword replies without root_allowed dword. */
+ AUTHREPLY_LEN_BE_WITH_ROOT = 0x09000000 /* Big-endian length prefix for authpassword replies with root_allowed dword. */
+} AuthpasswordReplyLenBeConstants;
+
 /*
  * Mirror of sshd’s syslog verbosity levels so the hook can translate its own severity decisions into whatever the daemon expects.
  */

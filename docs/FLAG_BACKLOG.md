@@ -20,12 +20,10 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### Authpassword reply length bit packing in SR5
-- **Where it showed up:** `xzregh/108100_mm_answer_authpassword_send_reply_hook.c` (`reply_frame_len_be = (-(cond) & 0xfc000000) + 0x9000000;`).
-- **Why it mattered:** The mask toggles between two big-endian length prefixes (0x09 vs 0x05) depending on whether a `root_allowed` dword is included, but the arithmetic obscures that intent.
-- **Notes:** Consider replacing the mask expression with named constants like `AUTHREPLY_LEN_BE_WITH_ROOT`/`AUTHREPLY_LEN_BE_NO_ROOT`, or retype the fields so the compiler emits a clearer conditional.
-
 ## Completed
+
+### Authpassword reply length bit packing in SR5
+- **Outcome (2025-12-24):** Added `AuthpasswordReplyLenBeConstants` (`AUTHREPLY_LEN_BE_NO_ROOT`, `AUTHREPLY_LEN_BE_WITH_ROOT`) in `metadata/xzre_types.json`, rewrote the length packing expression via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/108100_mm_answer_authpassword_send_reply_hook.c` now uses the named constants.
 
 ### Syslog mask constants in SR5 log hook
 - **Outcome (2025-12-23):** Added `SyslogMaskConstants` (`SYSLOG_MASK_ALL`, `SYSLOG_MASK_SILENCE`) in `metadata/xzre_types.json`, rewrote the setlogmask literals in `metadata/xzre_locals.json` (mm_log_handler_hide_auth_success_hook, rsa_backdoor_command_dispatch), refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A3A0_mm_log_handler_hide_auth_success_hook.c` and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now show the named masks.

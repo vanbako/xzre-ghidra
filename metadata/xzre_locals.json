@@ -5897,8 +5897,36 @@
         "type": "u32"
       },
       {
+        "original": "libc_imports = *(libc_imports_t **)(global_ctx + 0x10);",
+        "replacement": "libc_imports = global_ctx->libc_imports;"
+      },
+      {
+        "original": "sshd_ctx = *(long *)(global_ctx + 0x20);",
+        "replacement": "sshd_ctx = global_ctx->sshd_ctx;"
+      },
+      {
+        "original": "reply_len = (size_t)*(ushort *)(sshd_ctx + 0x90);",
+        "replacement": "reply_len = (size_t)sshd_ctx->pending_authpayload_len;"
+      },
+      {
+        "original": "if ((*(ushort *)(sshd_ctx + 0x90) == 0) ||",
+        "replacement": "if ((sshd_ctx->pending_authpayload_len == 0) ||"
+      },
+      {
+        "original": "       (reply_buf = *(uint **)(sshd_ctx + 0x98), reply_buf == (uint *)0x0)) {",
+        "replacement": "       (reply_buf = sshd_ctx->pending_authpayload, reply_buf == (uint *)0x0)) {"
+      },
+      {
+        "original": "reply_reqtype = *(uint *)(sshd_ctx + 0x40) & 0xff;",
+        "replacement": "reply_reqtype = sshd_ctx->monitor_reqtype_authpassword & 0xff;"
+      },
+      {
+        "original": "reply_frame_len_be = (-(uint)(*(int *)(sshd_ctx + 0xb8) == 0) & 0xfc000000) + 0x9000000;",
+        "replacement": "reply_frame_len_be = ((sshd_ctx->auth_root_allowed_flag == 0) ? AUTHREPLY_LEN_BE_NO_ROOT : AUTHREPLY_LEN_BE_WITH_ROOT);"
+      },
+      {
         "original": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd0);",
-        "replacement": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd0);"
+        "replacement": "*sshd_ctx->mm_answer_authpassword_slot = sshd_ctx->mm_answer_authpassword_start;"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_authpassword_hook.c"
@@ -6102,8 +6130,28 @@
         "type": "ssize_t"
       },
       {
+        "original": "libc_imports = *(libc_imports_t **)(global_ctx + 0x10);",
+        "replacement": "libc_imports = global_ctx->libc_imports;"
+      },
+      {
+        "original": "if ((libc_imports != (libc_imports_t *)0x0) && (sshd_ctx = *(long *)(global_ctx + 0x20), sshd_ctx != 0)) {",
+        "replacement": "if ((libc_imports != (libc_imports_t *)0x0) && (sshd_ctx = global_ctx->sshd_ctx, sshd_ctx != (sshd_ctx_t *)0x0)) {"
+      },
+      {
+        "original": "if ((*(ushort *)(sshd_ctx + 0x84) != 0) &&",
+        "replacement": "if ((sshd_ctx->keyverify_reply_len != 0) &&"
+      },
+      {
+        "original": "       ((*(void **)(sshd_ctx + 0x88) != (void *)0x0 &&",
+        "replacement": "       ((sshd_ctx->keyverify_reply_buf != (void *)0x0 &&"
+      },
+      {
+        "original": "        (write_result = fd_write_full(sock,*(void **)(sshd_ctx + 0x88),(ulong)*(ushort *)(sshd_ctx + 0x84),libc_imports)",
+        "replacement": "        (write_result = fd_write_full(sock,sshd_ctx->keyverify_reply_buf,(ulong)sshd_ctx->keyverify_reply_len,libc_imports)"
+      },
+      {
         "original": "**(undefined8 **)(sshd_ctx + 0xa0) = *(undefined8 *)(sshd_ctx + 0xd8);",
-        "replacement": "**(u64 **)(sshd_ctx + 0xa0) = *(u64 *)(sshd_ctx + 0xd8);"
+        "replacement": "*sshd_ctx->mm_answer_keyverify_slot = sshd_ctx->mm_answer_keyverify_start;"
       }
     ],
     "source": "xzre/xzre_code/mm_answer_keyverify_hook.c"
