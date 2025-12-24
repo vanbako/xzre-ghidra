@@ -1962,15 +1962,15 @@
     ]
   },
   "mm_log_handler_hide_auth_success_hook": {
-    "plate": "Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses\nrequests once logging was already squelched, when the loader flipped `global_ctx->disable_backdoor`, or when setup failed to\ncapture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal\n`\"Connection closed by ... (preauth)\"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, \"%s\", msg)` after forcing\nsyslog into mask `SYSLOG_MASK_ALL` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook\nharvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,\nand rebuilds `\"Connection closed by ... (preauth)\"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both\nrewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's\noriginal mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.",
+    "plate": "Hooks sshd's mm_log_handler so every monitor log line flows through the implant before touching syslog. It refuses\nrequests once logging was already squelched, when the captured caller uid is non-zero (non-root), or when setup failed to\ncapture a valid handler/context pair, falling back to sshd's original handler. If a message already contains the literal\n`\"Connection closed by ... (preauth)\"` it replays the line via `sshd_log_via_sshlogv(log_ctx_state, level, \"%s\", msg)` after forcing\nsyslog into mask `SYSLOG_MASK_ALL` so sshd stays quiet. When the text instead begins with `Accepted {password|publickey} for` the hook\nharvests the username between `for` and `from` plus the host segment leading up to `ssh2`, copies both into scratch buffers,\nand rebuilds `\"Connection closed by ... (preauth)\"` with the sanitized format strings cached in `sshd_log_ctx_t`. Both\nrewrite paths toggle `log_squelched`, temporarily apply the payload's logmask, emit the fake line, and then restore sshd's\noriginal mask so future loggers resume normally; missing fragments simply flip `log_squelched` and drop the original entry.",
     "inline": [
       {
         "match": "if (log_ctx_state->log_squelched == TRUE) {",
         "comment": "Respect the `log_squelched` gate: each log request is rewritten at most once before the hook bails out."
       },
       {
-        "match": "if (*(int *)(global_ctx + 0x90) != 0) {",
-        "comment": "Stop filtering altogether once the loader flagged logging as disabled (for example after sshd drops back to the sandbox)."
+        "match": "if (global_ctx->caller_uid != 0) {",
+        "comment": "Skip filtering when the captured caller uid is non-zero (non-root)."
       },
       {
         "match": "if ((log_ctx_state->saved_log_handler != (log_handler_fn)0x0) &&",
@@ -2454,19 +2454,20 @@
     ]
   },
   "secret_data_append_singleton_bits": {
-    "plate": "One-shot wrapper around `secret_data_append_code_bits`. Each descriptor guards itself with the\n`global_ctx->shift_operation_flags[operation_index]` byte, discovers the function bounds via `find_function_bounds` and the cached sshd text\nlimits, feeds the resulting range into `secret_data_append_code_bits`, and increments `global_ctx->secret_bits_filled` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
+    "plate": "One-shot wrapper around `secret_data_append_code_bits`. Each descriptor guards itself with the\n`global_ctx->shift_operation_flags[operation_index]` byte, discovers the function bounds via `find_function_bounds` and the cached liblzma text\nlimits, feeds the resulting range into `secret_data_append_code_bits`, and increments `global_ctx->secret_bits_filled` when bits were\nemitted. Subsequent calls become no-ops that report TRUE so callers can treat the slot as satisfied.",
     "inline": [
       {
-        "match": "if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\\0')) {",
+        "match": "global_ctx->shift_operation_flags[operation_index] !=",
+        "match_type": "substring",
         "comment": "Skip the work when the loader never published `global_ctx` or when `shift_operation_flags[operation_index]` is already set."
       },
       {
-        "match": "*(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
+        "match": "global_ctx->shift_operation_flags[operation_index] = 1;",
         "comment": "Set `shift_operation_flags[operation_index]` so later invocations bail immediately."
       },
       {
-        "match": "shared_ctx_addr = global_ctx;",
-        "comment": "Resolve the enclosing sshd function by reusing the cached `(text_start, text_end)` window from `global_ctx`.",
+        "match": "append_ok = find_function_bounds",
+        "comment": "Resolve the enclosing function by reusing the cached liblzma text window from `global_ctx`.",
         "match_type": "substring"
       },
       {
@@ -2474,7 +2475,7 @@
         "comment": "Feed the resolved range to the instruction walker; when `call_site` is NULL we ask it to locate the next CALL before scanning."
       },
       {
-        "match": "*(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;",
+        "match": "global_ctx->secret_bits_filled = global_ctx->secret_bits_filled + shift_count;",
         "comment": "Keep the aggregate `secret_bits_filled` counter in sync so policy helpers can see how many attestation bits landed."
       }
     ]

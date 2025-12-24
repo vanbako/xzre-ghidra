@@ -6258,6 +6258,18 @@
         "type": "long"
       },
       {
+        "original": "log_ctx_state = *(sshd_log_ctx_t **)(global_ctx + 0x30);",
+        "replacement": "log_ctx_state = global_ctx->sshd_log_ctx;"
+      },
+      {
+        "original": "libc_imports = *(long *)(global_ctx + 0x10);",
+        "replacement": "libc_imports = global_ctx->libc_imports;"
+      },
+      {
+        "original": "if (*(int *)(global_ctx + 0x90) != 0) {",
+        "replacement": "if (global_ctx->caller_uid != 0) {"
+      },
+      {
         "original": "local_238._2_6_",
         "replacement": "(local_238 >> 16)"
       },
@@ -7592,6 +7604,10 @@
         "type": "X86_OPCODE"
       },
       {
+        "original": "bit_slot = (byte *)(global_ctx + 0x108 + (ulong)(bit_index >> 3));",
+        "replacement": "bit_slot = global_ctx->encrypted_secret_data + (ulong)(bit_index >> 3);"
+      },
+      {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
       }
@@ -7656,6 +7672,30 @@
       {
         "original": "*(undefined1 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
         "replacement": "*(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;"
+      },
+      {
+        "original": "if ((global_ctx == 0) || (*(char *)(global_ctx + 0x141 + (ulong)operation_index) != '\\0')) {",
+        "replacement": "if ((global_ctx == 0) || (global_ctx->shift_operation_flags[operation_index] != '\\0')) {"
+      },
+      {
+        "original": "*(u8 *)(global_ctx + 0x141 + (ulong)operation_index) = 1;",
+        "replacement": "global_ctx->shift_operation_flags[operation_index] = 1;"
+      },
+      {
+        "original": "(code,&function_start,(void **)0x0,*(u8 **)(shared_ctx_addr + 0x80),",
+        "replacement": "(code,&function_start,(void **)0x0,global_ctx->liblzma_text_start,"
+      },
+      {
+        "original": "*(u8 **)(shared_ctx_addr + 0x88),FIND_NOP);",
+        "replacement": "global_ctx->liblzma_text_end,FIND_NOP);"
+      },
+      {
+        "original": "(function_start,*(void **)(global_ctx + 0x88),shift_cursor,shift_count,",
+        "replacement": "(function_start,global_ctx->liblzma_text_end,shift_cursor,shift_count,"
+      },
+      {
+        "original": "*(int *)(global_ctx + 0x160) = *(int *)(global_ctx + 0x160) + shift_count;",
+        "replacement": "global_ctx->secret_bits_filled = global_ctx->secret_bits_filled + shift_count;"
       }
     ],
     "source": "xzre/xzre_code/secret_data_append_singleton.c"

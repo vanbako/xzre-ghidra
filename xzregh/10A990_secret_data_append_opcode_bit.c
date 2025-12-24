@@ -30,7 +30,7 @@ BOOL secret_data_append_opcode_bit(dasm_ctx_t *dctx,secret_data_shift_cursor_t *
     if (((decoded_opcode != X86_OPCODE_1B_MOV_STORE) && (decoded_opcode != X86_OPCODE_1B_CMP_R_RM)) &&
        ((0x2e < decoded_opcode - X86_OPCODE_1B_ADD_R_RM ||
         ((0x410100000101U >> ((byte)(decoded_opcode - X86_OPCODE_1B_ADD_R_RM) & 0x3f) & 1) == 0)))) {
-      bit_slot = (byte *)(global_ctx + 0x108 + (ulong)(bit_index >> 3));
+      bit_slot = global_ctx->encrypted_secret_data + (ulong)(bit_index >> 3);
       // AutoDoc: Translate the global bit index into the packed 0x39-byte `global_ctx->encrypted_secret_data` buffer and set the corresponding bit.
       *bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));
     }
