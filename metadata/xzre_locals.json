@@ -5576,6 +5576,10 @@
         "name": "init_status",
         "original": "iVar1",
         "type": "int"
+      },
+      {
+        "original": "ctx->bootstrap_state_flags = 4;",
+        "replacement": "ctx->bootstrap_state_flags = HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS;"
       }
     ],
     "source": "xzre/xzre_code/init_hooks_ctx.c"

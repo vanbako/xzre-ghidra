@@ -17,7 +17,7 @@ Track how many focused RE/documentation passes each struct has received. Increme
 | `backdoor_shared_globals_t` | 1 | Backdoor order #1 – renamed fields (authpassword hook, EVP hook, global_ctx_slot) and documented usage (2025-11-19). |
 | `backdoor_shared_libraries_data_t` | 1 | Backdoor order #2 – renamed PLT slot/hooks_data pointers and documented their purpose (2025-11-19). |
 | `backdoor_hooks_data_t` | 1 | Backdoor order #3 – annotated ldso/global/import/log/payload blocks + signed blob tail (2025-11-19). |
-| `backdoor_hooks_ctx_t` | 1 | Backdoor order #4 – renamed ctx scratch/slot fields, documented symbind/RSA/mm hook pointers, noted the reserved log/monitor placeholders (2025-11-19). |
+| `backdoor_hooks_ctx_t` | 2 | Backdoor order #4 – renamed ctx scratch/slot fields, documented symbind/RSA/mm hook pointers, noted the reserved log/monitor placeholders (2025-11-19); typed bootstrap_state_flags as BackdoorBootstrapStateFlags_t with HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS (2025-12-25). |
 | `backdoor_payload_hdr_t` | 2 | Backdoor review order #5 – flattened header layout so decomp prefers `cmd_type_*` fields (2025-12-15). |
 | `backdoor_payload_body_t` | 1 | Backdoor review order #6 – renamed the signature/args/data slots to `ed448_signature`/`cmd_flags`/`monitor_payload`, documented the Ed448 coverage and 0x87 payload offset (2025-11-19). |
 | `backdoor_payload_t` | 1 | Backdoor review order #7 – renamed the raw bytes view, documented the parsed header/body union, and noted why the hooks need both representations (2025-11-19). |

