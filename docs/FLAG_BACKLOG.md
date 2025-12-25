@@ -20,6 +20,22 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
+### secret_data opcode allowlist bitset
+- **Where it showed up:** `xzregh/10A990_secret_data_append_opcode_bit.c` (mask `0x410100000101U` shifted by `decoded_opcode - X86_OPCODE_1B_ADD_R_RM`).
+- **Why it mattered:** This packed bitset excludes specific ALU reg/reg opcodes from the secret-data log; naming it would make the filter logic clearer and allow metadata to replace the literal mask.
+
+### Encoded-string trie node header flags
+- **Where it showed up:** `xzregh/10A880_encoded_string_id_lookup.c` (`child_header & 4`, `& 2`, `& 1`, plus `child_header & 0xfffd/0xfffe`).
+- **Why it mattered:** The header packs terminal and signed-delta semantics for the trie row/bitmap jumps. A named bitfield (e.g., TERMINAL, ROW_DELTA_POS, BITMAP_DELTA_POS) would make the traversal logic legible and avoid raw masks.
+
+### sshbuf offset index sign-bit sentinel
+- **Where it showed up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c` and `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c` (sign-bit checks on `sshbuf_*_qword_index`, `data_index & size_index`).
+- **Why it mattered:** The negative index encoding controls whether offsets are inline or computed. Naming the sentinel (or splitting into a flag + index) would clarify the layout override logic and remove raw sign-bit checks.
+
+### cmd_flags tail bitfield packer for sshd_offsets
+- **Where it showed up:** `xzregh/1094A0_rsa_backdoor_command_dispatch.c` (opcode 0/3 paths: `CONCAT11(encrypted_payload_bytes[3], encrypted_payload_bytes[2]) >> 6 & 0x7f`, `encrypted_payload_bytes[4] >> 5`, `encrypted_payload_bytes[4] >> 2 & 7`, `encrypted_payload_bytes[3] & 0x3f/0x40`).
+- **Why it mattered:** These slices repack the cmd flag tail into `ctx->sshd_offsets` fields (log-hook flags, monitor opcode override, socket selectors). Modeling the bitfield would make the encoding explicit and eliminate raw masks.
+
 ## Completed
 
 ### CPUID extended-leaf high-bit mask
