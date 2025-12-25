@@ -763,7 +763,21 @@
       "names": [
         "X86_REG"
       ],
-      "code": "enum X86_REG {\n X86_REG_RBP = 5\n};"
+      "code": "enum X86_REG {\n X86_REG_RAX = 0,\n X86_REG_RCX = 1,\n X86_REG_RDX = 2,\n X86_REG_RBX = 3,\n X86_REG_RSP = 4,\n X86_REG_RBP = 5,\n X86_REG_RSI = 6,\n X86_REG_RDI = 7,\n X86_REG_R8 = 8,\n X86_REG_R9 = 9,\n X86_REG_R10 = 10,\n X86_REG_R11 = 11,\n X86_REG_R12 = 12,\n X86_REG_R13 = 13,\n X86_REG_R14 = 14,\n X86_REG_R15 = 15\n};"
+    },
+    {
+      "kind": "enum",
+      "names": [
+        "X86RegisterMask"
+      ],
+      "code": "typedef enum {\n X86_REG_MASK_RAX = (1u << X86_REG_RAX),\n X86_REG_MASK_RCX = (1u << X86_REG_RCX),\n X86_REG_MASK_RDX = (1u << X86_REG_RDX),\n X86_REG_MASK_RBX = (1u << X86_REG_RBX),\n X86_REG_MASK_RSP = (1u << X86_REG_RSP),\n X86_REG_MASK_RBP = (1u << X86_REG_RBP),\n X86_REG_MASK_RSI = (1u << X86_REG_RSI),\n X86_REG_MASK_RDI = (1u << X86_REG_RDI),\n X86_REG_MASK_R8 = (1u << X86_REG_R8),\n X86_REG_MASK_R9 = (1u << X86_REG_R9),\n X86_REG_MASK_R10 = (1u << X86_REG_R10),\n X86_REG_MASK_R11 = (1u << X86_REG_R11),\n X86_REG_MASK_R12 = (1u << X86_REG_R12),\n X86_REG_MASK_R13 = (1u << X86_REG_R13),\n X86_REG_MASK_R14 = (1u << X86_REG_R14),\n X86_REG_MASK_R15 = (1u << X86_REG_R15)\n} X86RegisterMask;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "X86RegisterMask_t"
+      ],
+      "code": "typedef u16 X86RegisterMask_t; /* Storage for X86RegisterMask (X86_REG_MASK_*) bitmask. */"
     },
     {
       "kind": "enum",
@@ -1960,7 +1974,7 @@
       "names": [
         "instruction_register_bitmap_t"
       ],
-      "code": "typedef union __attribute__((packed)) instruction_register_bitmap {\n struct __attribute__((packed)) {\n  u16 allowed_regs; /* 16-bit mask over x86 GPR encodings (bit N -> reg N). */\n  u8 reg_index; /* Captured register index (0-15) or 0xFF when unset. */\n  u8 reserved; /* Padding/reserved byte; currently unused by the scanners. */\n } fields;\n struct __attribute__((packed)) {\n  u16 low_word; /* Low 16-bit mask (same as fields.allowed_regs). */\n  u16 high_word; /* High 16-bit view of {reg_index,reserved}. */\n } words;\n u32 raw_value; /* Raw view for shifts and byte-level updates. */\n} instruction_register_bitmap_t;"
+      "code": "typedef union __attribute__((packed)) instruction_register_bitmap {\n struct __attribute__((packed)) {\n  X86RegisterMask_t allowed_regs; /* 16-bit mask over x86 GPR encodings (bit N -> reg N). */\n  u8 reg_index; /* Captured register index (0-15) or 0xFF when unset. */\n  u8 reserved; /* Padding/reserved byte; currently unused by the scanners. */\n } fields;\n struct __attribute__((packed)) {\n  u16 low_word; /* Low 16-bit mask (same as fields.allowed_regs). */\n  u16 high_word; /* High 16-bit view of {reg_index,reserved}. */\n } words;\n u32 raw_value; /* Raw view for shifts and byte-level updates. */\n} instruction_register_bitmap_t;"
     },
     {
       "kind": "union",

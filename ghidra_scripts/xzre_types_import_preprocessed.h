@@ -396,8 +396,44 @@ typedef enum {
  * Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).
  */
 enum X86_REG {
- X86_REG_RBP = 5
+ X86_REG_RAX = 0,
+ X86_REG_RCX = 1,
+ X86_REG_RDX = 2,
+ X86_REG_RBX = 3,
+ X86_REG_RSP = 4,
+ X86_REG_RBP = 5,
+ X86_REG_RSI = 6,
+ X86_REG_RDI = 7,
+ X86_REG_R8 = 8,
+ X86_REG_R9 = 9,
+ X86_REG_R10 = 10,
+ X86_REG_R11 = 11,
+ X86_REG_R12 = 12,
+ X86_REG_R13 = 13,
+ X86_REG_R14 = 14,
+ X86_REG_R15 = 15
 };
+
+typedef enum {
+ X86_REG_MASK_RAX = (1u << X86_REG_RAX),
+ X86_REG_MASK_RCX = (1u << X86_REG_RCX),
+ X86_REG_MASK_RDX = (1u << X86_REG_RDX),
+ X86_REG_MASK_RBX = (1u << X86_REG_RBX),
+ X86_REG_MASK_RSP = (1u << X86_REG_RSP),
+ X86_REG_MASK_RBP = (1u << X86_REG_RBP),
+ X86_REG_MASK_RSI = (1u << X86_REG_RSI),
+ X86_REG_MASK_RDI = (1u << X86_REG_RDI),
+ X86_REG_MASK_R8 = (1u << X86_REG_R8),
+ X86_REG_MASK_R9 = (1u << X86_REG_R9),
+ X86_REG_MASK_R10 = (1u << X86_REG_R10),
+ X86_REG_MASK_R11 = (1u << X86_REG_R11),
+ X86_REG_MASK_R12 = (1u << X86_REG_R12),
+ X86_REG_MASK_R13 = (1u << X86_REG_R13),
+ X86_REG_MASK_R14 = (1u << X86_REG_R14),
+ X86_REG_MASK_R15 = (1u << X86_REG_R15)
+} X86RegisterMask;
+
+typedef u16 X86RegisterMask_t; /* Storage for X86RegisterMask (X86_REG_MASK_*) bitmask. */
 
 typedef enum {
  FALSE = 0,
@@ -1986,7 +2022,7 @@ typedef enum {
 
 typedef union __attribute__((packed)) instruction_register_bitmap {
  struct __attribute__((packed)) {
-  u16 allowed_regs; /* 16-bit mask over x86 GPR encodings (bit N -> reg N). */
+  X86RegisterMask_t allowed_regs; /* 16-bit mask over x86 GPR encodings (bit N -> reg N). */
   u8 reg_index; /* Captured register index (0-15) or 0xFF when unset. */
   u8 reserved; /* Padding/reserved byte; currently unused by the scanners. */
  } fields;

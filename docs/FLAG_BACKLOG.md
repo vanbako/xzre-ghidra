@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### instruction_register_bitmap_t.allowed_regs register masks
-- **Where it showed up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (seeds `allowed_regs` with `0x80` and `0x2`), `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (tests `allowed_regs` for decoded registers).
-- **Why it mattered:** Naming the register-mask bits would explain why the audit scan whitelists specific registers and avoid raw hex masks.
-- **Notes:** Bits map to GPR indices (bit N -> reg N); confirm the intended registers (0x80 -> reg 7, 0x2 -> reg 1) and add `X86_REG_MASK_*` constants or reuse `1u << X86_REG_*`.
-
 ### EncodedStringId high-dword preserve mask
 - **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (clears low dword with `& 0xffffffff00000000` before splicing `EncodedStringId` values).
 - **Why it mattered:** Naming the mask would make the encoded-string ID packing clear and avoid the raw 64-bit literal.
@@ -41,6 +36,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
 
 ## Completed
+
+### instruction_register_bitmap_t.allowed_regs register masks
+- **Outcome (2025-12-25):** Added `X86RegisterMask`/`X86RegisterMask_t` plus `X86_REG_*`/`X86_REG_MASK_*` constants in `metadata/xzre_types.json`, retyped `instruction_register_bitmap_t.allowed_regs`, rewrote the register-filter seeds in `metadata/xzre_locals.json` to use `X86_REG_MASK_RDI`/`X86_REG_MASK_RCX`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` now shows named register masks.
 
 ### backdoor_hooks_ctx_t.bootstrap_state_flags (0x4)
 - **Outcome (2025-12-25):** Added `BackdoorBootstrapStateFlags`/`BackdoorBootstrapStateFlags_t` in `metadata/xzre_types.json`, retyped `backdoor_hooks_ctx_t.bootstrap_state_flags`, rewrote the bootstrap assignment in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, verified `xzregh/1027D0_hooks_ctx_init_or_wait_for_shared_globals.c` now emits `HOOKS_CTX_BOOTSTRAP_WAIT_FOR_SHARED_GLOBALS`, and updated `docs/STRUCT_PROGRESS.md`.

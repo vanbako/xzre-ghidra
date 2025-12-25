@@ -4787,6 +4787,14 @@
       {
         "original": "insn_ctx.prefix.flags_u32 & 0x20)",
         "replacement": "insn_ctx.prefix.flags_u32 & DF16_REX)"
+      },
+      {
+        "original": "mask_register_bitmap.raw_value = CONCAT22(mask_register_bitmap.words.high_word,mask_register_bitmap.fields.allowed_regs) | 0x80;",
+        "replacement": "mask_register_bitmap.raw_value = CONCAT22(mask_register_bitmap.words.high_word,mask_register_bitmap.fields.allowed_regs) | X86_REG_MASK_RDI;"
+      },
+      {
+        "original": "output_register_bitmap.fields.allowed_regs = output_register_bitmap.fields.allowed_regs | 2;",
+        "replacement": "output_register_bitmap.fields.allowed_regs = output_register_bitmap.fields.allowed_regs | X86_REG_MASK_RCX;"
       }
     ],
     "source": "xzre/xzre_code/find_link_map_l_audit_any_plt.c"

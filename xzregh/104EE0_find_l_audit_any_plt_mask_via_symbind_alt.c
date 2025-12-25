@@ -63,8 +63,8 @@ BOOL find_l_audit_any_plt_mask_via_symbind_alt
     }
     audit_func_cursor = (hooks->ldso_ctx)._dl_audit_symbind_alt;
     mask_register_bitmap.fields.reg_index = 0xff;
-    mask_register_bitmap.raw_value = CONCAT22(mask_register_bitmap.words.high_word,mask_register_bitmap.fields.allowed_regs) | 0x80;
-    output_register_bitmap.fields.allowed_regs = output_register_bitmap.fields.allowed_regs | 2;
+    mask_register_bitmap.raw_value = CONCAT22(mask_register_bitmap.words.high_word,mask_register_bitmap.fields.allowed_regs) | X86_REG_MASK_RDI;
+    output_register_bitmap.fields.allowed_regs = output_register_bitmap.fields.allowed_regs | X86_REG_MASK_RCX;
     audit_func_end = audit_func_cursor + (hooks->ldso_ctx)._dl_audit_symbind_alt__size;
     output_register_bitmap.fields.reserved = output_register_snapshot.fields.reserved;
     output_register_bitmap.fields.reg_index = 0xff;
