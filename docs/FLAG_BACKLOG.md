@@ -20,6 +20,41 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
+### ld.so auditstate bindflags bitmask
+- **Where it showed up:** `xzregh/102770_restore_ldso_audit_state.c` (restores the saved libcrypto/sshd auditstate bindflags after hook teardown).
+- **Why it mattered:** `auditstate::bindflags` is a loader bitmask; naming the bits would make the restore step clearer and keep future masking consistent.
+- **Notes:** Confirm the actual bit meanings from glibc auditstate definitions before modeling (likely `LA_*`/`LA_SYMB_*` flags).
+
+### link_map l_audit_any_plt bitmask
+- **Where it showed up:** `xzregh/102770_restore_ldso_audit_state.c` (clears `*sshd_audit_flag_byte` with `~ldso_ctx->link_map_l_audit_any_plt_bitmask`).
+- **Why it mattered:** The mask looks like a single-bit indicator for audit/PLT activity; naming it would clarify the ld.so cleanup path.
+- **Notes:** The mask is derived by `find_l_audit_any_plt_mask_*`; consider a `L_AUDIT_ANY_PLT` flag constant or a bool view over the byte.
+
+### backdoor_hooks_ctx_t.bootstrap_state_flags (0x4)
+- **Where it showed up:** `xzregh/1027D0_hooks_ctx_init_or_wait_for_shared_globals.c` (sets `bootstrap_state_flags = 0x4` when shared globals are missing).
+- **Why it mattered:** The field name suggests a bitmask but only one bit is used; naming it would document the bootstrap-retry state.
+- **Notes:** No other reads/writes spotted yet; confirm if stage-two checks the value before formalizing.
+
+### instruction_register_bitmap_t.allowed_regs register masks
+- **Where it showed up:** `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` (seeds `allowed_regs` with `0x80` and `0x2`), `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c` (tests `allowed_regs` for decoded registers).
+- **Why it mattered:** Naming the register-mask bits would explain why the audit scan whitelists specific registers and avoid raw hex masks.
+- **Notes:** Bits map to GPR indices (bit N -> reg N); confirm the intended registers (0x80 -> reg 7, 0x2 -> reg 1) and add `X86_REG_MASK_*` constants or reuse `1u << X86_REG_*`.
+
+### EncodedStringId high-dword preserve mask
+- **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (clears low dword with `& 0xffffffff00000000` before splicing `EncodedStringId` values).
+- **Why it mattered:** Naming the mask would make the encoded-string ID packing clear and avoid the raw 64-bit literal.
+- **Notes:** The same mask shows up in other helpers (`xzregh/108270_sshd_monitor_cmd_dispatch.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`); consider a shared `ENCODED_STRING_ID_HI_MASK` or helper macro.
+
+### 4K page-alignment mask
+- **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (aligns `resolver_frame_addr` down to a page boundary with `& 0xfffffffffffff000`).
+- **Why it mattered:** A named `PAGE_MASK_4K`/`PAGE_ALIGN_MASK_4K` constant would clarify the page-alignment intent.
+- **Notes:** This mask is used in several ELF helpers (e.g., `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101EC0_elf_get_text_segment.c`); standardizing the constant would reduce magic literals.
+
+### CPUID extended-leaf high-bit mask
+- **Where it showed up:** `xzregh/10A800_get_cpuid_with_ifunc_bootstrap.c` (passes `leaf & 0x80000000` into `cpuid_ifunc_resolver_entry` to select the max-leaf query).
+- **Why it mattered:** Naming the high-bit mask makes the extended-leaf selection logic explicit and avoids the raw `0x80000000` literal.
+- **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
+
 ## Completed
 
 ### Authpassword reply length bit packing in SR5
