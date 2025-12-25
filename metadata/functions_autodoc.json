@@ -3129,7 +3129,7 @@
         "comment": "Push the forged monitor frame across the target fd; any short write aborts the run."
       },
       {
-        "match": "rsa_signature_block[0] = rsa_signature_block[0] & 0xffffffff00000000;",
+        "match": "rsa_signature_block[0] = rsa_signature_block[0] & ENCODED_STRING_ID_HI_MASK;",
         "comment": "When the wait bit is set, read the reply length and drain the monitor socket until sshd finishes responding."
       },
       {

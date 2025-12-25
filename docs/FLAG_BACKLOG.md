@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### EncodedStringId high-dword preserve mask
-- **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (clears low dword with `& 0xffffffff00000000` before splicing `EncodedStringId` values).
-- **Why it mattered:** Naming the mask would make the encoded-string ID packing clear and avoid the raw 64-bit literal.
-- **Notes:** The same mask shows up in other helpers (`xzregh/108270_sshd_monitor_cmd_dispatch.c`, `xzregh/1094A0_rsa_backdoor_command_dispatch.c`); consider a shared `ENCODED_STRING_ID_HI_MASK` or helper macro.
-
 ### 4K page-alignment mask
 - **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (aligns `resolver_frame_addr` down to a page boundary with `& 0xfffffffffffff000`).
 - **Why it mattered:** A named `PAGE_MASK_4K`/`PAGE_ALIGN_MASK_4K` constant would clarify the page-alignment intent.
@@ -36,6 +31,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
 
 ## Completed
+
+### EncodedStringId high-dword preserve mask
+- **Outcome (2025-12-25):** Added `EncodedStringIdMaskConstants` (`ENCODED_STRING_ID_HI_MASK`) in `metadata/xzre_types.json`, rewrote the high-dword mask literals in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/105830_backdoor_install_runtime_hooks.c`, `xzregh/108270_sshd_monitor_cmd_dispatch.c`, and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now show `ENCODED_STRING_ID_HI_MASK`.
 
 ### instruction_register_bitmap_t.allowed_regs register masks
 - **Outcome (2025-12-25):** Added `X86RegisterMask`/`X86RegisterMask_t` plus `X86_REG_*`/`X86_REG_MASK_*` constants in `metadata/xzre_types.json`, retyped `instruction_register_bitmap_t.allowed_regs`, rewrote the register-filter seeds in `metadata/xzre_locals.json` to use `X86_REG_MASK_RDI`/`X86_REG_MASK_RCX`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/104EE0_find_l_audit_any_plt_mask_via_symbind_alt.c` now shows named register masks.

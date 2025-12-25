@@ -365,7 +365,7 @@ LAB_00109d36:
                                                   op_result = stack0xfffffffffffffa60;
                                                   *(u8 *)&socket_probe_header = 0;
                                                   extra_data = (u8 *)((ulong)extra_data &
-                                                                     0xffffffff00000000);
+                                                                     ENCODED_STRING_ID_HI_MASK);
                                                   shared_keybuf_or_timespec_lo = 0;
                                                   shared_keybuf_or_timespec_hi = 0;
                                                   if (((-1 < stack0xfffffffffffffa60) &&

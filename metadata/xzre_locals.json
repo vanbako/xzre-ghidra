@@ -1763,6 +1763,10 @@
         "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
       },
       {
+        "original": "0xffffffff00000000",
+        "replacement": "ENCODED_STRING_ID_HI_MASK"
+      },
+      {
         "original": "*resolved_count_ptr = 2;",
         "replacement": "*resolved_count_ptr = LA_FLG_BINDFROM;"
       },
@@ -7209,6 +7213,10 @@
         "replacement": "(shared_keybuf_or_timespec_lo >> 8)"
       },
       {
+        "original": "0xffffffff00000000",
+        "replacement": "ENCODED_STRING_ID_HI_MASK"
+      },
+      {
         "name": "cmd_args_scratch",
         "original": "local_550",
         "type": "u8[16]"
@@ -9348,6 +9356,10 @@
       {
         "original": "cmd_args->request_flags & 0x20",
         "replacement": "cmd_args->request_flags & CMD_REQUEST_SSHBUF_CONTINUATION"
+      },
+      {
+        "original": "0xffffffff00000000",
+        "replacement": "ENCODED_STRING_ID_HI_MASK"
       },
       {
         "name": "stack_slot",

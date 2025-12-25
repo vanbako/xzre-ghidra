@@ -569,7 +569,7 @@ LAB_001089b5:
               }
 LAB_0010897e:
               // AutoDoc: When the wait bit is set, read the reply length and drain the monitor socket until sshd finishes responding.
-              rsa_signature_block[0] = rsa_signature_block[0] & 0xffffffff00000000;
+              rsa_signature_block[0] = rsa_signature_block[0] & ENCODED_STRING_ID_HI_MASK;
               io_result = fd_read_full(status,rsa_signature_block,4,libc_funcs);
               if (io_result < 0) {
                 return FALSE;

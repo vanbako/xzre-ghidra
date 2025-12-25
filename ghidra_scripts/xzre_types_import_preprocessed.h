@@ -789,6 +789,10 @@ typedef enum {
  STR_ELF = 0x300,
 } EncodedStringId;
 
+typedef enum {
+ ENCODED_STRING_ID_HI_MASK = 0xffffffff00000000
+} EncodedStringIdMaskConstants;
+
 /*
  * State machine for the payload download/decrypt workflow (only INITIAL is defined so far while the rest of the states are discovered dynamically).
  */

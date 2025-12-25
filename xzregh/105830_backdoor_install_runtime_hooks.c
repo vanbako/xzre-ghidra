@@ -384,7 +384,7 @@ LAB_00105951:
           search_image = loader_data.elf_handles.sshd;
           sshd_ctx_cursor = (hooks_data->global_ctx).sshd_ctx;
           syslog_dasm_ctx.instruction = (u8 *)0x0;
-          literal_probe_slot = literal_probe_slot & 0xffffffff00000000;
+          literal_probe_slot = literal_probe_slot & ENCODED_STRING_ID_HI_MASK;
           sshd_ctx_cursor->have_mm_answer_keyallowed = FALSE;
           sshd_ctx_cursor->have_mm_answer_authpassword = FALSE;
           sshd_ctx_cursor->have_mm_answer_keyverify = FALSE;

@@ -985,6 +985,13 @@
     {
       "kind": "enum",
       "names": [
+        "EncodedStringIdMaskConstants"
+      ],
+      "code": "typedef enum {\n ENCODED_STRING_ID_HI_MASK = 0xffffffff00000000\n} EncodedStringIdMaskConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "PayloadState"
       ],
       "code": "typedef enum {\n PAYLOAD_STATE_INITIAL = -1\n} PayloadState;"
