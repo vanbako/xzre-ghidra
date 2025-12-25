@@ -1763,6 +1763,14 @@
         "replacement": "X86_OPCODE_MASK_IGNORE_DIR"
       },
       {
+        "original": "*resolved_count_ptr = 2;",
+        "replacement": "*resolved_count_ptr = LA_FLG_BINDFROM;"
+      },
+      {
+        "original": "*resolved_count_ptr = 1;",
+        "replacement": "*resolved_count_ptr = LA_FLG_BINDTO;"
+      },
+      {
         "original": "local_9d8.instruction_size._0_4_",
         "replacement": "*(uint *)&local_9d8.instruction_size"
       },

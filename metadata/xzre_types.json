@@ -549,11 +549,25 @@
       "code": "typedef enum {\n LZMA_CHECK_NONE = 0,\n LZMA_CHECK_CRC32 = 1,\n LZMA_CHECK_CRC64 = 4,\n LZMA_CHECK_SHA256 = 10\n} lzma_check;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "LaObjopenFlags"
+      ],
+      "code": "typedef enum {\n LA_FLG_BINDTO = 0x01,\n LA_FLG_BINDFROM = 0x02\n} LaObjopenFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "LaObjopenFlags_t"
+      ],
+      "code": "typedef u32 LaObjopenFlags_t; /* Storage for LaObjopenFlags (LA_FLG_*) bitmask. */"
+    },
+    {
       "kind": "struct",
       "names": [
         "auditstate"
       ],
-      "code": "struct auditstate\n{\n   uintptr_t cookie;\n   unsigned int bindflags;\n};"
+      "code": "struct auditstate\n{\n   uintptr_t cookie;\n   LaObjopenFlags_t bindflags;\n};"
     },
     {
       "kind": "struct",

@@ -217,10 +217,17 @@ typedef enum {
  LZMA_CHECK_SHA256 = 10
 } lzma_check;
 
+typedef enum {
+ LA_FLG_BINDTO = 0x01,
+ LA_FLG_BINDFROM = 0x02
+} LaObjopenFlags;
+
+typedef u32 LaObjopenFlags_t; /* Storage for LaObjopenFlags (LA_FLG_*) bitmask. */
+
 struct auditstate
 {
    uintptr_t cookie;
-   unsigned int bindflags;
+   LaObjopenFlags_t bindflags;
 };
 
 /*

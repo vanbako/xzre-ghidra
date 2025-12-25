@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### ld.so auditstate bindflags bitmask
-- **Where it showed up:** `xzregh/102770_restore_ldso_audit_state.c` (restores the saved libcrypto/sshd auditstate bindflags after hook teardown).
-- **Why it mattered:** `auditstate::bindflags` is a loader bitmask; naming the bits would make the restore step clearer and keep future masking consistent.
-- **Notes:** Confirm the actual bit meanings from glibc auditstate definitions before modeling (likely `LA_*`/`LA_SYMB_*` flags).
-
 ### link_map l_audit_any_plt bitmask
 - **Where it showed up:** `xzregh/102770_restore_ldso_audit_state.c` (clears `*sshd_audit_flag_byte` with `~ldso_ctx->link_map_l_audit_any_plt_bitmask`).
 - **Why it mattered:** The mask looks like a single-bit indicator for audit/PLT activity; naming it would clarify the ld.so cleanup path.
@@ -56,6 +51,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
 
 ## Completed
+
+### ld.so auditstate bindflags bitmask
+- **Outcome (2025-12-25):** Added `LaObjopenFlags`/`LaObjopenFlags_t` (`LA_FLG_BINDTO`, `LA_FLG_BINDFROM`) in `metadata/xzre_types.json`, retyped `auditstate.bindflags`, rewrote the bindflags assignments in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/105830_backdoor_install_runtime_hooks.c` now shows the named flags.
 
 ### Authpassword reply length bit packing in SR5
 - **Outcome (2025-12-24):** Added `AuthpasswordReplyLenBeConstants` (`AUTHREPLY_LEN_BE_NO_ROOT`, `AUTHREPLY_LEN_BE_WITH_ROOT`) in `metadata/xzre_types.json`, rewrote the length packing expression via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/108100_mm_answer_authpassword_send_reply_hook.c` now uses the named constants.

