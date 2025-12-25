@@ -1717,7 +1717,7 @@
       {
         "name": "audit_slot_byte",
         "original": "pbVar17",
-        "type": "byte *"
+        "type": "LinkMapAuditFlags_t *"
       },
       {
         "name": "cpuid_leaf_ptr",
@@ -4857,7 +4857,7 @@
       {
         "name": "audit_flag_slot",
         "original": "pbVar10",
-        "type": "u8 *"
+        "type": "LinkMapAuditFlags_t *"
       },
       {
         "name": "decoded_pointer_register",
@@ -5595,7 +5595,7 @@
       {
         "name": "sshd_audit_flag_byte",
         "original": "pbVar2",
-        "type": "byte *"
+        "type": "LinkMapAuditFlags_t *"
       }
     ],
     "source": "xzre/xzre_code/init_ldso_ctx.c"

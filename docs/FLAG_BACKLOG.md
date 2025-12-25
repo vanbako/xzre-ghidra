@@ -20,11 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### link_map l_audit_any_plt bitmask
-- **Where it showed up:** `xzregh/102770_restore_ldso_audit_state.c` (clears `*sshd_audit_flag_byte` with `~ldso_ctx->link_map_l_audit_any_plt_bitmask`).
-- **Why it mattered:** The mask looks like a single-bit indicator for audit/PLT activity; naming it would clarify the ld.so cleanup path.
-- **Notes:** The mask is derived by `find_l_audit_any_plt_mask_*`; consider a `L_AUDIT_ANY_PLT` flag constant or a bool view over the byte.
-
 ### backdoor_hooks_ctx_t.bootstrap_state_flags (0x4)
 - **Where it showed up:** `xzregh/1027D0_hooks_ctx_init_or_wait_for_shared_globals.c` (sets `bootstrap_state_flags = 0x4` when shared globals are missing).
 - **Why it mattered:** The field name suggests a bitmask but only one bit is used; naming it would document the bootstrap-retry state.
@@ -51,6 +46,9 @@ backlogs so we avoid duplicating effort.
 - **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
 
 ## Completed
+
+### link_map l_audit_any_plt bitmask
+- **Outcome (2025-12-25):** Added `LinkMapAuditFlags`/`LinkMapAuditFlags_t` in `metadata/xzre_types.json`, retyped the ldso_ctx audit flag pointer/bitmask plus locals in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/102770_restore_ldso_audit_state.c`, `xzregh/104AE0_find_l_audit_any_plt_mask_and_slot.c`, and `xzregh/105830_backdoor_install_runtime_hooks.c` now emit `LinkMapAuditFlags_t`.
 
 ### ld.so auditstate bindflags bitmask
 - **Outcome (2025-12-25):** Added `LaObjopenFlags`/`LaObjopenFlags_t` (`LA_FLG_BINDTO`, `LA_FLG_BINDFROM`) in `metadata/xzre_types.json`, retyped `auditstate.bindflags`, rewrote the bindflags assignments in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/105830_backdoor_install_runtime_hooks.c` now shows the named flags.

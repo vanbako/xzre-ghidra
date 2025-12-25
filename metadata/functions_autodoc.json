@@ -213,7 +213,7 @@
         "comment": "Stream every resolved hook/trampoline pointer into `secret_data` so telemetry and the command channel can attest to the install."
       },
       {
-        "match": "audit_slot_byte = (byte *)(hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;",
+        "match": "audit_slot_byte = (hooks_data->ldso_ctx).sshd_link_map_l_audit_any_plt_addr;",
         "comment": "Flip sshd\u2019s `l_audit_any_plt` bit so `_dl_audit_symbind_alt` starts calling our symbind trampoline for every sshd\u2192libcrypto PLT."
       },
       {

@@ -584,6 +584,20 @@
       "code": "typedef struct link_map {\n Elf64_Addr l_addr; /* Base load address; treated as the ELF header pointer in helpers. */\n char *l_name; /* NUL-terminated path/SONAME (empty for the main binary). */\n Elf64_Dyn *l_ld; /* Dynamic section pointer. */\n struct link_map *l_next; /* Next entry in r_debug->r_map. */\n struct link_map *l_prev; /* Previous entry in r_debug->r_map. */\n} link_map;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "LinkMapAuditFlags"
+      ],
+      "code": "typedef enum {\n L_AUDIT_ANY_PLT = 0x1\n} LinkMapAuditFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "LinkMapAuditFlags_t"
+      ],
+      "code": "typedef u8 LinkMapAuditFlags_t; /* Storage for LinkMapAuditFlags (L_AUDIT_*) bitmask. */"
+    },
+    {
       "kind": "struct",
       "names": [
         "gnu_hash_table_t"
@@ -1610,7 +1624,7 @@
       "names": [
         "ldso_ctx_t"
       ],
-      "code": "typedef struct __attribute__((packed)) ldso_ctx {\n u8 libcrypto_basename_buf[0x40]; /* Scratch buffer holding libcrypto's basename; used while forging link_map::l_name for audit hooks. */\n u32 *libcrypto_auditstate_bindflags_ptr;\n u32 libcrypto_auditstate_bindflags_old_value;\n u8 _unknown1476[0x4];\n u32 *sshd_auditstate_bindflags_ptr;\n u32 sshd_auditstate_bindflags_old_value;\n u8 _unknown1493[0x4];\n void* sshd_link_map_l_audit_any_plt_addr;\n u8 link_map_l_audit_any_plt_bitmask;\n u8 _unknown1510[0x7];\n struct audit_ifaces **_dl_audit_ptr;\n unsigned int *_dl_naudit_ptr;\n struct audit_ifaces hooked_audit_ifaces;\n u8 _unknown1538[0x30];\n char **libcrypto_l_name;\n dl_audit_symbind_alt_fn _dl_audit_symbind_alt;\n size_t _dl_audit_symbind_alt__size;\n pfn_RSA_public_decrypt_t rsa_public_decrypt_backdoor_shim;\n pfn_EVP_PKEY_set1_RSA_t evp_pkey_set1_rsa_backdoor_shim;\n pfn_RSA_get0_key_t rsa_get0_key_backdoor_shim;\n imported_funcs_t *imported_funcs;\n u64 hooks_installed;\n} ldso_ctx_t;"
+      "code": "typedef struct __attribute__((packed)) ldso_ctx {\n u8 libcrypto_basename_buf[0x40]; /* Scratch buffer holding libcrypto's basename; used while forging link_map::l_name for audit hooks. */\n u32 *libcrypto_auditstate_bindflags_ptr;\n u32 libcrypto_auditstate_bindflags_old_value;\n u8 _unknown1476[0x4];\n u32 *sshd_auditstate_bindflags_ptr;\n u32 sshd_auditstate_bindflags_old_value;\n u8 _unknown1493[0x4];\n LinkMapAuditFlags_t *sshd_link_map_l_audit_any_plt_addr;\n LinkMapAuditFlags_t link_map_l_audit_any_plt_bitmask;\n u8 _unknown1510[0x7];\n struct audit_ifaces **_dl_audit_ptr;\n unsigned int *_dl_naudit_ptr;\n struct audit_ifaces hooked_audit_ifaces;\n u8 _unknown1538[0x30];\n char **libcrypto_l_name;\n dl_audit_symbind_alt_fn _dl_audit_symbind_alt;\n size_t _dl_audit_symbind_alt__size;\n pfn_RSA_public_decrypt_t rsa_public_decrypt_backdoor_shim;\n pfn_EVP_PKEY_set1_RSA_t evp_pkey_set1_rsa_backdoor_shim;\n pfn_RSA_get0_key_t rsa_get0_key_backdoor_shim;\n imported_funcs_t *imported_funcs;\n u64 hooks_installed;\n} ldso_ctx_t;"
     },
     {
       "kind": "struct",

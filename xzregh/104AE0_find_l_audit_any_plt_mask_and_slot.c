@@ -25,7 +25,7 @@ BOOL find_l_audit_any_plt_mask_and_slot
   pfn_EVP_DecryptInit_ex_t evp_decryptinit_stub;
   lzma_allocator *libc_allocator;
   pfn_getuid_t getuid_stub;
-  u8 *audit_flag_slot;
+  LinkMapAuditFlags_t *audit_flag_slot;
   uchar decoded_pointer_register;
   u8 decoded_register;
   long ctx_clear_idx;
@@ -215,7 +215,8 @@ LAB_00104da9:
             audit_flag_slot = (byte *)((long)&data->runtime_data->sshd_link_map->l_addr +
                               (ulong)(search_ctx->offset_to_match).dwords.offset);
             (hook_table->ldso_ctx).sshd_link_map_l_audit_any_plt_addr = audit_flag_slot;
-            (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask = (u8)insn_ctx.imm_zeroextended;
+            (hook_table->ldso_ctx).link_map_l_audit_any_plt_bitmask =
+                 (LinkMapAuditFlags_t)insn_ctx.imm_zeroextended;
             if ((*audit_flag_slot & insn_ctx.imm_zeroextended) == 0) {
               return TRUE;
             }
