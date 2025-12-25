@@ -1412,6 +1412,10 @@
         "name": "leaf_supported",
         "original": "uVar2",
         "type": "uint"
+      },
+      {
+        "original": "0x80000000",
+        "replacement": "CPUID_LEAF_EXTENDED_MASK"
       }
     ],
     "source": "xzre/xzre_code/get_cpuid_modified.c"

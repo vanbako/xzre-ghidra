@@ -957,6 +957,13 @@
     {
       "kind": "enum",
       "names": [
+        "CpuidLeafMaskConstants"
+      ],
+      "code": "typedef enum {\n CPUID_LEAF_EXTENDED_MASK = 0x80000000\n} CpuidLeafMaskConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "ModRm_Mod"
       ],
       "code": "typedef enum {\n MRM_I_REG,\n MRM_I_DISP1,\n MRM_I_DISP4,\n MRM_D_REG\n} ModRm_Mod;"

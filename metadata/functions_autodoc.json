@@ -17,10 +17,10 @@
     ]
   },
   "get_cpuid_with_ifunc_bootstrap": {
-    "plate": "Exported resolver glibc binds as `_get_cpuid`/`__get_cpuid`. It first calls `cpuid_ifunc_resolver_entry()` with either leaf 0 or\n0x80000000 (depending on the caller\u2019s high bit) so the loader runs before any sshd worker queries CPUID. The returned EAX value is\ninterpreted as the CPU-advertised maximum leaf; only when the requested leaf is <= that bound does it forward the request to the\nreal `cpuid_query_and_unpack()` implementation and report success.",
+    "plate": "Exported resolver glibc binds as `_get_cpuid`/`__get_cpuid`. It first calls `cpuid_ifunc_resolver_entry()` with either leaf 0 or\n`CPUID_LEAF_EXTENDED_MASK` (depending on the caller\u2019s high bit) so the loader runs before any sshd worker queries CPUID. The returned EAX value is\ninterpreted as the CPU-advertised maximum leaf; only when the requested leaf is <= that bound does it forward the request to the\nreal `cpuid_query_and_unpack()` implementation and report success.",
     "inline": [
       {
-        "match": "max_leaf = cpuid_ifunc_resolver_entry(leaf & 0x80000000,caller_frame);",
+        "match": "max_leaf = cpuid_ifunc_resolver_entry(leaf & CPUID_LEAF_EXTENDED_MASK,caller_frame);",
         "comment": "Force the IFUNC resolver to run (and thus the loader to initialize) before satisfying any caller-supplied leaf."
       },
       {

@@ -612,6 +612,10 @@ typedef enum cpuid_leaf {
  CPUID_LEAF_BRAND_STRING_PART3 = 0x80000004
 } cpuid_leaf_t;
 
+typedef enum {
+ CPUID_LEAF_EXTENDED_MASK = 0x80000000
+} CpuidLeafMaskConstants;
+
 /*
  * Categorization of the ModRM byte modes that the instruction search helpers check when scanning for register or displacement based operands.
  */
