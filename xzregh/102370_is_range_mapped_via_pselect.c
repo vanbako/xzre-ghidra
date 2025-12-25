@@ -30,7 +30,7 @@ LAB_00102393:
     range_is_mapped = FALSE;
   }
   else {
-    probe_cursor = (sigset_t *)((ulong)addr & 0xfffffffffffff000);
+    probe_cursor = (sigset_t *)((ulong)addr & PAGE_ALIGN_MASK_4K);
     if (probe_cursor < addr + length) {
       if (ctx == (global_context_t *)0x0) goto LAB_00102393;
       do {

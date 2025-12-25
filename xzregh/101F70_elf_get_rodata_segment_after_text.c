@@ -48,9 +48,9 @@ void * elf_get_rodata_segment_after_text(elf_info_t *elf_info,u64 *pSize)
         if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == PF_R)) {
           segment_runtime_start = (long)ehdr + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_runtime_end = phdr->p_memsz + segment_runtime_start;
-          segment_page_start = (void *)(segment_runtime_start & 0xfffffffffffff000);
+          segment_page_start = (void *)(segment_runtime_start & PAGE_ALIGN_MASK_4K);
           if ((segment_runtime_end & 0xfff) != 0) {
-            segment_runtime_end = (segment_runtime_end & 0xfffffffffffff000) + 0x1000;
+            segment_runtime_end = (segment_runtime_end & PAGE_ALIGN_MASK_4K) + 0x1000;
           }
           if ((void *)((long)segment_start_ptr + code_segment_size) <= segment_page_start) {
             if (rodata_segment_found) {

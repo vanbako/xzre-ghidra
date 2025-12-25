@@ -38,9 +38,9 @@ void * elf_get_text_segment(elf_info_t *elf_info,u64 *pSize)
         if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & PF_X) != 0)) {
           segment_start = (long)elf_info->elfbase + (phdr->p_vaddr - elf_info->load_base_vaddr);
           segment_end = phdr->p_memsz + segment_start;
-          code_segment_start = (void *)(segment_start & 0xfffffffffffff000);
+          code_segment_start = (void *)(segment_start & PAGE_ALIGN_MASK_4K);
           if ((segment_end & 0xfff) != 0) {
-            segment_end = (segment_end & 0xfffffffffffff000) + 0x1000;
+            segment_end = (segment_end & PAGE_ALIGN_MASK_4K) + 0x1000;
           }
           segment_size = segment_end - (long)code_segment_start;
           elf_info->text_segment_start = (u64)code_segment_start;

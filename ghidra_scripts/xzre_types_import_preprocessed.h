@@ -444,6 +444,10 @@ typedef enum {
  ASCII_CASEFOLD_MASK_HI = 0xDF00
 } AsciiCaseFoldMask;
 
+typedef enum {
+ PAGE_ALIGN_MASK_4K = 0xfffffffffffff000 /* 4K page-alignment mask. */
+} PageAlignmentMaskConstants;
+
 /*
  * Bitmask describing which optional instruction prefixes (LOCK/REP, segment overrides, operand/address-size hints, VEX, REX and ModRM) were observed while decoding an x86 instruction.
  */

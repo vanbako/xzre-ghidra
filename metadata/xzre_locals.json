@@ -1767,6 +1767,10 @@
         "replacement": "ENCODED_STRING_ID_HI_MASK"
       },
       {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
+      },
+      {
         "original": "*resolved_count_ptr = 2;",
         "replacement": "*resolved_count_ptr = LA_FLG_BINDFROM;"
       },
@@ -2662,11 +2666,11 @@
       },
       {
         "original": "segment_page_floor = (Elf64_Ehdr *)(segment_runtime_start & 0xfffffffffffff000);",
-        "replacement": "segment_page_floor = (u8 *)(segment_runtime_start & 0xfffffffffffff000);"
+        "replacement": "segment_page_floor = (u8 *)(segment_runtime_start & PAGE_ALIGN_MASK_4K);"
       },
       {
         "original": "segment_page_ceil = (Elf64_Ehdr *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);",
-        "replacement": "segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);"
+        "replacement": "segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & PAGE_ALIGN_MASK_4K) + 0x1000);"
       },
       {
         "original": "segment_page_ceil->e_ident + 1",
@@ -2700,6 +2704,10 @@
       {
         "original": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,2);",
         "replacement": "range_is_protected = elf_vaddr_range_has_pflags(elf_info,(void *)vaddr,size,PF_W);"
+      },
+      {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
       }
     ],
     "source": "xzre/xzre_code/elf_contains_vaddr_relro.c"
@@ -3099,6 +3107,10 @@
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 1) != 0)) {",
         "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & PF_X) != 0)) {"
+      },
+      {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
       }
     ],
     "source": "xzre/xzre_code/elf_get_code_segment.c"
@@ -3174,6 +3186,10 @@
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 6)) {",
         "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == (PF_R | PF_W))) {"
+      },
+      {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
       }
     ],
     "source": "xzre/xzre_code/elf_get_data_segment.c"
@@ -3277,6 +3293,10 @@
       {
         "original": "if ((phdr->p_type == 1) && ((phdr->p_flags & 7) == 4)) {",
         "replacement": "if ((phdr->p_type == PT_LOAD) && ((phdr->p_flags & (PF_R | PF_W | PF_X)) == PF_R)) {"
+      },
+      {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
       }
     ],
     "source": "xzre/xzre_code/elf_get_rodata_segment.c"
@@ -5703,6 +5723,10 @@
         "name": "timeout_nanoseconds",
         "original": "local_30",
         "type": "long"
+      },
+      {
+        "original": "0xfffffffffffff000",
+        "replacement": "PAGE_ALIGN_MASK_4K"
       }
     ],
     "source": "xzre/xzre_code/is_range_mapped.c"

@@ -20,17 +20,15 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### 4K page-alignment mask
-- **Where it showed up:** `xzregh/105830_backdoor_install_runtime_hooks.c` (aligns `resolver_frame_addr` down to a page boundary with `& 0xfffffffffffff000`).
-- **Why it mattered:** A named `PAGE_MASK_4K`/`PAGE_ALIGN_MASK_4K` constant would clarify the page-alignment intent.
-- **Notes:** This mask is used in several ELF helpers (e.g., `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101EC0_elf_get_text_segment.c`); standardizing the constant would reduce magic literals.
-
 ### CPUID extended-leaf high-bit mask
 - **Where it showed up:** `xzregh/10A800_get_cpuid_with_ifunc_bootstrap.c` (passes `leaf & 0x80000000` into `cpuid_ifunc_resolver_entry` to select the max-leaf query).
 - **Why it mattered:** Naming the high-bit mask makes the extended-leaf selection logic explicit and avoids the raw `0x80000000` literal.
 - **Notes:** Consider `CPUID_LEAF_EXTENDED_MASK` or `CPUID_LEAF_EXTENDED_BASE` (matching the cpuid enum’s extended leaf range).
 
 ## Completed
+
+### 4K page-alignment mask
+- **Outcome (2025-12-25):** Added `PageAlignmentMaskConstants` (`PAGE_ALIGN_MASK_4K`) in `metadata/xzre_types.json`, rewrote the page-alignment literals via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/105830_backdoor_install_runtime_hooks.c`, `xzregh/101EC0_elf_get_text_segment.c`, `xzregh/101F70_elf_get_rodata_segment_after_text.c`, `xzregh/102150_elf_get_writable_tail_span.c`, `xzregh/101240_elf_vaddr_range_has_pflags_impl.c`, `xzregh/1022D0_elf_vaddr_range_in_relro_if_required.c`, and `xzregh/102370_is_range_mapped_via_pselect.c` now show `PAGE_ALIGN_MASK_4K`.
 
 ### EncodedStringId high-dword preserve mask
 - **Outcome (2025-12-25):** Added `EncodedStringIdMaskConstants` (`ENCODED_STRING_ID_HI_MASK`) in `metadata/xzre_types.json`, rewrote the high-dword mask literals in `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/105830_backdoor_install_runtime_hooks.c`, `xzregh/108270_sshd_monitor_cmd_dispatch.c`, and `xzregh/1094A0_rsa_backdoor_command_dispatch.c` now show `ENCODED_STRING_ID_HI_MASK`.

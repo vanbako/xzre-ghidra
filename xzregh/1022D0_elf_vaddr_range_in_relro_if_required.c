@@ -25,9 +25,9 @@ BOOL elf_vaddr_range_in_relro_if_required
      (elf_info->gnurelro_present != FALSE)) {
     relro_window_start = (long)elf_info->elfbase + (elf_info->gnurelro_vaddr - elf_info->load_base_vaddr);
     relro_window_end = elf_info->gnurelro_memsize + relro_window_start;
-    relro_window_start = relro_window_start & 0xfffffffffffff000;
+    relro_window_start = relro_window_start & PAGE_ALIGN_MASK_4K;
     if ((relro_window_end & 0xfff) != 0) {
-      relro_window_end = (relro_window_end & 0xfffffffffffff000) + 0x1000;
+      relro_window_end = (relro_window_end & PAGE_ALIGN_MASK_4K) + 0x1000;
     }
     // AutoDoc: Clamp to the page-aligned RELRO span; any byte outside `[relro_window_start, relro_window_end)` fails the containment test.
     if ((relro_window_end <= vaddr) || (range_is_protected = FALSE, vaddr < relro_window_start)) {

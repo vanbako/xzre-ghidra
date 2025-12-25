@@ -46,9 +46,9 @@ LAB_0010138e:
           segment_runtime_start = (long)elf_info->elfbase + (load_segment->p_vaddr - elf_info->load_base_vaddr);
           segment_page_ceil = (u8 *)(segment_runtime_start + load_segment->p_memsz);
           // AutoDoc: Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages.
-          segment_page_floor = (u8 *)(segment_runtime_start & 0xfffffffffffff000);
+          segment_page_floor = (u8 *)(segment_runtime_start & PAGE_ALIGN_MASK_4K);
           if (((ulong)segment_page_ceil & 0xfff) != 0) {
-            segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & 0xfffffffffffff000) + 0x1000);
+            segment_page_ceil = (u8 *)(((ulong)segment_page_ceil & PAGE_ALIGN_MASK_4K) + 0x1000);
           }
           if ((vaddr >= segment_page_floor) && (range_limit <= segment_page_ceil)) goto LAB_0010138e;
           if ((range_limit > segment_page_ceil) || (segment_page_floor <= vaddr)) {

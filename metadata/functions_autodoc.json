@@ -527,7 +527,7 @@
     "plate": "Validates that `[vaddr, vaddr + size)` is entirely covered by one or more PT_LOAD segments whose `p_flags` mask includes the requested bits. It computes `range_limit = vaddr + size` (using `min(vaddr, range_limit)` as a wraparound guard), page-aligns the interval, walks each loadable program header, and recursively re-checks any prefix/suffix that straddles adjacent segments until the entire span is proven resident.\n\nIt refuses to run more than 0x3ea iterations (preventing runaway recursion), insists that the candidate addresses live inside the mapped ELF image, and short-circuits to TRUE when `size` is zero. Callers pass `p_flags` values such as PF_X or PF_W to differentiate text, data, and RELRO spans.",
     "inline": [
       {
-        "match": "segment_page_floor = *(segment_runtime_start & 0xfffffffffffff000);",
+        "match": "segment_page_floor = *(segment_runtime_start & PAGE_ALIGN_MASK_4K);",
         "match_type": "wildcard",
         "comment": "Align each candidate PT_LOAD window to page boundaries so the comparison never straddles partial pages."
       },
