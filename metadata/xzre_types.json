@@ -761,6 +761,13 @@
     {
       "kind": "enum",
       "names": [
+        "SecretDataOpcodeMaskConstants"
+      ],
+      "code": "typedef enum {\n SECRET_DATA_OPCODE_EXCLUDE_MASK = 0x410100000101 /* Bitset of ALU reg/reg opcodes to skip in secret_data_append_opcode_bit (index = opcode - X86_OPCODE_1B_ADD_R_RM). */\n} SecretDataOpcodeMaskConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "X86_REG"
       ],
       "code": "enum X86_REG {\n X86_REG_RAX = 0,\n X86_REG_RCX = 1,\n X86_REG_RDX = 2,\n X86_REG_RBX = 3,\n X86_REG_RSP = 4,\n X86_REG_RBP = 5,\n X86_REG_RSI = 6,\n X86_REG_RDI = 7,\n X86_REG_R8 = 8,\n X86_REG_R9 = 9,\n X86_REG_R10 = 10,\n X86_REG_R11 = 11,\n X86_REG_R12 = 12,\n X86_REG_R13 = 13,\n X86_REG_R14 = 14,\n X86_REG_R15 = 15\n};"

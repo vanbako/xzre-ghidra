@@ -392,6 +392,10 @@ typedef enum {
  X86_OPCODE_MASK_IGNORE_DIR = 0xFFFFFFFD
 } X86OpcodeMask;
 
+typedef enum {
+ SECRET_DATA_OPCODE_EXCLUDE_MASK = 0x410100000101 /* Bitset of ALU reg/reg opcodes to skip in secret_data_append_opcode_bit (index = opcode - X86_OPCODE_1B_ADD_R_RM). */
+} SecretDataOpcodeMaskConstants;
+
 /*
  * Normalized register identifiers that the decoder uses when it needs to refer to architectural registers (only RBP is currently required).
  */

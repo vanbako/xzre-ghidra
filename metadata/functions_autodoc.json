@@ -2399,7 +2399,7 @@
       {
         "match_regex": "if \\(\\(\\([^)]* != X86_OPCODE_1B_MOV_STORE\\) && \\([^)]* != X86_OPCODE_1B_CMP_R_RM\\)\\) &&",
         "match_type": "regex",
-        "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83-0xb1 bit table so noisy instructions don't pollute the log."
+        "comment": "Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via SECRET_DATA_OPCODE_EXCLUDE_MASK so noisy instructions don't pollute the log."
       },
       {
         "match": "*bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));",

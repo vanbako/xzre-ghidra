@@ -20,10 +20,6 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### secret_data opcode allowlist bitset
-- **Where it showed up:** `xzregh/10A990_secret_data_append_opcode_bit.c` (mask `0x410100000101U` shifted by `decoded_opcode - X86_OPCODE_1B_ADD_R_RM`).
-- **Why it mattered:** This packed bitset excludes specific ALU reg/reg opcodes from the secret-data log; naming it would make the filter logic clearer and allow metadata to replace the literal mask.
-
 ### Encoded-string trie node header flags
 - **Where it showed up:** `xzregh/10A880_encoded_string_id_lookup.c` (`child_header & 4`, `& 2`, `& 1`, plus `child_header & 0xfffd/0xfffe`).
 - **Why it mattered:** The header packs terminal and signed-delta semantics for the trie row/bitmap jumps. A named bitfield (e.g., TERMINAL, ROW_DELTA_POS, BITMAP_DELTA_POS) would make the traversal logic legible and avoid raw masks.
@@ -37,6 +33,9 @@ backlogs so we avoid duplicating effort.
 - **Why it mattered:** These slices repack the cmd flag tail into `ctx->sshd_offsets` fields (log-hook flags, monitor opcode override, socket selectors). Modeling the bitfield would make the encoding explicit and eliminate raw masks.
 
 ## Completed
+
+### secret_data opcode allowlist bitset
+- **Outcome (2025-12-26):** Added `SecretDataOpcodeMaskConstants` (`SECRET_DATA_OPCODE_EXCLUDE_MASK`) in `metadata/xzre_types.json`, rewrote the opcode bitset literal via `metadata/xzre_locals.json`, updated the inline AutoDoc note, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A990_secret_data_append_opcode_bit.c` now shows `SECRET_DATA_OPCODE_EXCLUDE_MASK`.
 
 ### CPUID extended-leaf high-bit mask
 - **Outcome (2025-12-25):** Added `CpuidLeafMaskConstants` (`CPUID_LEAF_EXTENDED_MASK`) in `metadata/xzre_types.json`, rewrote the high-bit literal via `metadata/xzre_locals.json`, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A800_get_cpuid_with_ifunc_bootstrap.c` now shows `CPUID_LEAF_EXTENDED_MASK`.

@@ -2,6 +2,9 @@
 
 Document notable steps taken while building out the Ghidra analysis environment for the xzre artifacts. Add new entries in reverse chronological order and include enough context so another analyst can pick up where you left off.
 
+## 2025-12-26
+- Session `FLAG_secret_data_opcode_allowlist_bitset`: added `SecretDataOpcodeMaskConstants` (`SECRET_DATA_OPCODE_EXCLUDE_MASK`) in `metadata/xzre_types.json`, rewrote the opcode bitset literal via `metadata/xzre_locals.json`, updated the inline AutoDoc note, refreshed via `./scripts/refresh_xzre_project.sh`, verified `xzregh/10A990_secret_data_append_opcode_bit.c` now shows `SECRET_DATA_OPCODE_EXCLUDE_MASK`, and marked the flag backlog entry complete. Rationale: replace the secret-data opcode mask literal with a named constant to clarify the filter logic. Next: tackle another remaining flag backlog item (encoded-string trie header flags, sshbuf sign-bit sentinel, or cmd_flags tail bitfield packer).
+
 ## 2025-12-25
 - Session `DOC_FLAG_BACKLOG_CC5_SCAN`: scanned CC5 (secret-data appenders II) for flag/bitmask candidates and found no new entries beyond the existing backlog. Rationale: confirm CC5 coverage for flag cleanup. Next: scan another batch or start modeling the queued crypto_cmd flag candidates.
 - Session `DOC_FLAG_BACKLOG_CC4_SCAN`: scanned CC4 (secret-data appenders I) for flag/bitmask candidates and found no new entries beyond the existing encoded-string trie header flags and opcode allowlist bitset already tracked in `docs/FLAG_BACKLOG.md`. Rationale: confirm CC4 coverage for flag cleanup. Next: scan another batch or start modeling the queued crypto_cmd flag candidates.

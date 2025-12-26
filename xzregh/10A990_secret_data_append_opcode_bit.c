@@ -26,10 +26,10 @@ BOOL secret_data_append_opcode_bit(dasm_ctx_t *dctx,secret_data_shift_cursor_t *
   if (bit_index < 0x1c8) {
     // AutoDoc: Grab the normalized opcode tag from the sliding window (`raw_opcode + 0x80` for one-byte opcodes).
     decoded_opcode = (dctx->opcode_window).opcode_window_dword;
-    // AutoDoc: Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via the 0x83-0xb1 bit table so noisy instructions don't pollute the log.
+    // AutoDoc: Filter out MOV (0x109), CMP (0xbb), plus {ADD/OR/AND/SUB/XOR} reg-op opcodes via SECRET_DATA_OPCODE_EXCLUDE_MASK so noisy instructions don't pollute the log.
     if (((decoded_opcode != X86_OPCODE_1B_MOV_STORE) && (decoded_opcode != X86_OPCODE_1B_CMP_R_RM)) &&
        ((0x2e < decoded_opcode - X86_OPCODE_1B_ADD_R_RM ||
-        ((0x410100000101U >> ((byte)(decoded_opcode - X86_OPCODE_1B_ADD_R_RM) & 0x3f) & 1) == 0)))) {
+        ((SECRET_DATA_OPCODE_EXCLUDE_MASK >> ((byte)(decoded_opcode - X86_OPCODE_1B_ADD_R_RM) & 0x3f) & 1) == 0)))) {
       bit_slot = global_ctx->encrypted_secret_data + (ulong)(bit_index >> 3);
       // AutoDoc: Translate the global bit index into the packed 0x39-byte `global_ctx->encrypted_secret_data` buffer and set the corresponding bit.
       *bit_slot = *bit_slot | (byte)(1 << ((byte)bit_index & 7));

@@ -7666,6 +7666,10 @@
       {
         "original": "(dctx->opcode_window).opcode_window_dword",
         "replacement": "(dctx->opcode_window).opcode_window_dword"
+      },
+      {
+        "original": "((0x410100000101U >> ((byte)(decoded_opcode - X86_OPCODE_1B_ADD_R_RM) & 0x3f) & 1) == 0)))) {",
+        "replacement": "((SECRET_DATA_OPCODE_EXCLUDE_MASK >> ((byte)(decoded_opcode - X86_OPCODE_1B_ADD_R_RM) & 0x3f) & 1) == 0)))) {"
       }
     ],
     "source": "xzre/xzre_code/secret_data_append_from_instruction.c"
