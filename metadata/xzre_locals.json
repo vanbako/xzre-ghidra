@@ -7913,6 +7913,18 @@
         "name": "sshbuf_data",
         "original": "addr",
         "type": "u8 *"
+      },
+      {
+        "original": "if ((char)(size_slot_index & data_slot_index) < '\\0') {",
+        "replacement": "if (((size_slot_index & data_slot_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {"
+      },
+      {
+        "original": "if ((ctx->sshd_offsets).bytes.sshbuf_data_qword_index < '\\0') {",
+        "replacement": "if (((ctx->sshd_offsets).bytes.sshbuf_data_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {"
+      },
+      {
+        "original": "if ((ctx->sshd_offsets).bytes.sshbuf_size_qword_index < '\\0') {",
+        "replacement": "if (((ctx->sshd_offsets).bytes.sshbuf_size_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {"
       }
     ],
     "source": "xzre/xzre_code/sshbuf_extract.c"
@@ -8987,6 +8999,10 @@
         "name": "banner_hits",
         "original": "uVar9",
         "type": "uint"
+      },
+      {
+        "original": "if (-1 < (char)(data_index & size_index)) {",
+        "replacement": "if (((data_index & size_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) == 0) {"
       }
     ],
     "source": "xzre/xzre_code/sshd_get_sshbuf.c"

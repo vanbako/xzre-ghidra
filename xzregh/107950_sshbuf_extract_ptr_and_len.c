@@ -5,9 +5,9 @@
 
 
 /*
- * AutoDoc: Reads an sshbuf's `d` pointer and `size` field using the packed layout stored in `global_ctx->sshd_offsets`. Negative qword
- * indices mean the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally checks the
- * referenced buffer is mapped before returning the pointer/length pair.
+ * AutoDoc: Reads an sshbuf's `d` pointer and `size` field using the packed layout stored in `global_ctx->sshd_offsets`. The sign-bit sentinel
+ * on the qword indices means the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally
+ * checks the referenced buffer is mapped before returning the pointer/length pair.
  */
 
 #include "xzre_types.h"
@@ -31,8 +31,8 @@ BOOL sshbuf_extract_ptr_and_len
   {
     size_slot_index = (ctx->sshd_offsets).bytes.sshbuf_size_qword_index;
     data_slot_index = (ctx->sshd_offsets).bytes.sshbuf_data_qword_index;
-    // AutoDoc: When either index is negative we trust the inline struct layout; otherwise derive the byte offset for each field.
-    if ((char)(size_slot_index & data_slot_index) < '\0') {
+    // AutoDoc: When both indices carry the inline sign-bit sentinel, trust the struct layout; otherwise derive byte offsets for each field.
+    if (((size_slot_index & data_slot_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {
       size_field_offset = 0;
       data_field_offset = 0;
       sshbuf_span = 0x48;
@@ -48,16 +48,16 @@ BOOL sshbuf_extract_ptr_and_len
     // AutoDoc: Never touch the data/size fields unless the surrounding struct bytes are readable.
     probe_ok = is_range_mapped_via_pselect((u8 *)buf,sshbuf_span,ctx);
     if (probe_ok != FALSE) {
-      // AutoDoc: Negative `data` indices use the literal field; otherwise hop over to the encoded offset to fetch the pointer.
-      if ((ctx->sshd_offsets).bytes.sshbuf_data_qword_index < '\0') {
+      // AutoDoc: Sign-bit `data` indices use the literal field; otherwise hop over to the encoded offset to fetch the pointer.
+      if (((ctx->sshd_offsets).bytes.sshbuf_data_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {
         sshbuf_data = buf->d;
       }
       else {
         sshbuf_data = *(u8 **)((long)&buf->d + data_field_offset);
       }
       *p_sshbuf_d = sshbuf_data;
-      // AutoDoc: Negative `size` indices use the literal `buf->size`; otherwise read the qword at the computed offset.
-      if ((ctx->sshd_offsets).bytes.sshbuf_size_qword_index < '\0') {
+      // AutoDoc: Sign-bit `size` indices use the literal `buf->size`; otherwise read the qword at the computed offset.
+      if (((ctx->sshd_offsets).bytes.sshbuf_size_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {
         sshbuf_span = buf->size;
       }
       else {

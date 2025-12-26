@@ -20,16 +20,14 @@ backlogs so we avoid duplicating effort.
 
 ## Candidates
 
-### Encoded-string trie node header flags
-### sshbuf offset index sign-bit sentinel
-- **Where it showed up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c` and `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c` (sign-bit checks on `sshbuf_*_qword_index`, `data_index & size_index`).
-- **Why it mattered:** The negative index encoding controls whether offsets are inline or computed. Naming the sentinel (or splitting into a flag + index) would clarify the layout override logic and remove raw sign-bit checks.
-
 ### cmd_flags tail bitfield packer for sshd_offsets
 - **Where it showed up:** `xzregh/1094A0_rsa_backdoor_command_dispatch.c` (opcode 0/3 paths: `CONCAT11(encrypted_payload_bytes[3], encrypted_payload_bytes[2]) >> 6 & 0x7f`, `encrypted_payload_bytes[4] >> 5`, `encrypted_payload_bytes[4] >> 2 & 7`, `encrypted_payload_bytes[3] & 0x3f/0x40`).
 - **Why it mattered:** These slices repack the cmd flag tail into `ctx->sshd_offsets` fields (log-hook flags, monitor opcode override, socket selectors). Modeling the bitfield would make the encoding explicit and eliminate raw masks.
 
 ## Completed
+
+### sshbuf offset index sign-bit sentinel
+- **Outcome (2025-12-26):** Added `SshdOffsetIndexMaskConstants` (`SSHD_OFFSET_INDEX_INLINE_FLAG`) in `metadata/xzre_types.json`, rewrote the sign-bit checks via `metadata/xzre_locals.json`, updated the inline AutoDoc matches, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/107950_sshbuf_extract_ptr_and_len.c`/`xzregh/107A20_sshd_find_forged_modulus_sshbuf.c` now use the named sentinel.
 
 ### Encoded-string trie node header flags
 - **Outcome (2025-12-26):** Added `EncodedStringTrieNodeHeaderFlags`/`EncodedStringTrieNodeHeaderFlags_t` plus `EncodedStringTrieNodeHeaderMaskConstants` in `metadata/xzre_types.json`, retyped `child_header` and rewrote the header flag/mask literals via `metadata/xzre_locals.json`, updated the inline AutoDoc match, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A880_encoded_string_id_lookup.c` now emits the named flags/masks.

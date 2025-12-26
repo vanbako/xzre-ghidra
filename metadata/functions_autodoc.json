@@ -2536,23 +2536,23 @@
     ]
   },
   "sshbuf_extract_ptr_and_len": {
-    "plate": "Reads an sshbuf's `d` pointer and `size` field using the packed layout stored in `global_ctx->sshd_offsets`. Negative qword\nindices mean the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally checks the\nreferenced buffer is mapped before returning the pointer/length pair.",
+    "plate": "Reads an sshbuf's `d` pointer and `size` field using the packed layout stored in `global_ctx->sshd_offsets`. The sign-bit sentinel\non the qword indices means the struct fields already line up; otherwise it computes byte offsets, probes the struct range, and finally\nchecks the referenced buffer is mapped before returning the pointer/length pair.",
     "inline": [
       {
-        "match": "if ((char)(size_slot_index & data_slot_index) < '\\0') {",
-        "comment": "When either index is negative we trust the inline struct layout; otherwise derive the byte offset for each field."
+        "match": "if (((size_slot_index & data_slot_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {",
+        "comment": "When both indices carry the inline sign-bit sentinel, trust the struct layout; otherwise derive byte offsets for each field."
       },
       {
         "match": "probe_ok = is_range_mapped_via_pselect((u8 *)buf,sshbuf_span,ctx);",
         "comment": "Never touch the data/size fields unless the surrounding struct bytes are readable."
       },
       {
-        "match": "if ((ctx->sshd_offsets).bytes.sshbuf_data_qword_index < '\\0') {",
-        "comment": "Negative `data` indices use the literal field; otherwise hop over to the encoded offset to fetch the pointer."
+        "match": "if (((ctx->sshd_offsets).bytes.sshbuf_data_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {",
+        "comment": "Sign-bit `data` indices use the literal field; otherwise hop over to the encoded offset to fetch the pointer."
       },
       {
-        "match": "if ((ctx->sshd_offsets).bytes.sshbuf_size_qword_index < '\\0') {",
-        "comment": "Negative `size` indices use the literal `buf->size`; otherwise read the qword at the computed offset."
+        "match": "if (((ctx->sshd_offsets).bytes.sshbuf_size_qword_index & SSHD_OFFSET_INDEX_INLINE_FLAG) != 0) {",
+        "comment": "Sign-bit `size` indices use the literal `buf->size`; otherwise read the qword at the computed offset."
       },
       {
         "match": "probe_ok = is_range_mapped_via_pselect(sshbuf_data,sshbuf_span,ctx);",
@@ -2981,8 +2981,8 @@
         "comment": "Offset override: `monitor_pkex_table_dword_index` selects which 32-bit slot inside `struct monitor` holds the pkex table pointer."
       },
       {
-        "match": "if (-1 < (char)(data_index & size_index)) {",
-        "comment": "When both qword indices are known, derive byte offsets so the later field probes land on the remapped struct layout."
+        "match": "if (((data_index & size_index) & SSHD_OFFSET_INDEX_INLINE_FLAG) == 0) {",
+        "comment": "When neither qword index carries the sign-bit sentinel, derive byte offsets so the later field probes land on the remapped struct layout."
       },
       {
         "match": "probe_ok = is_range_mapped_via_pselect(&(*pkex_table)->opaque,0x400,ctx)",
