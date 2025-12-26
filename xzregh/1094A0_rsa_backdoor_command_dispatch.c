@@ -292,8 +292,7 @@ LAB_00109aa2:
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {
                                   log_hook_flags = 0xff;
                                   if ((encrypted_payload_bytes[1] & 2) != 0) {
-                                    log_hook_flags = (byte)(CONCAT11(encrypted_payload_bytes[3],encrypted_payload_bytes[2]) >> 6) & 0x7f
-                                    ;
+                                    log_hook_flags = (byte)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.kex_sshbuf_qword_index;
                                   }
                                   monitor_opcode_field = 0xff;
                                   if ((control_flags & CMD_CTRL_EXTENDED_MODE) != 0) {
@@ -308,8 +307,8 @@ LAB_00109c56:
                                     socket_slot_field = 0xff;
                                   }
                                   else {
-                                    socket_slot_field = (uint)((byte)encrypted_payload_bytes[4] >> 5);
-                                    rsa_payload_span = rsa_payload_span | ((byte)encrypted_payload_bytes[4] >> 2 & 7) << 0x10;
+                                    socket_slot_field = (uint)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.sshbuf_size_qword_index;
+                                    rsa_payload_span = rsa_payload_span | ((uint)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.sshbuf_data_qword_index) << 0x10;
                                   }
 LAB_00109c7b:
                                   rsa_payload_span = rsa_payload_span | socket_slot_field << 0x18;
@@ -583,17 +582,17 @@ LAB_00109b6c:
                                 }
                                 if (((char)encrypted_payload_bytes[3] < '\0') ||
                                    (ctx->sshd_ctx->permit_root_login_ptr != (int *)0x0)) {
-                                  if ((encrypted_payload_bytes[2] & 0x20) != 0) {
+                                  if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.offsets_tail_present != 0) {
                                     monitor_opcode_override = 0xff;
-                                    if ((char)encrypted_payload_bytes[2] < '\0') {
-                                      monitor_opcode_override = encrypted_payload_bytes[4];
+                                    if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.monitor_opcode_override_present != 0) {
+                                      monitor_opcode_override = ((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.monitor_opcode_override;
                                     }
                                     log_hook_flags = 0xff;
-                                    if ((encrypted_payload_bytes[2] & 0x40) != 0) {
-                                      log_hook_flags = encrypted_payload_bytes[3] & 0x3f;
+                                    if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.log_flags_present != 0) {
+                                      log_hook_flags = (byte)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.kex_sshbuf_qword_index;
                                     }
                                     rsa_payload_span = (uint)CONCAT11(log_hook_flags,monitor_opcode_override);
-                                    if ((encrypted_payload_bytes[3] & 0x40) == 0) goto LAB_00109c56;
+                                    if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.socket_fields_present == 0) goto LAB_00109c56;
                                     socket_slot_field = encrypted_payload_bytes[1] >> 3 & 7;
                                     rsa_payload_span = rsa_payload_span | (encrypted_payload_bytes[1] & 7) << 0x10;
                                     goto LAB_00109c7b;

