@@ -5430,7 +5430,7 @@
       {
         "name": "child_header",
         "original": "uVar8",
-        "type": "ushort"
+        "type": "EncodedStringTrieNodeHeaderFlags_t"
       },
       {
         "name": "bitmap_pair",
@@ -5451,6 +5451,26 @@
         "name": "candidate_bits",
         "original": "uVar12",
         "type": "ulong"
+      },
+      {
+        "original": "child_header & 4",
+        "replacement": "child_header & ENCODED_STRING_TRIE_NODE_TERMINAL"
+      },
+      {
+        "original": "child_header & 2",
+        "replacement": "child_header & ENCODED_STRING_TRIE_NODE_ROW_DELTA_POSITIVE"
+      },
+      {
+        "original": "child_header & 1",
+        "replacement": "child_header & ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_POSITIVE"
+      },
+      {
+        "original": "child_header & 0xfffd",
+        "replacement": "child_header & ENCODED_STRING_TRIE_NODE_ROW_DELTA_CLEAR_MASK"
+      },
+      {
+        "original": "child_header & 0xfffe",
+        "replacement": "child_header & ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_CLEAR_MASK"
       }
     ],
     "source": "xzre/xzre_code/get_string_id.c"

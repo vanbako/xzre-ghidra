@@ -21,9 +21,6 @@ backlogs so we avoid duplicating effort.
 ## Candidates
 
 ### Encoded-string trie node header flags
-- **Where it showed up:** `xzregh/10A880_encoded_string_id_lookup.c` (`child_header & 4`, `& 2`, `& 1`, plus `child_header & 0xfffd/0xfffe`).
-- **Why it mattered:** The header packs terminal and signed-delta semantics for the trie row/bitmap jumps. A named bitfield (e.g., TERMINAL, ROW_DELTA_POS, BITMAP_DELTA_POS) would make the traversal logic legible and avoid raw masks.
-
 ### sshbuf offset index sign-bit sentinel
 - **Where it showed up:** `xzregh/107950_sshbuf_extract_ptr_and_len.c` and `xzregh/107A20_sshd_find_forged_modulus_sshbuf.c` (sign-bit checks on `sshbuf_*_qword_index`, `data_index & size_index`).
 - **Why it mattered:** The negative index encoding controls whether offsets are inline or computed. Naming the sentinel (or splitting into a flag + index) would clarify the layout override logic and remove raw sign-bit checks.
@@ -33,6 +30,9 @@ backlogs so we avoid duplicating effort.
 - **Why it mattered:** These slices repack the cmd flag tail into `ctx->sshd_offsets` fields (log-hook flags, monitor opcode override, socket selectors). Modeling the bitfield would make the encoding explicit and eliminate raw masks.
 
 ## Completed
+
+### Encoded-string trie node header flags
+- **Outcome (2025-12-26):** Added `EncodedStringTrieNodeHeaderFlags`/`EncodedStringTrieNodeHeaderFlags_t` plus `EncodedStringTrieNodeHeaderMaskConstants` in `metadata/xzre_types.json`, retyped `child_header` and rewrote the header flag/mask literals via `metadata/xzre_locals.json`, updated the inline AutoDoc match, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A880_encoded_string_id_lookup.c` now emits the named flags/masks.
 
 ### secret_data opcode allowlist bitset
 - **Outcome (2025-12-26):** Added `SecretDataOpcodeMaskConstants` (`SECRET_DATA_OPCODE_EXCLUDE_MASK`) in `metadata/xzre_types.json`, rewrote the opcode bitset literal via `metadata/xzre_locals.json`, updated the inline AutoDoc note, refreshed via `./scripts/refresh_xzre_project.sh`, and verified `xzregh/10A990_secret_data_append_opcode_bit.c` now shows `SECRET_DATA_OPCODE_EXCLUDE_MASK`.

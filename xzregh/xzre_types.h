@@ -807,6 +807,19 @@ typedef enum {
  ENCODED_STRING_ID_HI_MASK = 0xffffffff00000000
 } EncodedStringIdMaskConstants;
 
+typedef enum {
+ ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_POSITIVE = 0x1,
+ ENCODED_STRING_TRIE_NODE_ROW_DELTA_POSITIVE = 0x2,
+ ENCODED_STRING_TRIE_NODE_TERMINAL = 0x4
+} EncodedStringTrieNodeHeaderFlags;
+
+typedef u16 EncodedStringTrieNodeHeaderFlags_t; /* Storage for EncodedStringTrieNodeHeaderFlags (ENCODED_STRING_TRIE_NODE_*) bitmask. */
+
+typedef enum {
+ ENCODED_STRING_TRIE_NODE_ROW_DELTA_CLEAR_MASK = 0xfffd,
+ ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_CLEAR_MASK = 0xfffe
+} EncodedStringTrieNodeHeaderMaskConstants;
+
 /*
  * State machine for the payload download/decrypt workflow (only INITIAL is defined so far while the rest of the states are discovered dynamically).
  */

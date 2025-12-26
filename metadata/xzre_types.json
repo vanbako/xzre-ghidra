@@ -1013,6 +1013,27 @@
     {
       "kind": "enum",
       "names": [
+        "EncodedStringTrieNodeHeaderFlags"
+      ],
+      "code": "typedef enum {\n ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_POSITIVE = 0x1,\n ENCODED_STRING_TRIE_NODE_ROW_DELTA_POSITIVE = 0x2,\n ENCODED_STRING_TRIE_NODE_TERMINAL = 0x4\n} EncodedStringTrieNodeHeaderFlags;"
+    },
+    {
+      "kind": "typedef",
+      "names": [
+        "EncodedStringTrieNodeHeaderFlags_t"
+      ],
+      "code": "typedef u16 EncodedStringTrieNodeHeaderFlags_t; /* Storage for EncodedStringTrieNodeHeaderFlags (ENCODED_STRING_TRIE_NODE_*) bitmask. */"
+    },
+    {
+      "kind": "enum",
+      "names": [
+        "EncodedStringTrieNodeHeaderMaskConstants"
+      ],
+      "code": "typedef enum {\n ENCODED_STRING_TRIE_NODE_ROW_DELTA_CLEAR_MASK = 0xfffd,\n ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_CLEAR_MASK = 0xfffe\n} EncodedStringTrieNodeHeaderMaskConstants;"
+    },
+    {
+      "kind": "enum",
+      "names": [
         "PayloadState"
       ],
       "code": "typedef enum {\n PAYLOAD_STATE_INITIAL = -1\n} PayloadState;"

@@ -24,7 +24,7 @@ EncodedStringId encoded_string_id_lookup(char *string_begin,char *string_end)
   BOOL logged_probe;
   uint child_rank;
   byte current_char;
-  ushort child_header;
+  EncodedStringTrieNodeHeaderFlags_t child_header;
   ulong *bitmap_pair;
   byte *max_scan;
   long trie_row_offset;
@@ -73,18 +73,18 @@ EncodedStringId encoded_string_id_lookup(char *string_begin,char *string_end)
       child_entry = (ushort *)(trie_row_offset + (ulong)child_rank * 4);
       child_header = *child_entry;
       child_row_delta = child_entry[1];
-      // AutoDoc: Flag 0x4 marks a terminal node, so the stored `child_row_delta` doubles as the EncodedStringId return value.
-      if ((child_header & 4) != 0) {
+      // AutoDoc: Flag ENCODED_STRING_TRIE_NODE_TERMINAL marks a terminal node, so the stored `child_row_delta` doubles as the EncodedStringId return value.
+      if ((child_header & ENCODED_STRING_TRIE_NODE_TERMINAL) != 0) {
         return (int)(short)child_row_delta;
       }
-      if ((child_header & 2) == 0) {
+      if ((child_header & ENCODED_STRING_TRIE_NODE_ROW_DELTA_POSITIVE) == 0) {
         child_row_delta = -child_row_delta;
       }
       else {
-        child_header = child_header & 0xfffd;
+        child_header = child_header & ENCODED_STRING_TRIE_NODE_ROW_DELTA_CLEAR_MASK;
       }
-      bitmap_delta = child_header & 0xfffe;
-      if ((child_header & 1) == 0) {
+      bitmap_delta = child_header & ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_CLEAR_MASK;
+      if ((child_header & ENCODED_STRING_TRIE_NODE_BITMAP_DELTA_POSITIVE) == 0) {
         bitmap_delta = -child_header;
       }
       // AutoDoc: Use the remaining flag bits as signed deltas that hop to the next packed row inside `string_action_data`.

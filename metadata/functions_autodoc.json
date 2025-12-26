@@ -1610,8 +1610,8 @@
         "comment": "Scan the bitmap word until the desired bit index surfaces so the accumulated rank matches the child slot we need."
       },
       {
-        "match": "if ((child_header & 4) != 0) {",
-        "comment": "Flag 0x4 marks a terminal node, so the stored `child_row_delta` doubles as the EncodedStringId return value."
+        "match": "if ((child_header & ENCODED_STRING_TRIE_NODE_TERMINAL) != 0) {",
+        "comment": "Flag ENCODED_STRING_TRIE_NODE_TERMINAL marks a terminal node, so the stored `child_row_delta` doubles as the EncodedStringId return value."
       },
       {
         "match": "trie_row_offset = trie_row_offset + (short)(child_row_delta - 4);",
