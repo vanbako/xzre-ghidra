@@ -25,7 +25,7 @@ BOOL x86_decode_instruction(dasm_ctx_t *ctx,u8 *code_start,u8 *code_end)
   u64 derived_opcode;
   sbyte opcode_index;
   X86_OPCODE opcode;
-  X86_OPCODE opcode_high_bits;
+  dasm_opcode_window_map opcode_high_bits;
   long clear_idx;
   u8 *opcode_ptr;
   u8 *cursor;
@@ -75,7 +75,7 @@ LAB_00100aa5:
     vex_prefix_window.opcode_window[0] = current_byte;
     if (current_byte < 0x68) {
       if (current_byte < 0x2e) {
-        if (current_byte == 0xf) {
+        if (current_byte == X86_OPCODE_ESCAPE_0F) {
         // AutoDoc: 0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).
           (ctx->opcode_window).opcode_window_dword = 0xf;
           opcode_ptr = opcode_ptr + 1;
@@ -87,7 +87,7 @@ LAB_001001c9:
           opcode = current_byte | opcode;
           (ctx->opcode_window).opcode_window_dword = opcode;
           tmp_byte = *opcode_ptr;
-          if ((tmp_byte & 0xfd) == 0x38) {
+          if ((tmp_byte & 0xfd) == X86_OPCODE_MAP_0F38_PREFIX) {
             if (((ctx->prefix).decoded.flags & DF1_VEX) != 0) {
               return FALSE;
             }
@@ -97,7 +97,7 @@ LAB_001001c9:
           if (((int)(uint)(byte)(&dasm_twobyte_is_valid)[tmp_byte >> 3] >> (tmp_byte & 7) & 1U) == 0) {
             return FALSE;
           }
-          if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {
+          if (((ctx->prefix).decoded.lock_rep_byte == X86_PREFIX_REP) && (tmp_byte == 0x1e)) {
           // AutoDoc: Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.
             if (opcode_ptr + 1 < code_end) {
               prefix_zero_cursor = &ctx->prefix;
@@ -174,7 +174,7 @@ LAB_0010092e:
               if ((cursor_byte & 7) == 4) {
                 (ctx->prefix).decoded.flags = current_byte | (DF1_MODRM | DF1_SIB);
               }
-              if (tmp_byte != 1) {
+              if (tmp_byte != X86_VEX_MAP_0F) {
                 if (tmp_byte != 2) goto LAB_00100902;
                 goto LAB_0010092e;
               }
@@ -240,15 +240,15 @@ LAB_001009ea:
           }
 LAB_001004e1:
           ctx->instruction_size = (u64)opcode_ptr;
-          if (opcode_ptr == (byte *)0x0) {
+          if (opcode_ptr == NULL) {
             return FALSE;
           }
           goto LAB_001004ee;
         }
-        if (current_byte != 0x26) goto LAB_00100191;
+        if (current_byte != X86_PREFIX_SEG_ES) goto LAB_00100191;
       }
       else if ((0xc0000000010101U >> ((ulong)(current_byte - 0x2e) & 0x3f) & 1) == 0) {
-        if (current_byte == 0x67) {
+        if (current_byte == X86_PREFIX_ADDRSIZE) {
           current_byte = (ctx->prefix).decoded.flags;
           if ((current_byte & DF1_ASIZE) != 0) {
             return FALSE;
@@ -257,8 +257,8 @@ LAB_001004e1:
           (ctx->prefix).decoded.asize_byte = *opcode_ptr;
         }
         else {
-          if (current_byte != 0x66) {
-            if ((current_byte & 0xf0) == 0x40) {
+          if (current_byte != X86_PREFIX_OPSIZE) {
+            if ((current_byte & REX_PREFIX_MASK) == REX_PREFIX) {
               (ctx->prefix).decoded.flags = (ctx->prefix).decoded.flags | DF1_REX;
               current_byte = *opcode_ptr;
               opcode_ptr = opcode_ptr + 1;
@@ -285,9 +285,9 @@ LAB_001004e1:
       (ctx->prefix).decoded.seg_byte = *opcode_ptr;
     }
     else {
-      if (current_byte != 0xf0) {
+      if (current_byte != X86_PREFIX_LOCK) {
         if (current_byte < 0xf1) {
-          if (1 < (byte)(current_byte + 0x3c)) goto LAB_00100191;
+          if ((current_byte != X86_PREFIX_VEX3) && (current_byte != X86_PREFIX_VEX2)) goto LAB_00100191;
           tmp_byte = (ctx->prefix).decoded.flags;
           if ((tmp_byte & DF1_REX) != 0) {
             return FALSE;
@@ -306,8 +306,8 @@ LAB_001004e1:
           (ctx->opcode_window).opcode_window_dword = opcode;
           current_byte = ((char)opcode_ptr[1] >> 7 & 0xfcU) + 0x44;
           (ctx->prefix).modrm_bytes.rex_byte = current_byte;
-          if (modrm_byte == 0xc5) goto LAB_001001c5;
-          if (modrm_byte != 0xc4) {
+          if (modrm_byte == X86_PREFIX_VEX2) goto LAB_001001c5;
+          if (modrm_byte != X86_PREFIX_VEX3) {
             return FALSE;
           }
           modrm_byte = opcode_ptr[1];
@@ -331,18 +331,18 @@ LAB_001004e1:
           }
           opcode = opcode << 8;
           (ctx->opcode_window).opcode_window_dword = opcode;
-          if (tmp_byte == 2) {
-            opcode = opcode | 0x38;
+          if (tmp_byte == X86_VEX_MAP_0F38) {
+            opcode = opcode | X86_OPCODE_MAP_0F38_PREFIX;
           }
           else {
-            if (tmp_byte != 3) {
-              if (tmp_byte != 1) {
+            if (tmp_byte != X86_VEX_MAP_0F3A) {
+              if (tmp_byte != X86_VEX_MAP_0F) {
                 return FALSE;
               }
               opcode_ptr = opcode_ptr + 3;
               goto LAB_001001c9;
             }
-            opcode = opcode | 0x3a;
+            opcode = opcode | X86_OPCODE_MAP_0F3A_PREFIX;
           }
           (ctx->opcode_window).opcode_window_dword = opcode;
           opcode_ptr = opcode_ptr + 3;
@@ -359,7 +359,7 @@ LAB_001003fa:
           }
           opcode_high_bits = normalized_opcode & 0xff00;
           cursor = opcode_ptr;
-          if (opcode_high_bits != 0x3800) {
+          if (opcode_high_bits != XZ_OPCODE_WINDOW_THREE_BYTE_0F38) {
             opcode = normalized_opcode & 0xff;
             current_byte = (byte)normalized_opcode;
             if (current_byte < 0xf1) {
@@ -378,7 +378,7 @@ LAB_001003fa:
               else if ((0x1000080001U >> (current_byte + 0x34 & 0x3f) & 1) == 0) goto LAB_001005d6;
 LAB_001005bf:
               ctx->opcode_offset = (char)opcode_ptr - (char)code_start;
-              if (opcode_high_bits == 0x3a00) {
+              if (opcode_high_bits == XZ_OPCODE_WINDOW_THREE_BYTE_0F3A) {
 LAB_0010063c:
                 flags2_ptr = &(ctx->prefix).decoded.flags2;
                 *flags2_ptr = *flags2_ptr | DF2_IMM;
@@ -414,7 +414,7 @@ LAB_00100604:
                 }
               }
               ctx->opcode_offset = (char)opcode_ptr - (char)code_start;
-              if ((opcode_high_bits == 0x3a00) && (2 < opcode - 0x4a)) goto LAB_0010063c;
+              if ((opcode_high_bits == XZ_OPCODE_WINDOW_THREE_BYTE_0F3A) && (2 < opcode - 0x4a)) goto LAB_0010063c;
             }
             ctx->imm_size = 0;
             goto LAB_001008c5;
@@ -440,8 +440,8 @@ LAB_00100680:
           current_byte = *opcode_ptr;
           if (derived_opcode != 1) {
             cursor = opcode_ptr + 1;
-            if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {
-            // AutoDoc: When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.
+            if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == X86_PREFIX_OPSIZE)) {
+            // AutoDoc: When an operand-size override is active (X86_PREFIX_OPSIZE + DF1_OSIZE) flip 16- and 32-bit immediates so the decoded width stays accurate.
               if (derived_opcode == 2) {
                 ctx->imm_size = 4;
               }
@@ -486,12 +486,12 @@ LAB_00100680:
           ctx->instruction_size = (u64)opcode_ptr;
         }
         else {
-          if ((byte)(current_byte + 0xe) < 2) goto LAB_001000cf;
+          if ((current_byte == X86_PREFIX_REPNE) || (current_byte == X86_PREFIX_REP)) goto LAB_001000cf;
 LAB_00100191:
           if (code_end <= opcode_ptr) goto LAB_00100aa5;
           current_byte = *opcode_ptr;
           opcode_class_offset = (ulong)current_byte;
-          if (current_byte == 0xf) {
+          if (current_byte == X86_OPCODE_ESCAPE_0F) {
             (ctx->opcode_window).opcode_window_dword = 0xf;
             cursor = opcode_ptr;
 LAB_001001c5:
@@ -611,7 +611,7 @@ LAB_0010089f:
 LAB_001007e4:
           ctx->instruction_size = (u64)opcode_ptr;
         }
-        if (opcode_ptr == (byte *)0x0) {
+        if (opcode_ptr == NULL) {
           return FALSE;
         }
         opcode = (ctx->opcode_window).opcode_window_dword;

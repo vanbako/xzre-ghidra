@@ -10065,7 +10065,7 @@
       {
         "name": "opcode_high_bits",
         "original": "XVar13",
-        "type": "X86_OPCODE"
+        "type": "dasm_opcode_window_map"
       },
       {
         "name": "opcode_class_entry",
@@ -10359,6 +10359,98 @@
       {
         "original": "(ctx->prefix).modrm_bytes.rex_byte & 8",
         "replacement": "(ctx->prefix).modrm_bytes.rex_byte & REX_W"
+      },
+      {
+        "original": "if (current_byte == 0xf) {",
+        "replacement": "if (current_byte == X86_OPCODE_ESCAPE_0F) {"
+      },
+      {
+        "original": "if (((ctx->prefix).decoded.lock_rep_byte == 0xf3) && (tmp_byte == 0x1e)) {",
+        "replacement": "if (((ctx->prefix).decoded.lock_rep_byte == X86_PREFIX_REP) && (tmp_byte == 0x1e)) {"
+      },
+      {
+        "original": "if (current_byte != 0x26) goto LAB_00100191;",
+        "replacement": "if (current_byte != X86_PREFIX_SEG_ES) goto LAB_00100191;"
+      },
+      {
+        "original": "if (current_byte == 0x67) {",
+        "replacement": "if (current_byte == X86_PREFIX_ADDRSIZE) {"
+      },
+      {
+        "original": "if (current_byte != 0x66) {",
+        "replacement": "if (current_byte != X86_PREFIX_OPSIZE) {"
+      },
+      {
+        "original": "if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {",
+        "replacement": "if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == X86_PREFIX_OPSIZE)) {"
+      },
+      {
+        "original": "if ((current_byte & 0xf0) == 0x40) {",
+        "replacement": "if ((current_byte & REX_PREFIX_MASK) == REX_PREFIX) {"
+      },
+      {
+        "original": "if (current_byte != 0xf0) {",
+        "replacement": "if (current_byte != X86_PREFIX_LOCK) {"
+      },
+      {
+        "original": "if (modrm_byte == 0xc5) goto LAB_001001c5;",
+        "replacement": "if (modrm_byte == X86_PREFIX_VEX2) goto LAB_001001c5;"
+      },
+      {
+        "original": "if (modrm_byte != 0xc4) {",
+        "replacement": "if (modrm_byte != X86_PREFIX_VEX3) {"
+      },
+      {
+        "original": "if (tmp_byte == 2) {",
+        "replacement": "if (tmp_byte == X86_VEX_MAP_0F38) {"
+      },
+      {
+        "original": "if (tmp_byte != 3) {",
+        "replacement": "if (tmp_byte != X86_VEX_MAP_0F3A) {"
+      },
+      {
+        "original": "if (tmp_byte != 1) {",
+        "replacement": "if (tmp_byte != X86_VEX_MAP_0F) {"
+      },
+      {
+        "original": "if ((tmp_byte & 0xfd) == 0x38) {",
+        "replacement": "if ((tmp_byte & 0xfd) == X86_OPCODE_MAP_0F38_PREFIX) {"
+      },
+      {
+        "original": "opcode = opcode | 0x38;",
+        "replacement": "opcode = opcode | X86_OPCODE_MAP_0F38_PREFIX;"
+      },
+      {
+        "original": "opcode = opcode | 0x3a;",
+        "replacement": "opcode = opcode | X86_OPCODE_MAP_0F3A_PREFIX;"
+      },
+      {
+        "original": "0x3800",
+        "replacement": "XZ_OPCODE_WINDOW_THREE_BYTE_0F38"
+      },
+      {
+        "original": "0x3a00",
+        "replacement": "XZ_OPCODE_WINDOW_THREE_BYTE_0F3A"
+      },
+      {
+        "original": "if (1 < (byte)(current_byte + 0x3c)) goto LAB_00100191;",
+        "replacement": "if ((current_byte != 0xc4) && (current_byte != 0xc5)) goto LAB_00100191;"
+      },
+      {
+        "original": "if ((byte)(current_byte + 0xe) < 2) goto LAB_001000cf;",
+        "replacement": "if ((current_byte == 0xf2) || (current_byte == 0xf3)) goto LAB_001000cf;"
+      },
+      {
+        "original": "if ((current_byte != 0xc4) && (current_byte != 0xc5)) goto LAB_00100191;",
+        "replacement": "if ((current_byte != X86_PREFIX_VEX3) && (current_byte != X86_PREFIX_VEX2)) goto LAB_00100191;"
+      },
+      {
+        "original": "if ((current_byte == 0xf2) || (current_byte == 0xf3)) goto LAB_001000cf;",
+        "replacement": "if ((current_byte == X86_PREFIX_REPNE) || (current_byte == X86_PREFIX_REP)) goto LAB_001000cf;"
+      },
+      {
+        "original": "if (opcode_ptr == (byte *)0x0) {",
+        "replacement": "if (opcode_ptr == NULL) {"
       }
     ],
     "source": "xzre/xzre_code/x86_dasm.c"

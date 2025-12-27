@@ -510,7 +510,8 @@ typedef enum {
  REX_X = 0x2,
  REX_R = 0x4,
  REX_W = 0x8,
- REX_PREFIX = 0x40
+ REX_PREFIX = 0x40,
+ REX_PREFIX_MASK = 0xF0
 } RexPrefixFlags;
 
 typedef u8 RexPrefixFlags_t; /* Storage for REX prefix (REX_*) bitmask. */
@@ -932,15 +933,43 @@ enum dasm_modrm_signature {
  XZ_MODRM_RIPREL_DISP32 = 0x05000000
 };
 
+typedef enum {
+ X86_OPCODE_ESCAPE_0F = 0x0F,
+ X86_PREFIX_SEG_ES = 0x26,
+ X86_PREFIX_SEG_CS = 0x2E,
+ X86_PREFIX_SEG_SS = 0x36,
+ X86_PREFIX_SEG_DS = 0x3E,
+ X86_PREFIX_SEG_FS = 0x64,
+ X86_PREFIX_SEG_GS = 0x65,
+ X86_PREFIX_OPSIZE = 0x66,
+ X86_PREFIX_ADDRSIZE = 0x67,
+ X86_PREFIX_VEX3 = 0xC4,
+ X86_PREFIX_VEX2 = 0xC5,
+ X86_PREFIX_LOCK = 0xF0,
+ X86_PREFIX_REPNE = 0xF2,
+ X86_PREFIX_REP = 0xF3
+} X86PrefixByteConstants;
+
+typedef enum {
+ X86_OPCODE_MAP_0F38_PREFIX = 0x38,
+ X86_OPCODE_MAP_0F3A_PREFIX = 0x3A
+} X86OpcodeMapPrefixConstants;
+
+typedef enum {
+ X86_VEX_MAP_0F = 0x1,
+ X86_VEX_MAP_0F38 = 0x2,
+ X86_VEX_MAP_0F3A = 0x3
+} X86VexMapConstants;
+
 /*
  * Opcode-map prefixes stored in `dasm_ctx_t::opcode_window_dword` before the +0x80 normalization (mask off the low opcode byte): no prefix for one-byte opcodes, 0x0F00 for two-byte opcodes, and 0x0F38/0x0F3A for the three-byte maps.
  */
-enum dasm_opcode_window_map {
+typedef enum dasm_opcode_window_map {
  XZ_OPCODE_WINDOW_ONE_BYTE = 0x00000000,
  XZ_OPCODE_WINDOW_TWO_BYTE = 0x00000F00,
  XZ_OPCODE_WINDOW_THREE_BYTE_0F38 = 0x000F3800,
  XZ_OPCODE_WINDOW_THREE_BYTE_0F3A = 0x000F3A00
-};
+} dasm_opcode_window_map;
 
 typedef union __attribute__((packed)) {
  struct __attribute__((packed)) {
@@ -1026,8 +1055,8 @@ typedef struct __attribute__((packed)) dasm_ctx {
  u8 opcode_window_prefix[3]; /* Leading bytes before the 32-bit opcode window. */
  dasm_opcode_window_t opcode_window; /* Rolling opcode window that normalises one-, two-, and three-byte opcodes. */
  u8 rel32_bytes[4]; /* Scratch copy of the rel32 displacement bytes for branch/LEA scanners. */
- u64 mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */
- u64 imm_signed; /* Immediate value sign-extended to 64 bits. */
+ int64_t mem_disp; /* Displacement immediate; when DF1 is set add `instruction + instruction_size` for RIP-relative targets. */
+ int64_t imm_signed; /* Immediate value sign-extended to 64 bits. */
  u64 imm_zeroextended; /* Immediate value zero-extended to 64 bits. */
  u64 imm_size; /* Size in bytes of the decoded immediate (0 when the opcode lacks one). */
  u8 opcode_offset; /* Offset from `instruction` to the current opcode byte used during decoding. */

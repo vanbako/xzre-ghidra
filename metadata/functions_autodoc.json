@@ -3281,13 +3281,13 @@
         "placement": "after"
       },
       {
-        "match": "if (* == 0xf) {",
+        "match": "if (* == X86_OPCODE_ESCAPE_0F) {",
         "match_type": "wildcard",
         "comment": "0x0F prefixes switch into the two-byte opcode table (with optional 0x38/0x3A extensions).",
         "placement": "after"
       },
       {
-        "match": "if (((*->prefix).decoded.lock_rep_byte == 0xf3) && (* == 0x1e)) {",
+        "match": "if (((*->prefix).decoded.lock_rep_byte == X86_PREFIX_REP) && (* == 0x1e)) {",
         "match_type": "wildcard",
         "comment": "Recognise ENDBR{32,64} quickly so the prologue walkers can bail early.",
         "placement": "after"
@@ -3303,8 +3303,8 @@
         "placement": "after"
       },
       {
-        "match": "if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == 0x66)) {",
-        "comment": "When an operand-size override is active (0x66 + DF2) flip 16- and 32-bit immediates so the decoded width stays accurate.",
+        "match": "if ((((ctx->prefix).decoded.flags & DF1_OSIZE) != 0 && (ctx->prefix).decoded.osize_byte == X86_PREFIX_OPSIZE)) {",
+        "comment": "When an operand-size override is active (X86_PREFIX_OPSIZE + DF1_OSIZE) flip 16- and 32-bit immediates so the decoded width stays accurate.",
         "placement": "after"
       }
     ]
